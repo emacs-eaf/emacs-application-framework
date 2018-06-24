@@ -22,12 +22,12 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ## Installation
 
 1. Install PyQt5 and Python-Xlib (below commands use for archlinux)
-```
+```Bash
 sudo pacman -S python-xlib python-pyqt5
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
-```
+```Elisp
 (require 'eaf)
 ```
 
@@ -54,12 +54,12 @@ Want to create unparalleled plugins to extend emacs?
 ## How to develop new plugins?
 
 1. Create new python plugin file:
-```
+```Bash
 mkdir -p emacs-application-framework/app/foo/buffer.py
 ```
 
 2. Fill python file with below template:
-```
+```Python
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QLabel
 from buffer import Buffer
@@ -80,13 +80,13 @@ class FooBuffer(Buffer):
 
 3. Open emacs-application-framework/core/eaf.py
 
-3.1 Add import code to import plugin buffer:
-```
+    Add import code to import plugin buffer:
+```Python
 from app.foo.buffer import FooBuffer
 ```
 
-3.2 Research function `new_buffer`, you can launch new plugin when user input some file, like below:
-```
+    Research function `new_buffer`, you can launch new plugin when user input some file, like below:
+```Python
 ...
 
 if url.endswith(".foo"):
@@ -97,8 +97,9 @@ if url.endswith(".foo"):
 
 4. Try new plugins:
 
-4.1 You need call command `eaf-stop-process` to kill old python process first.
-4.2 Then call command `eaf-open' to test.
+    You need call command `eaf-stop-process` to kill old python process first.
+    
+    Then call command `eaf-open' to test.
 
 ## Todo list
 * Browser: click to open link in new tab 
@@ -112,4 +113,4 @@ if url.endswith(".foo"):
 
 lazycat dot manatee at gmail dot com
 
-*Any suggestions and patches are welcome, happy hacking!*
+Any suggestions and patches are welcome, happy hacking!
