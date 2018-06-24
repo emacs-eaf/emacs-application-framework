@@ -82,5 +82,5 @@ def fake_key_event(event_string):
     text = event_string
     if event_string in qt_text_dict:
         text = qt_text_dict[event_string]
-        
+
     return QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], Qt.NoModifier, text)
