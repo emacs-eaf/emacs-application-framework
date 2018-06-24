@@ -49,7 +49,7 @@ Do you want to live in emacs more comfortably?
 
 Want to create unparalleled plugins to extend emacs?
 
-**Join us!**
+*Join us!*
 
 ## How to develop new plugins?
 
@@ -80,12 +80,12 @@ class FooBuffer(Buffer):
 
 3. Open emacs-application-framework/core/eaf.py
 
-add import code to import plugin buffer:
+3.1 Add import code to import plugin buffer:
 ```
 from app.foo.buffer import FooBuffer
 ```
 
-research function `new_buffer`, you can launch new plugin when user input some file, like below:
+3.2 Research function `new_buffer`, you can launch new plugin when user input some file, like below:
 ```
 ...
 
@@ -97,8 +97,8 @@ if url.endswith(".foo"):
 
 4. Try new plugins:
 
-You need call command `eaf-stop-process` to kill old python process first.
-Then call command `eaf-open' to test.
+4.1 You need call command `eaf-stop-process` to kill old python process first.
+4.2 Then call command `eaf-open' to test.
 
 ## Todo list
 * Browser: click to open link in new tab 
@@ -108,4 +108,8 @@ Then call command `eaf-open' to test.
 * ImageViewer: add zoom support
 * VideoPlayer: use mpv or vlc instead html5 video tag
 
-Any suggestions and patches are welcome, happy hacking!
+## Contact me
+
+lazycat dot manatee at gmail dot com
+
+*Any suggestions and patches are welcome, happy hacking!*
