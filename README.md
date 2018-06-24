@@ -78,7 +78,7 @@ class FooBuffer(Buffer):
         
 ```
 
-3. Open emacs-application-framework/core/eaf.py
+3. Open emacs-application-framework/core/eaf.py, import plugins buffer module and change `new_buffer` function to launch plugin buffer
 
 ```Python
 from app.foo.buffer import FooBuffer
@@ -95,11 +95,10 @@ from app.foo.buffer import FooBuffer
 ...
 ```
 
-4. Try new plugins:
+4. Try new plugin:
 
-    You need call command `eaf-stop-process` to kill old python process first.
-    
-    Then call command `eaf-open' to test.
+* Call command `eaf-stop-process` to kill old python process first.
+* Then call command `eaf-open' to test new plugin
 
 ## Todo list
 * Browser: click to open link in new tab 
