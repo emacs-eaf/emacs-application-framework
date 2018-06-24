@@ -80,17 +80,17 @@ class FooBuffer(Buffer):
 
 3. Open emacs-application-framework/core/eaf.py
 
-    Add import code to import plugin buffer:
 ```Python
 from app.foo.buffer import FooBuffer
-```
 
-    Research function `new_buffer`, you can launch new plugin when user input some file, like below:
-```Python
 ...
 
-if url.endswith(".foo"):
-    self.buffer_dict[buffer_id] = FooBuffer(buffer_id, url, emacs_width, emacs_height)
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
+    def new_buffer(self, buffer_id, url):
+        ...
+
+        if url.endswith(".foo"):
+            self.buffer_dict[buffer_id] = FooBuffer(buffer_id, url, emacs_width, emacs_height)
 
 ...
 ```
