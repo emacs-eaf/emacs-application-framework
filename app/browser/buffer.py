@@ -28,7 +28,7 @@ class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
 
-        self.buffer_widget = QWebView()
+        self.buffer_widget = BrowserWidget()
         self.buffer_widget.resize(self.width, self.height)
         self.buffer_widget.setUrl(QUrl(url))
 
@@ -40,3 +40,8 @@ class BrowserBuffer(Buffer):
         self.width = width
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
+
+class BrowserWidget(QWebView):
+
+    def __init__(self):
+        super(QWebView, self).__init__()
