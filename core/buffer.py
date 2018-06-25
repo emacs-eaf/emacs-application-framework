@@ -20,7 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QImage
+from PyQt5.QtGui import QBrush
+from PyQt5.QtWidgets import QGraphicsScene
 import functools
 import abc
 
@@ -51,7 +52,7 @@ class PostGui(QtCore.QObject):
         else:
             self._func(*args, **kwargs)
 
-class Buffer(QtCore.QObject):
+class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
 
     update_title = QtCore.pyqtSignal(str, str)
@@ -59,7 +60,7 @@ class Buffer(QtCore.QObject):
     before_destroy_hook = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, width, height, background_color):
-        super(Buffer, self).__init__()
+        super(QGraphicsScene, self).__init__()
 
         self.width = width
         self.height = height
@@ -67,9 +68,16 @@ class Buffer(QtCore.QObject):
         self.buffer_id = buffer_id
         self.url = url
 
-        self.qimage = None
         self.buffer_widget = None
         self.background_color = background_color
+
+        self.setBackgroundBrush(QBrush(self.background_color))
+
+        self.fit_to_view = True
+
+    def add_widget(self, widget):
+        self.buffer_widget = widget
+        self.addWidget(self.buffer_widget)
 
     def resize_buffer(self, width, height):
         pass
@@ -80,17 +88,7 @@ class Buffer(QtCore.QObject):
         if self.buffer_widget != None:
             self.buffer_widget.destroy()
 
-        if self.qimage != None:
-            del self.qimage
-
         print("Destroy buffer: %s" % self.buffer_id)
-
-    @PostGui()
-    def update_content(self):
-        if self.buffer_widget != None:
-            qimage = QImage(self.width, self.height, QImage.Format_ARGB32)
-            self.buffer_widget.render(qimage)
-            self.qimage = qimage
 
     def change_title(self, title):
         self.update_title.emit(self.buffer_id, title)

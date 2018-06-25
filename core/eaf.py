@@ -19,16 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QEvent, QPointF
-from PyQt5.QtGui import QMouseEvent
 from PyQt5.QtWidgets import QApplication
 from dbus.mainloop.glib import DBusGMainLoop
 from fake_key_event import fake_key_event
 from view import View
 import dbus
 import dbus.service
-import threading
-import time
 
 import os,sys,inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -58,6 +54,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def new_buffer(self, buffer_id, url):
+
         global emacs_width, emacs_height
 
         if url.startswith("/"):
@@ -97,11 +94,31 @@ class EAF(dbus.service.Object):
         if view_infos != ['']:
             for view_info in view_infos:
                 if view_info not in self.view_dict:
-                    view = View(emacs_xid, view_info)
+                    (buffer_id, _, _, _, _) = view_info.split(":")
+                    view = View(emacs_xid, self.buffer_dict[buffer_id], view_info)
                     self.view_dict[view_info] = view
 
-                    view.trigger_mouse_event.connect(self.send_mouse_event_to_buffer)
                     view.trigger_focus_event.connect(self.focus_emacs_buffer)
+
+        # Update buffer size.
+        for buffer in list(self.buffer_dict.values()):
+            # Get match views.
+            match_views = list(filter(lambda v: view.py.buffer_id == buffer.buffer_id, self.view_dict.values()))
+
+            # Get size list of buffer's views.
+            view_sizes = list(map(lambda v: (v.width, v.height), match_views))
+
+            # Init buffer size with emacs' size.
+            buffer_width = emacs_width
+            buffer_height = emacs_height
+
+            # Update buffer size with max area view's size,
+            # to make each view has the same rendering area after user do split operation in emacs.
+            if len(view_sizes) > 0:
+                buffer_width, buffer_height = max(view_sizes, key=lambda size: size[0] * size[1])
+
+            # Resize buffer.
+            buffer.resize_buffer(buffer_width, buffer_height)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
@@ -148,96 +165,6 @@ class EAF(dbus.service.Object):
 
         app_buffer.open_url.connect(self.open_buffer_url)
 
-    def send_mouse_event_to_buffer(self, buffer_id, view_width, view_height, view_image_width, view_image_height, event):
-        print("Send mouse: %s %s" % (buffer_id, event))
-
-        global emacs_xid
-
-        if buffer_id in self.buffer_dict:
-            if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                                QEvent.MouseMove, QEvent.MouseButtonDblClick]:
-                # Get view render coordinate.
-                view_render_x = (view_width - view_image_width) / 2
-                view_render_y = (view_height - view_image_height) / 2
-
-                # Just send event if response in view image area.
-                if (event.x() >= view_render_x) and (event.x() <= view_render_x + view_image_width) and (event.y() >= view_render_y) and (event.y() <= view_render_y + view_image_height):
-                    view_sizes = list(map(lambda v: (v.width, v.height), self.view_dict.values()))
-
-                    buffer_width = emacs_width
-                    buffer_height = emacs_height
-
-                    if len(view_sizes) > 0:
-                        buffer_width, buffer_height = max(view_sizes, key=lambda size: size[0] * size[1])
-
-                    width_scale = view_width * 1.0 / buffer_width
-                    height_scale = view_height * 1.0 / buffer_height
-                    image_scale = 1.0
-                    if width_scale < height_scale:
-                        image_scale = width_scale
-                    else:
-                        image_scale = height_scale
-
-                    new_event_x = (event.x() - view_render_x) / image_scale
-                    new_event_y = (event.y() - view_render_y) / image_scale
-                    new_event_pos = QPointF(new_event_x, new_event_y)
-
-                    new_event = QMouseEvent(event.type(),
-                                            new_event_pos,
-                                            event.button(),
-                                            event.buttons(),
-                                            event.modifiers())
-
-                    QApplication.sendEvent(self.buffer_dict[buffer_id].buffer_widget, new_event)
-                else:
-                    print("Do not send event, because event out of view's response area")
-            else:
-                QApplication.sendEvent(self.buffer_dict[buffer_id].buffer_widget, event)
-
-    def update_buffers(self):
-        global emacs_width, emacs_height
-
-        while True:
-            for buffer in list(self.buffer_dict.values()):
-                # Get size list of buffer's views.
-                view_sizes = list(map(lambda v: (v.width, v.height), self.view_dict.values()))
-
-                # Init buffer size with emacs' size.
-                buffer_width = emacs_width
-                buffer_height = emacs_height
-
-                # Update buffer size with max area view's size,
-                # to make each view has the same rendering area after user do split operation in emacs.
-                if len(view_sizes) > 0:
-                    buffer_width, buffer_height = max(view_sizes, key=lambda size: size[0] * size[1])
-
-                # Resize buffer.
-                buffer.resize_buffer(buffer_width, buffer_height)
-
-                # Update buffer image.
-                buffer.update_content()
-
-                if hasattr(buffer, "qimage") and buffer.qimage != None:
-                    # Render views.
-                    for view in list(self.view_dict.values()):
-                        if view.buffer_id == buffer.buffer_id:
-                            # Scale image to view size.
-                            width_scale = view.width * 1.0 / buffer_width
-                            height_scale = view.height * 1.0 / buffer_height
-                            image_scale = 1.0
-                            if width_scale < height_scale:
-                                image_scale = width_scale
-                            else:
-                                image_scale = height_scale
-
-                            view.qimage = buffer.qimage.scaled(buffer_width * image_scale, buffer_height * image_scale)
-                            view.background_color = buffer.background_color
-
-                            # Update view.
-                            view.update()
-
-            time.sleep(0.04)
-
 if __name__ == "__main__":
     import sys
     import signal
@@ -254,8 +181,6 @@ if __name__ == "__main__":
         app = QApplication(sys.argv)
 
         eaf = EAF(sys.argv[1:])
-
-        threading.Thread(target=eaf.update_buffers).start()
 
         print("EAF process start.")
 

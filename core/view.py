@@ -20,18 +20,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtCore import Qt, QEvent, QMargins
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 from xutils import get_xlib_display
 
 class View(QWidget):
 
-    trigger_mouse_event = QtCore.pyqtSignal(str, int, int, int, int, QEvent)
     trigger_focus_event = QtCore.pyqtSignal(str)
 
-    def __init__(self, emacs_xid, view_info):
+    def __init__(self, emacs_xid, buffer, view_info):
         super(View, self).__init__()
+
+        self.buffer = buffer
 
         self.emacs_xid = emacs_xid
 
@@ -48,46 +49,50 @@ class View(QWidget):
         self.width = int(self.width)
         self.height = int(self.height)
 
-        self.qimage = None
         self.background_color = None
-
-        # Show and resize.
-        self.show()
-        self.resize(self.width, self.height)
 
         self.installEventFilter(self)
 
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.graphics_view = QGraphicsView(buffer, self)
+        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
+        # Remove damn border from QGraphicsView.
+        self.graphics_view.setFrameStyle(0)
+        self.graphics_view.setStyleSheet("QGraphicsView {background: transparent; border: 3px; outline: none;}")
+        self.layout.addWidget(self.graphics_view)
+
+        # Show and resize.
+        self.show()
+
+        # Resize after show to trigger fit view operation.
+        self.resize(self.width, self.height)
+
         print("Create view: %s" % self.view_info)
+
+    def resizeEvent(self, event):
+        if self.buffer.fit_to_view:
+            if event.oldSize().isValid():
+                self.graphics_view.fitInView(self.graphics_view.scene().sceneRect(), Qt.KeepAspectRatio)
+        QWidget.resizeEvent(self, event)
 
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel]:
-            self.trigger_mouse_event.emit(self.buffer_id, self.width, self.height, self.qimage.width(), self.qimage.height(), event)
             self.trigger_focus_event.emit("{0},{1}".format(event.globalX(), event.globalY()))
 
         return False
 
-    def paintEvent(self, event):
-        # Init painter.
-        painter = QPainter(self)
-
-        # Render background.
-        if self.background_color != None:
-            painter.setBrush(self.background_color)
-            painter.drawRect(0, 0, self.width, self.height)
-
-        # Render buffer image in center of view.
-        if self.qimage != None:
-            render_x = (self.width - self.qimage.width()) / 2
-            render_y = (self.height - self.qimage.height()) / 2
-            painter.drawImage(QtCore.QRect(render_x, render_y, self.qimage.width(), self.qimage.height()), self.qimage)
-
-        # End painter.
-        painter.end()
-
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
+
+        # Make graphics view at left-top corner after show.
+        self.graphics_view.verticalScrollBar().setValue(0)
+        self.graphics_view.horizontalScrollBar().setValue(0)
 
     def reparent(self):
         xlib_display = get_xlib_display()
@@ -101,9 +106,6 @@ class View(QWidget):
         xlib_display.sync()
 
     def handle_destroy(self):
-        if self.qimage != None:
-            del self.qimage
-
         self.destroy()
 
         print("Destroy view: %s" % self.view_info)

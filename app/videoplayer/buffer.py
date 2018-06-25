@@ -58,11 +58,14 @@ html_file = '''
 
 class VideoPlayerBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
+        Buffer.__init__(self, buffer_id, url, width, height, QColor(0, 0, 0, 255))
 
-        self.buffer_widget = QWebView()
+        self.add_widget(QWebView())
+        # self.buffer_widget = QWebView()
         self.buffer_widget.resize(self.width, self.height)
         self.buffer_widget.setHtml(html_file.replace("**********", url))
+
+        self.fit_to_view = True
 
         print("Create buffer: %s" % buffer_id)
 

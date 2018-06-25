@@ -31,12 +31,15 @@ class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
 
-        self.buffer_widget = BrowserWidget()
+        self.add_widget(BrowserWidget())
+        # self.buffer_widget = BrowserWidget()
         self.buffer_widget.resize(self.width, self.height)
         self.buffer_widget.setUrl(QUrl(url))
 
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.web_page.open_url_in_new_tab.connect(self.open_url)
+
+        self.fit_to_view = False
 
         print("Create buffer: %s" % buffer_id)
 
