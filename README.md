@@ -8,6 +8,8 @@ This framework mainly implements three functions:
 
 Using this framework, you can use PyQt develop powerful graphics programs to extend Emacs
 
+![img](./screenshot/intro.gif)
+
 ## Some screenshots
 
 ### Browser
