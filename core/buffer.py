@@ -51,10 +51,14 @@ class postGui(QtCore.QObject):
         else:
             self._func(*args, **kwargs)
 
-class Buffer(object):
+class Buffer(QtCore.QObject):
     __metaclass__ = abc.ABCMeta
+    
+    update_title = QtCore.pyqtSignal(str, str)
 
     def __init__(self, buffer_id, url, width, height, background_color):
+        super(Buffer, self).__init__()
+        
         self.width = width
         self.height = height
 

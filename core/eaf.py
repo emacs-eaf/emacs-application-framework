@@ -62,20 +62,20 @@ class EAF(dbus.service.Object):
 
         if url.startswith("/"):
             if url.endswith(".jpg") or url.endswith(".png"):
-                self.buffer_dict[buffer_id] = ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height)
+                self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
             elif url.endswith(".ogg"):
-                self.buffer_dict[buffer_id] = VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height)
+                self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height))
             else:
                 return "Don't know how to open {0}".format(url)
         else:
             from urllib.parse import urlparse
             result = urlparse(url)
             if len(result.scheme) != 0:
-                self.buffer_dict[buffer_id] = BrowserBuffer(buffer_id, result.geturl(), emacs_width, emacs_height)
+                self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl(), emacs_width, emacs_height))
             else:
                 result = urlparse("{0}:{1}".format("http", url))
                 if result.scheme != "":
-                    self.buffer_dict[buffer_id] = BrowserBuffer(buffer_id, result.geturl(), emacs_width, emacs_height)
+                    self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl(), emacs_width, emacs_height))
                 else:
                     return "{0} is not valid url".format(url)
 
@@ -132,6 +132,15 @@ class EAF(dbus.service.Object):
     @dbus.service.signal("com.lazycat.eaf")
     def start_finish(self):
         pass
+    
+    @dbus.service.signal("com.lazycat.eaf")
+    def update_buffer_title(self, buffer_id, title):
+        pass
+    
+    def create_buffer(self, buffer_id, app_buffer):
+        self.buffer_dict[buffer_id] = app_buffer
+        
+        app_buffer.update_title.connect(self.update_buffer_title)
 
     def send_mouse_event_to_buffer(self, buffer_id, view_width, view_height, view_image_width, view_image_height, event):
         print("Send mouse: %s %s" % (buffer_id, event))
