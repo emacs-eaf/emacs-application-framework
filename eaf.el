@@ -108,6 +108,8 @@
 
 (defvar eaf-first-start-url nil)
 
+(defvar eaf-title-length 30)
+
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
   :type 'string
@@ -183,7 +185,7 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 6)) ))
 
 (defun eaf-create-buffer (input-content)
-  (let ((eaf-buffer (generate-new-buffer input-content)))
+  (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode)
