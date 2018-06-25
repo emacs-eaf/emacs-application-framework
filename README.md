@@ -112,7 +112,6 @@ from app.foo.buffer import FooBuffer
 
 ## Todo list
 * Browser: click to open link in new tab 
-* Browser: update title after load finish
 * Browser: add progressbar
 * Browser: add cookie support
 * ImageViewer: add zoom support
