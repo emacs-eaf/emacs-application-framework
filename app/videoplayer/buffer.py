@@ -31,24 +31,24 @@ html_file = '''
   <body>
     <style>
      html {
-	 margin: 0px;
-	 padding: 0px;
+         margin: 0px;
+         padding: 0px;
      }
 
      body {
-	 margin: 0px;
-	 padding: 0px;
+         margin: 0px;
+         padding: 0px;
      }
 
      video {
-	 width: 100%;
-	 height: 100%;
-	 margin: 0px;
-	 padding: 0px;
+         width: 100%;
+         height: 100%;
+         margin: 0px;
+         padding: 0px;
      }
 
      ::-webkit-scrollbar {
-	 display: none;
+         display: none;
      }
     </style>
       <video controls autoplay src="file://**********"></video>

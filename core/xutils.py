@@ -45,4 +45,3 @@ def get_parent_window_id(window_id):
     xlib_display = get_xlib_display()
 
     return xlib_display.create_resource_object("window", window_id).query_tree().parent.__window__()
-

@@ -53,12 +53,12 @@ class postGui(QtCore.QObject):
 
 class Buffer(QtCore.QObject):
     __metaclass__ = abc.ABCMeta
-    
+
     update_title = QtCore.pyqtSignal(str, str)
 
     def __init__(self, buffer_id, url, width, height, background_color):
         super(Buffer, self).__init__()
-        
+
         self.width = width
         self.height = height
 
@@ -87,6 +87,6 @@ class Buffer(QtCore.QObject):
             qimage = QImage(self.width, self.height, QImage.Format_ARGB32)
             self.buffer_widget.render(qimage)
             self.qimage = qimage
-            
+
     def change_title(self, title):
         self.update_title.emit(self.buffer_id, title)

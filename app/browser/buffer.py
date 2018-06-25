@@ -31,7 +31,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget = QWebView()
         self.buffer_widget.resize(self.width, self.height)
         self.buffer_widget.setUrl(QUrl(url))
-        
+
         self.buffer_widget.titleChanged.connect(self.change_title)
 
         print("Create buffer: %s" % buffer_id)
@@ -40,4 +40,3 @@ class BrowserBuffer(Buffer):
         self.width = width
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
-                

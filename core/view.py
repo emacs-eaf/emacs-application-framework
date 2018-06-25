@@ -107,5 +107,3 @@ class View(QWidget):
         self.destroy()
 
         print("Destroy view: %s" % self.view_info)
-
-
