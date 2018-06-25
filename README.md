@@ -100,7 +100,7 @@ from app.foo.buffer import FooBuffer
         ...
 
         if url.endswith(".foo"):
-            self.buffer_dict[buffer_id] = FooBuffer(buffer_id, url, emacs_width, emacs_height)
+		    self.create_buffer(buffer_id, FooBuffer(buffer_id, url, emacs_width, emacs_height))
 
 ...
 ```
