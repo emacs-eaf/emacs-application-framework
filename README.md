@@ -8,18 +8,16 @@ This framework mainly implements three functions:
 
 Using this framework, you can use PyQt develop powerful graphics programs to extend Emacs
 
-![img](./screenshot/intro.gif)
-
 ## Some screenshots
 
 ### Browser
-![img](./screenshot/browser.png)
+![img](./screenshot/browser.gif)
 
 ### Image Viewer
-![img](./screenshot/image_viewer.png)
+![img](./screenshot/image_viewer.gif)
 
 ### Video Player
-![img](./screenshot/video_player.png)
+![img](./screenshot/video_player.gif)
 
 ## Installation
 
