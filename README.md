@@ -106,7 +106,7 @@ from app.foo.buffer import FooBuffer
 * Browser: add progressbar
 * Browser: add cookie support
 * ImageViewer: add zoom support
-* VideoPlayer: use mpv or vlc instead html5 video tag
+* VideoPlayer: use ffmpeg implement video player, mpv/vlc can't work with QWidget.render and slow, XComposite must need main window is show before composite to other window.
 
 ## Contact me
 
