@@ -111,8 +111,9 @@ from app.foo.buffer import FooBuffer
 * Then call command `eaf-open' to test new plugin
 
 ## Todo list
-* Browser: add progressbar
 * Browser: add cookie support
+* Browser: support pop window, such as emacs-china.org
+* Browser: add progressbar
 * ImageViewer: add zoom support
 * VideoPlayer: use ffmpeg implement video player, mpv/vlc can't work with QWidget.render and slow, XComposite must need main window is show before composite to other window.
 

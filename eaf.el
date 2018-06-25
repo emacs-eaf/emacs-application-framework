@@ -241,7 +241,10 @@ We need calcuate render allocation to make sure no black border around render co
            ;; Just send event when user insert single character.
            ;; Don't send event 'M' if user press Ctrl + M.
            ((and
-             (equal key-command "self-insert-command")
+             (or
+              (equal key-command "self-insert-command")
+              (equal key-command "completion-select-if-within-overlay")
+              )
              (equal 1 (string-width (this-command-keys))))
             (message (format "Send char: '%s" key-desc))
             (eaf-call "send_key" (format "%s:%s" buffer-id key-desc)))
@@ -313,16 +316,17 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-start-finish)
 
 (defun eaf-update-buffer-title (bid title)
-  (catch 'find-buffer
-    (dolist (window (window-list))
-      (let ((buffer (window-buffer window)))
-        (with-current-buffer buffer
-          (when (and
-                 (string= "eaf-mode" (format "%s" major-mode))
-                 (equal buffer-id bid))
-            (rename-buffer title)
-            (throw 'find-buffer t)
-            ))))))
+  (when (> (length title) 0)
+    (catch 'find-buffer
+      (dolist (window (window-list))
+        (let ((buffer (window-buffer window)))
+          (with-current-buffer buffer
+            (when (and
+                   (string= "eaf-mode" (format "%s" major-mode))
+                   (equal buffer-id bid))
+              (rename-buffer title)
+              (throw 'find-buffer t)
+              )))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"

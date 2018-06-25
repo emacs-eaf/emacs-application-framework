@@ -56,6 +56,7 @@ class Buffer(QtCore.QObject):
 
     update_title = QtCore.pyqtSignal(str, str)
     open_url = QtCore.pyqtSignal(str)
+    before_destroy_hook = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, width, height, background_color):
         super(Buffer, self).__init__()
@@ -74,6 +75,8 @@ class Buffer(QtCore.QObject):
         pass
 
     def handle_destroy(self):
+        self.before_destroy_hook.emit()
+
         if self.buffer_widget != None:
             self.buffer_widget.destroy()
 
