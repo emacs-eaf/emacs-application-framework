@@ -40,7 +40,4 @@ class BrowserBuffer(Buffer):
         self.width = width
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
-        
-    def change_title(self, title):
-        self.update_title.emit(self.buffer_id, title)
-        
+                

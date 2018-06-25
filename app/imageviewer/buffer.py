@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtCore
 from PyQt5.QtGui import QColor, QPixmap, QPainter
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtWidgets import QWidget
@@ -31,13 +32,18 @@ class ImageViewerBuffer(Buffer):
 
         self.buffer_widget = ImageViewerWidget(url, QColor(0, 0, 0, 255))
         self.buffer_widget.resize(self.width, self.height)
-
+        
+        self.buffer_widget.render_image.connect(self.change_title)
+        
     def resize_buffer(self, width, height):
         self.width = width
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
 
 class ImageViewerWidget(QWidget):
+    
+    render_image = QtCore.pyqtSignal(str)
+    
     def __init__(self, image_path, background_color):
         QWidget.__init__(self)
 
@@ -49,7 +55,9 @@ class ImageViewerWidget(QWidget):
         self.image_name = os.path.basename(image_path)
         self.qimage = QPixmap(image_path)
         self.update()
-
+        
+        self.render_image.emit(self.image_name)
+        
     def load_next_image(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
         images = list(filter(lambda f: f.endswith(".jpg") or f.endswith(".png"), files))

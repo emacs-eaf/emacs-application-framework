@@ -87,3 +87,6 @@ class Buffer(QtCore.QObject):
             qimage = QImage(self.width, self.height, QImage.Format_ARGB32)
             self.buffer_widget.render(qimage)
             self.qimage = qimage
+            
+    def change_title(self, title):
+        self.update_title.emit(self.buffer_id, title)
