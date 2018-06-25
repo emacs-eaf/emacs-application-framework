@@ -217,7 +217,7 @@ class EAF(dbus.service.Object):
                 # Update buffer image.
                 buffer.update_content()
 
-                if buffer.qimage != None:
+                if hasattr(buffer, "qimage") and buffer.qimage != None:
                     # Render views.
                     for view in list(self.view_dict.values()):
                         if view.buffer_id == buffer.buffer_id:
