@@ -22,12 +22,10 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtNetwork import QNetworkCookieJar, QNetworkCookie
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWebKit import QWebSettings
 from buffer import Buffer
-import os
 
 class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
@@ -39,7 +37,6 @@ class BrowserBuffer(Buffer):
 
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.web_page.open_url_in_new_tab.connect(self.open_url)
-        # self.buffer_widget.before_destroy_hook.connect(self.save_cookies)
 
         print("Create buffer: %s" % buffer_id)
 
@@ -48,11 +45,6 @@ class BrowserBuffer(Buffer):
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
 
-    def save_cookies(self):
-        self.buffer_widget.cookie_jar.save_cookies()
-
-        print("**************************************************")
-
 class BrowserWidget(QWebView):
 
     def __init__(self):
@@ -60,10 +52,6 @@ class BrowserWidget(QWebView):
 
         self.web_page = WebPage()
         self.setPage(self.web_page)
-
-        self.cookie_jar = CookieJar()
-        self.cookie_jar.restore_cookies()
-        self.page().networkAccessManager().setCookieJar(self.cookie_jar)
 
         self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
         self.settings().setAttribute(QWebSettings.JavascriptEnabled, True)
@@ -94,30 +82,3 @@ class WebPage(QWebPage):
 
     def javaScriptConsoleMessage(self, msg, lineNumber, sourceID):
         pass
-
-class CookieJar(QNetworkCookieJar):
-    def __init__(self, parent = None):
-        QNetworkCookieJar.__init__(self, parent)
-        self.cookie_path = os.path.expanduser("~/.emacs.d/eaf-browser/webkit-cookies")
-
-    def save_cookies(self):
-        all_cookies = QNetworkCookieJar.allCookies(self)
-
-        cookie_dir = os.path.dirname(self.cookie_path)
-        if not os.path.exists(cookie_dir):
-            os.makedirs(cookie_dir)
-
-        with open(self.cookie_path, 'w') as f:
-            lines = ''
-            for cookie in all_cookies:
-                lines = lines + cookie.toRawForm() + '\r\n'
-            f.writelines(lines)
-
-    def restore_cookies(self):
-        if os.path.exists(self.cookie_path):
-            with open(self.cookie_path, 'r') as f:
-                lines = ''
-                for line in f:
-                    lines = lines + line
-                allCookies = QNetworkCookie.parseCookies(lines)
-                QNetworkCookieJar.setAllCookies(self, allCookies)
