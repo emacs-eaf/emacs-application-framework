@@ -35,7 +35,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.setUrl(QUrl(url))
 
         self.buffer_widget.titleChanged.connect(self.change_title)
-        self.buffer_widget.web_page.open_url.connect(self.open_url)
+        self.buffer_widget.web_page.open_url_in_new_tab.connect(self.open_url)
 
         print("Create buffer: %s" % buffer_id)
 
@@ -54,7 +54,7 @@ class BrowserWidget(QWebView):
 
 class WebPage(QWebPage):
 
-    open_url = QtCore.pyqtSignal(str)
+    open_url_in_new_tab = QtCore.pyqtSignal(str)
 
     def __init__(self):
         super(WebPage, self).__init__()
@@ -65,7 +65,7 @@ class WebPage(QWebPage):
         # Handle myself if got user event.
         if type == QWebPage.NavigationTypeLinkClicked:
             if modifiers == Qt.ControlModifier:
-                self.open_url.emit(request.url().toString())
+                self.open_url_in_new_tab.emit(request.url().toString())
             else:
                 self.view().load(request.url())
 
