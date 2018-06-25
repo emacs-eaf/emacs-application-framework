@@ -24,12 +24,12 @@ from PyQt5.QtGui import QImage
 import functools
 import abc
 
-class postGui(QtCore.QObject):
+class PostGui(QtCore.QObject):
 
     through_thread = QtCore.pyqtSignal(object, object)
 
     def __init__(self, inclass=True):
-        super(postGui, self).__init__()
+        super(PostGui, self).__init__()
         self.through_thread.connect(self.on_signal_received)
         self.inclass = inclass
 
@@ -81,7 +81,7 @@ class Buffer(QtCore.QObject):
 
         print("Destroy buffer: %s" % self.buffer_id)
 
-    @postGui()
+    @PostGui()
     def update_content(self):
         if self.buffer_widget != None:
             qimage = QImage(self.width, self.height, QImage.Format_ARGB32)
