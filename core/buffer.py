@@ -55,6 +55,7 @@ class Buffer(QtCore.QObject):
     __metaclass__ = abc.ABCMeta
 
     update_title = QtCore.pyqtSignal(str, str)
+    open_url = QtCore.pyqtSignal(str)
 
     def __init__(self, buffer_id, url, width, height, background_color):
         super(Buffer, self).__init__()

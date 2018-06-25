@@ -137,10 +137,16 @@ class EAF(dbus.service.Object):
     def update_buffer_title(self, buffer_id, title):
         pass
 
+    @dbus.service.signal("com.lazycat.eaf")
+    def open_buffer_url(self, url):
+        pass
+
     def create_buffer(self, buffer_id, app_buffer):
         self.buffer_dict[buffer_id] = app_buffer
 
         app_buffer.update_title.connect(self.update_buffer_title)
+
+        app_buffer.open_url.connect(self.open_buffer_url)
 
     def send_mouse_event_to_buffer(self, buffer_id, view_width, view_height, view_image_width, view_image_height, event):
         print("Send mouse: %s %s" % (buffer_id, event))

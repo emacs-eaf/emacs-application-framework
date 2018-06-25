@@ -40,7 +40,7 @@ M-x eaf-open
 ```
 
 Such as,
-* type www.google.com to open browser
+* type www.google.com to open browser, Ctrl + LeftButton open link in new tab
 * type /path/image.jpg to open image viewer, and press key j or k to select other image in same directory
 * type /path/video.ogg to open video player, video player only support ogg file because it implement by HTML5 video tag
 
@@ -77,15 +77,15 @@ from buffer import Buffer
 class FooBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
-        
+
         self.buffer_widget = QLabel("foo")
         self.buffer_widget.resize(self.width, self.height)
-        
+
     def resize_buffer(self, width, height):
         self.width = width
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
-        
+
 ```
 
 3. Open emacs-application-framework/core/eaf.py, import plugins buffer module and change `new_buffer` function to launch plugin buffer
@@ -111,7 +111,6 @@ from app.foo.buffer import FooBuffer
 * Then call command `eaf-open' to test new plugin
 
 ## Todo list
-* Browser: click to open link in new tab 
 * Browser: add progressbar
 * Browser: add cookie support
 * ImageViewer: add zoom support
