@@ -42,6 +42,14 @@ Such as,
 * type /path/image.jpg to open image viewer, and press key j or k to select other image in same directory
 * type /path/video.ogg to open video player, video player only support ogg file because it implement by HTML5 video tag
 
+## Report bug
+If you found eaf message "*eaf* exited abnormally with ...", it mean something wrong in python.
+
+Please switch buffer *eaf* and paste content of *eaf* to me.
+
+Thanks!
+
+
 ## Join Us
 Do you want to make Emacs a real operating system?
 
