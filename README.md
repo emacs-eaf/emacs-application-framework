@@ -40,7 +40,7 @@ M-x eaf-open
 Such as,
 * type www.google.com to open browser, Ctrl + LeftButton open link in new tab
 * type /path/image_file to open image viewer, and press key j or k to select other image in same directory
-* type /path/video_file to open video player
+* type /path/video_file to open video player, press space to toggle play/pause status.
 
 ## How to develop new plugins?
 [Developer manual](HACKING.md)
