@@ -1,3 +1,13 @@
+## Why choose Qt?
+Qt's QGraphicsView and QGraphicsScene is awesome, it's easier to implement window composite than other GUI library (such as GTK+).
+
+If use Gtk+ or other GUI library, i need write many Widget/XComposite code to implement widget like QGraphicsView/QGraphicsScene.
+
+## Why choose Python?
+C/C++ need compile long time for every change, this will interrupt my attention and development enthusiasm.
+
+Python is perfect language to develop Qt program and it can call pretty much every library you need.
+
 ## Let me run hello word
 ```
 M-x eaf-open
@@ -53,3 +63,11 @@ Execute command `eaf-open' and type "i am rocks!".
 See? it's so easy!
 
 Above are all you need, happy hacking!
+
+## Todo list
+* Browser: add cookie support
+* Browser: support pop window, such as emacs-china.org
+* Browser: add progressbar
+* ImageViewer: add zoom support
+* VideoPlayer: space to toggle play/pause
+* VideoPlayer: hide view to pause video

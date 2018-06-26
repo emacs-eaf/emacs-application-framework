@@ -42,13 +42,8 @@ Such as,
 * type /path/image_file to open image viewer, and press key j or k to select other image in same directory
 * type /path/video_file to open video player
 
-## Report bug
-If you found eaf message "*eaf* exited abnormally with ...", it mean something wrong in python.
-
-Please switch buffer *eaf* and paste content of *eaf* to me.
-
-Thanks!
-
+## How to develop new plugins?
+[Developer manual](HACKING.md)
 
 ## Join Us
 Do you want to make Emacs a real operating system?
@@ -57,29 +52,4 @@ Do you want to live in emacs more comfortably?
 
 Want to create unparalleled plugins to extend emacs?
 
-*Join us!*
-
-## Why choose Qt?
-Qt's QGraphicsView and QGraphicsScene is awesome, it's easier to implement window composite than other GUI library (such as GTK+).
-
-If use Gtk+ or other GUI library, i need write many Widget/XComposite code to implement widget like QGraphicsView/QGraphicsScene.
-
-## Why choose Python?
-C/C++ need compile long time for every change, this will interrupt my attention and development enthusiasm.
-
-Python is perfect language to develop Qt program and it can call pretty much every library you need.
-
-## How to develop new plugins?
-[Developer manual](HACKING.md)
-
-## Todo list
-* Browser: add cookie support
-* Browser: support pop window, such as emacs-china.org
-* Browser: add progressbar
-* ImageViewer: add zoom support
-
-## Contact me
-
-lazycat dot manatee at gmail dot com
-
-Any suggestions and patches are welcome, happy hacking!
+Join us, happy hacking!
