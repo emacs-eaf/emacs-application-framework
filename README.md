@@ -21,7 +21,7 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ## Installation
 
-1. Install PyQt5 and Python-Xlib (below commands use for archlinux)
+1. Install python libraries (below commands use for archlinux)
 ```Bash
 sudo pacman -S python-xlib python-pyqt5 python-pymediainfo
 ```
@@ -58,6 +58,16 @@ Do you want to live in emacs more comfortably?
 Want to create unparalleled plugins to extend emacs?
 
 *Join us!*
+
+## Why choose Qt?
+Qt's QGraphicsView and QGraphicsScene is awesome, it's easier to implement window composite than other GUI library (such as GTK+).
+
+If use Gtk+ or other GUI library, i need write many Widget/XComposite code to implement widget like QGraphicsView/QGraphicsScene.
+
+## Why choose Python?
+C/C++ need compile long time for every change, this will interrupt my attention and development enthusiasm.
+
+Python is perfect language to develop Qt program and it can call pretty much every library you need.
 
 ## How to develop new plugins?
 
@@ -113,7 +123,6 @@ from app.foo.buffer import FooBuffer
 * Browser: support pop window, such as emacs-china.org
 * Browser: add progressbar
 * ImageViewer: add zoom support
-* VideoPlayer: use ffmpeg implement QGraphicsItem
 
 ## Contact me
 
