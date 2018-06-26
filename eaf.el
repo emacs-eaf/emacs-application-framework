@@ -157,7 +157,9 @@
             (when (equal major-mode 'eaf-mode)
               (incf count)
               (kill-buffer buffer)))
-          (message "Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
+          ;; Just report to me when eaf buffer exists.
+          (if (> count 1)
+              (message "Killed EAF %s buffer%s" count (if (> count 1) "s" "")))))
     (message "EAF process has dead.")))
 
 (defun eaf-restart-process ()

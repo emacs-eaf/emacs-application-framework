@@ -120,25 +120,25 @@ class EAF(dbus.service.Object):
 
                     view.trigger_focus_event.connect(self.focus_emacs_buffer)
 
-        # Update buffer size.
-        for buffer in list(self.buffer_dict.values()):
-            # Get match views.
-            match_views = list(filter(lambda v: view.py.buffer_id == buffer.buffer_id, self.view_dict.values()))
+        # # Update buffer size.
+        # for buffer in list(self.buffer_dict.values()):
+        #     # Get match views.
+        #     match_views = list(filter(lambda v: view.py.buffer_id == buffer.buffer_id, self.view_dict.values()))
 
-            # Get size list of buffer's views.
-            view_sizes = list(map(lambda v: (v.width, v.height), match_views))
+        #     # Get size list of buffer's views.
+        #     view_sizes = list(map(lambda v: (v.width, v.height), match_views))
 
-            # Init buffer size with emacs' size.
-            buffer_width = emacs_width
-            buffer_height = emacs_height
+        #     # Init buffer size with emacs' size.
+        #     buffer_width = emacs_width
+        #     buffer_height = emacs_height
 
-            # Update buffer size with max area view's size,
-            # to make each view has the same rendering area after user do split operation in emacs.
-            if len(view_sizes) > 0:
-                buffer_width, buffer_height = max(view_sizes, key=lambda size: size[0] * size[1])
+        #     # Update buffer size with max area view's size,
+        #     # to make each view has the same rendering area after user do split operation in emacs.
+        #     if len(view_sizes) > 0:
+        #         buffer_width, buffer_height = max(view_sizes, key=lambda size: size[0] * size[1])
 
-            # Resize buffer.
-            buffer.resize_buffer(buffer_width, buffer_height)
+        #     # Resize buffer.
+        #     buffer.resize_buffer(buffer_width, buffer_height)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
@@ -182,7 +182,6 @@ class EAF(dbus.service.Object):
         self.buffer_dict[buffer_id] = app_buffer
 
         app_buffer.update_title.connect(self.update_buffer_title)
-
         app_buffer.open_url.connect(self.open_buffer_url)
 
 if __name__ == "__main__":
