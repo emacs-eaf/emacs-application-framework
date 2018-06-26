@@ -30,14 +30,14 @@ class VideoPlayerBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
         Buffer.__init__(self, buffer_id, url, width, height, True, QColor(0, 0, 0, 255))
 
-        self.add_widget(VideoPlayer())
+        self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
         self.buffer_widget.video_item.setSize(QSizeF(width, height))
 
-class VideoPlayer(QWidget):
+class VideoPlayerWidget(QWidget):
 
     def __init__(self, parent=None):
-        super(VideoPlayer, self).__init__(parent)
+        super(VideoPlayerWidget, self).__init__(parent)
 
         self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
