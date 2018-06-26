@@ -35,6 +35,7 @@ sys.path.insert(0, parent_dir)
 from app.browser.buffer import BrowserBuffer
 from app.imageviewer.buffer import ImageViewerBuffer
 from app.videoplayer.buffer import VideoPlayerBuffer
+from app.demo.buffer import DemoBuffer
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"
@@ -58,7 +59,9 @@ class EAF(dbus.service.Object):
     def new_buffer(self, buffer_id, url):
         global emacs_width, emacs_height
 
-        if url.startswith("/"):
+        if url == "eaf rocks!":
+            self.create_buffer(buffer_id, DemoBuffer(buffer_id, url, emacs_width, emacs_height))
+        elif url.startswith("/"):
             if os.path.exists(url):
                 file_info = MediaInfo.parse(url)
                 if file_is_image(file_info):

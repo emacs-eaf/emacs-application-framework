@@ -70,46 +70,7 @@ C/C++ need compile long time for every change, this will interrupt my attention 
 Python is perfect language to develop Qt program and it can call pretty much every library you need.
 
 ## How to develop new plugins?
-
-1. Create new python plugin file:
-```Bash
-mkdir -p emacs-application-framework/app/foo/buffer.py
-```
-
-2. Fill python file with below template:
-```Python
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QLabel
-from buffer import Buffer
-
-class FooBuffer(Buffer):
-    def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, True, QColor(255, 255, 255, 255))
-
-        self.add_widget(QLabel("foo"))
-```
-
-3. Open emacs-application-framework/core/eaf.py, import plugins buffer module and change `new_buffer` function to launch plugin buffer
-
-```Python
-from app.foo.buffer import FooBuffer
-
-...
-
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
-    def new_buffer(self, buffer_id, url):
-        ...
-
-        if url.endswith(".foo"):
-	    self.create_buffer(buffer_id, FooBuffer(buffer_id, url, emacs_width, emacs_height))
-
-...
-```
-
-4. Try new plugin:
-
-* Call command `eaf-stop-process` to kill old python process first.
-* Then call command `eaf-open' to test new plugin
+[Developer manual](HACKING.md)
 
 ## Todo list
 * Browser: add cookie support
