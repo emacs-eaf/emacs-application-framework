@@ -60,8 +60,10 @@ class EAF(dbus.service.Object):
         if url.startswith("/"):
             if url.endswith(".jpg") or url.endswith(".png"):
                 self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
-            elif url.endswith(".ogg"):
-                self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height))
+            elif url.endswith(".rmvb"):
+                buffer = VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height)
+                buffer.set_video_size(emacs_width, emacs_height)
+                self.create_buffer(buffer_id, buffer)
             else:
                 return "Don't know how to open {0}".format(url)
         else:

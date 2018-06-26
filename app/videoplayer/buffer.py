@@ -19,51 +19,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtGui import QColor
-from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtCore import QSizeF, Qt, QUrl
+from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
+from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
+from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
 from buffer import Buffer
-
-html_file = '''
-<!DOCTYPE html>
-<html>
-  <head>
-  </head>
-  <body>
-    <style>
-     html {
-         margin: 0px;
-         padding: 0px;
-     }
-
-     body {
-         margin: 0px;
-         padding: 0px;
-     }
-
-     video {
-         width: 100%;
-         height: 100%;
-         margin: 0px;
-         padding: 0px;
-     }
-
-     ::-webkit-scrollbar {
-         display: none;
-     }
-    </style>
-      <video controls autoplay src="file://**********"></video>
-  </body>
-</html>
-'''
 
 class VideoPlayerBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(0, 0, 0, 255))
 
-        self.add_widget(QWebView())
-        # self.buffer_widget = QWebView()
+        self.add_widget(VideoPlayer())
         self.buffer_widget.resize(self.width, self.height)
-        self.buffer_widget.setHtml(html_file.replace("**********", url))
+        self.buffer_widget.play(url)
 
         self.fit_to_view = True
 
@@ -73,3 +42,34 @@ class VideoPlayerBuffer(Buffer):
         self.width = width
         self.height = height
         self.buffer_widget.resize(self.width, self.height)
+
+    def set_video_size(self, width, height):
+        self.buffer_widget.video_item.setSize(QSizeF(width, height))
+
+class VideoPlayer(QWidget):
+
+    def __init__(self, parent=None):
+        super(VideoPlayer, self).__init__(parent)
+
+        self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+
+        self.video_item = QGraphicsVideoItem()
+
+        self.scene = QGraphicsScene(self)
+        self.scene.setBackgroundBrush(QBrush(QColor(0, 0, 0, 255)))
+        self.graphics_view = QGraphicsView(self.scene)
+        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.setFrameStyle(0)
+        self.graphics_view.setStyleSheet("QGraphicsView {background: transparent; border: 3px; outline: none;}")
+        self.scene.addItem(self.video_item)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.graphics_view)
+
+        self.media_player.setVideoOutput(self.video_item)
+
+    def play(self, url):
+        self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(url)))
+        self.media_player.play()

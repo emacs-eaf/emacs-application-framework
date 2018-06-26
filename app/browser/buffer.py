@@ -32,7 +32,6 @@ class BrowserBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
 
         self.add_widget(BrowserWidget())
-        # self.buffer_widget = BrowserWidget()
         self.buffer_widget.resize(self.width, self.height)
         self.buffer_widget.setUrl(QUrl(url))
 

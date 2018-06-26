@@ -31,7 +31,6 @@ class ImageViewerBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(0, 0, 0, 255))
 
         self.add_widget(ImageViewerWidget(url, QColor(0, 0, 0, 255)))
-        # self.buffer_widget = ImageViewerWidget(url, QColor(0, 0, 0, 255))
         self.buffer_widget.resize(self.width, self.height)
 
         self.buffer_widget.render_image.connect(self.change_title)

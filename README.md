@@ -76,7 +76,7 @@ class FooBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
         Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
 
-        self.buffer_widget = QLabel("foo")
+        self.add_widget(QLabel("foo"))
         self.buffer_widget.resize(self.width, self.height)
 
     def resize_buffer(self, width, height):
