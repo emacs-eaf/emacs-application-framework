@@ -41,7 +41,7 @@ class DemoBuffer(Buffer):
         self.buffer_widget.setStyleSheet("font-size: 100px")
 ```
 
-Replace QPushButton with your PyQt5 widget.
+    Replace QPushButton with your PyQt5 widget.
 
 2. Open file [eaf.py](core/eaf.py):
 ```Python
@@ -53,16 +53,16 @@ Replace QPushButton with your PyQt5 widget.
             self.create_buffer(buffer_id, DemoBuffer(buffer_id, url, emacs_width, emacs_height))
 ```
 
-Replace "eaf rocks!" to "i am rocks!"
+    Replace "eaf rocks!" to "i am rocks!"
 
 3. Test
-Execute command `eaf-stop-process' to kill old python process.
+    Execute command `eaf-stop-process' to kill old python process.
 
-Execute command `eaf-open' and type "i am rocks!".
+    Execute command `eaf-open' and type "i am rocks!".
 
-See? it's so easy!
+    See? it's so easy!
 
-Above are all you need, happy hacking!
+    Above are all you need, happy hacking!
 
 ## Todo list
 * Browser: add cookie support
