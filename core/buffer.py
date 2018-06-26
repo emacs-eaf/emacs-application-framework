@@ -87,8 +87,6 @@ class Buffer(QGraphicsScene):
 
         if self.buffer_widget != None:
             self.buffer_widget.destroy()
-
-        print("Destroy buffer: %s" % self.buffer_id)
-
+        
     def change_title(self, title):
         self.update_title.emit(self.buffer_id, title)

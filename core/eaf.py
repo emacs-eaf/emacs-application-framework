@@ -164,7 +164,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal("com.lazycat.eaf")
     def focus_emacs_buffer(self, message):
-        print("************* %s" % message)
+        pass
 
     @dbus.service.signal("com.lazycat.eaf")
     def start_finish(self):

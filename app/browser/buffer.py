@@ -40,8 +40,6 @@ class BrowserBuffer(Buffer):
 
         self.fit_to_view = False
 
-        print("Create buffer: %s" % buffer_id)
-
     def resize_buffer(self, width, height):
         self.width = width
         self.height = height

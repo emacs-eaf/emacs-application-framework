@@ -71,8 +71,6 @@ class View(QWidget):
         # Resize after show to trigger fit view operation.
         self.resize(self.width, self.height)
 
-        print("Create view: %s" % self.view_info)
-
     def resizeEvent(self, event):
         if self.buffer.fit_to_view:
             if event.oldSize().isValid():

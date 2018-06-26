@@ -36,8 +36,6 @@ class VideoPlayerBuffer(Buffer):
 
         self.fit_to_view = True
 
-        print("Create buffer: %s" % buffer_id)
-
     def resize_buffer(self, width, height):
         self.width = width
         self.height = height
