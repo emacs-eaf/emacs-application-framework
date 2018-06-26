@@ -58,14 +58,17 @@ class EAF(dbus.service.Object):
         global emacs_width, emacs_height
 
         if url.startswith("/"):
-            if url.endswith(".jpg") or url.endswith(".png"):
-                self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
-            elif url.endswith(".rmvb"):
-                buffer = VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height)
-                buffer.set_video_size(emacs_width, emacs_height)
-                self.create_buffer(buffer_id, buffer)
+            if os.path.exists(url):
+                if url.endswith(".jpg") or url.endswith(".png"):
+                    self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
+                elif url.endswith(".rmvb"):
+                    buffer = VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height)
+                    buffer.set_video_size(emacs_width, emacs_height)
+                    self.create_buffer(buffer_id, buffer)
+                else:
+                    return "Don't know how to open {0}".format(url)
             else:
-                return "Don't know how to open {0}".format(url)
+                return "Path {0} not exists.".format(url)
         else:
             from urllib.parse import urlparse
             result = urlparse(url)
