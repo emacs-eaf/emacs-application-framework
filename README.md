@@ -39,8 +39,8 @@ M-x eaf-open
 
 Such as,
 * type www.google.com to open browser, Ctrl + LeftButton open link in new tab
-* type /path/image.jpg to open image viewer, and press key j or k to select other image in same directory
-* type /path/video.ogg to open video player, video player only support ogg file because it implement by HTML5 video tag
+* type /path/image_file to open image viewer, and press key j or k to select other image in same directory
+* type /path/video_file to open video player
 
 ## Report bug
 If you found eaf message "*eaf* exited abnormally with ...", it mean something wrong in python.
