@@ -49,8 +49,6 @@ class View(QWidget):
         self.width = int(self.width)
         self.height = int(self.height)
 
-        self.background_color = None
-
         self.installEventFilter(self)
 
         self.layout = QVBoxLayout(self)

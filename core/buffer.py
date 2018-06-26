@@ -22,35 +22,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import QBrush
 from PyQt5.QtWidgets import QGraphicsScene
-import functools
 import abc
-
-class PostGui(QtCore.QObject):
-
-    through_thread = QtCore.pyqtSignal(object, object)
-
-    def __init__(self, inclass=True):
-        super(PostGui, self).__init__()
-        self.through_thread.connect(self.on_signal_received)
-        self.inclass = inclass
-
-    def __call__(self, func):
-        self._func = func
-
-        @functools.wraps(func)
-        def obj_call(*args, **kwargs):
-            self.emit_signal(args, kwargs)
-        return obj_call
-
-    def emit_signal(self, args, kwargs):
-        self.through_thread.emit(args, kwargs)
-
-    def on_signal_received(self, args, kwargs):
-        if self.inclass:
-            obj, args = args[0], args[1:]
-            self._func(obj, *args, **kwargs)
-        else:
-            self._func(*args, **kwargs)
 
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
@@ -87,6 +59,6 @@ class Buffer(QGraphicsScene):
 
         if self.buffer_widget != None:
             self.buffer_widget.destroy()
-        
+
     def change_title(self, title):
         self.update_title.emit(self.buffer_id, title)
