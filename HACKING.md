@@ -46,12 +46,12 @@ class DemoBuffer(Buffer):
 
 2. Open file [eaf.py](core/eaf.py):
 ```Python
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
-    def new_buffer(self, buffer_id, url):
-        global emacs_width, emacs_height
+@dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
+def new_buffer(self, buffer_id, url):
+    global emacs_width, emacs_height
 
-        if url == "eaf rocks!":
-            self.create_buffer(buffer_id, DemoBuffer(buffer_id, url, emacs_width, emacs_height))
+    if url == "eaf rocks!":
+        self.create_buffer(buffer_id, DemoBuffer(buffer_id, url, emacs_width, emacs_height))
 ```
 
     Replace "eaf rocks!" to "i am rocks!"
