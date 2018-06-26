@@ -23,7 +23,7 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 1. Install PyQt5 and Python-Xlib (below commands use for archlinux)
 ```Bash
-sudo pacman -S python-xlib python-pyqt5
+sudo pacman -S python-xlib python-pyqt5 python-pymediainfo
 ```
 
 2. Clone this repository and add below code in your ~/.emacs

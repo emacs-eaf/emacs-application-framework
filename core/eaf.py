@@ -22,6 +22,7 @@
 from PyQt5.QtWidgets import QApplication
 from dbus.mainloop.glib import DBusGMainLoop
 from fake_key_event import fake_key_event
+from pymediainfo import MediaInfo
 from view import View
 import dbus
 import dbus.service
@@ -59,9 +60,10 @@ class EAF(dbus.service.Object):
 
         if url.startswith("/"):
             if os.path.exists(url):
-                if url.endswith(".jpg") or url.endswith(".png"):
+                file_info = MediaInfo.parse(url)
+                if self.file_is_image(file_info):
                     self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
-                elif url.endswith(".rmvb"):
+                elif self.file_is_video(file_info):
                     buffer = VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height)
                     buffer.set_video_size(emacs_width, emacs_height)
                     self.create_buffer(buffer_id, buffer)
@@ -82,6 +84,19 @@ class EAF(dbus.service.Object):
                     return "{0} is not valid url".format(url)
 
         return ""
+
+    def file_is_image(self, file_info):
+        for track in file_info.tracks:
+            if track.track_type == "Image":
+                return True
+
+        return False
+    def file_is_video(self, file_info):
+        for track in file_info.tracks:
+            if track.track_type == "Video":
+                return True
+
+        return False
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_views(self, args):
