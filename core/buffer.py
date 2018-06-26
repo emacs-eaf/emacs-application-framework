@@ -58,3 +58,6 @@ class Buffer(QGraphicsScene):
 
     def change_title(self, title):
         self.update_title.emit(self.buffer_id, title)
+
+    def all_views_hide(self):
+        pass

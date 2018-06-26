@@ -100,6 +100,16 @@ class EAF(dbus.service.Object):
 
         view_infos = args.split(",")
 
+        # Do something if buffer's all view hide after update_views operation.
+        old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
+        new_view_buffer_ids = map(lambda v: v.split(":")[0], view_infos)
+
+        for old_view_buffer_id in old_view_buffer_ids:
+            if old_view_buffer_id not in new_view_buffer_ids:
+                # Call all_views_hide interface when buffer's all views will hide.
+                # We do something in app's buffer interface, such as videoplayer will pause video when all views hide.
+                self.buffer_dict[old_view_buffer_id].all_views_hide()
+
         # Remove old key from view dict and destroy old view.
         for key in list(self.view_dict):
             if key not in view_infos:

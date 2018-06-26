@@ -34,6 +34,10 @@ class VideoPlayerBuffer(Buffer):
         self.buffer_widget.play(url)
         self.buffer_widget.video_item.setSize(QSizeF(width, height))
 
+    def all_views_hide(self):
+        # Pause video before all views hdie, otherwise will got error "Internal data stream error".
+        self.buffer_widget.media_player.pause()
+
 class VideoPlayerWidget(QWidget):
 
     def __init__(self, parent=None):
@@ -61,3 +65,10 @@ class VideoPlayerWidget(QWidget):
     def play(self, url):
         self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(url)))
         self.media_player.play()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Space:
+            if self.media_player.state() == QMediaPlayer.PlayingState:
+                self.media_player.pause()
+            else:
+                self.media_player.play()
