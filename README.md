@@ -84,16 +84,9 @@ from buffer import Buffer
 
 class FooBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, QColor(255, 255, 255, 255))
+        Buffer.__init__(self, buffer_id, url, width, height, True, QColor(255, 255, 255, 255))
 
         self.add_widget(QLabel("foo"))
-        self.buffer_widget.resize(self.width, self.height)
-
-    def resize_buffer(self, width, height):
-        self.width = width
-        self.height = height
-        self.buffer_widget.resize(self.width, self.height)
-
 ```
 
 3. Open emacs-application-framework/core/eaf.py, import plugins buffer module and change `new_buffer` function to launch plugin buffer
