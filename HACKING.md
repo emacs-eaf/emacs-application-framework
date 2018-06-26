@@ -13,10 +13,11 @@ Python is perfect language to develop Qt program and it can call pretty much eve
 M-x eaf-open
 ```
 
-Then type "eaf rocks!" as input, will pop hello world window in emacs like below:
+    Then type "eaf rocks!" as input, will pop hello world window in emacs like below:
+
 ![img](./screenshot/hello_world.png)
 
-It's a big hello button, try to click it, haha.
+    It's a big hello button, try to click it, haha.
 
 ## Develop new plugin
 It's very easy if you know how to write PyQt5 code.
