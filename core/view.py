@@ -40,6 +40,7 @@ class View(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_X11DoNotAcceptFocus, True)
         self.setContentsMargins(0, 0, 0, 0)
+        self.installEventFilter(self)
 
         # Init attributes.
         self.view_info = view_info
@@ -49,11 +50,9 @@ class View(QWidget):
         self.width = int(self.width)
         self.height = int(self.height)
 
-        self.installEventFilter(self)
-
+        # Build QGraphicsView.
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-
         self.graphics_view = QGraphicsView(buffer, self)
         self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -63,19 +62,21 @@ class View(QWidget):
         self.graphics_view.setStyleSheet("QGraphicsView {background: transparent; border: 3px; outline: none;}")
         self.layout.addWidget(self.graphics_view)
 
-        # Show and resize.
+        # NOTE: show function must start before resize to trigger *first* resizeEvent after show.
         self.show()
 
         # Resize after show to trigger fit view operation.
         self.resize(self.width, self.height)
 
     def resizeEvent(self, event):
+        # Fit content to view rect just when buffer fit_to_view option is enable.
         if self.buffer.fit_to_view:
             if event.oldSize().isValid():
                 self.graphics_view.fitInView(self.graphics_view.scene().sceneRect(), Qt.KeepAspectRatio)
         QWidget.resizeEvent(self, event)
 
     def eventFilter(self, obj, event):
+        # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel]:
             self.trigger_focus_event.emit("{0},{1}".format(event.globalX(), event.globalY()))
@@ -103,5 +104,4 @@ class View(QWidget):
 
     def handle_destroy(self):
         self.destroy()
-
-        print("Destroy view: %s" % self.view_info)
+        

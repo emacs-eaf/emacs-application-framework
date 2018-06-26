@@ -31,28 +31,24 @@ class Buffer(QGraphicsScene):
     open_url = QtCore.pyqtSignal(str)
     before_destroy_hook = QtCore.pyqtSignal()
 
-    def __init__(self, buffer_id, url, width, height, background_color):
+    def __init__(self, buffer_id, url, width, height, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
-
-        self.width = width
-        self.height = height
 
         self.buffer_id = buffer_id
         self.url = url
-
-        self.buffer_widget = None
+        self.width = width
+        self.height = height
+        self.fit_to_view = fit_to_view
         self.background_color = background_color
-
         self.setBackgroundBrush(QBrush(self.background_color))
 
-        self.fit_to_view = True
+        self.buffer_widget = None
 
     def add_widget(self, widget):
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
 
-    def resize_buffer(self, width, height):
-        pass
+        self.buffer_widget.resize(self.width, self.height)
 
     def handle_destroy(self):
         self.before_destroy_hook.emit()

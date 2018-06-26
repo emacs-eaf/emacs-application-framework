@@ -28,20 +28,10 @@ from buffer import Buffer
 
 class VideoPlayerBuffer(Buffer):
     def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, QColor(0, 0, 0, 255))
+        Buffer.__init__(self, buffer_id, url, width, height, True, QColor(0, 0, 0, 255))
 
         self.add_widget(VideoPlayer())
-        self.buffer_widget.resize(self.width, self.height)
         self.buffer_widget.play(url)
-
-        self.fit_to_view = True
-
-    def resize_buffer(self, width, height):
-        self.width = width
-        self.height = height
-        self.buffer_widget.resize(self.width, self.height)
-
-    def set_video_size(self, width, height):
         self.buffer_widget.video_item.setSize(QSizeF(width, height))
 
 class VideoPlayer(QWidget):

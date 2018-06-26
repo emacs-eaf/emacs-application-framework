@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import QApplication
 from dbus.mainloop.glib import DBusGMainLoop
 from fake_key_event import fake_key_event
 from pymediainfo import MediaInfo
+from utils import file_is_image, file_is_video
 from view import View
 import dbus
 import dbus.service
@@ -55,18 +56,15 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def new_buffer(self, buffer_id, url):
-
         global emacs_width, emacs_height
 
         if url.startswith("/"):
             if os.path.exists(url):
                 file_info = MediaInfo.parse(url)
-                if self.file_is_image(file_info):
+                if file_is_image(file_info):
                     self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
-                elif self.file_is_video(file_info):
-                    buffer = VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height)
-                    buffer.set_video_size(emacs_width, emacs_height)
-                    self.create_buffer(buffer_id, buffer)
+                elif file_is_video(file_info):
+                    self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height))
                 else:
                     return "Don't know how to open {0}".format(url)
             else:
@@ -85,18 +83,13 @@ class EAF(dbus.service.Object):
 
         return ""
 
-    def file_is_image(self, file_info):
-        for track in file_info.tracks:
-            if track.track_type == "Image":
-                return True
+    def create_buffer(self, buffer_id, app_buffer):
+        # Add buffer to buffer dict.
+        self.buffer_dict[buffer_id] = app_buffer
 
-        return False
-    def file_is_video(self, file_info):
-        for track in file_info.tracks:
-            if track.track_type == "Video":
-                return True
-
-        return False
+        # Monitor buffer signals.
+        app_buffer.update_title.connect(self.update_buffer_title)
+        app_buffer.open_url.connect(self.open_buffer_url)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_views(self, args):
@@ -120,26 +113,6 @@ class EAF(dbus.service.Object):
 
                     view.trigger_focus_event.connect(self.focus_emacs_buffer)
 
-        # # Update buffer size.
-        # for buffer in list(self.buffer_dict.values()):
-        #     # Get match views.
-        #     match_views = list(filter(lambda v: view.py.buffer_id == buffer.buffer_id, self.view_dict.values()))
-
-        #     # Get size list of buffer's views.
-        #     view_sizes = list(map(lambda v: (v.width, v.height), match_views))
-
-        #     # Init buffer size with emacs' size.
-        #     buffer_width = emacs_width
-        #     buffer_height = emacs_height
-
-        #     # Update buffer size with max area view's size,
-        #     # to make each view has the same rendering area after user do split operation in emacs.
-        #     if len(view_sizes) > 0:
-        #         buffer_width, buffer_height = max(view_sizes, key=lambda size: size[0] * size[1])
-
-        #     # Resize buffer.
-        #     buffer.resize_buffer(buffer_width, buffer_height)
-
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
         # Kill all view base on buffer_id.
@@ -153,12 +126,12 @@ class EAF(dbus.service.Object):
             self.buffer_dict[buffer_id].handle_destroy()
             self.buffer_dict.pop(buffer_id, None)
 
-
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def send_key(self, args):
-        print("Send key: %s" % args)
+        # Get buffer id and event string.
         (buffer_id, event_string) = args.split(":")
 
+        # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
             QApplication.sendEvent(self.buffer_dict[buffer_id].buffer_widget, fake_key_event(event_string))
 
@@ -177,12 +150,6 @@ class EAF(dbus.service.Object):
     @dbus.service.signal("com.lazycat.eaf")
     def open_buffer_url(self, url):
         pass
-
-    def create_buffer(self, buffer_id, app_buffer):
-        self.buffer_dict[buffer_id] = app_buffer
-
-        app_buffer.update_title.connect(self.update_buffer_title)
-        app_buffer.open_url.connect(self.open_buffer_url)
 
 if __name__ == "__main__":
     import sys
