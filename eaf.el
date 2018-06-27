@@ -371,7 +371,7 @@ We need calcuate render allocation to make sure no black border around render co
     ))
 
 (defun eaf-open (url)
-  (interactive "sOpen with EAF: ")
+  (interactive "FOpen with EAF: ")
   (if (process-live-p eaf-process)
       ;; Call `eaf-open-internal' directly if server process has start.
       (eaf-open-internal url)
