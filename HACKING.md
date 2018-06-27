@@ -35,8 +35,8 @@ from PyQt5.QtWidgets import QPushButton
 from buffer import Buffer
 
 class DemoBuffer(Buffer):
-    def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, True, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url):
+        Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
 
         self.add_widget(QPushButton("Hello, EAF hacker, it's work!!!"))
         self.buffer_widget.setStyleSheet("font-size: 100px")
@@ -48,10 +48,8 @@ class DemoBuffer(Buffer):
 ```Python
 @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
 def new_buffer(self, buffer_id, url):
-    global emacs_width, emacs_height
-
     if url == "eaf rocks!":
-        self.create_buffer(buffer_id, DemoBuffer(buffer_id, url, emacs_width, emacs_height))
+        self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
 ```
 
     Replace "eaf rocks!" to "i am rocks!"
@@ -67,4 +65,3 @@ def new_buffer(self, buffer_id, url):
 
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)
-

@@ -27,13 +27,11 @@ from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
 from buffer import Buffer
 
 class VideoPlayerBuffer(Buffer):
-    def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, True, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url):
+        Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
 
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
-        self.buffer_widget.video_item.setSize(QSizeF(width, height))
-
 
     def all_views_hide(self):
         # Pause video before all views hdie, otherwise will got error "Internal data stream error".
@@ -69,6 +67,10 @@ class VideoPlayerWidget(QWidget):
 
         self.video_need_replay = False
         self.video_seek_durcation = 3000 # in milliseconds
+
+    def resizeEvent(self, event):
+        self.video_item.setSize(QSizeF(event.size().width(), event.size().height()))
+        QWidget.resizeEvent(self, event)
 
     def play(self, url):
         self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(url)))

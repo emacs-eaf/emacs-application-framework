@@ -57,17 +57,15 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def new_buffer(self, buffer_id, url):
-        global emacs_width, emacs_height
-
         if url == "eaf rocks!":
-            self.create_buffer(buffer_id, DemoBuffer(buffer_id, url, emacs_width, emacs_height))
+            self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
         elif url.startswith("/"):
             if os.path.exists(url):
                 file_info = MediaInfo.parse(url)
                 if file_is_image(file_info):
-                    self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url, emacs_width, emacs_height))
+                    self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url))
                 elif file_is_video(file_info):
-                    self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url, emacs_width, emacs_height))
+                    self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url))
                 else:
                     return "Don't know how to open {0}".format(url)
             else:
@@ -76,19 +74,25 @@ class EAF(dbus.service.Object):
             from urllib.parse import urlparse
             result = urlparse(url)
             if len(result.scheme) != 0:
-                self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl(), emacs_width, emacs_height))
+                self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
             else:
                 result = urlparse("{0}:{1}".format("http", url))
                 if result.scheme != "":
-                    self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl(), emacs_width, emacs_height))
+                    self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
                 else:
                     return "{0} is not valid url".format(url)
 
         return ""
 
     def create_buffer(self, buffer_id, app_buffer):
+        global emacs_width, emacs_height
+
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer
+
+        # Resize buffer with emacs max window size,
+        # view (QGraphicsView) will adjust visual area along with emacs window changed.
+        app_buffer.buffer_widget.resize(emacs_width, emacs_height)
 
         # Monitor buffer signals.
         app_buffer.update_title.connect(self.update_buffer_title)

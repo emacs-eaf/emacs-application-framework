@@ -28,8 +28,8 @@ from PyQt5.QtWebKit import QWebSettings
 from buffer import Buffer
 
 class BrowserBuffer(Buffer):
-    def __init__(self, buffer_id, url, width, height):
-        Buffer.__init__(self, buffer_id, url, width, height, False, QColor(255, 255, 255, 255))
+    def __init__(self, buffer_id, url):
+        Buffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
 
         self.add_widget(BrowserWidget())
         self.buffer_widget.setUrl(QUrl(url))
