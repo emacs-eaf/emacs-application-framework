@@ -61,3 +61,6 @@ class Buffer(QGraphicsScene):
 
     def all_views_hide(self):
         pass
+
+    def some_view_show(self):
+        pass

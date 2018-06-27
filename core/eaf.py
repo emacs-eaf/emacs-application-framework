@@ -102,12 +102,14 @@ class EAF(dbus.service.Object):
 
         # Do something if buffer's all view hide after update_views operation.
         old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
-        new_view_buffer_ids = map(lambda v: v.split(":")[0], view_infos)
+        new_view_buffer_ids = list(set(map(lambda v: v.split(":")[0], view_infos)))
 
+        # Call all_views_hide interface when buffer's all views will hide.
+        # We do something in app's buffer interface, such as videoplayer will pause video when all views hide.
+        # Note, we must call this function before last view destroy,
+        # such as QGraphicsVideoItem will report "Internal data stream error" error.
         for old_view_buffer_id in old_view_buffer_ids:
             if old_view_buffer_id not in new_view_buffer_ids:
-                # Call all_views_hide interface when buffer's all views will hide.
-                # We do something in app's buffer interface, such as videoplayer will pause video when all views hide.
                 self.buffer_dict[old_view_buffer_id].all_views_hide()
 
         # Remove old key from view dict and destroy old view.
@@ -125,6 +127,14 @@ class EAF(dbus.service.Object):
                     self.view_dict[view_info] = view
 
                     view.trigger_focus_event.connect(self.focus_emacs_buffer)
+
+        # Call some_view_show interface when buffer's view switch back.
+        # Note, this must call after new view create, otherwise some buffer,
+        # such as QGraphicsVideoItem will report "Internal data stream error" error.
+        if view_infos != ['']:
+            for new_view_buffer_id in new_view_buffer_ids:
+                if new_view_buffer_id not in old_view_buffer_ids:
+                    self.buffer_dict[new_view_buffer_id].some_view_show()
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
