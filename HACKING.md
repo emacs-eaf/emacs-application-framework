@@ -1,12 +1,12 @@
 ## Why choose Qt?
 Qt's QGraphicsView and QGraphicsScene is awesome, it's easier to implement window composite than other GUI library (such as GTK+).
 
-If use Gtk+ or other GUI library, i need write many Widget/XComposite code to implement widget like QGraphicsView/QGraphicsScene.
+If use Gtk+ or other GUI library, I need write many Widget/XComposite code to implement widget like QGraphicsView/QGraphicsScene.
 
 ## Why choose Python?
-C/C++ need compile long time for every change, this will interrupt my attention and development enthusiasm.
+C/C++ need compile long time for every change, this will interrupt my attention and enthusiasm of development.
 
-Python is perfect language to develop Qt program and it can call pretty much every library you need.
+Python is a perfect language to develop Qt program and it can call pretty much in every library you need.
 
 ## Let me run hello word
 ```
@@ -26,7 +26,7 @@ Here have awesome tutorial help you study PyQt5: http://zetcode.com/gui/pyqt5/
 
 Trust me, PyQt5 is pretty easy to study.
 
-After you know how to write PyQt5 code, develop new plugin just need 3 steps:
+After you know how to write PyQt5 code, developing new plugin just needs 3 steps:
 
 1. Open file [buffer.py](app/demo/buffer.py):
 ```Python
@@ -71,7 +71,7 @@ def new_buffer(self, buffer_id, url):
     
     
 
-See? it's so easy!
+See? It's so easy!
 
 Above are all you need, happy hacking!
 
