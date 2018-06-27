@@ -160,7 +160,7 @@ class EAF(dbus.service.Object):
 
         # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
-            QApplication.sendEvent(self.buffer_dict[buffer_id].buffer_widget, fake_key_event(event_string))
+            self.buffer_dict[buffer_id].send_key_event(fake_key_event(event_string))
 
     @dbus.service.signal("com.lazycat.eaf")
     def focus_emacs_buffer(self, message):

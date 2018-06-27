@@ -21,7 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QBrush
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QApplication
 import abc
 
 class Buffer(QGraphicsScene):
@@ -60,3 +60,6 @@ class Buffer(QGraphicsScene):
 
     def some_view_show(self):
         pass
+
+    def send_key_event(self, event):
+        QApplication.sendEvent(self.buffer_widget, event)
