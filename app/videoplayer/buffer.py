@@ -50,10 +50,6 @@ class VideoPlayerWidget(QWidget):
     def __init__(self, parent=None):
         super(VideoPlayerWidget, self).__init__(parent)
 
-        self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-
-        self.video_item = QGraphicsVideoItem()
-
         self.scene = QGraphicsScene(self)
         self.scene.setBackgroundBrush(QBrush(QColor(0, 0, 0, 255)))
         self.graphics_view = QGraphicsView(self.scene)
@@ -61,19 +57,30 @@ class VideoPlayerWidget(QWidget):
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setFrameStyle(0)
         self.graphics_view.setStyleSheet("QGraphicsView {background: transparent; border: 3px; outline: none;}")
+        self.video_item = QGraphicsVideoItem()
         self.scene.addItem(self.video_item)
 
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.graphics_view)
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(self.graphics_view)
 
+        self.media_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         self.media_player.setVideoOutput(self.video_item)
 
         self.video_need_replay = False
+        self.video_seek_durcation = 3000 # in milliseconds
 
     def play(self, url):
         self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(url)))
         self.media_player.play()
+
+    def seek_forward(self):
+        video_position = self.media_player.position()
+        self.media_player.setPosition(video_position + self.video_seek_durcation)
+
+    def seek_backward(self):
+        video_position = self.media_player.position()
+        self.media_player.setPosition(max(video_position - self.video_seek_durcation, 0))
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Space:
@@ -83,3 +90,7 @@ class VideoPlayerWidget(QWidget):
             else:
                 self.media_player.play()
                 self.video_need_replay = True
+        elif event.key() == Qt.Key_H:
+            self.seek_backward()
+        elif event.key() == Qt.Key_L:
+            self.seek_forward()
