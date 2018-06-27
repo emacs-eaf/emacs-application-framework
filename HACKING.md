@@ -55,13 +55,16 @@ def new_buffer(self, buffer_id, url):
     Replace "eaf rocks!" to "i am rocks!"
 
 3. Test
+
     Execute command `eaf-stop-process' to kill old python process.
 
     Execute command `eaf-open' and type "i am rocks!".
+    
+    
 
-    See? it's so easy!
+See? it's so easy!
 
-    Above are all you need, happy hacking!
+Above are all you need, happy hacking!
 
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)
