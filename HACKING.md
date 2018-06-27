@@ -55,10 +55,11 @@ def new_buffer(self, buffer_id, url):
     Replace "eaf rocks!" to "i am rocks!"
 
 3. Test
-
+```
     Execute command `eaf-stop-process' to kill old python process.
 
     Execute command `eaf-open' and type "i am rocks!".
+```
     
     
 
