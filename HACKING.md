@@ -43,6 +43,14 @@ class DemoBuffer(Buffer):
 ```
 
     Replace QPushButton with your PyQt5 widget.
+    
+* buffer_id and url are need by framework, you just need pass those paramaters to Buffer class
+    
+* third paramater True mean application content will fit size with emacs window size change, such as image viewer. 
+    
+* third paramater False mean applicaton content won't fit size with emacs window size change, such as browser.
+    
+* fourth paramater is background color to fill application background.
 
 2. Open file [eaf.py](core/eaf.py):
 ```Python
