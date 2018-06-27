@@ -147,20 +147,19 @@
 (defun eaf-stop-process ()
   (interactive)
   (if (process-live-p eaf-process)
-      ;; kill all eaf buffers after delete eaf server process.
-      (progn
-        (delete-process eaf-process)
-        (let ((current-buf (current-buffer))
-              (count 0))
-          (dolist (buffer (buffer-list))
-            (set-buffer buffer)
-            (when (equal major-mode 'eaf-mode)
-              (incf count)
-              (kill-buffer buffer)))
-          ;; Just report to me when eaf buffer exists.
-          (if (> count 1)
-              (message "Killed EAF %s buffer%s" count (if (> count 1) "s" "")))))
-    (message "EAF process has dead.")))
+      ;; Delete eaf server process.
+      (delete-process eaf-process)
+    (message "EAF process has dead.")
+    (let ((current-buf (current-buffer))
+          (count 0))
+      (dolist (buffer (buffer-list))
+        (set-buffer buffer)
+        (when (equal major-mode 'eaf-mode)
+          (incf count)
+          (kill-buffer buffer)))
+      ;; Just report to me when eaf buffer exists.
+      (if (> count 1)
+          (message "Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))))
 
 (defun eaf-restart-process ()
   (interactive)
