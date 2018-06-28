@@ -34,7 +34,7 @@ from buffer import Buffer
 
 class PdfViewerBuffer(Buffer):
     def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
+        Buffer.__init__(self, buffer_id, url, False, QColor(0, 0, 0, 255))
 
         widget = PDFScrolledWidget(url)
         self.add_widget(widget)
