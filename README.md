@@ -19,6 +19,9 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ### Video Player
 ![img](./screenshot/video_player.gif)
 
+### PDF Player
+![img](./screenshot/video_player.gif)
+
 ## Installation
 
 1. Install python libraries:
