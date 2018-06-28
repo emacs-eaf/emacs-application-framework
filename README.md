@@ -40,12 +40,26 @@ sudo pip install git+https://github.com/wbsoft/python-poppler-qt5.git
 ```
 M-x eaf-open
 ```
+| App          | Key                | Event                                    |
+| --------     | :-----:            | :----                                    |
+| Browser      | Left Button        | Open link current tab                    |
+|              | Ctrl + Left Button | Open link in new tab                     |
+| Image Viewer | j                  | Load next image in current directory     |
+|              | k                  | Load previous image in current directory |
+| Video Player | Space              | Play or Pause                            |
+|              | h                  | Seek backward                            |
+|              | l                  | Seek forward                             |
+| Pdf Viewer   | j                  | Scroll up                                |
+|              | k                  | Scroll down                              |
+|              | Space              | Scroll up page                           |
+|              | b                  | Scroll down page                         |
+|              | ,                  | Scroll to end                            |
+|              | .                  | Scroll to home                           |
+|              | t                  | Switch scale mode                        |
+|              | -                  | zoom out                                 |
+|              | =                  | zoom in                                  |
+|              | 0                  | zoomn reset                              |
 
-Such as,
-* type www.google.com to open browser, Ctrl + LeftButton open link in new tab
-* type /path/image_file to open image viewer, and press key j or k to select other image in same directory
-* type /path/video_file to open video player, press space to toggle play/pause status, press H or L to seek video position.
-* type /path/pdf_file to open pdf viewer.
 
 ## How to develop new plugins?
 [Developer manual](HACKING.md)
