@@ -35,6 +35,7 @@ sys.path.insert(0, parent_dir)
 from app.browser.buffer import BrowserBuffer
 from app.imageviewer.buffer import ImageViewerBuffer
 from app.videoplayer.buffer import VideoPlayerBuffer
+from app.pdfviewer.buffer import PdfViewerBuffer
 from app.demo.buffer import DemoBuffer
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
@@ -61,13 +62,16 @@ class EAF(dbus.service.Object):
             self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
         elif url.startswith("/"):
             if os.path.exists(url):
-                file_info = MediaInfo.parse(url)
-                if file_is_image(file_info):
-                    self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url))
-                elif file_is_video(file_info):
-                    self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url))
+                if url.endswith(".pdf"):
+                    self.create_buffer(buffer_id, PdfViewerBuffer(buffer_id, url))
                 else:
-                    return "Don't know how to open {0}".format(url)
+                    file_info = MediaInfo.parse(url)
+                    if file_is_image(file_info):
+                        self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url))
+                    elif file_is_video(file_info):
+                        self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url))
+                    else:
+                        return "Don't know how to open {0}".format(url)
             else:
                 return "Path {0} not exists.".format(url)
         else:

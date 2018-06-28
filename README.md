@@ -21,9 +21,10 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ## Installation
 
-1. Install python libraries (below commands use for archlinux)
+1. Install python libraries:
 ```Bash
 sudo pacman -S python-xlib python-pyqt5 python-pymediainfo
+sudo pip install git+https://github.com/wbsoft/python-poppler-qt5.git
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
