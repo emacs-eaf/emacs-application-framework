@@ -42,6 +42,7 @@ Such as,
 * type www.google.com to open browser, Ctrl + LeftButton open link in new tab
 * type /path/image_file to open image viewer, and press key j or k to select other image in same directory
 * type /path/video_file to open video player, press space to toggle play/pause status, press H or L to seek video position.
+* type /path/pdf_file to open pdf viewer.
 
 ## How to develop new plugins?
 [Developer manual](HACKING.md)
