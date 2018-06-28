@@ -20,7 +20,7 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ![img](./screenshot/video_player.gif)
 
 ### PDF Player
-![img](./screenshot/video_player.gif)
+![img](./screenshot/pdf_viewer.gif)
 
 ## Installation
 
