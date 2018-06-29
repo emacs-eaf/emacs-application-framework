@@ -1,5 +1,4 @@
 ## Todo list
-* Core: balance window after split window.
 * Core: sometime, press key no respsone.
 * Browser: add cookie support
 * Browser: support pop window, such as emacs-china.org
