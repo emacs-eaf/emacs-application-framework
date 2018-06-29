@@ -60,31 +60,34 @@ class EAF(dbus.service.Object):
     def new_buffer(self, buffer_id, url):
         if url == "eaf rocks!":
             self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
-        elif url.startswith("/"):
-            if os.path.exists(url):
-                if url.endswith(".pdf"):
-                    self.create_buffer(buffer_id, PdfViewerBuffer(buffer_id, url))
-                else:
-                    file_info = MediaInfo.parse(url)
-                    if file_is_image(file_info):
-                        self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url))
-                    elif file_is_video(file_info):
-                        self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url))
-                    else:
-                        return "Don't know how to open {0}".format(url)
-            else:
-                return "Path {0} not exists.".format(url)
         else:
-            from urllib.parse import urlparse
-            result = urlparse(url)
-            if len(result.scheme) != 0:
-                self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
+            url = os.path.expanduser(url)
+
+            if url.startswith("/"):
+                if os.path.exists(url):
+                    if url.endswith(".pdf"):
+                        self.create_buffer(buffer_id, PdfViewerBuffer(buffer_id, url))
+                    else:
+                        file_info = MediaInfo.parse(url)
+                        if file_is_image(file_info):
+                            self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url))
+                        elif file_is_video(file_info):
+                            self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url))
+                        else:
+                            return "Don't know how to open {0}".format(url)
+                else:
+                    return "Path {0} not exists.".format(url)
             else:
-                result = urlparse("{0}:{1}".format("http", url))
-                if result.scheme != "":
+                from urllib.parse import urlparse
+                result = urlparse(url)
+                if len(result.scheme) != 0:
                     self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
                 else:
-                    return "{0} is not valid url".format(url)
+                    result = urlparse("{0}:{1}".format("http", url))
+                    if result.scheme != "":
+                        self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
+                    else:
+                        return "{0} is not valid url".format(url)
 
         return ""
 
