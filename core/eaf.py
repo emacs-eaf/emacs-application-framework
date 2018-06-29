@@ -147,6 +147,22 @@ class EAF(dbus.service.Object):
                 if new_view_buffer_id not in old_view_buffer_ids:
                     self.buffer_dict[new_view_buffer_id].some_view_show()
 
+        # Adjust buffer size along with views change.
+        # Note: just buffer that option `fit_to_view' is False need to adjust,
+        # if buffer option fit_to_view is True, buffer render adjust by view.resizeEvent()
+        for buffer in list(self.buffer_dict.values()):
+            if not buffer.fit_to_view:
+                buffer_views = list(filter(lambda v: v.buffer_id == buffer.buffer_id, list(self.view_dict.values())))
+
+                # Adjust buffer size to max view's size.
+                if len(buffer_views) > 0:
+                    max_view = max(buffer_views, key=lambda v: v.width * v.height)
+
+                    buffer.buffer_widget.resize(max_view.width, max_view.height)
+                # Adjust buffer size to emacs window size if not match view found.
+                else:
+                    buffer.buffer_widget.resize(emacs_width, emacs_height)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
         # Kill all view base on buffer_id.
