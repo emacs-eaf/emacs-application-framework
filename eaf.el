@@ -279,7 +279,8 @@ We need calcuate render allocation to make sure no black border around render co
            (t
             (unless (or
                      (equal key-command "keyboard-quit")
-                     (equal key-command "kill-this-buffer"))
+                     (equal key-command "kill-this-buffer")
+                     (equal key-command "eaf-open"))
               (ignore-errors (call-interactively (key-binding key))))
             (message (format "Got command: %s" key-command)))))
         ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
