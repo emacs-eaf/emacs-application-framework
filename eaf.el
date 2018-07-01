@@ -256,8 +256,7 @@ We need calcuate render allocation to make sure no black border around render co
            ((and
              (or
               (equal key-command "self-insert-command")
-              (equal key-command "completion-select-if-within-overlay")
-              )
+              (equal key-command "completion-select-if-within-overlay"))
              (equal 1 (string-width (this-command-keys))))
             (message (format "Send char: '%s" key-desc))
             (eaf-call "send_key" (format "%s:%s" buffer-id key-desc)))

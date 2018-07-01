@@ -8,5 +8,4 @@
 * ImageViewer: add zoom support
 * VideoPlayer: remember video play progress.
 * PdfViewer: render current page and total page
-* PdfViewer: add goto page
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough

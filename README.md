@@ -56,9 +56,10 @@ M-x eaf-open
 |              | ,                  | Scroll to end                            |
 |              | .                  | Scroll to home                           |
 |              | t                  | Switch scale mode                        |
-|              | -                  | zoom out                                 |
-|              | =                  | zoom in                                  |
-|              | 0                  | zoomn reset                              |
+|              | -                  | Zoom out                                 |
+|              | =                  | Zoom in                                  |
+|              | 0                  | Zoomn reset                              |
+|              | g                  | Goto page                                |
 
 ### Why this awesome framework can't works with MacOS?
 There are mainly three obstacles:

@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt, QRect, QPoint, QRectF
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
@@ -59,6 +59,10 @@ class PdfViewerWidget(QWidget):
 
         # Padding between pages.
         self.page_padding = 10
+
+        # Goto page status.
+        self.is_waiting_jump = False
+        self.jump_number = ""
 
     def resizeEvent(self, event):
         # Update scale attributes after widget resize.
@@ -103,6 +107,24 @@ class PdfViewerWidget(QWidget):
                 # Draw page image.
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
+        # Draw jump page bar.
+        if self.is_waiting_jump:
+            jump_bar_height = 60
+            painter.setBrush(QColor(0, 0, 0, 128))
+            render_x = (self.rect().width() - render_width) / 2
+            render_y = self.rect().y() + self.rect().height() - jump_bar_height
+            render_width = self.page_size.width() * self.scale
+
+            painter.drawRect(render_x, render_y, render_width, jump_bar_height)
+
+            prompt_padding_x = 20
+            font = painter.font()
+            font.setPointSize(28);
+            painter.setFont(font);
+            painter.setPen(QColor(255, 255, 255, 255))
+            painter.drawText(QRectF(render_x + prompt_padding_x, render_y, render_width - prompt_padding_x, jump_bar_height),
+                             "Jump to [{0} - {1}]: {2}".format(1, self.page_total_number, self.jump_number))
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_J:
             self.scroll_up()
@@ -124,6 +146,20 @@ class PdfViewerWidget(QWidget):
             self.zoom_in()
         elif event.key() == Qt.Key_Minus:
             self.zoom_out()
+        elif event.key() == Qt.Key_G:
+            if self.is_waiting_jump:
+                self.hide_jump_bar()
+            else:
+                self.show_jump_bar()
+        elif event.key() == Qt.Key_Return:
+            if self.is_waiting_jump:
+                self.jump_page()
+
+        if self.is_waiting_jump:
+            if event.key() in [Qt.Key_0, Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5, Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9]:
+                self.insert_page_number(event.text())
+            elif event.key() == Qt.Key_Backspace:
+                self.delete_page_number()
 
     def update_scale(self):
         if self.read_mode == "fit_to_width":
@@ -182,6 +218,33 @@ class PdfViewerWidget(QWidget):
     def zoom_reset(self):
         self.update_scale()
         self.update()
+
+    def show_jump_bar(self):
+        self.is_waiting_jump = True
+        self.update()
+
+    def hide_jump_bar(self):
+        self.is_waiting_jump = False
+        self.update()
+
+    def jump_page(self):
+        self.hide_jump_bar()
+
+        self.is_waiting_jump = False
+
+        self.scroll_offset = min(max(self.scale * (int(self.jump_number) - 1) * self.page_size.height(), 0), self.max_scroll_offset())
+        self.jump_number = ""
+
+        self.update()
+
+    def insert_page_number(self, number):
+        self.jump_number += number
+        self.update()
+
+    def delete_page_number(self):
+        if len(self.jump_number) > 0:
+            self.jump_number = self.jump_number[0:-1]
+            self.update()
 
 if __name__ == '__main__':
     import sys
