@@ -1,5 +1,4 @@
 ## Todo list
-* Core: Make dbus/reparent works on MacOS.
 * Core: sometime, press key no respsone.
 * Browser: add cookie support
 * Browser: support pop window, such as emacs-china.org
