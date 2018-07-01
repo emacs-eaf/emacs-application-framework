@@ -35,12 +35,6 @@ sudo pip install git+https://github.com/wbsoft/python-poppler-qt5.git
 (require 'eaf)
 ```
 
-### Why this awesome framework can't works with MacOS?
-There are mainly three obstacles:
-1. I can't make dbus/python-dbus works on MacOS High Sierra
-2. This framework need use X11 reparent to stick Qt5 window to emacs frame, but i don't know how to make X11 works on MacOS.
-3. Qt5 QGraphicsView/QGraphicsScene can't work MacOS, specify QGraphicsVideoItem can't work.
-
 ## Usage
 
 ```
@@ -66,6 +60,11 @@ M-x eaf-open
 |              | =                  | zoom in                                  |
 |              | 0                  | zoomn reset                              |
 
+### Why this awesome framework can't works with MacOS?
+There are mainly three obstacles:
+1. I can't make dbus/python-dbus works on MacOS High Sierra
+2. This framework need use X11 reparent to stick Qt5 window to emacs frame, but i don't know how to make X11 works on MacOS.
+3. Qt5 QGraphicsView/QGraphicsScene can't work MacOS, specify QGraphicsVideoItem can't work.
 
 ## How to develop new plugins?
 [Developer manual](HACKING.md)
