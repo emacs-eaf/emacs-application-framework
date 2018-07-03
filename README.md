@@ -26,7 +26,8 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 1. Install python libraries:
 ```Bash
-sudo pacman -S python-xlib python-pyqt5 python-pymediainfo PyMuPDF
+sudo pacman -S python-xlib python-pyqt5 python-pymediainfo
+sudo pip install PyMuPDF
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
