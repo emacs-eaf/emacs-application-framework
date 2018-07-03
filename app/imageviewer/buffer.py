@@ -24,7 +24,7 @@ from PyQt5.QtGui import QColor, QPixmap, QPainter
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtWidgets import QWidget
 import os
-from buffer import Buffer
+from core.buffer import Buffer
 
 class ImageViewerBuffer(Buffer):
     def __init__(self, buffer_id, url):

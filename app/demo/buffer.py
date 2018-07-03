@@ -21,7 +21,7 @@
 
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QPushButton
-from buffer import Buffer
+from core.buffer import Buffer
 
 class DemoBuffer(Buffer):
     def __init__(self, buffer_id, url):

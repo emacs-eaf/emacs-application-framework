@@ -24,7 +24,7 @@ from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from popplerqt5 import Poppler
-from buffer import Buffer
+from core.buffer import Buffer
 
 class PdfViewerBuffer(Buffer):
     def __init__(self, buffer_id, url):

@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView
-from xutils import get_xlib_display
+from core.xutils import get_xlib_display
 
 class View(QWidget):
 
@@ -104,4 +104,3 @@ class View(QWidget):
 
     def handle_destroy(self):
         self.destroy()
-        

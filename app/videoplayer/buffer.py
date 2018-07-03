@@ -24,7 +24,7 @@ from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
-from buffer import Buffer
+from core.buffer import Buffer
 
 class VideoPlayerBuffer(Buffer):
     def __init__(self, buffer_id, url):

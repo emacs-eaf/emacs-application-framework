@@ -104,7 +104,7 @@
   (use-local-map eaf-mode-map)
   (run-hooks 'eaf-mode-hook))
 
-(defvar eaf-python-file (expand-file-name "eaf.py" (concat (file-name-directory load-file-name) "core")))
+(defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
 (defvar eaf-process nil)
 

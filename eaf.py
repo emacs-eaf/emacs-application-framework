@@ -20,22 +20,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtWidgets import QApplication
+from app.browser.buffer import BrowserBuffer
+from app.demo.buffer import DemoBuffer
+from app.imageviewer.buffer import ImageViewerBuffer
+from app.pdfviewer.buffer import PdfViewerBuffer
+from app.videoplayer.buffer import VideoPlayerBuffer
+from core.fake_key_event import fake_key_event
+from core.utils import file_is_image, file_is_video
+from core.view import View
 from dbus.mainloop.glib import DBusGMainLoop
-from fake_key_event import fake_key_event
 from pymediainfo import MediaInfo
-from utils import file_is_image, file_is_video
-from view import View
 import dbus
 import dbus.service
-
-import os,sys
-sys.path.append("..")
-
-from app.browser.buffer import BrowserBuffer
-from app.imageviewer.buffer import ImageViewerBuffer
-from app.videoplayer.buffer import VideoPlayerBuffer
-from app.pdfviewer.buffer import PdfViewerBuffer
-from app.demo.buffer import DemoBuffer
+import os
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"

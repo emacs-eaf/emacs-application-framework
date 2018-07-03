@@ -25,7 +25,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWebKitWidgets import QWebView, QWebPage
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWebKit import QWebSettings
-from buffer import Buffer
+from core.buffer import Buffer
 
 class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url):
