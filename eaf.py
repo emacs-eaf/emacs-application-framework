@@ -61,7 +61,9 @@ class EAF(dbus.service.Object):
 
             if url.startswith("/"):
                 if os.path.exists(url):
-                    if url.endswith(".pdf"):
+                    (_, extension) = os.path.splitext(url)
+
+                    if extension in [".pdf", ".xps", ".oxps", ".cbz", ".epub", ".fb2", "fbz"]:
                         self.create_buffer(buffer_id, PdfViewerBuffer(buffer_id, url))
                     else:
                         file_info = MediaInfo.parse(url)
