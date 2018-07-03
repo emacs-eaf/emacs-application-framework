@@ -34,6 +34,14 @@ class CameraBuffer(Buffer):
 
         self.add_widget(CameraWidget(QColor(0, 0, 0, 255)))
 
+    def all_views_hide(self):
+        # Need stop camera if all view will hide, otherwise camera will crash.
+        self.buffer_widget.camera.stop()
+
+    def some_view_show(self):
+        # Re-start camero after some view show.
+        self.buffer_widget.camera.start()
+
 class CameraWidget(QWidget):
 
     def __init__(self, background_color):
