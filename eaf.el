@@ -354,6 +354,14 @@ We need calcuate render allocation to make sure no black border around render co
  "com.lazycat.eaf" "open_buffer_url"
  'eaf-open-buffer-url)
 
+(defun eaf-input-message (buffer_id interactive_string callback_type)
+  (eaf-call "handle_input_message" buffer_id callback_type (read-string interactive_string)))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "input_message"
+ 'eaf-input-message)
+
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 (add-hook 'pre-command-hook #'eaf-monitor-key-event)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)

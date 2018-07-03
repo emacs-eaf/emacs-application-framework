@@ -30,6 +30,7 @@ class Buffer(QGraphicsScene):
     update_title = QtCore.pyqtSignal(str, str)
     open_url = QtCore.pyqtSignal(str)
     before_destroy_hook = QtCore.pyqtSignal()
+    input_message = QtCore.pyqtSignal(str, str, str)
 
     def __init__(self, buffer_id, url, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
@@ -63,3 +64,9 @@ class Buffer(QGraphicsScene):
 
     def send_key_event(self, event):
         QApplication.sendEvent(self.buffer_widget, event)
+
+    def send_input_message(self, message, callback_type):
+        self.input_message.emit(self.buffer_id, message, callback_type)
+
+    def handle_input_message(self, result_type, result_content):
+        pass

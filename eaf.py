@@ -103,6 +103,9 @@ class EAF(dbus.service.Object):
         app_buffer.update_title.connect(self.update_buffer_title)
         app_buffer.open_url.connect(self.open_buffer_url)
 
+        # Send message to emacs.
+        app_buffer.input_message.connect(self.input_message)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_views(self, args):
         global emacs_xid
@@ -183,6 +186,12 @@ class EAF(dbus.service.Object):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].send_key_event(fake_key_event(event_string))
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
+    def handle_input_message(self, buffer_id, callback_type, callback_result):
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                buffer.handle_input_message(callback_type, callback_result)
+
     @dbus.service.signal("com.lazycat.eaf")
     def focus_emacs_buffer(self, message):
         pass
@@ -197,6 +206,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal("com.lazycat.eaf")
     def open_buffer_url(self, url):
+        pass
+
+    @dbus.service.signal("com.lazycat.eaf")
+    def input_message(self, buffer_id, message, callback_type):
         pass
 
 if __name__ == "__main__":
