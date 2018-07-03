@@ -76,6 +76,8 @@ See? It's so easy!
 Above are all you need, happy hacking!
 
 ## Other APIs
+
+### Read user's input
 Below is code example from pdfviewer:
 ```Python
 class PdfViewerBuffer(Buffer):
