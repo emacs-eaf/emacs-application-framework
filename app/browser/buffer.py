@@ -27,7 +27,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWebKit import QWebSettings
 from core.buffer import Buffer
 
-class BrowserBuffer(Buffer):
+class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
         Buffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
 

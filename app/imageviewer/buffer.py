@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import QWidget
 import os
 from core.buffer import Buffer
 
-class ImageViewerBuffer(Buffer):
+class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
         Buffer.__init__(self, buffer_id, url, False, QColor(0, 0, 0, 255))
 

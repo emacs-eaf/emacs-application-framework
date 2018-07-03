@@ -13,7 +13,7 @@ Python is a perfect language to develop Qt program and it can call pretty much i
 M-x eaf-open
 ```
 
-    Then type "eaf demo" as input, will pop hello world window in emacs like below:
+    Then type "eaf-demo" as input, will pop hello world window in emacs like below:
 
 ![img](./screenshot/hello_world.png)
 
@@ -34,7 +34,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QPushButton
 from core.buffer import Buffer
 
-class DemoBuffer(Buffer):
+class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
         Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
 
@@ -56,11 +56,11 @@ class DemoBuffer(Buffer):
 ```Python
 @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
 def new_buffer(self, buffer_id, url):
-    if url == "eaf demo":
-        self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
+    if url == "eaf-demo":
+        return self.create_app(buffer_id, url, "app.demo.buffer")
 ```
 
-    Replace "eaf demo" to "eaf rocks!"
+    Replace "eaf-demo" to "eaf rocks!"
 
 3. Test
 ```
@@ -80,7 +80,9 @@ Above are all you need, happy hacking!
 ### Read user's input
 Below is code example from pdfviewer:
 ```Python
-class PdfViewerBuffer(Buffer):
+...
+
+class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
         Buffer.__init__(self, buffer_id, url, False, QColor(0, 0, 0, 255))
 
@@ -93,6 +95,8 @@ class PdfViewerBuffer(Buffer):
     def handle_input_message(self, result_type, result_content):
         if result_type == "jump_page":
             self.buffer_widget.jump_to_page(int(result_content))
+
+...
 ```
 If you want read input from emacs minibuffer then call back to python.
 

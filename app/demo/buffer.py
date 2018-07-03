@@ -23,7 +23,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QPushButton
 from core.buffer import Buffer
 
-class DemoBuffer(Buffer):
+class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
         Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
 

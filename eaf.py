@@ -25,6 +25,7 @@ from core.utils import file_is_image, file_is_video
 from core.view import View
 from dbus.mainloop.glib import DBusGMainLoop
 from pymediainfo import MediaInfo
+import importlib
 import dbus
 import dbus.service
 import os
@@ -50,17 +51,9 @@ class EAF(dbus.service.Object):
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def new_buffer(self, buffer_id, url):
         if url == "eaf-demo":
-            try:
-                from app.demo.buffer import DemoBuffer
-                self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
-            except ImportError:
-                return "Something wrong when import app.demo.buffer"
+            return self.create_app(buffer_id, url, "app.demo.buffer")
         elif url == "eaf-camera":
-            try:
-                from app.camera.buffer import CameraBuffer
-                self.create_buffer(buffer_id, CameraBuffer(buffer_id, url))
-            except ImportError:
-                return "Something wrong when import app.camera.buffer"
+            return self.create_app(buffer_id, url, "app.camera.buffer")
         else:
             url = os.path.expanduser(url)
 
@@ -69,45 +62,38 @@ class EAF(dbus.service.Object):
                     (_, extension) = os.path.splitext(url)
 
                     if extension in [".pdf", ".xps", ".oxps", ".cbz", ".epub", ".fb2", "fbz"]:
-                        try:
-                            from app.pdfviewer.buffer import PdfViewerBuffer
-                            self.create_buffer(buffer_id, PdfViewerBuffer(buffer_id, url))
-                        except ImportError:
-                            return "Something wrong when import app.pdfviewer.buffer"
+                        return self.create_app(buffer_id, url, "app.pdfviewer.buffer")
                     else:
                         file_info = MediaInfo.parse(url)
                         if file_is_image(file_info):
-                            try:
-                                from app.imageviewer.buffer import ImageViewerBuffer
-                                self.create_buffer(buffer_id, ImageViewerBuffer(buffer_id, url))
-                            except ImportError:
-                                return "Something wrong when import app.imageviewer.buffer"
+                            return self.create_app(buffer_id, url, "app.imageviewer.buffer")
                         elif file_is_video(file_info):
-                            try:
-                                from app.videoplayer.buffer import VideoPlayerBuffer
-                                self.create_buffer(buffer_id, VideoPlayerBuffer(buffer_id, url))
-                            except ImportError:
-                                return "Something wrong when import app.videoplayer.buffer"
+                            return self.create_app(buffer_id, url, "app.videoplayer.buffer")
                         else:
                             return "Don't know how to open {0}".format(url)
                 else:
                     return "Path {0} not exists.".format(url)
             else:
-                try:
-                    from app.browser.buffer import BrowserBuffer
-                    from urllib.parse import urlparse
-                    result = urlparse(url)
-                    if len(result.scheme) != 0:
-                        self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
+                from urllib.parse import urlparse
+                result = urlparse(url)
+                if len(result.scheme) != 0:
+                    return self.create_app(buffer_id, result.geturl(), "app.browser.buffer")
+                else:
+                    result = urlparse("{0}:{1}".format("http", url))
+                    if result.scheme != "":
+                        return self.create_app(buffer_id, result.geturl(), "app.browser.buffer")
                     else:
-                        result = urlparse("{0}:{1}".format("http", url))
-                        if result.scheme != "":
-                            self.create_buffer(buffer_id, BrowserBuffer(buffer_id, result.geturl()))
-                        else:
-                            return "{0} is not valid url".format(url)
-                except ImportError:
-                    return "Something wrong when import app.browser.buffer"
+                        return "{0} is not valid url".format(url)
         return ""
+
+    def create_app(self, buffer_id, url, module_path):
+        if importlib.util.find_spec(module_path) is not None:
+            module = importlib.import_module(module_path)
+            self.create_buffer(buffer_id, module.AppBuffer(buffer_id, url))
+
+            return ""
+        else:
+            return "Something wrong when import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, app_buffer):
         global emacs_width, emacs_height
