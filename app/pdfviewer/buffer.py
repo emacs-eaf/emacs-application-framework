@@ -20,10 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import Qt, QRect, QRectF
-from PyQt5.QtGui import QColor, QPixmap
+from PyQt5.QtGui import QColor, QPixmap, QImage
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
-from popplerqt5 import Poppler
+import fitz
 from core.buffer import Buffer
 
 class PdfViewerBuffer(Buffer):
@@ -40,16 +40,15 @@ class PdfViewerWidget(QWidget):
         self.background_color = background_color
 
         # Load document first.
-        self.document = Poppler.Document.load(url)
-        self.document.setRenderHint(Poppler.Document.TextAntialiasing)
+        self.document = fitz.open(url)
 
         # Get document's page information.
-        self.first_page = self.document.page(0)
-        self.page_size = self.first_page.pageSize()
-        self.page_total_number = self.document.numPages()
+        self.first_pixmap = self.document.getPagePixmap(0)
+        self.page_width = self.first_pixmap.width
+        self.page_height = self.first_pixmap.height
+        self.page_total_number = self.document.pageCount
 
-        # Init dpi, scale and scale mode.
-        self.dpi = 72
+        # Init scale and scale mode.
         self.scale = 1.0
         self.read_mode = "fit_to_width"
 
@@ -80,26 +79,28 @@ class PdfViewerWidget(QWidget):
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
         # Get start/last render index.
-        start_page_index = int(self.scroll_offset * 1.0 / self.scale / self.page_size.height())
-        last_page_index = int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_size.height())
+        start_page_index = int(self.scroll_offset * 1.0 / self.scale / self.page_height)
+        last_page_index = int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height)
 
         # Translate painter at y coordinate.
-        translate_y = (start_page_index * self.scale * self.page_size.height()) - self.scroll_offset
+        translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
         painter.translate(0, translate_y)
 
         # Render pages in visible area.
         for index in list(range(start_page_index, last_page_index + 1)):
             if index < self.page_total_number:
                 # Get page image.
-                page = self.document.page(index)
-                img = page.renderToImage(self.dpi * self.scale, self.dpi * self.scale)
+                page = self.document[index]
+                trans = fitz.Matrix(self.scale, self.scale)
+                pixmap = page.getPixmap(matrix = trans, alpha = False)
+                img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
                 qpixmap = QPixmap.fromImage(img)
 
                 # Init render rect.
-                render_width = self.page_size.width() * self.scale
-                render_height = self.page_size.height() * self.scale
+                render_width = self.page_width * self.scale
+                render_height = self.page_height * self.scale
                 render_x = (self.rect().width() - render_width) / 2
-                render_y = (index - start_page_index) * self.scale * self.page_size.height()
+                render_y = (index - start_page_index) * self.scale * self.page_height
 
                 # Add padding between pages.
                 if (index - start_page_index) > 0:
@@ -108,7 +109,7 @@ class PdfViewerWidget(QWidget):
                 # Draw page image.
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
-        painter.restore()        
+        painter.restore()
 
         # Draw jump page bar.
         if self.is_waiting_jump:
@@ -116,7 +117,7 @@ class PdfViewerWidget(QWidget):
             painter.setBrush(QColor(0, 0, 0, 128))
             render_x = (self.rect().width() - render_width) / 2
             render_y = self.rect().y() + self.rect().height() - jump_bar_height
-            render_width = self.page_size.width() * self.scale
+            render_width = self.page_width * self.scale
 
             painter.drawRect(render_x, render_y, render_width, jump_bar_height)
 
@@ -166,16 +167,16 @@ class PdfViewerWidget(QWidget):
 
     def update_scale(self):
         if self.read_mode == "fit_to_width":
-            new_scale = self.rect().width() * 1.0 / self.page_size.width()
+            new_scale = self.rect().width() * 1.0 / self.page_width
             self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
             self.scale = new_scale
         elif self.read_mode == "fit_to_height":
-            new_scale = self.rect().size().height() * 1.0 / self.page_size.height()
+            new_scale = self.rect().size().height() * 1.0 / self.page_height
             self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
             self.scale = new_scale
 
     def max_scroll_offset(self):
-        return self.scale * self.page_size.height() * self.page_total_number - self.rect().height()
+        return self.scale * self.page_height * self.page_total_number - self.rect().height()
 
     def switch_to_read_mode(self):
         if self.read_mode == "fit_to_width":
@@ -235,7 +236,7 @@ class PdfViewerWidget(QWidget):
 
         self.is_waiting_jump = False
 
-        self.scroll_offset = min(max(self.scale * (int(self.jump_number) - 1) * self.page_size.height(), 0), self.max_scroll_offset())
+        self.scroll_offset = min(max(self.scale * (int(self.jump_number) - 1) * self.page_height, 0), self.max_scroll_offset())
         self.jump_number = ""
 
         self.update()
