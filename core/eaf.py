@@ -28,10 +28,9 @@ from view import View
 import dbus
 import dbus.service
 
-import os,sys,inspect
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
+import os,sys
+sys.path.append("..")
+
 from app.browser.buffer import BrowserBuffer
 from app.imageviewer.buffer import ImageViewerBuffer
 from app.videoplayer.buffer import VideoPlayerBuffer
