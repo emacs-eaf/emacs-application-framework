@@ -54,7 +54,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def new_buffer(self, buffer_id, url):
-        if url == "eaf rocks!":
+        if url == "eaf-demo":
             self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
         else:
             url = os.path.expanduser(url)

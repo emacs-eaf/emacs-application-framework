@@ -13,7 +13,7 @@ Python is a perfect language to develop Qt program and it can call pretty much i
 M-x eaf-open
 ```
 
-    Then type "eaf rocks!" as input, will pop hello world window in emacs like below:
+    Then type "eaf demo" as input, will pop hello world window in emacs like below:
 
 ![img](./screenshot/hello_world.png)
 
@@ -56,17 +56,17 @@ class DemoBuffer(Buffer):
 ```Python
 @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
 def new_buffer(self, buffer_id, url):
-    if url == "eaf rocks!":
+    if url == "eaf demo":
         self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
 ```
 
-    Replace "eaf rocks!" to "i am rocks!"
+    Replace "eaf demo" to "eaf rocks!"
 
 3. Test
 ```
     Execute command `eaf-stop-process' to kill old python process.
 
-    Execute command `eaf-open' and type "i am rocks!".
+    Execute command `eaf-open' and type "eaf rocks!".
 ```
 
 
