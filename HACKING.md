@@ -32,7 +32,7 @@ After you know how to write PyQt5 code, developing new plugin just needs 3 steps
 ```Python
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QPushButton
-from buffer import Buffer
+from core.buffer import Buffer
 
 class DemoBuffer(Buffer):
     def __init__(self, buffer_id, url):
