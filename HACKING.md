@@ -64,11 +64,11 @@ def new_buffer(self, buffer_id, url):
 
 3. Test
 ```
-    Execute command `eaf-stop-process' to kill old python process.
+Execute command `eaf-stop-process' to kill old python process.
 
-    Execute command `eaf-start-process' to start new python process.
+Execute command `eaf-start-process' to start new python process.
 
-    Execute command `eaf-open' and type "eaf rocks!".
+Execute command `eaf-open' and type "eaf rocks!".
 ```
 
 
