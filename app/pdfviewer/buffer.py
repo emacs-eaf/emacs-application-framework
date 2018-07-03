@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QRect, QPoint, QRectF
+from PyQt5.QtCore import Qt, QRect, QRectF
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
@@ -73,6 +73,7 @@ class PdfViewerWidget(QWidget):
     def paintEvent(self, event):
         # Init painter.
         painter = QPainter(self)
+        painter.save()
 
         # Draw background.
         painter.setBrush(self.background_color)
@@ -106,6 +107,8 @@ class PdfViewerWidget(QWidget):
 
                 # Draw page image.
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
+
+        painter.restore()        
 
         # Draw jump page bar.
         if self.is_waiting_jump:
