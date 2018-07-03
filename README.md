@@ -40,26 +40,28 @@ sudo pip install PyMuPDF
 ```
 M-x eaf-open
 ```
-| App          | Key                | Event                                    |
-| --------     | :-----:            | :----                                    |
-| Browser      | Left Button        | Open link current tab                    |
-|              | Ctrl + Left Button | Open link in new tab                     |
-| Image Viewer | j                  | Load next image in current directory     |
-|              | k                  | Load previous image in current directory |
-| Video Player | Space              | Play or Pause                            |
-|              | h                  | Seek backward                            |
-|              | l                  | Seek forward                             |
-| Pdf Viewer   | j                  | Scroll up                                |
-|              | k                  | Scroll down                              |
-|              | Space              | Scroll up page                           |
-|              | b                  | Scroll down page                         |
-|              | ,                  | Scroll to end                            |
-|              | .                  | Scroll to home                           |
-|              | t                  | Switch scale mode                        |
-|              | -                  | Zoom out                                 |
-|              | =                  | Zoom in                                  |
-|              | 0                  | Zoomn reset                              |
-|              | g                  | Goto page                                |
+| App          | Key                | Event                                    | Way to open       |
+| --------     | :-----:            | :----                                    | :----             |
+| Browser      | Left Button        | Open link current tab                    | URL               |
+|              | Ctrl + Left Button | Open link in new tab                     |                   |
+| Image Viewer | j                  | Load next image in current directory     | Image file path   |
+|              | k                  | Load previous image in current directory |                   |
+| Video Player | Space              | Play or Pause                            | Video file path   |
+|              | h                  | Seek backward                            |                   |
+|              | l                  | Seek forward                             |                   |
+| Pdf Viewer   | j                  | Scroll up                                | Pdf file path     |
+|              | k                  | Scroll down                              |                   |
+|              | Space              | Scroll up page                           |                   |
+|              | b                  | Scroll down page                         |                   |
+|              | ,                  | Scroll to end                            |                   |
+|              | .                  | Scroll to home                           |                   |
+|              | t                  | Switch scale mode                        |                   |
+|              | -                  | Zoom out                                 |                   |
+|              | =                  | Zoom in                                  |                   |
+|              | 0                  | Zoomn reset                              |                   |
+|              | g                  | Goto page                                |                   |
+| Camera       |                    |                                          | Type 'eaf-camera' |
+| Demo         |                    |                                          | Type 'eaf-demo'   |
 
 ### Why this awesome framework can't works with MacOS?
 There are mainly three obstacles:

@@ -55,6 +55,12 @@ class EAF(dbus.service.Object):
                 self.create_buffer(buffer_id, DemoBuffer(buffer_id, url))
             except ImportError:
                 return "Something wrong when import app.demo.buffer"
+        elif url == "eaf-camera":
+            try:
+                from app.camera.buffer import CameraBuffer
+                self.create_buffer(buffer_id, CameraBuffer(buffer_id, url))
+            except ImportError:
+                return "Something wrong when import app.camera.buffer"
         else:
             url = os.path.expanduser(url)
 
