@@ -43,13 +43,13 @@ class DemoBuffer(Buffer):
 ```
 
     Replace QPushButton with your PyQt5 widget.
-    
+
 * buffer_id and url are need by framework, you just need pass those paramaters to Buffer class
-    
-* third paramater True mean application content will fit size with emacs window size change, such as image viewer. 
-    
+
+* third paramater True mean application content will fit size with emacs window size change, such as image viewer.
+
 * third paramater False mean applicaton content won't fit size with emacs window size change, such as browser.
-    
+
 * fourth paramater is background color to fill application background.
 
 2. Open file [eaf.py](core/eaf.py):
@@ -68,12 +68,38 @@ def new_buffer(self, buffer_id, url):
 
     Execute command `eaf-open' and type "i am rocks!".
 ```
-    
-    
+
+
 
 See? It's so easy!
 
 Above are all you need, happy hacking!
+
+## Other APIs
+Below is code example from pdfviewer:
+```Python
+class PdfViewerBuffer(Buffer):
+    def __init__(self, buffer_id, url):
+        Buffer.__init__(self, buffer_id, url, False, QColor(0, 0, 0, 255))
+
+        self.add_widget(PdfViewerWidget(url, QColor(0, 0, 0, 255)))
+        self.buffer_widget.send_jump_page_message.connect(self.send_jump_page_message)
+
+    def send_jump_page_message(self):
+        self.send_input_message("Jump to: ", "jump_page")
+
+    def handle_input_message(self, result_type, result_content):
+        if result_type == "jump_page":
+            self.buffer_widget.jump_to_page(int(result_content))
+```
+If you want read input from emacs minibuffer then call back to python.
+
+You can emit buffer signal "send_input_message", first argument is prompt string to user, second argument is callback_type for interface "handle_input_message".
+
+After emacs read user input, framework will call interface "handle_input_message", result_type is callback_type you use in signal "send_input_message", result_content is input string from emacs.
+
+Simple logic is send "send_input_message" signal to emacs, then handle user input with buffer interface "handle_input_message"
+
 
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)
