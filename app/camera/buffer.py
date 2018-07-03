@@ -46,6 +46,7 @@ class CameraWidget(QWidget):
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setFrameStyle(0)
         self.graphics_view.setStyleSheet("QGraphicsView {background: transparent; border: 3px; outline: none;}")
+        self.graphics_view.scale(-1, 1) # this make live video from camero mirror.
         self.video_item = QGraphicsVideoItem()
         self.scene.addItem(self.video_item)
 
