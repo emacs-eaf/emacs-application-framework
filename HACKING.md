@@ -11,7 +11,7 @@ Python is a perfect language to develop Qt program and it can call pretty much i
 ## Let me run hello word
 ```
 M-x eaf-open
-```lazycat-emacs
+```
 
     Then type "eaf-demo" as input, will pop hello world window in emacs like below:
 
@@ -30,16 +30,16 @@ After you know how to write PyQt5 code, developing new plugin just needs 3 steps
 
 1. Open file [buffer.py](app/demo/buffer.py):
 ```Python
-    from PyQt5.QtGui import QColor
-    from PyQt5.QtWidgets import QPushButton
-    from core.buffer import Buffer
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QPushButton
+from core.buffer import Buffer
 
-    class AppBuffer(Buffer):
-        def __init__(self, buffer_id, url):
-            Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
+class AppBuffer(Buffer):
+    def __init__(self, buffer_id, url):
+        Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
 
-            self.add_widget(QPushButton("Hello, EAF hacker, it's work!!!"))
-            self.buffer_widget.setStyleSheet("font-size: 100px")
+        self.add_widget(QPushButton("Hello, EAF hacker, it's work!!!"))
+        self.buffer_widget.setStyleSheet("font-size: 100px")
 ```
 
     Replace QPushButton with your PyQt5 widget.
@@ -64,11 +64,11 @@ def new_buffer(self, buffer_id, url):
 
 3. Test
 ```
-Execute command `eaf-stop-process' to kill old python process.
+    Execute command `eaf-stop-process' to kill old python process.
 
-Execute command `eaf-start-process' to start new python process.
+    Execute command `eaf-start-process' to start new python process.
 
-Execute command `eaf-open' and type "eaf rocks!".
+    Execute command `eaf-open' and type "eaf rocks!".
 ```
 
 
