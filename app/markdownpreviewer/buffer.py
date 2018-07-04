@@ -30,6 +30,7 @@ from core.utils import PostGui
 import socket
 import subprocess
 import threading
+import os
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
@@ -37,13 +38,13 @@ class AppBuffer(Buffer):
 
         # Get free port to render markdown.
         self.port = self.get_free_port()
+        self.url = url
 
         # Start markdown render process.
         subprocess.Popen("grip {0} {1}".format(url, self.port), shell=True)
 
         # Init widget.
         self.add_widget(BrowserWidget())
-        self.buffer_widget.titleChanged.connect(self.change_title)
 
         # Add timer make load markdown preview link after grip process start finish.
         timer = threading.Timer(2, self.load_markdown_server)
@@ -64,7 +65,10 @@ class AppBuffer(Buffer):
     @PostGui()
     def load_markdown_server(self):
         self.buffer_widget.setUrl(QUrl("http://localhost:{0}".format(self.port)))
-        self.buffer_widget.update()
+
+        paths = os.path.split(self.url)
+        if len(paths) > 0:
+            self.change_title(paths[-1])
 
 class BrowserWidget(QWebView):
 
