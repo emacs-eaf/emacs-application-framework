@@ -75,6 +75,13 @@ M-x eaf-open
 | Camera             | Type 'eaf-camera'  |                    |                                          |
 | Demo               | Type 'eaf-demo'    |                    |                                          |
 
+## Report bug
+If you have any problem with eaf, please use command "emacs -Q" start Emacs first.
+
+Then test again, if "emacs -Q" works fine, it's must be something wrong with your emacs config file.
+
+If "emacs -Q" still have problem, please report bug at: https://github.com/manateelazycat/emacs-application-framework/issues/new
+
 ### Why this awesome framework can't works with MacOS?
 There are mainly three obstacles:
 1. I can't make dbus/python-dbus works on MacOS High Sierra
