@@ -63,6 +63,8 @@ class EAF(dbus.service.Object):
 
                     if extension in [".pdf", ".xps", ".oxps", ".cbz", ".epub", ".fb2", "fbz"]:
                         return self.create_app(buffer_id, url, "app.pdfviewer.buffer")
+                    if extension in [".md"]:
+                        return self.create_app(buffer_id, url, "app.markdownpreviewer.buffer")
                     else:
                         file_info = MediaInfo.parse(url)
                         if file_is_image(file_info):

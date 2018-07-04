@@ -13,6 +13,9 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ### Browser
 ![img](./screenshot/browser.gif)
 
+### Markdown Previewer
+![img](./screenshot/markdown_previewer.gif)
+
 ### Image Viewer
 ![img](./screenshot/image_viewer.gif)
 
@@ -27,8 +30,16 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 1. Install python libraries:
 ```Bash
 sudo pacman -S python-xlib python-pyqt5 python-pymediainfo
-sudo pip install PyMuPDF
+sudo pip install PyMuPDF grip
 ```
+
+| Package            | Use for                                                     |
+| :--------          | :----                                                       |
+| python-xlib        | Stick app window into emacs frame                           |
+| python-pyqt5       | GUI library required for application development            |
+| python-pymediainfo | Detect file type, then choose the right application to open |
+| PyMuPDF            | Render engine required for PDF Viewer                       |
+| grip               | Markdown render server for Markdown Previewer               |
 
 2. Clone this repository and add below code in your ~/.emacs
 ```Elisp
@@ -40,28 +51,29 @@ sudo pip install PyMuPDF
 ```
 M-x eaf-open
 ```
-| App          | Way to open       | Key                | Event                                    |
-| --------     | :----             | :-----:            | :----                                    |
-| Browser      | URL               | Left Button        | Open link current tab                    |
-|              |                   | Ctrl + Left Button | Open link in new tab                     |
-| Image Viewer | Image file path   | j                  | Load next image in current directory     |
-|              |                   | k                  | Load previous image in current directory |
-| Video Player | Video file path   | Space              | Play or Pause                            |
-|              |                   | h                  | Seek backward                            |
-|              |                   | l                  | Seek forward                             |
-| Pdf Viewer   | Pdf file path     | j                  | Scroll up                                |
-|              |                   | k                  | Scroll down                              |
-|              |                   | Space              | Scroll up page                           |
-|              |                   | b                  | Scroll down page                         |
-|              |                   | ,                  | Scroll to end                            |
-|              |                   | .                  | Scroll to home                           |
-|              |                   | t                  | Switch scale mode                        |
-|              |                   | -                  | Zoom out                                 |
-|              |                   | =                  | Zoom in                                  |
-|              |                   | 0                  | Zoomn reset                              |
-|              |                   | g                  | Goto page                                |
-| Camera       | Type 'eaf-camera' |                    |                                          |
-| Demo         | Type 'eaf-demo'   |                    |                                          |
+| App                | Way to open        | Key                | Event                                    |
+| :--------          | :----              | :-----:            | :----                                    |
+| Browser            | URL                | Left Button        | Open link current tab                    |
+|                    |                    | Ctrl + Left Button | Open link in new tab                     |
+| Markdown previewer | Markdown file path |                    |                                          |
+| Image Viewer       | Image file path    | j                  | Load next image in current directory     |
+|                    |                    | k                  | Load previous image in current directory |
+| Video Player       | Video file path    | Space              | Play or Pause                            |
+|                    |                    | h                  | Seek backward                            |
+|                    |                    | l                  | Seek forward                             |
+| Pdf Viewer         | Pdf file path      | j                  | Scroll up                                |
+|                    |                    | k                  | Scroll down                              |
+|                    |                    | Space              | Scroll up page                           |
+|                    |                    | b                  | Scroll down page                         |
+|                    |                    | ,                  | Scroll to end                            |
+|                    |                    | .                  | Scroll to home                           |
+|                    |                    | t                  | Switch scale mode                        |
+|                    |                    | -                  | Zoom out                                 |
+|                    |                    | =                  | Zoom in                                  |
+|                    |                    | 0                  | Zoomn reset                              |
+|                    |                    | g                  | Goto page                                |
+| Camera             | Type 'eaf-camera'  |                    |                                          |
+| Demo               | Type 'eaf-demo'    |                    |                                          |
 
 ### Why this awesome framework can't works with MacOS?
 There are mainly three obstacles:
