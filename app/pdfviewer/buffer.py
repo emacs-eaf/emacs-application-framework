@@ -21,7 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QColor, QPixmap, QImage
+from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 import fitz
@@ -70,6 +70,14 @@ class PdfViewerWidget(QWidget):
         # Padding between pages.
         self.page_padding = 10
 
+        # Init font.
+        self.page_annotate_height = 22
+        self.page_annotate_padding_right = 10
+        self.page_annotate_padding_bottom = 10
+        self.page_annotate_color = QColor("#333333");
+        self.font = QFont()
+        self.font.setPointSize(12)
+
     def resizeEvent(self, event):
         # Update scale attributes after widget resize.
         self.update_scale()
@@ -117,6 +125,16 @@ class PdfViewerWidget(QWidget):
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
         painter.restore()
+
+        # Render current page.
+        painter.setFont(self.font)
+        painter.setPen(self.page_annotate_color)
+        painter.drawText(QRect(self.rect().x(),
+                               self.rect().y() + self.rect().height() - self.page_annotate_height - self.page_annotate_padding_bottom,
+                               self.rect().width() - self.page_annotate_padding_right,
+                               self.page_annotate_height),
+                         Qt.AlignRight,
+                         "{0}% ({1}/{2})".format(int((start_page_index + 1) * 100 / self.page_total_number), start_page_index + 1, self.page_total_number))
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_J:
