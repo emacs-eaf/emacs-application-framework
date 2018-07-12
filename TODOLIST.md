@@ -7,6 +7,7 @@
 * Browser: implement js plugin like vimium
 * ImageViewer: add zoom support
 * VideoPlayer: remember video play progress.
+* Pdfviewer: hover mouse to detect url postion, ctrl + button can open url under mouse.
 * Pdfviewer: fix page still in scrolling even user release key.
 * PdfViewer: use mupdf/page.searchFor implement search text in pdf.
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough
