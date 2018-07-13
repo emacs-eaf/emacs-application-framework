@@ -79,7 +79,11 @@ class View(QWidget):
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel]:
+            # Send mouse event to applicatin view.
             self.trigger_focus_event.emit("{0},{1}".format(event.globalX(), event.globalY()))
+
+            # Stop mouse event.
+            return True
 
         return False
 

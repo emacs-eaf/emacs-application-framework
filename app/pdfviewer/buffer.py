@@ -66,6 +66,7 @@ class PdfViewerWidget(QWidget):
         # Init scroll attributes.
         self.scroll_step = 20
         self.scroll_offset = 0
+        self.mouse_scroll_offset = 20
 
         # Padding between pages.
         self.page_padding = 10
@@ -135,6 +136,10 @@ class PdfViewerWidget(QWidget):
                                self.page_annotate_height),
                          Qt.AlignRight,
                          "{0}% ({1}/{2})".format(int((start_page_index + 1) * 100 / self.page_total_number), start_page_index + 1, self.page_total_number))
+
+    def wheelEvent(self, event):
+        self.scroll_offset = max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0)
+        self.update()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_J:
