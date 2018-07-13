@@ -29,17 +29,17 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 1. Install python libraries:
 ```Bash
-sudo pacman -S python-xlib python-pyqt5 python-pymediainfo
-sudo pip install PyMuPDF grip
+sudo pacman -S python-xlib python-pyqt5
+sudo pip install PyMuPDF grip qrcode
 ```
 
-| Package            | Use for                                                     |
-| :--------          | :----                                                       |
-| python-xlib        | Stick app window into emacs frame                           |
-| python-pyqt5       | GUI library required for application development            |
-| python-pymediainfo | Detect file type, then choose the right application to open |
-| PyMuPDF            | Render engine required for PDF Viewer                       |
-| grip               | Markdown render server for Markdown Previewer               |
+| Package      | Use for                                          |
+| :--------    | :----                                            |
+| python-xlib  | Stick app window into emacs frame                |
+| python-pyqt5 | GUI library required for application development |
+| PyMuPDF      | Render engine required for PDF Viewer            |
+| grip         | Markdown render server for Markdown Previewer    |
+| qrcode       | Render local file QR code                        |
 
 2. Clone this repository and add below code in your ~/.emacs
 ```Elisp

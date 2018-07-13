@@ -138,7 +138,7 @@
           (apply 'start-process
                  eaf-name
                  eaf-name
-                 "python" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size))
+                 "python3" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size))
                  ))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel

@@ -24,7 +24,6 @@ from core.fake_key_event import fake_key_event
 from core.utils import file_is_image, file_is_video
 from core.view import View
 from dbus.mainloop.glib import DBusGMainLoop
-from pymediainfo import MediaInfo
 import importlib
 import dbus
 import dbus.service
@@ -55,12 +54,12 @@ class EAF(dbus.service.Object):
         return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)))
 
     def create_app(self, buffer_id, url, module_path):
-        if importlib.util.find_spec(module_path) is not None:
+        try:
             module = importlib.import_module(module_path)
             self.create_buffer(buffer_id, module.AppBuffer(buffer_id, url))
 
             return ""
-        else:
+        except ImportError:
             return "Something wrong when import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, app_buffer):
