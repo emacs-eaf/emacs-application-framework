@@ -110,6 +110,8 @@
 
 (defvar eaf-first-start-url nil)
 
+(defvar eaf-first-start-app-name nil)
+
 (defvar eaf-title-length 30)
 
 (defcustom eaf-name "*eaf*"
@@ -321,7 +323,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defun eaf-start-finish ()
   ;; Call `eaf-open-internal' after receive `start_finish' signal from server process.
-  (eaf-open-internal eaf-first-start-url))
+  (eaf-open-internal eaf-first-start-url eaf-first-start-app-name))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -366,11 +368,11 @@ We need calcuate render allocation to make sure no black border around render co
 (add-hook 'pre-command-hook #'eaf-monitor-key-event)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
 
-(defun eaf-open-internal (url)
+(defun eaf-open-internal (url app-name)
   (let* ((buffer (eaf-create-buffer url))
          buffer-result)
     (with-current-buffer buffer
-      (setq buffer-result (eaf-call "new_buffer" buffer-id url)))
+      (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name)))
     (if (equal buffer-result "")
         ;; Switch to new buffer if buffer create successful.
         (switch-to-buffer buffer)
@@ -379,14 +381,39 @@ We need calcuate render allocation to make sure no black border around render co
       (message buffer-result))
     ))
 
-(defun eaf-open (url)
+(defun eaf-open (url &optional app-name)
   (interactive "FOpen with EAF: ")
+  (unless app-name
+    (cond ((string-equal url "eaf-demo")
+           (setq app-name "demo"))
+          ((string-equal url "eaf-camera")
+           (setq app-name "camera"))
+          ((file-exists-p url)
+           (setq url (expand-file-name url))
+           (setq extension-name (file-name-extension url))
+           (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
+                  (setq app-name "pdfviewer"))
+                 ((member extension-name '("md"))
+                  (setq app-name "markdownpreviewer"))
+                 ((member extension-name '("jpg" "png" "bmp"))
+                  (setq app-name "imageviewer"))
+                 ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
+                  (setq app-name "videoplayer"))))
+          (t
+           (setq app-name "browser")
+           (unless (string-prefix-p "http" url)
+             (setq url (concat "http://" url))))))
   (if (process-live-p eaf-process)
       ;; Call `eaf-open-internal' directly if server process has start.
-      (eaf-open-internal url)
+      (eaf-open-internal url app-name)
     ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
     (setq eaf-first-start-url url)
+    (setq eaf-first-start-app-name app-name)
     (eaf-start-process)))
+
+(defun eaf-show-file-qrcode (url)
+  (interactive "FShow file QR code: ")
+  (eaf-open url "filetransfer"))
 
 (provide 'eaf)
 

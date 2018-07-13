@@ -48,45 +48,11 @@ class EAF(dbus.service.Object):
 
         self.start_finish()
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
-    def new_buffer(self, buffer_id, url):
-        if url == "eaf-demo":
-            return self.create_app(buffer_id, url, "app.demo.buffer")
-        elif url == "eaf-camera":
-            return self.create_app(buffer_id, url, "app.camera.buffer")
-        else:
-            url = os.path.expanduser(url)
-
-            if url.startswith("/"):
-                if os.path.exists(url):
-                    (_, extension) = os.path.splitext(url)
-
-                    if extension in [".pdf", ".xps", ".oxps", ".cbz", ".epub", ".fb2", "fbz"]:
-                        return self.create_app(buffer_id, url, "app.pdfviewer.buffer")
-                    if extension in [".md"]:
-                        return self.create_app(buffer_id, url, "app.markdownpreviewer.buffer")
-                    else:
-                        file_info = MediaInfo.parse(url)
-                        if file_is_image(file_info):
-                            return self.create_app(buffer_id, url, "app.imageviewer.buffer")
-                        elif file_is_video(file_info):
-                            return self.create_app(buffer_id, url, "app.videoplayer.buffer")
-                        else:
-                            return "Don't know how to open {0}".format(url)
-                else:
-                    return "Path {0} not exists.".format(url)
-            else:
-                from urllib.parse import urlparse
-                result = urlparse(url)
-                if len(result.scheme) != 0:
-                    return self.create_app(buffer_id, result.geturl(), "app.browser.buffer")
-                else:
-                    result = urlparse("{0}:{1}".format("http", url))
-                    if result.scheme != "":
-                        return self.create_app(buffer_id, result.geturl(), "app.browser.buffer")
-                    else:
-                        return "{0} is not valid url".format(url)
-        return ""
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="s")
+    def new_buffer(self, buffer_id, url, app_name):
+        # NOTE: We need use function str convert dbus.String to String,
+        # otherwise some library will throw error, such as fitz library.
+        return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)))
 
     def create_app(self, buffer_id, url, module_path):
         if importlib.util.find_spec(module_path) is not None:
