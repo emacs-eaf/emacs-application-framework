@@ -52,12 +52,17 @@ class AppBuffer(Buffer):
 
 * fourth paramater is background color to fill application background.
 
-2. Open file [eaf.py](core/eaf.py):
-```Python
-@dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
-def new_buffer(self, buffer_id, url):
-    if url == "eaf-demo":
-        return self.create_app(buffer_id, url, "app.demo.buffer")
+2. Open file [eaf.el](core/eaf.el):
+```Elisp
+...
+
+(defun eaf-open (url &optional app-name)
+  (interactive "FOpen with EAF: ")
+  (unless app-name
+    (cond ((string-equal url "eaf-demo")
+           (setq app-name "demo"))
+
+...
 ```
 
     Replace "eaf-demo" to "eaf rocks!"
