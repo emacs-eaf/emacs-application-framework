@@ -25,6 +25,12 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ### PDF Player
 ![img](./screenshot/pdf_viewer.gif)
 
+### File Transfer
+![img](./screenshot/file_transfer.png)
+
+### Air Share
+![img](./screenshot/air_share.png)
+
 ## Installation
 
 1. Install python libraries:

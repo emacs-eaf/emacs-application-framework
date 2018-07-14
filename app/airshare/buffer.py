@@ -66,7 +66,7 @@ class AirShareWidget(QWidget):
         self.setStyleSheet("background-color: black");
 
         self.file_name_font = QFont()
-        self.file_name_font.setPointSize(12)
+        self.file_name_font.setPointSize(24)
 
         self.file_name_label = QLabel(self)
         self.file_name_label.setText(url)
@@ -77,7 +77,7 @@ class AirShareWidget(QWidget):
         self.qrcode_label = QLabel(self)
 
         self.notify_font = QFont()
-        self.notify_font.setPointSize(24)
+        self.notify_font.setPointSize(12)
         self.notify_label = QLabel(self)
         self.notify_label.setText("Scan above QR to copy information")
         self.notify_label.setFont(self.notify_font)
