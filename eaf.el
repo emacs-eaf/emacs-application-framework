@@ -430,6 +430,10 @@ We need calcuate render allocation to make sure no black border around render co
     (eaf-open input-string "airshare")
     ))
 
+(defun eaf-upload-file (dir)
+  (interactive "DDirectory to save uploade file: ")
+  (eaf-open dir "fileuploader"))
+
 (provide 'eaf)
 
 ;;; eaf.el ends here
