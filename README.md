@@ -31,6 +31,9 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ### File Transfer
 ![img](./screenshot/file_transfer.png)
 
+### File Uploader
+![img](./screenshot/file_uploader.png)
+
 ### Air Share
 ![img](./screenshot/air_share.png)
 
@@ -85,6 +88,7 @@ M-x eaf-open
 | Demo               | Type 'eaf-demo'                               |                    |                                          |
 | File Transfer      | Type 'eaf-show-file-qrcode'                   |                    |                                          |
 |                    | Or use `dired-show-file-qrcode' in dired mode |                    |                                          |
+| File Uploader      | Type 'eaf-upload-file'                        |                    |                                          |
 | Air Share          | Type 'eaf-air-share'                          |                    |                                          |
 
 ## Report bug
