@@ -419,6 +419,17 @@ We need calcuate render allocation to make sure no black border around render co
   (interactive)
   (eaf-show-file-qrcode (dired-get-filename)))
 
+(defun eaf-air-share ()
+  (interactive)
+  (let* ((current-symbol (if (use-region-p)
+                             (buffer-substring-no-properties (region-beginning) (region-end))
+                           (thing-at-point 'symbol)))
+         (input-string (string-trim (read-string (format "Info (%s): " current-symbol)))))
+    (when (string-empty-p input-string)
+      (setq input-string current-symbol))
+    (eaf-open input-string "airshare")
+    ))
+
 (provide 'eaf)
 
 ;;; eaf.el ends here

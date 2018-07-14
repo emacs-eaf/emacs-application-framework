@@ -76,7 +76,7 @@ M-x eaf-open
 | Demo               | Type 'eaf-demo'                               |                    |                                          |
 | File Transfer      | Type 'eaf-show-file-qrcode'                   |                    |                                          |
 |                    | Or use `dired-show-file-qrcode' in dired mode |                    |                                          |
-|                    |                                               |                    |                                          |
+| Air Share          | Type 'eaf-air-share'                          |                    |                                          |
 
 ## Report bug
 If you have any problem with eaf, please use command "emacs -Q" start Emacs first.
