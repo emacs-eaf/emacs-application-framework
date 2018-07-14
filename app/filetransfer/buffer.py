@@ -86,6 +86,7 @@ class Image(qrcode.image.base.BaseImage):
 class FileTransferWidget(QWidget):
     def __init__(self, url, color):
         QWidget.__init__(self)
+        self.setStyleSheet("background-color: black");
 
         file_path = os.path.expanduser(url)
 
@@ -96,6 +97,7 @@ class FileTransferWidget(QWidget):
         self.file_name_label.setText(file_path)
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
+        self.file_name_label.setStyleSheet("color: #eee");
 
         self.qrcode_label = QLabel(self)
 
@@ -105,6 +107,7 @@ class FileTransferWidget(QWidget):
         self.notify_label.setText("Scan above QR and open link by browser to start downloading.\nMake sure that your smartphone is connected to the same WiFi network as this computer.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
+        self.notify_label.setStyleSheet("color: #eee");
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

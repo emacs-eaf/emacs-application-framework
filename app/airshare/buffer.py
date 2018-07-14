@@ -63,6 +63,7 @@ class Image(qrcode.image.base.BaseImage):
 class AirShareWidget(QWidget):
     def __init__(self, url, color):
         QWidget.__init__(self)
+        self.setStyleSheet("background-color: black");
 
         self.file_name_font = QFont()
         self.file_name_font.setPointSize(12)
@@ -71,6 +72,7 @@ class AirShareWidget(QWidget):
         self.file_name_label.setText(url)
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
+        self.file_name_label.setStyleSheet("color: #eee");
 
         self.qrcode_label = QLabel(self)
 
@@ -80,6 +82,7 @@ class AirShareWidget(QWidget):
         self.notify_label.setText("Scan above QR to copy information")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
+        self.notify_label.setStyleSheet("color: #eee");
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
