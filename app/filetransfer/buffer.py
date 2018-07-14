@@ -46,14 +46,19 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         global local_file_path
 
-        with open(local_file_path, 'rb') as f:
-            self.send_response(200)
-            self.send_header("Content-Type", 'application/octet-stream')
-            self.send_header("Content-Disposition", 'attachment; filename="{}"'.format(os.path.basename(local_file_path)))
-            fs = os.fstat(f.fileno())
-            self.send_header("Content-Length", str(fs.st_size))
-            self.end_headers()
-            shutil.copyfileobj(f, self.wfile)
+        try:
+
+            with open(local_file_path, 'rb') as f:
+                self.send_response(200)
+                self.send_header("Content-Type", 'application/octet-stream')
+                self.send_header("Content-Disposition", 'attachment; filename="{}"'.format(os.path.basename(local_file_path)))
+                fs = os.fstat(f.fileno())
+                self.send_header("Content-Length", str(fs.st_size))
+                self.end_headers()
+                shutil.copyfileobj(f, self.wfile)
+        except socket.error:
+            # Don't need handle socket error.
+            pass
 
 class Image(qrcode.image.base.BaseImage):
     def __init__(self, border, width, box_size):
