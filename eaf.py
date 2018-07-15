@@ -53,6 +53,12 @@ class EAF(dbus.service.Object):
         # otherwise some library will throw error, such as fitz library.
         return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)))
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
+    def scroll_buffer(self, view_info, scroll_direction, scroll_type):
+        (buffer_id, _, _, _, _) = view_info.split(":")
+        if buffer_id in self.buffer_dict:
+            self.buffer_dict[buffer_id].scroll(scroll_direction, scroll_type)
+
     def create_app(self, buffer_id, url, module_path):
         try:
             module = importlib.import_module(module_path)

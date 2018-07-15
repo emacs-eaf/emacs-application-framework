@@ -41,6 +41,18 @@ class AppBuffer(Buffer):
         if result_type == "jump_page":
             self.buffer_widget.jump_to_page(int(result_content))
 
+    def scroll(self, scroll_direction, scroll_type):
+        if scroll_type == "page":
+            if scroll_direction == "up":
+                self.buffer_widget.scroll_up_page()
+            else:
+                self.buffer_widget.scroll_down_page()
+        else:
+            if scroll_direction == "up":
+                self.buffer_widget.scroll_up()
+            else:
+                self.buffer_widget.scroll_down()
+
 class PdfViewerWidget(QWidget):
 
     send_jump_page_message = QtCore.pyqtSignal()

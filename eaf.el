@@ -434,6 +434,56 @@ We need calcuate render allocation to make sure no black border around render co
   (interactive "DDirectory to save uploade file: ")
   (eaf-open dir "fileuploader"))
 
+;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun eaf-get-view-info ()
+  (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
+         (x (nth 0 window-allocation))
+         (y (nth 1 window-allocation))
+         (w (nth 2 window-allocation))
+         (h (nth 3 window-allocation)))
+    (format "%s:%s:%s:%s:%s" buffer-id x y w h)))
+
+;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defadvice scroll-other-window (around eaf-scroll-up-or-next-page activate)
+  "When next buffer is `eaf-mode', do `eaf-scroll-up-or-next-page'."
+  (other-window +1)
+  (if (eq major-mode 'eaf-mode)
+      (let ((arg (ad-get-arg 0)))
+        (if (null arg)
+            (eaf-other-window-scroll-up-page)
+          (eaf-other-window-scroll-up-line))
+        (other-window -1))
+    (other-window -1)
+    ad-do-it))
+
+(defadvice scroll-other-window-down (around eaf-scroll-down-or-previous-page activate)
+  "When next buffer is `eaf-mode', do `eaf-scroll-down-or-previous-page'."
+  (other-window +1)
+  (if (eq major-mode 'eaf-mode)
+      (let ((arg (ad-get-arg 0)))
+        (if (null arg)
+            (eaf-other-window-scroll-down-page)
+          (eaf-other-window-scroll-down-line))
+        (other-window -1))
+    (other-window -1)
+    ad-do-it))
+
+(defun eaf-other-window-scroll-up-page ()
+  (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
+  (message "Scroll up page"))
+
+(defun eaf-other-window-scroll-up-line ()
+  (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line")
+  (message "Scroll up line"))
+
+(defun eaf-other-window-scroll-down-page ()
+  (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
+  (message "Scroll down page"))
+
+(defun eaf-other-window-scroll-down-line ()
+  (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line")
+  (message "Scroll down line"))
+
 (provide 'eaf)
 
 ;;; eaf.el ends here
