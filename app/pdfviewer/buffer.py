@@ -196,11 +196,13 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def scroll_up_page(self):
-        self.scroll_offset = min(self.scroll_offset + self.rect().height(), self.max_scroll_offset())
+        # Adjust scroll step to make users continue reading fluently.
+        self.scroll_offset = min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset())
         self.update()
 
     def scroll_down_page(self):
-        self.scroll_offset = max(self.scroll_offset - self.rect().height(), 0)
+        # Adjust scroll step to make users continue reading fluently.
+        self.scroll_offset = max(self.scroll_offset - self.rect().height() + self.scroll_step, 0)
         self.update()
 
     def scroll_to_home(self):
