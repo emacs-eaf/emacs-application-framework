@@ -74,3 +74,8 @@ class Buffer(QGraphicsScene):
     def scroll(self, scroll_direction, scroll_type):
         pass
 
+    def save_session_data(self):
+        pass
+
+    def restore_session_data(self, session_data):
+        pass

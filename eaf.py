@@ -28,6 +28,7 @@ import importlib
 import dbus
 import dbus.service
 import os
+import json
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"
@@ -47,6 +48,8 @@ class EAF(dbus.service.Object):
 
         self.start_finish()
 
+        self.session_file_path = os.path.expanduser("~/.emacs.d/eaf/session.json")
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="s")
     def new_buffer(self, buffer_id, url, app_name):
         # NOTE: We need use function str convert dbus.String to String,
@@ -62,7 +65,9 @@ class EAF(dbus.service.Object):
     def create_app(self, buffer_id, url, module_path):
         try:
             module = importlib.import_module(module_path)
-            self.create_buffer(buffer_id, module.AppBuffer(buffer_id, url))
+            buf = module.AppBuffer(buffer_id, url)
+            buf.module_path = module_path
+            self.create_buffer(buffer_id, buf)
 
             return ""
         except ImportError:
@@ -84,6 +89,9 @@ class EAF(dbus.service.Object):
 
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
+
+        # Restore buffer session.
+        self.restore_buffer_session(app_buffer)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_views(self, args):
@@ -153,6 +161,9 @@ class EAF(dbus.service.Object):
 
         # Clean buffer from buffer dict.
         if buffer_id in self.buffer_dict:
+            # Save buffer session.
+            self.save_buffer_session(self.buffer_dict[buffer_id])
+
             self.buffer_dict[buffer_id].handle_destroy()
             self.buffer_dict.pop(buffer_id, None)
 
@@ -190,6 +201,61 @@ class EAF(dbus.service.Object):
     @dbus.service.signal("com.lazycat.eaf")
     def input_message(self, buffer_id, message, callback_type):
         pass
+
+    def save_buffer_session(self, buf):
+        # Create config file it not exist.
+        if not os.path.exists(self.session_file_path):
+            basedir = os.path.dirname(self.session_file_path)
+            if not os.path.exists(basedir):
+                os.makedirs(basedir)
+
+            with open(self.session_file_path, 'a'):
+                os.utime(self.session_file_path, None)
+
+            print("Create session file %s" % (self.session_file_path))
+
+        with open(self.session_file_path, "r+") as session_file:
+            session_dict = {}
+            try:
+                session_dict = json.load(session_file)
+            except ValueError:
+                pass
+
+            if buf.module_path not in session_dict:
+                session_dict[buf.module_path] = {}
+
+            if buf.url in session_dict[buf.module_path]:
+                session_dict[buf.module_path].update({buf.url: buf.save_session_data()})
+            else:
+                session_dict.update({buf.module_path: {buf.url: buf.save_session_data()}})
+
+            session_file.seek(0)
+            session_file.truncate(0)
+            json.dump(session_dict, session_file)
+
+            print("Save session: ", buf.module_path, buf.url, buf.save_session_data())
+
+    def restore_buffer_session(self, buf):
+        if os.path.exists(self.session_file_path):
+            with open(self.session_file_path, "r+") as session_file:
+                session_dict = {}
+                try:
+                    session_dict = json.load(session_file)
+                except ValueError:
+                    import traceback
+                    traceback.print_exc()
+
+                if buf.module_path in session_dict:
+                    if buf.url in session_dict[buf.module_path]:
+                        buf.restore_session_data(session_dict[buf.module_path][buf.url])
+
+                        print("Restore session: ", buf.buffer_id, buf.module_path, self.session_file_path)
+                    else:
+                        print("No session data about %s, no need restore session." % (buf.url))
+                else:
+                    print("No data in session file, no need restore session.")
+        else:
+            print("Not found %s, no need restore session." % (self.session_file_path))
 
 if __name__ == "__main__":
     import sys

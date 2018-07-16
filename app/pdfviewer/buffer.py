@@ -53,6 +53,16 @@ class AppBuffer(Buffer):
             else:
                 self.buffer_widget.scroll_down()
 
+    def save_session_data(self):
+        return "{0}:{1}:{2}".format(self.buffer_widget.scroll_offset, self.buffer_widget.scale, self.buffer_widget.read_mode)
+
+    def restore_session_data(self, session_data):
+        (scroll_offset, scale, read_mode) = session_data.split(":")
+        self.buffer_widget.scroll_offset = float(scroll_offset)
+        self.buffer_widget.scale = float(scale)
+        self.buffer_widget.read_mode = read_mode
+        self.buffer_widget.update()
+
 class PdfViewerWidget(QWidget):
 
     send_jump_page_message = QtCore.pyqtSignal()
@@ -191,9 +201,11 @@ class PdfViewerWidget(QWidget):
         return self.scale * self.page_height * self.page_total_number - self.rect().height()
 
     def switch_to_read_mode(self):
-        if self.read_mode == "fit_to_width":
+        if self.read_mode == "fit_to_customize":
+            self.read_mode = "fit_to_width"
+        elif self.read_mode == "fit_to_width":
             self.read_mode = "fit_to_height"
-        else:
+        elif self.read_mode == "fit_to_height":
             self.read_mode = "fit_to_width"
 
         self.update_scale()
@@ -226,14 +238,17 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def zoom_in(self):
+        self.read_mode = "fit_to_customize"
         self.scale = min(10, self.scale + 0.2)
         self.update()
 
     def zoom_out(self):
+        self.read_mode = "fit_to_customize"
         self.scale = max(1, self.scale - 0.2)
         self.update()
 
     def zoom_reset(self):
+        self.read_mode = "fit_to_width"
         self.update_scale()
         self.update()
 

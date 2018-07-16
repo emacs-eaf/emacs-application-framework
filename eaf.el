@@ -163,7 +163,11 @@
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
     (if (> count 1)
-        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" "")))))
+        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" "")))
+    ;; Clean cache url and app name, avoid next start process to open buffer.
+    (setq eaf-first-start-url nil)
+    (setq eaf-first-start-app-name nil)
+    ))
 
 (defun eaf-restart-process ()
   (interactive)
