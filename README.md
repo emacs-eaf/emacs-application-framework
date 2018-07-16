@@ -132,6 +132,6 @@ Join us, happy hacking!
 如果我的作品让你的生活充满快乐, 欢迎请我喝瓶啤酒, 哈哈哈哈
 
 <p float="left">
-    <img src="./screenshot/alipay.jpg" width="200">
+    <img src="./screenshot/alipay.jpg" width="188">
     <img src="./screenshot/wechat.jpg" width="200">
 </p>
