@@ -9,7 +9,7 @@ This framework mainly implements three functions:
 Using this framework, you can use PyQt develop powerful graphics programs to extend Emacs
 
 ## Application Screenshots
-You can explore [Screenshots] of eaf application to feeling what's it
+You can explore [Screenshots](SCREENSHOT.md) of eaf application to feeling what's it
 
 ## Installation
 
