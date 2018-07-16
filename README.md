@@ -13,24 +13,32 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ### Browser & Markdown Previewer
 <p float="left">
     <img src="./screenshot/browser.gif" width="400">
+</p>
+<p float="right">
     <img src="./screenshot/markdown_previewer.gif" width="400">
 </p>
 
 ### Image Viewer & Video Player
 <p float="left">
     <img src="./screenshot/image_viewer.gif" width="400">
+</p>
+<p float="right">
     <img src="./screenshot/video_player.gif" width="400">
 </p>
 
 ### PDF Player & Camera
 <p float="left">
     <img src="./screenshot/pdf_viewer.gif" width="400">
+</p>
+<p float="right">
     <img src="./screenshot/camera.gif" width="400">
 </p>
 
 ### File Transfer & File Uploader
 <p float="left">
     <img src="./screenshot/file_transfer.png" width="400">
+</p>
+<p float="right">
     <img src="./screenshot/file_uploader.png" width="400">
 </p>
 
