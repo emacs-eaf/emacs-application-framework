@@ -10,32 +10,34 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ## Screenshots of EAF
 
-### Browser
-![img](./screenshot/browser.gif)
+### Browser and Markdown Previewer
+<p float="left">
+    <img src="./screenshot/browser.gif" width="400">
+    <img src="./screenshot/markdown_previewer.gif" width="400">
+</p>
 
-### Markdown Previewer
-![img](./screenshot/markdown_previewer.gif)
+### Image Viewer and Video Player
+<p float="left">
+    <img src="./screenshot/image_viewer.gif" width="400">
+    <img src="./screenshot/video_player.gif" width="400">
+</p>
 
-### Image Viewer
-![img](./screenshot/image_viewer.gif)
+### PDF Player and Camera
+<p float="left">
+    <img src="./screenshot/pdf_viewer.gif" width="400")
+    <img src="./screenshot/camera.gif" width="400")
+</p>
 
-### Video Player
-![img](./screenshot/video_player.gif)
-
-### PDF Player
-![img](./screenshot/pdf_viewer.gif)
-
-### Camera
-![img](./screenshot/camera.gif)
-
-### File Transfer
-![img](./screenshot/file_transfer.png)
-
-### File Uploader
-![img](./screenshot/file_uploader.png)
+### File Transfer and File Uploader
+<p float="left">
+    <img src="./screenshot/file_transfer.png" width="400")
+    <img src="./screenshot/file_uploader.png" width="400")
+</p>
 
 ### Air Share
-![img](./screenshot/air_share.png)
+<p float="left">
+    <img src="./screenshot/air_share.png" width="400")
+</p>
 
 ## Installation
 
