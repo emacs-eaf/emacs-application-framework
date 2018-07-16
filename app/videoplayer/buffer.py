@@ -43,6 +43,13 @@ class AppBuffer(Buffer):
         if self.buffer_widget.video_need_replay == True:
             self.buffer_widget.media_player.play()
 
+    def save_session_data(self):
+        return str(self.buffer_widget.media_player.position())
+
+    def restore_session_data(self, session_data):
+        position = int(session_data)
+        self.buffer_widget.media_player.setPosition(position)
+        
 class VideoPlayerWidget(QWidget):
 
     def __init__(self, parent=None):

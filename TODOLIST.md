@@ -6,7 +6,6 @@
 * Browser: add proxy support
 * Browser: implement js plugin like vimium
 * ImageViewer: add zoom support
-* VideoPlayer: remember video play progress.
 * Pdfviewer: hover mouse to detect url postion, ctrl + button can open url under mouse.
 * Pdfviewer: keep same offset when user do scale operation.
 * Pdfviewer: fix page still in scrolling even user release key.
