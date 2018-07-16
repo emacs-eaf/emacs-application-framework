@@ -113,6 +113,49 @@ After emacs read user input, framework will call interface "handle_input_message
 
 Simple logic is send "send_input_message" signal to emacs, then handle user input with buffer interface "handle_input_message"
 
+### Scroll by other window
+In emacs, we usually call command "scroll-other-window" to scroll other window's buffer.
+
+If you want eaf application buffer respond scroll event to command "scroll-other-window".
+
+You need implement "scroll" interface in AppBuffer, such as like PDF Viewer does:
+
+```Python
+    def scroll(self, scroll_direction, scroll_type):
+        if scroll_type == "page":
+            if scroll_direction == "up":
+                self.buffer_widget.scroll_up_page()
+            else:
+                self.buffer_widget.scroll_down_page()
+        else:
+            if scroll_direction == "up":
+                self.buffer_widget.scroll_up()
+            else:
+                self.buffer_widget.scroll_down()
+```
+
+scroll_direction is string, "up" mean scroll buffer up, "down" mean scroll buffer down.
+
+scroll_type is string, "page" mean scroll buffer by page, "line" mean scroll buffer by line.
+
+### Save/Restore session
+We always need save and restore session for application, such as, save play position of video player.
+
+You need implement interfaces "save_session_data" and "restore_session_data", below is an example of Vide Player does:
+
+
+```Python
+    def save_session_data(self):
+        return str(self.buffer_widget.media_player.position())
+
+    def restore_session_data(self, session_data):
+        position = int(session_data)
+        self.buffer_widget.media_player.setPosition(position)
+```
+
+session_data is string, you can put anything in it
+
+All session data save at ~/.emacs.d/eaf/session.json file.
 
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)
