@@ -1,3 +1,6 @@
+## EAF Application Screenshots
+You can explore [EAF Screenshots](SCREENSHOT.md) of eaf application to feeling what's it
+
 # What is Emacs Application Framework?
 Emacs Application Framework is a development framework that developers can develop any PyQt program and integrate into Emacs.
 
@@ -7,9 +10,6 @@ This framework mainly implements three functions:
 3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
 
 Using this framework, you can use PyQt develop powerful graphics programs to extend Emacs
-
-## Application Screenshots
-You can explore [Screenshots](SCREENSHOT.md) of eaf application to feeling what's it
 
 ## Installation
 
