@@ -40,10 +40,22 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ## Installation
 
 1. Install python libraries:
+
+### ArchLinux
+
 ```Bash
 sudo pacman -S python-xlib python-pyqt5
 sudo pip install PyMuPDF grip qrcode
 ```
+
+### Debian
+
+```Bash
+sudo apt-get update
+sudo apt-get install python3-xlib python3-pyqt5
+sudo pip3 instlal PyMuPDF grip qrcode
+```
+
 
 | Package      | Use for                                          |
 | :--------    | :----                                            |
