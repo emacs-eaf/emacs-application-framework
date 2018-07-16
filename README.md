@@ -10,32 +10,32 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ## Screenshots of EAF
 
-### Browser and Markdown Previewer
-<p float="left">
+### Browser & Markdown Previewer
+<p float="left" style="margin-left: 10px; margin-right: 10px">
     <img src="./screenshot/browser.gif" width="400">
     <img src="./screenshot/markdown_previewer.gif" width="400">
 </p>
 
-### Image Viewer and Video Player
-<p float="left">
+### Image Viewer & Video Player
+<p float="left" style="margin-left: 10px; margin-right: 10px">
     <img src="./screenshot/image_viewer.gif" width="400">
     <img src="./screenshot/video_player.gif" width="400">
 </p>
 
-### PDF Player and Camera
-<p float="left">
+### PDF Player & Camera
+<p float="left" style="margin-left: 10px; margin-right: 10px">
     <img src="./screenshot/pdf_viewer.gif" width="400">
     <img src="./screenshot/camera.gif" width="400">
 </p>
 
-### File Transfer and File Uploader
-<p float="left">
+### File Transfer & File Uploader
+<p float="left" style="margin-left: 10px; margin-right: 10px">
     <img src="./screenshot/file_transfer.png" width="400">
     <img src="./screenshot/file_uploader.png" width="400">
 </p>
 
 ### Air Share
-<p float="left">
+<p float="left" style="margin-left: 10px; margin-right: 10px">
     <img src="./screenshot/air_share.png" width="400">
 </p>
 
