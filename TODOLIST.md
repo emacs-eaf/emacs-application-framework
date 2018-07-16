@@ -4,6 +4,7 @@
 * Browser: support pop window, such as emacs-china.org
 * Browser: add progressbar
 * Browser: add proxy support
+* Browser: add scroll interface support.
 * Browser: implement js plugin like vimium
 * ImageViewer: add zoom support
 * Pdfviewer: hover mouse to detect url postion, ctrl + button can open url under mouse.
