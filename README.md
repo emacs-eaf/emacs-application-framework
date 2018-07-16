@@ -10,42 +10,29 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ## Screenshots of EAF
 
-### Browser & Markdown Previewer
-<p float="left">
-    <img src="./screenshot/browser.gif" width="400">
-</p>
-<p float="right">
-    <img src="./screenshot/markdown_previewer.gif" width="400">
-</p>
+| Browser                                          | Markdown Previewer                                          |
+| :--------:                                       | :----:                                                      |
+| <img src="./screenshot/browser.gif" width="400"> | <img src="./screenshot/markdown_previewer.gif" width="400"> |
 
-### Image Viewer & Video Player
-<p float="left">
-    <img src="./screenshot/image_viewer.gif" width="400">
-</p>
-<p float="right">
-    <img src="./screenshot/video_player.gif" width="400">
-</p>
+| Image Viewer                                          | Video Player                                          |
+| :--------:                                            | :----:                                                |
+| <img src="./screenshot/image_viewer.gif" width="400"> | <img src="./screenshot/video_player.gif" width="400"> |
+|                                                       |                                                       |
 
-### PDF Player & Camera
-<p float="left">
-    <img src="./screenshot/pdf_viewer.gif" width="400">
-</p>
-<p float="right">
-    <img src="./screenshot/camera.gif" width="400">
-</p>
+| PDF Viewer                                          | Camera                                          |
+| :--------:                                          | :----:                                          |
+| <img src="./screenshot/pdf_viewer.gif" width="400"> | <img src="./screenshot/camera.gif" width="400"> |
+|                                                     |                                                 |
 
-### File Transfer & File Uploader
-<p float="left">
-    <img src="./screenshot/file_transfer.png" width="400">
-</p>
-<p float="right">
-    <img src="./screenshot/file_uploader.png" width="400">
-</p>
+| File Transfer                                          | File Uploader                                          |
+| :--------:                                             | :----:                                                 |
+| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
+|                                                        |                                                        |
 
-### Air Share
-<p float="left">
-    <img src="./screenshot/air_share.png" width="400">
-</p>
+| Air Share                                          |
+| :--------:                                         |
+| <img src="./screenshot/air_share.png" width="400"> |
+|                                                    |
 
 ## Installation
 
@@ -88,7 +75,33 @@ There are mainly three obstacles:
 3. Qt5 QGraphicsView/QGraphicsScene can't work MacOS, specify QGraphicsVideoItem can't work.
 
 ## Usage
-You will got all operations of EAF at [Manual](USAGE.md).
+| App                | Way to open                                   | Key                | Event                                    |
+| :--------          | :----                                         | :-----:            | :----                                    |
+| Browser            | URL                                           | Left Button        | Open link current tab                    |
+|                    |                                               | Ctrl + Left Button | Open link in new tab                     |
+| Markdown previewer | Markdown file path                            |                    |                                          |
+| Image Viewer       | Image file path                               | j                  | Load next image in current directory     |
+|                    |                                               | k                  | Load previous image in current directory |
+| Video Player       | Video file path                               | Space              | Play or Pause                            |
+|                    |                                               | h                  | Seek backward                            |
+|                    |                                               | l                  | Seek forward                             |
+| Pdf Viewer         | Pdf file path                                 | j                  | Scroll up                                |
+|                    |                                               | k                  | Scroll down                              |
+|                    |                                               | Space              | Scroll up page                           |
+|                    |                                               | b                  | Scroll down page                         |
+|                    |                                               | ,                  | Scroll to end                            |
+|                    |                                               | .                  | Scroll to home                           |
+|                    |                                               | t                  | Switch scale mode                        |
+|                    |                                               | -                  | Zoom out                                 |
+|                    |                                               | =                  | Zoom in                                  |
+|                    |                                               | 0                  | Zoomn reset                              |
+|                    |                                               | g                  | Goto page                                |
+| Camera             | Type 'eaf-camera'                             |                    |                                          |
+| Demo               | Type 'eaf-demo'                               |                    |                                          |
+| File Transfer      | Type 'eaf-show-file-qrcode'                   |                    |                                          |
+|                    | Or use `dired-show-file-qrcode' in dired mode |                    |                                          |
+| File Uploader      | Type 'eaf-upload-file'                        |                    |                                          |
+| Air Share          | Type 'eaf-air-share'                          |                    |                                          |
 
 ## Report bug
 If you have any problem with eaf, please use command "emacs -Q" start Emacs first.
