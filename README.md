@@ -117,9 +117,6 @@ Then test again, if "emacs -Q" works fine, it's must be something wrong with you
 
 If "emacs -Q" still have problem, please [report bug](https://github.com/manateelazycat/emacs-application-framework/issues/new)
 
-## How to develop new plugins?
-[Developer manual](HACKING.md)
-
 ## Join Us
 Do you want to make Emacs a real operating system?
 
@@ -127,7 +124,7 @@ Do you want to live in emacs more comfortably?
 
 Want to create unparalleled plugins to extend emacs?
 
-Join us, happy hacking!
+[Join us!](HACKING.md)
 
 ## 打赏
 如果我的作品让你的生活充满快乐, 欢迎请我喝瓶啤酒, 哈哈哈哈
