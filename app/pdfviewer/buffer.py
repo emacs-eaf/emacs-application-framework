@@ -187,15 +187,21 @@ class PdfViewerWidget(QWidget):
         elif event.key() == Qt.Key_G:
             self.send_jump_page_message.emit()
 
+    def scale_to(self, new_scale):
+        self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
+        self.scale = new_scale
+
+    def scale_to_width(self):
+        self.scale_to(self.rect().width() * 1.0 / self.page_width)
+
+    def scale_to_height(self):
+        self.scale_to(self.rect().size().height() * 1.0 / self.page_height)
+
     def update_scale(self):
         if self.read_mode == "fit_to_width":
-            new_scale = self.rect().width() * 1.0 / self.page_width
-            self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
-            self.scale = new_scale
+            self.scale_to_width()
         elif self.read_mode == "fit_to_height":
-            new_scale = self.rect().size().height() * 1.0 / self.page_height
-            self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
-            self.scale = new_scale
+            self.scale_to_height()
 
     def max_scroll_offset(self):
         return self.scale * self.page_height * self.page_total_number - self.rect().height()
@@ -239,12 +245,12 @@ class PdfViewerWidget(QWidget):
 
     def zoom_in(self):
         self.read_mode = "fit_to_customize"
-        self.scale = min(10, self.scale + 0.2)
+        self.scale_to(min(10, self.scale + 0.2))
         self.update()
 
     def zoom_out(self):
         self.read_mode = "fit_to_customize"
-        self.scale = max(1, self.scale - 0.2)
+        self.scale_to(max(1, self.scale - 0.2))
         self.update()
 
     def zoom_reset(self):
