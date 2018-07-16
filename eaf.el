@@ -450,8 +450,8 @@ We need calcuate render allocation to make sure no black border around render co
   (if (eq major-mode 'eaf-mode)
       (let ((arg (ad-get-arg 0)))
         (if (null arg)
-            (eaf-other-window-scroll-up-page)
-          (eaf-other-window-scroll-up-line))
+            (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
+          (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line"))
         (other-window -1))
     (other-window -1)
     ad-do-it))
@@ -462,27 +462,11 @@ We need calcuate render allocation to make sure no black border around render co
   (if (eq major-mode 'eaf-mode)
       (let ((arg (ad-get-arg 0)))
         (if (null arg)
-            (eaf-other-window-scroll-down-page)
-          (eaf-other-window-scroll-down-line))
+            (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
+          (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line"))
         (other-window -1))
     (other-window -1)
     ad-do-it))
-
-(defun eaf-other-window-scroll-up-page ()
-  (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
-  (message "Scroll up page"))
-
-(defun eaf-other-window-scroll-up-line ()
-  (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line")
-  (message "Scroll up line"))
-
-(defun eaf-other-window-scroll-down-page ()
-  (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
-  (message "Scroll down page"))
-
-(defun eaf-other-window-scroll-down-line ()
-  (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line")
-  (message "Scroll down line"))
 
 (provide 'eaf)
 
