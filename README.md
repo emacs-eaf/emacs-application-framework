@@ -24,19 +24,19 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ### PDF Player and Camera
 <p float="left">
-    <img src="./screenshot/pdf_viewer.gif" width="400")
-    <img src="./screenshot/camera.gif" width="400")
+    <img src="./screenshot/pdf_viewer.gif" width="400">
+    <img src="./screenshot/camera.gif" width="400">
 </p>
 
 ### File Transfer and File Uploader
 <p float="left">
-    <img src="./screenshot/file_transfer.png" width="400")
-    <img src="./screenshot/file_uploader.png" width="400")
+    <img src="./screenshot/file_transfer.png" width="400">
+    <img src="./screenshot/file_uploader.png" width="400">
 </p>
 
 ### Air Share
 <p float="left">
-    <img src="./screenshot/air_share.png" width="400")
+    <img src="./screenshot/air_share.png" width="400">
 </p>
 
 ## Installation
