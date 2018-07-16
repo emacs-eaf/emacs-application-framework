@@ -75,7 +75,7 @@ class Buffer(QGraphicsScene):
         pass
 
     def save_session_data(self):
-        pass
+        return ""
 
     def restore_session_data(self, session_data):
         pass
