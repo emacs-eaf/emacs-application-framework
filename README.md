@@ -50,7 +50,7 @@ sudo pip install PyMuPDF grip qrcode
 ```Bash
 sudo apt-get update
 sudo apt-get install python3-xlib python3-pyqt5
-sudo pip3 instlal PyMuPDF grip qrcode
+sudo pip3 install PyMuPDF grip qrcode
 ```
 
 ### Package description.
