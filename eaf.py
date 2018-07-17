@@ -78,6 +78,8 @@ class EAF(dbus.service.Object):
 
             return ""
         except ImportError:
+            import traceback
+            traceback.print_exc()
             return "Something wrong when import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, app_buffer):

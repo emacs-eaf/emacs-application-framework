@@ -437,6 +437,7 @@ We need calcuate render allocation to make sure no black border around render co
             (other-window +1)))
       ;; Kill buffer and show error message from python server.
       (kill-buffer buffer)
+      (switch-to-buffer eaf-name)
       (message buffer-result))
     ))
 
