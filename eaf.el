@@ -153,10 +153,7 @@
 
 (defun eaf-stop-process ()
   (interactive)
-  (if (process-live-p eaf-process)
-      ;; Delete eaf server process.
-      (delete-process eaf-process)
-    (message "EAF process has dead."))
+  ;; Kill eaf buffers.
   (let ((current-buf (current-buffer))
         (count 0))
     (dolist (buffer (buffer-list))
@@ -166,16 +163,23 @@
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
     (if (> count 1)
-        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" "")))
-    ;; Clean cache url and app name, avoid next start process to open buffer.
-    (setq eaf-first-start-url nil)
-    (setq eaf-first-start-app-name nil)
-    ;; Clean `eaf-org-file-list'
-    (dolist (org-file-name eaf-org-file-list)
-      (eaf-delete-org-preview-file org-file-name))
-    (setq eaf-org-file-list nil)
-    (setq eaf-org-killed-file-list nil)
-    ))
+        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
+
+  ;; Clean cache url and app name, avoid next start process to open buffer.
+  (setq eaf-first-start-url nil)
+  (setq eaf-first-start-app-name nil)
+
+  ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
+  (dolist (org-file-name eaf-org-file-list)
+    (eaf-delete-org-preview-file org-file-name))
+  (setq eaf-org-file-list nil)
+  (setq eaf-org-killed-file-list nil)
+
+  ;; Kill process after kill buffer, make application can save session data.
+  (if (process-live-p eaf-process)
+      ;; Delete eaf server process.
+      (delete-process eaf-process)
+    (message "EAF process has dead.")))
 
 (defun eaf-restart-process ()
   (interactive)
