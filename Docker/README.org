@@ -1,0 +1,13 @@
+#+TITLE: README
+#+AUTHOR: lujun9972
+#+TAGS: Docker
+#+DATE: [2018-07-17 二 20:06]
+#+LANGUAGE:  zh-CN
+#+OPTIONS:  H:6 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:nil
+
+* RUN
+#+BEGIN_SRC shell
+  xhost +local:root # WARN: this comes with security issues
+
+  run -e DISPLAY -e DBUS_SESSION_BUS_ADDRESS --rm -it -v /tmp/.X11-unix/:/tmp/.X11-unix -v /run/user/$(id -u)/:/run/user/1000/ -v ~/.Xauthority:/home/eaf/.Xauthority --net=host --entrypoint=/bin/bash  eaf
+#+END_SRC

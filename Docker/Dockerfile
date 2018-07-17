@@ -1,0 +1,22 @@
+FROM silex/emacs:master
+
+RUN apt update && \
+    apt install git python3 python3-xlib python3-pyqt5 python3-pip python3-dbus -y && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --upgrade pip
+
+RUN pip install PyMuPDF grip qrcode
+
+RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
+
+RUN adduser --uid 1000  --shell /bin/bash eaf
+
+ENV HOME=/home/eaf
+
+USER eaf
+
+COPY .emacs /home/eaf/
+
+
+ENTRYPOINT ["emacs"]
