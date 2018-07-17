@@ -13,6 +13,7 @@ RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-fram
 RUN adduser --uid 1000  --shell /bin/bash eaf
 
 ENV HOME=/home/eaf
+ENV LANG=zh_CN.UTF-8
 
 USER eaf
 
