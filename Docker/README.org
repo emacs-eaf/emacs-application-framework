@@ -5,6 +5,13 @@
 #+LANGUAGE:  zh-CN
 #+OPTIONS:  H:6 num:nil toc:t \n:nil ::t |:t ^:nil -:nil f:t *:t <:nil
 
+* BUILD
+#+BEGIN_SRC shell
+  docker build -t eaf -f Dockerfile.ubuntu .
+  # or
+  docker build -t eaf -f Dockerfile.arch .
+
+#+END_SRC
 * RUN
 #+BEGIN_SRC shell
   xhost +local:root # WARN: this comes with security issues
