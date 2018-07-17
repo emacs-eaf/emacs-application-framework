@@ -422,8 +422,13 @@ We need calcuate render allocation to make sure no black border around render co
     (with-current-buffer buffer
       (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name)))
     (if (equal buffer-result "")
-        ;; Switch to new buffer if buffer create successful.
-        (switch-to-buffer buffer)
+        (progn
+          ;; Switch to new buffer if buffer create successful.
+          (switch-to-buffer buffer)
+          ;; Focus to file window if is previewer application.
+          (when (or (string= app-name "markdownpreviewer")
+                    (string= app-name "orgpreviewer"))
+            (other-window +1)))
       ;; Kill buffer and show error message from python server.
       (kill-buffer buffer)
       (message buffer-result))
@@ -443,10 +448,7 @@ We need calcuate render allocation to make sure no black border around render co
                   (setq app-name "pdfviewer"))
                  ((member extension-name '("md"))
                   ;; Split window to show file and previewer.
-                  (delete-other-windows)
-                  (find-file url)
-                  (split-window-horizontally)
-                  (other-window +1)
+                  (eaf-split-preview-windows)
                   (setq app-name "markdownpreviewer"))
                  ((member extension-name '("jpg" "png" "bmp"))
                   (setq app-name "imageviewer"))
@@ -462,10 +464,7 @@ We need calcuate render allocation to make sure no black border around render co
                   (unless (member url eaf-org-file-list)
                     (push url eaf-org-file-list))
                   ;; Split window to show file and previewer.
-                  (delete-other-windows)
-                  (find-file url)
-                  (split-window-horizontally)
-                  (other-window +1)
+                  (eaf-split-preview-windows)
                   (setq app-name "orgpreviewer")
                   )))
           (t
@@ -479,6 +478,12 @@ We need calcuate render allocation to make sure no black border around render co
     (setq eaf-first-start-url url)
     (setq eaf-first-start-app-name app-name)
     (eaf-start-process)))
+
+(defun eaf-split-preview-windows ()
+  (delete-other-windows)
+  (find-file url)
+  (split-window-horizontally)
+  (other-window +1))
 
 (defun eaf-show-file-qrcode (url)
   (interactive "FShow file QR code: ")
