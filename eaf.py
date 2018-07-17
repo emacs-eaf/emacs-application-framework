@@ -57,6 +57,13 @@ class EAF(dbus.service.Object):
         return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)))
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
+    def update_buffer_with_url(self, module_path, buffer_url, update_data):
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.module_path == module_path and buffer.url == buffer_url:
+                buffer.update_with_data(update_data)
+                break
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def scroll_buffer(self, view_info, scroll_direction, scroll_type):
         (buffer_id, _, _, _, _) = view_info.split(":")
         if buffer_id in self.buffer_dict:

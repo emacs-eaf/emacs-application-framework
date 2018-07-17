@@ -114,6 +114,9 @@
 
 (defvar eaf-title-length 30)
 
+(defvar eaf-org-file-list '())
+(defvar eaf-org-killed-file-list '())
+
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
   :type 'string
@@ -167,6 +170,11 @@
     ;; Clean cache url and app name, avoid next start process to open buffer.
     (setq eaf-first-start-url nil)
     (setq eaf-first-start-app-name nil)
+    ;; Clean `eaf-org-file-list'
+    (dolist (org-file-name eaf-org-file-list)
+      (eaf-delete-org-preview-file org-file-name))
+    (setq eaf-org-file-list nil)
+    (setq eaf-org-killed-file-list nil)
     ))
 
 (defun eaf-restart-process ()
@@ -225,7 +233,7 @@ We need calcuate render allocation to make sure no black border around render co
       (dolist (window (window-list))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
-            (if (string= "eaf-mode" (format "%s" major-mode))
+            (if (eq major-mode 'eaf-mode)
                 (let* ((window-allocation (eaf-get-window-allocation window))
                        (x (nth 0 window-allocation))
                        (y (nth 1 window-allocation))
@@ -239,18 +247,53 @@ We need calcuate render allocation to make sure no black border around render co
       (eaf-call "update_views" (mapconcat 'identity view-infos ","))
       )))
 
+(defun eaf-delete-org-preview-file (org-file)
+  (setq org-html-file (concat (file-name-sans-extension org-file) ".html"))
+  (when (file-exists-p org-html-file)
+    (delete-file org-html-file)
+    (message (format "Clean org preview file %s (%s)" org-html-file org-file))
+    ))
+
+(defun eaf-org-killed-buffer-clean ()
+  (dolist (org-killed-buffer eaf-org-killed-file-list)
+    (unless (get-file-buffer org-killed-buffer)
+      (setq eaf-org-file-list (remove org-killed-buffer eaf-org-file-list))
+      (eaf-delete-org-preview-file org-killed-buffer)
+      ))
+  (setq eaf-org-killed-file-list nil))
+
 (defun eaf-monitor-buffer-kill ()
   (ignore-errors
     (with-current-buffer (buffer-name)
-      (when (string= "eaf-mode" (format "%s" major-mode))
-        (eaf-call "kill_buffer" buffer-id)
-        (message (format "Kill %s" buffer-id))
-        ))))
+      (cond ((eq major-mode 'org-mode)
+             ;; NOTE:
+             ;; Because save org buffer will trigger `kill-buffer' action,
+             ;; but org buffer still live after do `kill-buffer' action.
+             ;; So i run a timer to check org buffer is live after `kill-buffer' aciton.
+             (when (member (buffer-file-name) eaf-org-file-list)
+               (unless (member (buffer-file-name) eaf-org-killed-file-list)
+                 (push (buffer-file-name) eaf-org-killed-file-list))
+               (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))
+               ))
+            ((eq major-mode 'eaf-mode)
+             (eaf-call "kill_buffer" buffer-id)
+             (message (format "Kill %s" buffer-id)))
+            ))))
+
+(defun eaf-monitor-buffer-save ()
+  (ignore-errors
+    (with-current-buffer (buffer-name)
+      (cond ((and
+              (eq major-mode 'org-mode)
+              (member (buffer-file-name) eaf-org-file-list))
+             (org-html-export-to-html)
+             (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
+             (message (format "export %s to html" (buffer-file-name))))))))
 
 (defun eaf-monitor-key-event ()
   (ignore-errors
     (with-current-buffer (buffer-name)
-      (when (string= "eaf-mode" (format "%s" major-mode))
+      (when (eq major-mode 'eaf-mode)
         (let* ((event last-command-event)
                (key (make-vector 1 event))
                (key-command (format "%s" (key-binding key)))
@@ -303,7 +346,7 @@ We need calcuate render allocation to make sure no black border around render co
       (dolist (window (window-list))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
-            (if (string= "eaf-mode" (format "%s" major-mode))
+            (if (eq major-mode 'eaf-mode)
                 (let* ((window-allocation (eaf-get-window-allocation window))
                        (x (nth 0 window-allocation))
                        (y (nth 1 window-allocation))
@@ -341,7 +384,7 @@ We need calcuate render allocation to make sure no black border around render co
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
             (when (and
-                   (string= "eaf-mode" (format "%s" major-mode))
+                   (eq major-mode 'eaf-mode)
                    (equal buffer-id bid))
               (rename-buffer title)
               (throw 'find-buffer t)
@@ -371,6 +414,7 @@ We need calcuate render allocation to make sure no black border around render co
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 (add-hook 'pre-command-hook #'eaf-monitor-key-event)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
+(add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
 (defun eaf-open-internal (url app-name)
   (let* ((buffer (eaf-create-buffer url))
@@ -398,11 +442,32 @@ We need calcuate render allocation to make sure no black border around render co
            (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
                   (setq app-name "pdfviewer"))
                  ((member extension-name '("md"))
+                  ;; Split window to show file and previewer.
+                  (delete-other-windows)
+                  (find-file url)
+                  (split-window-horizontally)
+                  (other-window +1)
                   (setq app-name "markdownpreviewer"))
                  ((member extension-name '("jpg" "png" "bmp"))
                   (setq app-name "imageviewer"))
                  ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-                  (setq app-name "videoplayer"))))
+                  (setq app-name "videoplayer"))
+                 ((member extension-name '("org"))
+                  ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
+                  (save-excursion
+                    (find-file url)
+                    (with-current-buffer (buffer-name)
+                      (org-html-export-to-html)))
+                  ;; Add file name to `eaf-org-file-list' after command `find-file'.
+                  (unless (member url eaf-org-file-list)
+                    (push url eaf-org-file-list))
+                  ;; Split window to show file and previewer.
+                  (delete-other-windows)
+                  (find-file url)
+                  (split-window-horizontally)
+                  (other-window +1)
+                  (setq app-name "orgpreviewer")
+                  )))
           (t
            (setq app-name "browser")
            (unless (string-prefix-p "http" url)

@@ -134,9 +134,9 @@ You need implement "scroll" interface in AppBuffer, such as like PDF Viewer does
                 self.buffer_widget.scroll_down()
 ```
 
-scroll_direction is string, "up" mean scroll buffer up, "down" mean scroll buffer down.
+Argument "scroll_direction" is string, "up" mean scroll buffer up, "down" mean scroll buffer down.
 
-scroll_type is string, "page" mean scroll buffer by page, "line" mean scroll buffer by line.
+Argument "scroll_type" is string, "page" mean scroll buffer by page, "line" mean scroll buffer by line.
 
 ### Save/Restore session
 We always need save and restore session for application, such as, save play position of video player.
@@ -153,9 +153,22 @@ You need implement interfaces "save_session_data" and "restore_session_data", be
         self.buffer_widget.media_player.setPosition(position)
 ```
 
-session_data is string, you can put anything in it
+Argument "session_data" is string, you can put anything in it
 
 All session data save at ~/.emacs.d/eaf/session.json file.
+
+### Update buffer
+If you need update buffer sometimes, such as update org-file previewer after save org-file.
+
+You need implement interfaces "update_with_data" , below is an example of Org Previewer does:
+
+```Python
+    def update_with_data(self, update_data):
+        self.load_org_html_file()
+        self.buffer_widget.reload()
+```
+
+Argument "update_data" is pass from elisp side.
 
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)

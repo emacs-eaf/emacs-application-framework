@@ -29,10 +29,11 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 | <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
 |                                                        |                                                        |
 
-| Air Share                                          |
-| :--------:                                         |
-| <img src="./screenshot/air_share.png" width="400"> |
-|                                                    |
+
+| Air Share                                          | Org Previewer                                          |
+| :--------:                                         | :--------:                                             |
+| <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
+|                                                    |                                                        |
 
 ## Installation
 
@@ -79,13 +80,14 @@ There are mainly three obstacles:
 | :--------          | :----                                         | :-----:            | :----                                    |
 | Browser            | URL                                           | Left Button        | Open link current tab                    |
 |                    |                                               | Ctrl + Left Button | Open link in new tab                     |
-| Markdown previewer | Markdown file path                            |                    |                                          |
-| Image Viewer       | Image file path                               | j                  | Load next image in current directory     |
+| Markdown previewer | Type 'eaf-open' RET markdown filepath         |                    |                                          |
+| Org file previewer | Type 'eaf-open' RET org filepath              |                    |                                          |
+| Image Viewer       | Type 'eaf-open' RET IMAGE filepath            | j                  | Load next image in current directory     |
 |                    |                                               | k                  | Load previous image in current directory |
-| Video Player       | Video file path                               | Space              | Play or Pause                            |
+| Video Player       | Type 'eaf-open' RET video filepath            | Space              | Play or Pause                            |
 |                    |                                               | h                  | Seek backward                            |
 |                    |                                               | l                  | Seek forward                             |
-| Pdf Viewer         | Pdf file path                                 | j                  | Scroll up                                |
+| Pdf Viewer         | Type 'eaf-open' RET PDF filepath              | j                  | Scroll up                                |
 |                    |                                               | k                  | Scroll down                              |
 |                    |                                               | Space              | Scroll up page                           |
 |                    |                                               | b                  | Scroll down page                         |

@@ -79,3 +79,6 @@ class Buffer(QGraphicsScene):
 
     def restore_session_data(self, session_data):
         pass
+
+    def update_with_data(self, update_data):
+        pass
