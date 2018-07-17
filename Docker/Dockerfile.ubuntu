@@ -10,7 +10,7 @@ RUN pip install PyMuPDF grip qrcode
 
 RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
 
-RUN adduser --uid 1000  --shell /bin/bash eaf
+RUN useradd -m --uid 1000  --shell /bin/bash eaf
 
 ENV HOME=/home/eaf
 ENV LANG=zh_CN.UTF-8
