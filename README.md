@@ -43,7 +43,7 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ```Bash
 sudo pacman -S python-xlib python-pyqt5
-sudo pip install PyMuPDF grip qrcode
+sudo pip install dbus-python PyMuPDF grip qrcode
 ```
 
 ### Debian
@@ -51,7 +51,7 @@ sudo pip install PyMuPDF grip qrcode
 ```Bash
 sudo apt-get update
 sudo apt-get install python3-xlib python3-pyqt5
-sudo pip3 install PyMuPDF grip qrcode
+sudo pip3 install dbus-python PyMuPDF grip qrcode
 ```
 
 ### Package description.
@@ -60,6 +60,7 @@ sudo pip3 install PyMuPDF grip qrcode
 | :--------    | :----                                            |
 | python-xlib  | Stick app window into emacs frame                |
 | python-pyqt5 | GUI library required for application development |
+| dbus-python  | DBus IPC for python and elisp                    |
 | PyMuPDF      | Render engine required for PDF Viewer            |
 | grip         | Markdown render server for Markdown Previewer    |
 | qrcode       | Render local file QR code                        |
