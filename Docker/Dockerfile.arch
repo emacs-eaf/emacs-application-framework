@@ -1,0 +1,28 @@
+FROM base/archlinux
+
+RUN pacman -Syy && \
+    pacman -S git python python-xlib python-pyqt5 python-pip python-dbus -y emacs --noconfirm && \
+    pacman -Scc --noconfirm
+
+RUN pip install --upgrade pip
+
+RUN pip install PyMuPDF grip qrcode
+
+RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
+
+RUN pacman -Syy && \
+    pacman -S qt5-webkit --noconfirm && \
+    pacman -Scc --noconfirm
+
+
+RUN useradd --uid 1000  -ms /bin/bash eaf
+
+ENV HOME=/home/eaf
+ENV LANG=zh_CN.UTF-8
+
+USER eaf
+
+COPY .emacs /home/eaf/
+
+
+ENTRYPOINT ["emacs"]
