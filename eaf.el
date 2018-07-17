@@ -429,6 +429,8 @@ We need calcuate render allocation to make sure no black border around render co
         (progn
           ;; Switch to new buffer if buffer create successful.
           (switch-to-buffer buffer)
+          (set (make-local-variable 'buffer-url) url)
+          (set (make-local-variable 'buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
           (when (or (string= app-name "markdownpreviewer")
                     (string= app-name "orgpreviewer"))
@@ -476,8 +478,21 @@ We need calcuate render allocation to make sure no black border around render co
            (unless (string-prefix-p "http" url)
              (setq url (concat "http://" url))))))
   (if (process-live-p eaf-process)
-      ;; Call `eaf-open-internal' directly if server process has start.
-      (eaf-open-internal url app-name)
+      (let (exists-eaf-buffer)
+        ;; Try to opened buffer.
+        (catch 'found-match-buffer
+          (dolist (buffer (buffer-list))
+            (set-buffer buffer)
+            (when (equal major-mode 'eaf-mode)
+              (when (and (string= buffer-url url)
+                         (string= buffer-app-name app-name))
+                (setq exists-eaf-buffer buffer)
+                (throw 'found-match-buffer t)))))
+        ;; Switch to exists buffer,
+        ;; if no match buffer found, call `eaf-open-internal'.
+        (if exists-eaf-buffer
+            (switch-to-buffer exists-eaf-buffer)
+          (eaf-open-internal url app-name)))
     ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
     (setq eaf-first-start-url url)
     (setq eaf-first-start-app-name app-name)
