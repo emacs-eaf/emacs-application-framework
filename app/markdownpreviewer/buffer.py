@@ -21,17 +21,16 @@
 
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QColor
-from core.browser import BrowserView, webview_scroll
-from core.buffer import Buffer
+from core.browser_buffer import BrowserBuffer
 from core.utils import PostGui
 import socket
 import subprocess
 import threading
 import os
 
-class AppBuffer(Buffer):
+class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
+        BrowserBuffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
 
         # Get free port to render markdown.
         self.port = self.get_free_port()
@@ -39,9 +38,6 @@ class AppBuffer(Buffer):
 
         # Start markdown render process.
         subprocess.Popen("grip {0} {1}".format(url, self.port), shell=True)
-
-        # Init widget.
-        self.add_widget(BrowserView())
 
         # Add timer make load markdown preview link after grip process start finish.
         timer = threading.Timer(2, self.load_markdown_server)
@@ -67,5 +63,3 @@ class AppBuffer(Buffer):
         if len(paths) > 0:
             self.change_title(paths[-1])
 
-    def scroll(self, scroll_direction, scroll_type):
-        webview_scroll(self, scroll_direction, scroll_type)

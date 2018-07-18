@@ -19,14 +19,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QColor
-from core.browser_buffer import BrowserBuffer
+from core.browser import BrowserView, webview_scroll
+from core.buffer import Buffer
 
-class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url):
-        BrowserBuffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
+class BrowserBuffer(Buffer):
 
-        self.buffer_widget.setUrl(QUrl(url))
-        self.buffer_widget.titleChanged.connect(self.change_title)
-        self.buffer_widget.open_url_in_new_tab.connect(self.open_url)
+    def __init__(self, buffer_id, url, fit_to_view, background_color):
+        Buffer.__init__(self, buffer_id, url, fit_to_view, background_color)
+
+        self.add_widget(BrowserView())
+
+    def send_key_event(self, event):
+        # We need send key event to QWebEngineView's child, not QWebEngineView.
+        for child in self.buffer_widget.children():
+            QApplication.sendEvent(child, event)
+
+    def scroll(self, scroll_direction, scroll_type):
+        webview_scroll(self, scroll_direction, scroll_type)

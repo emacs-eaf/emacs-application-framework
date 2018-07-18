@@ -21,16 +21,14 @@
 
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QColor
-from core.browser import BrowserView, webview_scroll
-from core.buffer import Buffer
+from core.browser_buffer import BrowserBuffer
 import os
 
-class AppBuffer(Buffer):
+class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
+        BrowserBuffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
 
         self.url = url
-        self.add_widget(BrowserView())
 
         self.load_org_html_file()
 
@@ -40,6 +38,3 @@ class AppBuffer(Buffer):
     def update_with_data(self, update_data):
         self.load_org_html_file()
         self.buffer_widget.reload()
-
-    def scroll(self, scroll_direction, scroll_type):
-        webview_scroll(self, scroll_direction, scroll_type)
