@@ -77,11 +77,11 @@ There are mainly three obstacles:
 3. Qt5 QGraphicsView/QGraphicsScene can't work MacOS, specify QGraphicsVideoItem can't work.
 
 ## Usage
+```
 NOTE:
 EAF use DBus' session bus, it must running in general user.
-
 Please don't run EAF with root user, root user just can access DBus's system bus.
-
+```
 
 | App                | Way to open                                   | Key                | Event                                    |
 | :--------          | :----                                         | :-----:            | :----                                    |
