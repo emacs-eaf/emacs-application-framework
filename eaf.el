@@ -443,6 +443,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defun eaf-open (url &optional app-name)
   (interactive "FOpen with EAF: ")
+  ;; Try set app-name along with url if app-name is set.
   (unless app-name
     (cond ((string-equal url "eaf-demo")
            (setq app-name "demo"))
@@ -474,30 +475,43 @@ We need calcuate render allocation to make sure no black border around render co
                   (eaf-split-preview-windows)
                   (setq app-name "orgpreviewer")
                   )))
-          (t
+          ((and (not (string-prefix-p "/" url))
+                (not (string-prefix-p "~" url))
+                (string-match thing-at-point-short-url-regexp url))
            (setq app-name "browser")
            (unless (string-prefix-p "http" url)
-             (setq url (concat "http://" url))))))
-  (if (process-live-p eaf-process)
-      (let (exists-eaf-buffer)
-        ;; Try to opened buffer.
-        (catch 'found-match-buffer
-          (dolist (buffer (buffer-list))
-            (set-buffer buffer)
-            (when (equal major-mode 'eaf-mode)
-              (when (and (string= buffer-url url)
-                         (string= buffer-app-name app-name))
-                (setq exists-eaf-buffer buffer)
-                (throw 'found-match-buffer t)))))
-        ;; Switch to exists buffer,
-        ;; if no match buffer found, call `eaf-open-internal'.
-        (if exists-eaf-buffer
-            (switch-to-buffer exists-eaf-buffer)
-          (eaf-open-internal url app-name)))
-    ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
-    (setq eaf-first-start-url url)
-    (setq eaf-first-start-app-name app-name)
-    (eaf-start-process)))
+             (setq url (concat "http://" url)))
+           )))
+  (if app-name
+      ;; Open url with eaf application if app-name is not empty.
+      (if (process-live-p eaf-process)
+          (let (exists-eaf-buffer)
+            ;; Try to opened buffer.
+            (catch 'found-match-buffer
+              (dolist (buffer (buffer-list))
+                (set-buffer buffer)
+                (when (equal major-mode 'eaf-mode)
+                  (when (and (string= buffer-url url)
+                             (string= buffer-app-name app-name))
+                    (setq exists-eaf-buffer buffer)
+                    (throw 'found-match-buffer t)))))
+            ;; Switch to exists buffer,
+            ;; if no match buffer found, call `eaf-open-internal'.
+            (if exists-eaf-buffer
+                (switch-to-buffer exists-eaf-buffer)
+              (eaf-open-internal url app-name)))
+        ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
+        (setq eaf-first-start-url url)
+        (setq eaf-first-start-app-name app-name)
+        (eaf-start-process)
+        (message (format "Opening %s with eaf.%s" url app-name)))
+    ;; Output something to user if app-name is empty string.
+    (if (or (string-prefix-p "/" url)
+            (string-prefix-p "~" url))
+        (if (not (file-exists-p url))
+            (message (format "EAF: %s is not exists." url))
+          (message (format "EAF Don't know how to open %s" url)))
+      (message (format "EAF Don't know how to open %s" url)))))
 
 (defun eaf-split-preview-windows ()
   (delete-other-windows)
