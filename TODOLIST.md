@@ -1,4 +1,5 @@
 ## Todo list
+* Make pdf/video/image default binding eaf
 * Core: draw framework about eaf, make hacker understand how eaf works.
 * Core: sometime, press key no respsone, something wrong at function eaf-monitor-key-event
 * Core: Make application can handle shortcut
