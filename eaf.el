@@ -176,6 +176,13 @@
   (setq eaf-org-killed-file-list nil)
 
   ;; Kill process after kill buffer, make application can save session data.
+  (eaf-kill-python-process))
+
+(defun eaf-kill-python-process ()
+  "Kill eaf background python process for debug.
+NOTE: this function just use for developer debug.
+Don't call this function if you not eaf developer."
+  (interactive)
   (if (process-live-p eaf-process)
       ;; Delete eaf server process.
       (delete-process eaf-process)
