@@ -19,6 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# NOTE
+# QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
+# So we import browser module before start Qt application instance to avoid this error, but we never use this module.
+from app.browser.buffer import AppBuffer as NeverUsed
+
 from PyQt5.QtWidgets import QApplication
 from core.fake_key_event import fake_key_event
 from core.utils import file_is_image, file_is_video

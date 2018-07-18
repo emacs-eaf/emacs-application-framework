@@ -19,57 +19,227 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtWebEngineWidgets
 from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWebKitWidgets import QWebView, QWebPage
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWebKit import QWebSettings
+from PyQt5.QtGui import QColor, QDesktopServices
+from PyQt5.QtWidgets import QApplication, QWidget
+
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url):
         Buffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
 
-        self.add_widget(BrowserWidget())
+        self.add_widget(BrowserView())
         self.buffer_widget.setUrl(QUrl(url))
         self.buffer_widget.titleChanged.connect(self.change_title)
-        self.buffer_widget.web_page.open_url_in_new_tab.connect(self.open_url)
+        self.buffer_widget.open_url_in_new_tab.connect(self.open_url)
 
-class BrowserWidget(QWebView):
+    def send_key_event(self, event):
+        # We need send key event to QWebEngineView's child, not QWebEngineView.
+        for child in self.buffer_widget.children():
+            QApplication.sendEvent(child, event)
 
-    def __init__(self):
-        super(QWebView, self).__init__()
-
-        self.web_page = WebPage()
-        self.setPage(self.web_page)
-
-        self.settings().setAttribute(QWebSettings.PluginsEnabled, True)
-        self.settings().setAttribute(QWebSettings.JavascriptEnabled, True)
-        self.settings().setAttribute(QWebSettings.JavascriptCanOpenWindows, True)
-
-class WebPage(QWebPage):
+class BrowserView(QtWebEngineWidgets.QWebEngineView):
 
     open_url_in_new_tab = QtCore.pyqtSignal(str)
 
     def __init__(self):
-        super(WebPage, self).__init__()
+        super(QtWebEngineWidgets.QWebEngineView, self).__init__()
 
-    def acceptNavigationRequest(self, frame, request, type):
-        modifiers = QApplication.keyboardModifiers()
+        self.installEventFilter(self)
 
-        # Handle myself if got user event.
-        if type == QWebPage.NavigationTypeLinkClicked:
-            if modifiers == Qt.ControlModifier:
-                self.open_url_in_new_tab.emit(request.url().toString())
-            else:
-                self.view().load(request.url())
+        self.web_page = BrowserPage()
+        self.setPage(self.web_page)
 
-            # Return False to stop default behavior.
-            return False
+    def event(self, event):
+        if event.type() == QEvent.ChildAdded:
+            obj = event.child()
+            if isinstance(obj, QWidget):
+                obj.installEventFilter(self)
 
-        # # Otherwise, use default behavior.
-        return QWebPage.acceptNavigationRequest(self, frame, request, type)
+        return QtWebEngineWidgets.QWebEngineView.event(self, event)
 
-    def javaScriptConsoleMessage(self, msg, lineNumber, sourceID):
-        pass
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonRelease:
+            hit = self.web_page.hitTestContent(event.pos())
+            clicked_url = hit.linkUrl()
+            base_url = hit.baseUrl()
+
+            if clicked_url != base_url and clicked_url != '':
+                result = ""
+                if 'http://' in clicked_url or 'https://' in clicked_url:
+                    result = clicked_url
+                elif clicked_url == "#":
+                    result = base_url + clicked_url
+                else:
+                    result = "http://" + base_url.split("/")[2] + clicked_url
+
+                modifiers = QApplication.keyboardModifiers()
+
+                if modifiers != Qt.ControlModifier:
+                    # Load url in current tab.
+                    self.setUrl(QUrl(result))
+                else:
+                    # Load url in new tab if user press ctrl modifier.
+                    self.open_url_in_new_tab.emit(result)
+
+                return True
+
+            event.accept()
+            return True
+
+        return super(QtWebEngineWidgets.QWebEngineView, self).eventFilter(obj, event)
+
+class BrowserPage(QtWebEngineWidgets.QWebEnginePage):
+
+    def __init__(self):
+        QtWebEngineWidgets.QWebEnginePage.__init__(self)
+
+    def hitTestContent(self, pos):
+        return WebHitTestResult(self, pos)
+
+    def mapToViewport(self, pos):
+        return QPointF(pos.x(), pos.y())
+
+    def executeJavaScript(self, scriptSrc):
+        self.loop = QEventLoop()
+        self.result = QVariant()
+        QTimer.singleShot(250, self.loop.quit)
+
+        self.runJavaScript(scriptSrc, self.callbackJS)
+        self.loop.exec_()
+        self.loop = None
+        return self.result
+
+    def callbackJS(self, res):
+        if self.loop is not None and self.loop.isRunning():
+            self.result = res
+            self.loop.quit()
+
+class WebHitTestResult():
+    def __init__(self, page, pos):
+        self.page = page
+        self.pos = pos
+        self.m_linkUrl = self.page.url().toString()
+        self.m_baseUrl = self.page.url().toString()
+        self.viewportPos = self.page.mapToViewport(self.pos)
+        self.source = """(function() {
+        let e = document.elementFromPoint(%1, %2);
+        if (!e)
+            return;
+        function isMediaElement(e) {
+            return e.tagName == 'AUDIO' || e.tagName == 'VIDEO';
+        };
+        function isEditableElement(e) {
+            if (e.isContentEditable)
+                return true;
+            if (e.tagName === 'INPUT' || e.tagName === 'TEXTAREA')
+                return e.getAttribute('readonly') != 'readonly';
+            return false;
+        };
+        function isSelected(e) {
+            let selection = window.getSelection();
+            if (selection.type !== 'Range')
+                return false;
+            return window.getSelection().containsNode(e, true);
+        };
+        let res = {
+            baseUrl: document.baseURI,
+            alternateText: e.getAttribute('alt'),
+            boundingRect: '',
+            imageUrl: '',
+            contentEditable: isEditableElement(e),
+            contentSelected: isSelected(e),
+            linkTitle: '',
+            linkUrl: '',
+            mediaUrl: '',
+            tagName: e.tagName.toLowerCase()
+        };
+        let r = e.getBoundingClientRect();
+        res.boundingRect = [r.top, r.left, r.width, r.height];
+        if (e.tagName == 'IMG')
+            res.imageUrl = e.getAttribute('src');
+        if (e.tagName == 'A') {
+            res.linkTitle = e.text;
+            res.linkUrl = e.getAttribute('href');
+        }
+        while (e) {
+            if (res.linkTitle === '' && e.tagName === 'A') {
+                res.linkTitle = e.text;
+                if(res.linkUrl === '') {
+                res.linkUrl = e.getAttribute('href');
+                }
+            }
+            if (res.mediaUrl === '' && isMediaElement(e)) {
+                res.mediaUrl = e.currentSrc;
+                res.mediaPaused = e.paused;
+                res.mediaMuted = e.muted;
+            }
+            e = e.parentElement;
+        }
+        return res;
+        })()"""
+
+        self.js = self.source.replace("%1", str(self.viewportPos.x())).replace("%2", str(self.viewportPos.y()))
+        self.dic = self.page.executeJavaScript(self.js)
+        if self.dic is None:
+            return
+
+        self.m_isNull = False
+        self.m_baseUrl = self.dic["baseUrl"]
+        self.m_alternateText = self.dic["alternateText"]
+        self.m_imageUrl = self.dic["imageUrl"]
+        self.m_isContentEditable = self.dic["contentEditable"]
+        self.m_isContentSelected = self.dic["contentSelected"]
+        self.m_linkTitle = self.dic["linkTitle"]
+        self.m_linkUrl = self.dic["linkUrl"]
+        self.m_mediaUrl = self.dic["mediaUrl"]
+        try:
+            self.m_mediaPaused = self.dic["mediaPaused"]
+            self.m_mediaMuted = self.dic["mediaMuted"]
+        except:
+            pass
+        self.m_tagName = self.dic["tagName"]
+
+    def linkUrl(self):
+        return self.m_linkUrl
+
+    def isContentEditable(self):
+        return self.m_isContentEditable
+
+    def isContentSelected(self):
+        return self.m_isContentSelected
+
+    def imageUrl(self):
+        try:
+            return self.m_imageUrl
+        except:
+            return ""
+
+    def mediaUrl(self):
+        return self.m_mediaUrl
+
+    def baseUrl(self):
+        return self.m_baseUrl
+
+    def updateWithContextMenuData(self, data):
+        if data.isValid():
+            pass
+        else:
+            return
+
+        self.m_linkTitle = data.linkText()
+        self.m_linkUrl = data.linkUrl().toString()
+        self.m_isContentEditable = data.isContentEditable()
+        if data.selectedText() == "":
+            self.m_isContentSelected = False
+        else:
+            self.m_isContentSelected = True
+
+        if data.mediaType() == QWebEngineContextMenuData.MediaTypeImage:
+            self.m_imageUrl = data.mediaUrl().toString()
+        elif data.mediaType() == QWebEngineContextMenuData.MediaTypeAudio or data.mediaType() == QWebEngineContextMenuData.MediaTypeVideo:
+            self.m_mediaUrl = data.mediaUrl().toString()
