@@ -21,7 +21,7 @@
 
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QColor
-from core.browser import BrowserView
+from core.browser import BrowserView, webview_scroll
 from core.buffer import Buffer
 from core.utils import PostGui
 import socket
@@ -66,3 +66,6 @@ class AppBuffer(Buffer):
         paths = os.path.split(self.url)
         if len(paths) > 0:
             self.change_title(paths[-1])
+
+    def scroll(self, scroll_direction, scroll_type):
+        webview_scroll(self, scroll_direction, scroll_type)

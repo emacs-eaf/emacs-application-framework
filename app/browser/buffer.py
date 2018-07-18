@@ -21,7 +21,7 @@
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
-from core.browser import BrowserView
+from core.browser import BrowserView, webview_scroll
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
@@ -37,3 +37,6 @@ class AppBuffer(Buffer):
         # We need send key event to QWebEngineView's child, not QWebEngineView.
         for child in self.buffer_widget.children():
             QApplication.sendEvent(child, event)
+
+    def scroll(self, scroll_direction, scroll_type):
+        webview_scroll(self, scroll_direction, scroll_type)

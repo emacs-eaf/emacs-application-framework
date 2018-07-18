@@ -227,3 +227,18 @@ class WebHitTestResult():
             self.m_imageUrl = data.mediaUrl().toString()
         elif data.mediaType() == QWebEngineContextMenuData.MediaTypeAudio or data.mediaType() == QWebEngineContextMenuData.MediaTypeVideo:
             self.m_mediaUrl = data.mediaUrl().toString()
+
+def webview_scroll(webview, scroll_direction, scroll_type):
+    line_offset = 10
+    page_offset = 100
+
+    if scroll_type == "page":
+        if scroll_direction == "up":
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, page_offset));
+        else:
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, -page_offset));
+    else:
+        if scroll_direction == "up":
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, line_offset));
+        else:
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, -line_offset));
