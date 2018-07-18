@@ -39,10 +39,15 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 1. Install python dependences:
 
-Make sure python3 and pip3 has install in your operating system, then execute below command:
+    Make sure python3 and pip3 has install in your operating system, then execute below command:
 
 ```Bash
-sudo pip3 install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib
+    sudo pip3 install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib
+```
+
+2. Clone this repository and add below code in your ~/.emacs
+```Elisp
+    (require 'eaf)
 ```
 
 ### Package description.
@@ -55,11 +60,6 @@ sudo pip3 install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib
 | PyMuPDF      | Render engine required for PDF Viewer            |
 | grip         | Markdown render server for Markdown Previewer    |
 | qrcode       | Render local file QR code                        |
-
-2. Clone this repository and add below code in your ~/.emacs
-```Elisp
-(require 'eaf)
-```
 
 ### Why this awesome framework can't works with MacOS?
 There are mainly three obstacles:
