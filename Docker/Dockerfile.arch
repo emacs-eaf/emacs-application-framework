@@ -1,19 +1,14 @@
 FROM base/archlinux
 
 RUN pacman -Syy && \
-    pacman -S git python python-xlib python-pyqt5 python-pip python-dbus -y emacs --noconfirm && \
-    pacman -Scc --noconfirm
+    pacman -S git nss emacs python python-pip python-dbus --noconfirm && \
+    yes|pacman -Scc 
 
 RUN pip install --upgrade pip
 
-RUN pip install PyMuPDF grip qrcode
+RUN pip install PyMuPDF grip qrcode xlib pyqt5 && rm -rf /root/.cache
 
 RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
-
-RUN pacman -Syy && \
-    pacman -S qt5-webkit --noconfirm && \
-    pacman -Scc --noconfirm
-
 
 RUN useradd --uid 1000  -ms /bin/bash eaf
 
