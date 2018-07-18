@@ -37,21 +37,12 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 ## Installation
 
-1. Install python libraries:
+1. Install python dependences:
 
-### ArchLinux
-
-```Bash
-sudo pacman -S python-xlib python-pyqt5
-sudo pip install dbus-python PyMuPDF grip qrcode
-```
-
-### Debian
+Make sure python3 and pip3 has install in your operating system, then execute below command:
 
 ```Bash
-sudo apt-get update
-sudo apt-get install python3-xlib python3-pyqt5
-sudo pip3 install dbus-python PyMuPDF grip qrcode
+sudo pip3 install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib
 ```
 
 ### Package description.
