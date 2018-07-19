@@ -19,8 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtCore import Qt, QEvent, QCoreApplication
+from PyQt5.QtWidgets import QGraphicsScene, QApplication
+from PyQt5.QtGui import QKeyEvent, QGuiApplication
+from core.utils import PostGui
 
 qt_key_dict = {
     '''a''' : Qt.Key_A,
@@ -87,9 +89,14 @@ qt_text_dict = {
     "SPC" : " "
 }
 
-def fake_key_event(event_string):
+def fake_key_event(event_string, app_buffer):
+    # Get key text.
     text = event_string
     if event_string in qt_text_dict:
         text = qt_text_dict[event_string]
 
-    return QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], Qt.NoModifier, text)
+    # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
+    key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], Qt.NoModifier, text)
+
+    for widget in app_buffer.get_key_event_widgets():
+        QApplication.sendEvent(widget, key_press)

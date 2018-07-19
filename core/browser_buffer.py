@@ -29,10 +29,9 @@ class BrowserBuffer(Buffer):
 
         self.add_widget(BrowserView())
 
-    def send_key_event(self, event):
-        # We need send key event to QWebEngineView's child, not QWebEngineView.
-        for child in self.buffer_widget.children():
-            QApplication.sendEvent(child, event)
+    def get_key_event_widgets(self):
+        # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
+        return [self.buffer_widget.focusProxy()]
 
     def scroll(self, scroll_direction, scroll_type):
         webview_scroll(self, scroll_direction, scroll_type)

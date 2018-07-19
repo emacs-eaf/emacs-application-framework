@@ -38,11 +38,14 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
 
+        self.event_widgets = []
+
     def event(self, event):
         if event.type() == QEvent.ChildAdded:
             obj = event.child()
             if isinstance(obj, QWidget):
                 obj.installEventFilter(self)
+                self.event_widgets.append(obj)
 
         return QtWebEngineWidgets.QWebEngineView.event(self, event)
 

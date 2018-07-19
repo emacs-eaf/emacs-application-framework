@@ -181,14 +181,11 @@ class EAF(dbus.service.Object):
             self.buffer_dict[buffer_id].handle_destroy()
             self.buffer_dict.pop(buffer_id, None)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
-    def send_key(self, args):
-        # Get buffer id and event string.
-        (buffer_id, event_string) = args.split(":")
-
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def send_key(self, buffer_id, event_string):
         # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].send_key_event(fake_key_event(event_string))
+            fake_key_event(event_string, self.buffer_dict[buffer_id])
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def send_keystroke(self, buffer_id, keystroke):

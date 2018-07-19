@@ -322,10 +322,8 @@ We need calcuate render allocation to make sure no black border around render co
               (equal key-command "self-insert-command")
               (equal key-command "completion-select-if-within-overlay"))
              (equal 1 (string-width (this-command-keys))))
-            (message (format "Send char: '%s" key-desc))
-            (eaf-call "send_key" (format "%s:%s" buffer-id key-desc)))
+            (eaf-call "send_key" buffer-id key-desc))
            ((string-match "^[CMSs]-.*" key-desc)
-            (message (format "Send keystroke: %s" key-desc))
             (eaf-call "send_keystroke" buffer-id key-desc))
            ((or
              (equal key-command "nil")
@@ -341,8 +339,7 @@ We need calcuate render allocation to make sure no black border around render co
              (equal key-desc "<prior>")
              (equal key-desc "<next>")
              )
-            (message (format "Send: '%s" key-desc))
-            (eaf-call "send_key" (format "%s:%s" buffer-id key-desc))
+            (eaf-call "send_key" buffer-id key-desc)
             )
            (t
             (unless (or
@@ -350,7 +347,7 @@ We need calcuate render allocation to make sure no black border around render co
                      (equal key-command "kill-this-buffer")
                      (equal key-command "eaf-open"))
               (ignore-errors (call-interactively (key-binding key))))
-            (message (format "Got command: %s" key-command)))))
+            )))
         ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
         ;; because i insert nothing in buffer.
         (setq last-command-event nil)

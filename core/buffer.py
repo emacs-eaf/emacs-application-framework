@@ -23,6 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QBrush
 from PyQt5.QtWidgets import QGraphicsScene, QApplication
 import abc
+from core.utils import PostGui
 
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
@@ -47,6 +48,13 @@ class Buffer(QGraphicsScene):
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
 
+        self.buffer_widget.installEventFilter(self)
+
+    def eventFitler(self, event):
+        print("8u3947923473924732 ", event.type())
+
+        return False
+
     def handle_destroy(self):
         self.before_destroy_hook.emit()
 
@@ -62,11 +70,8 @@ class Buffer(QGraphicsScene):
     def some_view_show(self):
         pass
 
-    def send_key_event(self, event):
-        QApplication.sendEvent(self.buffer_widget, event)
-
-    def send_key_event(self, keystroke):
-        pass
+    def get_key_event_widgets(self):
+        return [self.buffer_widget]
 
     def send_input_message(self, message, callback_type):
         self.input_message.emit(self.buffer_id, message, callback_type)

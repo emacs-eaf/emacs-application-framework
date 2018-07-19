@@ -1,6 +1,5 @@
 ## Todo list
 * Core: draw framework about eaf, make hacker understand how eaf works.
-* Core: sometime, press key no respsone, something wrong at function eaf-monitor-key-event
 * Browser: add cookie support
 * Browser: support pop window, such as emacs-china.org
 * Browser: add progressbar
