@@ -78,6 +78,8 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 | :--------          | :----                                         | :-----:            | :----                                    |
 | Browser            | URL                                           | Left Button        | Open link current tab                    |
 |                    |                                               | Ctrl + Left Button | Open link in new tab                     |
+|                    |                                               | M-f                | Forward page in history                  |
+|                    |                                               | M-b                | Backward page in history                 |
 | Markdown previewer | Type 'eaf-open' RET markdown filepath         |                    |                                          |
 | Org file previewer | Type 'eaf-open' RET org filepath              |                    |                                          |
 | Image Viewer       | Type 'eaf-open' RET IMAGE filepath            | j                  | Load next image in current directory     |

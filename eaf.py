@@ -190,6 +190,11 @@ class EAF(dbus.service.Object):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].send_key_event(fake_key_event(event_string))
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def send_keystroke(self, buffer_id, keystroke):
+        if buffer_id in self.buffer_dict:
+            self.buffer_dict[buffer_id].send_keystroke(keystroke)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def handle_input_message(self, buffer_id, callback_type, callback_result):
         for buffer in list(self.buffer_dict.values()):

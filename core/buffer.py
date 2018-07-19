@@ -65,6 +65,9 @@ class Buffer(QGraphicsScene):
     def send_key_event(self, event):
         QApplication.sendEvent(self.buffer_widget, event)
 
+    def send_key_event(self, keystroke):
+        pass
+
     def send_input_message(self, message, callback_type):
         self.input_message.emit(self.buffer_id, message, callback_type)
 

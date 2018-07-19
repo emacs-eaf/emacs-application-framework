@@ -310,6 +310,10 @@ We need calcuate render allocation to make sure no black border around render co
                (key-command (format "%s" (key-binding key)))
                (key-desc (key-description key))
                )
+
+          ;; Uncomment for debug.
+          ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
+
           (cond
            ;; Just send event when user insert single character.
            ;; Don't send event 'M' if user press Ctrl + M.
@@ -320,6 +324,9 @@ We need calcuate render allocation to make sure no black border around render co
              (equal 1 (string-width (this-command-keys))))
             (message (format "Send char: '%s" key-desc))
             (eaf-call "send_key" (format "%s:%s" buffer-id key-desc)))
+           ((string-match "^[CMSs]-.*" key-desc)
+            (message (format "Send keystroke: %s" key-desc))
+            (eaf-call "send_keystroke" buffer-id key-desc))
            ((or
              (equal key-command "nil")
              (equal key-desc "RET")
