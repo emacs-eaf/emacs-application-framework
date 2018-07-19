@@ -552,6 +552,22 @@ We need calcuate render allocation to make sure no black border around render co
   (interactive "DDirectory to save uploade file: ")
   (eaf-open dir "fileuploader"))
 
+(defun eaf-dired-open-file ()
+  "Open html/pdf/image/video file with eaf, other file use `find-file'"
+  (interactive)
+  (dolist (file (dired-get-marked-files))
+    (setq extension-name (file-name-extension file))
+    (cond ((member extension-name '("html"))
+           (eaf-open (concat "file://" file) "browser"))
+          ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
+           (eaf-open file "pdfviewer"))
+          ((member extension-name '("jpg" "png" "bmp"))
+           (eaf-open file "imageviewer"))
+          ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
+           (eaf-open file "videoplayer"))
+          (t
+           (find-file file)))))
+
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
   (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
