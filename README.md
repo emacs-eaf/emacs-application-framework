@@ -110,7 +110,7 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 | Air Share          | Type 'eaf-air-share'                          |                    |                                          |
 
 ## Report bug
-If you have any problem with eaf, please use command "emacs -Q" start Emacs first.
+If you have any problem with EAF, please use command "emacs -Q" start Emacs first.
 
 Then test again, if "emacs -Q" works fine, it's must be something wrong with your emacs config file.
 

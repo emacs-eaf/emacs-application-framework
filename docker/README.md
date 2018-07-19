@@ -1,6 +1,6 @@
-## Run eaf with docker
+## Run EAF with docker
 
-If you prefer to run linux in a container, you can use below command to build an eaf container.
+If you prefer to run linux in a container, you can use below command to build an EAF container.
 
 ### Build
 ```Shell
