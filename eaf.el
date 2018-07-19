@@ -81,6 +81,7 @@
 
 ;;; Require
 (require 'dbus)
+(require 'subr-x)
 
 ;;; Code:
 (defcustom eaf-mode-hook '()
