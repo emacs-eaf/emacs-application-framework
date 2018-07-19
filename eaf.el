@@ -469,6 +469,9 @@ We need calcuate render allocation to make sure no black border around render co
                   (setq app-name "imageviewer"))
                  ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
                   (setq app-name "videoplayer"))
+                 ((member extension-name '("html"))
+                  (setq url (concat "file://" url))
+                  (setq app-name "browser"))
                  ((member extension-name '("org"))
                   ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
                   (save-excursion
