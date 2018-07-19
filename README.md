@@ -61,6 +61,10 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 | grip         | Markdown render server for Markdown Previewer    |
 | qrcode       | Render local file QR code                        |
 
+### Or run EAF with docker
+
+If you prefer to run linux in a docker, you can read [Run EAF with docker](./docker/README.md)
+
 ### Why this awesome framework can't works with MacOS?
 There are mainly three obstacles:
 1. I can't make dbus/python-dbus works on MacOS High Sierra
