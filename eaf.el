@@ -115,7 +115,12 @@
 (defvar eaf-title-length 30)
 
 (defvar eaf-org-file-list '())
+
 (defvar eaf-org-killed-file-list '())
+
+(defvar eaf-last-frame-width 0)
+
+(defvar eaf-last-frame-height 0)
 
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
@@ -237,6 +242,16 @@ We need calcuate render allocation to make sure no black border around render co
    "com.lazycat.eaf"
    "is_support"
    url))
+
+(defun eaf-monitor-window-size-change (frame)
+  (setq eaf-last-frame-width (frame-pixel-width frame))
+  (setq eaf-last-frame-height (frame-pixel-height frame))
+  (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size))))
+
+(defun eaf-try-adjust-view-with-frame-size ()
+  (when (and (equal (frame-pixel-width) eaf-last-frame-width)
+             (equal (frame-pixel-height) eaf-last-frame-height))
+    (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
   (ignore-errors
@@ -426,6 +441,7 @@ We need calcuate render allocation to make sure no black border around render co
  "com.lazycat.eaf" "input_message"
  'eaf-input-message)
 
+(add-hook 'window-size-change-functions 'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 (add-hook 'pre-command-hook #'eaf-monitor-key-event)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
