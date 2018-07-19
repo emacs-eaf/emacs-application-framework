@@ -170,5 +170,19 @@ You need implement interfaces "update_with_data" , below is an example of Org Pr
 
 Argument "update_data" is pass from elisp side.
 
+### Handle Emacs keystroke
+
+If you want handle keystroke send from Emacs, you just need implement interface "send_keystroke" of Buffer, below is an example of browser does:
+
+```Python
+    def send_keystroke(self, keystroke):
+        if keystroke == "M-f":
+            self.buffer_widget.forward()
+        elif keystroke == "M-b":
+            self.buffer_widget.back()
+```
+
+Argument "keystroke" is emacs key string.
+
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)
