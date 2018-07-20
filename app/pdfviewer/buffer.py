@@ -114,6 +114,7 @@ class PdfViewerWidget(QWidget):
 
         # Draw background.
         painter.setBrush(self.background_color)
+        painter.setPen(self.background_color)
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
         # Get start/last render index.

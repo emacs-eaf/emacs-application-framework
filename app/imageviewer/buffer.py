@@ -78,6 +78,7 @@ class ImageViewerWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
 
+        painter.setPen(self.background_color)
         painter.setBrush(self.background_color)
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
