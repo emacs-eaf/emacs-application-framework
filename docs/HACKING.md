@@ -29,7 +29,10 @@ M-x eaf-open
 
     Then type "eaf-demo" as input, will pop hello world window in emacs like below:
 
-![img](../screenshot/hello_world.png)
+| Demo                                                  |
+| :--------:                                            |
+| <img src="../screenshot/hello_world.png" width="600"> |
+
 
     It's a big hello button, try to click it, haha.
 
