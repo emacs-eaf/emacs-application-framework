@@ -1,3 +1,17 @@
+## The Framework of EAF
+
+![img](./screenshot/framework.png)
+
+* QGraphicsScene similar Emacs' buffer, control content and state.
+* QGraphicsView similar Emacs' window, control size and position.
+* Every change in QGraphicsScene will synchronization to QGraphicsView in realtime by GPU composite.
+* We use Xlib XReparent technology stick QGraphicsView to Emacs frame.
+* Destroy QGraphicsView if emacs eaf-mode's window hide, create new QGraphicsView if eaf-mode window show, but QGraphicsScene still live in background until user kill eaf-mode buffer.
+* When user use mouse click on QGraphicsView, QGraphicsView will translate mouse event coordinate and pass mouse event to QGraphicsScene to handle.
+* When user use keyboard input in Emacs buffer, Emacs will key event to QGraphicsScene throught DBus IPC.
+* Elisp call Python function through DBus method.
+* Python call Elisp function through DBus signal.
+
 ## Why choose Qt?
 Qt's QGraphicsView and QGraphicsScene is awesome, it's easier to implement window composite than other GUI library (such as GTK+).
 
