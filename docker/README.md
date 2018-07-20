@@ -11,7 +11,7 @@ docker build -t eaf  .
 ```Shell
 xhost +local:root # WARN: this comes with security issues
 
-docker run -e DISPLAY -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus --rm -it -v /tmp/.X11-unix/:/tmp/.X11-unix -v /run/user/$(id -u)/:/run/user/1000/ -v ~/.Xauthority:/home/eaf/.Xauthority   eaf
+docker run -e DISPLAY -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus --rm -it -v /tmp/.X11-unix/:/tmp/.X11-unix -v ${DBUS_SESSION_BUS_ADDRESS#*=}/:/run/user/1000/bus/ -v ~/.Xauthority:/home/eaf/.Xauthority  eaf
 ```
 You can also reuse your own Emacs configuration in the container:
 
@@ -19,5 +19,5 @@ You can also reuse your own Emacs configuration in the container:
 xhost +local:root # WARN: this comes with security issues
 
 # mount the Emacs configuration into the container
-docker run -e DISPLAY -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus --rm -it -v /tmp/.X11-unix/:/tmp/.X11-unix -v /run/user/$(id -u)/:/run/user/1000/ -v ~/.Xauthority:/home/eaf/.Xauthority -v ~/.emacs.d:/home/eaf/.emacs.d  eaf
+docker run -e DISPLAY -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus --rm -it -v /tmp/.X11-unix/:/tmp/.X11-unix -v ${DBUS_SESSION_BUS_ADDRESS#*=}/:/run/user/1000/bus/ -v ~/.Xauthority:/home/eaf/.Xauthority -v ~/.emacs.d:/home/eaf/.emacs.d  eaf
 ```
