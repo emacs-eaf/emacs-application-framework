@@ -26,6 +26,9 @@ from PyQt5.QtCore import Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QWidget
 
+MOUSE_BACK_BUTTON = 8
+MOUSE_FORWARD_BUTTON = 16
+
 class BrowserView(QtWebEngineWidgets.QWebEngineView):
 
     open_url_in_new_tab = QtCore.pyqtSignal(str)
@@ -74,6 +77,17 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
 
             event.accept()
             return True
+        elif event.type() == QEvent.MouseButtonPress:
+            if event.button() == MOUSE_FORWARD_BUTTON:
+                self.forward()
+
+                event.accept()
+                return True
+            elif event.button() == MOUSE_BACK_BUTTON:
+                self.back()
+
+                event.accept()
+                return True
 
         return super(QtWebEngineWidgets.QWebEngineView, self).eventFilter(obj, event)
 
