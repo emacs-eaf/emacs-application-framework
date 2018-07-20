@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QBrush
+from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication
 import abc
 from core.utils import PostGui
@@ -44,16 +44,42 @@ class Buffer(QGraphicsScene):
 
         self.buffer_widget = None
 
+        self.draw_progressbar = False
+        self.progressbar_progress = 0
+        self.progressbar_color = QColor(233, 129, 35, 255)
+        self.progressbar_height = 2
+
+    def drawForeground(self, painter, rect):
+        if self.draw_progressbar:
+            painter.setBrush(self.progressbar_color)
+            painter.setPen(self.progressbar_color)
+            painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
+
+    @QtCore.pyqtSlot()
+    def start_progress(self):
+        self.progressbar_progress = 0
+        self.draw_progressbar = True
+        self.update()
+
+    @QtCore.pyqtSlot()
+    def stop_progress(self):
+        self.draw_progressbar = False
+        self.update()
+
+    @QtCore.pyqtSlot(int)
+    def update_progress(self, progress):
+        self.progressbar_progress = progress
+        self.draw_progressbar = True
+        self.update()
+
+        if progress == 100:
+            QtCore.QTimer.singleShot(500, self.stop_progress)
+
     def add_widget(self, widget):
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
 
         self.buffer_widget.installEventFilter(self)
-
-    def eventFitler(self, event):
-        print("8u3947923473924732 ", event.type())
-
-        return False
 
     def handle_destroy(self):
         self.before_destroy_hook.emit()

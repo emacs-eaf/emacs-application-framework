@@ -2,7 +2,6 @@
 * Core: Remove border of QGraphicsView.
 * Browser: add cookie support
 * Browser: support pop window, such as emacs-china.org
-* Browser: add progressbar
 * Browser: add proxy support
 * Browser: implement js plugin like vimium
 * Browser: study more code from https://github.com/LavaPower/Browthon-Old/blob/c25d5721b40e95131a3c521566a18467f13ecbf0/files/Browthon_elements.py

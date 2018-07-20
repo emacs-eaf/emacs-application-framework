@@ -201,5 +201,16 @@ If you want handle keystroke send from Emacs, you just need implement interface 
 
 Argument "keystroke" is emacs key string.
 
+### Update progress.
+
+If your application will do some long-time operation, you can use below use below interfaces of buffer:
+
+```Python
+    def start_progress(self):
+    def stop_progress(self):
+    def update_progress(self, progress):
+```	
+
+
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)

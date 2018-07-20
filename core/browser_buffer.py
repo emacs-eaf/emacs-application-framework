@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtCore
 from core.browser import BrowserView, webview_scroll
 from core.buffer import Buffer
 
@@ -28,6 +29,10 @@ class BrowserBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, fit_to_view, background_color)
 
         self.add_widget(BrowserView())
+
+        self.buffer_widget.loadStarted.connect(self.start_progress)
+        self.buffer_widget.loadProgress.connect(self.update_progress)
+        self.buffer_widget.loadFinished.connect(self.stop_progress)
 
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
