@@ -417,7 +417,7 @@ We need calcuate render allocation to make sure no black border around render co
             (when (and
                    (eq major-mode 'eaf-mode)
                    (equal buffer-id bid))
-              (rename-buffer title)
+              (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t)
               )))))))
 
