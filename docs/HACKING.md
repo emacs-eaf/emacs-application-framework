@@ -1,6 +1,6 @@
 ## The Framework of EAF
 
-![img](./screenshot/framework.png)
+![img](../screenshot/framework.png)
 
 * QGraphicsScene similar Emacs' buffer, control content and state.
 * QGraphicsView similar Emacs' window, control size and position.
@@ -29,7 +29,7 @@ M-x eaf-open
 
     Then type "eaf-demo" as input, will pop hello world window in emacs like below:
 
-![img](./screenshot/hello_world.png)
+![img](../screenshot/hello_world.png)
 
     It's a big hello button, try to click it, haha.
 
