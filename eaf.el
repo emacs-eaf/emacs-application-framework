@@ -553,6 +553,8 @@ We need calcuate render allocation to make sure no black border around render co
            (unless (string-prefix-p "http" url)
              (setq url (concat "http://" url)))
            )))
+  (unless arguments
+    (setq arguments ""))
   (if app-name
       ;; Open url with eaf application if app-name is not empty.
       (if (process-live-p eaf-process)
