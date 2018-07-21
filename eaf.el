@@ -355,6 +355,7 @@ We need calcuate render allocation to make sure no black border around render co
              (equal key-desc "RET")
              (equal key-desc "DEL")
              (equal key-desc "TAB")
+             (equal key-desc "<backtab>")
              (equal key-desc "<home>")
              (equal key-desc "<end>")
              (equal key-desc "<left>")

@@ -75,6 +75,7 @@ qt_key_dict = {
     '''RET''' : Qt.Key_Return,
     '''DEL''' : Qt.Key_Backspace,
     '''TAB''' : Qt.Key_Tab,
+    '''<backtab>''' : Qt.Key_Backtab,
     '''<home>''' : Qt.Key_Home,
     '''<end>''' : Qt.Key_End,
     '''<left>''' : Qt.Key_Left,
@@ -90,13 +91,24 @@ qt_text_dict = {
 }
 
 def fake_key_event(event_string, app_buffer):
-    # Get key text.
+    print("**********", event_string)
+
+    # Init.
     text = event_string
+    modifier = Qt.NoModifier
+
+    # Get key text.
     if event_string in qt_text_dict:
         text = qt_text_dict[event_string]
 
+    if event_string in ["TAB", "<backtab>"]:
+        text = ""
+
+    if event_string == "<backtab>":
+        modifier = Qt.ShiftModifier
+
     # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
-    key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], Qt.NoModifier, text)
+    key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], modifier, text)
 
     for widget in app_buffer.get_key_event_widgets():
         QApplication.sendEvent(widget, key_press)
