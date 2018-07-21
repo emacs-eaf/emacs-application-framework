@@ -219,14 +219,14 @@ We need calcuate render allocation to make sure no black border around render co
     (list x y w h)))
 
 (defun eaf-generate-id ()
-  (format "%04x%04x-%04x-%04x-%04x-%06x%06x"
+  (format "%04x-%04x-%04x-%04x-%04x-%04x-%04x"
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
-          (random (expt 16 6))
-          (random (expt 16 6)) ))
+          (random (expt 16 4))
+          (random (expt 16 4)) ))
 
 (defun eaf-create-buffer (input-content)
   (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
@@ -393,6 +393,22 @@ We need calcuate render allocation to make sure no black border around render co
                     (throw 'find-window t)
                     )
                   ))))))))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "create_new_browser_buffer"
+ 'eaf-create-new-browser-buffer)
+
+(defun eaf-create-new-browser-buffer (new-window-buffer-id)
+  (let ((eaf-buffer (generate-new-buffer (concat "browser popup window " new-window-buffer-id))))
+    (with-current-buffer eaf-buffer
+      (eaf-mode)
+      (read-only-mode)
+      (set (make-local-variable 'buffer-id) new-window-buffer-id)
+      (set (make-local-variable 'buffer-url) "")
+      (set (make-local-variable 'buffer-app-name) "browser")
+      )
+    (switch-to-buffer eaf-buffer)))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"

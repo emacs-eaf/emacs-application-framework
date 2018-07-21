@@ -41,6 +41,9 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
 
+    def createWindow(self, window_type):
+        return self.create_new_browser_window_callback()
+
     def event(self, event):
         if event.type() == QEvent.ChildAdded:
             obj = event.child()
@@ -55,14 +58,20 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
             clicked_url = hit.linkUrl()
             base_url = hit.baseUrl()
 
-            if clicked_url != base_url and clicked_url != '':
+
+            if clicked_url != None and base_url != None and clicked_url != base_url and clicked_url != '':
                 result = ""
+
                 if 'http://' in clicked_url or 'https://' in clicked_url:
                     result = clicked_url
                 elif clicked_url == "#":
                     result = base_url + clicked_url
                 else:
+                    # Don't open url in EAF if clicked_url is not start with http/ftp or #
                     result = "http://" + base_url.split("/")[2] + clicked_url
+
+                    event.accept()
+                    return False
 
                 modifiers = QApplication.keyboardModifiers()
 
@@ -76,7 +85,8 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
                 return True
 
             event.accept()
-            return True
+            return False
+
         elif event.type() == QEvent.MouseButtonPress:
             if event.button() == MOUSE_FORWARD_BUTTON:
                 self.forward()
