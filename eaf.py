@@ -25,6 +25,7 @@
 from app.browser.buffer import AppBuffer as NeverUsed
 
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtNetwork import QNetworkProxy
 from core.fake_key_event import fake_key_event
 from core.utils import file_is_image, file_is_video
 from core.view import View
@@ -47,13 +48,26 @@ class EAF(dbus.service.Object):
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_xid, emacs_width, emacs_height) = (map(lambda x: int(x), args))
+        # (emacs_xid, emacs_width, emacs_height, proxy_host, proxy_port) = (map(lambda x: int(x), args))
+        (emacs_xid, emacs_width, emacs_height, proxy_host, proxy_port) = args
+        emacs_xid = int(emacs_xid)
+        emacs_width = int(emacs_width)
+        emacs_height = int(emacs_height)
+
         self.buffer_dict = {}
         self.view_dict = {}
 
         self.start_finish()
 
         self.session_file_path = os.path.expanduser("~/.emacs.d/eaf/session.json")
+
+        # Set HTTP proxy.
+        if proxy_host != "" and proxy_port != "":
+            proxy = QNetworkProxy()
+            proxy.setType(QNetworkProxy.HttpProxy)
+            proxy.setHostName(proxy_host)
+            proxy.setPort(int(proxy_port))
+            QNetworkProxy.setApplicationProxy(proxy)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ssss", out_signature="s")
     def new_buffer(self, buffer_id, url, app_name, arguments):

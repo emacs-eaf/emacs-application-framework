@@ -127,6 +127,10 @@
 
 (defvar eaf-grip-token nil)
 
+(defvar eaf-http-proxy-host "")
+
+(defvar eaf-http-proxy-port "")
+
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
   :type 'string
@@ -151,7 +155,7 @@
           (apply 'start-process
                  eaf-name
                  eaf-name
-                 "python3" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size))
+                 "python3" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port))
                  ))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel

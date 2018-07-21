@@ -111,6 +111,16 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 
 ## Settings
 
+### Proxy
+If you can't access most awesome internet service like me, you perhaps need proxy settings like below:
+
+```Elisp
+(setq eaf-http-proxy-host "127.0.0.1")
+(setq eaf-http-proxy-port "1080")
+```
+
+Then EAF browser are free. ;)
+
 ### Markdown Previewer
 If you use markdown previewer, you need access [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
 
