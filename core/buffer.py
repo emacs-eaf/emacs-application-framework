@@ -33,6 +33,7 @@ class Buffer(QGraphicsScene):
     before_destroy_hook = QtCore.pyqtSignal()
     input_message = QtCore.pyqtSignal(str, str, str)
     close_buffer = QtCore.pyqtSignal(str)
+    message_to_emacs = QtCore.pyqtSignal(str)
 
     def __init__(self, buffer_id, url, arguments, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()

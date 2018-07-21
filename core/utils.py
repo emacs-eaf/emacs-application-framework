@@ -21,6 +21,7 @@
 
 import functools
 from PyQt5 import QtCore
+import os
 
 class PostGui(QtCore.QObject):
 
@@ -62,3 +63,13 @@ def file_is_video(file_info):
             return True
 
     return False
+
+def touch(path):
+    if not os.path.exists(path):
+        basedir = os.path.dirname(path)
+
+        if not os.path.exists(basedir):
+            os.makedirs(basedir)
+
+        with open(path, 'a'):
+            os.utime(path)

@@ -20,11 +20,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
+from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5 import QtWebEngineWidgets
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtCore import Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication, QWidget
+from core.utils import touch
+import os
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
@@ -40,6 +43,19 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
+
+        self.cookie_store = self.page().profile().cookieStore()
+        self.cookie_storage = BrowserCookieStorage()
+        self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
+
+        self.load_cookie()
+
+    def load_cookie(self):
+        for cookie in self.cookie_storage.load_cookie():
+            self.cookie_store.setCookie(cookie)
+
+    def clean_cookie(self):
+        self.cookie_storage.clean_cookie(self.cookie_store)
 
     def createWindow(self, window_type):
         return self.create_new_browser_window_callback()
@@ -265,3 +281,27 @@ def webview_scroll(webview, scroll_direction, scroll_type):
             webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, line_offset));
         else:
             webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, -line_offset));
+
+class BrowserCookieStorage:
+    def __init__(self):
+        self.cookie_file = os.path.expanduser("~/.emacs.d/eaf/browser/cookie/cookie")
+
+        touch(self.cookie_file)
+
+    def load_cookie(self):
+        with open(self.cookie_file, 'rb+') as store:
+            cookies = store.read()
+            return QNetworkCookie.parseCookies(cookies)
+
+    def save_cookie(self, cookie):
+        with open(self.cookie_file, 'wb+') as store:
+            store.write(cookie + b'\n' if cookie is not None else b'')
+
+    def add_cookie(self, cookie):
+        raw = cookie.toRawForm()
+        self.save_cookie(raw)
+
+    def clean_cookie(self, cookie_store):
+        cookie_store.deleteAllCookies()
+
+        open(self.cookie_file, 'w').close()

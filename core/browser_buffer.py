@@ -48,3 +48,6 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.forward()
         elif keystroke == "M-b":
             self.buffer_widget.back()
+        elif keystroke == "M-q":
+            self.buffer_widget.clean_cookie()
+            self.message_to_emacs.emit("Clean all cookie")

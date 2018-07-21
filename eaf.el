@@ -406,6 +406,11 @@ We need calcuate render allocation to make sure no black border around render co
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "message_to_emacs"
+ 'message)
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "create_new_browser_buffer"
  'eaf-create-new-browser-buffer)
 
