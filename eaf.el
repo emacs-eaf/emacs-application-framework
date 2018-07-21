@@ -412,6 +412,21 @@ We need calcuate render allocation to make sure no black border around render co
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "request_kill_buffer"
+ 'eaf-request-kill-buffer)
+
+(defun eaf-request-kill-buffer (kill-buffer-id)
+  (catch 'found-match-buffer
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (when (equal major-mode 'eaf-mode)
+        (when (string= buffer-id kill-buffer-id)
+          (kill-buffer buffer)
+          (message (format "Request kill buffer %s" kill-buffer-id))
+          (throw 'found-match-buffer t))))))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "focus_emacs_buffer"
  'eaf-focus-buffer)
 

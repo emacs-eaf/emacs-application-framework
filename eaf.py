@@ -131,6 +131,9 @@ class EAF(dbus.service.Object):
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
 
+        # Handle buffer close request.
+        app_buffer.close_buffer.connect(self.request_kill_buffer)
+
         # Add create new window callback if module is browser
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
@@ -253,6 +256,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal("com.lazycat.eaf")
     def create_new_browser_buffer(self, buffer_id):
+        pass
+
+    @dbus.service.signal("com.lazycat.eaf")
+    def request_kill_buffer(self, buffer_id):
         pass
 
     def save_buffer_session(self, buf):

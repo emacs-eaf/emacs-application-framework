@@ -34,6 +34,8 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.loadProgress.connect(self.update_progress)
         self.buffer_widget.loadFinished.connect(self.stop_progress)
 
+        self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
+
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
         return [self.buffer_widget.focusProxy()]

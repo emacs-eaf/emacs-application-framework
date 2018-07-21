@@ -32,6 +32,7 @@ class Buffer(QGraphicsScene):
     open_url = QtCore.pyqtSignal(str)
     before_destroy_hook = QtCore.pyqtSignal()
     input_message = QtCore.pyqtSignal(str, str, str)
+    close_buffer = QtCore.pyqtSignal(str)
 
     def __init__(self, buffer_id, url, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
@@ -89,6 +90,9 @@ class Buffer(QGraphicsScene):
 
     def change_title(self, title):
         self.update_title.emit(self.buffer_id, title)
+
+    def request_close_buffer(self):
+        self.close_buffer.emit(self.buffer_id)
 
     def all_views_hide(self):
         pass
