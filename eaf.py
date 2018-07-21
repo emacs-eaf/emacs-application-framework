@@ -55,11 +55,11 @@ class EAF(dbus.service.Object):
 
         self.session_file_path = os.path.expanduser("~/.emacs.d/eaf/session.json")
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="s")
-    def new_buffer(self, buffer_id, url, app_name):
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ssss", out_signature="s")
+    def new_buffer(self, buffer_id, url, app_name, arguments):
         # NOTE: We need use function str convert dbus.String to String,
         # otherwise some library will throw error, such as fitz library.
-        return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)))
+        return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), arguments)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
@@ -91,7 +91,7 @@ class EAF(dbus.service.Object):
         buffer_id = self.get_new_browser_window_buffer_id()
 
         # Create buffer for create new browser window.
-        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer")
+        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer", "")
 
         # Create emacs buffer with buffer id.
         self.create_new_browser_buffer(buffer_id)
@@ -99,9 +99,9 @@ class EAF(dbus.service.Object):
         # Return new QWebEngineView for create new browser window.
         return app_buffer.buffer_widget
 
-    def create_app(self, buffer_id, url, module_path):
+    def create_app(self, buffer_id, url, module_path, arguments):
         try:
-            self.create_buffer(buffer_id, url, module_path)
+            self.create_buffer(buffer_id, url, module_path, arguments)
 
             return ""
         except ImportError:
@@ -109,12 +109,12 @@ class EAF(dbus.service.Object):
             traceback.print_exc()
             return "Something wrong when import {0}".format(module_path)
 
-    def create_buffer(self, buffer_id, url, module_path):
+    def create_buffer(self, buffer_id, url, module_path, arguments):
         global emacs_width, emacs_height
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url)
+        app_buffer = module.AppBuffer(buffer_id, url, arguments)
         app_buffer.module_path = module_path
 
         # Add buffer to buffer dict.

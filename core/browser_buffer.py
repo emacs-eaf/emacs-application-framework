@@ -25,8 +25,8 @@ from core.buffer import Buffer
 
 class BrowserBuffer(Buffer):
 
-    def __init__(self, buffer_id, url, fit_to_view, background_color):
-        Buffer.__init__(self, buffer_id, url, fit_to_view, background_color)
+    def __init__(self, buffer_id, url, arguments, fit_to_view, background_color):
+        Buffer.__init__(self, buffer_id, url, arguments, fit_to_view, background_color)
 
         self.add_widget(BrowserView())
 

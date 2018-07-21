@@ -29,8 +29,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, True, QColor(0, 0, 0, 255))
 
         self.add_widget(CameraWidget(QColor(0, 0, 0, 255)))
 

@@ -44,8 +44,8 @@ import urllib.request, urllib.parse, urllib.error
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, False, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, argument):
+        Buffer.__init__(self, buffer_id, url, argument, False, QColor(0, 0, 0, 255))
 
         self.add_widget(FileUploaderWidget(url, QColor(0, 0, 0, 255)))
 

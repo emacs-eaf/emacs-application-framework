@@ -27,8 +27,8 @@ from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, True, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, True, QColor(0, 0, 0, 255))
 
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
@@ -49,7 +49,7 @@ class AppBuffer(Buffer):
     def restore_session_data(self, session_data):
         position = int(session_data)
         self.buffer_widget.media_player.setPosition(position)
-        
+
 class VideoPlayerWidget(QWidget):
 
     def __init__(self, parent=None):

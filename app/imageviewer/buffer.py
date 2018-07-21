@@ -27,8 +27,8 @@ import os
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url):
-        Buffer.__init__(self, buffer_id, url, False, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, False, QColor(0, 0, 0, 255))
 
         self.add_widget(ImageViewerWidget(url, QColor(0, 0, 0, 255)))
         self.buffer_widget.render_image.connect(self.change_title)

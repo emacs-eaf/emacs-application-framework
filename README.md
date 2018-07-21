@@ -109,6 +109,13 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 | File Uploader      | Type 'eaf-upload-file'                        |                    |                                          |
 | Air Share          | Type 'eaf-air-share'                          |                    |                                          |
 
+## Settings
+If you use markdown previewer, you need access [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
+
+```Elisp
+(setq eaf-grip-token "yourtokencode")
+```
+
 ## Report bug
 If you have any problem with EAF, please use command "emacs -Q" start Emacs first.
 

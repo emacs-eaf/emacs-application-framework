@@ -34,11 +34,12 @@ class Buffer(QGraphicsScene):
     input_message = QtCore.pyqtSignal(str, str, str)
     close_buffer = QtCore.pyqtSignal(str)
 
-    def __init__(self, buffer_id, url, fit_to_view, background_color):
+    def __init__(self, buffer_id, url, arguments, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
 
         self.buffer_id = buffer_id
         self.url = url
+        self.arguments = arguments
         self.fit_to_view = fit_to_view
         self.background_color = background_color
         self.setBackgroundBrush(QBrush(self.background_color))

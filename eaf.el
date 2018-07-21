@@ -113,6 +113,8 @@
 
 (defvar eaf-first-start-app-name nil)
 
+(defvar eaf-first-start-arguments nil)
+
 (defvar eaf-title-length 30)
 
 (defvar eaf-org-file-list '())
@@ -122,6 +124,8 @@
 (defvar eaf-last-frame-width 0)
 
 (defvar eaf-last-frame-height 0)
+
+(defvar eaf-grip-token nil)
 
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
@@ -174,6 +178,7 @@
   ;; Clean cache url and app name, avoid next start process to open buffer.
   (setq eaf-first-start-url nil)
   (setq eaf-first-start-app-name nil)
+  (setq eaf-first-start-arguments nil)
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
@@ -432,7 +437,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defun eaf-start-finish ()
   ;; Call `eaf-open-internal' after receive `start_finish' signal from server process.
-  (eaf-open-internal eaf-first-start-url eaf-first-start-app-name))
+  (eaf-open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -479,11 +484,11 @@ We need calcuate render allocation to make sure no black border around render co
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
 (add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
-(defun eaf-open-internal (url app-name)
+(defun eaf-open-internal (url app-name arguments)
   (let* ((buffer (eaf-create-buffer url))
          buffer-result)
     (with-current-buffer buffer
-      (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name)))
+      (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name arguments)))
     (if (equal buffer-result "")
         (progn
           ;; Switch to new buffer if buffer create successful.
@@ -500,7 +505,7 @@ We need calcuate render allocation to make sure no black border around render co
       (message buffer-result))
     ))
 
-(defun eaf-open (url &optional app-name)
+(defun eaf-open (url &optional app-name arguments)
   (interactive "FOpen with EAF: ")
   ;; Try set app-name along with url if app-name is set.
   (unless app-name
@@ -514,6 +519,10 @@ We need calcuate render allocation to make sure no black border around render co
            (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
                   (setq app-name "pdfviewer"))
                  ((member extension-name '("md"))
+                  ;; Try get user's github token if `eaf-grip-token' is nil.
+                  (if eaf-grip-token
+                      (setq arguments eaf-grip-token)
+                    (setq arguments (read-string "Fill your own github token: ")))
                   ;; Split window to show file and previewer.
                   (eaf-split-preview-windows)
                   (setq app-name "markdownpreviewer"))
@@ -561,10 +570,11 @@ We need calcuate render allocation to make sure no black border around render co
             ;; if no match buffer found, call `eaf-open-internal'.
             (if exists-eaf-buffer
                 (switch-to-buffer exists-eaf-buffer)
-              (eaf-open-internal url app-name)))
+              (eaf-open-internal url app-name arguments)))
         ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
         (setq eaf-first-start-url url)
         (setq eaf-first-start-app-name app-name)
+        (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
         (message (format "Opening %s with eaf.%s" url app-name)))
     ;; Output something to user if app-name is empty string.

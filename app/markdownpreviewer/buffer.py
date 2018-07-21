@@ -29,15 +29,20 @@ import threading
 import os
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url):
-        BrowserBuffer.__init__(self, buffer_id, url, False, QColor(255, 255, 255, 255))
+    def __init__(self, buffer_id, url, arguments):
+        BrowserBuffer.__init__(self, buffer_id, url, arguments, False, QColor(255, 255, 255, 255))
 
         # Get free port to render markdown.
         self.port = self.get_free_port()
         self.url = url
 
         # Start markdown render process.
-        subprocess.Popen("grip {0} {1}".format(url, self.port), shell=True)
+        if arguments == "":
+            subprocess.Popen("grip {0} {1}".format(url, self.port), shell=True)
+        else:
+            subprocess.Popen("grip --pass {0} {1} {2}".format(arguments, url, self.port), shell=True)
+
+        print("**************** ", arguments)    
 
         # Add timer make load markdown preview link after grip process start finish.
         timer = threading.Timer(2, self.load_markdown_server)
@@ -62,4 +67,3 @@ class AppBuffer(BrowserBuffer):
         paths = os.path.split(self.url)
         if len(paths) > 0:
             self.change_title(paths[-1])
-
