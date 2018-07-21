@@ -522,7 +522,7 @@ We need calcuate render allocation to make sure no black border around render co
                   ;; Try get user's github token if `eaf-grip-token' is nil.
                   (if eaf-grip-token
                       (setq arguments eaf-grip-token)
-                    (setq arguments (read-string "Fill your own github token: ")))
+                    (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
                   ;; Split window to show file and previewer.
                   (eaf-split-preview-windows)
                   (setq app-name "markdownpreviewer"))
