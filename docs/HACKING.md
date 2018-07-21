@@ -101,6 +101,14 @@ Above are all you need, happy hacking!
 
 ## Other APIs
 
+### Show message in emacs' minibuffer.
+
+If you want show message in emacs' minibuffer, you can emit AppBuffer's signal "message_to_emacs" like below:
+
+```Python
+self.message_to_emacs.emit("hello from eaf")
+```
+
 ### Read user's input
 Below is code example from pdfviewer:
 ```Python
