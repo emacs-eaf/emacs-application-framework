@@ -105,7 +105,7 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict = {}
         self.page_cache_scale = self.scale
         self.page_cache_trans = None
-        self.page_cache_context_delay = 500
+        self.page_cache_context_delay = 1000
 
         self.last_action_time = 0
 
