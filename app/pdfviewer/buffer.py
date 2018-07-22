@@ -32,14 +32,13 @@ class AppBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, False, QColor(0, 0, 0, 255))
 
         self.add_widget(PdfViewerWidget(url, QColor(0, 0, 0, 255)))
-        self.buffer_widget.send_jump_page_message.connect(self.send_jump_page_message)
-
-    def send_jump_page_message(self):
-        self.send_input_message("Jump to: ", "jump_page")
+        self.buffer_widget.send_input_message = self.send_input_message
 
     def handle_input_message(self, result_type, result_content):
         if result_type == "jump_page":
             self.buffer_widget.jump_to_page(int(result_content))
+        elif result_type == "jump_percent"    :
+            self.buffer_widget.jump_to_percent(int(result_content))
 
     def scroll(self, scroll_direction, scroll_type):
         if scroll_type == "page":
@@ -64,8 +63,6 @@ class AppBuffer(Buffer):
         self.buffer_widget.update()
 
 class PdfViewerWidget(QWidget):
-
-    send_jump_page_message = QtCore.pyqtSignal()
 
     def __init__(self, url, background_color):
         super(PdfViewerWidget, self).__init__()
@@ -186,7 +183,9 @@ class PdfViewerWidget(QWidget):
         elif event.key() == Qt.Key_Minus:
             self.zoom_out()
         elif event.key() == Qt.Key_G:
-            self.send_jump_page_message.emit()
+            self.send_input_message("Jump to: ", "jump_page")
+        elif event.key() == Qt.Key_P:
+            self.send_input_message("Jump to percent: ", "jump_percent")
 
     def scale_to(self, new_scale):
         self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
@@ -261,6 +260,10 @@ class PdfViewerWidget(QWidget):
 
     def jump_to_page(self, page_num):
         self.scroll_offset = min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset())
+        self.update()
+
+    def jump_to_percent(self, percent):
+        self.scroll_offset = min(max(self.scale * (int(self.page_total_number * percent / 100.0) - 1) * self.page_height, 0), self.max_scroll_offset())
         self.update()
 
 if __name__ == '__main__':

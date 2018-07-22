@@ -103,6 +103,7 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 |                    |                                               | =                  | Zoom in                                  |
 |                    |                                               | 0                  | Zoomn reset                              |
 |                    |                                               | g                  | Goto page                                |
+|                    |                                               | p                  | Goto to percent                          |
 | Camera             | Type 'eaf-camera'                             |                    |                                          |
 | Demo               | Type 'eaf-demo'                               |                    |                                          |
 | File Transfer      | Type 'eaf-show-file-qrcode'                   |                    |                                          |
