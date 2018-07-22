@@ -98,6 +98,37 @@ class PdfViewerWidget(QWidget):
         self.font = QFont()
         self.font.setPointSize(12)
 
+        # Page cache.
+        self.page_cache_pixmap_dict = {}
+        self.page_cache_scale = self.scale
+
+    def get_page_pixmap(self, index, scale):
+        # Just return cache pixmap when found match index and scale in cache dict.
+        if self.page_cache_scale == scale:
+            if index in self.page_cache_pixmap_dict.keys():
+                return self.page_cache_pixmap_dict[index]
+        # Clear dict if page scale changed.
+        else:
+            self.page_cache_pixmap_dict.clear()
+            self.page_cache_scale = scale
+
+        page = self.document[index]
+        trans = fitz.Matrix(scale, scale)
+        pixmap = page.getPixmap(matrix = trans, alpha = False)
+        img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
+        qpixmap = QPixmap.fromImage(img)
+
+        self.page_cache_pixmap_dict[index] = qpixmap
+
+        return qpixmap
+
+    def clean_unused_page_cache_pixmap(self, index_list):
+        cache_index_list = list(self.page_cache_pixmap_dict.keys())
+
+        for cache_index in cache_index_list:
+            if cache_index not in index_list:
+                self.page_cache_pixmap_dict.pop(cache_index)
+
     def resizeEvent(self, event):
         # Update scale attributes after widget resize.
         self.update_scale()
@@ -126,11 +157,12 @@ class PdfViewerWidget(QWidget):
         for index in list(range(start_page_index, last_page_index + 1)):
             if index < self.page_total_number:
                 # Get page image.
-                page = self.document[index]
-                trans = fitz.Matrix(self.scale, self.scale)
-                pixmap = page.getPixmap(matrix = trans, alpha = False)
-                img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
-                qpixmap = QPixmap.fromImage(img)
+                qpixmap = self.get_page_pixmap(index, self.scale)
+                # page = self.document[index]
+                # trans = fitz.Matrix(self.scale, self.scale)
+                # pixmap = page.getPixmap(matrix = trans, alpha = False)
+                # img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
+                # qpixmap = QPixmap.fromImage(img)
 
                 # Init render rect.
                 render_width = self.page_width * self.scale
@@ -144,6 +176,9 @@ class PdfViewerWidget(QWidget):
 
                 # Draw page image.
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
+
+        # Clean unused pixmap cache that avoid use too much memory.
+        self.clean_unused_page_cache_pixmap(list(range(start_page_index, last_page_index + 1)))
 
         painter.restore()
 
