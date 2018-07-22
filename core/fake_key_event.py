@@ -91,8 +91,6 @@ qt_text_dict = {
 }
 
 def fake_key_event(event_string, app_buffer):
-    print("**********", event_string)
-
     # Init.
     text = event_string
     modifier = Qt.NoModifier
