@@ -327,57 +327,66 @@ We need calcuate render allocation to make sure no black border around render co
              (message (format "export %s to html" (buffer-file-name))))))))
 
 (defun eaf-monitor-key-event ()
-  (ignore-errors
-    (with-current-buffer (buffer-name)
-      (when (eq major-mode 'eaf-mode)
-        (let* ((event last-command-event)
-               (key (make-vector 1 event))
-               (key-command (format "%s" (key-binding key)))
-               (key-desc (key-description key))
-               )
+  (unless
+      (ignore-errors
+        (with-current-buffer (buffer-name)
+          (when (eq major-mode 'eaf-mode)
+            (let* ((event last-command-event)
+                   (key (make-vector 1 event))
+                   (key-command (format "%s" (key-binding key)))
+                   (key-desc (key-description key))
+                   )
 
-          ;; Uncomment for debug.
-          ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
+              ;; Uncomment for debug.
+              ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
 
-          (cond
-           ;; Just send event when user insert single character.
-           ;; Don't send event 'M' if user press Ctrl + M.
-           ((and
-             (or
-              (equal key-command "self-insert-command")
-              (equal key-command "completion-select-if-within-overlay"))
-             (equal 1 (string-width (this-command-keys))))
-            (eaf-call "send_key" buffer-id key-desc))
-           ((string-match "^[CMSs]-.*" key-desc)
-            (eaf-call "send_keystroke" buffer-id key-desc))
-           ((or
-             (equal key-command "nil")
-             (equal key-desc "RET")
-             (equal key-desc "DEL")
-             (equal key-desc "TAB")
-             (equal key-desc "<backtab>")
-             (equal key-desc "<home>")
-             (equal key-desc "<end>")
-             (equal key-desc "<left>")
-             (equal key-desc "<right>")
-             (equal key-desc "<up>")
-             (equal key-desc "<down>")
-             (equal key-desc "<prior>")
-             (equal key-desc "<next>")
-             )
-            (eaf-call "send_key" buffer-id key-desc)
-            )
-           (t
-            (unless (or
-                     (equal key-command "keyboard-quit")
-                     (equal key-command "kill-this-buffer")
-                     (equal key-command "eaf-open"))
-              (ignore-errors (call-interactively (key-binding key))))
-            )))
-        ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
-        ;; because i insert nothing in buffer.
-        (setq last-command-event nil)
-        ))))
+              (cond
+               ;; Just send event when user insert single character.
+               ;; Don't send event 'M' if user press Ctrl + M.
+               ((and
+                 (or
+                  (equal key-command "self-insert-command")
+                  (equal key-command "completion-select-if-within-overlay"))
+                 (equal 1 (string-width (this-command-keys))))
+                (eaf-call "send_key" buffer-id key-desc))
+               ((string-match "^[CMSs]-.*" key-desc)
+                (eaf-call "send_keystroke" buffer-id key-desc))
+               ((or
+                 (equal key-command "nil")
+                 (equal key-desc "RET")
+                 (equal key-desc "DEL")
+                 (equal key-desc "TAB")
+                 (equal key-desc "<backtab>")
+                 (equal key-desc "<home>")
+                 (equal key-desc "<end>")
+                 (equal key-desc "<left>")
+                 (equal key-desc "<right>")
+                 (equal key-desc "<up>")
+                 (equal key-desc "<down>")
+                 (equal key-desc "<prior>")
+                 (equal key-desc "<next>")
+                 )
+                (eaf-call "send_key" buffer-id key-desc)
+                )
+               (t
+                (unless (or
+                         (equal key-command "keyboard-quit")
+                         (equal key-command "kill-this-buffer")
+                         (equal key-command "eaf-open"))
+                  (ignore-errors (call-interactively (key-binding key))))
+                )))
+            ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
+            ;; because i insert nothing in buffer.
+            (setq last-command-event nil))
+          ))
+    ;; If something wrong in `eaf-monitor-key-event', emacs will remove `eaf-monitor-key-event' from `pre-command-hook' hook list.
+    ;; Then we add `eaf-monitor-key-event' in `pre-command-hook' list again, hahahaha.
+    (run-with-timer
+     0.1
+     nil
+     (lambda ()
+       (progn
+         (add-hook 'pre-command-hook #'eaf-monitor-key-event))))))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
@@ -481,7 +490,11 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-open-buffer-url)
 
 (defun eaf-input-message (buffer_id interactive_string callback_type)
-  (eaf-call "handle_input_message" buffer_id callback_type (read-string interactive_string)))
+  (let ((input-message))
+    (setq input-message (ignore-errors (read-string interactive_string)))
+    (when input-message
+      (eaf-call "handle_input_message" buffer_id callback_type input-message)
+      )))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
