@@ -73,7 +73,7 @@ class EAF(dbus.service.Object):
     def new_buffer(self, buffer_id, url, app_name, arguments):
         # NOTE: We need use function str convert dbus.String to String,
         # otherwise some library will throw error, such as fitz library.
-        return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), arguments)
+        return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), str(arguments))
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
