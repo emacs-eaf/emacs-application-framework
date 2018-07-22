@@ -84,6 +84,8 @@ class Buffer(QGraphicsScene):
 
         self.buffer_widget.installEventFilter(self)
 
+        self.buffer_widget.message_to_emacs = self.message_to_emacs
+
     def handle_destroy(self):
         self.before_destroy_hook.emit()
 

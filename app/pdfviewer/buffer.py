@@ -24,7 +24,9 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
+from functools import wraps
 import fitz
+import time
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
@@ -67,6 +69,7 @@ class PdfViewerWidget(QWidget):
     def __init__(self, url, background_color):
         super(PdfViewerWidget, self).__init__()
 
+        self.url = url
         self.background_color = background_color
 
         # Load document first.
@@ -102,6 +105,11 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict = {}
         self.page_cache_scale = self.scale
         self.page_cache_trans = None
+        self.page_cache_context_delay = 500
+
+        self.last_action_time = 0
+
+        self.is_page_just_changed = False
 
     def get_page_pixmap(self, index, scale):
         # Just return cache pixmap when found match index and scale in cache dict.
@@ -122,13 +130,22 @@ class PdfViewerWidget(QWidget):
 
         self.page_cache_pixmap_dict[index] = qpixmap
 
+        print("*** New page pixmap: %s %s" % (self.url, index))
+
         return qpixmap
 
-    def clean_unused_page_cache_pixmap(self, index_list):
+    def clean_unused_page_cache_pixmap(self):
+        # We need expand render index bound that avoid clean cache around current index.
+        start_page_index = max(0, self.get_start_page_index() - 1)
+        last_page_index = min(self.page_total_number, self.get_last_page_index() + 1)
+        index_list = list(range(start_page_index, last_page_index))
+
+        # Try to clean unused cache.
         cache_index_list = list(self.page_cache_pixmap_dict.keys())
 
         for cache_index in cache_index_list:
             if cache_index not in index_list:
+                print("*** Clean unused page pixmap: %s %s" % (self.url, cache_index))
                 self.page_cache_pixmap_dict.pop(cache_index)
 
     def resizeEvent(self, event):
@@ -148,15 +165,15 @@ class PdfViewerWidget(QWidget):
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
         # Get start/last render index.
-        start_page_index = int(self.scroll_offset * 1.0 / self.scale / self.page_height)
-        last_page_index = int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height)
+        start_page_index = self.get_start_page_index()
+        last_page_index = self.get_last_page_index()
 
         # Translate painter at y coordinate.
         translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
         painter.translate(0, translate_y)
 
         # Render pages in visible area.
-        for index in list(range(start_page_index, last_page_index + 1)):
+        for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
                 # Get page image.
                 qpixmap = self.get_page_pixmap(index, self.scale)
@@ -175,7 +192,7 @@ class PdfViewerWidget(QWidget):
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
         # Clean unused pixmap cache that avoid use too much memory.
-        self.clean_unused_page_cache_pixmap(list(range(start_page_index, last_page_index + 1)))
+        self.clean_unused_page_cache_pixmap()
 
         painter.restore()
 
@@ -189,10 +206,36 @@ class PdfViewerWidget(QWidget):
                          Qt.AlignRight,
                          "{0}% ({1}/{2})".format(int((start_page_index + 1) * 100 / self.page_total_number), start_page_index + 1, self.page_total_number))
 
+
+    def build_context_wrap(f):
+        def wrapper(*args):
+            # Get self instance object.
+            self_obj = args[0]
+
+            # Record page before action.
+            page_before_action = self_obj.get_start_page_index()
+
+            # Do action.
+            ret =  f(*args)
+
+            # Record page after action.
+            page_after_action = self_obj.get_start_page_index()
+            self_obj.is_page_just_changed = (page_before_action != page_after_action)
+
+            # Start build context timer.
+            self_obj.last_action_time = time.time()
+            QtCore.QTimer().singleShot(self_obj.page_cache_context_delay, self_obj.build_context_cache)
+
+            return ret
+
+        return wrapper
+
+    @build_context_wrap
     def wheelEvent(self, event):
         self.scroll_offset = max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0)
         self.update()
 
+    @build_context_wrap
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_J:
             self.scroll_up()
@@ -218,6 +261,24 @@ class PdfViewerWidget(QWidget):
             self.send_input_message("Jump to: ", "jump_page")
         elif event.key() == Qt.Key_P:
             self.send_input_message("Jump to percent: ", "jump_percent")
+
+    def get_start_page_index(self):
+        return int(self.scroll_offset * 1.0 / self.scale / self.page_height)
+
+    def get_last_page_index(self):
+        return int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1
+
+    def build_context_cache(self):
+        # Just build context cache when action duration longer than delay
+        # Don't build contexnt cache when is_page_just_changed is True, avoid flickr when user change page.
+        last_action_duration = (time.time() - self.last_action_time) * 1000
+        if last_action_duration > self.page_cache_context_delay and not self.is_page_just_changed:
+            start_page_index = max(0, self.get_start_page_index() - 1)
+            last_page_index = min(self.page_total_number, self.get_last_page_index() + 1)
+
+            print("*** Try build %s context cache pixmap from %s to %s" % (self.url, start_page_index, last_page_index - 1))
+            for index in list(range(start_page_index, last_page_index)):
+                self.get_page_pixmap(index, self.scale)
 
     def scale_to(self, new_scale):
         self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
