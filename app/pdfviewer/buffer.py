@@ -230,8 +230,7 @@ class PdfViewerWidget(QWidget):
 
     @build_context_wrap
     def wheelEvent(self, event):
-        self.scroll_offset = max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0)
-        self.update()
+        self.update_scroll_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
 
     @build_context_wrap
     def keyPressEvent(self, event):
@@ -309,30 +308,24 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def scroll_up(self):
-        self.scroll_offset = min(self.scroll_offset + self.scale * self.scroll_step, self.max_scroll_offset())
-        self.update()
+        self.update_scroll_offset(min(self.scroll_offset + self.scale * self.scroll_step, self.max_scroll_offset()))
 
     def scroll_down(self):
-        self.scroll_offset = max(self.scroll_offset - self.scale * self.scroll_step, 0)
-        self.update()
+        self.update_scroll_offset(max(self.scroll_offset - self.scale * self.scroll_step, 0))
 
     def scroll_up_page(self):
         # Adjust scroll step to make users continue reading fluently.
-        self.scroll_offset = min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset())
-        self.update()
+        self.update_scroll_offset(min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset()))
 
     def scroll_down_page(self):
         # Adjust scroll step to make users continue reading fluently.
-        self.scroll_offset = max(self.scroll_offset - self.rect().height() + self.scroll_step, 0)
-        self.update()
+        self.update_scroll_offset(max(self.scroll_offset - self.rect().height() + self.scroll_step, 0))
 
     def scroll_to_home(self):
-        self.scroll_offset = 0
-        self.update()
+        self.update_scroll_offset(0)
 
     def scroll_to_end(self):
-        self.scroll_offset = self.max_scroll_offset()
-        self.update()
+        self.update_scroll_offset(self.max_scroll_offset())
 
     def zoom_in(self):
         self.read_mode = "fit_to_customize"
@@ -350,12 +343,17 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def jump_to_page(self, page_num):
-        self.scroll_offset = min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset())
-        self.update()
+        self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
 
     def jump_to_percent(self, percent):
-        self.scroll_offset = min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset())
-        self.update()
+        self.update_scroll_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
+
+    def update_scroll_offset(self, new_offset):
+        if self.scroll_offset != new_offset:
+            self.scroll_offset = new_offset
+            self.update()
+        else:
+            print("Scroll offset is not change, don't redraw.")
 
 if __name__ == '__main__':
     import sys
