@@ -489,11 +489,14 @@ We need calcuate render allocation to make sure no black border around render co
  "com.lazycat.eaf" "open_buffer_url"
  'eaf-open-buffer-url)
 
-(defun eaf-input-message (buffer_id interactive_string callback_type)
-  (let ((input-message))
-    (setq input-message (condition-case nil (read-string interactive_string) (quit nil)))
+(defun eaf-read-string (interactive-string)
+  "Like `read-string', but return nil if user execute `keyboard-quit' when input."
+  (condition-case nil (read-string interactive-string) (quit nil)))
+
+(defun eaf-input-message (buffer-id interactive-string callback-type)
+  (let* ((input-message (eaf-read-string interactive-string)))
     (when input-message
-      (eaf-call "handle_input_message" buffer_id callback_type input-message)
+      (eaf-call "handle_input_message" buffer-id callback-type input-message)
       )))
 
 (dbus-register-signal
