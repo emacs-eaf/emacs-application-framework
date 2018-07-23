@@ -77,41 +77,78 @@ NOTE:
 EAF use DBus' session bus, it must running in general user.
 Please don't run EAF with root user, root user just can access DBus's system bus.
 ```
+### Browser
 
-| App                | Way to open                                   | Key                | Event                                    |
-| :--------          | :----                                         | :-----:            | :----                                    |
-| Browser            | URL                                           | Left Button        | Open link current tab                    |
-|                    |                                               | Ctrl + Left Button | Open link in new tab                     |
-|                    |                                               | M-f                | Forward page in history                  |
-|                    |                                               | M-b                | Backward page in history                 |
-|                    |                                               | M-q                | Delete all cookies                       |
-| Markdown previewer | Type 'eaf-open' RET markdown filepath         |                    |                                          |
-| Org file previewer | Type 'eaf-open' RET org filepath              |                    |                                          |
-| Image Viewer       | Type 'eaf-open' RET IMAGE filepath            | j                  | Load next image in current directory     |
-|                    |                                               | k                  | Load previous image in current directory |
-| Video Player       | Type 'eaf-open' RET video filepath            | Space              | Play or Pause                            |
-|                    |                                               | h                  | Seek backward                            |
-|                    |                                               | l                  | Seek forward                             |
-| Pdf Viewer         | Type 'eaf-open' RET PDF filepath              | j                  | Scroll up                                |
-|                    |                                               | k                  | Scroll down                              |
-|                    |                                               | Space              | Scroll up page                           |
-|                    |                                               | b                  | Scroll down page                         |
-|                    |                                               | ,                  | Scroll to end                            |
-|                    |                                               | .                  | Scroll to home                           |
-|                    |                                               | t                  | Switch scale mode                        |
-|                    |                                               | -                  | Zoom out                                 |
-|                    |                                               | =                  | Zoom in                                  |
-|                    |                                               | 0                  | Zoomn reset                              |
-|                    |                                               | g                  | Goto page                                |
-|                    |                                               | p                  | Goto to percent                          |
-|                    |                                               | [                  | Remember position                        |
-|                    |                                               | ]                  | Remember jump                            |
-| Camera             | Type 'eaf-camera'                             |                    |                                          |
-| Demo               | Type 'eaf-demo'                               |                    |                                          |
-| File Transfer      | Type 'eaf-show-file-qrcode'                   |                    |                                          |
-|                    | Or use `dired-show-file-qrcode' in dired mode |                    |                                          |
-| File Uploader      | Type 'eaf-upload-file'                        |                    |                                          |
-| Air Share          | Type 'eaf-air-share'                          |                    |                                          |
+```
+Type 'eaf-open' RET www.google.com
+```
+
+| Browser Key        | Event                    |
+| :-----:            | :----                    |
+| Left Button        | Open link current tab    |
+| Ctrl + Left Button | Open link in new tab     |
+| M-f                | Forward page in history  |
+| M-b                | Backward page in history |
+| M-q                | Delete all cookies       |
+
+### PDF Viewer
+
+```
+Type 'eaf-open' RET pdf-filepath
+```
+
+| PDF Viewer Key | Event             |
+| :-----:        | :----             |
+| j              | Scroll up         |
+| k              | Scroll down       |
+| Space          | Scroll up page    |
+| b              | Scroll down page  |
+| ,              | Scroll to end     |
+| .              | Scroll to home    |
+| t              | Switch scale mode |
+| -              | Zoom out          |
+| =              | Zoom in           |
+| 0              | Zoomn reset       |
+| g              | Goto page         |
+| p              | Goto to percent   |
+| [              | Remember position |
+| ]              | Remember jump     |
+
+
+### Video Player
+
+```
+Type 'eaf-open' RET video-filepath
+```
+
+| Video Player Key | Event         |
+| :-----:          | :----         |
+| Space            | Play or Pause |
+| h                | Seek backward |
+| l                | Seek forward  |
+
+### Image Viewer
+```
+Type 'eaf-open' RET image-filepath
+```
+
+| Image Viewer Key | Event                                    |
+| :-----:          | :----                                    |
+| j                | Load next image in current directory     |
+| k                | Load previous image in current directory |
+
+### Other applications
+
+| Application Name   | Launch                                        |
+| :--------          | :----                                         |
+| Markdown previewer | Type 'eaf-open' RET markdown filepath         |
+| Org file previewer | Type 'eaf-open' RET org filepath              |
+| Camera             | Type 'eaf-camera'                             |
+| Demo               | Type 'eaf-demo'                               |
+| File Transfer      | Type 'eaf-show-file-qrcode'                   |
+|                    | Or use `dired-show-file-qrcode' in dired mode |
+| File Uploader      | Type 'eaf-upload-file'                        |
+| Air Share          | Type 'eaf-air-share'                          |
 
 ## Settings
 
