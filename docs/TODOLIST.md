@@ -5,7 +5,6 @@
 * ImageViewer: add zoom support
 * Pdfviewer: hover mouse to detect url postion, ctrl + button can open url under mouse.
 * Pdfviewer: open link like vimium.
-* Pdfviewer: fix page still in scrolling even user release key.
 * PdfViewer: use mupdf/page.searchFor implement search text in pdf.
 * PdfViewer: split window first, then scroll event cause view blank
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough
