@@ -491,7 +491,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defun eaf-input-message (buffer_id interactive_string callback_type)
   (let ((input-message))
-    (setq input-message (ignore-errors (read-string interactive_string)))
+    (setq input-message (condition-case nil (read-string interactive_string) (quit nil)))
     (when input-message
       (eaf-call "handle_input_message" buffer_id callback_type input-message)
       )))
