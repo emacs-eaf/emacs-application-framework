@@ -24,10 +24,9 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
-from functools import wraps
+from core.buffer import Buffer
 import fitz
 import time
-from core.buffer import Buffer
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -39,7 +38,7 @@ class AppBuffer(Buffer):
     def handle_input_message(self, result_type, result_content):
         if result_type == "jump_page":
             self.buffer_widget.jump_to_page(int(result_content))
-        elif result_type == "jump_percent"    :
+        elif result_type == "jump_percent":
             self.buffer_widget.jump_to_percent(int(result_content))
 
     def scroll(self, scroll_direction, scroll_type):
@@ -97,7 +96,7 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_height = 22
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_color = QColor("#333333");
+        self.page_annotate_color = QColor("#333333")
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -124,7 +123,7 @@ class PdfViewerWidget(QWidget):
 
         page = self.document[index]
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
-        pixmap = page.getPixmap(matrix = trans, alpha = False)
+        pixmap = page.getPixmap(matrix=trans, alpha=False)
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
 
@@ -206,7 +205,6 @@ class PdfViewerWidget(QWidget):
                          Qt.AlignRight,
                          "{0}% ({1}/{2})".format(int((start_page_index + 1) * 100 / self.page_total_number), start_page_index + 1, self.page_total_number))
 
-
     def build_context_wrap(f):
         def wrapper(*args):
             # Get self instance object.
@@ -216,7 +214,7 @@ class PdfViewerWidget(QWidget):
             page_before_action = self_obj.get_start_page_index()
 
             # Do action.
-            ret =  f(*args)
+            ret = f(*args)
 
             # Record page after action.
             page_after_action = self_obj.get_start_page_index()

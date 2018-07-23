@@ -22,19 +22,18 @@
 # NOTE
 # QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
-from app.browser.buffer import AppBuffer as NeverUsed
+from app.browser.buffer import AppBuffer as NeverUsed # noqa
 
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtNetwork import QNetworkProxy
+from PyQt5.QtWidgets import QApplication
 from core.fake_key_event import fake_key_event
-from core.utils import file_is_image, file_is_video
 from core.view import View
 from dbus.mainloop.glib import DBusGMainLoop
-import importlib
 import dbus
 import dbus.service
-import os
+import importlib
 import json
+import os
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"

@@ -21,9 +21,8 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QBrush, QColor
-from PyQt5.QtWidgets import QGraphicsScene, QApplication
+from PyQt5.QtWidgets import QGraphicsScene
 import abc
-from core.utils import PostGui
 
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
@@ -89,7 +88,7 @@ class Buffer(QGraphicsScene):
     def handle_destroy(self):
         self.before_destroy_hook.emit()
 
-        if self.buffer_widget != None:
+        if self.buffer_widget is not None:
             self.buffer_widget.destroy()
 
     def change_title(self, title):

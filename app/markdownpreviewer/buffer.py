@@ -19,14 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from core.browser_buffer import BrowserBuffer
 from core.utils import PostGui
+import os
 import socket
 import subprocess
 import threading
-import os
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
@@ -41,8 +41,6 @@ class AppBuffer(BrowserBuffer):
             subprocess.Popen("grip {0} {1}".format(url, self.port), shell=True)
         else:
             subprocess.Popen("grip --pass {0} {1} {2}".format(arguments, url, self.port), shell=True)
-
-        print("**************** ", arguments)    
 
         # Add timer make load markdown preview link after grip process start finish.
         timer = threading.Timer(2, self.load_markdown_server)

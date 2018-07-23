@@ -21,25 +21,21 @@
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
-from PyQt5.QtGui import QColor, QPixmap, QPainter
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from io import BytesIO
-import socket
 import cgi
 import http.server
 import mimetypes
-import os
 import os
 import posixpath
 import qrcode
 import re
 import shutil
+import socket
 import sys
 import threading
-import urllib.request, urllib.parse, urllib.error
+import urllib
 
 from core.buffer import Buffer
 
@@ -112,7 +108,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         remainbytes = int(self.headers['content-length'])
         line = self.rfile.readline()
         remainbytes -= len(line)
-        if not boundary in line:
+        if boundary not in line:
             return (False, "Content NOT begin with boundary")
         line = self.rfile.readline()
         remainbytes -= len(line)
@@ -247,8 +243,8 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         global upload_dir
 
         # abandon query parameters
-        path = path.split('?',1)[0]
-        path = path.split('#',1)[0]
+        path = path.split('?', 1)[0]
+        path = path.split('#', 1)[0]
         path = posixpath.normpath(urllib.parse.unquote(path))
         words = path.split('/')
         words = [_f for _f in words if _f]
@@ -257,7 +253,8 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         for word in words:
             drive, word = os.path.splitdrive(word)
             head, word = os.path.split(word)
-            if word in (os.curdir, os.pardir): continue
+            if word in (os.curdir, os.pardir):
+                continue
             path = os.path.join(path, word)
         return path
 
@@ -309,7 +306,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         '.py': 'text/plain',
         '.c': 'text/plain',
         '.h': 'text/plain',
-        })
+    })
 
 class Image(qrcode.image.base.BaseImage):
     def __init__(self, border, width, box_size):
@@ -339,7 +336,7 @@ class FileUploaderWidget(QWidget):
         QWidget.__init__(self)
         url = os.path.expanduser(url)
 
-        self.setStyleSheet("background-color: black");
+        self.setStyleSheet("background-color: black")
 
         self.file_name_font = QFont()
         self.file_name_font.setPointSize(24)
@@ -348,7 +345,7 @@ class FileUploaderWidget(QWidget):
         self.file_name_label.setText("Your file will uploading to\n{0}".format(url))
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
-        self.file_name_label.setStyleSheet("color: #eee");
+        self.file_name_label.setStyleSheet("color: #eee")
 
         self.qrcode_label = QLabel(self)
 
@@ -358,7 +355,7 @@ class FileUploaderWidget(QWidget):
         self.notify_label.setText("Scan above QR to uploading file.\nMake sure that your smartphone is connected to the same WiFi network as this computer.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
-        self.notify_label.setStyleSheet("color: #eee");
+        self.notify_label.setStyleSheet("color: #eee")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -396,7 +393,6 @@ class FileUploaderWidget(QWidget):
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
-    import sys
     import signal
     app = QApplication(sys.argv)
 

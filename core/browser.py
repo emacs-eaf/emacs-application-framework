@@ -20,11 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
+from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtNetwork import QNetworkCookie
-from PyQt5 import QtWebEngineWidgets
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtCore import Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
-from PyQt5.QtGui import QColor
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.utils import touch
 import os
@@ -32,12 +30,12 @@ import os
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
 
-class BrowserView(QtWebEngineWidgets.QWebEngineView):
+class BrowserView(QWebEngineView):
 
     open_url_in_new_tab = QtCore.pyqtSignal(str)
 
     def __init__(self):
-        super(QtWebEngineWidgets.QWebEngineView, self).__init__()
+        super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
 
@@ -66,7 +64,7 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
             if isinstance(obj, QWidget):
                 obj.installEventFilter(self)
 
-        return QtWebEngineWidgets.QWebEngineView.event(self, event)
+        return QWebEngineView.event(self, event)
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonRelease:
@@ -74,8 +72,7 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
             clicked_url = hit.linkUrl()
             base_url = hit.baseUrl()
 
-
-            if clicked_url != None and base_url != None and clicked_url != base_url and clicked_url != '':
+            if clicked_url is not None and base_url is not None and clicked_url != base_url and clicked_url != '':
                 result = ""
 
                 if 'http://' in clicked_url or 'https://' in clicked_url:
@@ -115,12 +112,12 @@ class BrowserView(QtWebEngineWidgets.QWebEngineView):
                 event.accept()
                 return True
 
-        return super(QtWebEngineWidgets.QWebEngineView, self).eventFilter(obj, event)
+        return super(QWebEngineView, self).eventFilter(obj, event)
 
-class BrowserPage(QtWebEngineWidgets.QWebEnginePage):
+class BrowserPage(QWebEnginePage):
 
     def __init__(self):
-        QtWebEngineWidgets.QWebEnginePage.__init__(self)
+        QWebEnginePage.__init__(self)
 
     def hitTestContent(self, pos):
         return WebHitTestResult(self, pos)
@@ -224,7 +221,7 @@ class WebHitTestResult():
         try:
             self.m_mediaPaused = self.dic["mediaPaused"]
             self.m_mediaMuted = self.dic["mediaMuted"]
-        except:
+        except Exception:
             pass
         self.m_tagName = self.dic["tagName"]
 
@@ -240,7 +237,7 @@ class WebHitTestResult():
     def imageUrl(self):
         try:
             return self.m_imageUrl
-        except:
+        except Exception:
             return ""
 
     def mediaUrl(self):
@@ -273,14 +270,14 @@ def webview_scroll(webview, scroll_direction, scroll_type):
 
     if scroll_type == "page":
         if scroll_direction == "up":
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy(0, screen.height)");
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy(0, screen.height)")
         else:
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy(0, -screen.height)");
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy(0, -screen.height)")
     else:
         if scroll_direction == "up":
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, line_offset));
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, line_offset))
         else:
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, -line_offset));
+            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, -line_offset))
 
 class BrowserCookieStorage:
     def __init__(self):

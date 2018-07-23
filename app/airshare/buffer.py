@@ -19,17 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtGui import QColor, QPixmap, QPainter
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
-import os
-import qrcode
-import sys
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from core.buffer import Buffer
+import qrcode
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -63,7 +58,7 @@ class Image(qrcode.image.base.BaseImage):
 class AirShareWidget(QWidget):
     def __init__(self, url, color):
         QWidget.__init__(self)
-        self.setStyleSheet("background-color: black");
+        self.setStyleSheet("background-color: black")
 
         self.file_name_font = QFont()
         self.file_name_font.setPointSize(24)
@@ -72,7 +67,7 @@ class AirShareWidget(QWidget):
         self.file_name_label.setText(url)
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
-        self.file_name_label.setStyleSheet("color: #eee");
+        self.file_name_label.setStyleSheet("color: #eee")
 
         self.qrcode_label = QLabel(self)
 
@@ -82,7 +77,7 @@ class AirShareWidget(QWidget):
         self.notify_label.setText("Scan above QR to copy information")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
-        self.notify_label.setStyleSheet("color: #eee");
+        self.notify_label.setStyleSheet("color: #eee")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

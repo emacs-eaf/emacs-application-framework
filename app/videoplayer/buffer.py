@@ -40,7 +40,7 @@ class AppBuffer(Buffer):
             self.buffer_widget.video_need_replay = True
 
     def some_view_show(self):
-        if self.buffer_widget.video_need_replay == True:
+        if self.buffer_widget.video_need_replay is True:
             self.buffer_widget.media_player.play()
 
     def save_session_data(self):

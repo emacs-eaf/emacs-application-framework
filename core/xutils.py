@@ -24,7 +24,7 @@ xlib_display = None
 def get_xlib_display():
     global xlib_display
 
-    if xlib_display == None:
+    if xlib_display is None:
         from Xlib import display
         xlib_display = display.Display()
 

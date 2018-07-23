@@ -19,13 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtGui import QColor, QPixmap, QPainter
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QWidget, QLabel
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
+from core.buffer import Buffer
 import http.server as BaseHTTPServer
 import os
 import qrcode
@@ -33,7 +31,6 @@ import shutil
 import socket
 import sys
 import threading
-from core.buffer import Buffer
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -86,7 +83,7 @@ class Image(qrcode.image.base.BaseImage):
 class FileTransferWidget(QWidget):
     def __init__(self, url, color):
         QWidget.__init__(self)
-        self.setStyleSheet("background-color: black");
+        self.setStyleSheet("background-color: black")
 
         file_path = os.path.expanduser(url)
 
@@ -97,7 +94,7 @@ class FileTransferWidget(QWidget):
         self.file_name_label.setText(file_path)
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
-        self.file_name_label.setStyleSheet("color: #eee");
+        self.file_name_label.setStyleSheet("color: #eee")
 
         self.qrcode_label = QLabel(self)
 
@@ -107,7 +104,7 @@ class FileTransferWidget(QWidget):
         self.notify_label.setText("Scan above QR and open link by browser to start downloading.\nMake sure that your smartphone is connected to the same WiFi network as this computer.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
-        self.notify_label.setStyleSheet("color: #eee");
+        self.notify_label.setStyleSheet("color: #eee")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -163,7 +160,6 @@ class FileTransferWidget(QWidget):
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
-    import sys
     import signal
     app = QApplication(sys.argv)
 

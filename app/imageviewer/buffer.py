@@ -20,11 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QColor, QPixmap, QPainter
 from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtGui import QColor, QPixmap, QPainter
 from PyQt5.QtWidgets import QWidget
-import os
 from core.buffer import Buffer
+import os
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
