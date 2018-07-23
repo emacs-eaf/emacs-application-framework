@@ -354,7 +354,7 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def jump_to_percent(self, percent):
-        self.scroll_offset = min(max(self.scale * (int(self.page_total_number * percent / 100.0) - 1) * self.page_height, 0), self.max_scroll_offset())
+        self.scroll_offset = min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset())
         self.update()
 
 if __name__ == '__main__':
