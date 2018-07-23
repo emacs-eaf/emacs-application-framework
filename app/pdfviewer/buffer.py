@@ -110,6 +110,22 @@ class PdfViewerWidget(QWidget):
 
         self.is_page_just_changed = False
 
+        self.remember_offset = None
+
+    def remember_current_position(self):
+        self.remember_offset = self.scroll_offset
+        self.message_to_emacs.emit("EAF pdf viewer: remember position.")
+
+    def remember_jump(self):
+        if self.remember_offset is None:
+            self.message_to_emacs.emit("EAF pdf viewer: no position can jump.")
+        else:
+            current_scroll_offset = self.scroll_offset
+            self.scroll_offset = self.remember_offset
+            self.update()
+
+            self.remember_offset = current_scroll_offset
+
     def get_page_pixmap(self, index, scale):
         # Just return cache pixmap when found match index and scale in cache dict.
         if self.page_cache_scale == scale:
@@ -258,6 +274,10 @@ class PdfViewerWidget(QWidget):
             self.send_input_message("Jump to: ", "jump_page")
         elif event.key() == Qt.Key_P:
             self.send_input_message("Jump to percent: ", "jump_percent")
+        elif event.key() == Qt.Key_BracketLeft:
+            self.remember_current_position()
+        elif event.key() == Qt.Key_BracketRight:
+            self.remember_jump()
 
     def get_start_page_index(self):
         return int(self.scroll_offset * 1.0 / self.scale / self.page_height)

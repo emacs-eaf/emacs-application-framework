@@ -66,6 +66,8 @@ qt_key_dict = {
     '''+''': Qt.Key_Plus,
     '''-''': Qt.Key_Minus,
     '''=''': Qt.Key_Equal,
+    '''[''': Qt.Key_BracketLeft,
+    ''']''': Qt.Key_BracketRight,
     '''@''': Qt.Key_At,
     '''"''': Qt.Key_QuoteDbl,
     '''$''': Qt.Key_Dollar,
