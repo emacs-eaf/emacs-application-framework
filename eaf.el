@@ -623,6 +623,10 @@ We need calcuate render allocation to make sure no black border around render co
   (interactive "FShow file QR code: ")
   (eaf-open url "filetransfer"))
 
+(defun eaf-open-url(url)
+  (interactive "MOpen with EAF: ")
+  (eaf-open url))
+
 (defun dired-show-file-qrcode ()
   (interactive)
   (eaf-show-file-qrcode (dired-get-filename)))
