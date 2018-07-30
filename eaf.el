@@ -81,6 +81,7 @@
 
 ;;; Require
 (require 'dbus)
+(require 'subr-x)
 
 ;;; Code:
 (defcustom eaf-mode-hook '()
@@ -112,10 +113,23 @@
 
 (defvar eaf-first-start-app-name nil)
 
+(defvar eaf-first-start-arguments nil)
+
 (defvar eaf-title-length 30)
 
 (defvar eaf-org-file-list '())
+
 (defvar eaf-org-killed-file-list '())
+
+(defvar eaf-last-frame-width 0)
+
+(defvar eaf-last-frame-height 0)
+
+(defvar eaf-grip-token nil)
+
+(defvar eaf-http-proxy-host "")
+
+(defvar eaf-http-proxy-port "")
 
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
@@ -141,7 +155,7 @@
           (apply 'start-process
                  eaf-name
                  eaf-name
-                 "python3" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size))
+                 "python3" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port))
                  ))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
@@ -153,10 +167,7 @@
 
 (defun eaf-stop-process ()
   (interactive)
-  (if (process-live-p eaf-process)
-      ;; Delete eaf server process.
-      (delete-process eaf-process)
-    (message "EAF process has dead."))
+  ;; Kill eaf buffers.
   (let ((current-buf (current-buffer))
         (count 0))
     (dolist (buffer (buffer-list))
@@ -166,16 +177,31 @@
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
     (if (> count 1)
-        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" "")))
-    ;; Clean cache url and app name, avoid next start process to open buffer.
-    (setq eaf-first-start-url nil)
-    (setq eaf-first-start-app-name nil)
-    ;; Clean `eaf-org-file-list'
-    (dolist (org-file-name eaf-org-file-list)
-      (eaf-delete-org-preview-file org-file-name))
-    (setq eaf-org-file-list nil)
-    (setq eaf-org-killed-file-list nil)
-    ))
+        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
+
+  ;; Clean cache url and app name, avoid next start process to open buffer.
+  (setq eaf-first-start-url nil)
+  (setq eaf-first-start-app-name nil)
+  (setq eaf-first-start-arguments nil)
+
+  ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
+  (dolist (org-file-name eaf-org-file-list)
+    (eaf-delete-org-preview-file org-file-name))
+  (setq eaf-org-file-list nil)
+  (setq eaf-org-killed-file-list nil)
+
+  ;; Kill process after kill buffer, make application can save session data.
+  (eaf-kill-python-process))
+
+(defun eaf-kill-python-process ()
+  "Kill eaf background python process for debug.
+NOTE: this function just use for developer debug.
+Don't call this function if you not eaf developer."
+  (interactive)
+  (if (process-live-p eaf-process)
+      ;; Delete eaf server process.
+      (delete-process eaf-process)
+    (message "EAF process has dead.")))
 
 (defun eaf-restart-process ()
   (interactive)
@@ -202,14 +228,14 @@ We need calcuate render allocation to make sure no black border around render co
     (list x y w h)))
 
 (defun eaf-generate-id ()
-  (format "%04x%04x-%04x-%04x-%04x-%06x%06x"
+  (format "%04x-%04x-%04x-%04x-%04x-%04x-%04x"
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
-          (random (expt 16 6))
-          (random (expt 16 6)) ))
+          (random (expt 16 4))
+          (random (expt 16 4)) ))
 
 (defun eaf-create-buffer (input-content)
   (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
@@ -226,6 +252,16 @@ We need calcuate render allocation to make sure no black border around render co
    "com.lazycat.eaf"
    "is_support"
    url))
+
+(defun eaf-monitor-window-size-change (frame)
+  (setq eaf-last-frame-width (frame-pixel-width frame))
+  (setq eaf-last-frame-height (frame-pixel-height frame))
+  (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size))))
+
+(defun eaf-try-adjust-view-with-frame-size ()
+  (when (and (equal (frame-pixel-width) eaf-last-frame-width)
+             (equal (frame-pixel-height) eaf-last-frame-height))
+    (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
   (ignore-errors
@@ -291,52 +327,66 @@ We need calcuate render allocation to make sure no black border around render co
              (message (format "export %s to html" (buffer-file-name))))))))
 
 (defun eaf-monitor-key-event ()
-  (ignore-errors
-    (with-current-buffer (buffer-name)
-      (when (eq major-mode 'eaf-mode)
-        (let* ((event last-command-event)
-               (key (make-vector 1 event))
-               (key-command (format "%s" (key-binding key)))
-               (key-desc (key-description key))
-               )
-          (cond
-           ;; Just send event when user insert single character.
-           ;; Don't send event 'M' if user press Ctrl + M.
-           ((and
-             (or
-              (equal key-command "self-insert-command")
-              (equal key-command "completion-select-if-within-overlay"))
-             (equal 1 (string-width (this-command-keys))))
-            (message (format "Send char: '%s" key-desc))
-            (eaf-call "send_key" (format "%s:%s" buffer-id key-desc)))
-           ((or
-             (equal key-command "nil")
-             (equal key-desc "RET")
-             (equal key-desc "DEL")
-             (equal key-desc "TAB")
-             (equal key-desc "<home>")
-             (equal key-desc "<end>")
-             (equal key-desc "<left>")
-             (equal key-desc "<right>")
-             (equal key-desc "<up>")
-             (equal key-desc "<down>")
-             (equal key-desc "<prior>")
-             (equal key-desc "<next>")
-             )
-            (message (format "Send: '%s" key-desc))
-            (eaf-call "send_key" (format "%s:%s" buffer-id key-desc))
-            )
-           (t
-            (unless (or
-                     (equal key-command "keyboard-quit")
-                     (equal key-command "kill-this-buffer")
-                     (equal key-command "eaf-open"))
-              (ignore-errors (call-interactively (key-binding key))))
-            (message (format "Got command: %s" key-command)))))
-        ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
-        ;; because i insert nothing in buffer.
-        (setq last-command-event nil)
-        ))))
+  (unless
+      (ignore-errors
+        (with-current-buffer (buffer-name)
+          (when (eq major-mode 'eaf-mode)
+            (let* ((event last-command-event)
+                   (key (make-vector 1 event))
+                   (key-command (format "%s" (key-binding key)))
+                   (key-desc (key-description key))
+                   )
+
+              ;; Uncomment for debug.
+              ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
+
+              (cond
+               ;; Just send event when user insert single character.
+               ;; Don't send event 'M' if user press Ctrl + M.
+               ((and
+                 (or
+                  (equal key-command "self-insert-command")
+                  (equal key-command "completion-select-if-within-overlay"))
+                 (equal 1 (string-width (this-command-keys))))
+                (eaf-call "send_key" buffer-id key-desc))
+               ((string-match "^[CMSs]-.*" key-desc)
+                (eaf-call "send_keystroke" buffer-id key-desc))
+               ((or
+                 (equal key-command "nil")
+                 (equal key-desc "RET")
+                 (equal key-desc "DEL")
+                 (equal key-desc "TAB")
+                 (equal key-desc "<backtab>")
+                 (equal key-desc "<home>")
+                 (equal key-desc "<end>")
+                 (equal key-desc "<left>")
+                 (equal key-desc "<right>")
+                 (equal key-desc "<up>")
+                 (equal key-desc "<down>")
+                 (equal key-desc "<prior>")
+                 (equal key-desc "<next>")
+                 )
+                (eaf-call "send_key" buffer-id key-desc)
+                )
+               (t
+                (unless (or
+                         (equal key-command "keyboard-quit")
+                         (equal key-command "kill-this-buffer")
+                         (equal key-command "eaf-open"))
+                  (ignore-errors (call-interactively (key-binding key))))
+                )))
+            ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
+            ;; because i insert nothing in buffer.
+            (setq last-command-event nil))
+          ))
+    ;; If something wrong in `eaf-monitor-key-event', emacs will remove `eaf-monitor-key-event' from `pre-command-hook' hook list.
+    ;; Then we add `eaf-monitor-key-event' in `pre-command-hook' list again, hahahaha.
+    (run-with-timer
+     0.1
+     nil
+     (lambda ()
+       (progn
+         (add-hook 'pre-command-hook #'eaf-monitor-key-event))))))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
@@ -365,12 +415,48 @@ We need calcuate render allocation to make sure no black border around render co
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "message_to_emacs"
+ 'message)
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "create_new_browser_buffer"
+ 'eaf-create-new-browser-buffer)
+
+(defun eaf-create-new-browser-buffer (new-window-buffer-id)
+  (let ((eaf-buffer (generate-new-buffer (concat "browser popup window " new-window-buffer-id))))
+    (with-current-buffer eaf-buffer
+      (eaf-mode)
+      (read-only-mode)
+      (set (make-local-variable 'buffer-id) new-window-buffer-id)
+      (set (make-local-variable 'buffer-url) "")
+      (set (make-local-variable 'buffer-app-name) "browser")
+      )
+    (switch-to-buffer eaf-buffer)))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "request_kill_buffer"
+ 'eaf-request-kill-buffer)
+
+(defun eaf-request-kill-buffer (kill-buffer-id)
+  (catch 'found-match-buffer
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (when (equal major-mode 'eaf-mode)
+        (when (string= buffer-id kill-buffer-id)
+          (kill-buffer buffer)
+          (message (format "Request kill buffer %s" kill-buffer-id))
+          (throw 'found-match-buffer t))))))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "focus_emacs_buffer"
  'eaf-focus-buffer)
 
 (defun eaf-start-finish ()
   ;; Call `eaf-open-internal' after receive `start_finish' signal from server process.
-  (eaf-open-internal eaf-first-start-url eaf-first-start-app-name))
+  (eaf-open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -386,7 +472,7 @@ We need calcuate render allocation to make sure no black border around render co
             (when (and
                    (eq major-mode 'eaf-mode)
                    (equal buffer-id bid))
-              (rename-buffer title)
+              (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t)
               )))))))
 
@@ -403,39 +489,51 @@ We need calcuate render allocation to make sure no black border around render co
  "com.lazycat.eaf" "open_buffer_url"
  'eaf-open-buffer-url)
 
-(defun eaf-input-message (buffer_id interactive_string callback_type)
-  (eaf-call "handle_input_message" buffer_id callback_type (read-string interactive_string)))
+(defun eaf-read-string (interactive-string)
+  "Like `read-string', but return nil if user execute `keyboard-quit' when input."
+  (condition-case nil (read-string interactive-string) (quit nil)))
+
+(defun eaf-input-message (buffer-id interactive-string callback-type)
+  (let* ((input-message (eaf-read-string interactive-string)))
+    (when input-message
+      (eaf-call "handle_input_message" buffer-id callback-type input-message)
+      )))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "input_message"
  'eaf-input-message)
 
+(add-hook 'window-size-change-functions 'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 (add-hook 'pre-command-hook #'eaf-monitor-key-event)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
 (add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
-(defun eaf-open-internal (url app-name)
+(defun eaf-open-internal (url app-name arguments)
   (let* ((buffer (eaf-create-buffer url))
          buffer-result)
     (with-current-buffer buffer
-      (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name)))
+      (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name arguments)))
     (if (equal buffer-result "")
         (progn
           ;; Switch to new buffer if buffer create successful.
           (switch-to-buffer buffer)
+          (set (make-local-variable 'buffer-url) url)
+          (set (make-local-variable 'buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
           (when (or (string= app-name "markdownpreviewer")
                     (string= app-name "orgpreviewer"))
             (other-window +1)))
       ;; Kill buffer and show error message from python server.
       (kill-buffer buffer)
+      (switch-to-buffer eaf-name)
       (message buffer-result))
     ))
 
-(defun eaf-open (url &optional app-name)
+(defun eaf-open (url &optional app-name arguments)
   (interactive "FOpen with EAF: ")
+  ;; Try set app-name along with url if app-name is set.
   (unless app-name
     (cond ((string-equal url "eaf-demo")
            (setq app-name "demo"))
@@ -447,6 +545,10 @@ We need calcuate render allocation to make sure no black border around render co
            (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
                   (setq app-name "pdfviewer"))
                  ((member extension-name '("md"))
+                  ;; Try get user's github token if `eaf-grip-token' is nil.
+                  (if eaf-grip-token
+                      (setq arguments eaf-grip-token)
+                    (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
                   ;; Split window to show file and previewer.
                   (eaf-split-preview-windows)
                   (setq app-name "markdownpreviewer"))
@@ -454,6 +556,9 @@ We need calcuate render allocation to make sure no black border around render co
                   (setq app-name "imageviewer"))
                  ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
                   (setq app-name "videoplayer"))
+                 ((member extension-name '("html"))
+                  (setq url (concat "file://" url))
+                  (setq app-name "browser"))
                  ((member extension-name '("org"))
                   ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
                   (save-excursion
@@ -467,17 +572,46 @@ We need calcuate render allocation to make sure no black border around render co
                   (eaf-split-preview-windows)
                   (setq app-name "orgpreviewer")
                   )))
-          (t
+          ((and (not (string-prefix-p "/" url))
+                (not (string-prefix-p "~" url))
+                (string-match thing-at-point-short-url-regexp url))
            (setq app-name "browser")
            (unless (string-prefix-p "http" url)
-             (setq url (concat "http://" url))))))
-  (if (process-live-p eaf-process)
-      ;; Call `eaf-open-internal' directly if server process has start.
-      (eaf-open-internal url app-name)
-    ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
-    (setq eaf-first-start-url url)
-    (setq eaf-first-start-app-name app-name)
-    (eaf-start-process)))
+             (setq url (concat "http://" url)))
+           )))
+  (unless arguments
+    (setq arguments ""))
+  (if app-name
+      ;; Open url with eaf application if app-name is not empty.
+      (if (process-live-p eaf-process)
+          (let (exists-eaf-buffer)
+            ;; Try to opened buffer.
+            (catch 'found-match-buffer
+              (dolist (buffer (buffer-list))
+                (set-buffer buffer)
+                (when (equal major-mode 'eaf-mode)
+                  (when (and (string= buffer-url url)
+                             (string= buffer-app-name app-name))
+                    (setq exists-eaf-buffer buffer)
+                    (throw 'found-match-buffer t)))))
+            ;; Switch to exists buffer,
+            ;; if no match buffer found, call `eaf-open-internal'.
+            (if exists-eaf-buffer
+                (switch-to-buffer exists-eaf-buffer)
+              (eaf-open-internal url app-name arguments)))
+        ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
+        (setq eaf-first-start-url url)
+        (setq eaf-first-start-app-name app-name)
+        (setq eaf-first-start-arguments arguments)
+        (eaf-start-process)
+        (message (format "Opening %s with eaf.%s" url app-name)))
+    ;; Output something to user if app-name is empty string.
+    (if (or (string-prefix-p "/" url)
+            (string-prefix-p "~" url))
+        (if (not (file-exists-p url))
+            (message (format "EAF: %s is not exists." url))
+          (message (format "EAF Don't know how to open %s" url)))
+      (message (format "EAF Don't know how to open %s" url)))))
 
 (defun eaf-split-preview-windows ()
   (delete-other-windows)
@@ -488,6 +622,10 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-show-file-qrcode (url)
   (interactive "FShow file QR code: ")
   (eaf-open url "filetransfer"))
+
+(defun eaf-open-url(url)
+  (interactive "MOpen with EAF: ")
+  (eaf-open url))
 
 (defun dired-show-file-qrcode ()
   (interactive)
@@ -507,6 +645,22 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-upload-file (dir)
   (interactive "DDirectory to save uploade file: ")
   (eaf-open dir "fileuploader"))
+
+(defun eaf-dired-open-file ()
+  "Open html/pdf/image/video file with eaf, other file use `find-file'"
+  (interactive)
+  (dolist (file (dired-get-marked-files))
+    (setq extension-name (file-name-extension file))
+    (cond ((member extension-name '("html"))
+           (eaf-open (concat "file://" file) "browser"))
+          ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
+           (eaf-open file "pdfviewer"))
+          ((member extension-name '("jpg" "png" "bmp"))
+           (eaf-open file "imageviewer"))
+          ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
+           (eaf-open file "videoplayer"))
+          (t
+           (find-file file)))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
