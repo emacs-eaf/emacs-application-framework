@@ -532,7 +532,7 @@ We need calcuate render allocation to make sure no black border around render co
     ))
 
 (defun eaf-open (url &optional app-name arguments)
-  (interactive "FOpen with EAF: ")
+  (interactive "MOpen with EAF: ")
   ;; Try set app-name along with url if app-name is set.
   (unless app-name
     (cond ((string-equal url "eaf-demo")
