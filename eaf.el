@@ -136,6 +136,11 @@
   :type 'string
   :group 'eaf)
 
+(defcustom eaf-python-command "python3"
+  "The Python interpreter used to run eaf.py."
+  :type 'string
+  :group 'eaf)
+
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -155,7 +160,7 @@
           (apply 'start-process
                  eaf-name
                  eaf-name
-                 "python3" (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port))
+                 eaf-python-command (append (list eaf-python-file (eaf-get-emacs-xid)) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port))
                  ))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
