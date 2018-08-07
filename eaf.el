@@ -271,7 +271,7 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-monitor-configuration-change (&rest _)
   (ignore-errors
     (let (view-infos)
-      (dolist (window (window-list))
+      (dolist (window (mapcan #'window-list (visible-frame-list)))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
             (if (eq major-mode 'eaf-mode)
