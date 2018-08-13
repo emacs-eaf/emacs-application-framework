@@ -4,7 +4,7 @@ If you prefer to run linux in a container, you can use below command to build an
 
 ### Build
 ```Shell
-docker build -t eaf  .
+docker build -t eaf --build-arg=_UID=$UID --build-arg=_USER=$USER  .
 ```
 
 ### Run
