@@ -29,12 +29,10 @@ class View(QWidget):
 
     trigger_focus_event = QtCore.pyqtSignal(str)
 
-    def __init__(self, emacs_xid, buffer, view_info):
+    def __init__(self, buffer, view_info):
         super(View, self).__init__()
 
         self.buffer = buffer
-
-        self.emacs_xid = emacs_xid
 
         # Init widget attributes.
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -44,7 +42,8 @@ class View(QWidget):
 
         # Init attributes.
         self.view_info = view_info
-        (self.buffer_id, self.x, self.y, self.width, self.height) = view_info.split(":")
+        (self.buffer_id, self.emacs_xid, self.x, self.y, self.width, self.height) = view_info.split(":")
+        self.emacs_xid = int(self.emacs_xid)
         self.x = int(self.x)
         self.y = int(self.y)
         self.width = int(self.width)

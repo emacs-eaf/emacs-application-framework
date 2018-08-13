@@ -40,16 +40,14 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_xid, emacs_width, emacs_height
+        global emacs_width, emacs_height
 
         dbus.service.Object.__init__(
             self,
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        # (emacs_xid, emacs_width, emacs_height, proxy_host, proxy_port) = (map(lambda x: int(x), args))
-        (emacs_xid, emacs_width, emacs_height, proxy_host, proxy_port) = args
-        emacs_xid = int(emacs_xid)
+        (emacs_width, emacs_height, proxy_host, proxy_port) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
 
@@ -83,7 +81,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def scroll_buffer(self, view_info, scroll_direction, scroll_type):
-        (buffer_id, _, _, _, _) = view_info.split(":")
+        (buffer_id, _, _, _, _, _) = view_info.split(":")
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].scroll(scroll_direction, scroll_type)
 
@@ -161,8 +159,6 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_views(self, args):
-        global emacs_xid
-
         view_infos = args.split(",")
 
         # Do something if buffer's all view hide after update_views operation.
@@ -187,8 +183,8 @@ class EAF(dbus.service.Object):
         if view_infos != ['']:
             for view_info in view_infos:
                 if view_info not in self.view_dict:
-                    (buffer_id, _, _, _, _) = view_info.split(":")
-                    view = View(emacs_xid, self.buffer_dict[buffer_id], view_info)
+                    (buffer_id, _, _, _, _, _) = view_info.split(":")
+                    view = View(self.buffer_dict[buffer_id], view_info)
                     self.view_dict[view_info] = view
 
                     view.trigger_focus_event.connect(self.focus_emacs_buffer)
@@ -353,7 +349,6 @@ if __name__ == "__main__":
     if bus.request_name(EAF_DBUS_NAME) != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
         print("EAF process has startup.")
     else:
-        emacs_xid = 0
         emacs_width = emacs_height = 0
 
         app = QApplication(sys.argv)
