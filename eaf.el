@@ -537,6 +537,10 @@ We need calcuate render allocation to make sure no black border around render co
       (message buffer-result))
     ))
 
+(defun eaf-open-url (url &optional arguments)
+  (interactive "MOpen url with EAF: ")
+  (eaf-open url "browser" arguments))
+
 (defun eaf-open (url &optional app-name arguments)
   (interactive "FOpen with EAF: ")
   ;; Try set app-name along with url if app-name is set.
