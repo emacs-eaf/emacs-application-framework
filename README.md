@@ -80,7 +80,7 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 ### Browser
 
 ```
-Type 'eaf-open' RET www.google.com
+Type 'eaf-open-url' RET www.google.com
 ```
 
 | Browser Key        | Event                    |
