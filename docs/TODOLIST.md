@@ -9,3 +9,4 @@
 * PdfViewer: split window first, then scroll event cause view blank
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough
 * CHMViewer: develop a chm viewer in emacs.
+* Maybe i can study key-process from https://github.com/tarsius/keycast ?
