@@ -324,8 +324,7 @@ class EAF(dbus.service.Object):
                 try:
                     session_dict = json.load(session_file)
                 except ValueError:
-                    import traceback
-                    traceback.print_exc()
+                    pass
 
                 if buf.module_path in session_dict:
                     if buf.url in session_dict[buf.module_path]:
