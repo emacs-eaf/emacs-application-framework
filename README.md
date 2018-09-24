@@ -1,12 +1,12 @@
 # What is Emacs Application Framework?
-Emacs Application Framework is a development framework that developers can develop any PyQt program and integrate into Emacs.
+Emacs Application Framework is a development framework, where developers can develop any PyQt program, and integrate into Emacs.
 
 This framework mainly implements three functions:
 1. Integrate PyQt program window into Emacs Frame using Xlib Reparent technology
 2. Listening to EAF buffer's keyboard event flow and controlling the keyboard input of PyQt program via DBus IPC
 3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
 
-Using this framework, you can use PyQt develop powerful graphics programs to extend Emacs
+Using this framework, you can use PyQt to develop powerful graphics programs to extend Emacs.
 
 ## Screenshots of EAF
 
@@ -65,7 +65,7 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 
 If you prefer to run linux in a docker, you can read [Run EAF with docker](./docker/README.md)
 
-### Why this awesome framework can't works with MacOS?
+### Why this awesome framework doesn't works with MacOS?
 There are mainly three obstacles:
 1. I can't make dbus/python-dbus works on MacOS High Sierra
 2. This framework need use X11 reparent to stick Qt5 window to emacs frame, but i don't know how to make X11 works on MacOS.
@@ -85,7 +85,7 @@ Type 'eaf-open-url' RET www.google.com
 
 | Browser Key        | Event                    |
 | :-----:            | :----                    |
-| Left Button        | Open link current tab    |
+| Left Button        | Open link in current tab |
 | Ctrl + Left Button | Open link in new tab     |
 | M-f                | Forward page in history  |
 | M-b                | Backward page in history |
@@ -108,7 +108,7 @@ Type 'eaf-open' RET pdf-filepath
 | t              | Switch scale mode |
 | -              | Zoom out          |
 | =              | Zoom in           |
-| 0              | Zoomn reset       |
+| 0              | Zoom reset        |
 | g              | Goto page         |
 | p              | Goto to percent   |
 | [              | Remember position |
@@ -153,17 +153,17 @@ Type 'eaf-open' RET image-filepath
 ## Settings
 
 ### Proxy
-If you can't access most awesome internet service like me, you perhaps need proxy settings like below:
+If you can't access most awesome internet services like me, you perhaps need proxy settings like below:
 
 ```Elisp
 (setq eaf-http-proxy-host "127.0.0.1")
 (setq eaf-http-proxy-port "1080")
 ```
 
-Then EAF browser are free. ;)
+Then EAF browser is free! ;)
 
 ### Markdown Previewer
-If you use markdown previewer, you need access [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
+If you use markdown previewer, you need access to a [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
 
 ```Elisp
 (setq eaf-grip-token "yourtokencode")
@@ -172,11 +172,11 @@ If you use markdown previewer, you need access [Personal access token](https://g
 Otherwise, github will popup "times limit" error because so many peope use grip. ;)
 
 ## Report bug
-If you have any problem with EAF, please use command "emacs -Q" start Emacs first.
+If you have any problem with EAF, please use command "emacs -Q" to start Emacs without any customizations.
 
-Then test again, if "emacs -Q" works fine, it's must be something wrong with your emacs config file.
+Then re-test your workflow. If "emacs -Q" works fine, it's must be something wrong with your emacs config file.
 
-If "emacs -Q" still have problem, please [report bug](https://github.com/manateelazycat/emacs-application-framework/issues/new)
+If the problem persists, please [report bug here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
 
 ## Join Us
 Do you want to make Emacs a real operating system?
@@ -185,7 +185,7 @@ Do you want to live in emacs more comfortably?
 
 Want to create unparalleled plugins to extend emacs?
 
-[Let's hacking together!](./docs/HACKING.md)
+[Let's hack together!](./docs/HACKING.md)
 
 ## 打赏
 如果我的作品让你的生活充满快乐, 欢迎请我喝瓶啤酒, 哈哈哈哈
