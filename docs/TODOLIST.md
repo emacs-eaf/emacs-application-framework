@@ -10,3 +10,9 @@
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough
 * CHMViewer: develop a chm viewer in emacs.
 * Maybe i can study key-process from https://github.com/tarsius/keycast ?
+
+### Mac version
+* Figure out mirror render technology from Mac's camera application.
+* Use Mac swift instead Qt develop application extension.
+* Use socket instead DBus as multi-process IPC
+* How to do X11 reparent in Mac?
