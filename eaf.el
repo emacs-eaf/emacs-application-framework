@@ -549,6 +549,8 @@ We need calcuate render allocation to make sure no black border around render co
            (setq app-name "demo"))
           ((string-equal url "eaf-camera")
            (setq app-name "camera"))
+          ((string-equal url "eaf-qutebrowser")
+           (setq app-name "qutebrowser"))
           ((file-exists-p url)
            (setq url (expand-file-name url))
            (setq extension-name (file-name-extension url))
