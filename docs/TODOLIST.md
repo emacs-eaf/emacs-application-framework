@@ -7,6 +7,7 @@
 * Pdfviewer: open link like vimium.
 * PdfViewer: use mupdf/page.searchFor implement search text in pdf.
 * PdfViewer: split window first, then scroll event cause view blank
+* PdfViewer: allow select text.
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough
 * CHMViewer: develop a chm viewer in emacs.
 * Maybe i can study key-process from https://github.com/tarsius/keycast ?
