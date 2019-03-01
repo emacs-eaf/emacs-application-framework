@@ -50,3 +50,9 @@ class BrowserBuffer(Buffer):
         elif keystroke == "M-q":
             self.buffer_widget.clean_cookie()
             self.message_to_emacs.emit("Clean all cookie")
+        elif keystroke == "C--":
+            self.buffer_widget.zoom_out()
+        elif keystroke == "C-=":
+            self.buffer_widget.zoom_in()
+        elif keystroke == "C-0":
+            self.buffer_widget.zoom_reset()
