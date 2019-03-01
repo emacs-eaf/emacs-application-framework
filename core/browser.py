@@ -114,6 +114,15 @@ class BrowserView(QWebEngineView):
 
         return super(QWebEngineView, self).eventFilter(obj, event)
 
+    def zoom_in(self):
+        self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
+
+    def zoom_out(self):
+        self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
+
+    def zoom_reset(self):
+        self.setZoomFactor(1)
+
 class BrowserPage(QWebEnginePage):
 
     def __init__(self):

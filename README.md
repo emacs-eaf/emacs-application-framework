@@ -90,6 +90,9 @@ Type 'eaf-open-url' RET www.google.com
 | M-f                | Forward page in history  |
 | M-b                | Backward page in history |
 | M-q                | Delete all cookies       |
+| C-=                | Zoom in                  |
+| C--                | Zoom out                 |
+| C-0                | Zoom reset               |
 
 ### PDF Viewer
 
