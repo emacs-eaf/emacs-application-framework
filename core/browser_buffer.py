@@ -42,6 +42,11 @@ class BrowserBuffer(Buffer):
     def scroll(self, scroll_direction, scroll_type):
         webview_scroll(self, scroll_direction, scroll_type)
 
+    def eval_code(self, code):
+        eval(code, {
+            "self": self.buffer_widget,
+        })
+
     def send_keystroke(self, keystroke):
         if keystroke == "M-f":
             self.buffer_widget.forward()
