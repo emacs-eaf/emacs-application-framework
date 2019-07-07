@@ -342,7 +342,7 @@ class FileUploaderWidget(QWidget):
         self.file_name_font.setPointSize(24)
 
         self.file_name_label = QLabel(self)
-        self.file_name_label.setText("Your file will uploading to\n{0}".format(url))
+        self.file_name_label.setText("Your file will be uploaded to\n{0}".format(url))
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
         self.file_name_label.setStyleSheet("color: #eee")

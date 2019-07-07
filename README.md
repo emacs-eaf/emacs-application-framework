@@ -80,7 +80,7 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 ### Browser
 
 ```
-Type 'eaf-open-url' RET www.google.com
+Type 'eaf-open-browser' RET www.google.com
 ```
 
 | Browser Key        | Event                    |
@@ -142,16 +142,16 @@ Type 'eaf-open' RET image-filepath
 
 ### Other applications
 
-| Application Name   | Launch                                        |
-| :--------          | :----                                         |
-| Markdown previewer | Type 'eaf-open' RET markdown filepath         |
-| Org file previewer | Type 'eaf-open' RET org filepath              |
-| Camera             | Type 'eaf-camera'                             |
-| Demo               | Type 'eaf-demo'                               |
-| File Transfer      | Type 'eaf-show-file-qrcode'                   |
-|                    | Or use `dired-show-file-qrcode' in dired mode |
-| File Uploader      | Type 'eaf-upload-file'                        |
-| Air Share          | Type 'eaf-air-share'                          |
+| Application Name   | Launch                                            |
+| :--------          | :----                                             |
+| Markdown previewer | Type 'eaf-open' RET markdown filepath             |
+| Org file previewer | Type 'eaf-open' RET org filepath                  |
+| Camera             | Type 'eaf-open-camera'                            |
+| Demo               | Type 'eaf-open-demo'                              |
+| File Transfer      | Type eaf-file-transfer-qrcode'                    |
+|                    | Or use `dired-file-transfer-qrcode' in dired mode |
+| File Uploader      | Type eaf-file-upload-qrcode'                      |
+| Air Share          | Type 'eaf-file-transfer-air-share'                |
 
 ## Settings
 
