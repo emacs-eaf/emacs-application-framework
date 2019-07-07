@@ -148,9 +148,9 @@ Type 'eaf-open' RET image-filepath
 | Org file previewer | Type 'eaf-open' RET org filepath                  |
 | Camera             | Type 'eaf-open-camera'                            |
 | Demo               | Type 'eaf-open-demo'                              |
-| File Transfer      | Type eaf-file-transfer-qrcode'                    |
-|                    | Or use `dired-file-transfer-qrcode' in dired mode |
-| File Uploader      | Type eaf-file-upload-qrcode'                      |
+| File Transfer      | Type 'eaf-file-transfer-qrcode'                   |
+|                    | Or use 'dired-file-transfer-qrcode' in dired mode |
+| File Uploader      | Type 'eaf-file-upload-qrcode'                     |
 | Air Share          | Type 'eaf-file-transfer-air-share'                |
 
 ## Settings
