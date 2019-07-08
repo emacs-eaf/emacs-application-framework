@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Sun Jul  7 01:54:15 2019 (-0400)
+;; Last-Updated: Mon Jul  8 09:31:31 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -130,6 +130,10 @@
 (defvar eaf-http-proxy-host "")
 
 (defvar eaf-http-proxy-port "")
+
+(defvar eaf-find-alternate-file-in-dired nil
+  "If non-nil, when calling `eaf-open-file-in-dired', EAF unrecognizable files will be opened
+by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
@@ -674,7 +678,8 @@ the file at current cursor position in dired."
   (eaf-open dir "file-uploader"))
 
 (defun eaf-open-file-in-dired ()
-  "Open html/pdf/image/video files with EAF. Other files will open normally with `find-file'."
+  "Open html/pdf/image/video files whenever possible with EAF in dired.
+Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
     (setq extension-name (file-name-extension file))
@@ -686,8 +691,9 @@ the file at current cursor position in dired."
            (eaf-open file "image-viewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
            (eaf-open file "video-player"))
-          (t
-           (find-file file)))))
+          (eaf-find-alternate-file-in-dired
+           (dired-find-alternate-file))
+          (t (dired-find-file)))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
