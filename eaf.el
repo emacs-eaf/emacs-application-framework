@@ -435,7 +435,7 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-create-new-browser-buffer)
 
 (defun eaf-create-new-browser-buffer (new-window-buffer-id)
-  (let ((eaf-buffer (generate-new-buffer (concat "Browser popup window " new-window-buffer-id))))
+  (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode)
@@ -660,16 +660,16 @@ the file at current cursor position in dired."
   (interactive)
   (eaf-file-transfer-qrcode (dired-get-filename)))
 
-(defun eaf-file-transfer-air-share ()
-  "Open EAF Air Share application."
+(defun eaf-file-transfer-airshare ()
+  "Open EAF Airshare application."
   (interactive)
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "EAF-Air-SHare - Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "EAF-Airshare - Info (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
-    (eaf-open input-string "air-share")
+    (eaf-open input-string "airshare")
     ))
 
 (defun eaf-file-upload-qrcode (dir)
