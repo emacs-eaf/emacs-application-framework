@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Wed Jul 10 23:25:43 2019 (-0400)
+;; Last-Updated: Thu Jul 11 17:04:16 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -551,7 +551,7 @@ We need calcuate render allocation to make sure no black border around render co
            (not (string-prefix-p "~" url))
            (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.[a-z]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
       (progn (setq app-name "browser")
-             (unless (and (string-prefix-p "http://" url) (not (string-prefix-p "https://" url)))
+             (unless (or (string-prefix-p "http://" url) (string-prefix-p "https://" url))
                (setq url (concat "http://" url)))
              (eaf-open url "browser" arguments))
     (when (string= app-name "browser")
