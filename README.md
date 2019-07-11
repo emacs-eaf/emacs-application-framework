@@ -151,7 +151,7 @@ Type 'eaf-open' RET image-filepath
 | File Transfer      | Type 'eaf-file-transfer-qrcode'                   |
 |                    | Or use 'dired-file-transfer-qrcode' in dired mode |
 | File Uploader      | Type 'eaf-file-upload-qrcode'                     |
-| Air Share          | Type 'eaf-file-transfer-air-share'                |
+| Airshare           | Type 'eaf-file-transfer-airshare'                 |
 
 ## Settings
 
