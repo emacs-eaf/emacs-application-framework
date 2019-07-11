@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Mon Jul  8 09:31:31 2019 (-0400)
+;; Last-Updated: Wed Jul 10 23:25:43 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -247,7 +247,8 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4)) ))
 
 (defun eaf-create-buffer (input-content)
-  (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
+  (let* ((file-or-command-name (substring input-content (string-match "[^\/]*$" input-content)))
+         (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode)
