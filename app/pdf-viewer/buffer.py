@@ -114,11 +114,11 @@ class PdfViewerWidget(QWidget):
 
     def remember_current_position(self):
         self.remember_offset = self.scroll_offset
-        self.message_to_emacs.emit("EAF pdf viewer: remember position.")
+        self.message_to_emacs.emit("EAF PDF Viewer: Remember Position.")
 
     def remember_jump(self):
         if self.remember_offset is None:
-            self.message_to_emacs.emit("EAF pdf viewer: no position can jump.")
+            self.message_to_emacs.emit("EAF PDF Viewer: Not a Jumpable Position.")
         else:
             current_scroll_offset = self.scroll_offset
             self.scroll_offset = self.remember_offset
@@ -250,33 +250,33 @@ class PdfViewerWidget(QWidget):
 
     @build_context_wrap
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_J:
+        if event.key() == Qt.Key.Key_J:
             self.scroll_up()
-        elif event.key() == Qt.Key_K:
+        elif event.key() == Qt.Key.Key_K:
             self.scroll_down()
-        elif event.key() == Qt.Key_Space:
+        elif event.key() == Qt.Key.Key_Space:
             self.scroll_up_page()
-        elif event.key() == Qt.Key_B:
+        elif event.key() == Qt.Key.Key_B:
             self.scroll_down_page()
-        elif event.key() == Qt.Key_T:
+        elif event.key() == Qt.Key.Key_T:
             self.switch_to_read_mode()
-        elif event.key() == Qt.Key_Period:
+        elif event.key() == Qt.Key.Key_Period:
             self.scroll_to_home()
-        elif event.key() == Qt.Key_Comma:
+        elif event.key() == Qt.Key.Key_Comma:
             self.scroll_to_end()
-        elif event.key() == Qt.Key_0:
+        elif event.key() == Qt.Key.Key_0:
             self.zoom_reset()
-        elif event.key() == Qt.Key_Equal:
+        elif event.key() == Qt.Key.Key_Equal:
             self.zoom_in()
-        elif event.key() == Qt.Key_Minus:
+        elif event.key() == Qt.Key.Key_Minus:
             self.zoom_out()
-        elif event.key() == Qt.Key_G:
+        elif event.key() == Qt.Key.Key_G:
             self.send_input_message("Jump to: ", "jump_page")
-        elif event.key() == Qt.Key_P:
+        elif event.key() == Qt.Key.Key_P:
             self.send_input_message("Jump to percent: ", "jump_percent")
-        elif event.key() == Qt.Key_BracketLeft:
+        elif event.key() == Qt.Key.Key_BracketLeft:
             self.remember_current_position()
-        elif event.key() == Qt.Key_BracketRight:
+        elif event.key() == Qt.Key.Key_BracketRight:
             self.remember_jump()
 
     def get_start_page_index(self):
