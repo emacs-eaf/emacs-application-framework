@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Thu Jul 11 17:04:16 2019 (-0400)
+;; Last-Updated: Thu Jul 11 23:47:06 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -132,7 +132,7 @@
 (defvar eaf-http-proxy-port "")
 
 (defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, when calling `eaf-open-file-in-dired', EAF unrecognizable files will be opened
+  "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
 by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
@@ -354,11 +354,10 @@ We need calcuate render allocation to make sure no black border around render co
               (cond
                ;; Just send event when user insert single character.
                ;; Don't send event 'M' if user press Ctrl + M.
-               ((and
-                 (or
-                  (equal key-command "self-insert-command")
-                  (equal key-command "completion-select-if-within-overlay"))
-                 (equal 1 (string-width (this-command-keys))))
+               ((and (or
+                      (equal key-command "self-insert-command")
+                      (equal key-command "completion-select-if-within-overlay"))
+                     (equal 1 (string-width (this-command-keys))))
                 (eaf-call "send_key" buffer-id key-desc))
                ((string-match "^[CMSs]-.*" key-desc)
                 (eaf-call "send_keystroke" buffer-id key-desc))
@@ -545,7 +544,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defun eaf-open-browser (url &optional arguments)
   "Open EAF browser application given a URL and ARGUMENTS."
-  (interactive "MEAF-Browser - Enter URL: ")
+  (interactive "MEAF Browser - Enter URL: ")
   ;; Validate URL legitimacy
   (if (and (not (string-prefix-p "/" url))
            (not (string-prefix-p "~" url))
@@ -652,7 +651,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defun eaf-file-transfer-qrcode (file)
   "Open EAF File Transfer application, display the QR code of the selected file FILE."
-  (interactive "FEAF-File-Transfer - Select File: ")
+  (interactive "FEAF File Transfer - Select File: ")
   (eaf-open file "file-transfer"))
 
 (defun dired-file-transfer-qrcode ()
@@ -667,7 +666,7 @@ the file at current cursor position in dired."
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "EAF-Airshare - Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "EAF Airshare - Info (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")
@@ -675,10 +674,10 @@ the file at current cursor position in dired."
 
 (defun eaf-file-upload-qrcode (dir)
   "Open EAF File Uploader application. Select directory DIR to save the uploaded file."
-  (interactive "DDirectory to save uploaded file: ")
+  (interactive "DEAF File Uploader - Specify Saved File's Directory: ")
   (eaf-open dir "file-uploader"))
 
-(defun eaf-open-file-in-dired ()
+(defun eaf-file-open-in-dired ()
   "Open html/pdf/image/video files whenever possible with EAF in dired.
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)

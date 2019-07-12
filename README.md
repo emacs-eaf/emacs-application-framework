@@ -1,12 +1,12 @@
 # What is Emacs Application Framework?
-Emacs Application Framework is a development framework, where developers can develop any PyQt program, and integrate into Emacs.
+Emacs Application Framework is a development framework, where developers can develop any PyQt program, and integrate it into Emacs.
 
 This framework mainly implements three functions:
 1. Integrate PyQt program window into Emacs Frame using Xlib Reparent technology
 2. Listening to EAF buffer's keyboard event flow and controlling the keyboard input of PyQt program via DBus IPC
 3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
 
-Using this framework, you can use PyQt to develop powerful graphics programs to extend Emacs.
+Using this framework, you can use PyQt to develop powerful GUI programs to extend Emacs.
 
 ## Screenshots of EAF
 
@@ -42,7 +42,7 @@ Using this framework, you can use PyQt to develop powerful graphics programs to 
     Make sure python3 and pip has install in your operating system, then execute below command:
 
 ```Bash
-    sudo pip install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib
+    sudo pip install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib PyQtWebEngine
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
