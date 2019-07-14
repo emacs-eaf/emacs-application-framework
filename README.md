@@ -24,7 +24,7 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 | <img src="./screenshot/pdf_viewer.gif" width="400"> | <img src="./screenshot/camera.gif" width="400"> |
 |                                                     |                                                 |
 
-| File Transfer                                          | File Uploader                                          |
+| File Sender                                            | File Receiver                                          |
 | :--------:                                             | :----:                                                 |
 | <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
 |                                                        |                                                        |
@@ -148,9 +148,9 @@ Type 'eaf-open' RET image-filepath
 | Org file previewer | Type 'eaf-open' RET org filepath                  |
 | Camera             | Type 'eaf-open-camera'                            |
 | Demo               | Type 'eaf-open-demo'                              |
-| File Transfer      | Type 'eaf-file-transfer-qrcode'                   |
-|                    | Or use 'dired-file-transfer-qrcode' in dired mode |
-| File Uploader      | Type 'eaf-file-upload-qrcode'                     |
+| File Sender        | Type 'eaf-file-sender-qrcode'                     |
+|                    | Or use 'dired-file-sender-qrcode' in dired mode   |
+| File Receiver      | Type 'eaf-file-receiver-qrcode'                   |
 | Airshare           | Type 'eaf-file-transfer-airshare'                 |
 
 ## Settings
