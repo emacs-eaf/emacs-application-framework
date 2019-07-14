@@ -352,7 +352,7 @@ class FileUploaderWidget(QWidget):
         self.notify_font = QFont()
         self.notify_font.setPointSize(12)
         self.notify_label = QLabel(self)
-        self.notify_label.setText("Scan QR code above to upload file.\nMake sure that your smartphone is connected to the same WiFi network as this computer.")
+        self.notify_label.setText("Scan QR code above to upload a file from your smartphone.\nMake sure the smartphone is connected to the same WiFi network as this computer.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
         self.notify_label.setStyleSheet("color: #eee")

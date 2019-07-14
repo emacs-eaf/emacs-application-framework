@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Sun Jul 14 18:39:50 2019 (-0400)
+;; Last-Updated: Sun Jul 14 19:05:39 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -246,8 +246,9 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))))
 
 (defun eaf-create-buffer (input-content)
-  (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/$" input-content)))
+  (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
+    (message file-or-command-name)
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode))
@@ -647,17 +648,6 @@ We need calcuate render allocation to make sure no black border around render co
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-file-transfer-qrcode (file)
-  "Open EAF File Transfer application, display the QR code of the selected file FILE."
-  (interactive "FEAF File Transfer - Select File: ")
-  (eaf-open file "file-transfer"))
-
-(defun dired-file-transfer-qrcode ()
-  "Open EAF File Transfer application using `eaf-file-transfer-qrcode' on
-the file at current cursor position in dired."
-  (interactive)
-  (eaf-file-transfer-qrcode (dired-get-filename)))
-
 (defun eaf-file-transfer-airshare ()
   "Open EAF Airshare application."
   (interactive)
@@ -670,10 +660,29 @@ the file at current cursor position in dired."
     (eaf-open input-string "airshare")
     ))
 
-(defun eaf-file-upload-qrcode (dir)
-  "Open EAF File Uploader application. Select directory DIR to save the uploaded file."
-  (interactive "DEAF File Uploader - Specify Saved File's Directory: ")
-  (eaf-open dir "file-uploader"))
+(defun eaf-file-sender-qrcode (file)
+  "Open EAF File Sender application.
+
+Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
+
+Make sure that your smartphone is connected to the same WiFi network as this computer."
+  (interactive "FEAF File Sender - Select File: ")
+  (eaf-open file "file-sender"))
+
+(defun dired-file-sender-qrcode ()
+  "Open EAF File Transfer application using `eaf-file-sender-qrcode' on
+the file at current cursor position in dired."
+  (interactive)
+  (eaf-file-sender-qrcode (dired-get-filename)))
+
+(defun eaf-file-receiver-qrcode (dir)
+  "Open EAF File Receiver application.
+
+Select directory DIR to receive the uploaded file.
+
+Make sure that your smartphone is connected to the same WiFi network as this computer."
+  (interactive "DEAF File Receiver - Specify Saved File's Directory: ")
+  (eaf-open dir "file-receiver"))
 
 (defun eaf-file-open-in-dired ()
   "Open html/pdf/image/video files whenever possible with EAF in dired.
