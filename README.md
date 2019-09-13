@@ -39,16 +39,14 @@ Using this framework, you can use PyQt to develop powerful graphics programs to 
 
 1. Install python dependences:
 
-    Make sure python3 and pip3 has install in your operating system, then execute below command:
-
 ```Bash
-    sudo pip3 install dbus-python pymupdf grip qrcode python-xlib pyqt5 pyqtwebengine
+sudo pip3 install dbus-python pymupdf grip qrcode python-xlib pyqt5 pyqtwebengine
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
 
 ```Elisp
-    (require 'eaf)
+(require 'eaf)
 ```
 
 ### Package description.
