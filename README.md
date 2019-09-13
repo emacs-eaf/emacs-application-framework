@@ -45,6 +45,12 @@ Using this framework, you can use PyQt to develop powerful graphics programs to 
     sudo pip install dbus-python PyMuPDF grip qrcode pyqt5 python-xlib
 ```
 
+If you use archlinux, you should use below command instead:
+
+```Bash
+    sudo pacman -S python-dbus python-pymupdf python-grip python-qrcode python-pyqt5 python-xlib
+```
+
 2. Clone this repository and add below code in your ~/.emacs
 ```Elisp
     (require 'eaf)
@@ -52,14 +58,14 @@ Using this framework, you can use PyQt to develop powerful graphics programs to 
 
 ### Package description.
 
-| Package      | Use for                                          |
-| :--------    | :----                                            |
-| python-xlib  | Stick app window into emacs frame                |
-| python-pyqt5 | GUI library required for application development |
-| dbus-python  | DBus IPC for python and elisp                    |
-| PyMuPDF      | Render engine required for PDF Viewer            |
-| grip         | Markdown render server for Markdown Previewer    |
-| qrcode       | Render local file QR code                        |
+| Debian Package | Arch Package   | Use for                                          |
+| :--------      | :-------       | :----                                            |
+| python-xlib    | python-xlib    | Stick app window into emacs frame                |
+| python-pyqt5   | python-pyqt5   | GUI library required for application development |
+| dbus-python    | python-dbus    | DBus IPC for python and elisp                    |
+| PyMuPDF        | python-pymupdf | Render engine required for PDF Viewer            |
+| grip           | python-grip    | Markdown render server for Markdown Previewer    |
+| qrcode         | python-qrcode  | Render local file QR code                        |
 
 ### Or run EAF with docker
 
