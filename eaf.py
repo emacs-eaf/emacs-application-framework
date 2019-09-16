@@ -118,7 +118,7 @@ class EAF(dbus.service.Object):
         except ImportError:
             import traceback
             traceback.print_exc()
-            return "EAF: Something went wrong when trying to import {0}".format(module_path)
+            return "Something wrong when import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
         global emacs_width, emacs_height

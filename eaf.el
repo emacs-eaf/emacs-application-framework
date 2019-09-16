@@ -6,9 +6,9 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
-;; Version: 0.2
-;; Last-Updated: Sun Jul 14 19:05:39 2019 (-0400)
-;;           By: Mingde (Matthew) Zeng
+;; Version: 0.1
+;; Last-Updated: 2018-06-15 14:10:12
+;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -94,7 +94,7 @@
     map)
   "Keymap used by `eaf-mode'.")
 
-(define-derived-mode eaf-mode text-mode "EAF"
+(define-derived-mode eaf-mode text-mode "Eaf"
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'eaf-mode)
@@ -130,10 +130,6 @@
 (defvar eaf-http-proxy-host "")
 
 (defvar eaf-http-proxy-port "")
-
-(defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
-by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
@@ -232,7 +228,8 @@ We need calcuate render allocation to make sure no black border around render co
          (x (nth 0 window-edges))
          (y (nth 1 window-edges))
          (w (- (nth 2 window-edges) x))
-         (h (- (nth 3 window-edges) y)))
+         (h (- (nth 3 window-edges) y))
+         )
     (list x y w h)))
 
 (defun eaf-generate-id ()
@@ -243,15 +240,14 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
-          (random (expt 16 4))))
+          (random (expt 16 4)) ))
 
 (defun eaf-create-buffer (input-content)
-  (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
-         (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
-    (message file-or-command-name)
+  (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (read-only-mode))
+      (read-only-mode)
+      )
     eaf-buffer))
 
 (defun eaf-is-support (url)
@@ -353,10 +349,11 @@ We need calcuate render allocation to make sure no black border around render co
               (cond
                ;; Just send event when user insert single character.
                ;; Don't send event 'M' if user press Ctrl + M.
-               ((and (or
-                      (equal key-command "self-insert-command")
-                      (equal key-command "completion-select-if-within-overlay"))
-                     (equal 1 (string-width (this-command-keys))))
+               ((and
+                 (or
+                  (equal key-command "self-insert-command")
+                  (equal key-command "completion-select-if-within-overlay"))
+                 (equal 1 (string-width (this-command-keys))))
                 (eaf-call "send_key" buffer-id key-desc))
                ((string-match "^[CMSs]-.*" key-desc)
                 (eaf-call "send_keystroke" buffer-id key-desc))
@@ -365,7 +362,6 @@ We need calcuate render allocation to make sure no black border around render co
                  (equal key-desc "RET")
                  (equal key-desc "DEL")
                  (equal key-desc "TAB")
-                 (equal key-desc "SPC")
                  (equal key-desc "<backtab>")
                  (equal key-desc "<home>")
                  (equal key-desc "<end>")
@@ -434,7 +430,7 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-create-new-browser-buffer)
 
 (defun eaf-create-new-browser-buffer (new-window-buffer-id)
-  (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
+  (let ((eaf-buffer (generate-new-buffer (concat "browser popup window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode)
@@ -465,7 +461,7 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-focus-buffer)
 
 (defun eaf-start-finish ()
-  "Call `eaf-open-internal' after receive `start_finish' signal from server process."
+  ;; Call `eaf-open-internal' after receive `start_finish' signal from server process.
   (eaf-open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
 
 (dbus-register-signal
@@ -532,8 +528,8 @@ We need calcuate render allocation to make sure no black border around render co
           (set (make-local-variable 'buffer-url) url)
           (set (make-local-variable 'buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
-          (when (or (string= app-name "markdown-previewer")
-                    (string= app-name "org-previewer"))
+          (when (or (string= app-name "markdownpreviewer")
+                    (string= app-name "orgpreviewer"))
             (other-window +1)))
       ;; Kill buffer and show error message from python server.
       (kill-buffer buffer)
@@ -541,80 +537,67 @@ We need calcuate render allocation to make sure no black border around render co
       (message buffer-result))
     ))
 
-(defun eaf-open-browser (url &optional arguments)
-  "Open EAF browser application given a URL and ARGUMENTS."
-  (interactive "MEAF Browser - Enter URL: ")
-  ;; Validate URL legitimacy
-  (if (and (not (string-prefix-p "/" url))
-           (not (string-prefix-p "~" url))
-           (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.[a-z]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
-      (progn (setq app-name "browser")
-             (unless (or (string-prefix-p "http://" url) (string-prefix-p "https://" url))
-               (setq url (concat "http://" url)))
-             (eaf-open url "browser" arguments))
-    (when (string= app-name "browser")
-      (message (format "EAF: %s is an invalid URL." url)))))
-
-(defun eaf-open-demo ()
-  "Open EAF demo screen to verify that EAF is working properly."
-  (interactive)
-  (eaf-open "eaf-demo" "demo"))
-
-(defun eaf-open-camera ()
-  "Open EAF camera application."
-  (interactive)
-  (eaf-open "eaf-camera" "camera"))
-
-(defun eaf-open-qutebrowser ()
-  "Open EAF Qutebrowser application."
-  (interactive)
-  (eaf-open "eaf-qutebrowser" "qutebrowser"))
+(defun eaf-open-url (url &optional arguments)
+  (interactive "MOpen url with EAF: ")
+  (eaf-open url "browser" arguments))
 
 (defun eaf-open (url &optional app-name arguments)
-  "Open an EAF application with URL, optional APP-NAME and ARGUMENTS."
   (interactive "FOpen with EAF: ")
-  ;; Try to set app-name along with url if app-name is unset.
-  (when (and (not app-name) (file-exists-p url))
-    (setq url (expand-file-name url))
-    (setq extension-name (file-name-extension url))
-    (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
-           (setq app-name "pdf-viewer"))
-          ((member extension-name '("md"))
-           ;; Try get user's github token if `eaf-grip-token' is nil.
-           (if eaf-grip-token
-               (setq arguments eaf-grip-token)
-             (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-           ;; Split window to show file and previewer.
-           (eaf-split-preview-windows)
-           (setq app-name "markdown-previewer"))
-          ((member extension-name '("jpg" "png" "bmp"))
-           (setq app-name "image-viewer"))
-          ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-           (setq app-name "video-player"))
-          ((member extension-name '("html"))
-           (setq url (concat "file://" url))
-           (setq app-name "browser"))
-          ((member extension-name '("org"))
-           ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
-           (save-excursion
-             (find-file url)
-             (with-current-buffer (buffer-name)
-               (org-html-export-to-html)))
-           ;; Add file name to `eaf-org-file-list' after command `find-file'.
-
-           (unless (member url eaf-org-file-list)
-             (push url eaf-org-file-list))
-           ;; Split window to show file and previewer.
-           (eaf-split-preview-windows)
-           (setq app-name "org-previewer"))))
-
+  ;; Try set app-name along with url if app-name is set.
+  (unless app-name
+    (cond ((string-equal url "eaf-demo")
+           (setq app-name "demo"))
+          ((string-equal url "eaf-camera")
+           (setq app-name "camera"))
+          ((string-equal url "eaf-qutebrowser")
+           (setq app-name "qutebrowser"))
+          ((file-exists-p url)
+           (setq url (expand-file-name url))
+           (setq extension-name (file-name-extension url))
+           (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
+                  (setq app-name "pdfviewer"))
+                 ((member extension-name '("md"))
+                  ;; Try get user's github token if `eaf-grip-token' is nil.
+                  (if eaf-grip-token
+                      (setq arguments eaf-grip-token)
+                    (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
+                  ;; Split window to show file and previewer.
+                  (eaf-split-preview-windows)
+                  (setq app-name "markdownpreviewer"))
+                 ((member extension-name '("jpg" "png" "bmp"))
+                  (setq app-name "imageviewer"))
+                 ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
+                  (setq app-name "videoplayer"))
+                 ((member extension-name '("html"))
+                  (setq url (concat "file://" url))
+                  (setq app-name "browser"))
+                 ((member extension-name '("org"))
+                  ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
+                  (save-excursion
+                    (find-file url)
+                    (with-current-buffer (buffer-name)
+                      (org-html-export-to-html)))
+                  ;; Add file name to `eaf-org-file-list' after command `find-file'.
+                  (unless (member url eaf-org-file-list)
+                    (push url eaf-org-file-list))
+                  ;; Split window to show file and previewer.
+                  (eaf-split-preview-windows)
+                  (setq app-name "orgpreviewer")
+                  )))
+          ((and (not (string-prefix-p "/" url))
+                (not (string-prefix-p "~" url))
+                (string-match thing-at-point-short-url-regexp url))
+           (setq app-name "browser")
+           (unless (string-prefix-p "http" url)
+             (setq url (concat "http://" url)))
+           )))
   (unless arguments
     (setq arguments ""))
   (if app-name
       ;; Open url with eaf application if app-name is not empty.
       (if (process-live-p eaf-process)
           (let (exists-eaf-buffer)
-            ;; Try to open buffer
+            ;; Try to opened buffer.
             (catch 'found-match-buffer
               (dolist (buffer (buffer-list))
                 (set-buffer buffer)
@@ -633,14 +616,14 @@ We need calcuate render allocation to make sure no black border around render co
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message (format "Opening %s with EAF-%s..." url app-name)))
+        (message (format "Opening %s with eaf.%s" url app-name)))
     ;; Output something to user if app-name is empty string.
     (if (or (string-prefix-p "/" url)
             (string-prefix-p "~" url))
         (if (not (file-exists-p url))
-            (message (format "EAF: %s does not exist." url))
-          (message (format "EAF doesn't know how to open %s." url)))
-      (message (format "EAF doesn't know how to open %s." url)))))
+            (message (format "EAF: %s is not exists." url))
+          (message (format "EAF Don't know how to open %s" url)))
+      (message (format "EAF Don't know how to open %s" url)))))
 
 (defun eaf-split-preview-windows ()
   (delete-other-windows)
@@ -648,59 +631,44 @@ We need calcuate render allocation to make sure no black border around render co
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-file-transfer-airshare ()
-  "Open EAF Airshare application."
+(defun eaf-show-file-qrcode (url)
+  (interactive "FShow file QR code: ")
+  (eaf-open url "filetransfer"))
+
+(defun dired-show-file-qrcode ()
+  (interactive)
+  (eaf-show-file-qrcode (dired-get-filename)))
+
+(defun eaf-air-share ()
   (interactive)
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "EAF Airshare - Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "Info (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")
     ))
 
-(defun eaf-file-sender-qrcode (file)
-  "Open EAF File Sender application.
+(defun eaf-upload-file (dir)
+  (interactive "DDirectory to save uploade file: ")
+  (eaf-open dir "fileuploader"))
 
-Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
-
-Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "FEAF File Sender - Select File: ")
-  (eaf-open file "file-sender"))
-
-(defun dired-file-sender-qrcode ()
-  "Open EAF File Transfer application using `eaf-file-sender-qrcode' on
-the file at current cursor position in dired."
-  (interactive)
-  (eaf-file-sender-qrcode (dired-get-filename)))
-
-(defun eaf-file-receiver-qrcode (dir)
-  "Open EAF File Receiver application.
-
-Select directory DIR to receive the uploaded file.
-
-Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "DEAF File Receiver - Specify Saved File's Directory: ")
-  (eaf-open dir "file-receiver"))
-
-(defun eaf-file-open-in-dired ()
-  "Open html/pdf/image/video files whenever possible with EAF in dired.
-Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
+(defun eaf-dired-open-file ()
+  "Open html/pdf/image/video file with eaf, other file use `find-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
     (setq extension-name (file-name-extension file))
     (cond ((member extension-name '("html"))
            (eaf-open (concat "file://" file) "browser"))
           ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
-           (eaf-open file "pdf-viewer"))
+           (eaf-open file "pdfviewer"))
           ((member extension-name '("jpg" "png" "bmp"))
-           (eaf-open file "image-viewer"))
+           (eaf-open file "imageviewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-           (eaf-open file "video-player"))
-          (eaf-find-alternate-file-in-dired
-           (dired-find-alternate-file))
-          (t (dired-find-file)))))
+           (eaf-open file "videoplayer"))
+          (t
+           (find-file file)))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()

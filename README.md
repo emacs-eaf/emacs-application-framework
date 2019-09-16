@@ -1,12 +1,12 @@
 # What is Emacs Application Framework?
-Emacs Application Framework is a development framework, where developers can develop any PyQt program, and integrate it into Emacs.
+Emacs Application Framework is a development framework, where developers can develop any PyQt program, and integrate into Emacs.
 
 This framework mainly implements three functions:
 1. Integrate PyQt program window into Emacs Frame using Xlib Reparent technology
 2. Listening to EAF buffer's keyboard event flow and controlling the keyboard input of PyQt program via DBus IPC
 3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
 
-Using this framework, you can use PyQt to develop powerful GUI programs to extend Emacs.
+Using this framework, you can use PyQt to develop powerful graphics programs to extend Emacs.
 
 ## Screenshots of EAF
 
@@ -24,7 +24,7 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 | <img src="./screenshot/pdf_viewer.gif" width="400"> | <img src="./screenshot/camera.gif" width="400"> |
 |                                                     |                                                 |
 
-| File Sender                                            | File Receiver                                          |
+| File Transfer                                          | File Uploader                                          |
 | :--------:                                             | :----:                                                 |
 | <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
 |                                                        |                                                        |
@@ -40,7 +40,7 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 1. Install python dependences:
 
 ```Bash
-    sudo pip3 install dbus-python pymupdf grip qrcode python-xlib pyqt5 pyqtwebengine
+sudo pip3 install dbus-python pymupdf grip qrcode python-xlib pyqt5 pyqtwebengine
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
@@ -80,7 +80,7 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 ### Browser
 
 ```
-Type 'eaf-open-browser' RET www.google.com
+Type 'eaf-open-url' RET www.google.com
 ```
 
 | Browser Key        | Event                    |
@@ -142,16 +142,16 @@ Type 'eaf-open' RET image-filepath
 
 ### Other applications
 
-| Application Name   | Launch                                            |
-| :--------          | :----                                             |
-| Markdown previewer | Type 'eaf-open' RET markdown filepath             |
-| Org file previewer | Type 'eaf-open' RET org filepath                  |
-| Camera             | Type 'eaf-open-camera'                            |
-| Demo               | Type 'eaf-open-demo'                              |
-| File Sender        | Type 'eaf-file-sender-qrcode'                     |
-|                    | Or use 'dired-file-sender-qrcode' in dired mode   |
-| File Receiver      | Type 'eaf-file-receiver-qrcode'                   |
-| Airshare           | Type 'eaf-file-transfer-airshare'                 |
+| Application Name   | Launch                                        |
+| :--------          | :----                                         |
+| Markdown previewer | Type 'eaf-open' RET markdown filepath         |
+| Org file previewer | Type 'eaf-open' RET org filepath              |
+| Camera             | Type 'eaf-camera'                             |
+| Demo               | Type 'eaf-demo'                               |
+| File Transfer      | Type 'eaf-show-file-qrcode'                   |
+|                    | Or use `dired-show-file-qrcode' in dired mode |
+| File Uploader      | Type 'eaf-upload-file'                        |
+| Air Share          | Type 'eaf-air-share'                          |
 
 ## Settings
 
