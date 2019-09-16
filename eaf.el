@@ -6,9 +6,9 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
-;; Version: 0.1
-;; Last-Updated: 2018-06-15 14:10:12
-;;           By: Andy Stewart
+;; Version: 0.2
+;; Last-Updated: Sun Jul 14 19:05:39 2019 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -94,7 +94,7 @@
     map)
   "Keymap used by `eaf-mode'.")
 
-(define-derived-mode eaf-mode text-mode "Eaf"
+(define-derived-mode eaf-mode text-mode "EAF"
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'eaf-mode)
@@ -240,14 +240,13 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))
           (random (expt 16 4))
           (random (expt 16 4))
-          (random (expt 16 4)) ))
+          (random (expt 16 4))))
 
 (defun eaf-create-buffer (input-content)
   (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (read-only-mode)
-      )
+      (read-only-mode))
     eaf-buffer))
 
 (defun eaf-is-support (url)
@@ -362,6 +361,7 @@ We need calcuate render allocation to make sure no black border around render co
                  (equal key-desc "RET")
                  (equal key-desc "DEL")
                  (equal key-desc "TAB")
+                 (equal key-desc "SPC")
                  (equal key-desc "<backtab>")
                  (equal key-desc "<home>")
                  (equal key-desc "<end>")
@@ -430,7 +430,7 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-create-new-browser-buffer)
 
 (defun eaf-create-new-browser-buffer (new-window-buffer-id)
-  (let ((eaf-buffer (generate-new-buffer (concat "browser popup window " new-window-buffer-id))))
+  (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode)
@@ -461,7 +461,7 @@ We need calcuate render allocation to make sure no black border around render co
  'eaf-focus-buffer)
 
 (defun eaf-start-finish ()
-  ;; Call `eaf-open-internal' after receive `start_finish' signal from server process.
+  "Call `eaf-open-internal' after receive `start_finish' signal from server process."
   (eaf-open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
 
 (dbus-register-signal
@@ -597,7 +597,7 @@ We need calcuate render allocation to make sure no black border around render co
       ;; Open url with eaf application if app-name is not empty.
       (if (process-live-p eaf-process)
           (let (exists-eaf-buffer)
-            ;; Try to opened buffer.
+            ;; Try to open buffer
             (catch 'found-match-buffer
               (dolist (buffer (buffer-list))
                 (set-buffer buffer)
