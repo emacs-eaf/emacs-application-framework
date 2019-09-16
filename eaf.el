@@ -614,14 +614,14 @@ We need calcuate render allocation to make sure no black border around render co
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message (format "Opening %s with eaf.%s" url app-name)))
+        (message (format "Opening %s with EAF-%s..." url app-name)))
     ;; Output something to user if app-name is empty string.
     (if (or (string-prefix-p "/" url)
             (string-prefix-p "~" url))
         (if (not (file-exists-p url))
-            (message (format "EAF: %s is not exists." url))
-          (message (format "EAF Don't know how to open %s" url)))
-      (message (format "EAF Don't know how to open %s" url)))))
+            (message (format "EAF: %s does not exist." url))
+          (message (format "EAF doesn't know how to open %s." url)))
+      (message (format "EAF doesn't know how to open %s." url)))))
 
 (defun eaf-split-preview-windows ()
   (delete-other-windows)
