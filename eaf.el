@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Sun Jul 14 19:05:39 2019 (-0400)
+;; Last-Updated: Tue Sep 17 09:30:54 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -537,13 +537,24 @@ We need calcuate render allocation to make sure no black border around render co
       (message buffer-result))
     ))
 
-(defun eaf-open-url (url &optional arguments)
-  (interactive "MOpen url with EAF: ")
+(defun eaf-open-browser (url &optional arguments)
+  "Open EAF browser application given a URL and ARGUMENTS."
+  (interactive "MEAF Browser - Enter URL: ")
+  ;; Validate URL legitimacy
+  (if (and (not (string-prefix-p "/" url))
+           (not (string-prefix-p "~" url))
+           (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.[a-z]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
+      (progn (setq app-name "browser")
+             (unless (or (string-prefix-p "http://" url) (string-prefix-p "https://" url))
+               (setq url (concat "http://" url)))
   (eaf-open url "browser" arguments))
+    (when (string= app-name "browser")
+      (message (format "EAF: %s is an invalid URL." url)))))
 
 (defun eaf-open (url &optional app-name arguments)
+  "Open an EAF application with URL, optional APP-NAME and ARGUMENTS."
   (interactive "FOpen with EAF: ")
-  ;; Try set app-name along with url if app-name is set.
+  ;; Try to set app-name along with url if app-name is unset.
   (unless app-name
     (cond ((string-equal url "eaf-demo")
            (setq app-name "demo"))
@@ -552,6 +563,7 @@ We need calcuate render allocation to make sure no black border around render co
           ((string-equal url "eaf-qutebrowser")
            (setq app-name "qutebrowser"))
           ((file-exists-p url)
+           ;;(when (and (not app-name) (file-exists-p url))
            (setq url (expand-file-name url))
            (setq extension-name (file-name-extension url))
            (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
@@ -578,19 +590,13 @@ We need calcuate render allocation to make sure no black border around render co
                     (with-current-buffer (buffer-name)
                       (org-html-export-to-html)))
                   ;; Add file name to `eaf-org-file-list' after command `find-file'.
+
                   (unless (member url eaf-org-file-list)
                     (push url eaf-org-file-list))
                   ;; Split window to show file and previewer.
                   (eaf-split-preview-windows)
-                  (setq app-name "orgpreviewer")
-                  )))
-          ((and (not (string-prefix-p "/" url))
-                (not (string-prefix-p "~" url))
-                (string-match thing-at-point-short-url-regexp url))
-           (setq app-name "browser")
-           (unless (string-prefix-p "http" url)
-             (setq url (concat "http://" url)))
-           )))
+                  (setq app-name "orgpreviewer"))))))
+
   (unless arguments
     (setq arguments ""))
   (if app-name
@@ -616,14 +622,14 @@ We need calcuate render allocation to make sure no black border around render co
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message (format "Opening %s with eaf.%s" url app-name)))
+        (message (format "Opening %s with EAF-%s..." url app-name)))
     ;; Output something to user if app-name is empty string.
     (if (or (string-prefix-p "/" url)
             (string-prefix-p "~" url))
         (if (not (file-exists-p url))
-            (message (format "EAF: %s is not exists." url))
-          (message (format "EAF Don't know how to open %s" url)))
-      (message (format "EAF Don't know how to open %s" url)))))
+            (message (format "EAF: %s does not exist." url))
+          (message (format "EAF doesn't know how to open %s." url)))
+      (message (format "EAF doesn't know how to open %s." url)))))
 
 (defun eaf-split-preview-windows ()
   (delete-other-windows)
