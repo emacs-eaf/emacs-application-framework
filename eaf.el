@@ -544,12 +544,14 @@ We need calcuate render allocation to make sure no black border around render co
   (if (and (not (string-prefix-p "/" url))
            (not (string-prefix-p "~" url))
            (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.[a-z]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
-      (progn (setq app-name "browser")
-             (unless (or (string-prefix-p "http://" url) (string-prefix-p "https://" url))
-               (setq url (concat "http://" url)))
-             (eaf-open url "browser" arguments))
-    (when (string= app-name "browser")
-      (message (format "EAF: %s is an invalid URL." url)))))
+      (progn
+        (unless (or (string-prefix-p "http://" url)
+                    (string-prefix-p "https://" url))
+          (setq url (concat "http://" url)))
+        (eaf-open url "browser" arguments))
+    (message (format "EAF: %s is an invalid URL." url))))
+
+(defalias 'eaf-open-url 'eaf-open-browser)
 
 (defun eaf-open-demo ()
   "Open EAF demo screen to verify that EAF is working properly."
