@@ -15,3 +15,4 @@
 * Support HiDPI? I haven't HiDPI screen.
 * Press F11 not work with EAF
 * Make EAF support bookmark.
+* Aria2 client is awesome, welcome to PR.
