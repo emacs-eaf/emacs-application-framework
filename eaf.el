@@ -244,7 +244,6 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-create-buffer (input-content)
   (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
-    (message file-or-command-name)
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode))
