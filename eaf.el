@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Mon Sep 16 19:09:46 2019 (-0400)
+;; Last-Updated: Tue Sep 17 09:30:54 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -555,7 +555,15 @@ We need calcuate render allocation to make sure no black border around render co
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS."
   (interactive "FOpen with EAF: ")
   ;; Try to set app-name along with url if app-name is unset.
-  (when (and (not app-name) (file-exists-p url))
+  (unless app-name
+    (cond ((string-equal url "eaf-demo")
+           (setq app-name "demo"))
+          ((string-equal url "eaf-camera")
+           (setq app-name "camera"))
+          ((string-equal url "eaf-qutebrowser")
+           (setq app-name "qutebrowser"))
+          ((file-exists-p url)
+           ;;(when (and (not app-name) (file-exists-p url))
            (setq url (expand-file-name url))
            (setq extension-name (file-name-extension url))
            (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
@@ -587,7 +595,7 @@ We need calcuate render allocation to make sure no black border around render co
                     (push url eaf-org-file-list))
                   ;; Split window to show file and previewer.
                   (eaf-split-preview-windows)
-           (setq app-name "orgpreviewer"))))
+                  (setq app-name "orgpreviewer"))))))
 
   (unless arguments
     (setq arguments ""))
