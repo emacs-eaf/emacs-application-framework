@@ -228,8 +228,7 @@ We need calcuate render allocation to make sure no black border around render co
          (x (nth 0 window-edges))
          (y (nth 1 window-edges))
          (w (- (nth 2 window-edges) x))
-         (h (- (nth 3 window-edges) y))
-         )
+         (h (- (nth 3 window-edges) y)))
     (list x y w h)))
 
 (defun eaf-generate-id ()
@@ -243,7 +242,9 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))))
 
 (defun eaf-create-buffer (input-content)
-  (let ((eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
+  (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
+         (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
+    (message file-or-command-name)
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (read-only-mode))
@@ -348,11 +349,10 @@ We need calcuate render allocation to make sure no black border around render co
               (cond
                ;; Just send event when user insert single character.
                ;; Don't send event 'M' if user press Ctrl + M.
-               ((and
-                 (or
-                  (equal key-command "self-insert-command")
-                  (equal key-command "completion-select-if-within-overlay"))
-                 (equal 1 (string-width (this-command-keys))))
+               ((and (or
+                      (equal key-command "self-insert-command")
+                      (equal key-command "completion-select-if-within-overlay"))
+                     (equal 1 (string-width (this-command-keys))))
                 (eaf-call "send_key" buffer-id key-desc))
                ((string-match "^[CMSs]-.*" key-desc)
                 (eaf-call "send_keystroke" buffer-id key-desc))
