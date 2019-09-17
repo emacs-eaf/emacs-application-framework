@@ -553,51 +553,60 @@ We need calcuate render allocation to make sure no black border around render co
 
 (defalias 'eaf-open-url 'eaf-open-browser)
 
+(defun eaf-open-demo ()
+  "Open EAF demo screen to verify that EAF is working properly."
+  (interactive)
+  (eaf-open "eaf-demo" "demo"))
+
+(defun eaf-open-camera ()
+  "Open EAF camera application."
+  (interactive)
+  (eaf-open "eaf-camera" "camera"))
+
+(defun eaf-open-qutebrowser ()
+  "Open EAF Qutebrowser application."
+  (interactive)
+  (eaf-open "eaf-qutebrowser" "qutebrowser"))
+
 (defun eaf-open (url &optional app-name arguments)
-  "Open an EAF application with URL, optional APP-NAME and ARGUMENTS."
+  "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
+
+When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "FOpen with EAF: ")
   ;; Try to set app-name along with url if app-name is unset.
-  (unless app-name
-    (cond ((string-equal url "eaf-demo")
-           (setq app-name "demo"))
-          ((string-equal url "eaf-camera")
-           (setq app-name "camera"))
-          ((string-equal url "eaf-qutebrowser")
-           (setq app-name "qutebrowser"))
-          ((file-exists-p url)
-           ;;(when (and (not app-name) (file-exists-p url))
-           (setq url (expand-file-name url))
-           (setq extension-name (file-name-extension url))
-           (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
-                  (setq app-name "pdfviewer"))
-                 ((member extension-name '("md"))
-                  ;; Try get user's github token if `eaf-grip-token' is nil.
-                  (if eaf-grip-token
-                      (setq arguments eaf-grip-token)
-                    (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-                  ;; Split window to show file and previewer.
-                  (eaf-split-preview-windows)
-                  (setq app-name "markdownpreviewer"))
-                 ((member extension-name '("jpg" "png" "bmp"))
-                  (setq app-name "imageviewer"))
-                 ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-                  (setq app-name "videoplayer"))
-                 ((member extension-name '("html"))
-                  (setq url (concat "file://" url))
-                  (setq app-name "browser"))
-                 ((member extension-name '("org"))
-                  ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
-                  (save-excursion
-                    (find-file url)
-                    (with-current-buffer (buffer-name)
-                      (org-html-export-to-html)))
-                  ;; Add file name to `eaf-org-file-list' after command `find-file'.
+  (when (and (not app-name) (file-exists-p url))
+    (setq url (expand-file-name url))
+    (setq extension-name (file-name-extension url))
+    (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
+           (setq app-name "pdfviewer"))
+          ((member extension-name '("md"))
+           ;; Try get user's github token if `eaf-grip-token' is nil.
+           (if eaf-grip-token
+               (setq arguments eaf-grip-token)
+             (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
+           ;; Split window to show file and previewer.
+           (eaf-split-preview-windows)
+           (setq app-name "markdownpreviewer"))
+          ((member extension-name '("jpg" "png" "bmp"))
+           (setq app-name "imageviewer"))
+          ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
+           (setq app-name "videoplayer"))
+          ((member extension-name '("html"))
+           (setq url (concat "file://" url))
+           (setq app-name "browser"))
+          ((member extension-name '("org"))
+           ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
+           (save-excursion
+             (find-file url)
+             (with-current-buffer (buffer-name)
+               (org-html-export-to-html)))
+           ;; Add file name to `eaf-org-file-list' after command `find-file'.
 
-                  (unless (member url eaf-org-file-list)
-                    (push url eaf-org-file-list))
-                  ;; Split window to show file and previewer.
-                  (eaf-split-preview-windows)
-                  (setq app-name "orgpreviewer"))))))
+           (unless (member url eaf-org-file-list)
+             (push url eaf-org-file-list))
+           ;; Split window to show file and previewer.
+           (eaf-split-preview-windows)
+           (setq app-name "orgpreviewer"))))
 
   (unless arguments
     (setq arguments ""))

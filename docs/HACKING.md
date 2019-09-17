@@ -24,10 +24,10 @@ Python is a perfect language to develop Qt program and it can call pretty much i
 
 ## Let me run hello word
 ```
-M-x eaf-open
+M-x eaf-open-demo
 ```
 
-    Then type "eaf-demo" as input, will pop hello world window in emacs like below:
+    This will pop hello world window in emacs like below:
 
 | Demo                                                  |
 | :--------:                                            |
