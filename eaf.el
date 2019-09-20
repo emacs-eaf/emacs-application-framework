@@ -131,6 +131,10 @@
 
 (defvar eaf-http-proxy-port "")
 
+(defvar eaf-find-alternate-file-in-dired nil
+  "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
+by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
+
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
   :type 'string
@@ -682,8 +686,9 @@ When called interactively, URL accepts a file that can be opened by EAF."
            (eaf-open file "imageviewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
            (eaf-open file "videoplayer"))
-          (t
-           (find-file file)))))
+          (eaf-find-alternate-file-in-dired
+           (dired-find-alternate-file))
+          (t (dired-find-file)))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
