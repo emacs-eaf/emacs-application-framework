@@ -249,8 +249,7 @@ We need calcuate render allocation to make sure no black border around render co
   (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
-      (eaf-mode)
-      (read-only-mode))
+      (eaf-mode))
     eaf-buffer))
 
 (defun eaf-is-support (url)
@@ -350,40 +349,40 @@ We need calcuate render allocation to make sure no black border around render co
               ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
 
               (cond
-               ;; Just send event when user insert single character.
-               ;; Don't send event 'M' if user press Ctrl + M.
-               ((and (or
-                      (equal key-command "self-insert-command")
-                      (equal key-command "completion-select-if-within-overlay"))
-                     (equal 1 (string-width (this-command-keys))))
-                (eaf-call "send_key" buffer-id key-desc))
-               ((string-match "^[CMSs]-.*" key-desc)
-                (eaf-call "send_keystroke" buffer-id key-desc))
-               ((or
-                 (equal key-command "nil")
-                 (equal key-desc "RET")
-                 (equal key-desc "DEL")
-                 (equal key-desc "TAB")
-                 (equal key-desc "SPC")
-                 (equal key-desc "<backtab>")
-                 (equal key-desc "<home>")
-                 (equal key-desc "<end>")
-                 (equal key-desc "<left>")
-                 (equal key-desc "<right>")
-                 (equal key-desc "<up>")
-                 (equal key-desc "<down>")
-                 (equal key-desc "<prior>")
-                 (equal key-desc "<next>")
+                ;; Just send event when user insert single character.
+                ;; Don't send event 'M' if user press Ctrl + M.
+                ((and (or
+                       (equal key-command "self-insert-command")
+                       (equal key-command "completion-select-if-within-overlay"))
+                      (equal 1 (string-width (this-command-keys))))
+                 (eaf-call "send_key" buffer-id key-desc))
+                ((string-match "^[CMSs]-.*" key-desc)
+                 (eaf-call "send_keystroke" buffer-id key-desc))
+                ((or
+                  (equal key-command "nil")
+                  (equal key-desc "RET")
+                  (equal key-desc "DEL")
+                  (equal key-desc "TAB")
+                  (equal key-desc "SPC")
+                  (equal key-desc "<backtab>")
+                  (equal key-desc "<home>")
+                  (equal key-desc "<end>")
+                  (equal key-desc "<left>")
+                  (equal key-desc "<right>")
+                  (equal key-desc "<up>")
+                  (equal key-desc "<down>")
+                  (equal key-desc "<prior>")
+                  (equal key-desc "<next>")
+                  )
+                 (eaf-call "send_key" buffer-id key-desc)
                  )
-                (eaf-call "send_key" buffer-id key-desc)
-                )
-               (t
-                (unless (or
-                         (equal key-command "keyboard-quit")
-                         (equal key-command "kill-this-buffer")
-                         (equal key-command "eaf-open"))
-                  (ignore-errors (call-interactively (key-binding key))))
-                )))
+                (t
+                 (unless (or
+                          (equal key-command "keyboard-quit")
+                          (equal key-command "kill-this-buffer")
+                          (equal key-command "eaf-open"))
+                   (ignore-errors (call-interactively (key-binding key))))
+                 )))
             ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
             ;; because i insert nothing in buffer.
             (setq last-command-event nil))
@@ -436,11 +435,9 @@ We need calcuate render allocation to make sure no black border around render co
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (read-only-mode)
       (set (make-local-variable 'buffer-id) new-window-buffer-id)
       (set (make-local-variable 'buffer-url) "")
-      (set (make-local-variable 'buffer-app-name) "browser")
-      )
+      (set (make-local-variable 'buffer-app-name) "browser"))
     (switch-to-buffer eaf-buffer)))
 
 (dbus-register-signal
