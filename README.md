@@ -72,84 +72,13 @@ There are mainly three obstacles:
 3. Qt5 QGraphicsView/QGraphicsScene can't work MacOS, specify QGraphicsVideoItem can't work.
 
 ## Usage
-```
-NOTE:
-EAF use DBus' session bus, it must running in general user.
-Please don't run EAF with root user, root user just can access DBus's system bus.
-```
-### Browser
-
-```
-Type 'eaf-open-browser' RET www.google.com
-```
-
-| Browser Key        | Event                    |
-| :-----:            | :----                    |
-| Left Button        | Open link in current tab |
-| Ctrl + Left Button | Open link in new tab     |
-| M-f                | Forward page in history  |
-| M-b                | Backward page in history |
-| M-q                | Delete all cookies       |
-| C-=                | Zoom in                  |
-| C--                | Zoom out                 |
-| C-0                | Zoom reset               |
-| C-n                | Scroll up                |
-| C-p                | Scroll down              |
-| C-v                | Scroll up page           |
-| M-v                | Scroll down page         |
-| M-<                | Scroll to top            |
-| M->                | Scroll to bottom         |
-
-### PDF Viewer
-
-```
-Type 'eaf-open' RET pdf-filepath
-```
-
-| PDF Viewer Key | Event             |
-| :-----:        | :----             |
-| j              | Scroll up         |
-| k              | Scroll down       |
-| Space          | Scroll up page    |
-| b              | Scroll down page  |
-| ,              | Scroll to end     |
-| .              | Scroll to home    |
-| t              | Switch scale mode |
-| -              | Zoom out          |
-| =              | Zoom in           |
-| 0              | Zoom reset        |
-| g              | Goto page         |
-| p              | Goto to percent   |
-| [              | Remember position |
-| ]              | Remember jump     |
-
-
-### Video Player
-
-```
-Type 'eaf-open' RET video-filepath
-```
-
-| Video Player Key | Event         |
-| :-----:          | :----         |
-| Space            | Play or Pause |
-| h                | Seek backward |
-| l                | Seek forward  |
-
-### Image Viewer
-```
-Type 'eaf-open' RET image-filepath
-```
-
-| Image Viewer Key | Event                                    |
-| :-----:          | :----                                    |
-| j                | Load next image in current directory     |
-| k                | Load previous image in current directory |
-
-### Other applications
 
 | Application Name   | Launch                                        |
 | :--------          | :----                                         |
+| Browser            | Type 'eaf-browser' RET https://www.google.com |
+| PDF Viewer         | Type 'eaf-open' RET pdf filepath             |
+| Video Player       | Type 'eaf-open' RET video filepath          |
+| Image Viewer       | Type 'eaf-open' RET image filepath    |
 | Markdown previewer | Type 'eaf-open' RET markdown filepath         |
 | Org file previewer | Type 'eaf-open' RET org filepath              |
 | Camera             | Type 'eaf-camera'                             |
@@ -158,6 +87,14 @@ Type 'eaf-open' RET image-filepath
 |                    | Or use `dired-show-file-qrcode' in dired mode |
 | File Uploader      | Type 'eaf-upload-file'                        |
 | Air Share          | Type 'eaf-air-share'                          |
+
+Please check [Key binding](./docs/KEYBINDING.md) to check keybinding of application.
+
+```
+NOTE:
+EAF use DBus' session bus, it must running in general user.
+Please don't run EAF with root user, root user just can access DBus's system bus.
+```
 
 ## Settings
 
