@@ -17,6 +17,8 @@
 | M-<                | Scroll to top            |
 | M->                | Scroll to bottom         |
 
+You can customize keys with option ```eaf-browser-keybinding```
+
 ### PDF Viewer
 
 | PDF Viewer Key | Event             |
@@ -36,6 +38,8 @@
 | [              | Remember position |
 | ]              | Remember jump     |
 
+You can customize keys with option ```eaf-pdfviewer-keybinding```
+
 ### Video Player
 
 | Video Player Key | Event         |
@@ -44,9 +48,13 @@
 | h                | Seek backward |
 | l                | Seek forward  |
 
+You can customize keys with option ```eaf-videoplayer-keybinding```
+
 ### Image Viewer
 
 | Image Viewer Key | Event                                    |
 | :-----:          | :----                                    |
 | j                | Load next image in current directory     |
 | k                | Load previous image in current directory |
+
+You can customize keys with option ```eaf-imageviewer-keybinding```
