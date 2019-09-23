@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from core.browser import BrowserView, webview_scroll
+from core.browser import BrowserView
 from core.buffer import Buffer
 
 class BrowserBuffer(Buffer):
@@ -40,7 +40,16 @@ class BrowserBuffer(Buffer):
         return [self.buffer_widget.focusProxy()]
 
     def scroll(self, scroll_direction, scroll_type):
-        webview_scroll(self, scroll_direction, scroll_type)
+        if scroll_type == "page":
+            if scroll_direction == "up":
+                self.scroll_up_page()
+            else:
+                self.scroll_down_page()
+        else:
+            if scroll_direction == "up":
+                self.scroll_up()
+            else:
+                self.scroll_down()
 
     def eval_js(self, js):
         self.buffer_widget.web_page.runJavaScript(js)
@@ -69,6 +78,12 @@ class BrowserBuffer(Buffer):
 
     def scroll_down(self):
         self.eval_js("window.scrollBy(0, -50)")
+
+    def scroll_up_page(self):
+        self.eval_js("window.scrollBy(0, screen.height)")
+
+    def scroll_down_page(self):
+        self.eval_js("window.scrollBy(0, -screen.height)")
 
     def scroll_to_begin(self):
         self.eval_js("window.scrollTo(0, 0)")

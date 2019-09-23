@@ -274,20 +274,6 @@ class WebHitTestResult():
         elif data.mediaType() == QWebEngineContextMenuData.MediaTypeAudio or data.mediaType() == QWebEngineContextMenuData.MediaTypeVideo:
             self.m_mediaUrl = data.mediaUrl().toString()
 
-def webview_scroll(webview, scroll_direction, scroll_type):
-    line_offset = 50
-
-    if scroll_type == "page":
-        if scroll_direction == "up":
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy(0, screen.height)")
-        else:
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy(0, -screen.height)")
-    else:
-        if scroll_direction == "up":
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, line_offset))
-        else:
-            webview.buffer_widget.web_page.runJavaScript("window.scrollBy({0}, {1});".format(0, -line_offset))
-
 class BrowserCookieStorage:
     def __init__(self):
         self.cookie_file = os.path.expanduser("~/.emacs.d/eaf/browser/cookie/cookie")
