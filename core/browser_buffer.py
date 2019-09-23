@@ -42,6 +42,9 @@ class BrowserBuffer(Buffer):
     def scroll(self, scroll_direction, scroll_type):
         webview_scroll(self, scroll_direction, scroll_type)
 
+    def eval_js(self, js):
+        self.buffer_widget.web_page.runJavaScript(js)
+
     def history_backward(self):
         self.buffer_widget.back()
 
@@ -62,13 +65,13 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.zoom_reset()
 
     def scroll_up(self):
-        self.buffer_widget.web_page.runJavaScript("window.scrollBy(0, 50)")
+        self.eval_js("window.scrollBy(0, 50)")
 
     def scroll_down(self):
-        self.buffer_widget.web_page.runJavaScript("window.scrollBy(0, -50)")
+        self.eval_js("window.scrollBy(0, -50)")
 
     def scroll_to_begin(self):
-        self.buffer_widget.web_page.runJavaScript("window.scrollTo(0, 0)")
+        self.eval_js("window.scrollTo(0, 0)")
 
     def scroll_to_bottom(self):
-        self.buffer_widget.web_page.runJavaScript("window.scrollBy(0, document.body.scrollHeight)")
+        self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
