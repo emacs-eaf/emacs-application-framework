@@ -93,6 +93,12 @@ Type 'eaf-open-browser' RET www.google.com
 | C-=                | Zoom in                  |
 | C--                | Zoom out                 |
 | C-0                | Zoom reset               |
+| C-n                | Scroll up                |
+| C-p                | Scroll down              |
+| C-v                | Scroll up page           |
+| M-v                | Scroll down page         |
+| M-<                | Scroll to top            |
+| M->                | Scroll to bottom         |
 
 ### PDF Viewer
 
