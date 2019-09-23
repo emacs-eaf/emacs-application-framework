@@ -24,7 +24,7 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 | <img src="./screenshot/pdf_viewer.gif" width="400"> | <img src="./screenshot/camera.gif" width="400"> |
 |                                                     |                                                 |
 
-| File Transfer                                          | File Uploader                                          |
+| File Sender                                            | File Receiver                                          |
 | :--------:                                             | :----:                                                 |
 | <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
 |                                                        |                                                        |
@@ -76,17 +76,17 @@ There are mainly three obstacles:
 | Application Name   | Launch                                        |
 | :--------          | :----                                         |
 | Browser            | Type 'eaf-browser' RET https://www.google.com |
-| PDF Viewer         | Type 'eaf-open' RET pdf filepath             |
-| Video Player       | Type 'eaf-open' RET video filepath          |
-| Image Viewer       | Type 'eaf-open' RET image filepath    |
+| PDF Viewer         | Type 'eaf-open' RET pdf filepath              |
+| Video Player       | Type 'eaf-open' RET video filepath            |
+| Image Viewer       | Type 'eaf-open' RET image filepath            |
 | Markdown previewer | Type 'eaf-open' RET markdown filepath         |
 | Org file previewer | Type 'eaf-open' RET org filepath              |
-| Camera             | Type 'eaf-camera'                             |
-| Demo               | Type 'eaf-demo'                               |
-| File Transfer      | Type 'eaf-show-file-qrcode'                   |
-|                    | Or use `dired-show-file-qrcode' in dired mode |
-| File Uploader      | Type 'eaf-upload-file'                        |
-| Air Share          | Type 'eaf-air-share'                          |
+| Camera             | Type 'eaf-open-camera'                        |
+| Demo               | Type 'eaf-open-demo'                          |
+| File Sender        | Type 'eaf-file-sender-qrcode'                 |
+|                    | Or use 'eaf-file-sender-qrcode-in-dired'      |
+| File Receiver      | Type 'eaf-file-receiver-qrcode'               |
+| Airshare           | Type 'eaf-file-transfer-airshare'             |
 
 Please check [Key binding](./docs/KEYBINDING.md) to check keybinding of application.
 

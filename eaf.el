@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.2
-;; Last-Updated: Tue Sep 17 09:30:54 2019 (-0400)
+;; Last-Updated: Mon Sep 23 09:56:37 2019 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -604,8 +604,8 @@ Otherwise call send_key message to Python side."
           (set (make-local-variable 'buffer-url) url)
           (set (make-local-variable 'buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
-          (when (or (string= app-name "markdownpreviewer")
-                    (string= app-name "orgpreviewer"))
+          (when (or (string= app-name "markdown-previewer")
+                    (string= app-name "org-previewer"))
             (other-window +1)))
       ;; Kill buffer and show error message from python server.
       (kill-buffer buffer)
@@ -654,7 +654,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (setq url (expand-file-name url))
     (setq extension-name (file-name-extension url))
     (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
-           (setq app-name "pdfviewer"))
+           (setq app-name "pdf-viewer"))
           ((member extension-name '("md"))
            ;; Try get user's github token if `eaf-grip-token' is nil.
            (if eaf-grip-token
@@ -662,11 +662,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
              (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
            ;; Split window to show file and previewer.
            (eaf-split-preview-windows)
-           (setq app-name "markdownpreviewer"))
+           (setq app-name "markdown-previewer"))
           ((member extension-name '("jpg" "jpeg" "png" "bmp"))
-           (setq app-name "imageviewer"))
+           (setq app-name "image-viewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-           (setq app-name "videoplayer"))
+           (setq app-name "video-player"))
           ((member extension-name '("html"))
            (setq url (concat "file://" url))
            (setq app-name "browser"))
@@ -682,7 +682,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
              (push url eaf-org-file-list))
            ;; Split window to show file and previewer.
            (eaf-split-preview-windows)
-           (setq app-name "orgpreviewer"))))
+           (setq app-name "org-previewer"))))
 
   (unless arguments
     (setq arguments ""))
@@ -724,42 +724,56 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-show-file-qrcode (url)
-  (interactive "FShow file QR code: ")
-  (eaf-open url "filetransfer"))
-
-(defun dired-show-file-qrcode ()
-  (interactive)
-  (eaf-show-file-qrcode (dired-get-filename)))
-
-(defun eaf-air-share ()
+(defun eaf-file-transfer-airshare ()
+  "Open EAF Airshare application."
   (interactive)
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "EAF Airshare - Info (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")
     ))
 
-(defun eaf-upload-file (dir)
-  (interactive "DDirectory to save uploade file: ")
-  (eaf-open dir "fileuploader"))
+(defun eaf-file-sender-qrcode (file)
+  "Open EAF File Sender application.
 
-(defun eaf-dired-open-file ()
-  "Open html/pdf/image/video file with eaf, other file use `find-file'"
+Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
+
+Make sure that your smartphone is connected to the same WiFi network as this computer."
+  (interactive "FEAF File Sender - Select File: ")
+  (eaf-open file "file-sender"))
+
+(defun eaf-file-sender-qrcode-in-dired ()
+  "Open EAF File Transfer application using `eaf-file-sender-qrcode' on
+the file at current cursor position in dired."
+  (interactive)
+  (eaf-file-sender-qrcode (dired-get-filename)))
+
+(defun eaf-file-receiver-qrcode (dir)
+  "Open EAF File Receiver application.
+
+Select directory DIR to receive the uploaded file.
+
+Make sure that your smartphone is connected to the same WiFi network as this computer."
+  (interactive "DEAF File Receiver - Specify Destination: ")
+  (eaf-open dir "file-receiver"))
+
+(defun eaf-file-open-in-dired ()
+  "Open html/pdf/image/video files whenever possible with EAF in dired.
+Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
     (setq extension-name (file-name-extension file))
     (cond ((member extension-name '("html"))
            (eaf-open (concat "file://" file) "browser"))
           ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
-           (eaf-open file "pdfviewer"))
+           (eaf-open file "pdf-viewer"))
           ((member extension-name '("jpg" "jpeg" "png" "bmp"))
-           (eaf-open file "imageviewer"))
+           (eaf-open file "image-viewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-           (eaf-open file "videoplayer"))
+           (eaf-open file "video-player"))
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
           (t (dired-find-file)))))

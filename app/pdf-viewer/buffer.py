@@ -156,11 +156,11 @@ class PdfViewerWidget(QWidget):
 
     def remember_current_position(self):
         self.remember_offset = self.scroll_offset
-        self.message_to_emacs.emit("EAF pdf viewer: remember position.")
+        self.message_to_emacs.emit("EAF PDF Viewer: Remember Position.")
 
     def remember_jump(self):
         if self.remember_offset is None:
-            self.message_to_emacs.emit("EAF pdf viewer: no position can jump.")
+            self.message_to_emacs.emit("EAF PDF Viewer: Cannot Jump From This Position.")
         else:
             current_scroll_offset = self.scroll_offset
             self.scroll_offset = self.remember_offset
