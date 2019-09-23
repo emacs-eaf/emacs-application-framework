@@ -403,6 +403,9 @@ We need calcuate render allocation to make sure no black border around render co
               ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
 
               (cond
+                ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
+                ((equal key-desc "<f11>")
+                 t)
                 ;; Just send event when user insert single character.
                 ;; Don't send event 'M' if user press Ctrl + M.
                 ((and (or
