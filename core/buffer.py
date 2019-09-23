@@ -123,3 +123,9 @@ class Buffer(QGraphicsScene):
 
     def update_with_data(self, update_data):
         pass
+
+    def execute_function(self, function_name):
+        getattr(self, function_name)()
+
+
+

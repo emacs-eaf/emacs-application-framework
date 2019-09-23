@@ -42,17 +42,33 @@ class BrowserBuffer(Buffer):
     def scroll(self, scroll_direction, scroll_type):
         webview_scroll(self, scroll_direction, scroll_type)
 
-    def send_keystroke(self, keystroke):
-        if keystroke == "M-f":
-            self.buffer_widget.forward()
-        elif keystroke == "M-b":
-            self.buffer_widget.back()
-        elif keystroke == "M-q":
-            self.buffer_widget.clean_cookie()
-            self.message_to_emacs.emit("Clean all cookie")
-        elif keystroke == "C--":
-            self.buffer_widget.zoom_out()
-        elif keystroke == "C-=":
-            self.buffer_widget.zoom_in()
-        elif keystroke == "C-0":
-            self.buffer_widget.zoom_reset()
+    def history_backward(self):
+        self.buffer_widget.back()
+
+    def history_forward(self):
+        self.buffer_widget.forward()
+
+    def clean_all_cookie(self):
+        self.buffer_widget.clean_cookie()
+        self.message_to_emacs.emit("Clean all cookie")
+
+    def zoom_out(self):
+        self.buffer_widget.zoom_out()
+
+    def zoom_in(self):
+        self.buffer_widget.zoom_in()
+
+    def zoom_reset(self):
+        self.buffer_widget.zoom_reset()
+
+    def scroll_up(self):
+        self.buffer_widget.web_page.runJavaScript("window.scrollBy(0, 50)")
+
+    def scroll_down(self):
+        self.buffer_widget.web_page.runJavaScript("window.scrollBy(0, -50)")
+
+    def scroll_to_begin(self):
+        self.buffer_widget.web_page.runJavaScript("window.scrollTo(0, 0)")
+
+    def scroll_to_bottom(self):
+        self.buffer_widget.web_page.runJavaScript("window.scrollBy(0, document.body.scrollHeight)")

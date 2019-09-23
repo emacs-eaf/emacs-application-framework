@@ -195,20 +195,6 @@ You need to implement the interface "update_with_data". Below is an example of w
 
 Argument "update_data" is passed from elisp side.
 
-### Handle Emacs keystroke
-
-If you want to handle keystrokes that's been sent from Emacs, you need to implement the interface "send_keystroke" of your Buffer. Below is an example of what browser does:
-
-```Python
-    def send_keystroke(self, keystroke):
-        if keystroke == "M-f":
-            self.buffer_widget.forward()
-        elif keystroke == "M-b":
-            self.buffer_widget.back()
-```
-
-Argument "keystroke" is emacs key string.
-
 ### Update progress.
 
 If your application will do some long-time operation, you can use below use below interfaces of buffer:

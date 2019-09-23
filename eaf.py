@@ -230,15 +230,18 @@ class EAF(dbus.service.Object):
             self.buffer_dict.pop(buffer_id, None)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def execute_function(self, buffer_id, function_name):
+        if buffer_id in self.buffer_dict:
+            try:
+                self.buffer_dict[buffer_id].execute_function(function_name)
+            except AttributeError:
+                self.message_to_emacs("Can't call function: " + function_name)
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def send_key(self, buffer_id, event_string):
         # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
             fake_key_event(event_string, self.buffer_dict[buffer_id])
-
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
-    def send_keystroke(self, buffer_id, keystroke):
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].send_keystroke(keystroke)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def handle_input_message(self, buffer_id, callback_type, callback_result):
