@@ -182,6 +182,15 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-videoplayer-keybinding
+  '(("SPC" . "toggle_play")
+    ("h" . "play_backward")
+    ("l" . "play_forward")
+    )
+  "The keybinding of video player."
+  :type 'cons
+  :group 'eaf)
+
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -394,6 +403,11 @@ We need calcuate render allocation to make sure no black border around render co
                       (equal 1 (string-width (this-command-keys))))
                  (cond ((equal buffer-app-name "pdfviewer")
                         (let ((function-name-value (assoc key-desc eaf-pdfviewer-keybinding)))
+                          (if function-name-value
+                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
+                            (eaf-call "send_key" buffer-id key-desc))))
+                       ((equal buffer-app-name "videoplayer")
+                        (let ((function-name-value (assoc key-desc eaf-videoplayer-keybinding)))
                           (if function-name-value
                               (eaf-call "execute_function" buffer-id (cdr function-name-value))
                             (eaf-call "send_key" buffer-id key-desc))))

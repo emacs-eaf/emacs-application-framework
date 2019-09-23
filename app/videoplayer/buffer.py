@@ -50,6 +50,20 @@ class AppBuffer(Buffer):
         position = int(session_data)
         self.buffer_widget.media_player.setPosition(position)
 
+    def toggle_play(self):
+        if self.buffer_widget.media_player.state() == QMediaPlayer.PlayingState:
+            self.buffer_widget.media_player.pause()
+            self.buffer_widget.video_need_replay = False
+        else:
+            self.buffer_widget.media_player.play()
+            self.buffer_widget.video_need_replay = True
+
+    def play_backward(self):
+        self.buffer_widget.seek_backward()
+
+    def play_forward(self):
+        self.buffer_widget.seek_forward()
+
 class VideoPlayerWidget(QWidget):
 
     def __init__(self, parent=None):
@@ -91,15 +105,3 @@ class VideoPlayerWidget(QWidget):
         video_position = self.media_player.position()
         self.media_player.setPosition(max(video_position - self.video_seek_durcation, 0))
 
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Space:
-            if self.media_player.state() == QMediaPlayer.PlayingState:
-                self.media_player.pause()
-                self.video_need_replay = False
-            else:
-                self.media_player.play()
-                self.video_need_replay = True
-        elif event.key() == Qt.Key_H:
-            self.seek_backward()
-        elif event.key() == Qt.Key_L:
-            self.seek_forward()

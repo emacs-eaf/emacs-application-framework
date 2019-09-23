@@ -36,7 +36,7 @@
 | [              | Remember position |
 | ]              | Remember jump     |
 
-### Vide Player
+### Video Player
 
 | Video Player Key | Event         |
 | :-----:          | :----         |
