@@ -191,6 +191,14 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-imageviewer-keybinding
+  '(("j" . "load_next_image")
+    ("k" . "load_prev_image")
+    )
+  "The keybinding of image viewer."
+  :type 'cons
+  :group 'eaf)
+
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -408,6 +416,11 @@ We need calcuate render allocation to make sure no black border around render co
                             (eaf-call "send_key" buffer-id key-desc))))
                        ((equal buffer-app-name "videoplayer")
                         (let ((function-name-value (assoc key-desc eaf-videoplayer-keybinding)))
+                          (if function-name-value
+                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
+                            (eaf-call "send_key" buffer-id key-desc))))
+                       ((equal buffer-app-name "imageviewer")
+                        (let ((function-name-value (assoc key-desc eaf-imageviewer-keybinding)))
                           (if function-name-value
                               (eaf-call "execute_function" buffer-id (cdr function-name-value))
                             (eaf-call "send_key" buffer-id key-desc))))
@@ -648,7 +661,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
            ;; Split window to show file and previewer.
            (eaf-split-preview-windows)
            (setq app-name "markdownpreviewer"))
-          ((member extension-name '("jpg" "png" "bmp"))
+          ((member extension-name '("jpg" "jpeg" "png" "bmp"))
            (setq app-name "imageviewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
            (setq app-name "videoplayer"))
@@ -741,7 +754,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
            (eaf-open (concat "file://" file) "browser"))
           ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
            (eaf-open file "pdfviewer"))
-          ((member extension-name '("jpg" "png" "bmp"))
+          ((member extension-name '("jpg" "jpeg" "png" "bmp"))
            (eaf-open file "imageviewer"))
           ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
            (eaf-open file "videoplayer"))
