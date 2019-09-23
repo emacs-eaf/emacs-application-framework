@@ -145,6 +145,23 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'string
   :group 'eaf)
 
+(defcustom eaf-browser-keybinding
+  '(("M-f" . "history_forward")
+    ("M-b" . "history_backward")
+    ("M-q" . "clean_all_cookie")
+    ("C--" . "zoom_out")
+    ("C-=" . "zoom_in")
+    ("C-0" . "zoom_reset")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
+    ("C-v" . "scroll_up_page")
+    ("M-v" . "scroll_down_page")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom"))
+  "The keybinding of browser."
+  :type 'cons
+  :group 'eaf)
+
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -358,32 +375,10 @@ We need calcuate render allocation to make sure no black border around render co
                  (eaf-call "send_key" buffer-id key-desc))
                 ((string-match "^[CMSs]-.*" key-desc)
                  (cond ((equal buffer-app-name "browser")
-                        (cond ((equal key-desc "M-f")
-                               (eaf-call "execute_function" buffer-id "history_forward"))
-                              ((equal key-desc "M-b")
-                               (eaf-call "execute_function" buffer-id "history_backward"))
-                              ((equal key-desc "M-q")
-                               (eaf-call "execute_function" buffer-id "clean_all_cookie"))
-                              ((equal key-desc "C--")
-                               (eaf-call "execute_function" buffer-id "zoom_out"))
-                              ((equal key-desc "C-=")
-                               (eaf-call "execute_function" buffer-id "zoom_in"))
-                              ((equal key-desc "C-0")
-                               (eaf-call "execute_function" buffer-id "zoom_reset"))
-                              ((equal key-desc "C-n")
-                               (eaf-call "execute_function" buffer-id "scroll_up"))
-                              ((equal key-desc "C-p")
-                               (eaf-call "execute_function" buffer-id "scroll_down"))
-                              ((equal key-desc "C-v")
-                               (eaf-call "execute_function" buffer-id "scroll_up_page"))
-                              ((equal key-desc "M-v")
-                               (eaf-call "execute_function" buffer-id "scroll_down_page"))
-                              ((equal key-desc "M-<")
-                               (eaf-call "execute_function" buffer-id "scroll_to_begin"))
-                              ((equal key-desc "M->")
-                               (eaf-call "execute_function" buffer-id "scroll_to_bottom"))
-                              )))
-                 )
+                        (let ((function-name-value (assoc key-desc eaf-browser-keybinding)))
+                          (when function-name-value
+                            (eaf-call "execute_function" buffer-id (cdr function-name-value))))
+                        )))
                 ((or
                   (equal key-command "nil")
                   (equal key-desc "RET")
