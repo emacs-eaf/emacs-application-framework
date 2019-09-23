@@ -162,6 +162,26 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-pdfviewer-keybinding
+  '(("j" . "scroll_up")
+    ("k" . "scroll_down")
+    ("SPC" . "scroll_up_page")
+    ("b" . "scroll_down_page")
+    ("t" . "switch_to_read_mode")
+    ("." . "scroll_to_home")
+    ("," . "scroll_to_end")
+    ("0" . "zoom_reset")
+    ("=" . "zoom_in")
+    ("-" . "zoom_out")
+    ("g" . "jump_to_page")
+    ("p" . "jump_to_percent")
+    ("[" . "remember_current_position")
+    ("]" . "remeber_jump")
+    )
+  "The keybinding of pdf viewer."
+  :type 'cons
+  :group 'eaf)
+
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -372,7 +392,13 @@ We need calcuate render allocation to make sure no black border around render co
                        (equal key-command "self-insert-command")
                        (equal key-command "completion-select-if-within-overlay"))
                       (equal 1 (string-width (this-command-keys))))
-                 (eaf-call "send_key" buffer-id key-desc))
+                 (cond ((equal buffer-app-name "pdfviewer")
+                        (let ((function-name-value (assoc key-desc eaf-pdfviewer-keybinding)))
+                          (if function-name-value
+                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
+                            (eaf-call "send_key" buffer-id key-desc))))
+                       (t
+                        (eaf-call "send_key" buffer-id key-desc))))
                 ((string-match "^[CMSs]-.*" key-desc)
                  (cond ((equal buffer-app-name "browser")
                         (let ((function-name-value (assoc key-desc eaf-browser-keybinding)))

@@ -63,6 +63,48 @@ class AppBuffer(Buffer):
         self.buffer_widget.read_mode = read_mode
         self.buffer_widget.update()
 
+    def scroll_up(self):
+        self.buffer_widget.scroll_up()
+
+    def scroll_down(self):
+        self.buffer_widget.scroll_down()
+
+    def scroll_up_page(self):
+        self.buffer_widget.scroll_up_page()
+
+    def scroll_down_page(self):
+        self.buffer_widget.scroll_down_page()
+
+    def swtich_to_read_mode(self):
+        self.buffer_widget.switch_to_read_mode()
+
+    def scroll_to_home(self):
+        self.buffer_widget.scroll_to_home()
+
+    def scroll_to_end(self):
+        self.buffer_widget.scroll_to_end()
+
+    def zoom_reset(self):
+        self.buffer_widget.zoom_reset()
+
+    def zoom_in(self):
+        self.buffer_widget.zoom_in()
+
+    def zoom_out(self):
+        self.buffer_widget.zoom_out()
+
+    def jump_to_page(self):
+        self.buffer_widget.send_input_message("Jump to: ", "jump_page")
+
+    def jump_to_percent(self):
+        self.buffer_widget.send_input_message("Jump to percent: ", "jump_percent")
+
+    def remember_current_position(self):
+        self.buffer_widget.remember_current_position()
+
+    def remeber_jump(self):
+        self.buffer_widget.remeber_jump()
+
 class PdfViewerWidget(QWidget):
 
     def __init__(self, url, background_color):
@@ -247,37 +289,6 @@ class PdfViewerWidget(QWidget):
     @build_context_wrap
     def wheelEvent(self, event):
         self.update_scroll_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
-
-    @build_context_wrap
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_J:
-            self.scroll_up()
-        elif event.key() == Qt.Key_K:
-            self.scroll_down()
-        elif event.key() == Qt.Key_Space:
-            self.scroll_up_page()
-        elif event.key() == Qt.Key_B:
-            self.scroll_down_page()
-        elif event.key() == Qt.Key_T:
-            self.switch_to_read_mode()
-        elif event.key() == Qt.Key_Period:
-            self.scroll_to_home()
-        elif event.key() == Qt.Key_Comma:
-            self.scroll_to_end()
-        elif event.key() == Qt.Key_0:
-            self.zoom_reset()
-        elif event.key() == Qt.Key_Equal:
-            self.zoom_in()
-        elif event.key() == Qt.Key_Minus:
-            self.zoom_out()
-        elif event.key() == Qt.Key_G:
-            self.send_input_message("Jump to: ", "jump_page")
-        elif event.key() == Qt.Key_P:
-            self.send_input_message("Jump to percent: ", "jump_percent")
-        elif event.key() == Qt.Key_BracketLeft:
-            self.remember_current_position()
-        elif event.key() == Qt.Key_BracketRight:
-            self.remember_jump()
 
     def get_start_page_index(self):
         return int(self.scroll_offset * 1.0 / self.scale / self.page_height)
