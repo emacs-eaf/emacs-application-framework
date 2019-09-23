@@ -74,7 +74,7 @@ class AirShareWidget(QWidget):
         self.notify_font = QFont()
         self.notify_font.setPointSize(12)
         self.notify_label = QLabel(self)
-        self.notify_label.setText("Scan QR code above to copy information.")
+        self.notify_label.setText("Scan QR code above to copy data.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
         self.notify_label.setStyleSheet("color: #eee")
