@@ -410,20 +410,11 @@ We need calcuate render allocation to make sure no black border around render co
                        (equal key-command "completion-select-if-within-overlay"))
                       (equal 1 (string-width (this-command-keys))))
                  (cond ((equal buffer-app-name "pdfviewer")
-                        (let ((function-name-value (assoc key-desc eaf-pdfviewer-keybinding)))
-                          (if function-name-value
-                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
-                            (eaf-call "send_key" buffer-id key-desc))))
+                        (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
                        ((equal buffer-app-name "videoplayer")
-                        (let ((function-name-value (assoc key-desc eaf-videoplayer-keybinding)))
-                          (if function-name-value
-                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
-                            (eaf-call "send_key" buffer-id key-desc))))
+                        (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
                        ((equal buffer-app-name "imageviewer")
-                        (let ((function-name-value (assoc key-desc eaf-imageviewer-keybinding)))
-                          (if function-name-value
-                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
-                            (eaf-call "send_key" buffer-id key-desc))))
+                        (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
                        (t
                         (eaf-call "send_key" buffer-id key-desc))))
                 ((string-match "^[CMSs]-.*" key-desc)
@@ -469,6 +460,14 @@ We need calcuate render allocation to make sure no black border around render co
      (lambda ()
        (progn
          (add-hook 'pre-command-hook #'eaf-monitor-key-event))))))
+
+(defun eaf-handle-app-key (buffer-id key-desc keybinding)
+  "Call function if match key in keybinding.
+Otherwise call send_key message to Python side."
+  (let ((function-name-value (assoc key-desc keybinding)))
+    (if function-name-value
+        (eaf-call "execute_function" buffer-id (cdr function-name-value))
+      (eaf-call "send_key" buffer-id key-desc))))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
