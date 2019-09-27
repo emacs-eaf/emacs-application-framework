@@ -10,6 +10,5 @@
 * Terminal: https://github.com/hrngultekin/pyqtermwidget5 looks good enough
 * Terminal: https://github.com/lxqt/qtermwidget looks support pyqt5 too. ;)
 * Support HiDPI? I haven't HiDPI screen.
-* Press F11 not work with EAF
 * Make EAF support bookmark.
 * Aria2 client is awesome, welcome to PR.
