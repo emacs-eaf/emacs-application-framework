@@ -765,8 +765,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
-    (setq extension-name (file-name-extension file))
-    (cond ((member extension-name
+    (cond ((member (file-name-extension file)
                    '("html"
                      "pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"
                      "jpg" "jpeg" "png" "bmp"
