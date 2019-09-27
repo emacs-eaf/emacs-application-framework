@@ -766,14 +766,14 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
   (interactive)
   (dolist (file (dired-get-marked-files))
     (setq extension-name (file-name-extension file))
-    (cond ((member extension-name '("html"))
-           (eaf-open (concat "file://" file) "browser"))
-          ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
-           (eaf-open file "pdf-viewer"))
-          ((member extension-name '("jpg" "jpeg" "png" "bmp"))
-           (eaf-open file "image-viewer"))
-          ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
-           (eaf-open file "video-player"))
+    (cond ((member extension-name
+                   '("html"
+                     "pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"
+                     "jpg" "jpeg" "png" "bmp"
+                     "avi" "rmvb" "ogg" "mp4"
+                     "md"
+                     "org"))
+           (eaf-open file))
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
           (t (dired-find-file)))))
