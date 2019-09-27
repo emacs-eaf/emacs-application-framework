@@ -81,7 +81,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def scroll_buffer(self, view_info, scroll_direction, scroll_type):
-        (buffer_id, _, _, _, _, _) = view_info.split(":")
+        (buffer_id, _, _, _, _) = view_info.split(":")
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].scroll(scroll_direction, scroll_type)
 

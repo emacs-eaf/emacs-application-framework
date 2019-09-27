@@ -811,6 +811,25 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
     (other-window -1)
     ad-do-it))
 
+(defadvice watch-other-window-internal (around eaf-watch-other-window activate)
+  "When next buffer is `eaf-mode', do `eaf-watch-other-window'."
+  (other-window +1)
+  (if (eq major-mode 'eaf-mode)
+      (let ((direction (ad-get-arg 0))
+            (line (ad-get-arg 1)))
+        (if (string-equal direction "up")
+            (if (null line)
+                (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
+              (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line")
+              )
+          (if (null line)
+              (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
+            (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line")
+            ))
+        (other-window -1))
+    (other-window -1)
+    ad-do-it))
+
 (provide 'eaf)
 
 ;;; eaf.el ends here
