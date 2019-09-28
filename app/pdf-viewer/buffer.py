@@ -20,8 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
+from PyQt5.QtCore import Qt, QRect, QEvent
+from PyQt5.QtGui import QColor, QPixmap, QImage, QFont, QCursor
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from core.buffer import Buffer
@@ -112,6 +112,7 @@ class PdfViewerWidget(QWidget):
 
         self.url = url
         self.background_color = background_color
+        self.installEventFilter(self)
 
         # Load document first.
         self.document = fitz.open(url)
@@ -385,6 +386,41 @@ class PdfViewerWidget(QWidget):
             self.update()
         else:
             print("Scroll offset is not change, don't redraw.")
+
+    def get_event_link(self, event):
+        start_page_index = self.get_start_page_index()
+        last_page_index = self.get_last_page_index()
+
+        translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
+
+        ex = event.globalX()
+        ey = event.globalY()
+
+        for index in list(range(start_page_index, last_page_index)):
+            if index < self.page_total_number:
+                page = self.document[index]
+
+                for link in page.getLinks():
+                    rect = link["from"]
+
+                    link_x_start = int(rect.x0 * self.scale)
+                    link_x_end = int(rect.x1 * self.scale)
+                    link_y_start = int(rect.y0 * self.scale + translate_y)
+                    link_y_end = int(rect.y1 * self.scale + translate_y)
+
+                    if ex >= link_x_start and ex <= link_x_end and ey >= link_y_start and ey <= link_y_end:
+                        if link["page"]:
+                            return link
+
+        return None
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonPress:
+            event_link = self.get_event_link(event)
+            if event_link:
+                self.jump_to_page(event_link["page"] + 1)
+
+        return False
 
 if __name__ == '__main__':
     import sys
