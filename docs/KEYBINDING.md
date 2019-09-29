@@ -58,3 +58,12 @@ You can customize keys with option ```eaf-videoplayer-keybinding```
 | k                | Load previous image in current directory |
 
 You can customize keys with option ```eaf-imageviewer-keybinding```
+
+### Terminal
+
+| Browser Key        | Event                    |
+| :-----:            | :----                    |
+| C-=                | Zoom in                  |
+| C--                | Zoom out                 |
+
+You can customize keys with option ```eaf-terminal-keybinding```
