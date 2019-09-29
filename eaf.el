@@ -199,6 +199,13 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-terminal-keybinding
+  '(("C--" . "zoom_out")
+    ("C-=" . "zoom_in"))
+  "The keybinding of terminal."
+  :type 'cons
+  :group 'eaf)
+
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -425,6 +432,11 @@ We need calcuate render allocation to make sure no black border around render co
                         (let ((function-name-value (assoc key-desc eaf-browser-keybinding)))
                           (when function-name-value
                             (eaf-call "execute_function" buffer-id (cdr function-name-value))))
+                        )
+                       ((equal buffer-app-name "terminal")
+                        (let ((function-name-value (assoc key-desc eaf-terminal-keybinding)))
+                          (when function-name-value
+                            (eaf-call "execute_function" buffer-id (cdr function-name-value))))
                         )))
                 ((or
                   (equal key-command "nil")
@@ -638,6 +650,11 @@ Otherwise call send_key message to Python side."
   "Open EAF camera application."
   (interactive)
   (eaf-open "eaf-camera" "camera"))
+
+(defun eaf-open-terminal ()
+  "Open EAF terminal application."
+  (interactive)
+  (eaf-open "eaf-terminal" "terminal"))
 
 (defun eaf-open-qutebrowser ()
   "Open EAF Qutebrowser application."

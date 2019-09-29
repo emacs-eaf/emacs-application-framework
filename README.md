@@ -41,6 +41,7 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 
 ```Bash
     sudo pip3 install dbus-python pymupdf grip qrcode python-xlib pyqt5 pyqtwebengine
+    sudo pacman -S qtermwidget-git
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
@@ -51,15 +52,16 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 
 ### Package description.
 
-| Debian Package | Use for                                          |
-| :--------      | :----                                            |
-| dbus-python    | DBus IPC for python and elisp                    |
-| pymupdf        | Render engine required for PDF Viewer            |
-| grip           | Markdown render server for Markdown Previewer    |
-| qrcode         | Render local file QR code                        |
-| python-xlib    | Stick app window into emacs frame                |
-| pyqt5          | GUI library required for application development |
-| pyqtwebengine  | QtWebEngine for browser application              |
+| Debian Package  | Package Repo | Use for                                          |
+| :--------       | :--------    | :----                                            |
+| dbus-python     | pip3         | DBus IPC for python and elisp                    |
+| pymupdf         | pip3         | Render engine required for PDF Viewer            |
+| grip            | pip3         | Markdown render server for Markdown Previewer    |
+| qrcode          | pip3         | Render local file QR code                        |
+| python-xlib     | pip3         | Stick app window into emacs frame                |
+| pyqt5           | pip3         | GUI library required for application development |
+| pyqtwebengine   | pip3         | QtWebEngine for browser application              |
+| qtermwidget-git | pacman       | QTermWidget is terminal emulator for PyQt5       |
 
 ### Or run EAF with docker
 
@@ -82,11 +84,12 @@ There are mainly three obstacles:
 | Markdown previewer | Type 'eaf-open' RET markdown filepath         |
 | Org file previewer | Type 'eaf-open' RET org filepath              |
 | Camera             | Type 'eaf-open-camera'                        |
-| Demo               | Type 'eaf-open-demo'                          |
+| Terminal           | Type 'eaf-open-terminal'                      |
 | File Sender        | Type 'eaf-file-sender-qrcode'                 |
 |                    | Or use 'eaf-file-sender-qrcode-in-dired'      |
 | File Receiver      | Type 'eaf-file-receiver-qrcode'               |
 | Airshare           | Type 'eaf-file-transfer-airshare'             |
+| Demo               | Type 'eaf-open-demo'                          |
 
 Please check [Key binding](./docs/KEYBINDING.md) to check keybinding of application.
 

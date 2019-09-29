@@ -7,7 +7,6 @@
 * PdfViewer: split window first, then scroll event cause view blank
 * PdfViewer: allow select text.
 * PdfViewer: use self.document.getToC() fetch and render bookmark.
-* Terminal: https://github.com/lxqt/qtermwidget looks support pyqt5 too. ;)
 * Support HiDPI? I haven't HiDPI screen.
 * Make EAF support bookmark.
 * Aria2 client is awesome, welcome to PR.

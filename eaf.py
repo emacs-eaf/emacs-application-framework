@@ -26,7 +26,6 @@ from app.browser.buffer import AppBuffer as NeverUsed # noqa
 
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.fake_key_event import fake_key_event
 from core.view import View
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
@@ -241,7 +240,7 @@ class EAF(dbus.service.Object):
     def send_key(self, buffer_id, event_string):
         # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
-            fake_key_event(event_string, self.buffer_dict[buffer_id])
+            self.buffer_dict[buffer_id].fake_key_event(event_string)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def handle_input_message(self, buffer_id, callback_type, callback_result):
