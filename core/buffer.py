@@ -249,7 +249,7 @@ class Buffer(QGraphicsScene):
         if event_string.isupper()    :
             modifier = Qt.ShiftModifier
 
-        print("Press: ", event_string)
+        # print("Press: ", event_string)
 
         # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
         key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], modifier, text)

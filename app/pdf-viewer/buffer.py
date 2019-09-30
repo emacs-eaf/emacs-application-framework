@@ -188,8 +188,6 @@ class PdfViewerWidget(QWidget):
 
         self.page_cache_pixmap_dict[index] = qpixmap
 
-        print("*** New page pixmap: %s %s" % (self.url, index))
-
         return qpixmap
 
     def clean_unused_page_cache_pixmap(self):
@@ -203,7 +201,6 @@ class PdfViewerWidget(QWidget):
 
         for cache_index in cache_index_list:
             if cache_index not in index_list:
-                print("*** Clean unused page pixmap: %s %s" % (self.url, cache_index))
                 self.page_cache_pixmap_dict.pop(cache_index)
 
     def resizeEvent(self, event):
@@ -305,7 +302,6 @@ class PdfViewerWidget(QWidget):
             start_page_index = max(0, self.get_start_page_index() - 1)
             last_page_index = min(self.page_total_number, self.get_last_page_index() + 1)
 
-            print("*** Try build %s context cache pixmap from %s to %s" % (self.url, start_page_index, last_page_index - 1))
             for index in list(range(start_page_index, last_page_index)):
                 self.get_page_pixmap(index, self.scale)
 
@@ -384,8 +380,6 @@ class PdfViewerWidget(QWidget):
         if self.scroll_offset != new_offset:
             self.scroll_offset = new_offset
             self.update()
-        else:
-            print("Scroll offset is not change, don't redraw.")
 
     def get_event_link(self, event):
         start_page_index = self.get_start_page_index()
