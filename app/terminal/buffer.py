@@ -29,7 +29,7 @@ class AppBuffer(Buffer):
 
         self.add_widget(QTermWidget.QTermWidget())
 
-        self.buffer_widget.setTerminalFont(QFont('WenQuanYi Micro Hei Mono', 12))
+        self.buffer_widget.setTerminalFont(QFont('Source Code Pro', 14))
         self.buffer_widget.setColorScheme('Linux')
 
         self.buffer_widget.finished.connect(self.request_close_buffer)
