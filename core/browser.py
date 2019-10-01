@@ -33,6 +33,7 @@ MOUSE_FORWARD_BUTTON = 16
 class BrowserView(QWebEngineView):
 
     open_url_in_new_tab = QtCore.pyqtSignal(str)
+    translate_selected_text = QtCore.pyqtSignal(str)
 
     def __init__(self):
         super(QWebEngineView, self).__init__()
@@ -46,7 +47,14 @@ class BrowserView(QWebEngineView):
         self.cookie_storage = BrowserCookieStorage()
         self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
 
+        self.selectionChanged.connect(self.select_text_change)
+
         self.load_cookie()
+
+    def select_text_change(self):
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers == Qt.ControlModifier:
+            self.translate_selected_text.emit(self.selectedText())
 
     def load_cookie(self):
         for cookie in self.cookie_storage.load_cookie():

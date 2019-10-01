@@ -137,6 +137,7 @@ class EAF(dbus.service.Object):
         # Monitor buffer signals.
         app_buffer.update_title.connect(self.update_buffer_title)
         app_buffer.open_url.connect(self.open_buffer_url)
+        app_buffer.translate_text.connect(self.translate_text)
 
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
@@ -262,6 +263,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal("com.lazycat.eaf")
     def open_buffer_url(self, url):
+        pass
+
+    @dbus.service.signal("com.lazycat.eaf")
+    def translate_text(self, text):
         pass
 
     @dbus.service.signal("com.lazycat.eaf")

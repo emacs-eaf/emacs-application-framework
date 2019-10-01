@@ -578,10 +578,19 @@ Otherwise call send_key message to Python side."
 (defun eaf-open-buffer-url (url)
   (eaf-open url))
 
+(defun eaf-translate-text (text)
+  (when (featurep 'sdcv)
+    (sdcv-search-input+ text)))
+
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "open_buffer_url"
  'eaf-open-buffer-url)
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "translate_text"
+ 'eaf-translate-text)
 
 (defun eaf-read-string (interactive-string)
   "Like `read-string', but return nil if user execute `keyboard-quit' when input."

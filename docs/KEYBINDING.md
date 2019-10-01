@@ -1,21 +1,22 @@
 ### Browser
 
-| Browser Key        | Event                    |
-| :-----:            | :----                    |
-| Left Button        | Open link in current tab |
-| Ctrl + Left Button | Open link in new tab     |
-| M-f                | Forward page in history  |
-| M-b                | Backward page in history |
-| M-q                | Delete all cookies       |
-| C-=                | Zoom in                  |
-| C--                | Zoom out                 |
-| C-0                | Zoom reset               |
-| C-n                | Scroll up                |
-| C-p                | Scroll down              |
-| C-v                | Scroll up page           |
-| M-v                | Scroll down page         |
-| M-<                | Scroll to top            |
-| M->                | Scroll to bottom         |
+| Browser Key         | Event                            |
+| :-----:             | :----                            |
+| Left Button         | Open link in current tab         |
+| Ctrl + Left Button  | Open link in new tab             |
+| Ctrl + Double Click | Use sdcv translate selected text |
+| M-f                 | Forward page in history          |
+| M-b                 | Backward page in history         |
+| M-q                 | Delete all cookies               |
+| C-=                 | Zoom in                          |
+| C--                 | Zoom out                         |
+| C-0                 | Zoom reset                       |
+| C-n                 | Scroll up                        |
+| C-p                 | Scroll down                      |
+| C-v                 | Scroll up page                   |
+| M-v                 | Scroll down page                 |
+| M-<                 | Scroll to top                    |
+| M->                 | Scroll to bottom                 |
 
 You can customize keys with option ```eaf-browser-keybinding```
 

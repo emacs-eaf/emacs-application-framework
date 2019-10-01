@@ -30,3 +30,4 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.setUrl(QUrl(url))
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url)
+        self.buffer_widget.translate_selected_text.connect(self.translate_text)

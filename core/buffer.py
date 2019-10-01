@@ -130,6 +130,7 @@ class Buffer(QGraphicsScene):
 
     update_title = QtCore.pyqtSignal(str, str)
     open_url = QtCore.pyqtSignal(str)
+    translate_text = QtCore.pyqtSignal(str)
     before_destroy_hook = QtCore.pyqtSignal()
     input_message = QtCore.pyqtSignal(str, str, str)
     close_buffer = QtCore.pyqtSignal(str)
