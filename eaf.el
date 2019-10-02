@@ -162,6 +162,14 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-browser-key-alias
+  '(("C-a" . "<home>")
+    ("C-e" . "<end>")
+    )
+  "The key alias of browser."
+  :type 'cons
+  :group 'eaf)
+
 (defcustom eaf-pdfviewer-keybinding
   '(("j" . "scroll_up")
     ("k" . "scroll_down")
@@ -430,9 +438,11 @@ We need calcuate render allocation to make sure no black border around render co
                 ((string-match "^[CMSs]-.*" key-desc)
                  (cond ((equal buffer-app-name "browser")
                         (let ((function-name-value (assoc key-desc eaf-browser-keybinding)))
-                          (when function-name-value
-                            (eaf-call "execute_function" buffer-id (cdr function-name-value))))
-                        )
+                          (if function-name-value
+                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
+                            (let ((key-alias-value (assoc key-desc eaf-browser-key-alias)))
+                              (if key-alias-value
+                                  (eaf-call "send_key" buffer-id (cdr key-alias-value)))))))
                        ((equal buffer-app-name "terminal")
                         (let ((function-name-value (assoc key-desc eaf-terminal-keybinding)))
                           (when function-name-value

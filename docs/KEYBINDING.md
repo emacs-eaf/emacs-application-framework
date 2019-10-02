@@ -8,6 +8,8 @@
 | M-f                 | Forward page in history          |
 | M-b                 | Backward page in history         |
 | M-q                 | Delete all cookies               |
+| C-a                 | Move cursor to beginning of text |
+| C-e                 | Move cursor to end of text       |
 | C-=                 | Zoom in                          |
 | C--                 | Zoom out                         |
 | C-0                 | Zoom reset                       |
@@ -18,7 +20,7 @@
 | M-<                 | Scroll to top                    |
 | M->                 | Scroll to bottom                 |
 
-You can customize keys with option ```eaf-browser-keybinding```
+You can customize keys with option ```eaf-browser-keybinding``` or ```eaf-browser-key-alias```
 
 ### PDF Viewer
 
