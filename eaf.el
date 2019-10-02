@@ -576,7 +576,7 @@ Otherwise call send_key message to Python side."
  'eaf-update-buffer-title)
 
 (defun eaf-open-buffer-url (url)
-  (eaf-open url))
+  (eaf-open-browser url))
 
 (defun eaf-translate-text (text)
   (when (featurep 'sdcv)
