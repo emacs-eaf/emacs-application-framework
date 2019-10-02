@@ -164,7 +164,7 @@ class WebHitTestResult():
         self.m_linkUrl = self.page.url().toString()
         self.m_baseUrl = self.page.url().toString()
         self.viewportPos = self.page.mapToViewport(self.pos)
-        with open("./javascript/open_in_new_tab.js", 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), "javascript", "open_in_new_tab.js"), "r") as f:
             self.source = f.read()
 
         self.js = self.source.replace("%1", str(self.viewportPos.x())).replace("%2", str(self.viewportPos.y()))
