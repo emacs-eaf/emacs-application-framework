@@ -701,7 +701,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
            (setq app-name "markdown-previewer"))
           ((member extension-name '("jpg" "jpeg" "png" "bmp"))
            (setq app-name "image-viewer"))
-          ((member extension-name '("avi" "rmvb" "ogg" "mp4"))
+          ((member extension-name '("avi" "rmvb" "ogg" "mp4" "mkv"))
            (setq app-name "video-player"))
           ((member extension-name '("html"))
            (setq url (concat "file://" url))
@@ -805,7 +805,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
                    '("html"
                      "pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"
                      "jpg" "jpeg" "png" "bmp"
-                     "avi" "rmvb" "ogg" "mp4"
+                     "avi" "rmvb" "ogg" "mp4" "mkv"
                      "md"
                      "org"))
            (eaf-open file))
