@@ -6,9 +6,9 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
-;; Version: 0.2
-;; Last-Updated: Mon Sep 23 09:56:37 2019 (-0400)
-;;           By: Mingde (Matthew) Zeng
+;; Version: 0.3
+;; Last-Updated: 2019-10-11 13:20:12
+;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -211,6 +211,42 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   '(("C--" . "zoom_out")
     ("C-=" . "zoom_in"))
   "The keybinding of terminal."
+  :type 'cons
+  :group 'eaf)
+
+(defcustom eaf-pdf-extension-list
+  '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
+  "The extension list of pdf application."
+  :type 'cons
+  :group 'eaf)
+
+(defcustom eaf-markdown-extension-list
+  '("md")
+  "The extension list of markdown previewer application."
+  :type 'cons
+  :group 'eaf)
+
+(defcustom eaf-image-extension-list
+  '("jpg" "jpeg" "png" "bmp")
+  "The extension list of image viewer application."
+  :type 'cons
+  :group 'eaf)
+
+(defcustom eaf-video-extension-list
+  '("avi" "rmvb" "ogg" "mp4" "mkv")
+  "The extension list of video player application."
+  :type 'cons
+  :group 'eaf)
+
+(defcustom eaf-browser-extension-list
+  '("html")
+  "The extension list of browser application."
+  :type 'cons
+  :group 'eaf)
+
+(defcustom eaf-org-extension-list
+  '("org")
+  "The extension list of org previewer application."
   :type 'cons
   :group 'eaf)
 
@@ -689,9 +725,9 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
     (setq extension-name (file-name-extension url))
-    (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu"))
+    (cond ((member extension-name eaf-pdf-extension-list)
            (setq app-name "pdf-viewer"))
-          ((member extension-name '("md"))
+          ((member extension-name eaf-markdown-extension-list)
            ;; Try get user's github token if `eaf-grip-token' is nil.
            (if eaf-grip-token
                (setq arguments eaf-grip-token)
@@ -699,14 +735,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
            ;; Split window to show file and previewer.
            (eaf-split-preview-windows)
            (setq app-name "markdown-previewer"))
-          ((member extension-name '("jpg" "jpeg" "png" "bmp"))
+          ((member extension-name eaf-image-extension-list)
            (setq app-name "image-viewer"))
-          ((member extension-name '("avi" "rmvb" "ogg" "mp4" "mkv"))
+          ((member extension-name eaf-video-extension-list)
            (setq app-name "video-player"))
-          ((member extension-name '("html"))
+          ((member extension-name eaf-browser-extension-list)
            (setq url (concat "file://" url))
            (setq app-name "browser"))
-          ((member extension-name '("org"))
+          ((member extension-name eaf-org-extension-list)
            ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
            (save-excursion
              (find-file url)
@@ -802,12 +838,13 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
   (interactive)
   (dolist (file (dired-get-marked-files))
     (cond ((member (file-name-extension file)
-                   '("html"
-                     "pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu"
-                     "jpg" "jpeg" "png" "bmp"
-                     "avi" "rmvb" "ogg" "mp4" "mkv"
-                     "md"
-                     "org"))
+                   (append eaf-pdf-extension-list
+                           eaf-markdown-extension-list
+                           eaf-image-extension-list
+                           eaf-video-extension-list
+                           eaf-browser-extension-list
+                           eaf-org-extension-list
+                           ))
            (eaf-open file))
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
