@@ -689,7 +689,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
     (setq extension-name (file-name-extension url))
-    (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"))
+    (cond ((member extension-name '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu"))
            (setq app-name "pdf-viewer"))
           ((member extension-name '("md"))
            ;; Try get user's github token if `eaf-grip-token' is nil.
@@ -803,7 +803,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
   (dolist (file (dired-get-marked-files))
     (cond ((member (file-name-extension file)
                    '("html"
-                     "pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz"
+                     "pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu"
                      "jpg" "jpeg" "png" "bmp"
                      "avi" "rmvb" "ogg" "mp4" "mkv"
                      "md"
