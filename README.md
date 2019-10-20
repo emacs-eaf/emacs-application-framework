@@ -35,6 +35,11 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 | <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
 |                                                    |                                                        |
 
+| Terminal Emulator                                 |
+| :--------:                                        |
+| <img src="./screenshot/terminal.png" width="400"> |
+|                                                   |
+
 ## Installation
 
 1. Install python dependences:
