@@ -421,18 +421,14 @@ class PdfViewerWidget(QWidget):
                 render_x = int((self.rect().width() - render_width) / 2)
 
                 # computer absolute coordinate of page
-                x0 = int((pos.x() - render_x) * 1.0 / self.scale)
-                x1 = int((pos.x() + 2 - render_x) * 1.0 / self.scale)
+                x = int((pos.x() - render_x) * 1.0 / self.scale)
                 if last_page_index - start_page_index == 1:
                     page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
                 else:
                     page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height
-                y0 = int((pos.y() + page_offset) * 1.0 / self.scale)
-                y1 = int((pos.y() + 2 + page_offset) * 1.0 / self.scale)
-
-                draw_rect = fitz.Rect(x0, y0, x1, y1)
-                if draw_rect.isEmpty or draw_rect.isInfinite:
-                    return None
+                y = int((pos.y() + page_offset) * 1.0 / self.scale)
+                word_offset = 10 # 10 pixel is enough for word intersect operation
+                draw_rect = fitz.Rect(x, y, x + word_offset, y + word_offset)
 
                 page = self.document[index]
                 page.setCropBox(page.rect)
