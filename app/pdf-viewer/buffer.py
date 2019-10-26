@@ -34,6 +34,7 @@ class AppBuffer(Buffer):
 
         self.add_widget(PdfViewerWidget(url, QColor(0, 0, 0, 255)))
         self.buffer_widget.send_input_message = self.send_input_message
+        self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
     def handle_input_message(self, result_type, result_content):
         if result_type == "jump_page":
@@ -106,6 +107,7 @@ class AppBuffer(Buffer):
         self.buffer_widget.remeber_jump()
 
 class PdfViewerWidget(QWidget):
+    translate_double_click_word = QtCore.pyqtSignal(str)
 
     def __init__(self, url, background_color):
         super(PdfViewerWidget, self).__init__()
@@ -408,11 +410,48 @@ class PdfViewerWidget(QWidget):
 
         return None
 
+    def get_double_click_word(self, event):
+        start_page_index = self.get_start_page_index()
+        last_page_index = self.get_last_page_index()
+        pos = event.pos()
+
+        for index in list(range(start_page_index, last_page_index)):
+            if index < self.page_total_number:
+                render_width = self.page_width * self.scale
+                render_x = int((self.rect().width() - render_width) / 2)
+
+                # computer absolute coordinate of page
+                x0 = int((pos.x() - render_x) * 1.0 / self.scale)
+                x1 = int((pos.x() + 2 - render_x) * 1.0 / self.scale)
+                if last_page_index - start_page_index == 1:
+                    page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
+                else:
+                    page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height
+                y0 = int((pos.y() + page_offset) * 1.0 / self.scale)
+                y1 = int((pos.y() + 2 + page_offset) * 1.0 / self.scale)
+
+                draw_rect = fitz.Rect(x0, y0, x1, y1)
+                if draw_rect.isEmpty or draw_rect.isInfinite:
+                    return None
+
+                page = self.document[index]
+                page.setCropBox(page.rect)
+                page_words = page.getTextWords()
+                rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
+                if rect_words:
+                    return rect_words[0][4]
+
+        return None
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
             event_link = self.get_event_link(event)
             if event_link:
                 self.jump_to_page(event_link["page"] + 1)
+        elif event.type() == QEvent.MouseButtonDblClick:
+            double_click_word = self.get_double_click_word(event)
+            if double_click_word:
+                self.translate_double_click_word.emit(double_click_word)
 
         return False
 
