@@ -24,22 +24,23 @@ You can customize keys with option ```eaf-browser-keybinding``` or ```eaf-browse
 
 ### PDF Viewer
 
-| PDF Viewer Key | Event             |
-| :-----:        | :----             |
-| j              | Scroll up         |
-| k              | Scroll down       |
-| Space          | Scroll up page    |
-| b              | Scroll down page  |
-| ,              | Scroll to end     |
-| .              | Scroll to home    |
-| t              | Switch scale mode |
-| -              | Zoom out          |
-| =              | Zoom in           |
-| 0              | Zoom reset        |
-| g              | Goto page         |
-| p              | Goto to percent   |
-| [              | Remember position |
-| ]              | Remember jump     |
+| PDF Viewer Key | Event                               |
+| :-----:        | :----                               |
+| j              | Scroll up                           |
+| k              | Scroll down                         |
+| Space          | Scroll up page                      |
+| b              | Scroll down page                    |
+| ,              | Scroll to end                       |
+| .              | Scroll to home                      |
+| t              | Switch scale mode                   |
+| -              | Zoom out                            |
+| =              | Zoom in                             |
+| 0              | Zoom reset                          |
+| g              | Goto page                           |
+| p              | Goto to percent                     |
+| [              | Remember position                   |
+| ]              | Remember jump                       |
+| Double Click   | Use sdcv translate word under point |
 
 You can customize keys with option ```eaf-pdfviewer-keybinding```
 
