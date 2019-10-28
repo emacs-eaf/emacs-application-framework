@@ -5,7 +5,6 @@
 * ImageViewer: add zoom support
 * Pdfviewer: open link like vimium.
 * PdfViewer: use mupdf/page.searchFor implement search text in pdf.
-* PdfViewer: split window first, then scroll event cause view blank
 * PdfViewer: allow select text.
 * PdfViewer: use self.document.getToC() fetch and render bookmark.
 * Support HiDPI? I haven't HiDPI screen.
