@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: 2019-10-11 13:20:12
-;;           By: Andy Stewart
+;; Last-Updated: Wed Nov 20 16:24:20 2019 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -132,7 +132,7 @@
 (defvar eaf-http-proxy-port "")
 
 (defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
+  "If non-nil, when calling `eaf-open-this-from-dired', EAF unrecognizable files will be opened
 by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
@@ -832,7 +832,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "DEAF File Receiver - Specify Destination: ")
   (eaf-open dir "file-receiver"))
 
-(defun eaf-file-open-in-dired ()
+(defun eaf-open-this-from-dired ()
   "Open html/pdf/image/video files whenever possible with EAF in dired.
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
