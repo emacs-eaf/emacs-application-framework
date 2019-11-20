@@ -95,12 +95,13 @@
   "Keymap used by `eaf-mode'.")
 
 (define-derived-mode eaf-mode text-mode "EAF"
-  (interactive)
+  "Major mode for Emacs Application Framework."
   (kill-all-local-variables)
   (setq major-mode 'eaf-mode)
   (setq mode-name "EAF")
+  (setq buffer-read-only t)
   ;; Split window combinations proportionally.
-  (setq window-combination-resize t)    ;
+  (setq window-combination-resize t)
   (set (make-local-variable 'buffer-id) (eaf-generate-id))
   (use-local-map eaf-mode-map)
   (run-hooks 'eaf-mode-hook))
