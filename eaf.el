@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Wed Nov 20 16:24:20 2019 (-0500)
+;; Last-Updated: Thu Nov 21 22:11:14 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -287,7 +287,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (equal major-mode 'eaf-mode)
-        (incf count)
+        (cl-incf count)
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
     (if (> count 1)
