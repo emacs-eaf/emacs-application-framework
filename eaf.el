@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Thu Nov 21 22:11:14 2019 (-0500)
+;; Last-Updated: Sat Nov 23 03:15:08 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -95,12 +95,13 @@
   "Keymap used by `eaf-mode'.")
 
 (define-derived-mode eaf-mode text-mode "EAF"
-  (interactive)
+  "Major mode for Emacs Application Framework."
   (kill-all-local-variables)
   (setq major-mode 'eaf-mode)
   (setq mode-name "EAF")
+  (setq buffer-read-only t)
   ;; Split window combinations proportionally.
-  (setq window-combination-resize t)    ;
+  (setq window-combination-resize t)
   (set (make-local-variable 'buffer-id) (eaf-generate-id))
   (use-local-map eaf-mode-map)
   (run-hooks 'eaf-mode-hook))
@@ -132,7 +133,7 @@
 (defvar eaf-http-proxy-port "")
 
 (defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, when calling `eaf-open-this-from-dired', EAF unrecognizable files will be opened
+  "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
 by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
@@ -832,7 +833,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "DEAF File Receiver - Specify Destination: ")
   (eaf-open dir "file-receiver"))
 
-(defun eaf-open-this-from-dired ()
+(defun eaf-file-open-in-dired ()
   "Open html/pdf/image/video files whenever possible with EAF in dired.
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
