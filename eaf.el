@@ -99,7 +99,6 @@
   (kill-all-local-variables)
   (setq major-mode 'eaf-mode)
   (setq mode-name "EAF")
-  (setq buffer-read-only t)
   ;; Split window combinations proportionally.
   (setq window-combination-resize t)
   (set (make-local-variable 'buffer-id) (eaf-generate-id))
