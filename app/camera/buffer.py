@@ -22,11 +22,14 @@
 from PyQt5.QtCore import Qt, QSizeF
 from PyQt5.QtGui import QBrush
 from PyQt5.QtGui import QColor
-from PyQt5.QtMultimedia import QCameraInfo, QCamera
+from PyQt5.QtMultimedia import QCameraInfo, QCamera, QCameraImageCapture
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
+from pathlib import Path
+import time
+import os
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -41,6 +44,9 @@ class AppBuffer(Buffer):
     def some_view_show(self):
         # Re-start camero after some view show.
         self.buffer_widget.camera.start()
+
+    def take_photo(self):
+        self.buffer_widget.take_photo()
 
 class CameraWidget(QWidget):
 
@@ -76,6 +82,14 @@ class CameraWidget(QWidget):
         self.camera.setViewfinder(self.video_item)
         self.camera.setCaptureMode(QCamera.CaptureStillImage)
         self.camera.start()
+
+    def take_photo(self):
+        photo_path = os.path.join(str(Path.home()), "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(time.time()))))
+
+        image_capture = QCameraImageCapture(self.camera)
+        image_capture.capture(photo_path)
+
+        self.message_to_emacs.emit("Save photo at: " + photo_path)
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication

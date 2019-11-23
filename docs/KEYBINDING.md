@@ -70,4 +70,10 @@ You can customize keys with option ```eaf-imageviewer-keybinding```
 | C-=                | Zoom in                  |
 | C--                | Zoom out                 |
 
-You can customize keys with option ```eaf-terminal-keybinding```
+### Camera
+
+| Browser Key | Event      |
+| :-----:     | :----      |
+| j           | Take photo |
+
+You can customize keys with option ```eaf-camera-keybinding```

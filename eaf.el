@@ -214,6 +214,12 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-camera-keybinding
+  '(("j" . "take_photo"))
+  "The keybinding of camera"
+  :type 'cons
+  :group 'eaf)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
   "The extension list of pdf application."
@@ -451,7 +457,7 @@ We need calcuate render allocation to make sure no black border around render co
                    )
 
               ;; Uncomment for debug.
-              ;; (message (format "!!!!! %s %s %s %s" event key key-command key-desc))
+              ;; (message (format "!!!!! %s %s %s %s %s" event key key-command key-desc buffer-app-name))
 
               (cond
                 ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
@@ -469,6 +475,8 @@ We need calcuate render allocation to make sure no black border around render co
                         (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
                        ((equal buffer-app-name "image-viewer")
                         (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
+                       ((equal buffer-app-name "camera")
+                        (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
                        (t
                         (eaf-call "send_key" buffer-id key-desc))))
                 ((string-match "^[CMSs]-.*" key-desc)
