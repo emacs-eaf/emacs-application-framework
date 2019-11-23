@@ -288,7 +288,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (equal major-mode 'eaf-mode)
-        (incf count)
+        (cl-incf count)
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
     (if (> count 1)
