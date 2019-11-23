@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: 2019-10-11 13:20:12
-;;           By: Andy Stewart
+;; Last-Updated: Sat Nov 23 03:15:08 2019 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -95,12 +95,12 @@
   "Keymap used by `eaf-mode'.")
 
 (define-derived-mode eaf-mode text-mode "EAF"
-  (interactive)
+  "Major mode for Emacs Application Framework."
   (kill-all-local-variables)
   (setq major-mode 'eaf-mode)
   (setq mode-name "EAF")
   ;; Split window combinations proportionally.
-  (setq window-combination-resize t)    ;
+  (setq window-combination-resize t)
   (set (make-local-variable 'buffer-id) (eaf-generate-id))
   (use-local-map eaf-mode-map)
   (run-hooks 'eaf-mode-hook))
@@ -293,7 +293,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (equal major-mode 'eaf-mode)
-        (incf count)
+        (cl-incf count)
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
     (if (> count 1)
