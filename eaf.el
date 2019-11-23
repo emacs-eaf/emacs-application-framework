@@ -185,6 +185,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
     ("p" . "jump_to_percent")
     ("[" . "remember_current_position")
     ("]" . "remeber_jump")
+    ("i" . "toggle_inverted_mode")
     )
   "The keybinding of pdf viewer."
   :type 'cons

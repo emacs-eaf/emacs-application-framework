@@ -40,6 +40,7 @@ You can customize keys with option ```eaf-browser-keybinding``` or ```eaf-browse
 | p              | Goto to percent                     |
 | [              | Remember position                   |
 | ]              | Remember jump                       |
+| i              | Toggle inverted mode                |
 | Double Click   | Use sdcv translate word under point |
 
 You can customize keys with option ```eaf-pdfviewer-keybinding```

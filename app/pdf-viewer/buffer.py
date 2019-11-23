@@ -55,13 +55,17 @@ class AppBuffer(Buffer):
                 self.buffer_widget.scroll_down()
 
     def save_session_data(self):
-        return "{0}:{1}:{2}".format(self.buffer_widget.scroll_offset, self.buffer_widget.scale, self.buffer_widget.read_mode)
+        return "{0}:{1}:{2}:{3}".format(self.buffer_widget.scroll_offset,
+                                        self.buffer_widget.scale,
+                                        self.buffer_widget.read_mode,
+                                        self.buffer_widget.inverted_mode)
 
     def restore_session_data(self, session_data):
-        (scroll_offset, scale, read_mode) = session_data.split(":")
+        (scroll_offset, scale, read_mode, inverted_mode) = session_data.split(":")
         self.buffer_widget.scroll_offset = float(scroll_offset)
         self.buffer_widget.scale = float(scale)
         self.buffer_widget.read_mode = read_mode
+        self.buffer_widget.inverted_mode = inverted_mode == "True"
         self.buffer_widget.update()
 
     def scroll_up(self):
@@ -106,6 +110,9 @@ class AppBuffer(Buffer):
     def remeber_jump(self):
         self.buffer_widget.remeber_jump()
 
+    def toggle_inverted_mode(self):
+        self.buffer_widget.toggle_inverted_mode()
+
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
@@ -128,6 +135,9 @@ class PdfViewerWidget(QWidget):
         # Init scale and scale mode.
         self.scale = 1.0
         self.read_mode = "fit_to_width"
+
+        # Inverted mode.
+        self.inverted_mode = False
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -185,6 +195,10 @@ class PdfViewerWidget(QWidget):
         page = self.document[index]
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
+
+        if self.inverted_mode:
+            pixmap.invertIRect(pixmap.irect)
+
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
 
@@ -371,6 +385,16 @@ class PdfViewerWidget(QWidget):
     def zoom_reset(self):
         self.read_mode = "fit_to_width"
         self.update_scale()
+        self.update()
+
+    def toggle_inverted_mode(self):
+        # Need clear page cache first, otherwise current page will not inverted until next page.
+        self.page_cache_pixmap_dict.clear()
+
+        # Toggle inverted status.
+        self.inverted_mode = not self.inverted_mode
+
+        # Re-render page.
         self.update()
 
     def jump_to_page(self, page_num):
