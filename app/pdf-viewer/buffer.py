@@ -151,7 +151,8 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_height = 22
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_color = QColor("#333333")
+        self.page_annotate_light_color = QColor("#333333")
+        self.page_annotate_dark_color = QColor("#999999")
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -272,7 +273,12 @@ class PdfViewerWidget(QWidget):
 
         # Render current page.
         painter.setFont(self.font)
-        painter.setPen(self.page_annotate_color)
+
+        if self.inverted_mode:
+            painter.setPen(self.page_annotate_dark_color)
+        else:
+            painter.setPen(self.page_annotate_light_color)
+
         painter.drawText(QRect(self.rect().x(),
                                self.rect().y() + self.rect().height() - self.page_annotate_height - self.page_annotate_padding_bottom,
                                self.rect().width() - self.page_annotate_padding_right,
