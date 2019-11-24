@@ -125,6 +125,18 @@ If you use markdown previewer, you need access to a [Personal access token](http
 
 Otherwise, github will popup "times limit" error because so many peope use grip. ;)
 
+## FAQ
+
+### Why not support Wayland?
+EAF use X11 XReparent technology to stick Qt5 window on Emacs buffer area, Wayland not support XReparent.
+
+I recommend you use KDE, it's stable enough and support X11 XReparent technology.
+
+### "undefined symbol" error
+If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes, it's a bug of Arch.
+
+You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
+
 ## Report bug
 If you have any problem with EAF, please use command "emacs -Q" to start Emacs without any customizations.
 
