@@ -231,8 +231,11 @@ class PdfViewerWidget(QWidget):
         painter.save()
 
         # Draw background.
-        painter.setBrush(self.background_color)
-        painter.setPen(self.background_color)
+        background_color = self.background_color
+        if self.inverted_mode: # change color of background if inverted mode is enable
+            background_color = QColor(20, 20, 20, 255)
+        painter.setBrush(background_color)
+        painter.setPen(background_color)
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
         # Get start/last render index.
