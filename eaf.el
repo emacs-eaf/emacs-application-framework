@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Sat Nov 23 03:15:08 2019 (-0500)
+;; Last-Updated: Tue Nov 26 19:58:38 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -130,6 +130,11 @@
 (defvar eaf-http-proxy-host "")
 
 (defvar eaf-http-proxy-port "")
+
+(defvar eaf-var-list '()
+  "The alist storing user-defined variables that's shared with EAF Python side.
+
+Use `eaf-setq' to modify this list.")
 
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
@@ -539,6 +544,13 @@ Otherwise call send_key message to Python side."
         (eaf-call "execute_function" buffer-id (cdr function-name-value))
       (eaf-call "send_key" buffer-id key-desc))))
 
+(defun eaf-setq (sym val)
+  "Similar to `setq', but store SYM with VAL in the EAF Python side.
+
+Use it as (eaf-setq 'sym val)"
+  (when (symbol-name sym)
+    (map-put eaf-var-list sym val)))
+
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
          (mouse-press-x (string-to-number (nth 0 coordinate-list)))
@@ -662,6 +674,16 @@ Otherwise call send_key message to Python side."
  "com.lazycat.eaf" "input_message"
  'eaf-input-message)
 
+(defun eaf-send-var-to-python ()
+  (message "Sending variables to Python side...")
+  (cl-loop for (sym . val) in eaf-var-list
+           do (eaf-call "store_emacs_var" (symbol-name sym) val)))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "get_emacs_var"
+ 'eaf-send-var-to-python)
+
 (add-hook 'window-size-change-functions 'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 (add-hook 'pre-command-hook #'eaf-monitor-key-event)
@@ -713,6 +735,7 @@ Otherwise call send_key message to Python side."
 (defun eaf-open-camera ()
   "Open EAF camera application."
   (interactive)
+  (eaf-setq 'eaf-camera-save-path "~/Downloads")
   (eaf-open "eaf-camera" "camera"))
 
 (defun eaf-open-terminal ()
@@ -764,9 +787,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
            ;; Split window to show file and previewer.
            (eaf-split-preview-windows)
            (setq app-name "org-previewer"))))
-
-  (unless arguments
-    (setq arguments ""))
+  (unless arguments (setq arguments ""))
+  ;; Now that app-name should hopefully be set
   (if app-name
       ;; Open url with eaf application if app-name is not empty.
       (if (process-live-p eaf-process)

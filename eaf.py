@@ -142,6 +142,9 @@ class EAF(dbus.service.Object):
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
 
+        # Get variables defined in emacs
+        self.get_emacs_var()
+
         # Handle buffer close request.
         app_buffer.close_buffer.connect(self.request_kill_buffer)
 
@@ -249,7 +252,13 @@ class EAF(dbus.service.Object):
             if buffer.buffer_id == buffer_id:
                 buffer.handle_input_message(callback_type, callback_result)
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def store_emacs_var(self, var_name, var_value):
+        for buffer in list(self.buffer_dict.values()):
+            buffer.emacs_var_dict[var_name] = var_value
+            # self.message_to_emacs("EAF Python: Storing " + var_name + " with " + buffer.emacs_var_dict[var_name])
+
+    @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):
         pass
 
@@ -283,6 +292,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal("com.lazycat.eaf")
     def message_to_emacs(self, message):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def get_emacs_var(self):
         pass
 
     def save_buffer_session(self, buf):
