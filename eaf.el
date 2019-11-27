@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Tue Nov 26 19:58:38 2019 (-0500)
+;; Last-Updated: Tue Nov 26 23:50:59 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -131,7 +131,8 @@
 
 (defvar eaf-http-proxy-port "")
 
-(defvar eaf-var-list '()
+(defvar eaf-var-list
+  '((eaf-camera-save-path . "~/Downloads"))
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Use `eaf-setq' to modify this list.")
@@ -736,7 +737,6 @@ Use it as (eaf-setq 'sym val)"
 (defun eaf-open-camera ()
   "Open EAF camera application."
   (interactive)
-  (eaf-setq 'eaf-camera-save-path "~/Downloads")
   (eaf-open "eaf-camera" "camera"))
 
 (defun eaf-open-terminal ()
