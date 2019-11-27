@@ -269,6 +269,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   (frame-parameter frame 'window-id))
 
 (defun eaf-start-process ()
+  "Start EAF process if it haven't started yet"
   (interactive)
   (if (process-live-p eaf-process)
       (message "EAF process has started.")
