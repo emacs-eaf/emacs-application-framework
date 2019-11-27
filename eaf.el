@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Tue Nov 26 23:50:59 2019 (-0500)
+;; Last-Updated: Wed Nov 27 02:49:28 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -135,7 +135,7 @@
   '((eaf-camera-save-path . "~/Downloads"))
   "The alist storing user-defined variables that's shared with EAF Python side.
 
-Use `eaf-setq' to modify this list.")
+Try not to modify this alist directly. Use `eaf-setq' to modify instead.")
 
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
