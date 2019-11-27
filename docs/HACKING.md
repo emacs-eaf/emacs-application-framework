@@ -205,6 +205,21 @@ If your application will do some long-time operation, you can use below use belo
     def update_progress(self, progress):
 ```
 
+### Customize variable at Elisp side.
+You can use below code set the save patch of camera photo:
+
+```Elisp
+(eaf-setq 'eaf-camera-save-path "~/Downloads")
+```
+
+On the python side, you can use below code pick up the value of ```eaf-camera-save-path```
+
+```Python
+self.emacs_var_dict["eaf-camera-save-path"]
+```
+
+Above is an example of ```eaf-camera-save-path```, you can customize any variable on elisp side actually, don't need modify python code to customize EAF application!
+
 
 ## Todolist
 [Some works you can hacking ;)](TODOLIST.md)
