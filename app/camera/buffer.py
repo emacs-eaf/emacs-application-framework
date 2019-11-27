@@ -46,7 +46,7 @@ class AppBuffer(Buffer):
         self.buffer_widget.camera.start()
 
     def take_photo(self):
-        self.buffer_widget.take_photo()
+        self.buffer_widget.take_photo(self.emacs_var_dict["eaf-camera-save-path"])
 
 class CameraWidget(QWidget):
 
@@ -83,11 +83,16 @@ class CameraWidget(QWidget):
         self.camera.setCaptureMode(QCamera.CaptureStillImage)
         self.camera.start()
 
-    def take_photo(self):
-        photo_path = os.path.join(str(Path.home()), "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(time.time()))))
-
+    def take_photo(self, camera_save_path):
         image_capture = QCameraImageCapture(self.camera)
-        image_capture.capture(photo_path)
+        try:
+            save_path = str(Path(os.path.expanduser(camera_save_path)))
+            photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
+            image_capture.capture(photo_path)
+        except:
+            save_path = str(Path(os.path.expanduser("~/Downloads")))
+            photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
+            image_capture.capture(photo_path)
 
         self.message_to_emacs.emit("Save photo at: " + photo_path)
 
