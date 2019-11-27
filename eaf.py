@@ -262,35 +262,35 @@ class EAF(dbus.service.Object):
     def focus_emacs_buffer(self, message):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def start_finish(self):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def update_buffer_title(self, buffer_id, title):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def open_buffer_url(self, url):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def translate_text(self, text):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def input_message(self, buffer_id, message, callback_type):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def create_new_browser_buffer(self, buffer_id):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def request_kill_buffer(self, buffer_id):
         pass
 
-    @dbus.service.signal("com.lazycat.eaf")
+    @dbus.service.signal(EAF_DBUS_NAME)
     def message_to_emacs(self, message):
         pass
 
@@ -350,11 +350,11 @@ class EAF(dbus.service.Object):
                     if buf.url in session_dict[buf.module_path]:
                         buf.restore_session_data(session_dict[buf.module_path][buf.url])
 
-                        print("Restore session: ", buf.buffer_id, buf.module_path, self.session_file_path)
+                        print("Restored session: ", buf.buffer_id, buf.module_path, self.session_file_path)
                     else:
-                        print("No session data about %s, no need restore session." % (buf.url))
+                        print("No session data about %s, no need to restore session." % (buf.url))
                 else:
-                    print("No data in session file, no need restore session.")
+                    print("No data present in session file, no need to restore session.")
         else:
             print("Not found %s, no need restore session." % (self.session_file_path))
 
