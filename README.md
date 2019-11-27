@@ -130,7 +130,7 @@ If you use markdown previewer, you need access to a [Personal access token](http
 (setq eaf-grip-token "yourtokencode")
 ```
 
-Otherwise, github will popup "times limit" error because so many peope use grip. ;)
+Otherwise, github will popup "times limit" error because so many people use grip. ;)
 
 ## FAQ
 
