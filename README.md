@@ -111,7 +111,7 @@ You can easily configure variables that EAF Python side uses with the Emacs Lisp
 #### EAF Camera
 The default directory to store images taken by EAF Camera is `~/Downloads`. To change it, put the following in `.emacs`
 ```Elisp
-(eaf-setq 'eaf-camera-save-path "~/Downloads")
+(eaf-setq eaf-camera-save-path "~/Downloads")
 ```
 ### Proxy
 If you can't access most awesome internet services like me, you perhaps need proxy settings like below:

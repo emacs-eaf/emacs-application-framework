@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Wed Nov 27 02:49:28 2019 (-0500)
+;; Last-Updated: Thu Nov 28 01:46:36 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -546,12 +546,25 @@ Otherwise call send_key message to Python side."
         (eaf-call "execute_function" buffer-id (cdr function-name-value))
       (eaf-call "send_key" buffer-id key-desc))))
 
-(defun eaf-setq (sym val)
-  "Similar to `setq', but store SYM with VAL in the EAF Python side.
+(defun eaf-set (sym val)
+  "Similar to `set', but store SYM with VAL in the EAF Python side.
 
-Use it as (eaf-setq 'sym val)"
+For convenience, use the Lisp macro `eaf-setq' instead."
   (when (symbol-name sym)
     (map-put eaf-var-list sym val)))
+
+(defun eaf-set (sym val)
+  "Similar to `set', but store SYM with VAL in the EAF Python side.
+
+For convenience, use the Lisp macro `eaf-setq' instead"
+  (when (symbol-name sym)
+    (map-put eaf-var-list sym val)))
+
+(defmacro eaf-setq (var val)
+  "Similar to `setq', but store VAR with VAL in the EAF Python side.
+
+Use it as (eaf-setq var val)"
+  `(eaf-set ',var ,val))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
