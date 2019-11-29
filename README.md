@@ -107,7 +107,7 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 ## Settings
 
 ### Customization
-You can easily configure variables that EAF Python side uses with the Emacs Lisp function `eaf-setq`. Check the full list of configurable variables with `C-h v eaf-var-list`.
+You can easily configure variables that EAF Python side uses with the Emacs Lisp function `eaf-set`. Check the full list of configurable variables with `C-h v eaf-var-list`.
 #### EAF Camera
 The default directory to store images taken by EAF Camera is `~/Downloads`. To change it, put the following in `.emacs`
 ```Elisp
