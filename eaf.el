@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Thu Nov 28 15:40:24 2019 (-0500)
+;; Last-Updated: Fri Nov 29 08:46:55 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -135,7 +135,7 @@
   '((eaf-camera-save-path . "~/Downloads"))
   "The alist storing user-defined variables that's shared with EAF Python side.
 
-Try not to modify this alist directly. Use `eaf-set' to modify instead.")
+Try not to modify this alist directly. Use `eaf-setq' to modify instead.")
 
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
@@ -547,11 +547,17 @@ Otherwise call send_key message to Python side."
       (eaf-call "send_key" buffer-id key-desc))))
 
 (defun eaf-set (sym val)
-  "Similar to `setq', but store SYM with VAL in the EAF Python side.
+  "Similar to `set', but store SYM with VAL in the EAF Python side.
 
-Use it as (eaf-set 'sym val)"
+For convenience, use the Lisp macro `eaf-setq' instead."
   (when (symbol-name sym)
     (map-put eaf-var-list sym val)))
+
+(defmacro eaf-setq (var val)
+  "Similar to `setq', but store VAR with VAL in the EAF Python side.
+
+Use it as (eaf-setq var val)"
+  `(eaf-set ',var ,val))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
