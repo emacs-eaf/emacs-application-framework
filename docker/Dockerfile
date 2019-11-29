@@ -1,4 +1,4 @@
-FROM base/archlinux
+FROM archlinux/base
 
 RUN pacman -Syy && \
     pacman -S sudo git emacs libpulse nss python python-pip python-dbus  --noconfirm && \
