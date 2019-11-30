@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Sat Nov 30 01:44:46 2019 (-0500)
+;; Last-Updated: Sat Nov 30 02:12:38 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -519,9 +519,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
                     (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
                 (eaf-call "send_key" buffer-id key-desc))
-               ((and (eaf-identify-key-in-app key-command buffer-app-name)
-                     (or (equal 1 (string-width (this-command-keys)))
-                         (string-match "^[CMSs]-.*" key-desc)))
+               ((eaf-identify-key-in-app key-command buffer-app-name)
                 (cond ((equal buffer-app-name "browser")
                        (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
                          (if function-name-value
@@ -581,7 +579,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   "Call function on the Python side if matched key in the keybinding.
 
 Otherwise call send_key message to Python side."
-  (let ((function-name-value (cdr (assoc key-desc eaf-camera-keybinding))))
+  (let ((function-name-value (cdr (assoc key-desc keybinding))))
     (if function-name-value
         (eaf-call "execute_function" buffer-id function-name-value)
       (eaf-call "send_key" buffer-id key-desc))))
