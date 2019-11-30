@@ -209,7 +209,7 @@ If your application will do some long-time operation, you can use below use belo
 You can use below code set the save patch of camera photo:
 
 ```Elisp
-(eaf-set 'eaf-camera-save-path "~/Downloads")
+(eaf-setq eaf-camera-save-path "~/Downloads")
 ```
 
 On the python side, you can use below code pick up the value of ```eaf-camera-save-path```
