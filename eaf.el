@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Fri Nov 29 08:46:55 2019 (-0500)
+;; Last-Updated: Sat Nov 30 02:12:38 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -166,15 +166,14 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom"))
-  "The keybinding of browser."
+  "The keybinding of EAF Browser."
   :type 'cons
   :group 'eaf)
 
 (defcustom eaf-browser-key-alias
   '(("C-a" . "<home>")
-    ("C-e" . "<end>")
-    )
-  "The key alias of browser."
+    ("C-e" . "<end>"))
+  "The key alias of EAF Browser."
   :type 'cons
   :group 'eaf)
 
@@ -193,39 +192,36 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("p" . "jump_to_percent")
     ("[" . "remember_current_position")
     ("]" . "remeber_jump")
-    ("i" . "toggle_inverted_mode")
-    )
-  "The keybinding of pdf viewer."
+    ("i" . "toggle_inverted_mode"))
+  "The keybinding of EAF PDF Viewer."
   :type 'cons
   :group 'eaf)
 
 (defcustom eaf-videoplayer-keybinding
   '(("SPC" . "toggle_play")
     ("h" . "play_backward")
-    ("l" . "play_forward")
-    )
-  "The keybinding of video player."
+    ("l" . "play_forward"))
+  "The keybinding of EAF Video Player."
   :type 'cons
   :group 'eaf)
 
 (defcustom eaf-imageviewer-keybinding
   '(("j" . "load_next_image")
-    ("k" . "load_prev_image")
-    )
-  "The keybinding of image viewer."
+    ("k" . "load_prev_image"))
+  "The keybinding of EAF Image Viewer."
   :type 'cons
   :group 'eaf)
 
 (defcustom eaf-terminal-keybinding
   '(("C--" . "zoom_out")
     ("C-=" . "zoom_in"))
-  "The keybinding of terminal."
+  "The keybinding of EAF Terminal."
   :type 'cons
   :group 'eaf)
 
 (defcustom eaf-camera-keybinding
   '(("j" . "take_photo"))
-  "The keybinding of camera"
+  "The keybinding of EAF Camera."
   :type 'cons
   :group 'eaf)
 
@@ -366,12 +362,57 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))
           (random (expt 16 4))))
 
-(defun eaf-create-buffer (input-content)
+(defun eaf-dummy-function (sym)
+  "Define an alias from SYM to a dummy function that acts as a placeholder."
+  (defalias sym (lambda nil
+                  "This Lisp function is a placeholder, the actual function will be handled on the Python side.
+
+Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
+                  (interactive)
+                  (eaf-monitor-key-event))))
+
+(defun eaf-gen-keybinding-map (keybinding)
+  "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
+  (setq eaf-mode-map
+        (let ((map (make-sparse-keymap)))
+          (cl-loop for (key . fun) in keybinding
+                   do (eaf-dummy-function (intern fun))
+                   (define-key map (kbd key) (intern fun))) map)))
+
+(defun eaf-create-buffer (input-content app-name)
+  "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
+  (cond ((equal app-name "browser")
+         (eaf-gen-keybinding-map eaf-browser-keybinding))
+        ((equal app-name "pdf-viewer")
+         (eaf-gen-keybinding-map eaf-pdfviewer-keybinding))
+        ((equal app-name "video-player")
+         (eaf-gen-keybinding-map eaf-videoplayer-keybinding))
+        ((equal app-name "image-viewer")
+         (eaf-gen-keybinding-map eaf-imageviewer-keybinding))
+        ((equal app-name "camera")
+         (eaf-gen-keybinding-map eaf-camera-keybinding))
+        ((equal app-name "terminal")
+         (eaf-gen-keybinding-map eaf-terminal-keybinding)))
   (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode))
     eaf-buffer))
+
+(defun eaf-identify-key-in-app (key-command app-name)
+  "Given a KEY-COMMAND string, identify whether command is in EAF keybindings based on APP-NAME."
+  (cond ((equal app-name "browser")
+         (rassoc key-command eaf-browser-keybinding))
+        ((equal app-name "pdf-viewer")
+         (rassoc key-command eaf-pdfviewer-keybinding))
+        ((equal app-name "video-player")
+         (rassoc key-command eaf-videoplayer-keybinding))
+        ((equal app-name "image-viewer")
+         (rassoc key-command eaf-imageviewer-keybinding))
+        ((equal app-name "camera")
+         (rassoc key-command eaf-camera-keybinding))
+        ((equal app-name "terminal")
+         (rassoc key-command eaf-terminal-keybinding))))
 
 (defun eaf-is-support (url)
   (dbus-call-method
@@ -456,81 +497,75 @@ We need calcuate render allocation to make sure no black border around render co
              (message (format "export %s to html" (buffer-file-name))))))))
 
 (defun eaf-monitor-key-event ()
+  "Monitor key events during EAF process."
   (unless
       (ignore-errors
         (with-current-buffer (buffer-name)
           (when (eq major-mode 'eaf-mode)
             (let* ((event last-command-event)
-                   (key (make-vector 1 event))
-                   (key-command (format "%s" (key-binding key)))
-                   (key-desc (key-description key))
-                   )
+                   (key (if event
+                            (make-vector 1 event)
+                          (where-is-internal last-command)))
+                   (key-command (symbol-name (key-binding key)))
+                   (key-desc (key-description key)))
 
               ;; Uncomment for debug.
               ;; (message (format "!!!!! %s %s %s %s %s" event key key-command key-desc buffer-app-name))
 
               (cond
-                ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
-                ((equal key-desc "<f11>")
-                 t)
-                ;; Just send event when user insert single character.
-                ;; Don't send event 'M' if user press Ctrl + M.
-                ((and (or
-                       (equal key-command "self-insert-command")
-                       (equal key-command "completion-select-if-within-overlay"))
-                      (equal 1 (string-width (this-command-keys))))
-                 (cond ((equal buffer-app-name "pdf-viewer")
-                        (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
-                       ((equal buffer-app-name "video-player")
-                        (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
-                       ((equal buffer-app-name "image-viewer")
-                        (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
-                       ((equal buffer-app-name "camera")
-                        (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
-                       (t
-                        (eaf-call "send_key" buffer-id key-desc))))
-                ((string-match "^[CMSs]-.*" key-desc)
-                 (cond ((equal buffer-app-name "browser")
-                        (let ((function-name-value (assoc key-desc eaf-browser-keybinding)))
-                          (if function-name-value
-                              (eaf-call "execute_function" buffer-id (cdr function-name-value))
-                            (let ((key-alias-value (assoc key-desc eaf-browser-key-alias)))
-                              (if key-alias-value
-                                  (eaf-call "send_key" buffer-id (cdr key-alias-value)))))))
-                       ((equal buffer-app-name "terminal")
-                        (let ((function-name-value (assoc key-desc eaf-terminal-keybinding)))
-                          (when function-name-value
-                            (eaf-call "execute_function" buffer-id (cdr function-name-value))))
-                        )))
-                ((or
-                  (equal key-command "nil")
-                  (equal key-desc "RET")
-                  (equal key-desc "DEL")
-                  (equal key-desc "TAB")
-                  (equal key-desc "SPC")
-                  (equal key-desc "<backtab>")
-                  (equal key-desc "<home>")
-                  (equal key-desc "<end>")
-                  (equal key-desc "<left>")
-                  (equal key-desc "<right>")
-                  (equal key-desc "<up>")
-                  (equal key-desc "<down>")
-                  (equal key-desc "<prior>")
-                  (equal key-desc "<next>")
-                  )
-                 (eaf-call "send_key" buffer-id key-desc)
-                 )
-                (t
-                 (unless (or
-                          (equal key-command "keyboard-quit")
-                          (equal key-command "kill-this-buffer")
-                          (equal key-command "eaf-open"))
-                   (ignore-errors (call-interactively (key-binding key))))
-                 )))
+               ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
+               ((equal key-desc "<f11>")
+                t)
+               ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
+                    (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
+                (eaf-call "send_key" buffer-id key-desc))
+               ((eaf-identify-key-in-app key-command buffer-app-name)
+                (cond ((equal buffer-app-name "browser")
+                       (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
+                         (if function-name-value
+                             (eaf-call "execute_function" buffer-id function-name-value)
+                           (let ((key-alias-value (cdr (assoc key-desc eaf-browser-keybinding))))
+                             (if key-alias-value
+                                 (eaf-call "send_key" buffer-id key-alias-value))))))
+                      ((equal buffer-app-name "terminal")
+                       (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
+                         (when function-name-value
+                           (eaf-call "execute_function" buffer-id function-name-value))))
+                      ((equal buffer-app-name "pdf-viewer")
+                       (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
+                      ((equal buffer-app-name "video-player")
+                       (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
+                      ((equal buffer-app-name "image-viewer")
+                       (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
+                      ((equal buffer-app-name "camera")
+                       (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
+                      (t
+                       (eaf-call "send_key" buffer-id key-desc))))
+               ((or
+                 (equal key-command "nil")
+                 (equal key-desc "RET")
+                 (equal key-desc "DEL")
+                 (equal key-desc "TAB")
+                 (equal key-desc "SPC")
+                 (equal key-desc "<backtab>")
+                 (equal key-desc "<home>")
+                 (equal key-desc "<end>")
+                 (equal key-desc "<left>")
+                 (equal key-desc "<right>")
+                 (equal key-desc "<up>")
+                 (equal key-desc "<down>")
+                 (equal key-desc "<prior>")
+                 (equal key-desc "<next>"))
+                (eaf-call "send_key" buffer-id key-desc))
+               (t
+                (unless (or
+                         (equal key-command "keyboard-quit")
+                         (equal key-command "kill-this-buffer")
+                         (equal key-command "eaf-open"))
+                  (ignore-errors (call-interactively (key-binding key)))))))
             ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
             ;; because i insert nothing in buffer.
-            (setq last-command-event nil))
-          ))
+            (setq last-command-event nil))))
     ;; If something wrong in `eaf-monitor-key-event', emacs will remove `eaf-monitor-key-event' from `pre-command-hook' hook list.
     ;; Then we add `eaf-monitor-key-event' in `pre-command-hook' list again, hahahaha.
     (run-with-timer
@@ -541,11 +576,12 @@ We need calcuate render allocation to make sure no black border around render co
          (add-hook 'pre-command-hook #'eaf-monitor-key-event))))))
 
 (defun eaf-handle-app-key (buffer-id key-desc keybinding)
-  "Call function if match key in keybinding.
+  "Call function on the Python side if matched key in the keybinding.
+
 Otherwise call send_key message to Python side."
-  (let ((function-name-value (assoc key-desc keybinding)))
+  (let ((function-name-value (cdr (assoc key-desc keybinding))))
     (if function-name-value
-        (eaf-call "execute_function" buffer-id (cdr function-name-value))
+        (eaf-call "execute_function" buffer-id function-name-value)
       (eaf-call "send_key" buffer-id key-desc))))
 
 (defun eaf-set (sym val)
@@ -560,6 +596,13 @@ For convenience, use the Lisp macro `eaf-setq' instead."
 
 Use it as (eaf-setq var val)"
   `(eaf-set ',var ,val))
+
+(defmacro eaf-bind-key (var key eaf-app-keybinding)
+  "Similar to `bind-key', but store VAR with KEY in EAF-APP-KEYBINDING list.
+This is used to bind key to EAF Python applications.
+
+Use it as (eaf-bind-key var key eaf-app-keybinding)"
+  `(map-put ,eaf-app-keybinding ,key (symbol-name ',var)))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
@@ -582,9 +625,7 @@ Use it as (eaf-setq var val)"
                          (> mouse-press-y y)
                          (< mouse-press-y (+ y h)))
                     (select-window window)
-                    (throw 'find-window t)
-                    )
-                  ))))))))
+                    (throw 'find-window t))))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -685,6 +726,7 @@ Use it as (eaf-setq var val)"
  'eaf-input-message)
 
 (defun eaf-send-var-to-python ()
+  "Send variables defined in `eaf-var-list' to the Python side."
   (message "Sending variables to Python side...")
   (cl-loop for (sym . val) in eaf-var-list
            do (eaf-call "store_emacs_var" (symbol-name sym) val)))
@@ -701,7 +743,7 @@ Use it as (eaf-setq var val)"
 (add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
 (defun eaf-open-internal (url app-name arguments)
-  (let* ((buffer (eaf-create-buffer url))
+  (let* ((buffer (eaf-create-buffer url app-name))
          buffer-result)
     (with-current-buffer buffer
       (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name arguments)))
@@ -718,8 +760,7 @@ Use it as (eaf-setq var val)"
       ;; Kill buffer and show error message from python server.
       (kill-buffer buffer)
       (switch-to-buffer eaf-name)
-      (message buffer-result))
-    ))
+      (message buffer-result))))
 
 (defun eaf-open-browser (url &optional arguments)
   "Open EAF browser application given a URL and ARGUMENTS."
@@ -845,8 +886,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
          (input-string (string-trim (read-string (format "EAF Airshare - Info (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
-    (eaf-open input-string "airshare")
-    ))
+    (eaf-open input-string "airshare")))
 
 (defun eaf-file-sender-qrcode (file)
   "Open EAF File Sender application.
