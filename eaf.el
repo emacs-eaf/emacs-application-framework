@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Fri Nov 29 21:29:56 2019 (-0500)
+;; Last-Updated: Fri Nov 29 22:00:10 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -515,9 +515,14 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
                ((equal key-desc "<f11>")
                 t)
-               ((and
-                 (eaf-identify-key-in-app key-command buffer-app-name)
-                 (string-match "^[CMSs]-.*" key-desc))
+               ((or ;; Just send event when user insert single character.
+                 ;; Don't send event 'M' if user press Ctrl + M.
+                 (equal (symbol-name key-command) "self-insert-command")
+                 (equal (symbol-name key-command) "completion-select-if-within-overlay"))
+                (eaf-call "send_key" buffer-id key-desc))
+               ((and (eaf-identify-key-in-app key-command buffer-app-name)
+                     (or (equal 1 (string-width (this-command-keys)))
+                         (string-match "^[CMSs]-.*" key-desc)))
                 (cond ((equal buffer-app-name "browser")
                        (let ((function-name-value (symbol-name (car (rassoc key-desc eaf-browser-keybinding)))))
                          (if function-name-value
@@ -528,22 +533,14 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                       ((equal buffer-app-name "terminal")
                        (let ((function-name-value (symbol-name (car (rassoc key-desc eaf-browser-keybinding)))))
                          (when function-name-value
-                           (eaf-call "execute_function" buffer-id function-name-value))))))
-               ((and (or
-                      (eaf-identify-key-in-app key-command buffer-app-name)
-                      ;; Just send event when user insert single character.
-                      ;; Don't send event 'M' if user press Ctrl + M.
-                      (equal (symbol-name key-command) "self-insert-command")
-                      (equal (symbol-name key-command) "completion-select-if-within-overlay"))
-                     (equal 1 (string-width (this-command-keys))))
-                (cond ((equal buffer-app-name "pdf-viewer")
+                           (eaf-call "execute_function" buffer-id function-name-value))))
+                      ((equal buffer-app-name "pdf-viewer")
                        (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
                       ((equal buffer-app-name "video-player")
                        (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
                       ((equal buffer-app-name "image-viewer")
                        (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
                       ((equal buffer-app-name "camera")
-
                        (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
                       (t
                        (eaf-call "send_key" buffer-id key-desc))))
