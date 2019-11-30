@@ -518,7 +518,6 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                ((and
                  (eaf-identify-key-in-app key-command buffer-app-name)
                  (string-match "^[CMSs]-.*" key-desc))
-                (message "HI")
                 (cond ((equal buffer-app-name "browser")
                        (let ((function-name-value (symbol-name (car (rassoc key-desc eaf-browser-keybinding)))))
                          (if function-name-value
