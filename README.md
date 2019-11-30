@@ -46,10 +46,19 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 
 ```Bash
     sudo pip3 install dbus-python pymupdf grip qrcode python-xlib pyqt5 pyqtwebengine
-    sudo pacman -S qtermwidget-git
 ```
 
-2. Clone this repository and add below code in your ~/.emacs
+2. Install QTermWidget's Python binding:
+
+```Bash
+git clone https://github.com/lxqt/qtermwidget.git --depth=1
+mkdir bulid && cd build
+cmake .. -DQTERMWIDGET_BUILD_PYTHON_BINDING=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr
+make
+sudo make install
+```
+
+3. Clone this repository and add below code in your ~/.emacs
 
 ```Elisp
 (require 'eaf)
@@ -57,16 +66,16 @@ Using this framework, you can use PyQt to develop powerful GUI programs to exten
 
 ### Package description.
 
-| Debian Package  | Package Repo | Use for                                          |
-| :--------       | :--------    | :----                                            |
-| dbus-python     | pip3         | DBus IPC for python and elisp                    |
-| pymupdf         | pip3         | Render engine required for PDF Viewer            |
-| grip            | pip3         | Markdown render server for Markdown Previewer    |
-| qrcode          | pip3         | Render local file QR code                        |
-| python-xlib     | pip3         | Stick app window into emacs frame                |
-| pyqt5           | pip3         | GUI library required for application development |
-| pyqtwebengine   | pip3         | QtWebEngine for browser application              |
-| qtermwidget-git | pacman       | QTermWidget is terminal emulator for PyQt5       |
+| Debian Package  | Package Repo        | Use for                                          |
+| :--------       | :--------           | :----                                            |
+| dbus-python     | pip3                | DBus IPC for python and elisp                    |
+| pymupdf         | pip3                | Render engine required for PDF Viewer            |
+| grip            | pip3                | Markdown render server for Markdown Previewer    |
+| qrcode          | pip3                | Render local file QR code                        |
+| python-xlib     | pip3                | Stick app window into emacs frame                |
+| pyqt5           | pip3                | GUI library required for application development |
+| pyqtwebengine   | pip3                | QtWebEngine for browser application              |
+| qtermwidget-git | source code compile | QTermWidget is terminal emulator for PyQt5       |
 
 ### Or run EAF with docker
 
