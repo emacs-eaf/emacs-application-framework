@@ -131,12 +131,6 @@
 
 (defvar eaf-http-proxy-port "")
 
-(defvar eaf-var-list
-  '((eaf-camera-save-path . "~/Downloads"))
-  "The alist storing user-defined variables that's shared with EAF Python side.
-
-Try not to modify this alist directly. Use `eaf-setq' to modify instead.")
-
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
 by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
@@ -149,6 +143,14 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
 (defcustom eaf-python-command "python3"
   "The Python interpreter used to run eaf.py."
   :type 'string
+  :group 'eaf)
+
+(defcustom eaf-var-list
+  '((eaf-camera-save-path . "~/Downloads"))
+  "The alist storing user-defined variables that's shared with EAF Python side.
+
+Try not to modify this alist directly. Use `eaf-setq' to modify instead."
+  :type 'cons
   :group 'eaf)
 
 (defcustom eaf-browser-keybinding
@@ -275,7 +277,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   (frame-parameter frame 'window-id))
 
 (defun eaf-start-process ()
-  "Start EAF process if it haven't started yet"
+  "Start EAF process if it haven't started yet."
   (interactive)
   (if (process-live-p eaf-process)
       (message "EAF process has started.")
