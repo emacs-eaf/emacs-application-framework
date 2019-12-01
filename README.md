@@ -1,14 +1,14 @@
 # What is Emacs Application Framework?
-Emacs Application Framework is a development framework, where developers can develop any PyQt program, and integrate it into Emacs.
+Emacs Application Framework (EAF) is an application framework that extend GNU Emacs to an entire new universe of powerful GUI PyQt applications.
+
+EAF is also super extensible, developers can develop any PyQt program, and integrate it into Emacs through EAF.
 
 This framework mainly implements three functions:
 1. Integrate PyQt program window into Emacs Frame using Xlib Reparent technology
 2. Listening to EAF buffer's keyboard event flow and controlling the keyboard input of PyQt program via DBus IPC
 3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
 
-Using this framework, you can use PyQt to develop powerful GUI programs to extend Emacs.
-
-## Screenshots of EAF
+## Some Screenshots
 
 | Browser                                          | Markdown Previewer                                          |
 | :--------:                                       | :----:                                                      |
@@ -58,13 +58,31 @@ make
 sudo make install
 ```
 
-3. Clone this repository and add below code in your ~/.emacs
+3. Clone this repository and add below code in `.emacs`
 
 ```Elisp
 (require 'eaf)
 ```
 
-### Package description.
+A `use-package` sample configuration
+```Elisp
+(use-package eaf
+  :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
+  :custom
+  (eaf-find-alternate-file-in-dired t)
+  :config
+  (eaf-bind-key scroll_up "RET" eaf-pdfviewer-keybinding)
+  (eaf-bind-key scroll_down_page "DEL" eaf-pdfviewer-keybinding)
+  (eaf-bind-key scroll_up "C-n" eaf-pdfviewer-keybinding)
+  (eaf-bind-key scroll_down "C-p" eaf-pdfviewer-keybinding)
+  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+  (defun eaf-open-google ()
+    "Open Google using EAF."
+    (interactive)
+    (eaf-open-browser "https://www.google.com")))
+```
+
+### Package Description
 
 | Debian Package  | Package Repo        | Use for                                          |
 | :--------       | :--------           | :----                                            |
@@ -77,15 +95,16 @@ sudo make install
 | pyqtwebengine   | pip3                | QtWebEngine for browser application              |
 | qtermwidget-git | source code compile | QTermWidget is terminal emulator for PyQt5       |
 
-### Or run EAF with docker
+### You can choose to run EAF with docker@
 
 If you prefer to run linux in a docker, you can read [Run EAF with docker](./docker/README.md)
 
-### Why this awesome framework doesn't works with MacOS?
+### Why this awesome framework doesn't works with MacOS or Windows?
 There are mainly three obstacles:
 1. I can't make dbus/python-dbus works on MacOS High Sierra
-2. This framework need use X11 reparent to stick Qt5 window to emacs frame, but i don't know how to make X11 works on MacOS.
+2. This framework need use X11 reparent to stick Qt5 window to emacs frame, but I don't know how to make X11 works on MacOS.
 3. Qt5 QGraphicsView/QGraphicsScene can't work MacOS, specify QGraphicsVideoItem can't work.
+4. If you figure them out, PR always welcome
 
 ## Usage
 
@@ -115,12 +134,26 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 
 ## Settings
 
-### Customization
-You can easily configure variables that EAF Python side uses with the Emacs Lisp function `eaf-setq`. Check the full list of configurable variables with `C-h v eaf-var-list`.
-#### EAF Camera
-The default directory to store images taken by EAF Camera is `~/Downloads`. To change it, put the following in `.emacs`
+### Keybindings
+There are default keybindings for each EAF application provided by us. If you want to see them all, execute `(describe-mode)` or `C-h m` within an EAF buffer.
+
+You can easily customize EAF keybindings, find the corresponding keybinding variable, and add the something like the following to `.emacs`
 ```Elisp
-(eaf-setq eaf-camera-save-path "~/Downloads")
+(eaf-bind-key scroll_up "C-n" eaf-pdfviewer-keybinding)
+(eaf-bind-key scroll_down "C-p" eaf-pdfviewer-keybinding)
+(eaf-bind-key take_photo "p" eaf-camera-keybinding)
+```
+
+Currently available keybinding variables are `eaf-browser-keybinding`, `eaf-pdfviewer-keybinding`, `eaf-videoplayer-keybinding`, `eaf-imageviewer-keybinding`, `eaf-camera-keybinding`, `eaf-terminal-keybinding`.
+
+### Variable Customization
+There are certain variables will be shared across Emacs Lisp and Python. You can easily configure then with `eaf-setq`.
+
+Check the full list of configurable variables with `C-h v eaf-var-list`.
+#### EAF Camera
+The default directory to store images taken by EAF Camera is `~/Downloads`. To modify it, add the something like the following to `.emacs`
+```Elisp
+(eaf-setq eaf-camera-save-path "new/path/")
 ```
 ### Proxy
 If you can't access most awesome internet services like me, you perhaps need proxy settings like below:
@@ -130,10 +163,10 @@ If you can't access most awesome internet services like me, you perhaps need pro
 (setq eaf-http-proxy-port "1080")
 ```
 
-Then EAF browser is free! ;)
+Then EAF browser is working! ;)
 
 ### Markdown Previewer
-If you use markdown previewer, you need access to a [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
+If you use markdown previewer, you need the access to a [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
 
 ```Elisp
 (setq eaf-grip-token "yourtokencode")
@@ -142,6 +175,13 @@ If you use markdown previewer, you need access to a [Personal access token](http
 Otherwise, github will popup "times limit" error because so many people use grip. ;)
 
 ## FAQ
+
+### How about EXWM? What makes EAF special?
+1. EAF gives you control over your program, while satisfying Emacs window design model. [EXWM](https://github.com/ch11ng/exwm) is only a tiling WM, that combines different applications together in an Emacs-like fashion. However, EXWM is unable to split the same application into two different windows while displaying different parts of the same application at the same time. For example, EAF is able to display different pages of the same PDF on two different windows.
+2. EAF essentially provides Emacs a secondary scripting language ([This topic has been brought up in EmacsConf2019](https://media.emacsconf.org/2019/26.html) and [reddit](https://www.reddit.com/r/emacs/comments/e1wfoe/emacs_the_editor_for_the_next_40_years/)). Emacs Lisp doesn't render graphics very well, especially it doesn't play nicely with the browser. This is (an example of) where PyQt5 can come in handy.
+3. With DBus IPC, EAF can use Python to control Emacs Lisp, conversely also true that Emacs Lisp can control Qt rendering and Python code.
+4. EXWM, as a Windows Manager, does its job very well. Therefore, it doesn't have control and doesn't care at all how other program functions. For example, EXWM cannot control keyboard events of other programs. On the other hand, you can configure them in EAF either using existing features (see above) or write code to contribute to this repository.
+5. From a higher point of view, EAF is using Emacs' design principles to extend GUI programs. You have the ability to control good GUI programs using Emacs keybindings. To achieve the ultimate goal: live in Emacs ;)
 
 ### Why not support Wayland?
 EAF use X11 XReparent technology to stick Qt5 window on Emacs buffer area, Wayland not support XReparent.
