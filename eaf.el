@@ -191,7 +191,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("g" . "jump_to_page")
     ("p" . "jump_to_percent")
     ("[" . "remember_current_position")
-    ("]" . "remeber_jump")
+    ("]" . "remember_jump")
     ("i" . "toggle_inverted_mode"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons
