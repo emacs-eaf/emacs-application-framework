@@ -107,8 +107,8 @@ class AppBuffer(Buffer):
     def remember_current_position(self):
         self.buffer_widget.remember_current_position()
 
-    def remeber_jump(self):
-        self.buffer_widget.remeber_jump()
+    def remember_jump(self):
+        self.buffer_widget.remember_jump()
 
     def toggle_inverted_mode(self):
         self.buffer_widget.toggle_inverted_mode()
