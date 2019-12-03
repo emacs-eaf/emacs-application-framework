@@ -11,3 +11,4 @@
 * Make EAF support bookmark.
 * Aria2 client is awesome, welcome to PR.
 * Markdown Previewer, add margin around preview page.
+* Maybe xterm.js running in browser is cool. ;)
