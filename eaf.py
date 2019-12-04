@@ -142,7 +142,7 @@ class EAF(dbus.service.Object):
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
 
-        # Get variables defined in emacs
+        # Get variables defined in emacs.
         self.get_emacs_var()
 
         # Handle buffer close request.
@@ -256,7 +256,7 @@ class EAF(dbus.service.Object):
     def store_emacs_var(self, var_name, var_value):
         for buffer in list(self.buffer_dict.values()):
             buffer.emacs_var_dict[var_name] = var_value
-            # self.message_to_emacs("EAF Python: Storing " + var_name + " with " + buffer.emacs_var_dict[var_name])
+            buffer.update_settings()
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):

@@ -150,11 +150,22 @@ Currently available keybinding variables are `eaf-browser-keybinding`, `eaf-pdfv
 There are certain variables will be shared across Emacs Lisp and Python. You can easily configure then with `eaf-setq`.
 
 Check the full list of configurable variables with `C-h v eaf-var-list`.
+
+#### EAF Browser
+Default browser enable plugin and JavaScript, to disable them, you can add something like the following to `.emacs`
+
+```Elisp
+(eaf-setq eaf-browser-enable-plugin "false")
+(eaf-setq eaf-browser-enable-javascript "false")
+```
+
 #### EAF Camera
 The default directory to store images taken by EAF Camera is `~/Downloads`. To modify it, add the something like the following to `.emacs`
+
 ```Elisp
 (eaf-setq eaf-camera-save-path "new/path/")
 ```
+
 ### Proxy
 If you can't access most awesome internet services like me, you perhaps need proxy settings like below:
 

@@ -146,7 +146,11 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   :group 'eaf)
 
 (defcustom eaf-var-list
-  '((eaf-camera-save-path . "~/Downloads"))
+  '(
+    (eaf-camera-save-path . "~/Downloads")
+    (eaf-browser-enable-plugin . "true")
+    (eaf-browser-enable-javascript . "true")
+    )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Try not to modify this alist directly. Use `eaf-setq' to modify instead."
@@ -377,7 +381,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         (let ((map (make-sparse-keymap)))
           (cl-loop for (key . fun) in keybinding
                    do (eaf-dummy-function (intern fun))
-                   (define-key map (kbd key) (intern fun))) map)))
+                      (define-key map (kbd key) (intern fun))) map)))
 
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
@@ -513,56 +517,56 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
               ;; (message (format "!!!!! %s %s %s %s %s" event key key-command key-desc buffer-app-name))
 
               (cond
-               ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
-               ((equal key-desc "<f11>")
-                t)
-               ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
-                    (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
-                (eaf-call "send_key" buffer-id key-desc))
-               ((eaf-identify-key-in-app key-command buffer-app-name)
-                (cond ((equal buffer-app-name "browser")
-                       (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
-                         (if function-name-value
-                             (eaf-call "execute_function" buffer-id function-name-value)
-                           (let ((key-alias-value (cdr (assoc key-desc eaf-browser-keybinding))))
-                             (if key-alias-value
-                                 (eaf-call "send_key" buffer-id key-alias-value))))))
-                      ((equal buffer-app-name "terminal")
-                       (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
-                         (when function-name-value
-                           (eaf-call "execute_function" buffer-id function-name-value))))
-                      ((equal buffer-app-name "pdf-viewer")
-                       (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
-                      ((equal buffer-app-name "video-player")
-                       (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
-                      ((equal buffer-app-name "image-viewer")
-                       (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
-                      ((equal buffer-app-name "camera")
-                       (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
-                      (t
-                       (eaf-call "send_key" buffer-id key-desc))))
-               ((or
-                 (equal key-command "nil")
-                 (equal key-desc "RET")
-                 (equal key-desc "DEL")
-                 (equal key-desc "TAB")
-                 (equal key-desc "SPC")
-                 (equal key-desc "<backtab>")
-                 (equal key-desc "<home>")
-                 (equal key-desc "<end>")
-                 (equal key-desc "<left>")
-                 (equal key-desc "<right>")
-                 (equal key-desc "<up>")
-                 (equal key-desc "<down>")
-                 (equal key-desc "<prior>")
-                 (equal key-desc "<next>"))
-                (eaf-call "send_key" buffer-id key-desc))
-               (t
-                (unless (or
-                         (equal key-command "keyboard-quit")
-                         (equal key-command "kill-this-buffer")
-                         (equal key-command "eaf-open"))
-                  (ignore-errors (call-interactively (key-binding key)))))))
+                ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
+                ((equal key-desc "<f11>")
+                 t)
+                ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
+                     (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
+                 (eaf-call "send_key" buffer-id key-desc))
+                ((eaf-identify-key-in-app key-command buffer-app-name)
+                 (cond ((equal buffer-app-name "browser")
+                        (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
+                          (if function-name-value
+                              (eaf-call "execute_function" buffer-id function-name-value)
+                            (let ((key-alias-value (cdr (assoc key-desc eaf-browser-keybinding))))
+                              (if key-alias-value
+                                  (eaf-call "send_key" buffer-id key-alias-value))))))
+                       ((equal buffer-app-name "terminal")
+                        (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
+                          (when function-name-value
+                            (eaf-call "execute_function" buffer-id function-name-value))))
+                       ((equal buffer-app-name "pdf-viewer")
+                        (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
+                       ((equal buffer-app-name "video-player")
+                        (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
+                       ((equal buffer-app-name "image-viewer")
+                        (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
+                       ((equal buffer-app-name "camera")
+                        (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
+                       (t
+                        (eaf-call "send_key" buffer-id key-desc))))
+                ((or
+                  (equal key-command "nil")
+                  (equal key-desc "RET")
+                  (equal key-desc "DEL")
+                  (equal key-desc "TAB")
+                  (equal key-desc "SPC")
+                  (equal key-desc "<backtab>")
+                  (equal key-desc "<home>")
+                  (equal key-desc "<end>")
+                  (equal key-desc "<left>")
+                  (equal key-desc "<right>")
+                  (equal key-desc "<up>")
+                  (equal key-desc "<down>")
+                  (equal key-desc "<prior>")
+                  (equal key-desc "<next>"))
+                 (eaf-call "send_key" buffer-id key-desc))
+                (t
+                 (unless (or
+                          (equal key-command "keyboard-quit")
+                          (equal key-command "kill-this-buffer")
+                          (equal key-command "eaf-open"))
+                   (ignore-errors (call-interactively (key-binding key)))))))
             ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
             ;; because i insert nothing in buffer.
             (setq last-command-event nil))))

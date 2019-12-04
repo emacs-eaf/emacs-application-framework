@@ -259,3 +259,6 @@ class Buffer(QGraphicsScene):
             QApplication.sendEvent(widget, key_press)
 
         self.fake_key_event_filter(event_string)
+
+    def update_settings(self):
+        pass
