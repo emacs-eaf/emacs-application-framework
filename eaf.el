@@ -727,7 +727,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 
 (defun eaf-send-var-to-python ()
   "Send variables defined in `eaf-var-list' to the Python side."
-  (message "Sending variables to Python side...")
   (cl-loop for (sym . val) in eaf-var-list
            do (eaf-call "store_emacs_var" (symbol-name sym) val)))
 
