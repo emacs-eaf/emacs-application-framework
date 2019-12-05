@@ -12,3 +12,4 @@
 * Aria2 client is awesome, welcome to PR.
 * Markdown Previewer, add margin around preview page.
 * Maybe xterm.js running in browser is cool. ;)
+* RSS Reader: use python feedparser or JavaScript library implement reader like Google Reader.
