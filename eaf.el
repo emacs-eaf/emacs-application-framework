@@ -748,7 +748,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (defun eaf-send-var-to-python ()
   "Send variables defined in `eaf-var-list' to the Python side."
   (eaf-call "store_emacs_var"
-            (string-join (loop for (key . value) in eaf-var-list
+            (string-join (cl-loop for (key . value) in eaf-var-list
                                collect (format "%s,%s" key value)) ":")))
 
 (dbus-register-signal
