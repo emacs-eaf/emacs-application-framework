@@ -154,6 +154,9 @@ class EAF(dbus.service.Object):
         # Handle set emacs var signal.
         app_buffer.set_emacs_var.connect(self.set_emacs_var)
 
+        # Handle eval form in emacs.
+        app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
+
         # Add create new window callback if module is browser
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
@@ -301,6 +304,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def set_emacs_var(self, var_name, var_value):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def eval_in_emacs(self, elisp_code_string):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

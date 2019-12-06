@@ -649,6 +649,14 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (defun eaf-set-emacs-var (var-name var-value)
   (set (intern var-name) var-value))
 
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "eval_in_emacs"
+ 'eaf-eval-in-emacs)
+
+(defun eaf-eval-in-emacs (elisp-code-string)
+  (eval (read elisp-code-string)))
+
 (defun eaf-create-new-browser-buffer (new-window-buffer-id)
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
