@@ -109,6 +109,22 @@ If you want show message in emacs' minibuffer, you can emit AppBuffer's signal "
 self.message_to_emacs.emit("hello from eaf")
 ```
 
+### Set emacs variable on python side
+
+You can use below code to set emacs variable on python side:
+
+```Python
+self.set_emacs_var.emit("var-name", "var-value")
+```
+
+### Eval elisp code on python side.
+
+Of course, eval any elisp code can implement by below method:
+
+```Python
+self.eval_in_emacs.emit('''(message "hello")''')
+```
+
 ### Read user's input
 Below is code example from pdfviewer:
 ```Python
