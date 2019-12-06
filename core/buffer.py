@@ -134,6 +134,7 @@ class Buffer(QGraphicsScene):
     input_message = QtCore.pyqtSignal(str, str, str)
     close_buffer = QtCore.pyqtSignal(str)
     message_to_emacs = QtCore.pyqtSignal(str)
+    set_emacs_var = QtCore.pyqtSignal(str, str)
 
     def __init__(self, buffer_id, url, arguments, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
@@ -186,6 +187,7 @@ class Buffer(QGraphicsScene):
         self.buffer_widget.installEventFilter(self)
 
         self.buffer_widget.message_to_emacs = self.message_to_emacs
+        self.buffer_widget.set_emacs_var = self.set_emacs_var
 
     def handle_destroy(self):
         self.before_destroy_hook.emit()
