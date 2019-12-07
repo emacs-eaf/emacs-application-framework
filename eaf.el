@@ -272,6 +272,12 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   :type 'cons
   :group 'eaf)
 
+(defcustom eaf-single-key-list
+  '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
+  "The single key use to send key to EAF app."
+  :type 'cons
+  :group 'eaf)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -543,19 +549,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                         (eaf-call "send_key" buffer-id key-desc))))
                 ((or
                   (equal key-command "nil")
-                  (equal key-desc "RET")
-                  (equal key-desc "DEL")
-                  (equal key-desc "TAB")
-                  (equal key-desc "SPC")
-                  (equal key-desc "<backtab>")
-                  (equal key-desc "<home>")
-                  (equal key-desc "<end>")
-                  (equal key-desc "<left>")
-                  (equal key-desc "<right>")
-                  (equal key-desc "<up>")
-                  (equal key-desc "<down>")
-                  (equal key-desc "<prior>")
-                  (equal key-desc "<next>"))
+                  (member key-desc eaf-single-key-list))
                  (eaf-call "send_key" buffer-id key-desc))
                 (t
                  (unless (or
