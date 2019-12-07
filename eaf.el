@@ -509,57 +509,47 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-monitor-key-event ()
   "Monitor key events during EAF process."
-  (unless
-      (ignore-errors
-        (with-current-buffer (buffer-name)
-          (when (eq major-mode 'eaf-mode)
-            (let* ((event last-command-event)
-                   (key (if event
-                            (make-vector 1 event)
-                          (where-is-internal last-command)))
-                   (key-command (symbol-name (key-binding key)))
-                   (key-desc (key-description key)))
+  (ignore-errors
+    (let* ((event last-command-event)
+           (key (if event
+                    (make-vector 1 event)
+                  (where-is-internal last-command)))
+           (key-command (symbol-name (key-binding key)))
+           (key-desc (key-description key)))
 
-              ;; Uncomment for debug.
-              ;; (message (format "!!!!! %s %s %s %s %s" event key key-command key-desc buffer-app-name))
+      ;; Uncomment for debug.
+      ;; (message (format "!!!!! %s %s %s %s %s" event key key-command key-desc buffer-app-name))
 
-              (cond
-                ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
-                ((equal key-desc "<f11>")
-                 t)
-                ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
-                     (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
-                 (eaf-call "send_key" buffer-id key-desc))
-                ((eaf-identify-key-in-app key-command buffer-app-name)
-                 (cond ((equal buffer-app-name "browser")
-                        (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
-                          (if function-name-value
-                              (eaf-call "execute_function" buffer-id function-name-value)
-                            (let ((key-alias-value (cdr (assoc key-desc eaf-browser-keybinding))))
-                              (if key-alias-value
-                                  (eaf-call "send_key" buffer-id key-alias-value))))))
-                       ((equal buffer-app-name "terminal")
-                        (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
-                          (when function-name-value
-                            (eaf-call "execute_function" buffer-id function-name-value))))
-                       ((assoc buffer-app-name eaf-app-binding-alist)
-                        (eaf-handle-app-key buffer-id key-desc
-                                            (eaf-get-app-bindings buffer-app-name)))
-                       (t
-                        (eaf-call "send_key" buffer-id key-desc))))
-                ((or
-                  (equal key-command "nil")
-                  (member key-desc eaf-single-key-list))
-                 (eaf-call "send_key" buffer-id key-desc))
-                (t
-                 (unless (or
-                          (equal key-command "keyboard-quit")
-                          (equal key-command "kill-this-buffer")
-                          (equal key-command "eaf-open"))
-                   (call-interactively (key-binding key))))))
-            ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
-            ;; because i insert nothing in buffer.
-            (setq last-command-event nil))))))
+      (cond
+        ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
+        ((equal key-desc "<f11>")
+         t)
+        ;; Send key when key-command is char type event.
+        ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
+             (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
+         (eaf-call "send_key" buffer-id key-desc))
+        ;; Execute function or send key with app keybinding.
+        ((eaf-identify-key-in-app key-command buffer-app-name)
+         (cond
+           ((assoc buffer-app-name eaf-app-binding-alist)
+            (eaf-handle-app-key buffer-id key-desc
+                                (eaf-get-app-bindings buffer-app-name)))
+           (t
+            (eaf-call "send_key" buffer-id key-desc))))
+        ;; Send key if key-command is nil or key is single char key.
+        ((or
+          (equal key-command "nil")
+          (member key-desc eaf-single-key-list))
+         (eaf-call "send_key" buffer-id key-desc))
+        (t
+         (unless (or
+                  (equal key-command "keyboard-quit")
+                  (equal key-command "kill-this-buffer")
+                  (equal key-command "eaf-open"))
+           (call-interactively (key-binding key))))))
+    ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
+    ;; because i insert nothing in buffer.
+    (setq last-command-event nil)))
 
 (defun eaf-handle-app-key (buffer-id key-desc keybinding)
   "Call function on the Python side if matched key in the keybinding.
