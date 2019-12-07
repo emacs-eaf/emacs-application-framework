@@ -104,6 +104,7 @@ qt_key_dict = {
     '''"''': Qt.Key_QuoteDbl,
     '''$''': Qt.Key_Dollar,
     '''%''': Qt.Key_Percent,
+    '''!''': Qt.Key_Exclam,
     '''/''': Qt.Key_Slash,
     '''SPC''': Qt.Key_Space,
     '''RET''': Qt.Key_Return,
