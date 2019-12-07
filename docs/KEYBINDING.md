@@ -1,3 +1,4 @@
+## All bindings below can be configured with the function eaf-bind-key. See README for more info
 ### Browser
 
 | Browser Key         | Event                            |
@@ -20,7 +21,7 @@
 | M-<                 | Scroll to top                    |
 | M->                 | Scroll to bottom                 |
 
-You can customize keys with option ```eaf-browser-keybinding``` or ```eaf-browser-key-alias```
+You can customize keys in the variable ```eaf-browser-keybinding```
 
 ### PDF Viewer
 
@@ -43,7 +44,7 @@ You can customize keys with option ```eaf-browser-keybinding``` or ```eaf-browse
 | i              | Toggle inverted mode                |
 | Double Click   | Use sdcv translate word under point |
 
-You can customize keys with option ```eaf-pdf-viewer-keybinding```
+You can customize in the variable ```eaf-pdf-viewer-keybinding```
 
 ### Video Player
 
@@ -53,7 +54,7 @@ You can customize keys with option ```eaf-pdf-viewer-keybinding```
 | h                | Seek backward |
 | l                | Seek forward  |
 
-You can customize keys with option ```eaf-video-player-keybinding```
+You can customize keys in the variable ```eaf-video-player-keybinding```
 
 ### Image Viewer
 
@@ -62,7 +63,7 @@ You can customize keys with option ```eaf-video-player-keybinding```
 | j                | Load next image in current directory     |
 | k                | Load previous image in current directory |
 
-You can customize keys with option ```eaf-image-viewer-keybinding```
+You can customize keys in the variable ```eaf-image-viewer-keybinding```
 
 ### Terminal
 
@@ -77,4 +78,4 @@ You can customize keys with option ```eaf-image-viewer-keybinding```
 | :-----:     | :----      |
 | j           | Take photo |
 
-You can customize keys with option ```eaf-camera-keybinding```
+You can customize keys in the variable ```eaf-camera-keybinding```
