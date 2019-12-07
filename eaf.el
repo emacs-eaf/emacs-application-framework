@@ -507,18 +507,15 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
              (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
              (message (format "export %s to html" (buffer-file-name))))))))
 
-(defun eaf-monitor-key-event ()
+(defun eaf-monitor-key-event (&optional key)
   "Monitor key events during EAF process."
   (ignore-errors
-    (let* ((event last-command-event)
-           (key (if event
-                    (make-vector 1 event)
-                  (where-is-internal last-command)))
+    (let* ((key (or key (this-command-keys-vector)))
            (key-command (symbol-name (key-binding key)))
            (key-desc (key-description key)))
 
       ;; Uncomment for debug.
-      ;; (message (format "!!!!! %s %s %s %s %s" event key key-command key-desc buffer-app-name))
+      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc buffer-app-name))
 
       (cond
         ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
