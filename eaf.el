@@ -509,7 +509,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-monitor-key-event ()
   "Monitor key events during EAF process."
-  (ignore-errors
+  (ignore-errors ;so it does not get removed from `pre-command-hook'
     (let* ((event last-command-event)
            (key (if event
                     (make-vector 1 event)
@@ -542,14 +542,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
           (member key-desc eaf-single-key-list))
          (eaf-call "send_key" buffer-id key-desc))
         (t
-         (unless (or
-                  (equal key-command "keyboard-quit")
-                  (equal key-command "kill-this-buffer")
-                  (equal key-command "eaf-open"))
-           (call-interactively (key-binding key))))))
-    ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
-    ;; because i insert nothing in buffer.
-    (setq last-command-event nil)))
+         ;; not a key handled by eaf so we can continue normally
+         (ignore))))))
 
 (defun eaf-handle-app-key (buffer-id key-desc keybinding)
   "Call function on the Python side if matched key in the keybinding.
