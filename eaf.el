@@ -524,41 +524,17 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
         ((equal key-desc "<f11>")
          t)
-        ;; Send key when key-command is char type event.
-        ((or (equal key-command "self-insert-command") ; Just send event when user insert single character.
-             (equal key-command "completion-select-if-within-overlay")) ; Don't send event 'M' if user press Ctrl + M.
-         (eaf-call "send_key" buffer-id key-desc))
-        ;; Execute function or send key with app keybinding.
+        ;; Call function on the Python side if matched key in the keybinding.
         ((eaf-identify-key-in-app key-command buffer-app-name)
-         (cond
-           ((assoc buffer-app-name eaf-app-binding-alist)
-            (eaf-handle-app-key buffer-id key-desc
-                                (eaf-get-app-bindings buffer-app-name)))
-           (t
-            (eaf-call "send_key" buffer-id key-desc))))
-        ;; Send key if key-command is nil or key is single char key.
-        ((or
-          (equal key-command "nil")
-          (member key-desc eaf-single-key-list))
+         (eaf-call "execute_function" buffer-id (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name)))))
+        ;; Send key to Python side if key-command is single character key.
+        ((or (equal key-command "self-insert-command")
+             (equal key-command "completion-select-if-within-overlay")
+             (equal key-command "nil")
+             (member key-desc eaf-single-key-list))
          (eaf-call "send_key" buffer-id key-desc))
         (t
-         (unless (or
-                  (equal key-command "keyboard-quit")
-                  (equal key-command "kill-this-buffer")
-                  (equal key-command "eaf-open"))
-           (call-interactively (key-binding key))))))
-    ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
-    ;; because i insert nothing in buffer.
-    (setq last-command-event nil)))
-
-(defun eaf-handle-app-key (buffer-id key-desc keybinding)
-  "Call function on the Python side if matched key in the keybinding.
-
-Otherwise call send_key message to Python side."
-  (let ((function-name-value (cdr (assoc key-desc keybinding))))
-    (if function-name-value
-        (eaf-call "execute_function" buffer-id function-name-value)
-      (eaf-call "send_key" buffer-id key-desc))))
+         nil)))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in the EAF Python side.
