@@ -417,34 +417,7 @@ class PdfViewerWidget(QWidget):
             self.scroll_offset = new_offset
             self.update()
 
-    def get_event_link(self, event):
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-
-        translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
-
-        ex = event.globalX()
-        ey = event.globalY()
-
-        for index in list(range(start_page_index, last_page_index)):
-            if index < self.page_total_number:
-                page = self.document[index]
-
-                for link in page.getLinks():
-                    rect = link["from"]
-
-                    link_x_start = int(rect.x0 * self.scale)
-                    link_x_end = int(rect.x1 * self.scale)
-                    link_y_start = int(rect.y0 * self.scale + translate_y)
-                    link_y_end = int(rect.y1 * self.scale + translate_y)
-
-                    if ex >= link_x_start and ex <= link_x_end and ey >= link_y_start and ey <= link_y_end:
-                        if link["page"]:
-                            return link
-
-        return None
-
-    def get_double_click_word(self, event):
+    def get_event_absolute_position(self, event):
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
         pos = event.pos()
@@ -458,22 +431,46 @@ class PdfViewerWidget(QWidget):
                 x = int((pos.x() - render_x) * 1.0 / self.scale)
                 if pos.y() + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
                     page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
-                    page = self.document[index]
+                    page_index = index
                 else:
                     # if display two pages, pos.y() will add page_padding
                     page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
-                    page = self.document[index + 1]
+                    page_index = index + 1
                 y = int((pos.y() + page_offset) * 1.0 / self.scale)
-                word_offset = 10 # 10 pixel is enough for word intersect operation
-                draw_rect = fitz.Rect(x, y, x + word_offset, y + word_offset)
 
-                page.setCropBox(page.rect)
-                page_words = page.getTextWords()
-                rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
-                if rect_words:
-                    return rect_words[0][4]
+                return x, y, page_index
+        return None, None, None
+
+    def get_event_link(self, event):
+        ex, ey, page_index = self.get_event_absolute_position(event)
+        if page_index is None:
+            return None
+
+        page = self.document[page_index]
+        for link in page.getLinks():
+            rect = link["from"]
+            if ex >= rect.x0 and ex <= rect.x1 and ey >= rect.y0 and ey <= rect.y1:
+                if link["page"]:
+                    return link
 
         return None
+
+    def get_double_click_word(self, event):
+        ex, ey, page_index = self.get_event_absolute_position(event)
+        if page_index is None:
+            return None
+        page = self.document[page_index]
+        word_offset = 10 # 10 pixel is enough for word intersect operation
+        draw_rect = fitz.Rect(ex, ey, ex + word_offset, ey + word_offset)
+
+        page.setCropBox(page.rect)
+        page_words = page.getTextWords()
+        rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
+        if rect_words:
+            return rect_words[0][4]
+
+    def enterEvent(self, event):
+        pass
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
