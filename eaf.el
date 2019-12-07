@@ -450,7 +450,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         (dolist (window (window-list frame))
           (let ((buffer (window-buffer window)))
             (with-current-buffer buffer
-              (if (eq major-mode 'eaf-mode)
+              (if (derived-mode-p 'eaf-mode)
                   (let* ((window-allocation (eaf-get-window-allocation window))
                          (x (nth 0 window-allocation))
                          (y (nth 1 window-allocation))
@@ -482,7 +482,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 (defun eaf-monitor-buffer-kill ()
   (ignore-errors
     (with-current-buffer (buffer-name)
-      (cond ((eq major-mode 'org-mode)
+      (cond ((derived-mode-p 'org-mode)
              ;; NOTE:
              ;; Because save org buffer will trigger `kill-buffer' action,
              ;; but org buffer still live after do `kill-buffer' action.
@@ -492,7 +492,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                  (push (buffer-file-name) eaf-org-killed-file-list))
                (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))
                ))
-            ((eq major-mode 'eaf-mode)
+            ((derived-mode-p 'eaf-mode)
              (eaf-call "kill_buffer" buffer-id)
              (message (format "Kill %s" buffer-id)))
             ))))
@@ -501,7 +501,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (ignore-errors
     (with-current-buffer (buffer-name)
       (cond ((and
-              (eq major-mode 'org-mode)
+              (derived-mode-p 'org-mode)
               (member (buffer-file-name) eaf-org-file-list))
              (org-html-export-to-html)
              (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
@@ -588,7 +588,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
       (dolist (window (window-list))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
-            (if (eq major-mode 'eaf-mode)
+            (if (derived-mode-p 'eaf-mode)
                 (let* ((window-allocation (eaf-get-window-allocation window))
                        (x (nth 0 window-allocation))
                        (y (nth 1 window-allocation))
@@ -674,7 +674,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
             (when (and
-                   (eq major-mode 'eaf-mode)
+                   (derived-mode-p 'eaf-mode)
                    (equal buffer-id bid))
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t)
@@ -728,7 +728,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
  "com.lazycat.eaf" "get_emacs_var"
  'eaf-send-var-to-python)
 
-(add-hook 'window-size-change-functions 'eaf-monitor-window-size-change)
+(add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
 (add-hook 'after-save-hook #'eaf-monitor-buffer-save)
@@ -934,7 +934,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (defadvice scroll-other-window (around eaf-scroll-up-or-next-page activate)
   "When next buffer is `eaf-mode', do `eaf-scroll-up-or-next-page'."
   (other-window +1)
-  (if (eq major-mode 'eaf-mode)
+  (if (derived-mode-p 'eaf-mode)
       (let ((arg (ad-get-arg 0)))
         (if (null arg)
             (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
@@ -946,7 +946,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (defadvice scroll-other-window-down (around eaf-scroll-down-or-previous-page activate)
   "When next buffer is `eaf-mode', do `eaf-scroll-down-or-previous-page'."
   (other-window +1)
-  (if (eq major-mode 'eaf-mode)
+  (if (derived-mode-p 'eaf-mode)
       (let ((arg (ad-get-arg 0)))
         (if (null arg)
             (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
@@ -958,7 +958,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (defadvice watch-other-window-internal (around eaf-watch-other-window activate)
   "When next buffer is `eaf-mode', do `eaf-watch-other-window'."
   (other-window +1)
-  (if (eq major-mode 'eaf-mode)
+  (if (derived-mode-p 'eaf-mode)
       (let ((direction (ad-get-arg 0))
             (line (ad-get-arg 1)))
         (if (string-equal direction "up")
