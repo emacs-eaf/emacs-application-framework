@@ -13,3 +13,4 @@
 * Markdown Previewer, add margin around preview page.
 * Maybe xterm.js running in browser is cool. ;)
 * RSS Reader: use python feedparser or JavaScript library implement reader like Google Reader.
+* Better error prompt if something goes wrong, maybe in the `*eaf*` buffer
