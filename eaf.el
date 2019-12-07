@@ -507,10 +507,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
              (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
              (message (format "export %s to html" (buffer-file-name))))))))
 
-(defun eaf-monitor-key-event (&optional key)
+(defun eaf-monitor-key-event ()
   "Monitor key events during EAF process."
   (ignore-errors
-    (let* ((key (or key (this-command-keys-vector)))
+    (let* ((key (this-command-keys-vector))
            (key-command (symbol-name (key-binding key)))
            (key-desc (key-description key)))
 
