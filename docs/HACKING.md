@@ -162,17 +162,17 @@ If you want eaf application buffer respond scroll event to command "scroll-other
 You need implement "scroll" interface in AppBuffer, such as like PDF Viewer does:
 
 ```Python
-    def scroll(self, scroll_direction, scroll_type):
-        if scroll_type == "page":
-            if scroll_direction == "up":
-                self.buffer_widget.scroll_up_page()
-            else:
-                self.buffer_widget.scroll_down_page()
+def scroll(self, scroll_direction, scroll_type):
+    if scroll_type == "page":
+        if scroll_direction == "up":
+            self.buffer_widget.scroll_up_page()
         else:
-            if scroll_direction == "up":
-                self.buffer_widget.scroll_up()
-            else:
-                self.buffer_widget.scroll_down()
+            self.buffer_widget.scroll_down_page()
+    else:
+        if scroll_direction == "up":
+            self.buffer_widget.scroll_up()
+        else:
+            self.buffer_widget.scroll_down()
 ```
 
 Argument "scroll_direction" is string, "up" mean scroll buffer up, "down" mean scroll buffer down.
@@ -186,12 +186,12 @@ You need implement interfaces "save_session_data" and "restore_session_data", be
 
 
 ```Python
-    def save_session_data(self):
-        return str(self.buffer_widget.media_player.position())
+def save_session_data(self):
+    return str(self.buffer_widget.media_player.position())
 
-    def restore_session_data(self, session_data):
-        position = int(session_data)
-        self.buffer_widget.media_player.setPosition(position)
+def restore_session_data(self, session_data):
+    position = int(session_data)
+    self.buffer_widget.media_player.setPosition(position)
 ```
 
 Argument "session_data" is string, you can put anything in it
@@ -204,9 +204,9 @@ If you need to update buffer sometimes, such as update org-file previewer after 
 You need to implement the interface "update_with_data". Below is an example of what Org Previewer does:
 
 ```Python
-    def update_with_data(self, update_data):
-        self.load_org_html_file()
-        self.buffer_widget.reload()
+def update_with_data(self, update_data):
+    self.load_org_html_file()
+    self.buffer_widget.reload()
 ```
 
 Argument "update_data" is passed from elisp side.
@@ -216,9 +216,9 @@ Argument "update_data" is passed from elisp side.
 If your application will do some long-time operation, you can use below use below interfaces of buffer:
 
 ```Python
-    def start_progress(self):
-    def stop_progress(self):
-    def update_progress(self, progress):
+def start_progress(self):
+def stop_progress(self):
+def update_progress(self, progress):
 ```
 
 ### Customize variable at Elisp side.
@@ -235,6 +235,22 @@ self.emacs_var_dict["eaf-camera-save-path"]
 ```
 
 Above is an example of ```eaf-camera-save-path```, you can customize any variable on elisp side actually, don't need modify python code to customize EAF application!
+
+### Update settings at Python side along with customize option change at Elisp side.
+Once you change customize option by ```eaf-setq```, everytime EAF buffer is created, AppBuffer's interface ```update_settings``` will execute.
+
+You can implement your own ```update_settings``` interface, such as, we can write below ```update_settings``` in browser plugin:
+
+```Python
+def update_settings(self):
+    settings = QWebEngineSettings.globalSettings()
+    try:
+        settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
+        settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
+    except Exception:
+        pass
+
+```
 
 
 ## Todolist
