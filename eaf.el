@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.3
-;; Last-Updated: Sat Nov 30 02:12:38 2019 (-0500)
+;; Last-Updated: Fri Dec  6 20:51:17 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -777,7 +777,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   ;; Validate URL legitimacy
   (if (and (not (string-prefix-p "/" url))
            (not (string-prefix-p "~" url))
-           (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.[a-z]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
+           (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.+[a-z0-9\.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
       (progn
         (unless (or (string-prefix-p "http://" url)
                     (string-prefix-p "https://" url))
