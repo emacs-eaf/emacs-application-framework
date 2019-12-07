@@ -6,9 +6,9 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
-;; Version: 0.3
-;; Last-Updated: Fri Dec  6 20:51:17 2019 (-0500)
-;;           By: Mingde (Matthew) Zeng
+;; Version: 0.4
+;; Last-Updated: 2019-12-07 21:46:44
+;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -96,13 +96,20 @@
 
 (define-derived-mode eaf-mode text-mode "EAF"
   "Major mode for Emacs Application Framework."
+  ;; Kill all local variables first.
   (kill-all-local-variables)
+  ;; Set mode.
   (setq major-mode 'eaf-mode)
   (setq mode-name "EAF")
   ;; Split window combinations proportionally.
   (setq window-combination-resize t)
   (set (make-local-variable 'buffer-id) (eaf-generate-id))
+  ;; Load local map.
   (use-local-map eaf-mode-map)
+  ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
+  ;; To fix interactive command run twice because `eaf-monitor-key-event' runs inside minibuffer and can not handle minibuffer quit signal.
+  (add-hook 'pre-command-hook #'eaf-monitor-key-event nil t)
+  ;; Run eaf-mode hooks.
   (run-hooks 'eaf-mode-hook))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
@@ -385,7 +392,7 @@ We need calcuate render allocation to make sure no black border around render co
 
 Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                   (interactive)
-                  (eaf-monitor-key-event))))
+                  )))
 
 (defun eaf-gen-keybinding-map (keybinding)
   "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
@@ -397,7 +404,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-get-app-bindings (app-name)
   (symbol-value
-    (cdr (assoc app-name eaf-app-binding-alist))))
+   (cdr (assoc app-name eaf-app-binding-alist))))
 
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
@@ -555,18 +562,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                           (equal key-command "keyboard-quit")
                           (equal key-command "kill-this-buffer")
                           (equal key-command "eaf-open"))
-                   (ignore-errors (call-interactively (key-binding key)))))))
+                   (call-interactively (key-binding key))))))
             ;; Set `last-command-event' with nil, emacs won't notify me buffer is ready-only,
             ;; because i insert nothing in buffer.
-            (setq last-command-event nil))))
-    ;; If something wrong in `eaf-monitor-key-event', emacs will remove `eaf-monitor-key-event' from `pre-command-hook' hook list.
-    ;; Then we add `eaf-monitor-key-event' in `pre-command-hook' list again, hahahaha.
-    (run-with-timer
-     0.1
-     nil
-     (lambda ()
-       (progn
-         (add-hook 'pre-command-hook #'eaf-monitor-key-event))))))
+            (setq last-command-event nil))))))
 
 (defun eaf-handle-app-key (buffer-id key-desc keybinding)
   "Call function on the Python side if matched key in the keybinding.
@@ -738,7 +737,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   "Send variables defined in `eaf-var-list' to the Python side."
   (eaf-call "store_emacs_var"
             (string-join (cl-loop for (key . value) in eaf-var-list
-                               collect (format "%s,%s" key value)) ":")))
+                                  collect (format "%s,%s" key value)) ":")))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -747,7 +746,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 
 (add-hook 'window-size-change-functions 'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-(add-hook 'pre-command-hook #'eaf-monitor-key-event)
 (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
 (add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
