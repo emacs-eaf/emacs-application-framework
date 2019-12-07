@@ -87,7 +87,7 @@
 (defcustom eaf-mode-hook '()
   "Eaf mode hook."
   :type 'hook
-  :group 'eaf-mode)
+  :group 'eaf)
 
 (defvar eaf-mode-map
   (let ((map (make-sparse-keymap)))
