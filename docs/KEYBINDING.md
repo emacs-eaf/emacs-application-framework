@@ -43,7 +43,7 @@ You can customize keys with option ```eaf-browser-keybinding``` or ```eaf-browse
 | i              | Toggle inverted mode                |
 | Double Click   | Use sdcv translate word under point |
 
-You can customize keys with option ```eaf-pdfviewer-keybinding```
+You can customize keys with option ```eaf-pdf-viewer-keybinding```
 
 ### Video Player
 
@@ -53,7 +53,7 @@ You can customize keys with option ```eaf-pdfviewer-keybinding```
 | h                | Seek backward |
 | l                | Seek forward  |
 
-You can customize keys with option ```eaf-videoplayer-keybinding```
+You can customize keys with option ```eaf-video-player-keybinding```
 
 ### Image Viewer
 
@@ -62,7 +62,7 @@ You can customize keys with option ```eaf-videoplayer-keybinding```
 | j                | Load next image in current directory     |
 | k                | Load previous image in current directory |
 
-You can customize keys with option ```eaf-imageviewer-keybinding```
+You can customize keys with option ```eaf-image-viewer-keybinding```
 
 ### Terminal
 

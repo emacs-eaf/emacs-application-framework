@@ -71,10 +71,10 @@ A `use-package` sample configuration
   :custom
   (eaf-find-alternate-file-in-dired t)
   :config
-  (eaf-bind-key scroll_up "RET" eaf-pdfviewer-keybinding)
-  (eaf-bind-key scroll_down_page "DEL" eaf-pdfviewer-keybinding)
-  (eaf-bind-key scroll_up "C-n" eaf-pdfviewer-keybinding)
-  (eaf-bind-key scroll_down "C-p" eaf-pdfviewer-keybinding)
+  (eaf-bind-key scroll_up "RET" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down_page "DEL" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
   (eaf-bind-key take_photo "p" eaf-camera-keybinding)
   (defun eaf-open-google ()
     "Open Google using EAF."
@@ -139,12 +139,12 @@ There are default keybindings for each EAF application provided by us. If you wa
 
 You can easily customize EAF keybindings, find the corresponding keybinding variable, and add the something like the following to `.emacs`
 ```Elisp
-(eaf-bind-key scroll_up "C-n" eaf-pdfviewer-keybinding)
-(eaf-bind-key scroll_down "C-p" eaf-pdfviewer-keybinding)
+(eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+(eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
 (eaf-bind-key take_photo "p" eaf-camera-keybinding)
 ```
 
-Currently available keybinding variables are `eaf-browser-keybinding`, `eaf-pdfviewer-keybinding`, `eaf-videoplayer-keybinding`, `eaf-imageviewer-keybinding`, `eaf-camera-keybinding`, `eaf-terminal-keybinding`.
+Currently available keybinding variables are `eaf-browser-keybinding`, `eaf-pdf-viewer-keybinding`, `eaf-video-player-keybinding`, `eaf-image-viewer-keybinding`, `eaf-camera-keybinding`, `eaf-terminal-keybinding`.
 
 ### Variable Customization
 There are certain variables will be shared across Emacs Lisp and Python. You can easily configure then with `eaf-setq`.

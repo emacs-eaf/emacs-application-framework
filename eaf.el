@@ -181,7 +181,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   :type 'cons
   :group 'eaf)
 
-(defcustom eaf-pdfviewer-keybinding
+(defcustom eaf-pdf-viewer-keybinding
   '(("j" . "scroll_up")
     ("k" . "scroll_down")
     ("SPC" . "scroll_up_page")
@@ -201,7 +201,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   :type 'cons
   :group 'eaf)
 
-(defcustom eaf-videoplayer-keybinding
+(defcustom eaf-video-player-keybinding
   '(("SPC" . "toggle_play")
     ("h" . "play_backward")
     ("l" . "play_forward"))
@@ -209,7 +209,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   :type 'cons
   :group 'eaf)
 
-(defcustom eaf-imageviewer-keybinding
+(defcustom eaf-image-viewer-keybinding
   '(("j" . "load_next_image")
     ("k" . "load_prev_image"))
   "The keybinding of EAF Image Viewer."
@@ -264,6 +264,18 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   "The extension list of org previewer application."
   :type 'cons
   :group 'eaf)
+
+(defvar eaf-app-binding-alist
+  '(("browser" . eaf-browser-keybinding)
+    ("pdf-viewer" . eaf-pdf-viewer-keybinding)
+    ("video-player" . eaf-video-player-keybinding)
+    ("image-viewer" . eaf-image-viewer-keybinding)
+    ("camera" . eaf-camera-keybinding)
+    ("terminal" . eaf-terminal-keybinding))
+  "Mapping app names to keybinding variables.
+
+Any new app should add the its name and the corresponding
+keybinding variable to this list.")
 
 (defun eaf-call (method &rest args)
   (apply 'dbus-call-method
@@ -383,20 +395,13 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                    do (eaf-dummy-function (intern fun))
                       (define-key map (kbd key) (intern fun))) map)))
 
+(defun eaf-get-app-bindings (app-name)
+  (symbol-value
+    (cdr (assoc app-name eaf-app-binding-alist))))
+
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
-  (cond ((equal app-name "browser")
-         (eaf-gen-keybinding-map eaf-browser-keybinding))
-        ((equal app-name "pdf-viewer")
-         (eaf-gen-keybinding-map eaf-pdfviewer-keybinding))
-        ((equal app-name "video-player")
-         (eaf-gen-keybinding-map eaf-videoplayer-keybinding))
-        ((equal app-name "image-viewer")
-         (eaf-gen-keybinding-map eaf-imageviewer-keybinding))
-        ((equal app-name "camera")
-         (eaf-gen-keybinding-map eaf-camera-keybinding))
-        ((equal app-name "terminal")
-         (eaf-gen-keybinding-map eaf-terminal-keybinding)))
+  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
   (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
@@ -405,18 +410,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-identify-key-in-app (key-command app-name)
   "Given a KEY-COMMAND string, identify whether command is in EAF keybindings based on APP-NAME."
-  (cond ((equal app-name "browser")
-         (rassoc key-command eaf-browser-keybinding))
-        ((equal app-name "pdf-viewer")
-         (rassoc key-command eaf-pdfviewer-keybinding))
-        ((equal app-name "video-player")
-         (rassoc key-command eaf-videoplayer-keybinding))
-        ((equal app-name "image-viewer")
-         (rassoc key-command eaf-imageviewer-keybinding))
-        ((equal app-name "camera")
-         (rassoc key-command eaf-camera-keybinding))
-        ((equal app-name "terminal")
-         (rassoc key-command eaf-terminal-keybinding))))
+  (rassoc key-command (eaf-get-app-bindings app-name)))
 
 (defun eaf-is-support (url)
   (dbus-call-method
@@ -535,14 +529,9 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                         (let ((function-name-value (cdr (assoc key-desc eaf-browser-keybinding))))
                           (when function-name-value
                             (eaf-call "execute_function" buffer-id function-name-value))))
-                       ((equal buffer-app-name "pdf-viewer")
-                        (eaf-handle-app-key buffer-id key-desc eaf-pdfviewer-keybinding))
-                       ((equal buffer-app-name "video-player")
-                        (eaf-handle-app-key buffer-id key-desc eaf-videoplayer-keybinding))
-                       ((equal buffer-app-name "image-viewer")
-                        (eaf-handle-app-key buffer-id key-desc eaf-imageviewer-keybinding))
-                       ((equal buffer-app-name "camera")
-                        (eaf-handle-app-key buffer-id key-desc eaf-camera-keybinding))
+                       ((assoc buffer-app-name eaf-app-binding-alist)
+                        (eaf-handle-app-key buffer-id key-desc
+                                            (eaf-get-app-bindings buffer-app-name)))
                        (t
                         (eaf-call "send_key" buffer-id key-desc))))
                 ((or
