@@ -414,7 +414,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                   (unless (boundp 'buffer-id)
                     (error "%s command can only be called in eaf buffer" sym))
                   ;; Enable the command to be called by M-x or from lisp code in
-                  ;; the case that this command is invoked by key-sequence.
+                  ;; the case that this command isn't invoked by key-sequence.
                   (when (and (eq this-command sym)
                              (not (equal (this-command-keys-vector) key)))
                     (eaf-call "execute_function" buffer-id (symbol-name sym))))))
