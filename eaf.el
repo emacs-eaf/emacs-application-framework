@@ -97,6 +97,12 @@
 (defvar-local eaf--buffer-id nil
   "Internal id used by eaf app.")
 
+(defvar-local eaf--buffer-url nil
+  "The buffer url.")
+
+(defvar-local eaf--buffer-app-name nil
+  "The buffer app name.")
+
 (define-derived-mode eaf-mode text-mode "EAF"
   "Major mode for Emacs Application Framework."
   ;; Kill all local variables first.
@@ -543,16 +549,16 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
            (key-desc (key-description key)))
 
       ;; Uncomment for debug.
-      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc buffer-app-name))
+      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc eaf--buffer-app-name))
 
       (cond
         ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
         ((equal key-desc "<f11>")
          t)
         ;; Call function on the Python side if matched key in the keybinding.
-        ((eaf-identify-key-in-app key-command buffer-app-name)
+        ((eaf-identify-key-in-app key-command eaf--buffer-app-name)
          (eaf-call "execute_function" eaf--buffer-id
-                   (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name)))))
+                   (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
         ;; Send key to Python side if key-command is single character key.
         ((or (equal key-command "self-insert-command")
              (equal key-command "completion-select-if-within-overlay")
@@ -636,8 +642,8 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (set (make-local-variable 'eaf--buffer-id) new-window-buffer-id)
-      (set (make-local-variable 'buffer-url) "")
-      (set (make-local-variable 'buffer-app-name) "browser"))
+      (set (make-local-variable 'eaf--buffer-url) "")
+      (set (make-local-variable 'eaf--buffer-app-name) "browser"))
     (switch-to-buffer eaf-buffer)))
 
 (dbus-register-signal
@@ -744,8 +750,8 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
         (progn
           ;; Switch to new buffer if buffer create successful.
           (switch-to-buffer buffer)
-          (set (make-local-variable 'buffer-url) url)
-          (set (make-local-variable 'buffer-app-name) app-name)
+          (set (make-local-variable 'eaf--buffer-url) url)
+          (set (make-local-variable 'eaf--buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
           (when (or (string= app-name "markdown-previewer")
                     (string= app-name "org-previewer"))
@@ -841,8 +847,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
               (dolist (buffer (buffer-list))
                 (set-buffer buffer)
                 (when (equal major-mode 'eaf-mode)
-                  (when (and (string= buffer-url url)
-                             (string= buffer-app-name app-name))
+                  (when (and (string= eaf--buffer-url url)
+                             (string= eaf--buffer-app-name app-name))
                     (setq exists-eaf-buffer buffer)
                     (throw 'found-match-buffer t)))))
             ;; Switch to exists buffer,
