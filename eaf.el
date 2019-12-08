@@ -419,7 +419,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                   ;; `pre-command-hook'
                   (when (and (eq this-command sym)
                              (not (equal (this-command-keys-vector) key)))
-                    (eaf-monitor-key-event (symbol-name sym))))))
+                    (eaf-call "execute_function" buffer-id (symbol-name sym))))))
 
 (defun eaf-gen-keybinding-map (keybinding)
   "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
@@ -528,12 +528,11 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
              (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
              (message (format "export %s to html" (buffer-file-name))))))))
 
-(defun eaf-monitor-key-event (&optional cmd-name)
+(defun eaf-monitor-key-event ()
   "Monitor key events during EAF process."
   (ignore-errors
     (let* ((key (this-command-keys-vector))
-           (key-command (or cmd-name
-                            (symbol-name (key-binding key))))
+           (key-command (symbol-name (key-binding key)))
            (key-desc (key-description key)))
 
       ;; Uncomment for debug.
@@ -546,8 +545,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         ;; Call function on the Python side if matched key in the keybinding.
         ((eaf-identify-key-in-app key-command buffer-app-name)
          (eaf-call "execute_function" buffer-id
-                   (or cmd-name
-                       (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name))))))
+                   (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name)))))
         ;; Send key to Python side if key-command is single character key.
         ((or (equal key-command "self-insert-command")
              (equal key-command "completion-select-if-within-overlay")
