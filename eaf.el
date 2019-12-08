@@ -402,30 +402,36 @@ buffer."
       (call-interactively cmd))))
 
 
-(defun eaf-dummy-function (sym key)
-  "Define an alias from SYM to a dummy function that acts as a placeholder."
+(defun eaf-dummy-function (sym fun key)
+  "Define elisp command SYM which can call python function FUN.
+
+FUN is only called when command SYM is not invoked by KEY, thus
+this command does nothing when `eaf-monitor-key-event' has
+already handled it."
   (defalias sym (lambda nil
-                  "This Lisp function is a placeholder, the actual function will be handled on the Python side.
+                   "This Lisp function is a placeholder, the actual function will be handled on the Python side.
 
 Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
 Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
-                  (interactive)
-                  ;; ensure this is only called from eaf buffer
-                  (unless (boundp 'buffer-id)
-                    (error "%s command can only be called in eaf buffer" sym))
-                  ;; Enable the command to be called by M-x or from lisp code in
-                  ;; the case that this command isn't invoked by key-sequence.
-                  (when (and (eq this-command sym)
-                             (not (equal (this-command-keys-vector) key)))
-                    (eaf-call "execute_function" buffer-id (symbol-name sym))))))
+                   (interactive)
+                   ;; ensure this is only called from eaf buffer
+                   (unless (boundp 'buffer-id)
+                     (error "%s command can only be called in eaf buffer" sym))
+                   ;; Enable the command to be called by M-x or from lisp code in
+                   ;; the case that this command isn't invoked by key-sequence.
+                   (when (and (eq this-command sym)
+                              (not (equal (this-command-keys-vector) key)))
+                     (eaf-call "execute_function" buffer-id fun)))))
 
 (defun eaf-gen-keybinding-map (keybinding)
   "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
           (cl-loop for (key . fun) in keybinding
-                   do (eaf-dummy-function (intern fun) key)
-                      (define-key map (kbd key) (intern fun))) map)))
+                   do (let ((dummy (intern (format "eaf-%s" fun))))
+                        (eaf-dummy-function dummy fun key)
+                        (define-key map (kbd key) dummy))
+                   finally return map))))
 
 (defun eaf-get-app-bindings (app-name)
   (symbol-value
