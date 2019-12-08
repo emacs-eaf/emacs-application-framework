@@ -391,7 +391,17 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))
           (random (expt 16 4))))
 
-(defun eaf-dummy-function (sym)
+(defun eaf-execute-app-cmd (cmd &optional buf)
+  "Execute app CMD.
+
+If BUF is given it should be the eaf buffer for the command
+otherwise it is assumed that the current buffer is the eaf
+buffer."
+  (with-current-buffer (or buf (current-buffer))
+    (let ((this-command cmd))
+      (call-interactively cmd))))
+
+
 (defun eaf-dummy-function (sym key)
   "Define an alias from SYM to a dummy function that acts as a placeholder."
   (defalias sym (lambda nil
