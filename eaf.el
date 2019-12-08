@@ -1,4 +1,4 @@
-;;; eaf.el --- Emacs application framework
+;;; eaf.el --- Emacs application framework  -*- lexical-binding: t; -*-
 
 ;; Filename: eaf.el
 ;; Description: Emacs application framework
@@ -391,21 +391,42 @@ We need calcuate render allocation to make sure no black border around render co
           (random (expt 16 4))
           (random (expt 16 4))))
 
-(defun eaf-dummy-function (sym)
+(defun eaf-execute-app-cmd (cmd &optional buf)
+  "Execute app CMD.
+
+If BUF is given it should be the eaf buffer for the command
+otherwise it is assumed that the current buffer is the eaf
+buffer."
+  (with-current-buffer (or buf (current-buffer))
+    (let ((this-command cmd))
+      (call-interactively cmd))))
+
+
+(defun eaf-dummy-function (sym key)
   "Define an alias from SYM to a dummy function that acts as a placeholder."
   (defalias sym (lambda nil
                   "This Lisp function is a placeholder, the actual function will be handled on the Python side.
 
+Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
 Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                   (interactive)
-                  )))
+                  ;; ensure this is only called from eaf buffer
+                  (unless (boundp 'buffer-id)
+                    (error "%s command can only be called in eaf buffer" sym))
+                  ;; enable the command to be called by M-x or from lisp code in
+                  ;; the case that this command is invoked by key-sequence
+                  ;; `eaf-monitor-key-event' is already executed by
+                  ;; `pre-command-hook'
+                  (when (and (eq this-command sym)
+                             (not (equal (this-command-keys-vector) key)))
+                    (eaf-call "execute_function" buffer-id (symbol-name sym))))))
 
 (defun eaf-gen-keybinding-map (keybinding)
   "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
           (cl-loop for (key . fun) in keybinding
-                   do (eaf-dummy-function (intern fun))
+                   do (eaf-dummy-function (intern fun) key)
                       (define-key map (kbd key) (intern fun))) map)))
 
 (defun eaf-get-app-bindings (app-name)
@@ -523,7 +544,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
          t)
         ;; Call function on the Python side if matched key in the keybinding.
         ((eaf-identify-key-in-app key-command buffer-app-name)
-         (eaf-call "execute_function" buffer-id (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name)))))
+         (eaf-call "execute_function" buffer-id
+                   (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name)))))
         ;; Send key to Python side if key-command is single character key.
         ((or (equal key-command "self-insert-command")
              (equal key-command "completion-select-if-within-overlay")
