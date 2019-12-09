@@ -287,7 +287,7 @@ Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
 (defun eaf-call (method &rest args)
-  (apply 'dbus-call-method
+  (apply #'dbus-call-method
          :session                   ; use the session (not system) bus
          "com.lazycat.eaf"          ; service name
          "/com/lazycat/eaf"         ; path name
@@ -298,12 +298,12 @@ keybinding variable to this list.")
   (frame-parameter frame 'window-id))
 
 (defun eaf-start-process ()
-  "Start EAF process if it haven't started yet."
+  "Start EAF process if it hasn't started yet."
   (interactive)
   (if (process-live-p eaf-process)
       (message "EAF process has started.")
     (setq eaf-process
-          (apply 'start-process
+          (apply #'start-process
                  eaf-name
                  eaf-name
                  eaf-python-command (append (list eaf-python-file) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port))
@@ -323,7 +323,7 @@ keybinding variable to this list.")
         (count 0))
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
-      (when (equal major-mode 'eaf-mode)
+      (when (derived-mode-p 'eaf-mode)
         (cl-incf count)
         (kill-buffer buffer)))
     ;; Just report to me when eaf buffer exists.
@@ -420,7 +420,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                      (eaf-call "execute_function" eaf--buffer-id fun)))))
 
 (defun eaf-gen-keybinding-map (keybinding)
-  "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
+  "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
           (cl-loop for (key . fun) in keybinding
@@ -436,7 +436,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
   (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
-  (let* ((file-or-command-name (substring input-content (string-match "[^\/]*\/?$" input-content)))
+  (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode))
@@ -511,12 +511,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
              (when (member (buffer-file-name) eaf-org-file-list)
                (unless (member (buffer-file-name) eaf-org-killed-file-list)
                  (push (buffer-file-name) eaf-org-killed-file-list))
-               (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))
-               ))
+               (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))))
             ((derived-mode-p 'eaf-mode)
              (eaf-call "kill_buffer" eaf--buffer-id)
-             (message (format "Kill %s" eaf--buffer-id)))
-            ))))
+             (message (format "Kill %s" eaf--buffer-id)))))))
 
 (defun eaf-monitor-buffer-save ()
   (ignore-errors
@@ -549,7 +547,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         ;; Send key to Python side if key-command is single character key.
         ((or (equal key-command "self-insert-command")
              (equal key-command "completion-select-if-within-overlay")
-             (equal key-command "nil")
+             (eq key-command 'nil)
              (member key-desc eaf-single-key-list))
          (eaf-call "send_key" eaf--buffer-id key-desc))
         (t
@@ -591,27 +589,25 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
                        (h (nth 3 window-allocation))
                        )
                   (when (and
-                         (> mouse-press-x x)
-                         (< mouse-press-x (+ x w))
-                         (> mouse-press-y y)
-                         (< mouse-press-y (+ y h)))
+                         (< x mouse-press-x (+ x w))
+                         (< y mouse-press-y (+ y h)))
                     (select-window window)
                     (throw 'find-window t))))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "message_to_emacs"
- 'message)
+ #'message)
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "create_new_browser_buffer"
- 'eaf-create-new-browser-buffer)
+ #'eaf-create-new-browser-buffer)
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "set_emacs_var"
- 'eaf-set-emacs-var)
+ #'eaf-set-emacs-var)
 
 (defun eaf-set-emacs-var (var-name var-value)
   (set (intern var-name) var-value))
@@ -619,7 +615,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "eval_in_emacs"
- 'eaf-eval-in-emacs)
+ #'eaf-eval-in-emacs)
 
 (defun eaf-eval-in-emacs (elisp-code-string)
   (eval (read elisp-code-string)))
@@ -636,13 +632,13 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "request_kill_buffer"
- 'eaf-request-kill-buffer)
+ #'eaf-request-kill-buffer)
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
   (catch 'found-match-buffer
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
-      (when (equal major-mode 'eaf-mode)
+      (when (derived-mode-p 'eaf-mode)
         (when (string= eaf--buffer-id kill-buffer-id)
           (kill-buffer buffer)
           (message (format "Request kill buffer %s" kill-buffer-id))
@@ -651,7 +647,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "focus_emacs_buffer"
- 'eaf-focus-buffer)
+ #'eaf-focus-buffer)
 
 (defun eaf-start-finish ()
   "Call `eaf-open-internal' after receive `start_finish' signal from server process."
@@ -660,7 +656,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "start_finish"
- 'eaf-start-finish)
+ #'eaf-start-finish)
 
 (defun eaf-update-buffer-title (bid title)
   (when (> (length title) 0)
@@ -672,13 +668,12 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
               (rename-buffer (truncate-string-to-width title eaf-title-length))
-              (throw 'find-buffer t)
-              )))))))
+              (throw 'find-buffer t))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "update_buffer_title"
- 'eaf-update-buffer-title)
+ #'eaf-update-buffer-title)
 
 (defun eaf-open-buffer-url (url)
   (eaf-open-browser url))
@@ -690,12 +685,12 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "open_buffer_url"
- 'eaf-open-buffer-url)
+ #'eaf-open-buffer-url)
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "translate_text"
- 'eaf-translate-text)
+ #'eaf-translate-text)
 
 (defun eaf-read-string (interactive-string)
   "Like `read-string', but return nil if user execute `keyboard-quit' when input."
@@ -710,7 +705,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "input_message"
- 'eaf-input-message)
+ #'eaf-input-message)
 
 (defun eaf-send-var-to-python ()
   "Send variables defined in `eaf-var-list' to the Python side."
@@ -721,7 +716,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "get_emacs_var"
- 'eaf-send-var-to-python)
+ #'eaf-send-var-to-python)
 
 (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
@@ -754,7 +749,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   ;; Validate URL legitimacy
   (if (and (not (string-prefix-p "/" url))
            (not (string-prefix-p "~" url))
-           (string-match "^\\(https?:\/\/\\)?[a-z0-9]+\\([\-\.]\\{1\\}[a-z0-9]+\\)*\.+[a-z0-9\.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(\/.*\\)?$" url))
+           (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.]\\{1\\}[a-z0-9]+\\)*.+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url))
       (progn
         (unless (or (string-prefix-p "http://" url)
                     (string-prefix-p "https://" url))
@@ -833,7 +828,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
             (catch 'found-match-buffer
               (dolist (buffer (buffer-list))
                 (set-buffer buffer)
-                (when (equal major-mode 'eaf-mode)
+                (when (derived-mode-p 'eaf-mode)
                   (when (and (string= eaf--buffer-url url)
                              (string= eaf--buffer-app-name app-name))
                     (setq exists-eaf-buffer buffer)
