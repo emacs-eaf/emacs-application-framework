@@ -107,23 +107,14 @@
 (defvar-local eaf--buffer-app-name nil
   "The buffer app name.")
 
-(define-derived-mode eaf-mode text-mode "EAF"
+(define-derived-mode eaf-mode fundamental-mode "EAF"
   "Major mode for Emacs Application Framework."
-  ;; Kill all local variables first.
-  (kill-all-local-variables)
-  ;; Set mode.
-  (setq major-mode 'eaf-mode)
-  (setq mode-name "EAF")
   ;; Split window combinations proportionally.
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
-  ;; Load local map.
-  (use-local-map eaf-mode-map)
   ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
   ;; To fix interactive command run twice because `eaf-monitor-key-event' runs inside minibuffer and can not handle minibuffer quit signal.
-  (add-hook 'pre-command-hook #'eaf-monitor-key-event nil t)
-  ;; Run eaf-mode hooks.
-  (run-hooks 'eaf-mode-hook))
+  (add-hook 'pre-command-hook #'eaf-monitor-key-event nil t))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
