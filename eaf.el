@@ -84,10 +84,14 @@
 (require 'subr-x)
 
 ;;; Code:
+
+(defgroup eaf nil
+  "Emacs Application Framework."
+  :group 'applications)
+
 (defcustom eaf-mode-hook '()
   "Eaf mode hook."
-  :type 'hook
-  :group 'eaf)
+  :type 'hook)
 
 (defvar eaf-mode-map
   (let ((map (make-sparse-keymap)))
@@ -153,13 +157,11 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
 
 (defcustom eaf-name "*eaf*"
   "Name of eaf buffer."
-  :type 'string
-  :group 'eaf)
+  :type 'string)
 
 (defcustom eaf-python-command "python3"
   "The Python interpreter used to run eaf.py."
-  :type 'string
-  :group 'eaf)
+  :type 'string)
 
 (defcustom eaf-var-list
   '(
@@ -170,8 +172,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Try not to modify this alist directly. Use `eaf-setq' to modify instead."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-browser-keybinding
   '(("M-f" . "history_forward")
@@ -187,15 +188,13 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom"))
   "The keybinding of EAF Browser."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-browser-key-alias
   '(("C-a" . "<home>")
     ("C-e" . "<end>"))
   "The key alias of EAF Browser."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-pdf-viewer-keybinding
   '(("j" . "scroll_up")
@@ -214,78 +213,66 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("]" . "remember_jump")
     ("i" . "toggle_inverted_mode"))
   "The keybinding of EAF PDF Viewer."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-video-player-keybinding
   '(("SPC" . "toggle_play")
     ("h" . "play_backward")
     ("l" . "play_forward"))
   "The keybinding of EAF Video Player."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-image-viewer-keybinding
   '(("j" . "load_next_image")
     ("k" . "load_prev_image"))
   "The keybinding of EAF Image Viewer."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-terminal-keybinding
   '(("C--" . "zoom_out")
     ("C-=" . "zoom_in"))
   "The keybinding of EAF Terminal."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-camera-keybinding
   '(("j" . "take_photo"))
   "The keybinding of EAF Camera."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
   "The extension list of pdf application."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-image-extension-list
   '("jpg" "jpeg" "png" "bmp")
   "The extension list of image viewer application."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-video-extension-list
   '("avi" "rmvb" "ogg" "mp4" "mkv")
   "The extension list of video player application."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-browser-extension-list
   '("html")
   "The extension list of browser application."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-org-extension-list
   '("org")
   "The extension list of org previewer application."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defcustom eaf-single-key-list
   '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
   "The single key use to send key to EAF app."
-  :type 'cons
-  :group 'eaf)
+  :type 'cons)
 
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
