@@ -450,7 +450,9 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (make-local-variable 'emulation-mode-map-alists)
+      ;; copy default value in case user already has bindings there
+      (setq-local emulation-mode-map-alists
+                  (default-value 'emulation-mode-map-alists))
       (push (list (cons t eaf-mode-map))
             emulation-mode-map-alists))
     eaf-buffer))
