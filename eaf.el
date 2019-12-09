@@ -93,10 +93,26 @@
   "Eaf mode hook."
   :type 'hook)
 
-(defvar eaf-mode-map
+(defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-h m") 'eaf-describe-bindings)
+    (define-key map [remap describe-bindings] 'eaf-describe-bindings)
     map)
-  "Keymap used by `eaf-mode'.")
+  "Keymap for default bindings available in all apps.")
+
+(defvar eaf-mode-map nil
+  "Keymap used by `eaf-mode'.
+
+Don't modify this map directly. To bind keys for all apps use
+`eaf-mode-map*' and to bind keys for individual apps use
+`eaf-bind-key'.")
+
+(defun eaf-describe-bindings ()
+  "Like `describe-bindings' for eaf buffers."
+  (interactive)
+  (let ((emulation-mode-map-alists nil)
+        (eaf-mode-map (current-local-map)))
+    (call-interactively 'describe-mode)))
 
 (defvar-local eaf--buffer-id nil
   "Internal id used by eaf app.")
@@ -420,7 +436,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                    do (let ((dummy (intern (format "eaf-%s" fun))))
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
-                   finally return map))))
+                   finally return (prog1 map
+                                    (set-keymap-parent map eaf-mode-map*))))))
 
 (defun eaf-get-app-bindings (app-name)
   (symbol-value
@@ -432,7 +449,12 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
-      (eaf-mode))
+      (eaf-mode)
+      ;; copy default value in case user already has bindings there
+      (setq-local emulation-mode-map-alists
+                  (default-value 'emulation-mode-map-alists))
+      (push (list (cons t eaf-mode-map))
+            emulation-mode-map-alists))
     eaf-buffer))
 
 (defun eaf-identify-key-in-app (key-command app-name)
