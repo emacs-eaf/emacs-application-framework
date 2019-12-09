@@ -110,7 +110,8 @@ Don't modify this map directly. To bind keys for all apps use
 (defun eaf-describe-bindings ()
   "Like `describe-bindings' for eaf buffers."
   (interactive)
-  (let ((eaf-mode-map (current-local-map)))
+  (let ((emulation-mode-map-alists nil)
+        (eaf-mode-map (current-local-map)))
     (call-interactively 'describe-mode)))
 
 (defvar-local eaf--buffer-id nil
@@ -448,7 +449,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
-      (eaf-mode))
+      (eaf-mode)
+      (make-local-variable 'emulation-mode-map-alists)
+      (push (list (cons t eaf-mode-map))
+            emulation-mode-map-alists))
     eaf-buffer))
 
 (defun eaf-identify-key-in-app (key-command app-name)
