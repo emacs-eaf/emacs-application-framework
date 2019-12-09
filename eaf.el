@@ -95,6 +95,7 @@
 
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-h m") 'eaf-describe-bindings)
     (define-key map [remap describe-bindings] 'eaf-describe-bindings)
     map)
   "Keymap for default bindings available in all apps.")
