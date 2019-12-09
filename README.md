@@ -152,6 +152,12 @@ There are certain variables will be shared across Emacs Lisp and Python. You can
 Check the full list of configurable variables with `C-h v eaf-var-list`.
 
 #### EAF Browser
+To set EAF Browser as your default browser, put the following in your `.emacs`
+```Elisp
+(setq browse-url-browser-function 'eaf-open-browser)
+(defalias 'browse-web 'eaf-open-browser)
+```
+
 Default browser enable plugin and JavaScript, to disable them, you can add something like the following to `.emacs`
 
 ```Elisp
