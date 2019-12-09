@@ -94,6 +94,15 @@
     map)
   "Keymap used by `eaf-mode'.")
 
+(defvar-local eaf--buffer-id nil
+  "Internal id used by eaf app.")
+
+(defvar-local eaf--buffer-url nil
+  "The buffer url.")
+
+(defvar-local eaf--buffer-app-name nil
+  "The buffer app name.")
+
 (define-derived-mode eaf-mode text-mode "EAF"
   "Major mode for Emacs Application Framework."
   ;; Kill all local variables first.
@@ -103,7 +112,7 @@
   (setq mode-name "EAF")
   ;; Split window combinations proportionally.
   (setq window-combination-resize t)
-  (set (make-local-variable 'buffer-id) (eaf-generate-id))
+  (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
   ;; Load local map.
   (use-local-map eaf-mode-map)
   ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
@@ -415,13 +424,13 @@ Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
 Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                    (interactive)
                    ;; ensure this is only called from eaf buffer
-                   (unless (boundp 'buffer-id)
+                   (unless (boundp 'eaf--buffer-id)
                      (error "%s command can only be called in eaf buffer" sym))
                    ;; Enable the command to be called by M-x or from lisp code in
                    ;; the case that this command isn't invoked by key-sequence.
                    (when (and (eq this-command sym)
                               (not (equal (this-command-keys-vector) key)))
-                     (eaf-call "execute_function" buffer-id fun)))))
+                     (eaf-call "execute_function" eaf--buffer-id fun)))))
 
 (defun eaf-gen-keybinding-map (keybinding)
   "Configure the eaf-mode-map from KEYBINDING, one of the eaf-*-keybinding variables."
@@ -482,7 +491,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation))
                          )
-                    (add-to-list 'view-infos (format "%s:%s:%s:%s:%s:%s" buffer-id (eaf-get-emacs-xid frame) x y w h))
+                    (add-to-list 'view-infos (format "%s:%s:%s:%s:%s:%s" eaf--buffer-id (eaf-get-emacs-xid frame) x y w h))
                     ))))))
       ;; I don't know how to make emacs send dbus-message with two-dimensional list.
       ;; So i package two-dimensional list in string, then unpack on server side. ;)
@@ -518,8 +527,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))
                ))
             ((derived-mode-p 'eaf-mode)
-             (eaf-call "kill_buffer" buffer-id)
-             (message (format "Kill %s" buffer-id)))
+             (eaf-call "kill_buffer" eaf--buffer-id)
+             (message (format "Kill %s" eaf--buffer-id)))
             ))))
 
 (defun eaf-monitor-buffer-save ()
@@ -540,22 +549,22 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
            (key-desc (key-description key)))
 
       ;; Uncomment for debug.
-      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc buffer-app-name))
+      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc eaf--buffer-app-name))
 
       (cond
         ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
         ((equal key-desc "<f11>")
          t)
         ;; Call function on the Python side if matched key in the keybinding.
-        ((eaf-identify-key-in-app key-command buffer-app-name)
-         (eaf-call "execute_function" buffer-id
-                   (cdr (assoc key-desc (eaf-get-app-bindings buffer-app-name)))))
+        ((eaf-identify-key-in-app key-command eaf--buffer-app-name)
+         (eaf-call "execute_function" eaf--buffer-id
+                   (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
         ;; Send key to Python side if key-command is single character key.
         ((or (equal key-command "self-insert-command")
              (equal key-command "completion-select-if-within-overlay")
              (equal key-command "nil")
              (member key-desc eaf-single-key-list))
-         (eaf-call "send_key" buffer-id key-desc))
+         (eaf-call "send_key" eaf--buffer-id key-desc))
         (t
          nil)))))
 
@@ -632,9 +641,9 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (set (make-local-variable 'buffer-id) new-window-buffer-id)
-      (set (make-local-variable 'buffer-url) "")
-      (set (make-local-variable 'buffer-app-name) "browser"))
+      (set (make-local-variable 'eaf--buffer-id) new-window-buffer-id)
+      (set (make-local-variable 'eaf--buffer-url) "")
+      (set (make-local-variable 'eaf--buffer-app-name) "browser"))
     (switch-to-buffer eaf-buffer)))
 
 (dbus-register-signal
@@ -647,7 +656,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (equal major-mode 'eaf-mode)
-        (when (string= buffer-id kill-buffer-id)
+        (when (string= eaf--buffer-id kill-buffer-id)
           (kill-buffer buffer)
           (message (format "Request kill buffer %s" kill-buffer-id))
           (throw 'found-match-buffer t))))))
@@ -674,7 +683,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
           (with-current-buffer buffer
             (when (and
                    (derived-mode-p 'eaf-mode)
-                   (equal buffer-id bid))
+                   (equal eaf--buffer-id bid))
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t)
               )))))))
@@ -705,10 +714,10 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   "Like `read-string', but return nil if user execute `keyboard-quit' when input."
   (condition-case nil (read-string interactive-string) (quit nil)))
 
-(defun eaf-input-message (buffer-id interactive-string callback-type)
+(defun eaf-input-message (eaf--buffer-id interactive-string callback-type)
   (let* ((input-message (eaf-read-string interactive-string)))
     (when input-message
-      (eaf-call "handle_input_message" buffer-id callback-type input-message)
+      (eaf-call "handle_input_message" eaf--buffer-id callback-type input-message)
       )))
 
 (dbus-register-signal
@@ -736,13 +745,13 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   (let* ((buffer (eaf-create-buffer url app-name))
          buffer-result)
     (with-current-buffer buffer
-      (setq buffer-result (eaf-call "new_buffer" buffer-id url app-name arguments)))
+      (setq buffer-result (eaf-call "new_buffer" eaf--buffer-id url app-name arguments)))
     (if (equal buffer-result "")
         (progn
           ;; Switch to new buffer if buffer create successful.
           (switch-to-buffer buffer)
-          (set (make-local-variable 'buffer-url) url)
-          (set (make-local-variable 'buffer-app-name) app-name)
+          (set (make-local-variable 'eaf--buffer-url) url)
+          (set (make-local-variable 'eaf--buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
           (when (or (string= app-name "markdown-previewer")
                     (string= app-name "org-previewer"))
@@ -838,8 +847,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
               (dolist (buffer (buffer-list))
                 (set-buffer buffer)
                 (when (equal major-mode 'eaf-mode)
-                  (when (and (string= buffer-url url)
-                             (string= buffer-app-name app-name))
+                  (when (and (string= eaf--buffer-url url)
+                             (string= eaf--buffer-app-name app-name))
                     (setq exists-eaf-buffer buffer)
                     (throw 'found-match-buffer t)))))
             ;; Switch to exists buffer,
@@ -927,7 +936,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
          (y (nth 1 window-allocation))
          (w (nth 2 window-allocation))
          (h (nth 3 window-allocation)))
-    (format "%s:%s:%s:%s:%s" buffer-id x y w h)))
+    (format "%s:%s:%s:%s:%s" eaf--buffer-id x y w h)))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defadvice scroll-other-window (around eaf-scroll-up-or-next-page activate)
