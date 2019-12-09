@@ -93,10 +93,24 @@
   "Eaf mode hook."
   :type 'hook)
 
-(defvar eaf-mode-map
+(defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-h m") 'eaf-describe-bindings)
     map)
-  "Keymap used by `eaf-mode'.")
+  "Keymap for default bindings available in all apps.")
+
+(defvar eaf-mode-map nil
+  "Keymap used by `eaf-mode'.
+
+Don't modify this map directly. To bind keys for all apps use
+`eaf-mode-map*' and to bind keys for individual apps use
+`eaf-bind-key'.")
+
+(defun eaf-describe-bindings ()
+  "Like `describe-bindings' for eaf buffers."
+  (interactive)
+  (let ((eaf-mode-map (current-local-map)))
+    (call-interactively 'describe-mode)))
 
 (defvar-local eaf--buffer-id nil
   "Internal id used by eaf app.")
@@ -420,7 +434,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                    do (let ((dummy (intern (format "eaf-%s" fun))))
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
-                   finally return map))))
+                   finally return (prog1 map
+                                    (set-keymap-parent map eaf-mode-map*))))))
 
 (defun eaf-get-app-bindings (app-name)
   (symbol-value
