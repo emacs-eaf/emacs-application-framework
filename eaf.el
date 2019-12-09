@@ -110,6 +110,8 @@
 (define-derived-mode eaf-mode fundamental-mode "EAF"
   "Major mode for Emacs Application Framework."
   ;; Split window combinations proportionally.
+  ;; FIXME: this changes this setting globally for the user
+  ;; which may not want this, introduce eaf user option?
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
   ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
