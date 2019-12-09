@@ -547,7 +547,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         ;; Send key to Python side if key-command is single character key.
         ((or (equal key-command "self-insert-command")
              (equal key-command "completion-select-if-within-overlay")
-             (eq key-command 'nil)
+             (equal key-command "nil")
              (member key-desc eaf-single-key-list))
          (eaf-call "send_key" eaf--buffer-id key-desc))
         (t
