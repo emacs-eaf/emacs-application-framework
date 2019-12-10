@@ -234,6 +234,9 @@ class Buffer(QGraphicsScene):
     def execute_function(self, function_name):
         getattr(self, function_name)()
 
+    def call_function(self, function_name):
+        return getattr(self, function_name)()
+
     def fake_key_event_filter(self, event_string):
         pass
 
