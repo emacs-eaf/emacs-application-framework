@@ -312,14 +312,13 @@ keybinding variable to this list.")
 The bookmark will try to recreate eaf buffer session.
 For now only eaf browser app is supported."
   (cond ((equal eaf--buffer-app-name "browser")
-         (let ((bookmark `((handler . eaf--bookmark-restore)
-                           (eaf-app . "browser")
-                           (defaults . ,(list eaf--bookmark-title))
-                           ;; not a filename but this shows url in bookmark-list
-                           ;; which is nice
-                           (filename . ,(eaf-call "call_function"
-                                                  eaf--buffer-id "get_bookmark")))))
-           bookmark))))
+         `((handler . eaf--bookmark-restore)
+           (eaf-app . "browser")
+           (defaults . ,(list eaf--bookmark-title))
+           ;; not a filename but this shows url in bookmark-list
+           ;; which is nice
+           (filename . ,(eaf-call "call_function"
+                                  eaf--buffer-id "get_bookmark"))))))
 
 (defun eaf--bookmark-restore (bookmark)
   "Restore eaf buffer according to BOOKMARK."
