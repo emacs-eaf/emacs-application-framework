@@ -321,15 +321,13 @@ keybinding variable to this list.")
     (set-process-sentinel
      eaf-process
      #'(lambda (process event)
-         (message (format "%s %s" process event))
-         ))
+         (message "%s %s" process event)))
     (message "EAF process starting...")))
 
 (defun eaf-stop-process ()
   (interactive)
   ;; Kill eaf buffers.
-  (let ((current-buf (current-buffer))
-        (count 0))
+  (let ((count 0))
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (derived-mode-p 'eaf-mode)
@@ -495,24 +493,22 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                          )
                     (add-to-list 'view-infos (format "%s:%s:%s:%s:%s:%s" eaf--buffer-id (eaf-get-emacs-xid frame) x y w h))
                     ))))))
-      ;; I don't know how to make emacs send dbus-message with two-dimensional list.
-      ;; So i package two-dimensional list in string, then unpack on server side. ;)
-      (eaf-call "update_views" (mapconcat 'identity view-infos ","))
+      ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
+      ;; So I package two-dimensional list in string, then unpack on server side. ;)
+      (eaf-call "update_views" (mapconcat #'identity view-infos ","))
       )))
 
 (defun eaf-delete-org-preview-file (org-file)
-  (setq org-html-file (concat (file-name-sans-extension org-file) ".html"))
-  (when (file-exists-p org-html-file)
-    (delete-file org-html-file)
-    (message (format "Clean org preview file %s (%s)" org-html-file org-file))
-    ))
+  (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
+    (when (file-exists-p org-html-file)
+      (delete-file org-html-file)
+      (message (format "Clean org preview file %s (%s)" org-html-file org-file)))))
 
 (defun eaf-org-killed-buffer-clean ()
   (dolist (org-killed-buffer eaf-org-killed-file-list)
     (unless (get-file-buffer org-killed-buffer)
       (setq eaf-org-file-list (remove org-killed-buffer eaf-org-file-list))
-      (eaf-delete-org-preview-file org-killed-buffer)
-      ))
+      (eaf-delete-org-preview-file org-killed-buffer)))
   (setq eaf-org-killed-file-list nil))
 
 (defun eaf-monitor-buffer-kill ()
@@ -858,7 +854,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message (format "Opening %s with EAF-%s..." url app-name)))
+        (message "Opening %s with EAF-%s..." url app-name))
     ;; Output something to user if app-name is empty string.
     (if (or (string-prefix-p "/" url)
             (string-prefix-p "~" url))
