@@ -708,14 +708,14 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
  #'eaf-translate-text)
 
 (defun eaf-read-string (interactive-string)
-  "Like `read-string', but return nil if user execute `keyboard-quit' when input."
+  "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
   (condition-case nil (read-string interactive-string) (quit nil)))
 
-(defun eaf-input-message (eaf--buffer-id interactive-string callback-type)
+(defun eaf-input-message (input-buffer-id interactive-string callback-type)
+  "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-string interactive-string)))
     (when input-message
-      (eaf-call "handle_input_message" eaf--buffer-id callback-type input-message)
-      )))
+      (eaf-call "handle_input_message" input-buffer-id callback-type input-message))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
