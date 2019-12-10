@@ -943,48 +943,49 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
     (format "%s:%s:%s:%s:%s" eaf--buffer-id x y w h)))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defadvice scroll-other-window (around eaf-scroll-up-or-next-page activate)
+
+;; FIXME: In the code below we should use `save-selected-window' (or even
+;; better `with-selected-window') rather than (other-window +1) followed by
+;; (other-window -1) since this is not always a no-op.
+
+(advice-add 'scroll-other-window :around #'eaf--scroll-other-window)
+(defun eaf--scroll-other-window (orig-fun &optional arg &rest args)
   "When next buffer is `eaf-mode', do `eaf-scroll-up-or-next-page'."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
-      (let ((arg (ad-get-arg 0)))
-        (if (null arg)
-            (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
-          (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line"))
+      (progn
+        (eaf-call "scroll_buffer" (eaf-get-view-info) "up"
+                  (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
-    ad-do-it))
+    (apply orig-fun arg args)))
 
-(defadvice scroll-other-window-down (around eaf-scroll-down-or-previous-page activate)
+(advice-add 'scroll-other-window-down :around #'eaf--scroll-other-window-down)
+(defun eaf--scroll-other-window-down (orig-fun &optional arg &rest args)
   "When next buffer is `eaf-mode', do `eaf-scroll-down-or-previous-page'."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
-      (let ((arg (ad-get-arg 0)))
-        (if (null arg)
-            (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
-          (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line"))
+      (progn
+        (eaf-call "scroll_buffer" (eaf-get-view-info) "down"
+                  (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
-    ad-do-it))
+    (apply orig-fun arg args)))
 
-(defadvice watch-other-window-internal (around eaf-watch-other-window activate)
+(advice-add 'watch-other-window-internal :around
+            #'eaf--watch-other-window-internal)
+(defun eaf--watch-other-window-internal (orig-fun &optional direction line
+                                                  &rest args)
   "When next buffer is `eaf-mode', do `eaf-watch-other-window'."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
-      (let ((direction (ad-get-arg 0))
-            (line (ad-get-arg 1)))
-        (if (string-equal direction "up")
-            (if (null line)
-                (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
-              (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line")
-              )
-          (if (null line)
-              (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
-            (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line")
-            ))
+      (progn
+        (eaf-call "scroll_buffer" (eaf-get-view-info)
+                  (if (string-equal direction "up") "up" "down")
+                  (if line "line" "page"))
         (other-window -1))
     (other-window -1)
-    ad-do-it))
+    (apply orig-fun direction line args)))
 
 (provide 'eaf)
 
