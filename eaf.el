@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.4
-;; Last-Updated: 2019-12-07 21:46:44
-;;           By: Andy Stewart
+;; Last-Updated: Tue Dec 10 02:03:37 2019 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -545,28 +545,27 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   "Monitor key events during EAF process."
   (ignore-errors
     (let* ((key (this-command-keys-vector))
-           (key-command (symbol-name (key-binding key)))
            (key-desc (key-description key)))
 
       ;; Uncomment for debug.
-      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc eaf--buffer-app-name))
+      ;; (message (format "!!!!! %s %s %s %s" key this-command key-desc eaf--buffer-app-name))
 
       (cond
-        ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
-        ((equal key-desc "<f11>")
-         t)
-        ;; Call function on the Python side if matched key in the keybinding.
-        ((eaf-identify-key-in-app key-command eaf--buffer-app-name)
-         (eaf-call "execute_function" eaf--buffer-id
-                   (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
-        ;; Send key to Python side if key-command is single character key.
-        ((or (equal key-command "self-insert-command")
-             (equal key-command "completion-select-if-within-overlay")
-             (equal key-command "nil")
-             (member key-desc eaf-single-key-list))
-         (eaf-call "send_key" eaf--buffer-id key-desc))
-        (t
-         nil)))))
+       ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
+       ((equal key-desc "<f11>")
+        t)
+       ;; Call function on the Python side if matched key in the keybinding.
+       ((eaf-identify-key-in-app this-command eaf--buffer-app-name)
+        (eaf-call "execute_function" eaf--buffer-id
+                  (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
+       ;; Send key to Python side if this-command is single character key.
+       ((or (member this-command '(self-insert-command
+                                 completion-select-if-within-overlay
+                                 nil))
+            (member key-desc eaf-single-key-list))
+        (eaf-call "send_key" eaf--buffer-id key-desc))
+       (t
+        nil)))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in the EAF Python side.
