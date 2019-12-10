@@ -6,9 +6,9 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
-;; Version: 0.4
-;; Last-Updated: Tue Dec 10 02:03:37 2019 (-0500)
-;;           By: Mingde (Matthew) Zeng
+;; Version: 0.5
+;; Last-Updated: 2019-12-10 23:13:55
+;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -132,9 +132,7 @@ Don't modify this map directly. To bind keys for all apps use
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
   (setq-local bookmark-make-record-function 'eaf--bookmark-make-record)
-  ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
-  ;; To fix interactive command run twice because `eaf-monitor-key-event' runs inside minibuffer and can not handle minibuffer quit signal.
-  (add-hook 'pre-command-hook #'eaf-monitor-key-event nil t))
+  )
 
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
@@ -281,14 +279,14 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   "The extension list of org previewer application."
   :type 'cons)
 
-(defcustom eaf-single-key-list
+(defcustom eaf-capture-keys
   '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
-  "The single key use to send key to EAF app."
+  "Keys should send key event for to python side."
   :type 'cons)
 
 (defcustom eaf-capture-commands
   '(self-insert-command completion-select-if-within-overlay delete-backward-char)
-  "Commands which `eaf-monitor-key-event' should send keys for to python side."
+  "Commands should send key event for to python side."
   :type 'cons)
 
 (defvar eaf-app-binding-alist
@@ -466,9 +464,7 @@ buffer."
 (defun eaf-dummy-function (sym fun key)
   "Define elisp command SYM which can call python function FUN.
 
-FUN is only called when command SYM is not invoked by KEY, thus
-this command does nothing when `eaf-monitor-key-event' has
-already handled it."
+FUN is only called when command SYM is not invoked by KEY."
   (defalias sym (lambda nil
                    "This Lisp function is a placeholder, the actual function will be handled on the Python side.
 
@@ -494,7 +490,9 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                         (define-key map (kbd key) dummy))
                    finally return (prog1 map
                                     (dolist (cmd eaf-capture-commands)
-                                      (define-key map (vector 'remap cmd) 'ignore))
+                                      (define-key map (vector 'remap cmd) 'eaf-send-key))
+                                    (dolist (single-key eaf-capture-keys)
+                                      (define-key map (kbd single-key) 'eaf-send-key))
                                     (set-keymap-parent map eaf-mode-map*))))))
 
 (defun eaf-get-app-bindings (app-name)
@@ -506,7 +504,6 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
-
     (with-current-buffer eaf-buffer
       (eaf-mode)
       ;; copy default value in case user already has bindings there
@@ -602,30 +599,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
              (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
              (message (format "export %s to html" (buffer-file-name))))))))
 
-(defun eaf-monitor-key-event ()
-  "Monitor key events during EAF process."
-  (ignore-errors
-    (let* ((key (this-command-keys-vector))
-           (key-desc (key-description key)))
-
-      ;; Uncomment for debug.
-      ;; (message (format "!!!!! %s %s %s %s" key this-command key-desc eaf--buffer-app-name))
-
-      (cond
-       ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
-       ((equal key-desc "<f11>")
-        t)
-       ;; Call function on the Python side if matched key in the keybinding.
-       ((eaf-identify-key-in-app this-command eaf--buffer-app-name)
-        (eaf-call "execute_function" eaf--buffer-id
-                  (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
-       ;; Send key to Python side if this-command is single character key.
-       ((or (not this-command) ; this should be impossible...?
-            (eq this-command 'ignore)
-            (member key-desc eaf-single-key-list))
-        (eaf-call "send_key" eaf--buffer-id key-desc))
-       (t
-        nil)))))
+(defun eaf-send-key ()
+  (interactive)
+  (with-current-buffer (current-buffer)
+    (eaf-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector)))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in the EAF Python side.
