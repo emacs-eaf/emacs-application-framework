@@ -272,4 +272,4 @@ class Buffer(QGraphicsScene):
         pass
 
     def get_bookmark(self):
-        pass
+        return ""
