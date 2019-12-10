@@ -304,8 +304,8 @@ Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
 
-(defvar eaf--browser-current-url nil)
-(defvar-local eaf--full-title nil)
+(defvar eaf--bookmark-link nil)
+(defvar-local eaf--bookmark-title nil)
 
 (defun eaf--bookmark-make-record ()
   "Create a eaf bookmark.
@@ -313,15 +313,15 @@ keybinding variable to this list.")
 The bookmark will try to recreate eaf buffer session.
 For now only eaf browser app is supported."
   (cond ((equal eaf--buffer-app-name "browser")
-         ;; set `eaf--browser-current-url'
+         ;; set `eaf--bookmark-link'
          (eaf-call "execute_function" eaf--buffer-id
                    "set_bookmark")
          (let ((bookmark `((handler . eaf--bookmark-restore)
                            (eaf-app . "browser")
-                           (defaults . ,(list eaf--full-title))
+                           (defaults . ,(list eaf--bookmark-title))
                            ;; not a filename but this shows url in bookmark-list
                            ;; which is nice
-                           (filename . ,eaf--browser-current-url))))
+                           (filename . ,eaf--bookmark-link))))
            bookmark))))
 
 (defun eaf--bookmark-restore (bookmark)
@@ -342,8 +342,8 @@ For now only eaf browser app is supported."
          (cand (completing-read "Eaf bookmark: "
                                 bookmarks
                                 nil nil nil nil
-                                (unless (member eaf--full-title names)
-                                  (format "+%s" eaf--full-title)))))
+                                (unless (member eaf--bookmark-title names)
+                                  (format "+%s" eaf--bookmark-title)))))
     (cond ((member cand names)
            (bookmark-jump cand))
           (t
@@ -744,7 +744,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (when (and
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
-              (setq-local eaf--full-title title)
+              (setq-local eaf--bookmark-title title)
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t))))))))
 
