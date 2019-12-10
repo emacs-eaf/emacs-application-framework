@@ -342,7 +342,8 @@ For now only eaf browser app is supported."
          (cand (completing-read "Eaf bookmark: "
                                 bookmarks
                                 nil nil nil nil
-                                (unless (member eaf--bookmark-title names)
+                                (unless (or (member eaf--bookmark-title names)
+                                            (not (derived-mode-p 'eaf-mode)))
                                   (format "+%s" eaf--bookmark-title)))))
     (cond ((member cand names)
            (bookmark-jump cand))
