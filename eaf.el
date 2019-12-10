@@ -130,9 +130,11 @@ Don't modify this map directly. To bind keys for all apps use
   ;; which may not want this, introduce eaf user option?
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
+  (setq-local bookmark-make-record-function 'eaf--bookmark-make-record)
   ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
   ;; To fix interactive command run twice because `eaf-monitor-key-event' runs inside minibuffer and can not handle minibuffer quit signal.
   (add-hook 'pre-command-hook #'eaf-monitor-key-event nil t))
+
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -300,6 +302,33 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
 Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
+
+(defvar eaf--browser-current-url nil)
+(defvar eaf--browser-full-title nil)
+
+(defun eaf--bookmark-make-record ()
+  "Create a eaf bookmark.
+
+The bookmark will try to recreate eaf buffer session.
+For now only eaf browser app is supported."
+  (cond ((equal eaf--buffer-app-name "browser")
+         ;; set `eaf--browser-current-url'
+         (eaf-call "execute_function" eaf--buffer-id
+                   "set_url_for_bookmark")
+         (let ((bookmark `((handler . eaf--bookmark-restore)
+                           (app . "browser")
+                           (defaults . ,(list eaf--browser-full-title))
+                           ;; not a filename but this shows url in bookmark-list
+                           ;; which is nice
+                           (filename . ,eaf--browser-current-url))))
+           bookmark))))
+
+(defun eaf--bookmark-restore (bookmark)
+  "Restore eaf buffer according to BOOKMARK."
+  (let ((app (cdr (assq 'app bookmark))))
+    (cond ((equal app "browser")
+           (eaf-open-url (cdr (assq 'filename bookmark)))))))
+
 (defun eaf-call (method &rest args)
   (apply #'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -453,6 +482,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
+
     (with-current-buffer eaf-buffer
       (eaf-mode)
       ;; copy default value in case user already has bindings there
@@ -687,6 +717,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (when (and
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
+              (setq eaf--browser-full-title title)
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t))))))))
 
