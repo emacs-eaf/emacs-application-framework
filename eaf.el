@@ -305,7 +305,7 @@ keybinding variable to this list.")
 
 
 (defvar eaf--browser-current-url nil)
-(defvar eaf--browser-full-title nil)
+(defvar-local eaf--browser-full-title nil)
 
 (defun eaf--bookmark-make-record ()
   "Create a eaf bookmark.
@@ -744,7 +744,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (when (and
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
-              (setq eaf--browser-full-title title)
+              (setq-local eaf--browser-full-title title)
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t))))))))
 
