@@ -316,7 +316,7 @@ For now only eaf browser app is supported."
          (eaf-call "execute_function" eaf--buffer-id
                    "set_url_for_bookmark")
          (let ((bookmark `((handler . eaf--bookmark-restore)
-                           (app . "browser")
+                           (eaf-app . "browser")
                            (defaults . ,(list eaf--browser-full-title))
                            ;; not a filename but this shows url in bookmark-list
                            ;; which is nice
@@ -325,7 +325,7 @@ For now only eaf browser app is supported."
 
 (defun eaf--bookmark-restore (bookmark)
   "Restore eaf buffer according to BOOKMARK."
-  (let ((app (cdr (assq 'app bookmark))))
+  (let ((app (cdr (assq 'eaf-app bookmark))))
     (cond ((equal app "browser")
            (eaf-open-url (cdr (assq 'filename bookmark)))))))
 
