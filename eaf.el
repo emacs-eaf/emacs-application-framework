@@ -97,7 +97,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") 'eaf-describe-bindings)
     (define-key map [remap describe-bindings] 'eaf-describe-bindings)
-    (define-key map (kbd "C-c b") 'eaf-browser-open-bookmark)
+    (define-key map (kbd "C-c b") 'eaf-open-bookmark)
     map)
   "Keymap for default bindings available in all apps.")
 
@@ -305,7 +305,7 @@ keybinding variable to this list.")
 
 
 (defvar eaf--browser-current-url nil)
-(defvar-local eaf--browser-full-title nil)
+(defvar-local eaf--full-title nil)
 
 (defun eaf--bookmark-make-record ()
   "Create a eaf bookmark.
@@ -318,7 +318,7 @@ For now only eaf browser app is supported."
                    "set_url_for_bookmark")
          (let ((bookmark `((handler . eaf--bookmark-restore)
                            (eaf-app . "browser")
-                           (defaults . ,(list eaf--browser-full-title))
+                           (defaults . ,(list eaf--full-title))
                            ;; not a filename but this shows url in bookmark-list
                            ;; which is nice
                            (filename . ,eaf--browser-current-url))))
@@ -330,7 +330,7 @@ For now only eaf browser app is supported."
     (cond ((equal app "browser")
            (eaf-open-url (cdr (assq 'filename bookmark)))))))
 
-(defun eaf-browser-open-bookmark ()
+(defun eaf-open-bookmark ()
   "Command to open or create eaf bookmarks with completion."
   (interactive)
   (bookmark-maybe-load-default-file)
@@ -342,8 +342,8 @@ For now only eaf browser app is supported."
          (cand (completing-read "Eaf bookmark: "
                                 bookmarks
                                 nil nil nil nil
-                                (unless (member eaf--browser-full-title names)
-                                  (format "+%s" eaf--browser-full-title)))))
+                                (unless (member eaf--full-title names)
+                                  (format "+%s" eaf--full-title)))))
     (cond ((member cand names)
            (bookmark-jump cand))
           (t
@@ -744,7 +744,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (when (and
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
-              (setq-local eaf--browser-full-title title)
+              (setq-local eaf--full-title title)
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t))))))))
 
