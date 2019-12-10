@@ -802,37 +802,38 @@ When called interactively, URL accepts a file that can be opened by EAF."
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
-    (setq extension-name (file-name-extension url))
-    (cond ((member extension-name eaf-pdf-extension-list)
-           (setq app-name "pdf-viewer"))
-          ((member extension-name eaf-markdown-extension-list)
-           ;; Try get user's github token if `eaf-grip-token' is nil.
-           (if eaf-grip-token
-               (setq arguments eaf-grip-token)
-             (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-           ;; Split window to show file and previewer.
-           (eaf-split-preview-windows)
-           (setq app-name "markdown-previewer"))
-          ((member extension-name eaf-image-extension-list)
-           (setq app-name "image-viewer"))
-          ((member extension-name eaf-video-extension-list)
-           (setq app-name "video-player"))
-          ((member extension-name eaf-browser-extension-list)
-           (setq url (concat "file://" url))
-           (setq app-name "browser"))
-          ((member extension-name eaf-org-extension-list)
-           ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
-           (save-excursion
-             (find-file url)
-             (with-current-buffer (buffer-name)
-               (org-html-export-to-html)))
-           ;; Add file name to `eaf-org-file-list' after command `find-file'.
+    (let* ((extension-name (file-name-extension url)))
+      (setq app-name
+            (cond ((member extension-name eaf-pdf-extension-list)
+                   "pdf-viewer")
+                  ((member extension-name eaf-markdown-extension-list)
+                   ;; Try get user's github token if `eaf-grip-token' is nil.
+                   (setq arguments
+                         (or eaf-grip-token
+                             (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
+                   ;; Split window to show file and previewer.
+                   (eaf-split-preview-windows url)
+                   "markdown-previewer")
+                  ((member extension-name eaf-image-extension-list)
+                   "image-viewer")
+                  ((member extension-name eaf-video-extension-list)
+                   "video-player")
+                  ((member extension-name eaf-browser-extension-list)
+                   (setq url (concat "file://" url))
+                   "browser")
+                  ((member extension-name eaf-org-extension-list)
+                   ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
+                   (save-excursion
+                     (find-file url)
+                     (with-current-buffer (buffer-name) ;FIXME: Why?
+                       (org-html-export-to-html)))
+                   ;; Add file name to `eaf-org-file-list' after command `find-file'.
 
-           (unless (member url eaf-org-file-list)
-             (push url eaf-org-file-list))
-           ;; Split window to show file and previewer.
-           (eaf-split-preview-windows)
-           (setq app-name "org-previewer"))))
+                   (unless (member url eaf-org-file-list)
+                     (push url eaf-org-file-list))
+                   ;; Split window to show file and previewer.
+                   (eaf-split-preview-windows url)
+                   "org-previewer")))))
   (unless arguments (setq arguments ""))
   ;; Now that app-name should hopefully be set
   (if app-name
@@ -860,14 +861,16 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (eaf-start-process)
         (message (format "Opening %s with EAF-%s..." url app-name)))
     ;; Output something to user if app-name is empty string.
-    (if (or (string-prefix-p "/" url)
-            (string-prefix-p "~" url))
-        (if (not (file-exists-p url))
-            (message (format "EAF: %s does not exist." url))
-          (message (format "EAF doesn't know how to open %s." url)))
-      (message (format "EAF doesn't know how to open %s." url)))))
+    (message (cond
+              ((not (or (string-prefix-p "/" url)
+                        (string-prefix-p "~" url)))
+               "EAF doesn't know how to open %s.")
+              ((file-exists-p url)
+               "EAF doesn't know how to open %s.")
+              (t "EAF: %s does not exist."))
+             url)))
 
-(defun eaf-split-preview-windows ()
+(defun eaf-split-preview-windows (url)
   (delete-other-windows)
   (find-file url)
   (split-window-horizontally)
