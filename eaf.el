@@ -329,6 +329,25 @@ For now only eaf browser app is supported."
     (cond ((equal app "browser")
            (eaf-open-url (cdr (assq 'filename bookmark)))))))
 
+(defun eaf-browser-open-bookmark ()
+  "Command to open or create eaf bookmarks with completion."
+  (interactive)
+  (bookmark-maybe-load-default-file)
+  (let* ((bookmarks (cl-remove-if-not
+                     (lambda (entry)
+                       (bookmark-prop-get entry 'eaf-app))
+                     bookmark-alist))
+         (names (mapcar #'car bookmarks))
+         (cand (completing-read "Eaf bookmark: " bookmarks)))
+    (cond ((member cand names)
+           (bookmark-jump cand))
+          (t
+           (unless (derived-mode-p 'eaf-mode)
+             (user-error "Not in an eaf buffer"))
+           ;; create new one
+           (bookmark-set cand)))))
+
+
 (defun eaf-call (method &rest args)
   (apply #'dbus-call-method
          :session                   ; use the session (not system) bus
