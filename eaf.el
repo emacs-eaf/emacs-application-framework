@@ -491,7 +491,11 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation))
                          )
-                    (add-to-list 'view-infos (format "%s:%s:%s:%s:%s:%s" eaf--buffer-id (eaf-get-emacs-xid frame) x y w h))
+                    (push (format "%s:%s:%s:%s:%s:%s"
+                                  eaf--buffer-id
+                                  (eaf-get-emacs-xid frame)
+                                  x y w h)
+                          view-infos)
                     ))))))
       ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
       ;; So I package two-dimensional list in string, then unpack on server side. ;)
@@ -629,7 +633,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
  #'eaf-eval-in-emacs)
 
 (defun eaf-eval-in-emacs (elisp-code-string)
-  (eval (read elisp-code-string)))
+  (eval (read elisp-code-string) 'lexical))
 
 (defun eaf-create-new-browser-buffer (new-window-buffer-id)
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
@@ -754,6 +758,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
       (switch-to-buffer eaf-name)
       (message buffer-result))))
 
+;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
   "Open EAF browser application given a URL and ARGUMENTS."
   (interactive "MEAF Browser - Enter URL: ")
@@ -768,28 +773,34 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
         (eaf-open url "browser" arguments))
     (message (format "EAF: %s is an invalid URL." url))))
 
-(defalias 'eaf-open-url 'eaf-open-browser)
+;;;###autoload
+(defalias 'eaf-open-url #'eaf-open-browser)
 
+;;;###autoload
 (defun eaf-open-demo ()
   "Open EAF demo screen to verify that EAF is working properly."
   (interactive)
   (eaf-open "eaf-demo" "demo"))
 
+;;;###autoload
 (defun eaf-open-camera ()
   "Open EAF camera application."
   (interactive)
   (eaf-open "eaf-camera" "camera"))
 
+;;;###autoload
 (defun eaf-open-terminal ()
   "Open EAF terminal application."
   (interactive)
   (eaf-open "eaf-terminal" "terminal"))
 
+;;;###autoload
 (defun eaf-open-qutebrowser ()
   "Open EAF Qutebrowser application."
   (interactive)
   (eaf-open "eaf-qutebrowser" "qutebrowser"))
 
+;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
 
