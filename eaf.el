@@ -315,7 +315,7 @@ For now only eaf browser app is supported."
   (cond ((equal eaf--buffer-app-name "browser")
          ;; set `eaf--browser-current-url'
          (eaf-call "execute_function" eaf--buffer-id
-                   "set_url_for_bookmark")
+                   "set_bookmark")
          (let ((bookmark `((handler . eaf--bookmark-restore)
                            (eaf-app . "browser")
                            (defaults . ,(list eaf--full-title))
