@@ -97,6 +97,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") 'eaf-describe-bindings)
     (define-key map [remap describe-bindings] 'eaf-describe-bindings)
+    (define-key map (kbd "C-c b") 'eaf-open-bookmark)
     map)
   "Keymap for default bindings available in all apps.")
 
@@ -130,9 +131,11 @@ Don't modify this map directly. To bind keys for all apps use
   ;; which may not want this, introduce eaf user option?
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
+  (setq-local bookmark-make-record-function 'eaf--bookmark-make-record)
   ;; Fix #110 , make `eaf-monitor-key-event' buffer locally to pre-command-hook of the eaf-mode buffer.
   ;; To fix interactive command run twice because `eaf-monitor-key-event' runs inside minibuffer and can not handle minibuffer quit signal.
   (add-hook 'pre-command-hook #'eaf-monitor-key-event nil t))
+
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -300,6 +303,56 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
 Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
+
+(defvar-local eaf--bookmark-title nil)
+
+(defun eaf--bookmark-make-record ()
+  "Create a eaf bookmark.
+
+The bookmark will try to recreate eaf buffer session.
+For now only eaf browser app is supported."
+  (cond ((equal eaf--buffer-app-name "browser")
+         `((handler . eaf--bookmark-restore)
+           (eaf-app . "browser")
+           (defaults . ,(list eaf--bookmark-title))
+           ;; not a filename but this shows url in bookmark-list
+           ;; which is nice
+           (filename . ,(eaf-call "call_function"
+                                  eaf--buffer-id "get_bookmark"))))))
+
+(defun eaf--bookmark-restore (bookmark)
+  "Restore eaf buffer according to BOOKMARK."
+  (let ((app (cdr (assq 'eaf-app bookmark))))
+    (cond ((equal app "browser")
+           (eaf-open-url (cdr (assq 'filename bookmark)))))))
+
+(defun eaf-open-bookmark ()
+  "Command to open or create eaf bookmarks with completion."
+  (interactive)
+  (bookmark-maybe-load-default-file)
+  (let* ((bookmarks (cl-remove-if-not
+                     (lambda (entry)
+                       (bookmark-prop-get entry 'eaf-app))
+                     bookmark-alist))
+         (names (mapcar #'car bookmarks))
+         (cand (completing-read "Eaf bookmark: "
+                                bookmarks
+                                nil nil nil nil
+                                (unless (or (member eaf--bookmark-title names)
+                                            (not (derived-mode-p 'eaf-mode)))
+                                  (format "+%s" eaf--bookmark-title)))))
+    (cond ((member cand names)
+           (bookmark-jump cand))
+          (t
+           (unless (derived-mode-p 'eaf-mode)
+             (user-error "Not in an eaf buffer"))
+
+           (when (string-match "\\`\\+" cand)
+             (setq cand (replace-match "" nil nil cand)))
+           ;; create new one
+           (bookmark-set cand)))))
+
+
 (defun eaf-call (method &rest args)
   (apply #'dbus-call-method
          :session                   ; use the session (not system) bus
@@ -453,6 +506,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
+
     (with-current-buffer eaf-buffer
       (eaf-mode)
       ;; copy default value in case user already has bindings there
@@ -687,6 +741,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (when (and
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
+              (setq-local eaf--bookmark-title title)
               (rename-buffer (truncate-string-to-width title eaf-title-length))
               (throw 'find-buffer t))))))))
 
