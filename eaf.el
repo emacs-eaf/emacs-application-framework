@@ -339,12 +339,19 @@ For now only eaf browser app is supported."
                        (bookmark-prop-get entry 'eaf-app))
                      bookmark-alist))
          (names (mapcar #'car bookmarks))
-         (cand (completing-read "Eaf bookmark: " bookmarks)))
+         (cand (completing-read "Eaf bookmark: "
+                                bookmarks
+                                nil nil nil nil
+                                (unless (member eaf--browser-full-title names)
+                                  (format "+%s" eaf--browser-full-title)))))
     (cond ((member cand names)
            (bookmark-jump cand))
           (t
            (unless (derived-mode-p 'eaf-mode)
              (user-error "Not in an eaf buffer"))
+
+           (when (string-match "\\`\\+" cand)
+             (setq cand (replace-match "" nil nil cand)))
            ;; create new one
            (bookmark-set cand)))))
 
