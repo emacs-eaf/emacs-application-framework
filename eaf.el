@@ -131,9 +131,7 @@ Don't modify this map directly. To bind keys for all apps use
   ;; which may not want this, introduce eaf user option?
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
-  (setq-local bookmark-make-record-function 'eaf--bookmark-make-record)
-  )
-
+  (setq-local bookmark-make-record-function 'eaf--bookmark-make-record))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -313,8 +311,12 @@ For now only eaf browser app is supported."
          `((handler . eaf--bookmark-restore)
            (eaf-app . "browser")
            (defaults . ,(list eaf--bookmark-title))
-           ;; not a filename but this shows url in bookmark-list
-           ;; which is nice
+           (filename . ,(eaf-call "call_function"
+                                  eaf--buffer-id "get_bookmark"))))
+        ((equal eaf--buffer-app-name "pdf-viewer")
+         `((handler . eaf--bookmark-restore)
+           (eaf-app . "pdf-viewer")
+           (defaults . ,(list eaf--bookmark-title))
            (filename . ,(eaf-call "call_function"
                                   eaf--buffer-id "get_bookmark"))))))
 
@@ -322,7 +324,9 @@ For now only eaf browser app is supported."
   "Restore eaf buffer according to BOOKMARK."
   (let ((app (cdr (assq 'eaf-app bookmark))))
     (cond ((equal app "browser")
-           (eaf-open-url (cdr (assq 'filename bookmark)))))))
+           (eaf-open-url (cdr (assq 'filename bookmark))))
+          ((equal app "pdf-viewer")
+           (eaf-open (cdr (assq 'filename bookmark)))))))
 
 (defun eaf-open-bookmark ()
   "Command to open or create eaf bookmarks with completion."
@@ -349,7 +353,6 @@ For now only eaf browser app is supported."
              (setq cand (replace-match "" nil nil cand)))
            ;; create new one
            (bookmark-set cand)))))
-
 
 (defun eaf-call (method &rest args)
   (apply #'dbus-call-method
