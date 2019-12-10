@@ -271,5 +271,5 @@ class Buffer(QGraphicsScene):
     def update_settings(self):
         pass
 
-    def set_bookmark(self):
+    def get_bookmark(self):
         pass

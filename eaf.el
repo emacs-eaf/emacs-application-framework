@@ -304,7 +304,6 @@ Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
 
-(defvar eaf--bookmark-link nil)
 (defvar-local eaf--bookmark-title nil)
 
 (defun eaf--bookmark-make-record ()
@@ -313,15 +312,13 @@ keybinding variable to this list.")
 The bookmark will try to recreate eaf buffer session.
 For now only eaf browser app is supported."
   (cond ((equal eaf--buffer-app-name "browser")
-         ;; set `eaf--bookmark-link'
-         (eaf-call "execute_function" eaf--buffer-id
-                   "set_bookmark")
          (let ((bookmark `((handler . eaf--bookmark-restore)
                            (eaf-app . "browser")
                            (defaults . ,(list eaf--bookmark-title))
                            ;; not a filename but this shows url in bookmark-list
                            ;; which is nice
-                           (filename . ,eaf--bookmark-link))))
+                           (filename . ,(eaf-call "call_function"
+                                                  eaf--buffer-id "get_bookmark")))))
            bookmark))))
 
 (defun eaf--bookmark-restore (bookmark)

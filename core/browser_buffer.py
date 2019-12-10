@@ -91,8 +91,7 @@ class BrowserBuffer(Buffer):
     def scroll_to_bottom(self):
         self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
 
-    def set_bookmark(self):
-        url = self.buffer_widget.web_page.executeJavaScript("window.location.href;")
-        self.buffer_widget.set_emacs_var.emit("eaf--browser-current-url", url)
+    def get_bookmark(self):
+        return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
 
 
