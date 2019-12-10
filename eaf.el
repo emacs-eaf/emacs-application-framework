@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.4
-;; Last-Updated: 2019-12-07 21:46:44
-;;           By: Andy Stewart
+;; Last-Updated: Tue Dec 10 02:03:37 2019 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -283,6 +283,11 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   "The single key use to send key to EAF app."
   :type 'cons)
 
+(defcustom eaf-capture-commands
+  '(self-insert-command completion-select-if-within-overlay delete-backward-char)
+  "Commands which `eaf-monitor-key-event' should send keys for to python side."
+  :type 'cons)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -435,6 +440,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
                    finally return (prog1 map
+                                    (dolist (cmd eaf-capture-commands)
+                                      (define-key map (vector 'remap cmd) 'ignore))
                                     (set-keymap-parent map eaf-mode-map*))))))
 
 (defun eaf-get-app-bindings (app-name)
@@ -545,28 +552,26 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   "Monitor key events during EAF process."
   (ignore-errors
     (let* ((key (this-command-keys-vector))
-           (key-command (symbol-name (key-binding key)))
            (key-desc (key-description key)))
 
       ;; Uncomment for debug.
-      ;; (message (format "!!!!! %s %s %s %s %s" key key-command key-desc eaf--buffer-app-name))
+      ;; (message (format "!!!!! %s %s %s %s" key this-command key-desc eaf--buffer-app-name))
 
       (cond
-        ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
-        ((equal key-desc "<f11>")
-         t)
-        ;; Call function on the Python side if matched key in the keybinding.
-        ((eaf-identify-key-in-app key-command eaf--buffer-app-name)
-         (eaf-call "execute_function" eaf--buffer-id
-                   (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
-        ;; Send key to Python side if key-command is single character key.
-        ((or (equal key-command "self-insert-command")
-             (equal key-command "completion-select-if-within-overlay")
-             (equal key-command "nil")
-             (member key-desc eaf-single-key-list))
-         (eaf-call "send_key" eaf--buffer-id key-desc))
-        (t
-         nil)))))
+       ;; Fix #51 , don't handle F11 to make emacs toggle frame fullscreen status successfully.
+       ((equal key-desc "<f11>")
+        t)
+       ;; Call function on the Python side if matched key in the keybinding.
+       ((eaf-identify-key-in-app this-command eaf--buffer-app-name)
+        (eaf-call "execute_function" eaf--buffer-id
+                  (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
+       ;; Send key to Python side if this-command is single character key.
+       ((or (not this-command) ; this should be impossible...?
+            (eq this-command 'ignore)
+            (member key-desc eaf-single-key-list))
+        (eaf-call "send_key" eaf--buffer-id key-desc))
+       (t
+        nil)))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in the EAF Python side.
@@ -708,14 +713,14 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
  #'eaf-translate-text)
 
 (defun eaf-read-string (interactive-string)
-  "Like `read-string', but return nil if user execute `keyboard-quit' when input."
+  "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
   (condition-case nil (read-string interactive-string) (quit nil)))
 
-(defun eaf-input-message (eaf--buffer-id interactive-string callback-type)
+(defun eaf-input-message (input-buffer-id interactive-string callback-type)
+  "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-string interactive-string)))
     (when input-message
-      (eaf-call "handle_input_message" eaf--buffer-id callback-type input-message)
-      )))
+      (eaf-call "handle_input_message" input-buffer-id callback-type input-message))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -809,37 +814,38 @@ When called interactively, URL accepts a file that can be opened by EAF."
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
-    (setq extension-name (file-name-extension url))
-    (cond ((member extension-name eaf-pdf-extension-list)
-           (setq app-name "pdf-viewer"))
-          ((member extension-name eaf-markdown-extension-list)
-           ;; Try get user's github token if `eaf-grip-token' is nil.
-           (if eaf-grip-token
-               (setq arguments eaf-grip-token)
-             (setq arguments (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-           ;; Split window to show file and previewer.
-           (eaf-split-preview-windows)
-           (setq app-name "markdown-previewer"))
-          ((member extension-name eaf-image-extension-list)
-           (setq app-name "image-viewer"))
-          ((member extension-name eaf-video-extension-list)
-           (setq app-name "video-player"))
-          ((member extension-name eaf-browser-extension-list)
-           (setq url (concat "file://" url))
-           (setq app-name "browser"))
-          ((member extension-name eaf-org-extension-list)
-           ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
-           (save-excursion
-             (find-file url)
-             (with-current-buffer (buffer-name)
-               (org-html-export-to-html)))
-           ;; Add file name to `eaf-org-file-list' after command `find-file'.
+    (let* ((extension-name (file-name-extension url)))
+      (setq app-name
+            (cond ((member extension-name eaf-pdf-extension-list)
+                   "pdf-viewer")
+                  ((member extension-name eaf-markdown-extension-list)
+                   ;; Try get user's github token if `eaf-grip-token' is nil.
+                   (setq arguments
+                         (or eaf-grip-token
+                             (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
+                   ;; Split window to show file and previewer.
+                   (eaf-split-preview-windows url)
+                   "markdown-previewer")
+                  ((member extension-name eaf-image-extension-list)
+                   "image-viewer")
+                  ((member extension-name eaf-video-extension-list)
+                   "video-player")
+                  ((member extension-name eaf-browser-extension-list)
+                   (setq url (concat "file://" url))
+                   "browser")
+                  ((member extension-name eaf-org-extension-list)
+                   ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
+                   (save-excursion
+                     (find-file url)
+                     (with-current-buffer (buffer-name) ;FIXME: Why?
+                       (org-html-export-to-html)))
+                   ;; Add file name to `eaf-org-file-list' after command `find-file'.
 
-           (unless (member url eaf-org-file-list)
-             (push url eaf-org-file-list))
-           ;; Split window to show file and previewer.
-           (eaf-split-preview-windows)
-           (setq app-name "org-previewer"))))
+                   (unless (member url eaf-org-file-list)
+                     (push url eaf-org-file-list))
+                   ;; Split window to show file and previewer.
+                   (eaf-split-preview-windows url)
+                   "org-previewer")))))
   (unless arguments (setq arguments ""))
   ;; Now that app-name should hopefully be set
   (if app-name
@@ -867,14 +873,16 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (eaf-start-process)
         (message "Opening %s with EAF-%s..." url app-name))
     ;; Output something to user if app-name is empty string.
-    (if (or (string-prefix-p "/" url)
-            (string-prefix-p "~" url))
-        (if (not (file-exists-p url))
-            (message (format "EAF: %s does not exist." url))
-          (message (format "EAF doesn't know how to open %s." url)))
-      (message (format "EAF doesn't know how to open %s." url)))))
+    (message (cond
+              ((not (or (string-prefix-p "/" url)
+                        (string-prefix-p "~" url)))
+               "EAF doesn't know how to open %s.")
+              ((file-exists-p url)
+               "EAF doesn't know how to open %s.")
+              (t "EAF: %s does not exist."))
+             url)))
 
-(defun eaf-split-preview-windows ()
+(defun eaf-split-preview-windows (url)
   (delete-other-windows)
   (find-file url)
   (split-window-horizontally)
@@ -943,48 +951,49 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
     (format "%s:%s:%s:%s:%s" eaf--buffer-id x y w h)))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defadvice scroll-other-window (around eaf-scroll-up-or-next-page activate)
+
+;; FIXME: In the code below we should use `save-selected-window' (or even
+;; better `with-selected-window') rather than (other-window +1) followed by
+;; (other-window -1) since this is not always a no-op.
+
+(advice-add 'scroll-other-window :around #'eaf--scroll-other-window)
+(defun eaf--scroll-other-window (orig-fun &optional arg &rest args)
   "When next buffer is `eaf-mode', do `eaf-scroll-up-or-next-page'."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
-      (let ((arg (ad-get-arg 0)))
-        (if (null arg)
-            (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
-          (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line"))
+      (progn
+        (eaf-call "scroll_buffer" (eaf-get-view-info) "up"
+                  (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
-    ad-do-it))
+    (apply orig-fun arg args)))
 
-(defadvice scroll-other-window-down (around eaf-scroll-down-or-previous-page activate)
+(advice-add 'scroll-other-window-down :around #'eaf--scroll-other-window-down)
+(defun eaf--scroll-other-window-down (orig-fun &optional arg &rest args)
   "When next buffer is `eaf-mode', do `eaf-scroll-down-or-previous-page'."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
-      (let ((arg (ad-get-arg 0)))
-        (if (null arg)
-            (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
-          (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line"))
+      (progn
+        (eaf-call "scroll_buffer" (eaf-get-view-info) "down"
+                  (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
-    ad-do-it))
+    (apply orig-fun arg args)))
 
-(defadvice watch-other-window-internal (around eaf-watch-other-window activate)
+(advice-add 'watch-other-window-internal :around
+            #'eaf--watch-other-window-internal)
+(defun eaf--watch-other-window-internal (orig-fun &optional direction line
+                                                  &rest args)
   "When next buffer is `eaf-mode', do `eaf-watch-other-window'."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
-      (let ((direction (ad-get-arg 0))
-            (line (ad-get-arg 1)))
-        (if (string-equal direction "up")
-            (if (null line)
-                (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "page")
-              (eaf-call "scroll_buffer" (eaf-get-view-info) "up" "line")
-              )
-          (if (null line)
-              (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "page")
-            (eaf-call "scroll_buffer" (eaf-get-view-info) "down" "line")
-            ))
+      (progn
+        (eaf-call "scroll_buffer" (eaf-get-view-info)
+                  (if (string-equal direction "up") "up" "down")
+                  (if line "line" "page"))
         (other-window -1))
     (other-window -1)
-    ad-do-it))
+    (apply orig-fun direction line args)))
 
 (provide 'eaf)
 
