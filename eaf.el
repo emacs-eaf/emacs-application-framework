@@ -283,6 +283,11 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   "The single key use to send key to EAF app."
   :type 'cons)
 
+(defcustom eaf-capture-commands
+  '(self-insert-command completion-select-if-within-overlay delete-backward-char)
+  "Commands which `eaf-monitor-key-event' should send keys for to python side."
+  :type 'cons)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -435,6 +440,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
                    finally return (prog1 map
+                                    (dolist (cmd eaf-capture-commands)
+                                      (define-key map (vector 'remap cmd) 'ignore))
                                     (set-keymap-parent map eaf-mode-map*))))))
 
 (defun eaf-get-app-bindings (app-name)
@@ -559,9 +566,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
         (eaf-call "execute_function" eaf--buffer-id
                   (cdr (assoc key-desc (eaf-get-app-bindings eaf--buffer-app-name)))))
        ;; Send key to Python side if this-command is single character key.
-       ((or (member this-command '(self-insert-command
-                                 completion-select-if-within-overlay
-                                 nil))
+       ((or (not this-command) ; this should be impossible...?
+            (eq this-command 'ignore)
             (member key-desc eaf-single-key-list))
         (eaf-call "send_key" eaf--buffer-id key-desc))
        (t
