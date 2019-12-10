@@ -236,6 +236,23 @@ self.emacs_var_dict["eaf-camera-save-path"]
 
 Above is an example of ```eaf-camera-save-path```, you can customize any variable on elisp side actually, don't need modify python code to customize EAF application!
 
+### Call Python method and store function result to temp Elisp variable
+
+In EAF buffer have interface ```get_bookmark```
+
+```Python
+def get_bookmark(self):
+    return ""
+```
+
+At Elisp side, we can use below code call Python method and store function result to Elisp variable:
+
+```Elisp
+(setq temp-var (eaf-call "call_function" eaf--buffer-id "get_bookmark"))
+```
+
+Once you understand principle, you can define your own interface function in core/buffer.py , then use ```call_function``` method on Elisp side to fetch Python function result, don't need define temp elisp variable everywhere.
+
 ### Update settings at Python side along with customize option change at Elisp side.
 Once you change customize option by ```eaf-setq```, everytime EAF buffer is created, AppBuffer's interface ```update_settings``` will execute.
 
