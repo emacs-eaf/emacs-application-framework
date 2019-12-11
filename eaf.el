@@ -840,6 +840,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "FOpen with EAF: ")
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
+    (recentf-add-file url)
     (setq url (expand-file-name url))
     (let* ((extension-name (file-name-extension url)))
       (setq app-name
