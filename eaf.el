@@ -790,10 +790,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (eaf-call "new_buffer"
                             eaf--buffer-id url app-name arguments))))
     (cond ((equal buffer-result "")
-           (let ((display-fun (or (cdr (assoc app-name
-                                              eaf-app-display-function-alist))
-                                  #'switch-to-buffer)))
-             (funcall display-fun buffer)))
+           (eaf--display-app-buffer buffer))
           (t
            ;; Kill buffer and show error message from python server.
            (kill-buffer buffer)
@@ -916,10 +913,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
             ;; Switch to exists buffer,
             ;; if no match buffer found, call `eaf-open-internal'.
             (if exists-eaf-buffer
-                (let ((display-fun (or (cdr (assoc app-name
-                                                   eaf-app-display-function-alist))
-                                       #'switch-to-buffer)))
-                  (funcall display-fun exists-eaf-buffer))
+                (eaf--display-app-buffer app-name exists-eaf-buffer)
               (eaf-open-internal url app-name arguments)))
         ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
         (setq eaf-first-start-url url)
@@ -936,6 +930,12 @@ When called interactively, URL accepts a file that can be opened by EAF."
                "EAF doesn't know how to open %s.")
               (t "EAF: %s does not exist."))
              url)))
+
+(defun eaf--display-app-buffer (app-name buffer)
+  (let ((display-fun (or (cdr (assoc app-name
+                                     eaf-app-display-function-alist))
+                         #'switch-to-buffer)))
+    (funcall display-fun buffer)))
 
 (defun eaf-split-preview-windows (url)
   (delete-other-windows)
