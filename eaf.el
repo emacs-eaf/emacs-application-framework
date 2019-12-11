@@ -90,7 +90,7 @@
   :group 'applications)
 
 (defcustom eaf-mode-hook '()
-  "Eaf mode hook."
+  "EAF mode hook."
   :type 'hook)
 
 (defvar eaf-mode-map*
@@ -109,14 +109,14 @@ Don't modify this map directly. To bind keys for all apps use
 `eaf-bind-key'.")
 
 (defun eaf-describe-bindings ()
-  "Like `describe-bindings' for eaf buffers."
+  "Like `describe-bindings' for EAF buffers."
   (interactive)
   (let ((emulation-mode-map-alists nil)
         (eaf-mode-map (current-local-map)))
     (call-interactively 'describe-mode)))
 
 (defvar-local eaf--buffer-id nil
-  "Internal id used by eaf app.")
+  "Internal id used by EAF app.")
 
 (defvar-local eaf--buffer-url nil
   "The buffer url.")
@@ -128,10 +128,10 @@ Don't modify this map directly. To bind keys for all apps use
   "Major mode for Emacs Application Framework."
   ;; Split window combinations proportionally.
   ;; FIXME: this changes this setting globally for the user
-  ;; which may not want this, introduce eaf user option?
+  ;; which may not want this, introduce EAF user option?
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
-  (setq-local bookmark-make-record-function 'eaf--bookmark-make-record))
+  (setq-local bookmark-make-record-function #'eaf--bookmark-make-record))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -164,7 +164,7 @@ Don't modify this map directly. To bind keys for all apps use
 by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
-  "Name of eaf buffer."
+  "Name of EAF buffer."
   :type 'string)
 
 (defcustom eaf-python-command "python3"
@@ -284,7 +284,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
 
 (defcustom eaf-capture-commands
   '(self-insert-command completion-select-if-within-overlay delete-backward-char)
-  "Commands should send key event for to python side."
+  "Commands that should directly send key event to the Python side."
   :type 'cons)
 
 (defvar eaf-app-binding-alist
@@ -303,10 +303,10 @@ keybinding variable to this list.")
 (defvar-local eaf--bookmark-title nil)
 
 (defun eaf--bookmark-make-record ()
-  "Create a eaf bookmark.
+  "Create a EAF bookmark.
 
-The bookmark will try to recreate eaf buffer session.
-For now only eaf browser app is supported."
+The bookmark will try to recreate EAF buffer session.
+For now only EAF browser app is supported."
   (cond ((equal eaf--buffer-app-name "browser")
          `((handler . eaf--bookmark-restore)
            (eaf-app . "browser")
@@ -321,7 +321,7 @@ For now only eaf browser app is supported."
                                   eaf--buffer-id "get_bookmark"))))))
 
 (defun eaf--bookmark-restore (bookmark)
-  "Restore eaf buffer according to BOOKMARK."
+  "Restore EAF buffer according to BOOKMARK."
   (let ((app (cdr (assq 'eaf-app bookmark))))
     (cond ((equal app "browser")
            (eaf-open-url (cdr (assq 'filename bookmark))))
@@ -329,7 +329,7 @@ For now only eaf browser app is supported."
            (eaf-open (cdr (assq 'filename bookmark)))))))
 
 (defun eaf-open-bookmark ()
-  "Command to open or create eaf bookmarks with completion."
+  "Command to open or create EAF bookmarks with completion."
   (interactive)
   (bookmark-maybe-load-default-file)
   (let* ((bookmarks (cl-remove-if-not
@@ -337,12 +337,12 @@ For now only eaf browser app is supported."
                        (bookmark-prop-get entry 'eaf-app))
                      bookmark-alist))
          (names (mapcar #'car bookmarks))
-         (cand (completing-read "Eaf bookmark: " bookmarks)))
+         (cand (completing-read "EAF Bookmarks: " bookmarks)))
     (cond ((member cand names)
            (bookmark-jump cand))
           (t
            (unless (derived-mode-p 'eaf-mode)
-             (user-error "Not in an eaf buffer"))
+             (user-error "Not in an EAF buffer"))
            ;; create new one for current buffer with provided name
            (bookmark-set cand)))))
 
@@ -377,14 +377,14 @@ For now only eaf browser app is supported."
 
 (defun eaf-stop-process ()
   (interactive)
-  ;; Kill eaf buffers.
+  ;; Kill EAF buffers.
   (let ((count 0))
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (derived-mode-p 'eaf-mode)
         (cl-incf count)
         (kill-buffer buffer)))
-    ;; Just report to me when eaf buffer exists.
+    ;; Just report to me when EAF buffer exists.
     (if (> count 1)
         (message "Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
 
@@ -403,12 +403,12 @@ For now only eaf browser app is supported."
   (eaf-kill-python-process))
 
 (defun eaf-kill-python-process ()
-  "Kill eaf background python process for debug.
+  "Kill EAF background python process for debug.
 NOTE: this function just use for developer debug.
-Don't call this function if you not eaf developer."
+Don't call this function if you not EAF developer."
   (interactive)
   (if (process-live-p eaf-process)
-      ;; Delete eaf server process.
+      ;; Delete EAF server process.
       (delete-process eaf-process)
     (message "EAF process has dead.")))
 
@@ -448,8 +448,8 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-execute-app-cmd (cmd &optional buf)
   "Execute app CMD.
 
-If BUF is given it should be the eaf buffer for the command
-otherwise it is assumed that the current buffer is the eaf
+If BUF is given it should be the EAF buffer for the command
+otherwise it is assumed that the current buffer is the EAF
 buffer."
   (with-current-buffer (or buf (current-buffer))
     (let ((this-command cmd))
@@ -466,9 +466,9 @@ FUN is only called when command SYM is not invoked by KEY."
 Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
 Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                    (interactive)
-                   ;; ensure this is only called from eaf buffer
+                   ;; ensure this is only called from EAF buffer
                    (unless (boundp 'eaf--buffer-id)
-                     (error "%s command can only be called in eaf buffer" sym))
+                     (error "%s command can only be called in an EAF buffer" sym))
                    ;; Enable the command to be called by M-x or from lisp code in
                    ;; the case that this command isn't invoked by key-sequence.
                    (when (and (eq this-command sym)
@@ -840,6 +840,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "FOpen with EAF: ")
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
+    (recentf-add-file url)
     (setq url (expand-file-name url))
     (let* ((extension-name (file-name-extension url)))
       (setq app-name
@@ -876,7 +877,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (unless arguments (setq arguments ""))
   ;; Now that app-name should hopefully be set
   (if app-name
-      ;; Open url with eaf application if app-name is not empty.
+      ;; Open url with EAF application if app-name is not empty.
       (if (process-live-p eaf-process)
           (let (exists-eaf-buffer)
             ;; Try to open buffer
