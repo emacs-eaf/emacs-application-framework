@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: 2019-12-10 23:13:55
-;;           By: Andy Stewart
+;; Last-Updated: Wed Dec 11 04:27:17 2019 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -479,16 +479,16 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
+          (dolist (cmd eaf-capture-commands)
+            (define-key map (vector 'remap cmd) 'eaf-send-key))
+          (dolist (single-key eaf-capture-keys)
+            (define-key map (kbd single-key) 'eaf-send-key))
+          (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
                    do (let ((dummy (intern (format "eaf-%s" fun))))
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
-                   finally return (prog1 map
-                                    (dolist (cmd eaf-capture-commands)
-                                      (define-key map (vector 'remap cmd) 'eaf-send-key))
-                                    (dolist (single-key eaf-capture-keys)
-                                      (define-key map (kbd single-key) 'eaf-send-key))
-                                    (set-keymap-parent map eaf-mode-map*))))))
+                   finally return map))))
 
 (defun eaf-get-app-bindings (app-name)
   (symbol-value
