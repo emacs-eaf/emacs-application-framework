@@ -131,7 +131,12 @@ Don't modify this map directly. To bind keys for all apps use
   ;; which may not want this, introduce EAF user option?
   (setq window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
-  (setq-local bookmark-make-record-function #'eaf--bookmark-make-record))
+  (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
+  ;; copy default value in case user already has bindings there
+  (setq-local emulation-mode-map-alists
+              (default-value 'emulation-mode-map-alists))
+  (push (list (cons t eaf-mode-map))
+        emulation-mode-map-alists))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -500,12 +505,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
-      (eaf-mode)
-      ;; copy default value in case user already has bindings there
-      (setq-local emulation-mode-map-alists
-                  (default-value 'emulation-mode-map-alists))
-      (push (list (cons t eaf-mode-map))
-            emulation-mode-map-alists))
+      (eaf-mode))
     eaf-buffer))
 
 (defun eaf-identify-key-in-app (key-command app-name)
