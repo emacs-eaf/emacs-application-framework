@@ -790,7 +790,7 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
             (eaf-call "new_buffer"
                             eaf--buffer-id url app-name arguments))))
     (cond ((equal buffer-result "")
-           (eaf--display-app-buffer buffer))
+           (eaf--display-app-buffer app-name buffer))
           (t
            ;; Kill buffer and show error message from python server.
            (kill-buffer buffer)
