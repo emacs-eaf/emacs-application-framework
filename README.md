@@ -211,6 +211,8 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
 ## Report bug
+If you got ```*eaf* aborted``` error, please check buffer ```*eaf*``` first, mostly because Python library dependencies is not installed successfully.
+
 If you have any problem with EAF, please use command "emacs -Q" to start Emacs without any customizations.
 
 Then re-test your workflow. If "emacs -Q" works fine, it's must be something wrong with your emacs config file.
