@@ -480,7 +480,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
           (cl-loop for (key . fun) in keybinding
-                   do (let ((dummy (intern (format "eaf-%s" fun))))
+                   do (let ((dummy (intern fun)))
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
                    finally return (prog1 map
