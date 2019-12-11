@@ -916,7 +916,10 @@ When called interactively, URL accepts a file that can be opened by EAF."
             ;; Switch to exists buffer,
             ;; if no match buffer found, call `eaf-open-internal'.
             (if exists-eaf-buffer
-                (switch-to-buffer exists-eaf-buffer)
+                (let ((display-fun (or (cdr (assoc app-name
+                                                   eaf-app-display-function-alist))
+                                       #'switch-to-buffer)))
+                  (funcall display-fun exists-eaf-buffer))
               (eaf-open-internal url app-name arguments)))
         ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
         (setq eaf-first-start-url url)
