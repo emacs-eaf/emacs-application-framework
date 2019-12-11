@@ -505,7 +505,9 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
-      (eaf-mode))
+      (eaf-mode)
+      (set (make-local-variable 'eaf--buffer-url) input-content)
+      (set (make-local-variable 'eaf--buffer-app-name) app-name))
     eaf-buffer))
 
 (defun eaf-identify-key-in-app (key-command app-name)
@@ -779,8 +781,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
         (progn
           ;; Switch to new buffer if buffer create successful.
           (switch-to-buffer buffer)
-          (set (make-local-variable 'eaf--buffer-url) url)
-          (set (make-local-variable 'eaf--buffer-app-name) app-name)
           ;; Focus to file window if is previewer application.
           (when (or (string= app-name "markdown-previewer")
                     (string= app-name "org-previewer"))
