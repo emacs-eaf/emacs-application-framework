@@ -304,6 +304,17 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
 Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
+(defvar eaf-app-display-function-alist
+  '(("markdown-previewer" . eaf--markdown-preview-display)
+    ("org-previewer" . eaf--org-preview-display))
+  "Mapping app names to display functions.
+
+Display functions are called to initilize the initial view when
+starting an app.
+
+A display function receives the initialized app buffer as
+argument and defaults to `switch-to-buffer'.")
+
 
 (defvar-local eaf--bookmark-title nil)
 
@@ -774,21 +785,45 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 
 (defun eaf-open-internal (url app-name arguments)
   (let* ((buffer (eaf-create-buffer url app-name))
-         buffer-result)
-    (with-current-buffer buffer
-      (setq buffer-result (eaf-call "new_buffer" eaf--buffer-id url app-name arguments)))
-    (if (equal buffer-result "")
-        (progn
-          ;; Switch to new buffer if buffer create successful.
-          (switch-to-buffer buffer)
-          ;; Focus to file window if is previewer application.
-          (when (or (string= app-name "markdown-previewer")
-                    (string= app-name "org-previewer"))
-            (other-window +1)))
-      ;; Kill buffer and show error message from python server.
-      (kill-buffer buffer)
-      (switch-to-buffer eaf-name)
-      (message buffer-result))))
+         (buffer-result
+          (with-current-buffer buffer
+            (eaf-call "new_buffer"
+                            eaf--buffer-id url app-name arguments))))
+    (cond ((equal buffer-result "")
+           (let ((display-fun (or (cdr (assoc app-name
+                                              eaf-app-display-function-alist))
+                                  #'switch-to-buffer)))
+             (funcall display-fun buffer)))
+          (t
+           ;; Kill buffer and show error message from python server.
+           (kill-buffer buffer)
+           (switch-to-buffer eaf-name)
+           (message buffer-result)))))
+
+(defun eaf--markdown-preview-display (buf)
+  ;; Split window to show file and previewer.
+  (eaf-split-preview-windows
+   (buffer-local-value
+    'eaf--buffer-url buf))
+  (switch-to-buffer buf)
+  (other-window +1))
+
+(defun eaf--org-preview-display (buf)
+  (let ((url (buffer-local-value
+              'eaf--buffer-url buf)))
+    ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
+    (save-excursion
+      (find-file url)
+      (org-html-export-to-html))
+    ;; Add file name to `eaf-org-file-list' after command `find-file'.
+    (unless (member url eaf-org-file-list)
+      (push url eaf-org-file-list))
+    ;; Split window to show file and previewer.
+    (eaf-split-preview-windows url)
+    ;; Switch to new buffer if buffer create successful.
+    (switch-to-buffer buf)
+    (other-window +1)))
+
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
@@ -844,6 +879,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (when (featurep 'recentf)
       (recentf-add-file url))
     (let* ((extension-name (file-name-extension url)))
+      ;; init app name, url and arguments
       (setq app-name
             (cond ((member extension-name eaf-pdf-extension-list)
                    "pdf-viewer")
@@ -852,8 +888,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
                    (setq arguments
                          (or eaf-grip-token
                              (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-                   ;; Split window to show file and previewer.
-                   (eaf-split-preview-windows url)
                    "markdown-previewer")
                   ((member extension-name eaf-image-extension-list)
                    "image-viewer")
@@ -863,17 +897,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
                    (setq url (concat "file://" url))
                    "browser")
                   ((member extension-name eaf-org-extension-list)
-                   ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
-                   (save-excursion
-                     (find-file url)
-                     (with-current-buffer (buffer-name) ;FIXME: Why?
-                       (org-html-export-to-html)))
-                   ;; Add file name to `eaf-org-file-list' after command `find-file'.
-
-                   (unless (member url eaf-org-file-list)
-                     (push url eaf-org-file-list))
-                   ;; Split window to show file and previewer.
-                   (eaf-split-preview-windows url)
                    "org-previewer")))))
   (unless arguments (setq arguments ""))
   ;; Now that app-name should hopefully be set
