@@ -379,8 +379,6 @@ For now only EAF browser app is supported."
   (interactive)
   (if (process-live-p eaf-process)
       (message "EAF process has started.")
-    (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-    (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
     (setq eaf-process
           (apply #'start-process
                  eaf-name
@@ -895,6 +893,9 @@ When called interactively, URL accepts a file that can be opened by EAF."
                   ((member extension-name eaf-org-extension-list)
                    "org-previewer")))))
   (unless arguments (setq arguments ""))
+  ;; hooks are only added if not present already...
+  (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
+  (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
   ;; Now that app-name should hopefully be set
   (if app-name
       ;; Open url with EAF application if app-name is not empty.
