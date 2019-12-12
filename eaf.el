@@ -200,7 +200,8 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("C-v" . "scroll_up_page")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom"))
+    ("M->" . "scroll_to_bottom")
+    ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
 
@@ -478,21 +479,23 @@ buffer."
 
 FUN is only called when command SYM is not invoked by KEY."
   (defalias sym (lambda nil
+                  (interactive)
+                  ;; ensure this is only called from EAF buffer
+                  (unless (boundp 'eaf--buffer-id)
+                    (error "%s command can only be called in an EAF buffer" sym))
+                  ;; Enable the command to be called by M-x or from lisp code in
+                  ;; the case that this command isn't invoked by key-sequence.
+                  (when (and (eq this-command sym)
+                             (not (equal (this-command-keys-vector) key)))
+                    (eaf-call "execute_function" eaf--buffer-id fun)))
+      (format
                    "This Lisp function is a placeholder, the actual function will be handled on the Python side.
 
 Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
-Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
-                   (interactive)
-                   ;; ensure this is only called from EAF buffer
-                   (unless (boundp 'eaf--buffer-id)
-                     (error "%s command can only be called in an EAF buffer" sym))
-                   ;; Enable the command to be called by M-x or from lisp code in
-                   ;; the case that this command isn't invoked by key-sequence.
-                   (when (and (eq this-command sym)
-                              (not (equal (this-command-keys-vector) key)))
-                     (eaf-call "execute_function" eaf--buffer-id fun)))))
+Please ONLY use `eaf-bind-key' and use the unprefixed command name (`%s`)
+to edit EAF keybindings!" fun)))
 
-(defun eaf-gen-keybinding-map (keybinding)
+(defun eaf-gen-keybinding-map (keybinding app-name)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
@@ -502,7 +505,8 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
             (define-key map (kbd single-key) 'eaf-send-key))
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
-                   do (let ((dummy (intern fun)))
+                   do (let ((dummy (intern
+                                    (format "eaf-%s-%s" app-name fun))))
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
                    finally return map))))
@@ -513,7 +517,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
-  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
+  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name) app-name)
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer

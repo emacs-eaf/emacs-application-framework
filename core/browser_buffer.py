@@ -91,6 +91,9 @@ class BrowserBuffer(Buffer):
     def scroll_to_bottom(self):
         self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
 
+    def refresh_page(self):
+        self.eval_js("location.reload()")
+
     def get_bookmark(self):
         return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
 
