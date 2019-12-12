@@ -598,15 +598,13 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
              (eaf-call "kill_buffer" eaf--buffer-id)
              (message (format "Kill %s" eaf--buffer-id)))))))
 
-(defun eaf-monitor-buffer-save ()
-  (ignore-errors
-    (with-current-buffer (buffer-name)
-      (cond ((and
-              (derived-mode-p 'org-mode)
-              (member (buffer-file-name) eaf-org-file-list))
-             (org-html-export-to-html)
-             (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
-             (message (format "export %s to html" (buffer-file-name))))))))
+(defun eaf--org-preview-monitor-buffer-save ()
+  (when (process-live-p eaf-process)
+    (ignore-errors
+      ;; eaf-org-file-list?
+      (org-html-export-to-html)
+      (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
+      (message (format "export %s to html" (buffer-file-name))))))
 
 (defun eaf-send-key ()
   (interactive)
@@ -781,7 +779,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 
 (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-(add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
 (defun eaf-open-internal (url app-name arguments)
   (let* ((buffer (eaf-create-buffer url app-name))
@@ -811,7 +808,8 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
     ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
     (save-excursion
       (find-file url)
-      (org-html-export-to-html))
+      (org-html-export-to-html)
+      (add-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save nil t))
     ;; Add file name to `eaf-org-file-list' after command `find-file'.
     (unless (member url eaf-org-file-list)
       (push url eaf-org-file-list))
