@@ -586,19 +586,19 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-monitor-buffer-kill ()
   (ignore-errors
-    (with-current-buffer (buffer-name)
-      (cond ((derived-mode-p 'org-mode)
-             ;; NOTE:
-             ;; Because save org buffer will trigger `kill-buffer' action,
-             ;; but org buffer still live after do `kill-buffer' action.
-             ;; So i run a timer to check org buffer is live after `kill-buffer' aciton.
-             (when (member (buffer-file-name) eaf-org-file-list)
-               (unless (member (buffer-file-name) eaf-org-killed-file-list)
-                 (push (buffer-file-name) eaf-org-killed-file-list))
-               (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))))
-            ((derived-mode-p 'eaf-mode)
-             (eaf-call "kill_buffer" eaf--buffer-id)
-             (message (format "Kill %s" eaf--buffer-id)))))))
+    (eaf-call "kill_buffer" eaf--buffer-id)
+    (message (format "Kill %s" eaf--buffer-id))))
+
+(defun eaf--org-preview-monitor-kill ()
+  ;; NOTE:
+  ;; Because save org buffer will trigger `kill-buffer' action,
+  ;; but org buffer still live after do `kill-buffer' action.
+  ;; So i run a timer to check org buffer is live after `kill-buffer' aciton.
+  (when (member (buffer-file-name) eaf-org-file-list)
+    (unless (member (buffer-file-name) eaf-org-killed-file-list)
+      (push (buffer-file-name) eaf-org-killed-file-list))
+    (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))))
+
 
 (defun eaf--org-preview-monitor-buffer-save ()
   (when (process-live-p eaf-process)
@@ -808,7 +808,8 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
     (save-excursion
       (find-file url)
       (org-html-export-to-html)
-      (add-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save nil t))
+      (add-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save nil t)
+      (add-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill nil t))
     ;; Add file name to `eaf-org-file-list' after command `find-file'.
     (unless (member url eaf-org-file-list)
       (push url eaf-org-file-list))
