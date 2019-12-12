@@ -605,7 +605,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
     (ignore-errors
       ;; eaf-org-file-list?
       (org-html-export-to-html)
-      (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
+      (eaf-call "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
       (message (format "export %s to html" (buffer-file-name))))))
 
 (defun eaf-send-key ()
