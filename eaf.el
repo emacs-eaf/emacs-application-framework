@@ -479,19 +479,21 @@ buffer."
 
 FUN is only called when command SYM is not invoked by KEY."
   (defalias sym (lambda nil
+                  (interactive)
+                  ;; ensure this is only called from EAF buffer
+                  (unless (boundp 'eaf--buffer-id)
+                    (error "%s command can only be called in an EAF buffer" sym))
+                  ;; Enable the command to be called by M-x or from lisp code in
+                  ;; the case that this command isn't invoked by key-sequence.
+                  (when (and (eq this-command sym)
+                             (not (equal (this-command-keys-vector) key)))
+                    (eaf-call "execute_function" eaf--buffer-id fun)))
+      (format
                    "This Lisp function is a placeholder, the actual function will be handled on the Python side.
 
 Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
-Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
-                   (interactive)
-                   ;; ensure this is only called from EAF buffer
-                   (unless (boundp 'eaf--buffer-id)
-                     (error "%s command can only be called in an EAF buffer" sym))
-                   ;; Enable the command to be called by M-x or from lisp code in
-                   ;; the case that this command isn't invoked by key-sequence.
-                   (when (and (eq this-command sym)
-                              (not (equal (this-command-keys-vector) key)))
-                     (eaf-call "execute_function" eaf--buffer-id fun)))))
+Please ONLY use `eaf-bind-key' and use the unprefixed command name (`%s`)
+to edit EAF keybindings!" fun)))
 
 (defun eaf-gen-keybinding-map (keybinding app-name)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
