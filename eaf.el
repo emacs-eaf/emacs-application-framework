@@ -493,7 +493,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
                               (not (equal (this-command-keys-vector) key)))
                      (eaf-call "execute_function" eaf--buffer-id fun)))))
 
-(defun eaf-gen-keybinding-map (keybinding)
+(defun eaf-gen-keybinding-map (keybinding app-name)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
@@ -504,7 +504,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
                    do (let ((dummy (intern
-                                    (format "eaf-%s" fun))))
+                                    (format "eaf-%s-%s" app-name fun))))
                         (eaf-dummy-function dummy fun key)
                         (define-key map (kbd key) dummy))
                    finally return map))))
@@ -515,7 +515,7 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
-  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
+  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name) app-name)
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
