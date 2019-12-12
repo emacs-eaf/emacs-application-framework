@@ -136,7 +136,8 @@ Don't modify this map directly. To bind keys for all apps use
   (setq-local emulation-mode-map-alists
               (default-value 'emulation-mode-map-alists))
   (push (list (cons t eaf-mode-map))
-        emulation-mode-map-alists))
+        emulation-mode-map-alists)
+  (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill nil t))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -534,9 +535,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
    url))
 
 (defun eaf-monitor-window-size-change (frame)
-  (setq eaf-last-frame-width (frame-pixel-width frame))
-  (setq eaf-last-frame-height (frame-pixel-height frame))
-  (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size))))
+  (when (process-live-p eaf-process)
+    (setq eaf-last-frame-width (frame-pixel-width frame))
+    (setq eaf-last-frame-height (frame-pixel-height frame))
+    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size)))))
 
 (defun eaf-try-adjust-view-with-frame-size ()
   (when (and (equal (frame-pixel-width) eaf-last-frame-width)
@@ -544,29 +546,30 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
     (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
-  (ignore-errors
-    (let (view-infos)
-      (dolist (frame (frame-list))
-        (dolist (window (window-list frame))
-          (let ((buffer (window-buffer window)))
-            (with-current-buffer buffer
-              (if (derived-mode-p 'eaf-mode)
-                  (let* ((window-allocation (eaf-get-window-allocation window))
-                         (x (nth 0 window-allocation))
-                         (y (nth 1 window-allocation))
-                         (w (nth 2 window-allocation))
-                         (h (nth 3 window-allocation))
-                         )
-                    (push (format "%s:%s:%s:%s:%s:%s"
-                                  eaf--buffer-id
-                                  (eaf-get-emacs-xid frame)
-                                  x y w h)
-                          view-infos)
-                    ))))))
-      ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
-      ;; So I package two-dimensional list in string, then unpack on server side. ;)
-      (eaf-call "update_views" (mapconcat #'identity view-infos ","))
-      )))
+  (when (process-live-p eaf-process)
+    (ignore-errors
+      (let (view-infos)
+        (dolist (frame (frame-list))
+          (dolist (window (window-list frame))
+            (let ((buffer (window-buffer window)))
+              (with-current-buffer buffer
+                (if (derived-mode-p 'eaf-mode)
+                    (let* ((window-allocation (eaf-get-window-allocation window))
+                           (x (nth 0 window-allocation))
+                           (y (nth 1 window-allocation))
+                           (w (nth 2 window-allocation))
+                           (h (nth 3 window-allocation))
+                           )
+                      (push (format "%s:%s:%s:%s:%s:%s"
+                                    eaf--buffer-id
+                                    (eaf-get-emacs-xid frame)
+                                    x y w h)
+                            view-infos)
+                      ))))))
+        ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
+        ;; So I package two-dimensional list in string, then unpack on server side. ;)
+        (eaf-call "update_views" (mapconcat #'identity view-infos ","))
+        ))))
 
 (defun eaf-delete-org-preview-file (org-file)
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
@@ -583,29 +586,27 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
 
 (defun eaf-monitor-buffer-kill ()
   (ignore-errors
-    (with-current-buffer (buffer-name)
-      (cond ((derived-mode-p 'org-mode)
-             ;; NOTE:
-             ;; Because save org buffer will trigger `kill-buffer' action,
-             ;; but org buffer still live after do `kill-buffer' action.
-             ;; So i run a timer to check org buffer is live after `kill-buffer' aciton.
-             (when (member (buffer-file-name) eaf-org-file-list)
-               (unless (member (buffer-file-name) eaf-org-killed-file-list)
-                 (push (buffer-file-name) eaf-org-killed-file-list))
-               (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))))
-            ((derived-mode-p 'eaf-mode)
-             (eaf-call "kill_buffer" eaf--buffer-id)
-             (message (format "Kill %s" eaf--buffer-id)))))))
+    (eaf-call "kill_buffer" eaf--buffer-id)
+    (message (format "Kill %s" eaf--buffer-id))))
 
-(defun eaf-monitor-buffer-save ()
-  (ignore-errors
-    (with-current-buffer (buffer-name)
-      (cond ((and
-              (derived-mode-p 'org-mode)
-              (member (buffer-file-name) eaf-org-file-list))
-             (org-html-export-to-html)
-             (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
-             (message (format "export %s to html" (buffer-file-name))))))))
+(defun eaf--org-preview-monitor-kill ()
+  ;; NOTE:
+  ;; Because save org buffer will trigger `kill-buffer' action,
+  ;; but org buffer still live after do `kill-buffer' action.
+  ;; So i run a timer to check org buffer is live after `kill-buffer' aciton.
+  (when (member (buffer-file-name) eaf-org-file-list)
+    (unless (member (buffer-file-name) eaf-org-killed-file-list)
+      (push (buffer-file-name) eaf-org-killed-file-list))
+    (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))))
+
+
+(defun eaf--org-preview-monitor-buffer-save ()
+  (when (process-live-p eaf-process)
+    (ignore-errors
+      ;; eaf-org-file-list?
+      (org-html-export-to-html)
+      (eaf-call "update_buffer_with_url" "app.orgpreviewer.buffer" (buffer-file-name) "")
+      (message (format "export %s to html" (buffer-file-name))))))
 
 (defun eaf-send-key ()
   (interactive)
@@ -778,11 +779,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
  "com.lazycat.eaf" "get_emacs_var"
  #'eaf-send-var-to-python)
 
-(add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-(add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-(add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
-(add-hook 'after-save-hook #'eaf-monitor-buffer-save)
-
 (defun eaf-open-internal (url app-name arguments)
   (let* ((buffer (eaf-create-buffer url app-name))
          (buffer-result
@@ -811,7 +807,9 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
     ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
     (save-excursion
       (find-file url)
-      (org-html-export-to-html))
+      (org-html-export-to-html)
+      (add-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save nil t)
+      (add-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill nil t))
     ;; Add file name to `eaf-org-file-list' after command `find-file'.
     (unless (member url eaf-org-file-list)
       (push url eaf-org-file-list))
@@ -896,6 +894,9 @@ When called interactively, URL accepts a file that can be opened by EAF."
                   ((member extension-name eaf-org-extension-list)
                    "org-previewer")))))
   (unless arguments (setq arguments ""))
+  ;; hooks are only added if not present already...
+  (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
+  (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
   ;; Now that app-name should hopefully be set
   (if app-name
       ;; Open url with EAF application if app-name is not empty.
