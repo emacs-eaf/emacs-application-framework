@@ -125,7 +125,11 @@ Don't modify this map directly. To bind keys for all apps use
   "The buffer app name.")
 
 (define-derived-mode eaf-mode fundamental-mode "EAF"
-  "Major mode for Emacs Application Framework."
+  "Major mode for Emacs Application Framework.
+
+This mode is used by all apps. Each app can setup app specific
+hooks by declaring `eaf-<app-name>-hook'. This hook runs after
+the app buffer has initialized."
   ;; Split window combinations proportionally.
   ;; FIXME: this changes this setting globally for the user
   ;; which may not want this, introduce EAF user option?
@@ -523,7 +527,8 @@ to edit EAF keybindings!" fun)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (set (make-local-variable 'eaf--buffer-url) input-content)
-      (set (make-local-variable 'eaf--buffer-app-name) app-name))
+      (set (make-local-variable 'eaf--buffer-app-name) app-name)
+      (run-hooks (intern (format "eaf-%s-hook" app-name))))
     eaf-buffer))
 
 (defun eaf-identify-key-in-app (key-command app-name)
