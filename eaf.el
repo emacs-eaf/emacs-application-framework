@@ -509,10 +509,12 @@ to edit EAF keybindings!" fun)))
             (define-key map (kbd single-key) 'eaf-send-key))
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
-                   do (let ((dummy (intern
-                                    (format "eaf-%s-%s" app-name fun))))
-                        (eaf-dummy-function dummy fun key)
-                        (define-key map (kbd key) dummy))
+                   do (if (symbolp fun)
+                          (define-key map (kbd key) fun)
+                        (let ((dummy (intern
+                                      (format "eaf-%s-%s" app-name fun))))
+                          (eaf-dummy-function dummy fun key)
+                          (define-key map (kbd key) dummy)))
                    finally return map))))
 
 (defun eaf-get-app-bindings (app-name)
