@@ -136,7 +136,8 @@ Don't modify this map directly. To bind keys for all apps use
   (setq-local emulation-mode-map-alists
               (default-value 'emulation-mode-map-alists))
   (push (list (cons t eaf-mode-map))
-        emulation-mode-map-alists))
+        emulation-mode-map-alists)
+  (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill nil t))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -780,7 +781,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
 
 (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
 (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-(add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill)
 (add-hook 'after-save-hook #'eaf-monitor-buffer-save)
 
 (defun eaf-open-internal (url app-name arguments)
