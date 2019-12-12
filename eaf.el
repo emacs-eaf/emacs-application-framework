@@ -537,9 +537,10 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
    url))
 
 (defun eaf-monitor-window-size-change (frame)
-  (setq eaf-last-frame-width (frame-pixel-width frame))
-  (setq eaf-last-frame-height (frame-pixel-height frame))
-  (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size))))
+  (when (process-live-p eaf-process)
+    (setq eaf-last-frame-width (frame-pixel-width frame))
+    (setq eaf-last-frame-height (frame-pixel-height frame))
+    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size)))))
 
 (defun eaf-try-adjust-view-with-frame-size ()
   (when (and (equal (frame-pixel-width) eaf-last-frame-width)
@@ -547,29 +548,30 @@ Please ONLY use `eaf-bind-key' to edit EAF keybindings!"
     (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
-  (ignore-errors
-    (let (view-infos)
-      (dolist (frame (frame-list))
-        (dolist (window (window-list frame))
-          (let ((buffer (window-buffer window)))
-            (with-current-buffer buffer
-              (if (derived-mode-p 'eaf-mode)
-                  (let* ((window-allocation (eaf-get-window-allocation window))
-                         (x (nth 0 window-allocation))
-                         (y (nth 1 window-allocation))
-                         (w (nth 2 window-allocation))
-                         (h (nth 3 window-allocation))
-                         )
-                    (push (format "%s:%s:%s:%s:%s:%s"
-                                  eaf--buffer-id
-                                  (eaf-get-emacs-xid frame)
-                                  x y w h)
-                          view-infos)
-                    ))))))
-      ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
-      ;; So I package two-dimensional list in string, then unpack on server side. ;)
-      (eaf-call "update_views" (mapconcat #'identity view-infos ","))
-      )))
+  (when (process-live-p eaf-process)
+    (ignore-errors
+      (let (view-infos)
+        (dolist (frame (frame-list))
+          (dolist (window (window-list frame))
+            (let ((buffer (window-buffer window)))
+              (with-current-buffer buffer
+                (if (derived-mode-p 'eaf-mode)
+                    (let* ((window-allocation (eaf-get-window-allocation window))
+                           (x (nth 0 window-allocation))
+                           (y (nth 1 window-allocation))
+                           (w (nth 2 window-allocation))
+                           (h (nth 3 window-allocation))
+                           )
+                      (push (format "%s:%s:%s:%s:%s:%s"
+                                    eaf--buffer-id
+                                    (eaf-get-emacs-xid frame)
+                                    x y w h)
+                            view-infos)
+                      ))))))
+        ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
+        ;; So I package two-dimensional list in string, then unpack on server side. ;)
+        (eaf-call "update_views" (mapconcat #'identity view-infos ","))
+        ))))
 
 (defun eaf-delete-org-preview-file (org-file)
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
