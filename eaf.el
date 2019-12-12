@@ -379,6 +379,8 @@ For now only EAF browser app is supported."
   (interactive)
   (if (process-live-p eaf-process)
       (message "EAF process has started.")
+    (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
+    (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
     (setq eaf-process
           (apply #'start-process
                  eaf-name
@@ -776,9 +778,6 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "get_emacs_var"
  #'eaf-send-var-to-python)
-
-(add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-(add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
 
 (defun eaf-open-internal (url app-name arguments)
   (let* ((buffer (eaf-create-buffer url app-name))
