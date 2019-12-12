@@ -200,7 +200,8 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("C-v" . "scroll_up_page")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom"))
+    ("M->" . "scroll_to_bottom")
+    ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
 
