@@ -325,24 +325,38 @@ argument and defaults to `switch-to-buffer'.")
 
 
 (defvar-local eaf--bookmark-title nil)
+(defvar eaf-app-bookmark-handlers-alist
+  '(("browser" . eaf--browser-bookmark)
+    ("pdf-viewer" . eaf--pdf-viewer-bookmark))
+  "Mapping app names to bookmark handler functions.
+
+A bookmark handler function is used as
+`bookmark-make-record-function' and should follow its spec.")
 
 (defun eaf--bookmark-make-record ()
   "Create a EAF bookmark.
 
 The bookmark will try to recreate EAF buffer session.
 For now only EAF browser app is supported."
-  (cond ((equal eaf--buffer-app-name "browser")
-         `((handler . eaf--bookmark-restore)
-           (eaf-app . "browser")
-           (defaults . ,(list eaf--bookmark-title))
-           (filename . ,(eaf-call "call_function"
-                                  eaf--buffer-id "get_bookmark"))))
-        ((equal eaf--buffer-app-name "pdf-viewer")
-         `((handler . eaf--bookmark-restore)
-           (eaf-app . "pdf-viewer")
-           (defaults . ,(list eaf--bookmark-title))
-           (filename . ,(eaf-call "call_function"
-                                  eaf--buffer-id "get_bookmark"))))))
+  (let ((handler (cdr
+                  (assoc eaf--buffer-app-name
+                         eaf-app-bookmark-handlers-alist))))
+    (when handler
+      (funcall handler))))
+
+(defun eaf--browser-bookmark ()
+  `((handler . eaf--bookmark-restore)
+    (eaf-app . "browser")
+    (defaults . ,(list eaf--bookmark-title))
+    (filename . ,(eaf-call "call_function"
+                           eaf--buffer-id "get_bookmark"))))
+
+(defun eaf--pdf-viewer-bookmark ()
+  `((handler . eaf--bookmark-restore)
+    (eaf-app . "pdf-viewer")
+    (defaults . ,(list eaf--bookmark-title))
+    (filename . ,(eaf-call "call_function"
+                           eaf--buffer-id "get_bookmark"))))
 
 (defun eaf--bookmark-restore (bookmark)
   "Restore EAF buffer according to BOOKMARK."
