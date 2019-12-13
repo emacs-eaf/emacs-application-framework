@@ -663,12 +663,12 @@ For convenience, use the Lisp macro `eaf-setq' instead."
 Use it as (eaf-setq var val)"
   `(eaf-set ',var ,val))
 
-(defmacro eaf-bind-key (var key eaf-app-keybinding)
-  "Similar to `bind-key', but store VAR with KEY in EAF-APP-KEYBINDING list.
+(defmacro eaf-bind-key (command key eaf-app-keybinding)
+  "Similar to `bind-key', but store COMMAND with KEY in EAF-APP-KEYBINDING list.
 This is used to bind key to EAF Python applications.
 
 Use it as (eaf-bind-key var key eaf-app-keybinding)"
-  `(map-put ,eaf-app-keybinding ,key (symbol-name ',var)))
+  `(map-put ,eaf-app-keybinding ,key (symbol-name ',command)))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
