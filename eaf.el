@@ -668,7 +668,7 @@ Use it as (eaf-setq var val)"
 This is used to bind key to EAF Python applications.
 
 Use it as (eaf-bind-key var key eaf-app-keybinding)"
-  `(map-put ,eaf-app-keybinding ,key (symbol-name ',command)))
+  `(map-put ,eaf-app-keybinding ,key ,(symbol-name command)))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
