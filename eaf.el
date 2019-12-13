@@ -1020,14 +1020,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
-    (cond ((member (file-name-extension file)
-                   (append eaf-pdf-extension-list
-                           eaf-markdown-extension-list
-                           eaf-image-extension-list
-                           eaf-video-extension-list
-                           eaf-browser-extension-list
-                           eaf-org-extension-list
-                           ))
+    (cond ((eaf--get-app-for-extension
+            (file-name-extension file))
            (eaf-open file))
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
