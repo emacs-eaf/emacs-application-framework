@@ -324,7 +324,6 @@ A display function receives the initialized app buffer as
 argument and defaults to `switch-to-buffer'.")
 
 
-(defvar-local eaf--bookmark-title nil)
 (defvar eaf-app-bookmark-handlers-alist
   '(("browser" . eaf--browser-bookmark)
     ("pdf-viewer" . eaf--pdf-viewer-bookmark))
@@ -332,6 +331,21 @@ argument and defaults to `switch-to-buffer'.")
 
 A bookmark handler function is used as
 `bookmark-make-record-function' and should follow its spec.")
+
+(defvar eaf-app-extensions-alist
+  '(("pdf-viewer" . eaf-pdf-extension-list)
+    ("markdown-previewer" . eaf-markdown-extension-list)
+    ("image-viewer" . eaf-image-extension-list)
+    ("video-player" . eaf-video-extension-list)
+    ("browser" . eaf-browser-extension-list)
+    ("org-previewer" . eaf-org-extension-list))
+  "Mapping app names to extension list variables.
+
+A new app can use this to configure extensions which should
+handled by it.")
+
+
+(defvar-local eaf--bookmark-title nil)
 
 (defun eaf--bookmark-make-record ()
   "Create a EAF bookmark.
@@ -889,6 +903,11 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   (interactive)
   (eaf-open "eaf-qutebrowser" "qutebrowser"))
 
+(defun eaf--get-app-for-extension (extension-name)
+  (cl-loop for (app . ext) in eaf-app-extensions-alist
+           if (member extension-name (symbol-value ext))
+           return app))
+
 ;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
@@ -902,24 +921,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (recentf-add-file url))
     (let* ((extension-name (file-name-extension url)))
       ;; init app name, url and arguments
-      (setq app-name
-            (cond ((member extension-name eaf-pdf-extension-list)
-                   "pdf-viewer")
-                  ((member extension-name eaf-markdown-extension-list)
-                   ;; Try get user's github token if `eaf-grip-token' is nil.
-                   (setq arguments
-                         (or eaf-grip-token
-                             (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-                   "markdown-previewer")
-                  ((member extension-name eaf-image-extension-list)
-                   "image-viewer")
-                  ((member extension-name eaf-video-extension-list)
-                   "video-player")
-                  ((member extension-name eaf-browser-extension-list)
-                   (setq url (concat "file://" url))
-                   "browser")
-                  ((member extension-name eaf-org-extension-list)
-                   "org-previewer")))))
+      (setq app-name (eaf--get-app-for-extension extension-name))
+      (when (equal app-name "markdown-previewer")
+        ;; Try get user's github token if `eaf-grip-token' is nil.
+        (setq arguments
+              (or eaf-grip-token
+                  (read-string "Fill your own github token (or set `eaf-grip-token' with token string): "))))
+      (when (equal app-name "browser")
+        (setq url (concat "file://" url)))))
   (unless arguments (setq arguments ""))
   ;; hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
