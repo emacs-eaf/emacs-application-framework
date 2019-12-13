@@ -674,6 +674,70 @@ This is used to bind key to EAF Python applications.
 Use it as (eaf-bind-key var key eaf-app-keybinding)"
   `(map-put ,eaf-app-keybinding ,key (symbol-name ',var)))
 
+(cl-defun eaf-configure
+    (app &key
+         key-alist extensions hook-functions
+         key-alist* extensions* hook-functions*
+         display-function* bookmark-function*
+         )
+  "Configure eaf APP.
+
+Keywords without a trailing '*' update existing settings with the
+provided values.
+
+When using keywords with a trailing '*' any existing settings are
+replaced by the provided value.
+
+KEY-ALIST/KEY-ALIST* is an alist of keys mapped to bindings for
+APP, see `eaf-app-binding-alist'.
+
+EXTENSIONS/EXTENSIONS* is a list of file extensions which should
+be handled by APP, see also `eaf-app-extensions-alist'.
+
+HOOK-FUNCTIONS/HOOK-FUNCTIONS* is a list of functions to be
+called to initilize the APP
+
+DISPLAY-FUNCTION* is the function used to display the APP buffer,
+see `eaf-app-display-function-alist'.
+
+BOOKMARK-FUNCTION* is a handler function to create a bookmark for
+APP, see `eaf-app-bookmark-handlers-alist'."
+  (when (or key-alist key-alist*)
+    (let ((settings (cdr (assoc app eaf-app-binding-alist))))
+      (cond (key-alist*
+             (setf (symbol-value settings) key-alist*))
+            (settings
+             (cl-loop for (key . fun) in key-alist
+                      do (setf (alist-get key (symbol-value settings)
+                                          nil nil #'equal)
+                               fun))))))
+  (when (or extensions extensions*)
+    (let ((settings (cdr (assoc app eaf-app-extensions-alist))))
+      (cond (extensions*
+             (setf (symbol-value settings) extensions*))
+            (settings
+             (cl-loop for ext in extensions
+                      do (pushnew ext (symbol-value settings)
+                                  :test #'equal))))))
+
+  (when (or hook-functions hook-functions*)
+    (let ((hook (intern (format "eaf-%s-hook" app))))
+      (cond (hook-functions*
+             (setf (symbol-value hook) hook-functions*))
+            (hook-functions
+             (dolist (fun hook-functions)
+               (add-hook hook fun))))))
+
+  (when display-function*
+    (setf (alist-get app eaf-app-display-function-alist
+                     nil nil #'equal)
+          display-function*))
+
+  (when bookmark-function*
+    (setf (alist-get app eaf-app-bookmark-handlers-alist
+                     nil nil #'equal)
+          bookmark-function*)))
+
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
          (mouse-press-x (string-to-number (nth 0 coordinate-list)))
