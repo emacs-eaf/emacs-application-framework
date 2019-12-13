@@ -663,8 +663,8 @@ Use it as (eaf-setq var val)"
   `(eaf-set ',var ,val))
 
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
-  "Similar to `bind-key', but store COMMAND with KEY in EAF-APP-KEYBINDING list.
-This is used to bind key to EAF Python applications.
+  "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
+EAF-APP-KEYBINDING is one of the eaf-.*-keybinding variables.
 
 Use it as (eaf-bind-key var key eaf-app-keybinding)"
   `(map-put ,eaf-app-keybinding ,key ,(symbol-name command)))
