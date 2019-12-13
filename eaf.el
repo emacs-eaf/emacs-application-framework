@@ -98,6 +98,10 @@
     (define-key map (kbd "C-h m") 'eaf-describe-bindings)
     (define-key map [remap describe-bindings] 'eaf-describe-bindings)
     (define-key map (kbd "C-c b") 'eaf-open-bookmark)
+    (dolist (cmd eaf-capture-commands)
+      (define-key map (vector 'remap cmd) 'eaf-send-key))
+    (dolist (single-key eaf-capture-keys)
+      (define-key map (kbd single-key) 'eaf-send-key))
     map)
   "Keymap for default bindings available in all apps.")
 
@@ -533,10 +537,6 @@ to edit EAF keybindings!" fun)))
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
-          (dolist (cmd eaf-capture-commands)
-            (define-key map (vector 'remap cmd) 'eaf-send-key))
-          (dolist (single-key eaf-capture-keys)
-            (define-key map (kbd single-key) 'eaf-send-key))
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
                    do (if (symbolp fun)
