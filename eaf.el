@@ -563,10 +563,6 @@ to edit EAF keybindings!" fun)))
       (run-hooks (intern (format "eaf-%s-hook" app-name))))
     eaf-buffer))
 
-(defun eaf-identify-key-in-app (key-command app-name)
-  "Given a KEY-COMMAND string, identify whether command is in EAF keybindings based on APP-NAME."
-  (rassoc key-command (eaf-get-app-bindings app-name)))
-
 (defun eaf-is-support (url)
   (dbus-call-method
    :session "com.lazycat.eaf"
