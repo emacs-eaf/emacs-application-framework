@@ -324,6 +324,27 @@ A display function receives the initialized app buffer as
 argument and defaults to `switch-to-buffer'.")
 
 
+(defvar eaf-app-bookmark-handlers-alist
+  '(("browser" . eaf--browser-bookmark)
+    ("pdf-viewer" . eaf--pdf-viewer-bookmark))
+  "Mapping app names to bookmark handler functions.
+
+A bookmark handler function is used as
+`bookmark-make-record-function' and should follow its spec.")
+
+(defvar eaf-app-extensions-alist
+  '(("pdf-viewer" . eaf-pdf-extension-list)
+    ("markdown-previewer" . eaf-markdown-extension-list)
+    ("image-viewer" . eaf-image-extension-list)
+    ("video-player" . eaf-video-extension-list)
+    ("browser" . eaf-browser-extension-list)
+    ("org-previewer" . eaf-org-extension-list))
+  "Mapping app names to extension list variables.
+
+A new app can use this to configure extensions which should
+handled by it.")
+
+
 (defvar-local eaf--bookmark-title nil)
 
 (defun eaf--bookmark-make-record ()
@@ -331,18 +352,25 @@ argument and defaults to `switch-to-buffer'.")
 
 The bookmark will try to recreate EAF buffer session.
 For now only EAF browser app is supported."
-  (cond ((equal eaf--buffer-app-name "browser")
-         `((handler . eaf--bookmark-restore)
-           (eaf-app . "browser")
-           (defaults . ,(list eaf--bookmark-title))
-           (filename . ,(eaf-call "call_function"
-                                  eaf--buffer-id "get_bookmark"))))
-        ((equal eaf--buffer-app-name "pdf-viewer")
-         `((handler . eaf--bookmark-restore)
-           (eaf-app . "pdf-viewer")
-           (defaults . ,(list eaf--bookmark-title))
-           (filename . ,(eaf-call "call_function"
-                                  eaf--buffer-id "get_bookmark"))))))
+  (let ((handler (cdr
+                  (assoc eaf--buffer-app-name
+                         eaf-app-bookmark-handlers-alist))))
+    (when handler
+      (funcall handler))))
+
+(defun eaf--browser-bookmark ()
+  `((handler . eaf--bookmark-restore)
+    (eaf-app . "browser")
+    (defaults . ,(list eaf--bookmark-title))
+    (filename . ,(eaf-call "call_function"
+                           eaf--buffer-id "get_bookmark"))))
+
+(defun eaf--pdf-viewer-bookmark ()
+  `((handler . eaf--bookmark-restore)
+    (eaf-app . "pdf-viewer")
+    (defaults . ,(list eaf--bookmark-title))
+    (filename . ,(eaf-call "call_function"
+                           eaf--buffer-id "get_bookmark"))))
 
 (defun eaf--bookmark-restore (bookmark)
   "Restore EAF buffer according to BOOKMARK."
@@ -875,6 +903,11 @@ Use it as (eaf-bind-key var key eaf-app-keybinding)"
   (interactive)
   (eaf-open "eaf-qutebrowser" "qutebrowser"))
 
+(defun eaf--get-app-for-extension (extension-name)
+  (cl-loop for (app . ext) in eaf-app-extensions-alist
+           if (member extension-name (symbol-value ext))
+           return app))
+
 ;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
@@ -888,24 +921,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (recentf-add-file url))
     (let* ((extension-name (file-name-extension url)))
       ;; init app name, url and arguments
-      (setq app-name
-            (cond ((member extension-name eaf-pdf-extension-list)
-                   "pdf-viewer")
-                  ((member extension-name eaf-markdown-extension-list)
-                   ;; Try get user's github token if `eaf-grip-token' is nil.
-                   (setq arguments
-                         (or eaf-grip-token
-                             (read-string "Fill your own github token (or set `eaf-grip-token' with token string): ")))
-                   "markdown-previewer")
-                  ((member extension-name eaf-image-extension-list)
-                   "image-viewer")
-                  ((member extension-name eaf-video-extension-list)
-                   "video-player")
-                  ((member extension-name eaf-browser-extension-list)
-                   (setq url (concat "file://" url))
-                   "browser")
-                  ((member extension-name eaf-org-extension-list)
-                   "org-previewer")))))
+      (setq app-name (eaf--get-app-for-extension extension-name))
+      (when (equal app-name "markdown-previewer")
+        ;; Try get user's github token if `eaf-grip-token' is nil.
+        (setq arguments
+              (or eaf-grip-token
+                  (read-string "Fill your own github token (or set `eaf-grip-token' with token string): "))))
+      (when (equal app-name "browser")
+        (setq url (concat "file://" url)))))
   (unless arguments (setq arguments ""))
   ;; hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
@@ -997,14 +1020,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
-    (cond ((member (file-name-extension file)
-                   (append eaf-pdf-extension-list
-                           eaf-markdown-extension-list
-                           eaf-image-extension-list
-                           eaf-video-extension-list
-                           eaf-browser-extension-list
-                           eaf-org-extension-list
-                           ))
+    (cond ((eaf--get-app-for-extension
+            (file-name-extension file))
            (eaf-open file))
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
