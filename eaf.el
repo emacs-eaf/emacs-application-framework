@@ -654,8 +654,7 @@ to edit EAF keybindings!" fun)))
   "Similar to `set', but store SYM with VAL in the EAF Python side.
 
 For convenience, use the Lisp macro `eaf-setq' instead."
-  (when (symbol-name sym)
-    (map-put eaf-var-list sym val)))
+  (map-put eaf-var-list sym val))
 
 (defmacro eaf-setq (var val)
   "Similar to `setq', but store VAR with VAL in the EAF Python side.
