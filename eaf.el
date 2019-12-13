@@ -296,7 +296,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-capture-commands
-  '(self-insert-command completion-select-if-within-overlay delete-backward-char)
+  '(self-insert-command delete-backward-char)
   "Commands that should directly send key event to the Python side."
   :type 'cons)
 
