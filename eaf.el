@@ -218,6 +218,8 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
 (defcustom eaf-pdf-viewer-keybinding
   '(("j" . "scroll_up")
     ("k" . "scroll_down")
+    ("<down>" . "scroll_up")
+    ("<up>" . "scroll_down")
     ("SPC" . "scroll_up_page")
     ("b" . "scroll_down_page")
     ("t" . "switch_to_read_mode")
