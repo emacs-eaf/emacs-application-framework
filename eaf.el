@@ -93,13 +93,13 @@
   "EAF mode hook."
   :type 'hook)
 
-(defcustom eaf-capture-keys
+(defvar eaf-capture-keys
   '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
   "Keys should send key event for to python side."
   :type 'cons)
 
-(defcustom eaf-capture-commands
-  '(self-insert-command delete-backward-char)
+(defvar eaf-capture-commands
+  '(self-insert-command)
   "Commands that should directly send key event to the Python side."
   :type 'cons)
 
