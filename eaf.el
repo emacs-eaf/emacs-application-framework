@@ -93,6 +93,16 @@
   "EAF mode hook."
   :type 'hook)
 
+(defcustom eaf-capture-keys
+  '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
+  "Keys should send key event for to python side."
+  :type 'cons)
+
+(defcustom eaf-capture-commands
+  '(self-insert-command delete-backward-char)
+  "Commands that should directly send key event to the Python side."
+  :type 'cons)
+
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") 'eaf-describe-bindings)
@@ -292,16 +302,6 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
 (defcustom eaf-org-extension-list
   '("org")
   "The extension list of org previewer application."
-  :type 'cons)
-
-(defcustom eaf-capture-keys
-  '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
-  "Keys should send key event for to python side."
-  :type 'cons)
-
-(defcustom eaf-capture-commands
-  '(self-insert-command delete-backward-char)
-  "Commands that should directly send key event to the Python side."
   :type 'cons)
 
 (defvar eaf-app-binding-alist
