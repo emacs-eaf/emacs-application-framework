@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Dec 13 22:57:38 2019 (-0500)
+;; Last-Updated: Sat Dec 14 17:34:32 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -355,15 +355,13 @@ For now only EAF browser app is supported."
   `((handler . eaf--bookmark-restore)
     (eaf-app . "browser")
     (defaults . ,(list eaf--bookmark-title))
-    (filename . ,(eaf-call "call_function"
-                           eaf--buffer-id "get_bookmark"))))
+    (filename . ,(eaf-get-path-or-url))))
 
 (defun eaf--pdf-viewer-bookmark ()
   `((handler . eaf--bookmark-restore)
     (eaf-app . "pdf-viewer")
     (defaults . ,(list eaf--bookmark-title))
-    (filename . ,(eaf-call "call_function"
-                           eaf--buffer-id "get_bookmark"))))
+    (filename . ,(eaf-get-path-or-url))))
 
 (defun eaf--bookmark-restore (bookmark)
   "Restore EAF buffer according to BOOKMARK."
@@ -500,6 +498,12 @@ buffer."
     (let ((this-command cmd))
       (call-interactively cmd))))
 
+(defun eaf-get-path-or-url ()
+  "Get the current file path or web URL, and copy to ‘kill-ring’."
+  (interactive)
+  (if (derived-mode-p 'eaf-mode)
+      (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
+    (user-error "This command can only be called in an EAF buffer!")))
 
 (defun eaf-proxy-function (fun)
   "Define elisp command which can call python function FUN."

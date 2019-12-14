@@ -113,9 +113,6 @@ class AppBuffer(Buffer):
     def toggle_inverted_mode(self):
         self.buffer_widget.toggle_inverted_mode()
 
-    def get_bookmark(self):
-        return self.buffer_widget.url
-
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
