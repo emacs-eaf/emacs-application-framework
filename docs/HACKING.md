@@ -238,17 +238,17 @@ Above is an example of ```eaf-camera-save-path```, you can customize any variabl
 
 ### Call Python method and store function result to temp Elisp variable
 
-In EAF buffer have interface ```get_bookmark```
+In EAF buffer have interface ```get_url```
 
 ```Python
-def get_bookmark(self):
+def get_url(self):
     return ""
 ```
 
 At Elisp side, we can use below code call Python method and store function result to Elisp variable:
 
 ```Elisp
-(setq temp-var (eaf-call "call_function" eaf--buffer-id "get_bookmark"))
+(setq temp-var (eaf-call "call_function" eaf--buffer-id "get_url"))
 ```
 
 Once you understand principle, you can define your own interface function in core/buffer.py , then use ```call_function``` method on Elisp side to fetch Python function result, don't need define temp elisp variable everywhere.

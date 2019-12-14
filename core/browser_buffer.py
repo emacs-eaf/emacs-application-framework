@@ -94,7 +94,5 @@ class BrowserBuffer(Buffer):
     def refresh_page(self):
         self.eval_js("location.reload()")
 
-    def get_bookmark(self):
+    def get_url(self):
         return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
-
-
