@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Dec 11 04:27:17 2019 (-0500)
+;; Last-Updated: Fri Dec 13 22:57:38 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -501,39 +501,33 @@ buffer."
       (call-interactively cmd))))
 
 
-(defun eaf-dummy-function (sym fun key)
-  "Define elisp command SYM which can call python function FUN.
-
-FUN is only called when command SYM is not invoked by KEY."
-  (defalias sym (lambda nil
-                  (interactive)
-                  ;; ensure this is only called from EAF buffer
-                  (unless (boundp 'eaf--buffer-id)
-                    (error "%s command can only be called in an EAF buffer" sym))
-                  ;; Enable the command to be called by M-x or from lisp code in
-                  ;; the case that this command isn't invoked by key-sequence.
-                  (when (and (eq this-command sym)
-                             (not (equal (this-command-keys-vector) key)))
-                    (eaf-call "execute_function" eaf--buffer-id fun)))
-      (format
-                   "This Lisp function is a placeholder, the actual function will be handled on the Python side.
+(defun eaf-proxy-function (fun)
+  "Define elisp command which can call python function FUN."
+  (let ((sym (intern (format "eaf--proxy-%s" fun))))
+    (unless (fboundp sym)
+      (defalias sym
+        (lambda nil
+          (interactive)
+          ;; Ensure this is only called from EAF buffer
+          (unless eaf--buffer-id
+            (error "%s command can only be called in an EAF buffer" sym))
+          (eaf-call "execute_function" eaf--buffer-id fun))
+        (format
+         "Proxy function to call \"%s\" on the Python side.
 
 Use `eaf-execute-app-cmd' if you want to execute this command programmatically.
-Please ONLY use `eaf-bind-key' and use the unprefixed command name (`%s`)
-to edit EAF keybindings!" fun)))
+Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
+to edit EAF keybindings!" fun fun)))
+    sym))
 
-(defun eaf-gen-keybinding-map (keybinding app-name)
-  "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-*-keybinding variables."
+(defun eaf-gen-keybinding-map (keybinding)
+  "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
-                   do (if (symbolp fun)
-                          (define-key map (kbd key) fun)
-                        (let ((dummy (intern
-                                      (format "eaf-%s-%s" app-name fun))))
-                          (eaf-dummy-function dummy fun key)
-                          (define-key map (kbd key) dummy)))
+                   do (define-key map (kbd key)
+                        (if (symbolp fun) fun (eaf-proxy-function fun)))
                    finally return map))))
 
 (defun eaf-get-app-bindings (app-name)
@@ -542,7 +536,7 @@ to edit EAF keybindings!" fun)))
 
 (defun eaf-create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
-  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name) app-name)
+  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
@@ -653,6 +647,12 @@ Use it as (eaf-setq var val)"
 
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
+
+COMMAND is a command with `eaf--proxy-' prefix found by calling
+`eaf-describe-bindings' in an EAF buffer, but dropping the prefix.
+
+KEY is a string representing a sequence of keystrokes and events.
+
 EAF-APP-KEYBINDING is one of the eaf-.*-keybinding variables.
 
 This is used to bind key to EAF Python applications."
