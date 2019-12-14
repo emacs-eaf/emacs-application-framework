@@ -655,7 +655,7 @@ Use it as (eaf-setq var val)"
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
 EAF-APP-KEYBINDING is one of the eaf-.*-keybinding variables.
 
-Use it as (eaf-bind-key var key eaf-app-keybinding)"
+This is used to bind key to EAF Python applications."
   `(map-put ,eaf-app-keybinding ,key ,(symbol-name command)))
 
 (defun eaf-focus-buffer (msg)
