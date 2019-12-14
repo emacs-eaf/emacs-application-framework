@@ -499,10 +499,14 @@ buffer."
       (call-interactively cmd))))
 
 (defun eaf-get-path-or-url ()
-  "Get the current file path or web URL, and copy to ‘kill-ring’."
+  "Get the current file path or web URL.
+
+When called interactively, copy to ‘kill-ring’."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
-      (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
+      (if (called-interactively-p 'any)
+          (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
+        (eaf-call "call_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
 (defun eaf-proxy-function (fun)
