@@ -93,24 +93,13 @@
   "EAF mode hook."
   :type 'hook)
 
-(defcustom eaf-capture-keys
-  '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>")
-  "Keys should send key event for to python side."
-  :type 'cons)
-
-(defcustom eaf-capture-commands
-  '(self-insert-command)
-  "Commands that should directly send key event to the Python side."
-  :type 'cons)
-
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") 'eaf-describe-bindings)
     (define-key map [remap describe-bindings] 'eaf-describe-bindings)
     (define-key map (kbd "C-c b") 'eaf-open-bookmark)
-    (dolist (cmd eaf-capture-commands)
-      (define-key map (vector 'remap cmd) #'eaf-send-key))
-    (dolist (single-key eaf-capture-keys)
+    (define-key map (vector 'remap self-insert-command) #'eaf-send-key)
+    (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>"))
       (define-key map (kbd single-key) #'eaf-send-key))
     map)
   "Keymap for default bindings available in all apps.")
