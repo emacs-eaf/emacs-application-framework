@@ -137,7 +137,7 @@ the app buffer has initialized."
   ;; FIXME: this changes this setting globally for the user
   ;; which may not want this, introduce EAF user option?
   (setq window-combination-resize t)
-  (set (make-local-variable 'eaf--buffer-id) (eaf-generate-id))
+  (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
   (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
   ;; copy default value in case user already has bindings there
   (setq-local emulation-mode-map-alists
@@ -478,7 +478,7 @@ We need calcuate render allocation to make sure no black border around render co
          (h (- (nth 3 window-edges) y)))
     (list x y w h)))
 
-(defun eaf-generate-id ()
+(defun eaf--generate-id ()
   (format "%04x-%04x-%04x-%04x-%04x-%04x-%04x"
           (random (expt 16 4))
           (random (expt 16 4))
@@ -509,9 +509,9 @@ When called interactively, copy to ‘kill-ring’."
         (eaf-call "call_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
-(defun eaf-proxy-function (fun)
-  "Define elisp command which can call python function FUN."
-  (let ((sym (intern (format "eaf--proxy-%s" fun))))
+(defun eaf--make-proxy-function (fun)
+  "Define elisp command which can call python function string FUN."
+  (let ((sym (intern (format "eaf-proxy-%s" fun))))
     (unless (fboundp sym)
       (defalias sym
         (lambda nil
@@ -528,23 +528,23 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
-(defun eaf-gen-keybinding-map (keybinding)
+(defun eaf--gen-keybinding-map (keybinding)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
                    do (define-key map (kbd key)
-                        (if (symbolp fun) fun (eaf-proxy-function fun)))
+                        (if (symbolp fun) fun (eaf--make-proxy-function fun)))
                    finally return map))))
 
-(defun eaf-get-app-bindings (app-name)
+(defun eaf--get-app-bindings (app-name)
   (symbol-value
    (cdr (assoc app-name eaf-app-binding-alist))))
 
-(defun eaf-create-buffer (input-content app-name)
+(defun eaf--create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
-  (eaf-gen-keybinding-map (eaf-get-app-bindings app-name))
+  (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
   (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
          (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
     (with-current-buffer eaf-buffer
@@ -637,6 +637,7 @@ to edit EAF keybindings!" fun fun)))
       (message (format "export %s to html" (buffer-file-name))))))
 
 (defun eaf-send-key ()
+  "Directly send key to EAF Python side."
   (interactive)
   (with-current-buffer (current-buffer)
     (eaf-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector)))))
@@ -656,7 +657,7 @@ Use it as (eaf-setq var val)"
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
 
-COMMAND is a command with `eaf--proxy-' prefix found by calling
+COMMAND is a command with `eaf-proxy-' prefix found by calling
 `eaf-describe-bindings' in an EAF buffer, but dropping the prefix.
 
 KEY is a string representing a sequence of keystrokes and events.
@@ -743,8 +744,8 @@ This is used to bind key to EAF Python applications."
  #'eaf-focus-buffer)
 
 (defun eaf-start-finish ()
-  "Call `eaf-open-internal' after receive `start_finish' signal from server process."
-  (eaf-open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
+  "Call `eaf--open-internal' after receive `start_finish' signal from server process."
+  (eaf--open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -801,7 +802,7 @@ This is used to bind key to EAF Python applications."
  "com.lazycat.eaf" "input_message"
  #'eaf-input-message)
 
-(defun eaf-send-var-to-python ()
+(defun eaf--send-var-to-python ()
   "Send variables defined in `eaf-var-list' to the Python side."
   (eaf-call "store_emacs_var"
             (string-join (cl-loop for (key . value) in eaf-var-list
@@ -810,10 +811,10 @@ This is used to bind key to EAF Python applications."
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "get_emacs_var"
- #'eaf-send-var-to-python)
+ #'eaf--send-var-to-python)
 
-(defun eaf-open-internal (url app-name arguments)
-  (let* ((buffer (eaf-create-buffer url app-name))
+(defun eaf--open-internal (url app-name arguments)
+  (let* ((buffer (eaf--create-buffer url app-name))
          (buffer-result
           (with-current-buffer buffer
             (eaf-call "new_buffer"
@@ -940,11 +941,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
                     (setq exists-eaf-buffer buffer)
                     (throw 'found-match-buffer t)))))
             ;; Switch to exists buffer,
-            ;; if no match buffer found, call `eaf-open-internal'.
+            ;; if no match buffer found, call `eaf--open-internal'.
             (if exists-eaf-buffer
                 (eaf--display-app-buffer app-name exists-eaf-buffer)
-              (eaf-open-internal url app-name arguments)))
-        ;; Record user input, and call `eaf-open-internal' after receive `start_finish' signal from server process.
+              (eaf--open-internal url app-name arguments)))
+        ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
         (setq eaf-first-start-url url)
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
