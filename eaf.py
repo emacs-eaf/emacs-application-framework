@@ -267,6 +267,12 @@ class EAF(dbus.service.Object):
             if buffer.buffer_id == buffer_id:
                 buffer.handle_input_message(callback_type, callback_result)
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def cancel_input_message(self, buffer_id, callback_type):
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                buffer.cancel_input_message(callback_type)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def store_emacs_var(self, var_dict_string):
         for var_pair in var_dict_string.split(":"):

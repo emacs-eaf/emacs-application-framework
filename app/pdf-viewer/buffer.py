@@ -45,6 +45,10 @@ class AppBuffer(Buffer):
         elif result_type == "jump_link":
             self.buffer_widget.jump_to_link(str(result_content))
 
+    def cancel_input_message(self, result_type):
+        if result_type == "jump_link":
+            self.buffer_widget.clean_links()
+
     def scroll(self, scroll_direction, scroll_type):
         if scroll_type == "page":
             if scroll_direction == "up":
@@ -500,7 +504,6 @@ class PdfViewerWidget(QWidget):
                     page.deleteAnnot(annot)
         self.jump_link_key_cache_dict.clear()
         self.jump_link_annot_cache_dict.clear()
-        self.update()
 
     def jump_to_link(self, key):
         key = str(key).upper()
@@ -509,6 +512,14 @@ class PdfViewerWidget(QWidget):
             self.remember_current_position()
             self.jump_to_page(link["page"] + 1)
         self.delete_all_mark_jump_link_tips()
+
+        self.update()
+
+    def clean_links(self):
+        self.is_mark_link = False
+        self.delete_all_mark_jump_link_tips()
+        self.page_cache_pixmap_dict.clear()
+
         self.update()
 
     def jump_to_page(self, page_num):

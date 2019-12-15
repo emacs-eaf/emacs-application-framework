@@ -127,6 +127,7 @@ self.eval_in_emacs.emit('''(message "hello")''')
 
 ### Read user's input
 Below is code example from pdfviewer:
+
 ```Python
 ...
 
@@ -144,22 +145,28 @@ class AppBuffer(Buffer):
         if result_type == "jump_page":
             self.buffer_widget.jump_to_page(int(result_content))
 
+    def cacel_input_message(self, result_type):
+        if result_type == "jump_page":
+            ...
+
 ...
 ```
 If you want read input from emacs minibuffer then call back to python.
 
-You can emit buffer signal "send_input_message", first argument is prompt string to user, second argument is callback_type for interface "handle_input_message".
+You can emit buffer signal ```send_input_message```, first argument is prompt string to user, second argument is callback_type for interface ```handle_input_message```.
 
-After emacs read user input, framework will call interface "handle_input_message", result_type is callback_type you use in signal "send_input_message", result_content is input string from emacs.
+After emacs read user input, framework will call interface ```handle_input_message```, result_type is callback_type you use in signal ```send_input_message```, result_content is input string from emacs.
 
-Simple logic is send "send_input_message" signal to emacs, then handle user input with buffer interface "handle_input_message"
+Simple logic is send ```send_input_message``` signal to emacs, then handle user input with buffer interface ```handle_input_message```
+
+If user cancel input, such as press Ctrl + g, you can define your own ```cancel_input_message``` interface, write cancel callback for type.
 
 ### Scroll by other window
-In emacs, we usually call command "scroll-other-window" to scroll other window's buffer.
+In emacs, we usually call command ```scroll-other-window``` to scroll other window's buffer.
 
 If you want eaf application buffer respond scroll event to command "scroll-other-window".
 
-You need implement "scroll" interface in AppBuffer, such as like PDF Viewer does:
+You need implement ```scroll``` interface in AppBuffer, such as like PDF Viewer does:
 
 ```Python
 def scroll(self, scroll_direction, scroll_type):
@@ -182,7 +189,7 @@ Argument "scroll_type" is string, "page" mean scroll buffer by page, "line" mean
 ### Save/Restore session
 We always need save and restore session for an application, such as, save play position of the video player.
 
-You need implement interfaces "save_session_data" and "restore_session_data", below is an example of Vide Player does:
+You need implement interfaces ```save_session_data``` and ```restore_session_data```, below is an example of Vide Player does:
 
 
 ```Python
@@ -201,7 +208,7 @@ All session data save at ~/.emacs.d/eaf/session.json file.
 ### Update buffer
 If you need to update buffer sometimes, such as update org-file previewer after saving org-file.
 
-You need to implement the interface "update_with_data". Below is an example of what Org Previewer does:
+You need to implement the interface ```update_with_data```. Below is an example of what Org Previewer does:
 
 ```Python
 def update_with_data(self, update_data):

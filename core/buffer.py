@@ -239,6 +239,9 @@ class Buffer(QGraphicsScene):
     def handle_input_message(self, result_type, result_content):
         pass
 
+    def cancel_input_message(self, result_type):
+        pass
+
     def scroll(self, scroll_direction, scroll_type):
         pass
 

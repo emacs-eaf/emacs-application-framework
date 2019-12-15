@@ -796,8 +796,10 @@ This is used to bind key to EAF Python applications."
 (defun eaf-input-message (input-buffer-id interactive-string callback-type)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-string interactive-string)))
-    (when input-message
-      (eaf-call "handle_input_message" input-buffer-id callback-type input-message))))
+    (if input-message
+        (eaf-call "handle_input_message" input-buffer-id callback-type input-message)
+      (eaf-call "cancel_input_message" input-buffer-id callback-type)
+      )))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
