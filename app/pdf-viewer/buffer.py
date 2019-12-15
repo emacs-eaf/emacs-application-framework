@@ -116,6 +116,9 @@ class AppBuffer(Buffer):
     def toggle_inverted_mode(self):
         self.buffer_widget.toggle_inverted_mode()
 
+    def toggle_mark_link(self):
+        self.buffer_widget.toggle_mark_link()
+
     def jump_to_link(self):
         self.buffer_widget.add_mark_jump_link_tips()
         self.buffer_widget.send_input_message("Jump to link: ", "jump_link")
@@ -145,6 +148,10 @@ class PdfViewerWidget(QWidget):
 
         # Inverted mode.
         self.inverted_mode = False
+
+        # mark link
+        self.is_mark_link = False
+        self.mark_link_annot_cache_dict = {}
 
         #jump link
         self.jump_link_key_cache_dict = {}
@@ -204,7 +211,12 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
             self.page_cache_trans = fitz.Matrix(scale, scale)
 
-        page = self.document[index]
+        if self.is_mark_link:
+            page = self.add_mark_link(index)
+        else:
+            self.delete_all_mark_link()
+            page = self.document[index]
+
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
 
@@ -415,6 +427,31 @@ class PdfViewerWidget(QWidget):
         self.inverted_mode = not self.inverted_mode
 
         # Re-render page.
+        self.update()
+
+    def toggle_mark_link(self):
+        self.is_mark_link = not self.is_mark_link
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
+    def add_mark_link(self, index):
+        annot_list = []
+        page = self.document[index]
+        if page.firstLink:
+            for link in page.getLinks():
+                annot = page.addUnderlineAnnot(link["from"])
+                annot.parent = page # Must assign annot parent, else deleteAnnot cause parent is None problem.
+                annot_list.append(annot)
+            self.mark_link_annot_cache_dict[index] = annot_list
+        return page
+
+    def delete_all_mark_link(self):
+        if (not self.is_mark_link) and self.mark_link_annot_cache_dict:
+            for index in self.mark_link_annot_cache_dict.keys():
+                page = self.document[index]
+                for annot in self.mark_link_annot_cache_dict[index]:
+                    page.deleteAnnot(annot)
+        self.mark_link_annot_cache_dict.clear()
         self.update()
 
     def generate_random_key(self, count):
