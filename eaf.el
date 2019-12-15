@@ -237,7 +237,8 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("]" . "remember_jump")
     ("i" . "toggle_inverted_mode")
     ("m" . "toggle_mark_link")
-    ("f" . "jump_to_link"))
+    ("f" . "jump_to_link")
+    ("s" . "local_search_text"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
