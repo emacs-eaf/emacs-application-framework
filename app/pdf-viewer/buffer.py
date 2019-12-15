@@ -27,6 +27,7 @@ from PyQt5.QtWidgets import QWidget
 from core.buffer import Buffer
 import fitz
 import time
+import random
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -41,6 +42,8 @@ class AppBuffer(Buffer):
             self.buffer_widget.jump_to_page(int(result_content))
         elif result_type == "jump_percent":
             self.buffer_widget.jump_to_percent(int(result_content))
+        elif result_type == "jump_link":
+            self.buffer_widget.jump_to_link(str(result_content))
 
     def scroll(self, scroll_direction, scroll_type):
         if scroll_type == "page":
@@ -113,6 +116,13 @@ class AppBuffer(Buffer):
     def toggle_inverted_mode(self):
         self.buffer_widget.toggle_inverted_mode()
 
+    def toggle_mark_link(self):
+        self.buffer_widget.toggle_mark_link()
+
+    def jump_to_link(self):
+        self.buffer_widget.add_mark_jump_link_tips()
+        self.buffer_widget.send_input_message("Jump to link: ", "jump_link")
+
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
@@ -138,6 +148,14 @@ class PdfViewerWidget(QWidget):
 
         # Inverted mode.
         self.inverted_mode = False
+
+        # mark link
+        self.is_mark_link = False
+        self.mark_link_annot_cache_dict = {}
+
+        #jump link
+        self.jump_link_key_cache_dict = {}
+        self.jump_link_annot_cache_dict = {}
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -193,7 +211,12 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
             self.page_cache_trans = fitz.Matrix(scale, scale)
 
-        page = self.document[index]
+        if self.is_mark_link:
+            page = self.add_mark_link(index)
+        else:
+            self.delete_all_mark_link()
+            page = self.document[index]
+
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
 
@@ -406,6 +429,88 @@ class PdfViewerWidget(QWidget):
         # Re-render page.
         self.update()
 
+    def toggle_mark_link(self):
+        self.is_mark_link = not self.is_mark_link
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
+    def add_mark_link(self, index):
+        annot_list = []
+        page = self.document[index]
+        if page.firstLink:
+            for link in page.getLinks():
+                annot = page.addUnderlineAnnot(link["from"])
+                annot.parent = page # Must assign annot parent, else deleteAnnot cause parent is None problem.
+                annot_list.append(annot)
+            self.mark_link_annot_cache_dict[index] = annot_list
+        return page
+
+    def delete_all_mark_link(self):
+        if (not self.is_mark_link) and self.mark_link_annot_cache_dict:
+            for index in self.mark_link_annot_cache_dict.keys():
+                page = self.document[index]
+                for annot in self.mark_link_annot_cache_dict[index]:
+                    page.deleteAnnot(annot)
+        self.mark_link_annot_cache_dict.clear()
+        self.update()
+
+    def generate_random_key(self, count):
+        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        key_list = []
+        while count > 0:
+            key = ''.join(random.choices(letters, k=2))
+            if key not in key_list:
+                key_list.append(key)
+                count -= 1
+        return key_list
+
+    def add_mark_jump_link_tips(self):
+        # Only mark display page
+        start_page_index = self.get_start_page_index()
+        last_page_index = self.get_last_page_index()
+        tips_size = 7
+        annot_list = []
+
+        for page_index in range(start_page_index, last_page_index):
+            page = self.document[page_index]
+            annot_list = []
+            if page.firstLink:
+                links = page.getLinks()
+                key_list = self.generate_random_key(len(links))
+                for index, link in enumerate(links):
+                    key = key_list[index]
+                    link_rect = link["from"]
+                    annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + tips_size, link_rect.y0 + tips_size)
+                    annot = page.addFreetextAnnot(annot_rect, str(key), fontsize=6, fontname="Cour", \
+                                                  text_color=[0.0, 0.0, 0.0], fill_color=[255/255.0, 197/255.0, 36/255.0])
+                    annot.parent = page
+                    annot_list.append(annot)
+                    self.jump_link_key_cache_dict[key] = link
+
+            self.jump_link_annot_cache_dict[page_index] = annot_list
+
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
+    def delete_all_mark_jump_link_tips(self):
+        if self.jump_link_annot_cache_dict:
+            for index in self.jump_link_annot_cache_dict.keys():
+                page = self.document[index]
+                for annot in self.jump_link_annot_cache_dict[index]:
+                    page.deleteAnnot(annot)
+        self.jump_link_key_cache_dict.clear()
+        self.jump_link_annot_cache_dict.clear()
+        self.update()
+
+    def jump_to_link(self, key):
+        key = str(key).upper()
+        if key in self.jump_link_key_cache_dict:
+            link = self.jump_link_key_cache_dict[key]
+            self.remember_current_position()
+            self.jump_to_page(link["page"] + 1)
+        self.delete_all_mark_jump_link_tips()
+        self.update()
+
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
 
@@ -468,9 +573,6 @@ class PdfViewerWidget(QWidget):
         rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
         if rect_words:
             return rect_words[0][4]
-
-    def enterEvent(self, event):
-        pass
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseButtonPress:
