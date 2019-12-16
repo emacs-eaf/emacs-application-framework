@@ -391,7 +391,7 @@ For now only EAF browser app is supported."
            (bookmark-jump cand))
           (t
            (unless (derived-mode-p 'eaf-mode)
-             (user-error "Not in an EAF buffer"))
+             (user-error "This command can only be called in an EAF buffer!"))
            ;; create new one for current buffer with provided name
            (bookmark-set cand)))))
 
@@ -523,9 +523,9 @@ When called interactively, copy to ‘kill-ring’."
         (lambda nil
           (interactive)
           ;; Ensure this is only called from EAF buffer
-          (unless eaf--buffer-id
-            (error "%s command can only be called in an EAF buffer" sym))
-          (eaf-call "execute_function" eaf--buffer-id fun))
+          (if (derived-mode-p 'eaf-mode)
+              (eaf-call "execute_function" eaf--buffer-id fun)
+            (user-error "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
 
