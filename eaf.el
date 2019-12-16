@@ -82,6 +82,7 @@
 ;;; Require
 (require 'dbus)
 (require 'subr-x)
+(require 'map)
 
 ;;; Code:
 
