@@ -28,6 +28,7 @@ from core.buffer import Buffer
 import fitz
 import time
 import random
+import math
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -486,8 +487,9 @@ class PdfViewerWidget(QWidget):
     def generate_random_key(self, count):
         letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         key_list = []
+        key_len = int(math.log10(count)) + 1
         while count > 0:
-            key = ''.join(random.choices(letters, k=2))
+            key = ''.join(random.choices(letters, k=key_len))
             if key not in key_list:
                 key_list.append(key)
                 count -= 1
@@ -497,7 +499,7 @@ class PdfViewerWidget(QWidget):
         # Only mark display page
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
-        tips_size = 7
+        tips_size = 4
         annot_list = []
 
         for page_index in range(start_page_index, last_page_index):
@@ -509,7 +511,7 @@ class PdfViewerWidget(QWidget):
                 for index, link in enumerate(links):
                     key = key_list[index]
                     link_rect = link["from"]
-                    annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + tips_size, link_rect.y0 + tips_size)
+                    annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + (tips_size * len(key)), link_rect.y0 + 7)
                     annot = page.addFreetextAnnot(annot_rect, str(key), fontsize=6, fontname="Cour", \
                                                   text_color=[0.0, 0.0, 0.0], fill_color=[255/255.0, 197/255.0, 36/255.0])
                     annot.parent = page
@@ -548,7 +550,7 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def add_mark_search_text(self, page, page_index):
-        quads_list = page.searchFor(self.search_text, hit_max=999, quads=True)
+        quads_list = page.searchFor(self.search_term, hit_max=999, quads=True)
         annot_list = []
         if quads_list:
             for quads in quads_list:
@@ -561,7 +563,7 @@ class PdfViewerWidget(QWidget):
 
     def search_text(self, text):
         self.search_flag = True
-        self.search_text = text
+        self.search_term = text
         self.page_cache_pixmap_dict.clear()
 
         search_text_index = 0
@@ -590,14 +592,13 @@ class PdfViewerWidget(QWidget):
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
 
     def delete_all_mark_search_text(self):
-        self.search_flag = False
         if self.search_text_annot_cache_dict:
             for page_index in self.search_text_annot_cache_dict.keys():
                 page = self.document[page_index]
                 for annot in self.search_text_annot_cache_dict[page_index]:
                     page.deleteAnnot(annot)
         self.search_flag = False
-        self.search_text = None
+        self.search_term = None
         self.search_text_annot_cache_dict.clear()
         self.page_cache_pixmap_dict.clear()
         self.search_text_offset_list.clear()
