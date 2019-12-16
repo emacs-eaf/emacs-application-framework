@@ -130,17 +130,17 @@ class AppBuffer(Buffer):
         self.buffer_widget.send_input_message("Jump to link: ", "jump_link")
 
     def search_text(self):
-        if self.buffer_widget.is_search_text:
+        if self.buffer_widget.search_flag:
             self.buffer_widget.delete_all_mark_search_text()
         else:
             self.buffer_widget.send_input_message("Search text: ", "search_text")
 
     def jump_next_match(self):
-        if self.buffer_widget.is_search_text:
+        if self.buffer_widget.search_flag:
             self.buffer_widget.jump_next_match()
 
     def jump_last_match(self):
-        if self.buffer_widget.is_search_text:
+        if self.buffer_widget.search_flag:
             self.buffer_widget.jump_last_match()
 
 class PdfViewerWidget(QWidget):
@@ -177,13 +177,10 @@ class PdfViewerWidget(QWidget):
         self.jump_link_key_cache_dict = {}
         self.jump_link_annot_cache_dict = {}
 
-        # local search text
-        self.is_local_search_text = False
-        self.local_search_text_annot_cache_dict = {}
-
         #global search text
-        self.is_search_text = False
+        self.search_flag = False
         self.search_text_offset_list = []
+        self.search_text_annot_cache_dict = {}
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -246,8 +243,8 @@ class PdfViewerWidget(QWidget):
             page = self.document[index]
 
         # follow page search text
-        if self.is_local_search_text:
-            page = self.add_mark_local_search_text(page, index)
+        if self.search_flag:
+            page = self.add_mark_search_text(page, index)
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
@@ -550,7 +547,7 @@ class PdfViewerWidget(QWidget):
 
         self.update()
 
-    def add_mark_local_search_text(self, page, page_index):
+    def add_mark_search_text(self, page, page_index):
         quads_list = page.searchFor(self.search_text, hit_max=999, quads=True)
         annot_list = []
         if quads_list:
@@ -558,31 +555,14 @@ class PdfViewerWidget(QWidget):
                 annot = page.addHighlightAnnot(quads)
                 annot.parent = page
                 annot_list.append(annot)
-        self.local_search_text_annot_cache_dict[page_index] = annot_list
+        self.search_text_annot_cache_dict[page_index] = annot_list
+
         return page
 
-    def local_search_text(self, search_text):
-        # begin local search
-        self.is_local_search_text = True
-        self.search_text = search_text
-        self.page_cache_pixmap_dict.clear()
-        self.update()
-
-    def delete_all_mark_local_search_text(self):
-        if self.local_search_text_annot_cache_dict:
-            for page_index in self.local_search_text_annot_cache_dict.keys():
-                page = self.document[page_index]
-                for annot in self.local_search_text_annot_cache_dict[page_index]:
-                    page.deleteAnnot(annot)
-        self.is_local_search_text = False
-        self.search_text = None
-        self.local_search_text_annot_cache_dict.clear()
-        self.page_cache_pixmap_dict.clear()
-        self.update()
-
     def search_text(self, text):
-        self.is_search_text = True
-        self.local_search_text(text)
+        self.search_flag = True
+        self.search_text = text
+        self.page_cache_pixmap_dict.clear()
 
         search_text_index = 0
         self.search_text_index = 0
@@ -597,6 +577,8 @@ class PdfViewerWidget(QWidget):
                         self.search_text_index = search_text_index
                     search_text_index += 1
 
+        self.update()
+
     def jump_next_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index + 1) % len(self.search_text_offset_list)
@@ -608,10 +590,18 @@ class PdfViewerWidget(QWidget):
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
 
     def delete_all_mark_search_text(self):
-        self.is_search_text = False
-        self.is_local_search_text = False
-        self.delete_all_mark_local_search_text()
+        self.search_flag = False
+        if self.search_text_annot_cache_dict:
+            for page_index in self.search_text_annot_cache_dict.keys():
+                page = self.document[page_index]
+                for annot in self.search_text_annot_cache_dict[page_index]:
+                    page.deleteAnnot(annot)
+        self.search_flag = False
+        self.search_text = None
+        self.search_text_annot_cache_dict.clear()
+        self.page_cache_pixmap_dict.clear()
         self.search_text_offset_list.clear()
+        self.update()
 
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
