@@ -238,7 +238,10 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("i" . "toggle_inverted_mode")
     ("m" . "toggle_mark_link")
     ("f" . "jump_to_link")
-    ("s" . "local_search_text"))
+    ("s" . "local_search_text")
+    ("S" . "global_search_text")
+    ("n" . "global_search_text_next")
+    ("N" . "global_search_text_last"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
