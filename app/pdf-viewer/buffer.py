@@ -44,11 +44,8 @@ class AppBuffer(Buffer):
             self.buffer_widget.jump_to_percent(int(result_content))
         elif result_type == "jump_link":
             self.buffer_widget.jump_to_link(str(result_content))
-        elif result_type == "local_search_text":
-            self.buffer_widget.local_search_text(str(result_content))
-        elif result_type == "global_search_text":
-            self.buffer_widget.global_search_text(str(result_content))
-
+        elif result_type == "search_text":
+            self.buffer_widget.search_text(str(result_content))
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link":
@@ -132,25 +129,19 @@ class AppBuffer(Buffer):
         self.buffer_widget.add_mark_jump_link_tips()
         self.buffer_widget.send_input_message("Jump to link: ", "jump_link")
 
-    def local_search_text(self):
-        if self.buffer_widget.is_local_search_text:
-            self.buffer_widget.delete_all_mark_local_search_text()
+    def search_text(self):
+        if self.buffer_widget.is_search_text:
+            self.buffer_widget.delete_all_mark_search_text()
         else:
-            self.buffer_widget.send_input_message("Search text: ", "local_search_text")
+            self.buffer_widget.send_input_message("Search text: ", "search_text")
 
-    def global_search_text(self):
-        if self.buffer_widget.is_global_search_text:
-            self.buffer_widget.delete_all_mark_global_search_text()
-        else:
-            self.buffer_widget.send_input_message("Search text: ", "global_search_text")
+    def jump_next_match(self):
+        if self.buffer_widget.is_search_text:
+            self.buffer_widget.jump_next_match()
 
-    def global_search_text_next(self):
-        if self.buffer_widget.is_global_search_text:
-            self.buffer_widget.global_search_text_next()
-
-    def global_search_text_last(self):
-        if self.buffer_widget.is_global_search_text:
-            self.buffer_widget.global_search_text_last()
+    def jump_last_match(self):
+        if self.buffer_widget.is_search_text:
+            self.buffer_widget.jump_last_match()
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -191,8 +182,8 @@ class PdfViewerWidget(QWidget):
         self.local_search_text_annot_cache_dict = {}
 
         #global search text
-        self.is_global_search_text = False
-        self.global_search_text_offset_list = []
+        self.is_search_text = False
+        self.search_text_offset_list = []
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -589,38 +580,38 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
         self.update()
 
-    def global_search_text(self, text):
-        self.is_global_search_text = True
+    def search_text(self, text):
+        self.is_search_text = True
         self.local_search_text(text)
 
         search_text_index = 0
-        self.global_search_text_index = 0
+        self.search_text_index = 0
         for page_index in range(self.page_total_number):
             quads_list = self.document.searchPageFor(page_index, text, hit_max=999, quads=True)
             if quads_list:
                 for quad in quads_list:
                     search_text_offset = (page_index * self.page_height + quad.ul.y) * self.scale
 
-                    self.global_search_text_offset_list.append(search_text_offset)
+                    self.search_text_offset_list.append(search_text_offset)
                     if search_text_offset > self.scroll_offset and search_text_offset < (self.scroll_offset + self.rect().height()):
-                        self.global_search_text_index = search_text_index
+                        self.search_text_index = search_text_index
                     search_text_index += 1
 
-    def global_search_text_next(self):
-        if len(self.global_search_text_offset_list) > 0:
-            self.global_search_text_index = (self.global_search_text_index + 1) % len(self.global_search_text_offset_list)
-            self.update_scroll_offset(self.global_search_text_offset_list[self.global_search_text_index])
+    def jump_next_match(self):
+        if len(self.search_text_offset_list) > 0:
+            self.search_text_index = (self.search_text_index + 1) % len(self.search_text_offset_list)
+            self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
 
-    def global_search_text_last(self):
-        if len(self.global_search_text_offset_list) > 0:
-            self.global_search_text_index = (self.global_search_text_index - 1) % len(self.global_search_text_offset_list)
-            self.update_scroll_offset(self.global_search_text_offset_list[self.global_search_text_index])
+    def jump_last_match(self):
+        if len(self.search_text_offset_list) > 0:
+            self.search_text_index = (self.search_text_index - 1) % len(self.search_text_offset_list)
+            self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
 
-    def delete_all_mark_global_search_text(self):
-        self.is_global_search_text = False
+    def delete_all_mark_search_text(self):
+        self.is_search_text = False
         self.is_local_search_text = False
         self.delete_all_mark_local_search_text()
-        self.global_search_text_offset_list.clear()
+        self.search_text_offset_list.clear()
 
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))

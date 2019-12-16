@@ -42,6 +42,10 @@ You can customize keys in the variable ```eaf-browser-keybinding```
 | [              | Remember position                   |
 | ]              | Remember jump                       |
 | i              | Toggle inverted mode                |
+| m              | Toggle mark link                    |
+| s              | Search text                         |
+| n              | Jump next match of search           |
+| N              | Jump last match of search       |
 | Double Click   | Use sdcv translate word under point |
 
 You can customize in the variable ```eaf-pdf-viewer-keybinding```
