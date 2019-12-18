@@ -485,7 +485,7 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def generate_random_key(self, count):
-        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        letters = "ASDFHJKLQWEIOP"
         key_list = []
         key_len = int(math.log10(count)) + 1
         while count > 0:
