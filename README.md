@@ -52,7 +52,7 @@ This framework mainly implements three functions:
 
 ```Bash
 git clone https://github.com/lxqt/qtermwidget.git --depth=1
-mkdir bulid && cd build
+mkdir build && cd build
 cmake .. -DQTERMWIDGET_BUILD_PYTHON_BINDING=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr
 make
 sudo make install
