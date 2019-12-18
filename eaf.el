@@ -241,12 +241,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("f" . "jump_to_link")
     ("s" . "search_text")
     ("n" . "jump_next_match")
-    ("N" . "jump_last_match")
-    ("v" . "toggle_cursor_mode")
-    ("<right>" . "cursor_forward")
-    ("l" . "cursor_forward")
-    ("<left>" . "cursor_backward")
-    ("h" . "cursor_backward"))
+    ("N" . "jump_last_match"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
