@@ -85,7 +85,10 @@ class AppBuffer(Buffer):
         self.buffer_widget.scroll_down()
 
     def scroll_up_page(self):
-        self.buffer_widget.scroll_up_page()
+        if self.buffer_widget.cursor_mode:
+            self.buffer_widget.toggle_cursor_mark_set()
+        else:
+            self.buffer_widget.scroll_up_page()
 
     def scroll_down_page(self):
         self.buffer_widget.scroll_down_page()
@@ -144,6 +147,17 @@ class AppBuffer(Buffer):
         if self.buffer_widget.search_flag:
             self.buffer_widget.jump_last_match()
 
+    def toggle_cursor_mode(self):
+        self.buffer_widget.toggle_cursor_mode()
+
+    def cursor_forward(self):
+        if self.buffer_widget.cursor_mode:
+            self.buffer_widget.cursor_forward()
+
+    def cursor_backward(self):
+        if self.buffer_widget.cursor_mode:
+            self.buffer_widget.cursor_backward()
+
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
@@ -169,6 +183,13 @@ class PdfViewerWidget(QWidget):
 
         # Inverted mode.
         self.inverted_mode = False
+
+        # Cursor mode
+        self.cursor_mode = False
+        self.cursor_mark_mode = False
+        self.cursor_word_rect_index = 0
+        self.cursor_annot_cache_dict = {}
+        self.current_page_cursor_annot_list = []
 
         # mark link
         self.is_mark_link = False
@@ -604,6 +625,101 @@ class PdfViewerWidget(QWidget):
         self.search_text_offset_list.clear()
         self.update()
 
+    def toggle_cursor_mode(self):
+        if not self.cursor_mode:
+            self.cursor_mode = True
+            self.cursor_word_rect_list = list(map(lambda x: fitz.Rect(x[:4]), self.get_cursor_word_list()))
+            self.cursor_higtlight()
+        else:
+            self.delete_all_cursor_mark()
+
+    def get_cursor_word_list(self, reverse=False):
+        display_rect, top_page_index, bottom_page_index = self.get_display_absolute_rect()
+        self.cursor_page_index = top_page_index # default cursor on start page.
+
+        # only get the start page word list
+        bottom_right_y = display_rect.y1 if top_page_index == bottom_page_index else self.page_height
+        display_rect = fitz.Rect(display_rect.x0, display_rect.y0, display_rect.x1, bottom_right_y)
+
+        page = self.document[self.cursor_page_index]
+        page_words = page.getText("words")
+        if page_words:
+            self.cursor_annot_cache_dict[self.cursor_page_index] = [] # init list
+            word_list = [w for w in page_words if fitz.Rect(w[:4]) in display_rect]
+
+            if word_list:
+                idx = -1 if reverse else 0
+                self.cursor_word_rect_index = page_words.index(word_list[idx]) # default higtlight display area first word.
+                return page_words
+            else:
+                # If start page don't word, jump to next page, and renew get new page word list.
+                # Because jump_to_page function will subtract one get really page index, but this
+                # cursor_page_index is really page index.
+                self.jump_to_page(self.cursor_page_index + 2)
+                return self.get_cursor_word_list()
+
+    def cursor_higtlight(self):
+        if self.cursor_mode:
+            page = self.document[self.cursor_page_index]
+            annot = page.addHighlightAnnot(self.cursor_word_rect_list[self.cursor_word_rect_index].quad)
+            annot.parent = page
+            self.cursor_annot_cache_dict[self.cursor_page_index].append(annot)
+
+            self.page_cache_pixmap_dict.clear()
+            self.update()
+
+    def reset_last_cursor(self):
+        if self.cursor_mode:
+            page = self.document[self.cursor_page_index]
+            page_annot_list = self.cursor_annot_cache_dict[self.cursor_page_index]
+            if page_annot_list:
+                page.deleteAnnot(page_annot_list.pop())
+
+    def delete_all_cursor_mark(self):
+        if self.cursor_mode and self.cursor_annot_cache_dict:
+            for page_index, annot_list in self.cursor_annot_cache_dict.items():
+                page = self.document[page_index]
+                for annot in annot_list:
+                    page.deleteAnnot(annot)
+
+            self.cursor_mode = False
+            self.cursor_mark_mode = False
+            self.cursor_word_rect_index = None
+            self.cursor_page_index = None
+            self.cursor_annot_cache_dict.clear()
+            self.cursor_word_rect_list.clear()
+
+            self.page_cache_pixmap_dict.clear()
+            self.update()
+
+    def cursor_forward(self):
+        self.cursor_word_rect_index += 1
+        if self.cursor_word_rect_list and not self.cursor_mark_mode:
+            self.reset_last_cursor()
+
+        if self.cursor_word_rect_index == len(self.cursor_word_rect_list):
+            self.jump_to_page(self.cursor_page_index + 2) # jump to last page.
+            self.cursor_word_rect_list = list(map(lambda x: fitz.Rect(x[:4]), self.get_cursor_word_list()))
+
+        self.cursor_higtlight()
+
+    def cursor_backward(self):
+        self.cursor_word_rect_index -= 1
+        if self.cursor_word_rect_list and not self.cursor_mark_mode:
+            self.reset_last_cursor()
+
+        if self.cursor_word_rect_index == -1:
+            self.scroll_down_page()
+            self.cursor_word_rect_list = list(map(lambda x: fitz.Rect(x[:4]), self.get_cursor_word_list(reverse=True)))
+
+        self.cursor_higtlight()
+
+    def toggle_cursor_mark_set(self):
+        if self.cursor_mode:
+            self.cursor_mark_mode = not self.cursor_mark_mode
+        else:
+            self.cursor_mark_mode = False
+
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
 
@@ -615,10 +731,19 @@ class PdfViewerWidget(QWidget):
             self.scroll_offset = new_offset
             self.update()
 
-    def get_event_absolute_position(self, event):
+    def get_display_absolute_rect(self):
+        page_left_x = (self.rect().width() - self.page_width * self.scale) / 2.0
+        page_right_x = page_left_x + self.page_width * self.scale
+
+        tlx, tly, top_page_index = self.get_absolute_position(page_left_x, 5.0) # top left
+        rbx, rby, bottom_page_index = self.get_absolute_position(page_right_x, self.rect().height()) # bottom right
+        display_rect = fitz.Rect(tlx, tly, rbx, rby)
+
+        return display_rect, top_page_index, bottom_page_index
+
+    def get_absolute_position(self, posx, posy):
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
-        pos = event.pos()
 
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
@@ -626,21 +751,21 @@ class PdfViewerWidget(QWidget):
                 render_x = int((self.rect().width() - render_width) / 2)
 
                 # computer absolute coordinate of page
-                x = int((pos.x() - render_x) * 1.0 / self.scale)
-                if pos.y() + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
+                x = int((posx - render_x) * 1.0 / self.scale)
+                if posy + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
                     page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
                     page_index = index
                 else:
-                    # if display two pages, pos.y() will add page_padding
+                    # if display two pages, posy will add page_padding
                     page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
                     page_index = index + 1
-                y = int((pos.y() + page_offset) * 1.0 / self.scale)
+                y = int((posy + page_offset) * 1.0 / self.scale)
 
                 return x, y, page_index
         return None, None, None
 
     def get_event_link(self, event):
-        ex, ey, page_index = self.get_event_absolute_position(event)
+        ex, ey, page_index = self.get_absolute_position(event.x(), event.y())
         if page_index is None:
             return None
 
@@ -654,14 +779,13 @@ class PdfViewerWidget(QWidget):
         return None
 
     def get_double_click_word(self, event):
-        ex, ey, page_index = self.get_event_absolute_position(event)
+        ex, ey, page_index = self.get_absolute_position(event.x(), event.y())
         if page_index is None:
             return None
         page = self.document[page_index]
         word_offset = 10 # 10 pixel is enough for word intersect operation
         draw_rect = fitz.Rect(ex, ey, ex + word_offset, ey + word_offset)
 
-        page.setCropBox(page.rect)
         page_words = page.getTextWords()
         rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
         if rect_words:
