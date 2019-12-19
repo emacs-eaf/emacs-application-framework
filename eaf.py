@@ -255,6 +255,12 @@ class EAF(dbus.service.Object):
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
+    def action_quit(self, buffer_id):
+        if buffer_id in self.buffer_dict:
+            self.buffer_dict[buffer_id].action_quit()
+        self.message_to_emacs("Quit")
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def send_key(self, buffer_id, event_string):
         # Send event to buffer when found match buffer.

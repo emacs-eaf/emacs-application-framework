@@ -130,6 +130,12 @@ class AppBuffer(Buffer):
         self.buffer_widget.add_mark_jump_link_tips()
         self.buffer_widget.send_input_message("EAF PDF Viewer - Jump to Link: ", "jump_link")
 
+    def action_quit(self):
+        if self.buffer_widget.is_mark_search:
+            self.buffer_widget.cleanup_search()
+        if self.buffer_widget.is_mark_link:
+            self.buffer_widget.cleanup_links()
+
     def search_text(self):
         if self.buffer_widget.search_flag:
             self.buffer_widget.remove_marked_search_text()
