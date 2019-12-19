@@ -259,7 +259,6 @@ class EAF(dbus.service.Object):
     def action_quit(self, buffer_id):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].action_quit()
-        self.message_to_emacs("Quit")
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def send_key(self, buffer_id, event_string):
