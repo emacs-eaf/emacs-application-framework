@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 14 17:34:32 2019 (-0500)
+;; Last-Updated: Wed Dec 18 23:16:29 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -156,8 +156,6 @@ the app buffer has initialized."
 (defvar eaf-first-start-app-name nil)
 
 (defvar eaf-first-start-arguments nil)
-
-(defvar eaf-title-length 30)
 
 (defvar eaf-org-file-list '())
 
@@ -552,7 +550,7 @@ to edit EAF keybindings!" fun fun)))
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
   (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
   (let* ((input-content (if (file-exists-p input-content) (file-name-nondirectory input-content) input-content))
-         (eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
+         (eaf-buffer (generate-new-buffer input-content)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (set (make-local-variable 'eaf--buffer-url) input-content)
@@ -768,7 +766,7 @@ This is used to bind key to EAF Python applications."
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
               (setq-local eaf--bookmark-title title)
-              (rename-buffer (truncate-string-to-width title eaf-title-length))
+              (rename-buffer title)
               (throw 'find-buffer t))))))))
 
 (dbus-register-signal
