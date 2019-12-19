@@ -96,10 +96,11 @@
 
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-h m") 'eaf-describe-bindings)
-    (define-key map [remap describe-bindings] 'eaf-describe-bindings)
-    (define-key map (kbd "C-c b") 'eaf-open-bookmark)
-    (define-key map (vector 'remap 'self-insert-command) #'eaf-send-key)
+    (define-key map (kbd "C-g") #'eaf-keyboard-quit)
+    (define-key map (kbd "C-h m") #'eaf-describe-bindings)
+    (define-key map [remap describe-bindings] #'eaf-describe-bindings)
+    (define-key map (kbd "C-c b") #'eaf-open-bookmark)
+    (define-key map (vector 'remap #'self-insert-command) #'eaf-send-key)
     (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>"))
       (define-key map (kbd single-key) #'eaf-send-key))
     map)
@@ -639,6 +640,11 @@ to edit EAF keybindings!" fun fun)))
       (org-html-export-to-html)
       (eaf-call "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
       (message (format "export %s to html" (buffer-file-name))))))
+
+(defun eaf-keyboard-quit ()
+  "Similar to `keyboard-quit' but signals a ‘quit’ condition to EAF applications."
+  (interactive)
+  (eaf-call "action_quit" eaf--buffer-id))
 
 (defun eaf-send-key ()
   "Directly send key to EAF Python side."
