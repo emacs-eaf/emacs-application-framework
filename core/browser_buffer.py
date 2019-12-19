@@ -75,7 +75,7 @@ class BrowserBuffer(Buffer):
 
     def search_text_backward(self):
         if self.search_term == "":
-            self.send_input_message("EAF Browser - Forward Search Text: ", "search_text_backward")
+            self.send_input_message("EAF Browser - Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
