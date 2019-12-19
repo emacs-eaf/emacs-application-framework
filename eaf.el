@@ -202,6 +202,8 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
+    ("C-s" . "search_text_forward")
+    ("C-r" . "search_text_backward")
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
     ("C-v" . "scroll_up_page")

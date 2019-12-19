@@ -132,7 +132,6 @@ class BrowserView(QWebEngineView):
         self.setZoomFactor(1)
 
 class BrowserPage(QWebEnginePage):
-
     def __init__(self):
         QWebEnginePage.__init__(self)
 
