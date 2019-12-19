@@ -551,8 +551,8 @@ to edit EAF keybindings!" fun fun)))
 (defun eaf--create-buffer (input-content app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
   (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
-  (let* ((file-or-command-name (substring input-content (string-match "[^/]*/?$" input-content)))
-         (eaf-buffer (generate-new-buffer (truncate-string-to-width file-or-command-name eaf-title-length))))
+  (let* ((input-content (if (file-exists-p input-content) (file-name-nondirectory input-content) input-content))
+         (eaf-buffer (generate-new-buffer (truncate-string-to-width input-content eaf-title-length))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (set (make-local-variable 'eaf--buffer-url) input-content)
