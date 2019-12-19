@@ -62,7 +62,7 @@ class BrowserBuffer(Buffer):
 
     def clean_all_cookie(self):
         self.buffer_widget.clean_cookie()
-        self.message_to_emacs.emit("Clean all cookie")
+        self.message_to_emacs.emit("EAF Browser - Cleared all cookies.")
 
     def zoom_out(self):
         self.buffer_widget.zoom_out()
