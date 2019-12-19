@@ -644,9 +644,10 @@ to edit EAF keybindings!" fun fun)))
       (message (format "export %s to html" (buffer-file-name))))))
 
 (defun eaf-keyboard-quit ()
-  "Similar to `keyboard-quit' but signals a ‘quit’ condition to EAF applications."
+  "Layers on top of `keyboard-quit' but signals a ‘quit’ condition to EAF applications."
   (interactive)
-  (eaf-call "action_quit" eaf--buffer-id))
+  (eaf-call "action_quit" eaf--buffer-id)
+  (call-interactively 'keyboard-quit))
 
 (defun eaf-send-key ()
   "Directly send key to EAF Python side."
