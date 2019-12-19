@@ -17,6 +17,8 @@
 | C-n                 | Scroll up                        |
 | C-p                 | Scroll down                      |
 | C-v                 | Scroll up page                   |
+| C-s                 | Search forward                   |
+| C-r                 | Search backward                  |
 | M-v                 | Scroll down page                 |
 | M-<                 | Scroll to top                    |
 | M->                 | Scroll to bottom                 |
@@ -71,15 +73,15 @@ You can customize keys in the variable ```eaf-image-viewer-keybinding```
 
 ### Terminal
 
-| Browser Key        | Event                    |
-| :-----:            | :----                    |
-| C-=                | Zoom in                  |
-| C--                | Zoom out                 |
+| Terminal Key | Event    |
+| :-----:      | :----    |
+| C-=          | Zoom in  |
+| C--          | Zoom out |
 
 ### Camera
 
-| Browser Key | Event      |
-| :-----:     | :----      |
-| j           | Take photo |
+| Camera Key | Event      |
+| :-----:    | :----      |
+| j          | Take photo |
 
 You can customize keys in the variable ```eaf-camera-keybinding```
