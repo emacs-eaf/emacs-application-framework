@@ -696,7 +696,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   `(map-put ,eaf-app-keybinding ,key
             ,(if (string-match "_" (symbol-name command))
                  (symbol-name command)
-               `(quote ,command))))
+               `(quote ,command)) #'equal))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
