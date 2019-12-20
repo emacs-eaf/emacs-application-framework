@@ -136,22 +136,17 @@ class AppBuffer(Buffer):
         if self.buffer_widget.is_mark_link:
             self.buffer_widget.cleanup_links()
 
-    def search_text(self):
-        if self.buffer_widget.is_mark_search:
-            self.buffer_widget.cleanup_search()
-        self.buffer_widget.send_input_message("EAF PDF - Search Text: ", "search_text")
-
-    def jump_next_match(self):
+    def search_text_forward(self):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.jump_next_match()
         else:
-            self.message_to_emacs.emit("EAF PDF - Cannot jump to next match. Nothing searched!")
+            self.buffer_widget.send_input_message("EAF PDF - Search Text: ", "search_text")
 
-    def jump_last_match(self):
+    def search_text_backward(self):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.jump_last_match()
         else:
-            self.message_to_emacs.emit("EAF PDF - Cannot jump to last match. Nothing searched!")
+            self.buffer_widget.send_input_message("EAF PDF - Search Text: ", "search_text")
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)

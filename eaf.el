@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Dec 20 13:31:58 2019 (-0500)
+;; Last-Updated: Fri Dec 20 14:14:27 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -240,9 +240,8 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("i" . "toggle_inverted_mode")
     ("m" . "toggle_mark_link")
     ("f" . "jump_to_link")
-    ("s" . "search_text")
-    ("n" . "jump_next_match")
-    ("N" . "jump_last_match"))
+    ("C-s" . "search_text_forward")
+    ("C-r" . "search_text_backward"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
