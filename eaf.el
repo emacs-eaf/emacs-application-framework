@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Dec 20 12:26:06 2019 (-0500)
+;; Last-Updated: Fri Dec 20 13:31:58 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -965,7 +965,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
             ;; if no match buffer found, call `eaf--open-internal'.
             (if exists-eaf-buffer
                 (eaf--display-app-buffer app-name exists-eaf-buffer)
-              (eaf--open-internal url app-name arguments)))
+              (eaf--open-internal url app-name arguments)
+              (message "EAF - Opening %s with EAF-%s..." url app-name)))
         ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
         (setq eaf-first-start-url url)
         (setq eaf-first-start-app-name app-name)
