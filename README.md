@@ -107,10 +107,6 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
-### \*eaf* aborted
-
-If you got ```*eaf* aborted``` error, please check buffer ```*eaf*``` first, mostly because Python library dependencies is not installed successfully.
-
 ### Proxy
 If you can't access most awesome internet services like me, you can configure the proxy settings.
 
