@@ -130,11 +130,16 @@ Don't modify this map directly. To bind keys for all apps use
   "The buffer app name.")
 
 (define-derived-mode eaf-mode fundamental-mode "EAF"
-  "Major mode for Emacs Application Framework.
+  "Major mode for Emacs Application Framework buffers.
 
-This mode is used by all apps. Each app can setup app specific
-hooks by declaring `eaf-<app-name>-hook'. This hook runs after
-the app buffer has initialized."
+This mode is used by all apps. The mode map `eaf-mode-map' is
+created dynamically for each app and should not be changed
+manually. See `eaf-bind-key' for customization of app bindings.
+
+Within EAF buffers the variable `eaf--buffer-app-name' holds the
+name of the current app. Each app can setup app hooks by using
+`eaf-<app-name>-hook'. This hook runs after the app buffer has
+been initialized."
   ;; Split window combinations proportionally.
   ;; FIXME: this changes this setting globally for the user
   ;; which may not want this, introduce EAF user option?
@@ -675,15 +680,22 @@ Use it as (eaf-setq var val)"
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
 
-COMMAND is a command with `eaf-proxy-' prefix found by calling
-`eaf-describe-bindings' in an EAF buffer, but dropping the prefix.
+Use this to bind keys for EAF applications.
+
+COMMAND is a symbol of a regular Emacs command or a python app
+command. You can see a list of available commands by calling
+`eaf-describe-bindings' in an EAF buffer. The `eaf-proxy-' prefix
+should be dropped for the COMMAND symbol.
 
 KEY is a string representing a sequence of keystrokes and events.
 
-EAF-APP-KEYBINDING is one of the eaf-.*-keybinding variables.
-
-This is used to bind key to EAF Python applications."
-  `(map-put ,eaf-app-keybinding ,key ,(symbol-name command)))
+EAF-APP-KEYBINDING is one of the `eaf-<app-name>-keybinding'
+variables, where <app-name> can be obtained by checking the value
+of `eaf--buffer-app-name' inside the EAF buffer."
+  `(map-put ,eaf-app-keybinding ,key
+            ,(if (string-match "_" (symbol-name command))
+                 (symbol-name command)
+               `(quote ,command)) #'equal))
 
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
