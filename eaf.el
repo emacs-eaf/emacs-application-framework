@@ -424,7 +424,9 @@ For now only EAF browser app is supported."
     (set-process-sentinel
      eaf-process
      #'(lambda (process event)
-         (message "%s %s" process event)))
+         (when (string-prefix-p "exited abnormally with code" event)
+           (switch-to-buffer eaf-name))
+         (message "%s %s" process (replace-regexp-in-string "\n$" "" event))))
     (message "EAF process starting...")))
 
 (defun eaf-stop-process ()
@@ -462,8 +464,8 @@ Don't call this function if you not EAF developer."
   (if (process-live-p eaf-process)
       ;; Delete EAF server process.
       (progn
-       (delete-process eaf-process)
-       (message "EAF - Process terminated."))
+        (delete-process eaf-process)
+        (message "EAF - Process terminated."))
     (message "EAF - Process already terminated.")))
 
 (defun eaf-restart-process ()
@@ -525,12 +527,12 @@ When called interactively, copy to ‘kill-ring’."
   (let ((sym (intern (format "eaf-proxy-%s" fun))))
     (unless (fboundp sym)
       (defalias sym
-        (lambda nil
-          (interactive)
-          ;; Ensure this is only called from EAF buffer
-          (if (derived-mode-p 'eaf-mode)
-              (eaf-call "execute_function" eaf--buffer-id fun)
-            (user-error "%s command can only be called in an EAF buffer!" sym)))
+          (lambda nil
+            (interactive)
+            ;; Ensure this is only called from EAF buffer
+            (if (derived-mode-p 'eaf-mode)
+                (eaf-call "execute_function" eaf--buffer-id fun)
+              (user-error "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
 
@@ -835,9 +837,9 @@ This is used to bind key to EAF Python applications."
 (defun eaf--open-internal (url app-name arguments)
   (let* ((buffer (eaf--create-buffer url app-name))
          (buffer-result
-          (with-current-buffer buffer
-            (eaf-call "new_buffer"
-                            eaf--buffer-id url app-name arguments))))
+           (with-current-buffer buffer
+             (eaf-call "new_buffer"
+                       eaf--buffer-id url app-name arguments))))
     (cond ((equal buffer-result "")
            (eaf--display-app-buffer app-name buffer))
           (t
@@ -918,7 +920,7 @@ This is used to bind key to EAF Python applications."
 (defun eaf--get-app-for-extension (extension-name)
   (cl-loop for (app . ext) in eaf-app-extensions-alist
            if (member extension-name (symbol-value ext))
-           return app))
+             return app))
 
 ;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
@@ -972,12 +974,12 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (message "EAF - Opening %s with EAF-%s..." url app-name))
     ;; Output something to user if app-name is empty string.
     (message (cond
-              ((not (or (string-prefix-p "/" url)
-                        (string-prefix-p "~" url)))
-               "EAF - Cannot open %s.")
-              ((file-exists-p url)
-               "EAF - Cannot open %s.")
-              (t "EAF - %s does not exist."))
+               ((not (or (string-prefix-p "/" url)
+                         (string-prefix-p "~" url)))
+                "EAF - Cannot open %s.")
+               ((file-exists-p url)
+                "EAF - Cannot open %s.")
+               (t "EAF - %s does not exist."))
              url)))
 
 (defun eaf--display-app-buffer (app-name buffer)
