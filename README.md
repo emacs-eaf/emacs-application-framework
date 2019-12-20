@@ -134,7 +134,7 @@ Do you want to live in emacs more comfortably?
 
 Want to create unparalleled plugins to extend emacs?
 
-[Let's hack together!](./docs/HACKING.md)
+[Let's hack together!](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
 
 ## 打赏
 如果我的作品让你的生活充满快乐, 欢迎请我喝瓶啤酒, 哈哈哈哈
