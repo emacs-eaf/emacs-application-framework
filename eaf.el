@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Dec 20 03:26:28 2019 (-0500)
+;; Last-Updated: Fri Dec 20 12:26:06 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -173,7 +173,7 @@ the app buffer has initialized."
 (defvar eaf-http-proxy-port "")
 
 (defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, when calling `eaf-file-open-in-dired', EAF unrecognizable files will be opened
+  "If non-nil, when calling `eaf-open-this-from-dired', EAF unrecognizable files will be opened
 by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
@@ -413,7 +413,7 @@ For now only EAF browser app is supported."
   "Start EAF process if it hasn't started yet."
   (interactive)
   (if (process-live-p eaf-process)
-      (message "EAF process has started.")
+      (message "EAF - Process has started.")
     (setq eaf-process
           (apply #'start-process
                  eaf-name
@@ -427,7 +427,7 @@ For now only EAF browser app is supported."
          (when (string-prefix-p "exited abnormally with code" event)
            (switch-to-buffer eaf-name))
          (message "%s %s" process (replace-regexp-in-string "\n$" "" event))))
-    (message "EAF process starting...")))
+    (message "EAF - Process starting...")))
 
 (defun eaf-stop-process ()
   (interactive)
