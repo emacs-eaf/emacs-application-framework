@@ -8,7 +8,7 @@ This framework mainly implements three functions:
 2. Listening to EAF buffer's keyboard event flow and controlling the keyboard input of PyQt program via DBus IPC
 3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
 
-## Some Screenshots
+## Screenshots
 
 | Browser                                          | Markdown Previewer                                          |
 | :--------:                                       | :----:                                                      |
@@ -40,25 +40,72 @@ This framework mainly implements three functions:
 | <img src="./screenshot/terminal.png" width="400"> |
 |                                                   |
 
-## Getting Started
-Please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) for instructions on how to install and setup EAF.
+## Install EAF
+1. Clone this repository, add to ```load-path```, and add the following to ```.emacs```
+
+```Elisp
+(require 'eaf)
+```
+
+If you use [use-package](https://github.com/jwiegley/use-package), a sample configuration has been provided.
+
+```Elisp
+(use-package eaf
+  :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
+  :custom
+  (eaf-find-alternate-file-in-dired t)
+  :config
+  (eaf-bind-key scroll_up "RET" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down_page "DEL" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key take_photo "p" eaf-camera-keybinding))
+```
+
+2. Make sure to have ```python3``` installed, and use ```pip3``` to install EAF dependencies:
+
+```Elisp
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode
+```
+
+3. Compile ```qtermwidget-git``` use the following command:
+```Elisp
+git clone https://github.com/lxqt/qtermwidget.git --depth=1
+mkdir build && cd build
+cmake .. -DQTERMWIDGET_BUILD_PYTHON_BINDING=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr
+make
+sudo make install
+```
+
+Package info:
+
+| Package         | Package Repo        | Classification | Package Description                                |
+| :--------       | :----               | :------        | :------                                            |
+| dbus-python     | pip3                | Core           | DBus IPC to communicate python with elisp          |
+| python-xlib     | pip3                | Core           | Stick app window into Emacs frame                  |
+| pyqt5           | pip3                | Core           | GUI library required for applications              |
+| pyqtwebengine   | pip3                | Core           | Browser: QtWebEngine for browser application       |
+| pymupdf         | pip3                | Application    | PDF Viewer: Rendering engine                       |
+| grip            | pip3                | Application    | Markdown Previewer: Markdown render server         |
+| qrcode          | pip3                | Application    | File Transfer: Render QR code pointing local files |
+| qtermwidget-git | compile from source | Application    | Terminal: QTermWidget, PyQt5 terminal emulator     |
+
 
 ## Launch EAF Applications
-| Application Name   | Launch                                        |
-| :--------          | :----                                         |
-| Browser            | Type 'eaf-browser' RET https://www.google.com |
-| PDF Viewer         | Type 'eaf-open' RET pdf filepath              |
-| Video Player       | Type 'eaf-open' RET video filepath            |
-| Image Viewer       | Type 'eaf-open' RET image filepath            |
-| Markdown previewer | Type 'eaf-open' RET markdown filepath         |
-| Org file previewer | Type 'eaf-open' RET org filepath              |
-| Camera             | Type 'eaf-open-camera'                        |
-| Terminal           | Type 'eaf-open-terminal'                      |
-| File Sender        | Type 'eaf-file-sender-qrcode'                 |
-|                    | Or use 'eaf-file-sender-qrcode-in-dired'      |
-| File Receiver      | Type 'eaf-file-receiver-qrcode'               |
-| Airshare           | Type 'eaf-file-transfer-airshare'             |
-| Demo               | Type 'eaf-open-demo'                          |
+| Application Name   | Launch                                                                  |
+| :--------          | :----                                                                   |
+| Browser            | Type 'eaf-browser' RET https://www.google.com                           |
+| PDF Viewer         | Type 'eaf-open' RET pdf filepath                                        |
+| Video Player       | Type 'eaf-open' RET video filepath                                      |
+| Image Viewer       | Type 'eaf-open' RET image filepath                                      |
+| Markdown previewer | Type 'eaf-open' RET markdown filepath                                   |
+| Org file previewer | Type 'eaf-open' RET org filepath                                        |
+| Camera             | Type 'eaf-open-camera'                                                  |
+| Terminal           | Type 'eaf-open-terminal'                                                |
+| File Sender        | Type 'eaf-file-sender-qrcode', or use 'eaf-file-sender-qrcode-in-dired' |
+| File Receiver      | Type 'eaf-file-receiver-qrcode'                                         |
+| Airshare           | Type 'eaf-file-transfer-airshare'                                       |
+| Demo               | Type 'eaf-open-demo'                                                    |
 
 To run `eaf-open` on the current file under the cursor in `dired`, call `eaf-open-this-from-dired`.
 
@@ -69,9 +116,6 @@ Please don't run EAF with root user, root user just can access DBus's system bus
 ```
 
 ## FAQ and Support
-
-### Read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) First
-For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
 
 ### How about EXWM? What makes EAF special?
 1. EAF gives you control over your program, while satisfying Emacs window design model. [EXWM](https://github.com/ch11ng/exwm) is only a tiling WM, that combines different applications together in an Emacs-like fashion. However, EXWM is unable to split the same application into two different windows while displaying different same application at the same time. For example, EAF is able to display same PDF on two different windows.
@@ -102,11 +146,6 @@ If you use EAF Markdown Previewer, you need the access to a [Personal access tok
 
 Otherwise, github will popup "times limit" error because so many people use grip. ;)
 
-### "undefined symbol" error
-If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes, it's a bug of Arch.
-
-You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
-
 ### Proxy
 If you can't access most awesome internet services like me, you can configure the proxy settings.
 
@@ -115,11 +154,16 @@ If you can't access most awesome internet services like me, you can configure th
 (setq eaf-http-proxy-port "1080")
 ```
 
+### "undefined symbol" error
+If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes, it's a bug of Arch.
+
+You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
+
 ## Report bug
 
-If you have any problem with EAF, please use command "emacs -Q" to start Emacs without any customizations.
+For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
 
-Then re-test your workflow. If "emacs -Q" works fine, it's must be something wrong with your emacs config file.
+If you have any problem with EAF, please use command "emacs -Q" to start Emacs without any customizations. Then re-test your workflow. If "emacs -Q" works fine, it's must be something wrong with your emacs config file.
 
 If the problem persists, please [report bug here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
 
