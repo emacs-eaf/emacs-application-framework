@@ -130,11 +130,16 @@ Don't modify this map directly. To bind keys for all apps use
   "The buffer app name.")
 
 (define-derived-mode eaf-mode fundamental-mode "EAF"
-  "Major mode for Emacs Application Framework.
+  "Major mode for Emacs Application Framework buffers.
 
-This mode is used by all apps. Each app can setup app specific
-hooks by declaring `eaf-<app-name>-hook'. This hook runs after
-the app buffer has initialized."
+This mode is used by all apps. The mode map `eaf-mode-map' is
+created dynamically for each app and should not be changed
+manually. See `eaf-bind-key' for customization of app bindings.
+
+Within EAF buffers the variable `eaf--buffer-app-name' holds the
+name of the current app. Each app can setup app hooks by using
+`eaf-<app-name>-hook'. This hook runs after the app buffer has
+been initialized."
   ;; Split window combinations proportionally.
   ;; FIXME: this changes this setting globally for the user
   ;; which may not want this, introduce EAF user option?
