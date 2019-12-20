@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Dec 20 02:21:29 2019 (-0500)
+;; Last-Updated: Fri Dec 20 02:42:51 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -306,7 +306,9 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("video-player" . eaf-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
     ("camera" . eaf-camera-keybinding)
-    ("terminal" . eaf-terminal-keybinding))
+    ("terminal" . eaf-terminal-keybinding)
+    ("markdown-previewer" . eaf-browser-keybinding)
+    ("org-previewer" . eaf-browser-keybinding))
   "Mapping app names to keybinding variables.
 
 Any new app should add the its name and the corresponding
@@ -459,8 +461,10 @@ Don't call this function if you not EAF developer."
   (interactive)
   (if (process-live-p eaf-process)
       ;; Delete EAF server process.
-      (delete-process eaf-process)
-    (message "EAF process has dead.")))
+      (progrn
+       (delete-process eaf-process)
+       (message "EAF - Process terminated."))
+    (message "EAF - Process already terminated.")))
 
 (defun eaf-restart-process ()
   (interactive)
@@ -882,7 +886,7 @@ This is used to bind key to EAF Python applications."
                     (string-prefix-p "https://" url))
           (setq url (concat "http://" url)))
         (eaf-open url "browser" arguments))
-    (message (format "EAF: %s is an invalid URL." url))))
+    (message (format "EAF - %s is an invalid URL." url))))
 
 ;;;###autoload
 (defalias 'eaf-open-url #'eaf-open-browser)
@@ -921,7 +925,7 @@ This is used to bind key to EAF Python applications."
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
 
 When called interactively, URL accepts a file that can be opened by EAF."
-  (interactive "FOpen with EAF: ")
+  (interactive "FEAF - Open with EAF App: ")
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
@@ -934,7 +938,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
         ;; Try get user's github token if `eaf-grip-token' is nil.
         (setq arguments
               (or eaf-grip-token
-                  (read-string "Fill your own github token (or set `eaf-grip-token' with token string): "))))
+                  (read-string "EAF - Fill your own Github token (or set `eaf-grip-token' with token string): "))))
       (when (equal app-name "browser")
         (setq url (concat "file://" url)))))
   (unless arguments (setq arguments ""))
@@ -965,15 +969,15 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message "Opening %s with EAF-%s..." url app-name))
+        (message "EAF - Opening %s with EAF-%s..." url app-name))
     ;; Output something to user if app-name is empty string.
     (message (cond
               ((not (or (string-prefix-p "/" url)
                         (string-prefix-p "~" url)))
-               "EAF doesn't know how to open %s.")
+               "EAF - Cannot open %s.")
               ((file-exists-p url)
-               "EAF doesn't know how to open %s.")
-              (t "EAF: %s does not exist."))
+               "EAF - Cannot open %s.")
+              (t "EAF - %s does not exist."))
              url)))
 
 (defun eaf--display-app-buffer (app-name buffer)
