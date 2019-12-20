@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Dec 18 23:16:29 2019 (-0500)
+;; Last-Updated: Fri Dec 20 02:21:29 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1023,7 +1023,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "DEAF File Receiver - Specify Destination: ")
   (eaf-open dir "file-receiver"))
 
-(defun eaf-file-open-in-dired ()
+;;;###autoload
+(defun eaf-open-this-from-dired ()
   "Open html/pdf/image/video files whenever possible with EAF in dired.
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
@@ -1034,6 +1035,9 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
           (t (dired-find-file)))))
+
+;;;###autoload
+(defalias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
