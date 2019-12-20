@@ -461,7 +461,7 @@ Don't call this function if you not EAF developer."
   (interactive)
   (if (process-live-p eaf-process)
       ;; Delete EAF server process.
-      (progrn
+      (progn
        (delete-process eaf-process)
        (message "EAF - Process terminated."))
     (message "EAF - Process already terminated.")))
