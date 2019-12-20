@@ -159,6 +159,10 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
+```Elisp
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode --force-reinstall
+```
+
 ## Report bug
 
 For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
