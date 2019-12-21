@@ -90,8 +90,8 @@ class AppBuffer(Buffer):
     def scroll_down_page(self):
         self.buffer_widget.scroll_down_page()
 
-    def switch_to_read_mode(self):
-        self.buffer_widget.switch_to_read_mode()
+    def toggle_read_mode(self):
+        self.buffer_widget.toggle_read_mode()
 
     def scroll_to_home(self):
         self.buffer_widget.scroll_to_home()
@@ -407,7 +407,7 @@ class PdfViewerWidget(QWidget):
     def max_scroll_offset(self):
         return self.scale * self.page_height * self.page_total_number - self.rect().height()
 
-    def switch_to_read_mode(self):
+    def toggle_read_mode(self):
         if self.read_mode == "fit_to_customize":
             self.read_mode = "fit_to_width"
         elif self.read_mode == "fit_to_width":

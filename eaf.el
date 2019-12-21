@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 21 00:43:40 2019 (-0500)
+;; Last-Updated: Sat Dec 21 00:55:03 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -228,7 +228,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("b" . "scroll_down_page")
     ("C-v" . "scroll_up_page")
     ("M-v" . "scroll_down_page")
-    ("t" . "switch_to_read_mode")
+    ("t" . "toggle_read_mode")
     ("." . "scroll_to_home")
     ("," . "scroll_to_end")
     ("0" . "zoom_reset")
