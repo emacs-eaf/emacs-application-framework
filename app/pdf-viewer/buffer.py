@@ -90,7 +90,7 @@ class AppBuffer(Buffer):
     def scroll_down_page(self):
         self.buffer_widget.scroll_down_page()
 
-    def swtich_to_read_mode(self):
+    def switch_to_read_mode(self):
         self.buffer_widget.switch_to_read_mode()
 
     def scroll_to_home(self):
