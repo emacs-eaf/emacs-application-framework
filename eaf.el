@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Dec 20 14:14:27 2019 (-0500)
+;; Last-Updated: Sat Dec 21 01:38:19 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -15,7 +15,7 @@
 ;;
 ;; Features that might be required by this library:
 ;;
-;;
+;; Please check README
 ;;
 
 ;;; This file is NOT part of GNU Emacs
@@ -39,21 +39,13 @@
 
 ;;; Commentary:
 ;;
-;; Emacs application framework
+;; Emacs Application Framework
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf.el to your load-path.
-;; The load-path is usually ~/elisp/.
-;; It's set in your ~/.emacs like this:
-;; (add-to-list 'load-path (expand-file-name "~/elisp"))
+;; Please check README
 ;;
-;; And the following to your ~/.emacs startup file.
-;;
-;; (require 'eaf)
-;;
-;; No need more.
 
 ;;; Customize:
 ;;
@@ -230,9 +222,13 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("k" . "scroll_down")
     ("<down>" . "scroll_up")
     ("<up>" . "scroll_down")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
     ("SPC" . "scroll_up_page")
     ("b" . "scroll_down_page")
-    ("t" . "switch_to_read_mode")
+    ("C-v" . "scroll_up_page")
+    ("M-v" . "scroll_down_page")
+    ("t" . "toggle_read_mode")
     ("." . "scroll_to_home")
     ("," . "scroll_to_end")
     ("0" . "zoom_reset")
@@ -245,10 +241,6 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("i" . "toggle_inverted_mode")
     ("m" . "toggle_mark_link")
     ("f" . "jump_to_link")
-    ("C-n" . "scroll_up")
-    ("C-p" . "scroll_down")
-    ("C-v" . "scroll_up_page")
-    ("M-v" . "scroll_down_page")
     ("C-s" . "search_text_forward")
     ("C-r" . "search_text_backward"))
   "The keybinding of EAF PDF Viewer."
@@ -572,7 +564,8 @@ to edit EAF keybindings!" fun fun)))
       (eaf-mode)
       (set (make-local-variable 'eaf--buffer-url) input-content)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
-      (run-hooks (intern (format "eaf-%s-hook" app-name))))
+      (run-hooks (intern (format "eaf-%s-hook" app-name)))
+      (setq mode-name (concat "EAF - " (capitalize (replace-regexp-in-string "-" " " app-name)))))
     eaf-buffer))
 
 (defun eaf-is-support (url)
@@ -981,7 +974,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message "EAF - Opening %s with EAF-%s..." url app-name))
+        (message "EAF - Opening %s with EAF - %s..." url (capitalize (replace-regexp-in-string "-" " " app-name))))
     ;; Output something to user if app-name is empty string.
     (message (cond
                ((not (or (string-prefix-p "/" url)
