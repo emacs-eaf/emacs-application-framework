@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 21 00:55:03 2019 (-0500)
+;; Last-Updated: Sat Dec 21 01:38:19 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -564,7 +564,8 @@ to edit EAF keybindings!" fun fun)))
       (eaf-mode)
       (set (make-local-variable 'eaf--buffer-url) input-content)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
-      (run-hooks (intern (format "eaf-%s-hook" app-name))))
+      (run-hooks (intern (format "eaf-%s-hook" app-name)))
+      (setq mode-name (concat "EAF - " (capitalize (replace-regexp-in-string "-" " " app-name)))))
     eaf-buffer))
 
 (defun eaf-is-support (url)
@@ -979,7 +980,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message "EAF - Opening %s with EAF-%s..." url app-name))
+        (message "EAF - Opening %s with EAF - %s..." url (capitalize (replace-regexp-in-string "-" " " app-name))))
     ;; Output something to user if app-name is empty string.
     (message (cond
                ((not (or (string-prefix-p "/" url)
