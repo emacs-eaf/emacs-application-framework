@@ -69,13 +69,13 @@ class BrowserBuffer(Buffer):
 
     def search_text_forward(self):
         if self.search_term == "":
-            self.send_input_message("EAF Browser - Forward Search Text: ", "search_text_forward")
+            self.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
             self._search_text(self.search_term)
 
     def search_text_backward(self):
         if self.search_term == "":
-            self.send_input_message("EAF Browser - Backward Search Text: ", "search_text_backward")
+            self.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
@@ -90,7 +90,7 @@ class BrowserBuffer(Buffer):
 
     def clean_all_cookie(self):
         self.buffer_widget.clean_cookie()
-        self.message_to_emacs.emit("EAF Browser - Cleared all cookies.")
+        self.message_to_emacs.emit("Cleared all cookies.")
 
     def action_quit(self):
         if self.search_term != "":

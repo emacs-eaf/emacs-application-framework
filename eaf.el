@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 21 01:38:19 2019 (-0500)
+;; Last-Updated: Sat Dec 21 04:11:34 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -413,7 +413,7 @@ For now only EAF browser app is supported."
   "Start EAF process if it hasn't started yet."
   (interactive)
   (if (process-live-p eaf-process)
-      (message "EAF - Process has started.")
+      (message "[EAF] Process has started.")
     (setq eaf-process
           (apply #'start-process
                  eaf-name
@@ -426,8 +426,8 @@ For now only EAF browser app is supported."
      #'(lambda (process event)
          (when (string-prefix-p "exited abnormally with code" event)
            (switch-to-buffer eaf-name))
-         (message "%s %s" process (replace-regexp-in-string "\n$" "" event))))
-    (message "EAF - Process starting...")))
+         (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
+    (message "[EAF] Process starting...")))
 
 (defun eaf-stop-process ()
   (interactive)
@@ -440,7 +440,7 @@ For now only EAF browser app is supported."
         (kill-buffer buffer)))
     ;; Just report to me when EAF buffer exists.
     (if (> count 1)
-        (message "Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
+        (message "[EAF] Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
 
   ;; Clean cache url and app name, avoid next start process to open buffer.
   (setq eaf-first-start-url nil)
@@ -465,8 +465,8 @@ Don't call this function if you not EAF developer."
       ;; Delete EAF server process.
       (progn
         (delete-process eaf-process)
-        (message "EAF - Process terminated."))
-    (message "EAF - Process already terminated.")))
+        (message "[EAF] Process terminated."))
+    (message "[EAF] Process already terminated.")))
 
 (defun eaf-restart-process ()
   (interactive)
@@ -527,12 +527,12 @@ When called interactively, copy to ‘kill-ring’."
   (let ((sym (intern (format "eaf-proxy-%s" fun))))
     (unless (fboundp sym)
       (defalias sym
-          (lambda nil
-            (interactive)
-            ;; Ensure this is only called from EAF buffer
-            (if (derived-mode-p 'eaf-mode)
-                (eaf-call "execute_function" eaf--buffer-id fun)
-              (user-error "%s command can only be called in an EAF buffer!" sym)))
+        (lambda nil
+          (interactive)
+          ;; Ensure this is only called from EAF buffer
+          (if (derived-mode-p 'eaf-mode)
+              (eaf-call "execute_function" eaf--buffer-id fun)
+            (user-error "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
 
@@ -566,7 +566,7 @@ to edit EAF keybindings!" fun fun)))
       (set (make-local-variable 'eaf--buffer-url) input-content)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
-      (setq mode-name (concat "EAF - " (capitalize (replace-regexp-in-string "-" " " app-name)))))
+      (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
 
 (defun eaf-is-support (url)
@@ -618,7 +618,7 @@ to edit EAF keybindings!" fun fun)))
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
     (when (file-exists-p org-html-file)
       (delete-file org-html-file)
-      (message (format "Clean org preview file %s (%s)" org-html-file org-file)))))
+      (message "[EAF] Cleaned org-preview file %s (%s)." org-html-file org-file))))
 
 (defun eaf-org-killed-buffer-clean ()
   (dolist (org-killed-buffer eaf-org-killed-file-list)
@@ -630,7 +630,7 @@ to edit EAF keybindings!" fun fun)))
 (defun eaf-monitor-buffer-kill ()
   (ignore-errors
     (eaf-call "kill_buffer" eaf--buffer-id)
-    (message (format "Kill %s" eaf--buffer-id))))
+    (message "[EAF] Killed %s." eaf--buffer-id)))
 
 (defun eaf--org-preview-monitor-kill ()
   ;; NOTE:
@@ -649,7 +649,7 @@ to edit EAF keybindings!" fun fun)))
       ;; eaf-org-file-list?
       (org-html-export-to-html)
       (eaf-call "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
-      (message (format "export %s to html" (buffer-file-name))))))
+      (message "[EAF] Export %s to HTML." (buffer-file-name)))))
 
 (defun eaf-keyboard-quit ()
   "Wrap around `keyboard-quit' and signals a ‘quit’ condition to EAF applications."
@@ -719,7 +719,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "message_to_emacs"
- #'message)
+ (lambda (format-string) (message (concat "[EAF/" eaf--buffer-app-name "] " format-string))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -763,7 +763,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
       (when (derived-mode-p 'eaf-mode)
         (when (string= eaf--buffer-id kill-buffer-id)
           (kill-buffer buffer)
-          (message (format "Request kill buffer %s" kill-buffer-id))
+          (message "[EAF] Request to kill buffer %s." kill-buffer-id)
           (throw 'found-match-buffer t))))))
 
 (dbus-register-signal
@@ -789,6 +789,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
             (when (and
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id bid))
+              (setq mode-name (concat "EAF/" eaf--buffer-app-name))
               (setq-local eaf--bookmark-title title)
               (rename-buffer title)
               (throw 'find-buffer t))))))))
@@ -821,11 +822,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf-input-message (input-buffer-id interactive-string callback-type)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
-  (let* ((input-message (eaf-read-string interactive-string)))
+  (let* ((input-message (eaf-read-string (concat "[EAF/" eaf--buffer-app-name "] " interactive-string))))
     (if input-message
         (eaf-call "handle_input_message" input-buffer-id callback-type input-message)
-      (eaf-call "cancel_input_message" input-buffer-id callback-type)
-      )))
+      (eaf-call "cancel_input_message" input-buffer-id callback-type))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -846,9 +846,9 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf--open-internal (url app-name arguments)
   (let* ((buffer (eaf--create-buffer url app-name))
          (buffer-result
-           (with-current-buffer buffer
-             (eaf-call "new_buffer"
-                       eaf--buffer-id url app-name arguments))))
+          (with-current-buffer buffer
+            (eaf-call "new_buffer"
+                      eaf--buffer-id url app-name arguments))))
     (cond ((equal buffer-result "")
            (eaf--display-app-buffer app-name buffer))
           (t
@@ -887,7 +887,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
   "Open EAF browser application given a URL and ARGUMENTS."
-  (interactive "MEAF Browser - Enter URL: ")
+  (interactive "M[EAF/browser] Enter URL: ")
   ;; Validate URL legitimacy
   (if (and (not (string-prefix-p "/" url))
            (not (string-prefix-p "~" url))
@@ -897,7 +897,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
                     (string-prefix-p "https://" url))
           (setq url (concat "http://" url)))
         (eaf-open url "browser" arguments))
-    (message (format "EAF - %s is an invalid URL." url))))
+    (message "[EAF/browser] %s is an invalid URL." url)))
 
 ;;;###autoload
 (defalias 'eaf-open-url #'eaf-open-browser)
@@ -923,14 +923,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf--get-app-for-extension (extension-name)
   (cl-loop for (app . ext) in eaf-app-extensions-alist
            if (member extension-name (symbol-value ext))
-             return app))
+           return app))
 
 ;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
 
 When called interactively, URL accepts a file that can be opened by EAF."
-  (interactive "FEAF - Open with EAF App: ")
+  (interactive "F[EAF] Open with EAF App: ")
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
@@ -943,7 +943,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
         ;; Try get user's github token if `eaf-grip-token' is nil.
         (setq arguments
               (or eaf-grip-token
-                  (read-string "EAF - Fill your own Github token (or set `eaf-grip-token' with token string): "))))
+                  (read-string (concat "[EAF/" app-name "] Fill your own Github token (or set `eaf-grip-token' with token string): ")))))
       (when (equal app-name "browser")
         (setq url (concat "file://" url)))))
   (unless arguments (setq arguments ""))
@@ -969,22 +969,21 @@ When called interactively, URL accepts a file that can be opened by EAF."
             (if exists-eaf-buffer
                 (eaf--display-app-buffer app-name exists-eaf-buffer)
               (eaf--open-internal url app-name arguments)
-              (message "EAF - Opening %s with EAF-%s..." url app-name)))
+              (message (concat "[EAF/" app-name "] " "Opening %s...") url)))
         ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
         (setq eaf-first-start-url url)
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message "EAF - Opening %s with EAF - %s..." url (capitalize (replace-regexp-in-string "-" " " app-name))))
+        (message (concat "[EAF/" app-name "] " "Opening %s...") url))
     ;; Output something to user if app-name is empty string.
-    (message (cond
-               ((not (or (string-prefix-p "/" url)
-                         (string-prefix-p "~" url)))
-                "EAF - Cannot open %s.")
-               ((file-exists-p url)
-                "EAF - Cannot open %s.")
-               (t "EAF - %s does not exist."))
-             url)))
+    (message (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
+                     (cond
+                      ((not (or (string-prefix-p "/" url)
+                                (string-prefix-p "~" url))) "Cannot open file %s.")
+                      ((file-exists-p url) "Cannot open file %s.")
+                      (t "File %s does not exist.")))
+                     url)))
 
 (defun eaf--display-app-buffer (app-name buffer)
   (let ((display-fun (or (cdr (assoc app-name
@@ -1004,7 +1003,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "EAF Airshare - Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "[EAF/airshare] Info (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")))
@@ -1015,7 +1014,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
 Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
 
 Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "FEAF File Sender - Select File: ")
+  (interactive "F[EAF/file-sender] Select File: ")
   (eaf-open file "file-sender"))
 
 (defun eaf-file-sender-qrcode-in-dired ()
@@ -1030,7 +1029,7 @@ the file at current cursor position in dired."
 Select directory DIR to receive the uploaded file.
 
 Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "DEAF File Receiver - Specify Destination: ")
+  (interactive "D[EAF/file-receiver] Specify Destination: ")
   (eaf-open dir "file-receiver"))
 
 ;;;###autoload

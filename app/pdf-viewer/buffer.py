@@ -109,10 +109,10 @@ class AppBuffer(Buffer):
         self.buffer_widget.zoom_out()
 
     def jump_to_page(self):
-        self.buffer_widget.send_input_message("EAF PDF - Jump to Page: ", "jump_page")
+        self.buffer_widget.send_input_message("Jump to Page: ", "jump_page")
 
     def jump_to_percent(self):
-        self.buffer_widget.send_input_message("EAF PDF - Jump to Percent: ", "jump_percent")
+        self.buffer_widget.send_input_message("Jump to Percent: ", "jump_percent")
 
     def remember_current_position(self):
         self.buffer_widget.remember_current_position()
@@ -128,7 +128,7 @@ class AppBuffer(Buffer):
 
     def jump_to_link(self):
         self.buffer_widget.add_mark_jump_link_tips()
-        self.buffer_widget.send_input_message("EAF PDF - Jump to Link: ", "jump_link")
+        self.buffer_widget.send_input_message("Jump to Link: ", "jump_link")
 
     def action_quit(self):
         if self.buffer_widget.is_mark_search:
@@ -140,13 +140,13 @@ class AppBuffer(Buffer):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.jump_next_match()
         else:
-            self.buffer_widget.send_input_message("EAF PDF - Search Text: ", "search_text")
+            self.buffer_widget.send_input_message("Search Text: ", "search_text")
 
     def search_text_backward(self):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.jump_last_match()
         else:
-            self.buffer_widget.send_input_message("EAF PDF - Search Text: ", "search_text")
+            self.buffer_widget.send_input_message("Search Text: ", "search_text")
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -218,11 +218,11 @@ class PdfViewerWidget(QWidget):
 
     def remember_current_position(self):
         self.remember_offset = self.scroll_offset
-        self.message_to_emacs.emit("EAF PDF - Remembered current position.")
+        self.message_to_emacs.emit("Remembered current position.")
 
     def remember_jump(self):
         if self.remember_offset is None:
-            self.message_to_emacs.emit("EAF PDF - Cannot jump from this position.")
+            self.message_to_emacs.emit("Cannot jump from this position.")
         else:
             current_scroll_offset = self.scroll_offset
             self.scroll_offset = self.remember_offset
@@ -550,7 +550,7 @@ class PdfViewerWidget(QWidget):
             self.jump_to_page(link["page"] + 1)
         self.delete_all_mark_jump_link_tips()
         self.update()
-        self.message_to_emacs.emit("EAF PDF - Landed on Page " + str(link["page"] + 1))
+        self.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
 
     def cleanup_links(self):
         self.is_mark_link = False
@@ -590,26 +590,26 @@ class PdfViewerWidget(QWidget):
                     search_text_index += 1
         self.update()
         if(len(self.search_text_offset_list) == 0):
-            self.message_to_emacs.emit("EAF PDF - No results found with \"" + text + "\".")
+            self.message_to_emacs.emit("No results found with \"" + text + "\".")
             self.is_mark_search = False
         else:
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
-            self.message_to_emacs.emit("EAF PDF - Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
+            self.message_to_emacs.emit("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
 
     def jump_next_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index + 1) % len(self.search_text_offset_list)
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
-            self.message_to_emacs.emit("EAF PDF - Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
+            self.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def jump_last_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index - 1) % len(self.search_text_offset_list)
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
-            self.message_to_emacs.emit("EAF PDF - Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
+            self.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def cleanup_search(self):
-        self.message_to_emacs.emit("EAF PDF - Unmarked all matched results.")
+        self.message_to_emacs.emit("Unmarked all matched results.")
         if self.search_text_annot_cache_dict:
             for page_index in self.search_text_annot_cache_dict.keys():
                 page = self.document[page_index]
