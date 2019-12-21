@@ -245,6 +245,10 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("i" . "toggle_inverted_mode")
     ("m" . "toggle_mark_link")
     ("f" . "jump_to_link")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
+    ("C-v" . "scroll_up_page")
+    ("M-v" . "scroll_down_page")
     ("C-s" . "search_text_forward")
     ("C-r" . "search_text_backward"))
   "The keybinding of EAF PDF Viewer."
