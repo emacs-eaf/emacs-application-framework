@@ -926,12 +926,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (interactive)
   (eaf-open "eaf-terminal" "terminal"))
 
-;;;###autoload
-(defun eaf-open-qutebrowser ()
-  "Open EAF Qutebrowser application."
-  (interactive)
-  (eaf-open "eaf-qutebrowser" "qutebrowser"))
-
 (defun eaf--get-app-for-extension (extension-name)
   (cl-loop for (app . ext) in eaf-app-extensions-alist
            if (member extension-name (symbol-value ext))
