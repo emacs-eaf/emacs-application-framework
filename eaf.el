@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 21 04:11:34 2019 (-0500)
+;; Last-Updated: Sun Dec 22 01:08:16 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -376,7 +376,7 @@ For now only EAF browser app is supported."
   "Restore EAF buffer according to BOOKMARK."
   (let ((app (cdr (assq 'eaf-app bookmark))))
     (cond ((equal app "browser")
-           (eaf-open-url (cdr (assq 'filename bookmark))))
+           (eaf-open-browser (cdr (assq 'filename bookmark))))
           ((equal app "pdf-viewer")
            (eaf-open (cdr (assq 'filename bookmark)))))))
 
