@@ -698,7 +698,7 @@ class PdfViewerWidget(QWidget):
                     sc_index = min(sc, lc)
                     lc_index = max(sc, lc)
 
-                    page_dict[page_index] = page_char_list[sc_index : lc_index]
+                    page_dict[page_index] = page_char_list[sc_index : lc_index + 1]
 
         return page_dict
 
