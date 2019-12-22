@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 21 04:11:34 2019 (-0500)
+;; Last-Updated: Sun Dec 22 02:45:06 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -143,7 +143,8 @@ been initialized."
               (default-value 'emulation-mode-map-alists))
   (push (list (cons t eaf-mode-map))
         emulation-mode-map-alists)
-  (add-hook 'kill-buffer-hook #'eaf-monitor-buffer-kill nil t))
+  (add-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill nil t)
+  (add-hook 'kill-emacs-hook #'eaf--monitor-emacs-kill))
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
@@ -376,7 +377,7 @@ For now only EAF browser app is supported."
   "Restore EAF buffer according to BOOKMARK."
   (let ((app (cdr (assq 'eaf-app bookmark))))
     (cond ((equal app "browser")
-           (eaf-open-url (cdr (assq 'filename bookmark))))
+           (eaf-open-browser (cdr (assq 'filename bookmark))))
           ((equal app "pdf-viewer")
            (eaf-open (cdr (assq 'filename bookmark)))))))
 
@@ -449,7 +450,7 @@ For now only EAF browser app is supported."
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
-    (eaf-delete-org-preview-file org-file-name))
+    (eaf--delete-org-preview-file org-file-name))
   (setq eaf-org-file-list nil)
   (setq eaf-org-killed-file-list nil)
 
@@ -614,23 +615,27 @@ to edit EAF keybindings!" fun fun)))
         (eaf-call "update_views" (mapconcat #'identity view-infos ","))
         ))))
 
-(defun eaf-delete-org-preview-file (org-file)
+(defun eaf--delete-org-preview-file (org-file)
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
     (when (file-exists-p org-html-file)
       (delete-file org-html-file)
       (message "[EAF] Cleaned org-preview file %s (%s)." org-html-file org-file))))
 
-(defun eaf-org-killed-buffer-clean ()
+(defun eaf--org-killed-buffer-clean ()
   (dolist (org-killed-buffer eaf-org-killed-file-list)
     (unless (get-file-buffer org-killed-buffer)
       (setq eaf-org-file-list (remove org-killed-buffer eaf-org-file-list))
-      (eaf-delete-org-preview-file org-killed-buffer)))
+      (eaf--delete-org-preview-file org-killed-buffer)))
   (setq eaf-org-killed-file-list nil))
 
-(defun eaf-monitor-buffer-kill ()
-  (ignore-errors
-    (eaf-call "kill_buffer" eaf--buffer-id)
-    (message "[EAF] Killed %s." eaf--buffer-id)))
+(defun eaf--monitor-buffer-kill ()
+  "Function monitoring when an EAF buffer is killed."
+  (eaf-call "kill_buffer" eaf--buffer-id)
+  (message "[EAF] Killed %s." eaf--buffer-id))
+
+(defun eaf--monitor-emacs-kill ()
+  "Function monitoring when Emacs is killed, kill all EAF buffers."
+  (eaf-call "kill_emacs"))
 
 (defun eaf--org-preview-monitor-kill ()
   ;; NOTE:
@@ -640,7 +645,7 @@ to edit EAF keybindings!" fun fun)))
   (when (member (buffer-file-name) eaf-org-file-list)
     (unless (member (buffer-file-name) eaf-org-killed-file-list)
       (push (buffer-file-name) eaf-org-killed-file-list))
-    (run-with-timer 1 nil (lambda () (eaf-org-killed-buffer-clean)))))
+    (run-with-timer 1 nil (lambda () (eaf--org-killed-buffer-clean)))))
 
 
 (defun eaf--org-preview-monitor-buffer-save ()

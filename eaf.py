@@ -222,6 +222,15 @@ class EAF(dbus.service.Object):
                 else:
                     buffer.buffer_widget.resize(emacs_width, emacs_height)
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="")
+    def kill_emacs(self):
+        tmp_buffer_dict = {}
+        for buffer_id in self.buffer_dict:
+            tmp_buffer_dict[buffer_id] = self.buffer_dict[buffer_id]
+
+        for buffer_id in tmp_buffer_dict:
+            self.kill_buffer(buffer_id)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
         # Kill all view base on buffer_id.
@@ -347,7 +356,8 @@ class EAF(dbus.service.Object):
             print("Create session file %s" % (self.session_file_path))
 
         # Save buffer session to file.
-        if buf.save_session_data() != "":
+        buf_session_data = buf.save_session_data()
+        if buf_session_data != "":
             with open(self.session_file_path, "r+") as session_file:
                 # Init session dict.
                 session_dict = {}
@@ -361,17 +371,14 @@ class EAF(dbus.service.Object):
                     session_dict[buf.module_path] = {}
 
                 # Update session data.
-                if buf.url in session_dict[buf.module_path]:
-                    session_dict[buf.module_path].update({buf.url: buf.save_session_data()})
-                else:
-                    session_dict.update({buf.module_path: {buf.url: buf.save_session_data()}})
+                session_dict[buf.module_path].update({buf.url: buf_session_data})
 
                 # Clean session file and update new content.
                 session_file.seek(0)
                 session_file.truncate(0)
                 json.dump(session_dict, session_file)
 
-                print("Save session: ", buf.module_path, buf.url, buf.save_session_data())
+                print("Save session: ", buf.module_path, buf.url, buf_session_data)
 
     def restore_buffer_session(self, buf):
         if os.path.exists(self.session_file_path):
