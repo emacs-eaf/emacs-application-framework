@@ -222,6 +222,15 @@ class EAF(dbus.service.Object):
                 else:
                     buffer.buffer_widget.resize(emacs_width, emacs_height)
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="")
+    def kill_emacs(self):
+        tmp_buffer_dict = {}
+        for buffer_id in self.buffer_dict:
+            tmp_buffer_dict[buffer_id] = self.buffer_dict[buffer_id]
+
+        for buffer_id in tmp_buffer_dict:
+            self.kill_buffer(buffer_id)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
         # Kill all view base on buffer_id.
