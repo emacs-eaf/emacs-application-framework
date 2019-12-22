@@ -153,7 +153,7 @@ class AppBuffer(Buffer):
             content = self.buffer_widget.parse_select_char_list()
             self.eval_in_emacs.emit('''(kill-new "{}")'''.format(content))
         else:
-            self.message_to_emacs.emit("Cannot copy, you haven't sleceted anything!")
+            self.message_to_emacs.emit("Cannot copy, you haven't select anything!")
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
