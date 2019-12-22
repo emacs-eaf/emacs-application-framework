@@ -93,7 +93,7 @@ class CameraWidget(QWidget):
             photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
             image_capture.capture(photo_path)
 
-        self.message_to_emacs.emit("EAF Camera - Captured Photo at " + photo_path)
+        self.message_to_emacs.emit("Captured Photo at " + photo_path)
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
