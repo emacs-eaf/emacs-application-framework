@@ -153,6 +153,14 @@ class AppBuffer(Buffer):
         else:
             self.message_to_emacs.emit("EAF PDF - Cannot jump to last match. Nothing searched!")
 
+    def copy_select(self):
+        if self.buffer_widget.hasMouseTracking():
+            content = self.buffer_widget.parse_select_char_list()
+            cm = '''(kill-new "{}")'''.format(content)
+            self.eval_in_emacs.emit(cm)
+        else:
+            self.message_to_emacs.emit("EAF PDF - Cannot copy anything. Nothing select!")
+
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
@@ -191,6 +199,14 @@ class PdfViewerWidget(QWidget):
         self.is_mark_search = False
         self.search_text_offset_list = []
         self.search_text_annot_cache_dict = {}
+
+        # select text
+        self.start_char_rect_index = None
+        self.start_char_page_index = None
+        self.last_char_rect_index = None
+        self.last_char_page_index = None
+        self.select_area_annot_cache_dict = {}
+        self.char_dict = {k:None for k in range(self.page_total_number)}
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -255,6 +271,11 @@ class PdfViewerWidget(QWidget):
         # follow page search text
         if self.is_mark_search:
             page = self.add_mark_search_text(page, index)
+
+        # cache page char_dict
+        if self.char_dict[index] is None:
+            self.char_dict[index] = self.get_page_char_rect_list(index)
+            self.select_area_annot_cache_dict[index] = []
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
@@ -627,6 +648,154 @@ class PdfViewerWidget(QWidget):
         self.search_text_offset_list.clear()
         self.update()
 
+    def get_page_char_rect_list(self, page_index):
+        lines_list = []
+        spans_list = []
+        chars_list = []
+
+        page_rawdict = self.document[page_index].getText("rawdict")
+        for block in page_rawdict["blocks"]:
+            if "lines" in block:
+                lines_list += block["lines"]
+
+        for line in lines_list:
+            if "spans" in line:
+                spans_list += line["spans"]
+
+        for span in spans_list:
+            if "chars" in span:
+                chars_list += span["chars"]
+
+        return chars_list
+
+    def get_char_rect_index(self, event):
+        offset = 10
+        ex, ey, page_index = self.get_event_absolute_position(event)
+        rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
+        for char_index, char in enumerate(self.char_dict[page_index]):
+            if fitz.Rect(char["bbox"]).intersect(rect):
+                return char_index, page_index
+        return None, None
+
+    def get_select_char_list(self):
+        page_dict = {}
+        if self.start_char_rect_index and self.last_char_rect_index:
+            # start and last page
+            sp_index = min(self.start_char_page_index, self.last_char_page_index)
+            lp_index = max(self.start_char_page_index, self.last_char_page_index)
+            for page_index in range(sp_index, lp_index + 1):
+                page_char_list = self.char_dict[page_index]
+
+                # handle forward select and backward select on multi page.
+                # backward select on multi page.
+                if self.start_char_page_index > self.last_char_page_index:
+                    sc = self.last_char_rect_index if page_index == sp_index else 0
+                    lc = self.start_char_rect_index if page_index == lp_index else len(page_char_list)
+                else:
+                    # forward select on multi page.
+                    sc = self.start_char_rect_index if page_index == sp_index else 0
+                    lc = self.last_char_rect_index if page_index == lp_index else len(page_char_list)
+
+                # handle forward select and backward select on same page.
+                sc_index = min(sc, lc)
+                lc_index = max(sc, lc)
+
+                page_dict[page_index] = page_char_list[sc_index : lc_index]
+
+        return page_dict
+
+    def parse_select_char_list(self):
+        string = ""
+        page_dict = self.get_select_char_list()
+        for index, chars_list in enumerate(page_dict.values()):
+            if chars_list:
+                string += "".join(list(map(lambda x: x["c"], chars_list)))
+
+            if index != 0:
+                string += "\n\n"    # add new line on page end.
+
+        self.delete_all_mark_select_area()
+        self.setMouseTracking(False)
+
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
+        return string
+
+    def mark_select_char_area(self):
+        start_page_index = self.get_start_page_index()
+        last_page_index = self.get_last_page_index()
+
+        page_dict = self.get_select_char_list()
+        for page_index, chars_list in page_dict.items():
+            # one handle near page.
+            if page_index not in range(start_page_index, last_page_index):
+                next
+
+            # Using multi line rect make of abnormity select area.
+            line_rect_list = []
+            if chars_list:
+                # every char has bbox property store char rect.
+                bbox_list = list(map(lambda x: x["bbox"], chars_list))
+
+                # With char order is left to right, if the after char x-axis more than before
+                # char x-axis, will determine have "\n" between on both.
+                if len(bbox_list) >= 2:
+                    tl_x, tl_y = 0, 0 # top left point
+                    for index, bbox in enumerate(bbox_list[:-1]):
+                        if (tl_x == 0) or (tl_x == 0):
+                            tl_x, tl_y = bbox[:2]
+                        if bbox[0] > bbox_list[index + 1][2]:
+                            br_x, br_y = bbox[2:] # bottom right
+                            line_rect_list.append((tl_x, tl_y, br_x, br_y))
+                            tl_x, tl_y = 0, 0
+
+                    lc = bbox_list[-1]  # The last char
+                    line_rect_list.append((tl_x, tl_y, lc[2], lc[3]))
+                else:
+                    # if only one char selected.
+                    line_rect_list.append(bbox_list[0])
+
+            line_rect_list = list(map(lambda x: fitz.Rect(x), line_rect_list))
+
+            # if some annot exists, will skip again add annot.
+            page = self.document[page_index]
+            duplicate_rect = []
+            for annot in self.select_area_annot_cache_dict[page_index]:
+                if annot.parent is None:
+                    annot.parent = page
+                if annot.rect in line_rect_list:
+                    duplicate_rect.append(annot.rect)
+                else:
+                    page.deleteAnnot(annot)
+
+            annot_list = []
+            for rect in line_rect_list:
+                if rect in duplicate_rect:
+                    continue
+                annot = page.addHighlightAnnot(rect.quad)
+                annot.parent = page
+                annot_list.append(annot)
+
+            # refresh annot cache
+            self.select_area_annot_cache_dict[page_index] = annot_list + duplicate_rect
+
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
+
+    def delete_all_mark_select_area(self):
+        if self.select_area_annot_cache_dict:
+            for page_index, annot_list in self.select_area_annot_cache_dict.items():
+                page = self.document[page_index]
+                for annot in annot_list:
+                    page.deleteAnnot(annot)
+        self.last_char_page_index = None
+        self.last_char_rect_index = None
+        self.start_char_page_index = None
+        self.start_char_rect_index = None
+        map(lambda x: x.clear(), self.select_area_annot_cache_dict)
+
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
 
@@ -649,7 +818,7 @@ class PdfViewerWidget(QWidget):
                 render_x = int((self.rect().width() - render_width) / 2)
 
                 # computer absolute coordinate of page
-                x = int((pos.x() - render_x) * 1.0 / self.scale)
+                x = (pos.x() - render_x) * 1.0 / self.scale
                 if pos.y() + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
                     page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
                     page_index = index
@@ -657,7 +826,7 @@ class PdfViewerWidget(QWidget):
                     # if display two pages, pos.y() will add page_padding
                     page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
                     page_index = index + 1
-                y = int((pos.y() + page_offset) * 1.0 / self.scale)
+                y = (pos.y() + page_offset) * 1.0 / self.scale
 
                 return x, y, page_index
         return None, None, None
@@ -691,14 +860,28 @@ class PdfViewerWidget(QWidget):
             return rect_words[0][4]
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.MouseButtonPress:
-            event_link = self.get_event_link(event)
-            if event_link:
-                self.jump_to_page(event_link["page"] + 1)
+        if event.type() == QEvent.MouseMove:
+            if self.start_char_rect_index is None:
+                self.start_char_rect_index, self.start_char_page_index = self.get_char_rect_index(event)
+
+            rect_index, page_index = self.get_char_rect_index(event)
+            if rect_index and page_index:
+                self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
+                self.mark_select_char_area()
+
+        elif event.type() == QEvent.MouseButtonPress:
+            if event.button() == Qt.LeftButton:
+                event_link = self.get_event_link(event)
+                if event_link:
+                    self.jump_to_page(event_link["page"] + 1)
+
         elif event.type() == QEvent.MouseButtonDblClick:
-            double_click_word = self.get_double_click_word(event)
-            if double_click_word:
-                self.translate_double_click_word.emit(double_click_word)
+            if event.button() == Qt.RightButton:
+                double_click_word = self.get_double_click_word(event)
+                if double_click_word:
+                    self.translate_double_click_word.emit(double_click_word)
+            elif event.button() == Qt.LeftButton:
+                self.setMouseTracking(True)
 
         return False
 
