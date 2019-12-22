@@ -768,7 +768,7 @@ class PdfViewerWidget(QWidget):
                 annot_list.append(annot)
 
             # refresh annot cache
-            self.select_area_annot_cache_dict[page_index] = annot_list # + duplicate_rect
+            self.select_area_annot_cache_dict[page_index] = annot_list + duplicate_rect
 
         self.page_cache_pixmap_dict.clear()
         self.update()
