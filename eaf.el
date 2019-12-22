@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Dec 22 02:45:06 2019 (-0500)
+;; Last-Updated: Sun Dec 22 11:24:23 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -636,7 +636,8 @@ to edit EAF keybindings!" fun fun)))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed, kill all EAF buffers."
-  (eaf-call "kill_emacs"))
+  (ignore-errors
+    (eaf-call "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
   ;; NOTE:
