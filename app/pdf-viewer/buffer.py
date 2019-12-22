@@ -149,12 +149,11 @@ class AppBuffer(Buffer):
             self.buffer_widget.send_input_message("Search Text: ", "search_text")
 
     def copy_select(self):
-        if self.buffer_widget.hasMouseTracking():
+        if self.buffer_widget.is_select_mode:
             content = self.buffer_widget.parse_select_char_list()
-            cm = '''(kill-new "{}")'''.format(content)
-            self.eval_in_emacs.emit(cm)
+            self.eval_in_emacs.emit('''(kill-new "{}")'''.format(content))
         else:
-            self.message_to_emacs.emit("EAF PDF - Cannot copy anything. Nothing select!")
+            self.message_to_emacs.emit("Cannot copy anything. Nothing select!")
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -165,6 +164,7 @@ class PdfViewerWidget(QWidget):
         self.url = url
         self.background_color = background_color
         self.installEventFilter(self)
+        self.setMouseTracking(True)
 
         # Load document first.
         self.document = fitz.open(url)
@@ -196,6 +196,7 @@ class PdfViewerWidget(QWidget):
         self.search_text_annot_cache_dict = {}
 
         # select text
+        self.is_select_mode = False
         self.start_char_rect_index = None
         self.start_char_page_index = None
         self.last_char_rect_index = None
@@ -664,12 +665,13 @@ class PdfViewerWidget(QWidget):
         return chars_list
 
     def get_char_rect_index(self, event):
-        offset = 10
+        offset = 20
         ex, ey, page_index = self.get_event_absolute_position(event)
-        rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
-        for char_index, char in enumerate(self.char_dict[page_index]):
-            if fitz.Rect(char["bbox"]).intersect(rect):
-                return char_index, page_index
+        if ex and ey and page_index:
+            rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
+            for char_index, char in enumerate(self.char_dict[page_index]):
+                if fitz.Rect(char["bbox"]).intersect(rect):
+                    return char_index, page_index
         return None, None
 
     def get_select_char_list(self):
@@ -681,21 +683,22 @@ class PdfViewerWidget(QWidget):
             for page_index in range(sp_index, lp_index + 1):
                 page_char_list = self.char_dict[page_index]
 
+                if page_char_list:
                 # handle forward select and backward select on multi page.
                 # backward select on multi page.
-                if self.start_char_page_index > self.last_char_page_index:
-                    sc = self.last_char_rect_index if page_index == sp_index else 0
-                    lc = self.start_char_rect_index if page_index == lp_index else len(page_char_list)
-                else:
-                    # forward select on multi page.
-                    sc = self.start_char_rect_index if page_index == sp_index else 0
-                    lc = self.last_char_rect_index if page_index == lp_index else len(page_char_list)
+                    if self.start_char_page_index > self.last_char_page_index:
+                        sc = self.last_char_rect_index if page_index == sp_index else 0
+                        lc = self.start_char_rect_index if page_index == lp_index else len(page_char_list)
+                    else:
+                        # forward select on multi page.
+                        sc = self.start_char_rect_index if page_index == sp_index else 0
+                        lc = self.last_char_rect_index if page_index == lp_index else len(page_char_list)
 
-                # handle forward select and backward select on same page.
-                sc_index = min(sc, lc)
-                lc_index = max(sc, lc)
+                    # handle forward select and backward select on same page.
+                    sc_index = min(sc, lc)
+                    lc_index = max(sc, lc)
 
-                page_dict[page_index] = page_char_list[sc_index : lc_index]
+                    page_dict[page_index] = page_char_list[sc_index : lc_index]
 
         return page_dict
 
@@ -706,11 +709,11 @@ class PdfViewerWidget(QWidget):
             if chars_list:
                 string += "".join(list(map(lambda x: x["c"], chars_list)))
 
-            if index != 0:
-                string += "\n\n"    # add new line on page end.
+                if index != 0:
+                    string += "\n\n"    # add new line on page end.
 
+        self.is_select_mode = False
         self.delete_all_mark_select_area()
-        self.setMouseTracking(False)
 
         self.page_cache_pixmap_dict.clear()
         self.update()
@@ -718,15 +721,8 @@ class PdfViewerWidget(QWidget):
         return string
 
     def mark_select_char_area(self):
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-
         page_dict = self.get_select_char_list()
         for page_index, chars_list in page_dict.items():
-            # one handle near page.
-            if page_index not in range(start_page_index, last_page_index):
-                next
-
             # Using multi line rect make of abnormity select area.
             line_rect_list = []
             if chars_list:
@@ -762,7 +758,12 @@ class PdfViewerWidget(QWidget):
                 if annot.rect in line_rect_list:
                     duplicate_rect.append(annot.rect)
                 else:
-                    page.deleteAnnot(annot)
+                    # Double click after on multi page select, will cause EAF core dumped
+                    # don't anything error output.
+                    try:
+                        page.deleteAnnot(annot)
+                    except:
+                        pass
 
             annot_list = []
             for rect in line_rect_list:
@@ -773,18 +774,18 @@ class PdfViewerWidget(QWidget):
                 annot_list.append(annot)
 
             # refresh annot cache
-            self.select_area_annot_cache_dict[page_index] = annot_list + duplicate_rect
+            self.select_area_annot_cache_dict[page_index] = annot_list # + duplicate_rect
 
         self.page_cache_pixmap_dict.clear()
         self.update()
-
 
     def delete_all_mark_select_area(self):
         if self.select_area_annot_cache_dict:
             for page_index, annot_list in self.select_area_annot_cache_dict.items():
                 page = self.document[page_index]
                 for annot in annot_list:
-                    page.deleteAnnot(annot)
+                    if annot.parent:
+                        page.deleteAnnot(annot)
         self.last_char_page_index = None
         self.last_char_rect_index = None
         self.start_char_page_index = None
@@ -856,13 +857,14 @@ class PdfViewerWidget(QWidget):
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseMove:
-            if self.start_char_rect_index is None:
-                self.start_char_rect_index, self.start_char_page_index = self.get_char_rect_index(event)
-
-            rect_index, page_index = self.get_char_rect_index(event)
-            if rect_index and page_index:
-                self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
-                self.mark_select_char_area()
+            if self.is_select_mode:
+                rect_index, page_index = self.get_char_rect_index(event)
+                if rect_index and page_index:
+                    if self.start_char_rect_index is None or self.start_char_page_index is None:
+                        self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
+                    else:
+                        self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
+                        self.mark_select_char_area()
 
         elif event.type() == QEvent.MouseButtonPress:
             if event.button() == Qt.LeftButton:
@@ -876,7 +878,7 @@ class PdfViewerWidget(QWidget):
                 if double_click_word:
                     self.translate_double_click_word.emit(double_click_word)
             elif event.button() == Qt.LeftButton:
-                self.setMouseTracking(True)
+                self.is_select_mode = True
 
         return False
 
