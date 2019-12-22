@@ -883,6 +883,11 @@ of `eaf--buffer-app-name' inside the EAF buffer."
     (switch-to-buffer buf)
     (other-window +1)))
 
+;;;###autoload
+(defun eaf-open-rss-reader ()
+  "Open EAF RSS Reader."
+  (interactive)
+  (eaf-open "RSS Reader" "rss-reader"))
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)

@@ -65,7 +65,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
 2. Make sure to have ```python3``` installed, and use ```pip3``` to install EAF dependencies:
 
 ```Elisp
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
 ```
 
 3. Compile ```qtermwidget-git``` use the following command:
@@ -88,6 +88,7 @@ Package info:
 | pymupdf         | pip3                | Application    | PDF Viewer: Rendering engine                       |
 | grip            | pip3                | Application    | Markdown Previewer: Markdown render server         |
 | qrcode          | pip3                | Application    | File Transfer: Render QR code pointing local files |
+| feedparser      | pip3                | Application    | RSS Reader: feed parser                            |
 | qtermwidget-git | compile from source | Application    | Terminal: QTermWidget, PyQt5 terminal emulator     |
 
 
@@ -105,6 +106,7 @@ Package info:
 | File Sender        | Type 'eaf-file-sender-qrcode', or use 'eaf-file-sender-qrcode-in-dired' |
 | File Receiver      | Type 'eaf-file-receiver-qrcode'                                         |
 | Airshare           | Type 'eaf-file-transfer-airshare'                                       |
+| RSS Reader         | Type 'eaf-open-rss-reader'                                              |
 | Demo               | Type 'eaf-open-demo'                                                    |
 
 To run `eaf-open` on the current file under the cursor in `dired`, call `eaf-open-this-from-dired`.
@@ -160,7 +162,7 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
 ```Elisp
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode --force-reinstall
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser --force-reinstall
 ```
 
 ## Report bug
