@@ -665,7 +665,7 @@ class PdfViewerWidget(QWidget):
         return chars_list
 
     def get_char_rect_index(self, event):
-        offset = 20
+        offset = 15
         ex, ey, page_index = self.get_event_absolute_position(event)
         if ex and ey and page_index:
             rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
@@ -753,17 +753,11 @@ class PdfViewerWidget(QWidget):
             page = self.document[page_index]
             duplicate_rect = []
             for annot in self.select_area_annot_cache_dict[page_index]:
-                if annot.parent is None:
-                    annot.parent = page
-                if annot.rect in line_rect_list:
-                    duplicate_rect.append(annot.rect)
-                else:
-                    # Double click after on multi page select, will cause EAF core dumped
-                    # don't anything error output.
-                    try:
+                if annot.parent:
+                    if annot.rect in line_rect_list:
+                        duplicate_rect.append(annot.rect)
+                    else:
                         page.deleteAnnot(annot)
-                    except:
-                        pass
 
             annot_list = []
             for rect in line_rect_list:
