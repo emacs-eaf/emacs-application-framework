@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Dec 22 11:24:23 2019 (-0500)
+;; Last-Updated: Mon Dec 23 17:41:01 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -702,6 +702,12 @@ of `eaf--buffer-app-name' inside the EAF buffer."
                  (symbol-name command)
                `(quote ,command)) #'equal))
 
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "focus_emacs_buffer"
+ #'eaf-focus-buffer)
+
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
          (mouse-press-x (string-to-number (nth 0 coordinate-list)))
@@ -730,26 +736,28 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "create_new_browser_buffer"
- #'eaf-create-new-browser-buffer)
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "set_emacs_var"
- #'eaf-set-emacs-var)
+ #'eaf--set-emacs-var)
 
-(defun eaf-set-emacs-var (var-name var-value)
+(defun eaf--set-emacs-var (var-name var-value)
+  "Used by Python applications to set Lisp variable VAR-NAME with value VAR-VALUE on the Emacs side."
   (set (intern var-name) var-value))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "eval_in_emacs"
- #'eaf-eval-in-emacs)
+ #'eaf--eval-in-emacs)
 
-(defun eaf-eval-in-emacs (elisp-code-string)
+(defun eaf--eval-in-emacs (elisp-code-string)
+  "Used by Python applications to evaluate ELISP-CODE-STRING as Emacs Lisp code on the Emacs side."
   (eval (read elisp-code-string) 'lexical))
 
-(defun eaf-create-new-browser-buffer (new-window-buffer-id)
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "create_new_browser_buffer"
+ #'eaf--create-new-browser-buffer)
+
+(defun eaf--create-new-browser-buffer (new-window-buffer-id)
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
@@ -775,19 +783,19 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "focus_emacs_buffer"
- #'eaf-focus-buffer)
+ "com.lazycat.eaf" "start_finish"
+ #'eaf--start-finish)
 
-(defun eaf-start-finish ()
+(defun eaf--start-finish ()
   "Call `eaf--open-internal' after receive `start_finish' signal from server process."
   (eaf--open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "start_finish"
- #'eaf-start-finish)
+ "com.lazycat.eaf" "update_buffer_title"
+ #'eaf--update-buffer-title)
 
-(defun eaf-update-buffer-title (bid title)
+(defun eaf--update-buffer-title (bid title)
   (when (> (length title) 0)
     (catch 'find-buffer
       (dolist (window (window-list))
@@ -803,11 +811,16 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "update_buffer_title"
- #'eaf-update-buffer-title)
+ "com.lazycat.eaf" "open_buffer_url"
+ #'eaf-open-buffer-url)
 
 (defun eaf-open-buffer-url (url)
   (eaf-open-browser url))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "translate_text"
+ #'eaf-translate-text)
 
 (defun eaf-translate-text (text)
   (when (featurep 'sdcv)
@@ -815,40 +828,30 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "open_buffer_url"
- #'eaf-open-buffer-url)
+ "com.lazycat.eaf" "input_message"
+ #'eaf--input-message)
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "translate_text"
- #'eaf-translate-text)
-
-(defun eaf-read-string (interactive-string)
-  "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
-  (condition-case nil (read-string interactive-string) (quit nil)))
-
-(defun eaf-input-message (input-buffer-id interactive-string callback-type)
+(defun eaf--input-message (input-buffer-id interactive-string callback-type)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-string (concat "[EAF/" eaf--buffer-app-name "] " interactive-string))))
     (if input-message
         (eaf-call "handle_input_message" input-buffer-id callback-type input-message)
       (eaf-call "cancel_input_message" input-buffer-id callback-type))))
 
+(defun eaf-read-string (interactive-string)
+  "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
+  (condition-case nil (read-string interactive-string) (quit nil)))
+
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "input_message"
- #'eaf-input-message)
+ "com.lazycat.eaf" "get_emacs_var"
+ #'eaf--send-var-to-python)
 
 (defun eaf--send-var-to-python ()
   "Send variables defined in `eaf-var-list' to the Python side."
   (eaf-call "store_emacs_var"
             (string-join (cl-loop for (key . value) in eaf-var-list
                                   collect (format "%s,%s" key value)) ":")))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "get_emacs_var"
- #'eaf--send-var-to-python)
 
 (defun eaf--open-internal (url app-name arguments)
   (let* ((buffer (eaf--create-buffer url app-name))
@@ -938,6 +941,22 @@ of `eaf--buffer-app-name' inside the EAF buffer."
            return app))
 
 ;;;###autoload
+(defun eaf-open-this-from-dired ()
+  "Open html/pdf/image/video files whenever possible with EAF in dired.
+Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
+  (interactive)
+  (dolist (file (dired-get-marked-files))
+    (cond ((eaf--get-app-for-extension
+            (file-name-extension file))
+           (eaf-open file))
+          (eaf-find-alternate-file-in-dired
+           (dired-find-alternate-file))
+          (t (dired-find-file)))))
+
+;;;###autoload
+(defalias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
+
+;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
 
@@ -949,7 +968,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (when (featurep 'recentf)
       (recentf-add-file url))
     (let* ((extension-name (file-name-extension url)))
-      ;; init app name, url and arguments
+      ;; Initialize app name, url and arguments
       (setq app-name (eaf--get-app-for-extension extension-name))
       (when (equal app-name "markdown-previewer")
         ;; Try get user's github token if `eaf-grip-token' is nil.
@@ -959,7 +978,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (when (equal app-name "browser")
         (setq url (concat "file://" url)))))
   (unless arguments (setq arguments ""))
-  ;; hooks are only added if not present already...
+  ;; Hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
   ;; Now that app-name should hopefully be set
@@ -987,7 +1006,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (setq eaf-first-start-app-name app-name)
         (setq eaf-first-start-arguments arguments)
         (eaf-start-process)
-        (message (concat "[EAF/" app-name "] " "Opening %s...") url))
+        (message (concat "[EAF/" app-name "] " "Opening %s") url))
     ;; Output something to user if app-name is empty string.
     (message (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
                      (cond
@@ -995,7 +1014,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
                                 (string-prefix-p "~" url))) "Cannot open file %s.")
                       ((file-exists-p url) "Cannot open file %s.")
                       (t "File %s does not exist.")))
-                     url)))
+             url)))
 
 (defun eaf--display-app-buffer (app-name buffer)
   (let ((display-fun (or (cdr (assoc app-name
@@ -1043,22 +1062,6 @@ Select directory DIR to receive the uploaded file.
 Make sure that your smartphone is connected to the same WiFi network as this computer."
   (interactive "D[EAF/file-receiver] Specify Destination: ")
   (eaf-open dir "file-receiver"))
-
-;;;###autoload
-(defun eaf-open-this-from-dired ()
-  "Open html/pdf/image/video files whenever possible with EAF in dired.
-Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
-  (interactive)
-  (dolist (file (dired-get-marked-files))
-    (cond ((eaf--get-app-for-extension
-            (file-name-extension file))
-           (eaf-open file))
-          (eaf-find-alternate-file-in-dired
-           (dired-find-alternate-file))
-          (t (dired-find-file)))))
-
-;;;###autoload
-(defalias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
