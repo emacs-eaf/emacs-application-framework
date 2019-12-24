@@ -111,6 +111,8 @@ Package info:
 
 To run `eaf-open` on the current file under the cursor in `dired`, call `eaf-open-this-from-dired`.
 
+Use command `eaf-google-it` google symbol or region string in browser.
+
 ```
 NOTE:
 EAF use DBus' session bus, it must run in general user.

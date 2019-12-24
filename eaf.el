@@ -894,6 +894,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
     (other-window +1)))
 
 ;;;###autoload
+(defun eaf-google-it ()
+  "Google symbol or region string."
+  (interactive)
+  (eaf-open-url (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
+                        (if mark-active
+                            (buffer-substring (region-beginning) (region-end))
+                          (symbol-at-point)))))
+
+;;;###autoload
 (defun eaf-open-rss-reader ()
   "Open EAF RSS Reader."
   (interactive)
