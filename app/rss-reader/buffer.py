@@ -21,7 +21,7 @@
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor, QPainter, QFont, QTextDocument
-from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QVBoxLayout, QWidget, QApplication, QWidget, QListWidget, QVBoxLayout, QLabel, QPushButton, QListWidgetItem
+from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QApplication, QWidget, QListWidget, QVBoxLayout, QLabel, QPushButton, QListWidgetItem
 from core.buffer import Buffer
 from PyQt5 import QtWidgets, QtCore
 from core.browser import BrowserView
@@ -33,12 +33,9 @@ class AppBuffer(Buffer):
 
         self.add_widget(RSSReaderWidget())
 
-        self.worker = FetchRSSThread()
-        self.workerThread = QtCore.QThread()
-        self.workerThread.started.connect(self.worker.run)
-        self.worker.fetchRSS.connect(self.buffer_widget.handle_rss)
-        self.worker.moveToThread(self.workerThread)
-        self.workerThread.start()
+        self.fetchThread = FetchRSSThread()
+        self.fetchThread.fetchRSS.connect(self.buffer_widget.handle_rss)
+        self.fetchThread.start()
 
 class RSSReaderWidget(QWidget):
 
@@ -67,7 +64,6 @@ class RSSReaderWidget(QWidget):
 
         article_layout.setStretchFactor(self.article_list, 1)
         article_layout.setStretchFactor(self.browser, 3)
-
 
         self.article_area.setLayout(article_layout)
 
@@ -105,13 +101,12 @@ class RSSReaderWidget(QWidget):
             self.article_list.addItem(item)
             self.article_list.setItemWidget(item, item_widget)
 
-class FetchRSSThread(QtCore.QObject):
+class FetchRSSThread(QtCore.QThread):
     fetchRSS = QtCore.pyqtSignal(object)
 
     def __init__(self):
         super().__init__()
 
-    @QtCore.pyqtSlot()
     def run(self):
         d = feedparser.parse('https://sachachua.com/blog/feed/')
         # d = feedparser.parse('https://planet.emacslife.com/atom.xml')
@@ -148,16 +143,34 @@ class RSSArticleItem(QWidget):
 
         date = ""
         try:
-            date = "%d-%02d-%02d" % (post.published_parsed.tm_year, post.published_parsed.tm_mon, post.published_parsed.tm_mday)
+            date = "[%d-%02d-%02d]" % (post.published_parsed.tm_year, post.published_parsed.tm_mon, post.published_parsed.tm_mday)
         except Exception:
             pass
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(0)
+        layout.setContentsMargins(10, 10, 0, 0)
+
+        post_info_widget = QWidget()
+        post_box = QHBoxLayout()
+        post_box.setSpacing(10)
+        post_box.setContentsMargins(0, 0, 0, 0)
+
+        date_label = QLabel(date)
+        date_label.setFont(QFont('Arial', 18))
+        post_box.addWidget(date_label)
 
         title_label = QLabel(post.title)
         title_label.setFont(QFont('Arial', 18))
-        layout.addWidget(title_label)
+        post_box.addWidget(title_label)
+
+        author_label = QLabel("(" + post.author + ")")
+        author_label.setFont(QFont('Arial', 16))
+        post_box.addWidget(author_label)
+
+        post_box.addStretch(1)
+
+        post_info_widget.setLayout(post_box)
 
         description_doc = QTextDocument()
         description_doc.setHtml(post.description)
@@ -165,26 +178,27 @@ class RSSArticleItem(QWidget):
         description_label.setWordWrap(True)
         description_label.setStyleSheet("color: #333")
         description_label.setFont(QFont("Arial", 16))
-        layout.addWidget(description_label)
-
-        post_info_widget = QWidget()
-        post_box = QHBoxLayout()
-        post_box.setSpacing(0)
-        post_box.setContentsMargins(0, 0, 0, 0)
-
-        author_label = QLabel(post.author)
-        author_label.setStyleSheet("color: #666")
-        post_box.addWidget(author_label)
-        post_box.addStretch(1)
-        date_label = QLabel(date)
-        date_label.setStyleSheet("color: #666")
-        post_box.addWidget(date_label)
-
-        post_info_widget.setLayout(post_box)
 
         layout.addWidget(post_info_widget)
+        layout.addWidget(description_label)
 
         self.setLayout(layout)
 
     def truncate_description(self, text):
         return (text[:90] + ' ...') if len(text) > 90 else text
+
+if __name__ == '__main__':
+    import sys
+    from PyQt5.QtWidgets import QApplication
+
+    app = QApplication(sys.argv)
+
+    w = RSSReaderWidget()
+    w.resize(1920, 1080)
+    w.show()
+
+    fetchThread = FetchRSSThread()
+    fetchThread.fetchRSS.connect(w.handle_rss)
+    fetchThread.start()
+
+    sys.exit(app.exec_())
