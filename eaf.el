@@ -557,15 +557,17 @@ to edit EAF keybindings!" fun fun)))
   (symbol-value
    (cdr (assoc app-name eaf-app-binding-alist))))
 
-(defun eaf--create-buffer (input-content app-name)
+(defun eaf--create-buffer (url app-name)
   "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
   (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
-  (let* ((input-content (if (equal (file-name-nondirectory input-content) "") input-content
-                          (file-name-nondirectory input-content)))
-         (eaf-buffer (generate-new-buffer input-content)))
+  (let* ((eaf-buffer-name (if (equal (file-name-nondirectory url) "")
+                              url
+                            (file-name-nondirectory url)))
+         (eaf-buffer (generate-new-buffer eaf-buffer-name)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (set (make-local-variable 'eaf--buffer-url) input-content)
+      ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
+      (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
       (setq mode-name (concat "EAF/" app-name)))
