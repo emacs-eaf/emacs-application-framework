@@ -255,6 +255,14 @@ class EAF(dbus.service.Object):
             except AttributeError:
                 self.message_to_emacs("Cannot execute function: " + function_name)
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
+    def execute_function_with_arg(self, buffer_id, function_name, arg):
+        if buffer_id in self.buffer_dict:
+            try:
+                self.buffer_dict[buffer_id].execute_function_with_arg(function_name, arg)
+            except AttributeError:
+                self.message_to_emacs("Cannot execute function: " + function_name + "with arg: " + arg)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def call_function(self, buffer_id, function_name):
         if buffer_id in self.buffer_dict:

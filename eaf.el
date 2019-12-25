@@ -376,6 +376,8 @@ For now only EAF browser app is supported."
 (defun eaf--pdf-viewer-bookmark ()
   `((handler . eaf--bookmark-restore)
     (eaf-app . "pdf-viewer")
+    (session . ,(eaf-call "call_function"
+                          eaf--buffer-id "save_session_data"))
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
 
@@ -385,7 +387,11 @@ For now only EAF browser app is supported."
     (cond ((equal app "browser")
            (eaf-open-browser (cdr (assq 'filename bookmark))))
           ((equal app "pdf-viewer")
-           (eaf-open (cdr (assq 'filename bookmark)))))))
+           (eaf-open (cdr (assq 'filename bookmark)))
+           (eaf-call "execute_function_with_arg"
+                     eaf--buffer-id
+                     "restore_session_data"
+                     (cdr (assq 'session bookmark)))))))
 
 (defun eaf-open-bookmark ()
   "Command to open or create EAF bookmarks with completion."

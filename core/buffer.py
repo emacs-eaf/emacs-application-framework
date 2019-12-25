@@ -260,6 +260,9 @@ class Buffer(QGraphicsScene):
     def execute_function(self, function_name):
         getattr(self, function_name)()
 
+    def execute_function_with_arg(self, function_name, arg):
+        getattr(self, function_name)(arg)
+
     def call_function(self, function_name):
         return getattr(self, function_name)()
 
