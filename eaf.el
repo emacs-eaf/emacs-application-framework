@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Dec 23 17:41:01 2019 (-0500)
+;; Last-Updated: Tue Dec 24 22:37:13 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -899,10 +899,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf-google-it ()
   "Google symbol or region string."
   (interactive)
-  (eaf-open-url (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
-                        (if mark-active
-                            (buffer-substring (region-beginning) (region-end))
-                          (symbol-at-point)))))
+  (let* ((current-symbol (if mark-active
+                             (buffer-substring (region-beginning) (region-end))
+                           (symbol-at-point)))
+         (search-string (read-string (format "[EAF/browser] Google (%s): " current-symbol))))
+    (if (string-blank-p search-string)
+        (when current-symbol
+          (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" current-symbol)))
+      (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" search-string)))))
 
 ;;;###autoload
 (defun eaf-open-rss-reader ()
@@ -926,7 +930,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
     (message "[EAF/browser] %s is an invalid URL." url)))
 
 ;;;###autoload
-(defalias 'eaf-open-url #'eaf-open-browser)
+(define-obsolete-function-alias 'eaf-open-url #'eaf-open-browser)
 
 ;;;###autoload
 (defun eaf-open-demo ()
@@ -965,7 +969,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
           (t (dired-find-file)))))
 
 ;;;###autoload
-(defalias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
+(define-obsolete-function-alias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;###autoload
 (defun eaf-open (url &optional app-name arguments)
