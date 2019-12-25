@@ -124,7 +124,7 @@ class BrowserBuffer(Buffer):
         self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
 
     def refresh_page(self):
-        self.eval_js("location.reload()")
+        self.buffer_widget.reload()
 
     def get_url(self):
         return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
