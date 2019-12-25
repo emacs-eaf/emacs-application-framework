@@ -135,6 +135,8 @@ class AppBuffer(Buffer):
             self.buffer_widget.cleanup_search()
         if self.buffer_widget.is_mark_link:
             self.buffer_widget.cleanup_links()
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.cleanup_select()
 
     def search_text_forward(self):
         if self.buffer_widget.is_mark_search:
@@ -152,6 +154,8 @@ class AppBuffer(Buffer):
         if self.buffer_widget.is_select_mode:
             content = self.buffer_widget.parse_select_char_list()
             self.eval_in_emacs.emit('''(kill-new "{}")'''.format(content))
+            self.message_to_emacs.emit(content)
+            self.buffer_widget.cleanup_select()
         else:
             self.message_to_emacs.emit("Cannot copy, you haven't select anything!")
 
@@ -711,14 +715,14 @@ class PdfViewerWidget(QWidget):
 
                 if index != 0:
                     string += "\n\n"    # add new line on page end.
+        return string
 
+    def cleanup_select(self):
         self.is_select_mode = False
         self.delete_all_mark_select_area()
-
         self.page_cache_pixmap_dict.clear()
         self.update()
 
-        return string
 
     def mark_select_char_area(self):
         page_dict = self.get_select_char_list()
