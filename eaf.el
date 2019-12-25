@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Dec 25 01:06:06 2019 (-0500)
+;; Last-Updated: Wed Dec 25 15:24:37 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -75,6 +75,7 @@
 (require 'dbus)
 (require 'subr-x)
 (require 'map)
+(require 'bookmark)
 
 ;;; Code:
 
@@ -101,7 +102,7 @@
 (defvar eaf-mode-map nil
   "Keymap used by `eaf-mode'.
 
-Don't modify this map directly. To bind keys for all apps use
+Don't modify this map directly.  To bind keys for all apps use
 `eaf-mode-map*' and to bind keys for individual apps use
 `eaf-bind-key'.")
 
@@ -171,8 +172,10 @@ been initialized."
 (defvar eaf-http-proxy-port "")
 
 (defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, when calling `eaf-open-this-from-dired', EAF unrecognizable files will be opened
-by `dired-find-alternate-file'. Otherwise they will be opened normally with `dired-find-file'.")
+  "If non-nil, calling `eaf-open-this-from-dired' determines file types to open.
+
+EAF unrecognizable files will be opened by `dired-find-alternate-file' normally.
+Otherwise they will be opened normally with `dired-find-file'.")
 
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
@@ -190,7 +193,7 @@ by `dired-find-alternate-file'. Otherwise they will be opened normally with `dir
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
-Try not to modify this alist directly. Use `eaf-setq' to modify instead."
+Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-browser-keybinding
@@ -563,7 +566,7 @@ to edit EAF keybindings!" fun fun)))
    (cdr (assoc app-name eaf-app-binding-alist))))
 
 (defun eaf--create-buffer (url app-name)
-  "Create an EAF buffer given INPUT-CONTENT and APP-NAME."
+  "Create an EAF buffer given URL and APP-NAME."
   (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
   (let* ((eaf-buffer-name (if (equal (file-name-nondirectory url) "")
                               url
@@ -647,10 +650,10 @@ to edit EAF keybindings!" fun fun)))
     (eaf-call "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
-  ;; NOTE:
+  "Function monitoring when org-preview application is killed."
   ;; Because save org buffer will trigger `kill-buffer' action,
   ;; but org buffer still live after do `kill-buffer' action.
-  ;; So i run a timer to check org buffer is live after `kill-buffer' aciton.
+  ;; So I run a timer to check org buffer is live after `kill-buffer' action.
   (when (member (buffer-file-name) eaf-org-file-list)
     (unless (member (buffer-file-name) eaf-org-killed-file-list)
       (push (buffer-file-name) eaf-org-killed-file-list))
@@ -695,8 +698,8 @@ Use it as (eaf-setq var val)"
 Use this to bind keys for EAF applications.
 
 COMMAND is a symbol of a regular Emacs command or a python app
-command. You can see a list of available commands by calling
-`eaf-describe-bindings' in an EAF buffer. The `eaf-proxy-' prefix
+command.  You can see a list of available commands by calling
+`eaf-describe-bindings' in an EAF buffer.  The `eaf-proxy-' prefix
 should be dropped for the COMMAND symbol.
 
 KEY is a string representing a sequence of keystrokes and events.
@@ -875,7 +878,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
            (message buffer-result)))))
 
 (defun eaf--markdown-preview-display (buf)
-  ;; Split window to show file and previewer.
+  "Given BUF, split window to show file and previewer."
   (eaf-split-preview-windows
    (buffer-local-value
     'eaf--buffer-url buf))
