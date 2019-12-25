@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Dec 24 22:37:13 2019 (-0500)
+;; Last-Updated: Wed Dec 25 01:06:06 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -194,10 +194,7 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-browser-keybinding
-  '(("M-f" . "history_forward")
-    ("M-b" . "history_backward")
-    ("M-q" . "clean_all_cookie")
-    ("C--" . "zoom_out")
+  '(("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
     ("C-s" . "search_text_forward")
@@ -205,6 +202,14 @@ Try not to modify this alist directly. Use `eaf-setq' to modify instead."
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
     ("C-v" . "scroll_up_page")
+    ("C-y" . "yank_text")
+    ("C-w" . "kill_text")
+    ("C-/" . "undo_action")
+    ("M-_" . "redo_action")
+    ("M-w" . "copy_text")
+    ("M-f" . "history_forward")
+    ("M-b" . "history_backward")
+    ("M-q" . "clean_all_cookie")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")

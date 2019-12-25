@@ -126,5 +126,20 @@ class BrowserBuffer(Buffer):
     def refresh_page(self):
         self.buffer_widget.reload()
 
+    def copy_text(self):
+        self.buffer_widget.web_page.triggerAction(self.buffer_widget.web_page.Copy)
+
+    def yank_text(self):
+        self.buffer_widget.web_page.triggerAction(self.buffer_widget.web_page.Paste)
+
+    def kill_text(self):
+        self.buffer_widget.web_page.triggerAction(self.buffer_widget.web_page.Cut)
+
+    def undo_action(self):
+        self.buffer_widget.web_page.triggerAction(self.buffer_widget.web_page.Undo)
+
+    def redo_action(self):
+        self.buffer_widget.web_page.triggerAction(self.buffer_widget.web_page.Redo)
+
     def get_url(self):
         return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
