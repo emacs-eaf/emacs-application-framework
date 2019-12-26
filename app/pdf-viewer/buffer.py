@@ -871,6 +871,8 @@ class PdfViewerWidget(QWidget):
                     self.jump_to_page(event_link["page"] + 1)
 
         elif event.type() == QEvent.MouseButtonDblClick:
+            if self.is_mark_search:
+                self.cleanup_search()
             if event.button() == Qt.RightButton:
                 double_click_word = self.get_double_click_word(event)
                 if double_click_word:
