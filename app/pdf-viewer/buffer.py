@@ -239,7 +239,7 @@ class PdfViewerWidget(QWidget):
 
     def save_current_pos(self):
         self.remember_offset = self.scroll_offset
-        self.message_to_emacs.emit("Remembered current position.")
+        self.message_to_emacs.emit("Saved current position.")
 
     def jump_to_saved_pos(self):
         if self.remember_offset is None:
@@ -248,8 +248,8 @@ class PdfViewerWidget(QWidget):
             current_scroll_offset = self.scroll_offset
             self.scroll_offset = self.remember_offset
             self.update()
-
             self.remember_offset = current_scroll_offset
+            self.message_to_emacs.emit("Jumped to saved position.")
 
     def get_page_pixmap(self, index, scale):
         # Just return cache pixmap when found match index and scale in cache dict.
