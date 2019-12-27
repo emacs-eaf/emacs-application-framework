@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Dec 26 03:32:58 2019 (-0500)
+;; Last-Updated: Thu Dec 26 22:26:34 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -245,8 +245,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("-" . "zoom_out")
     ("g" . "jump_to_page")
     ("p" . "jump_to_percent")
-    ("[" . "remember_current_position")
-    ("]" . "remember_jump")
+    ("[" . "save_current_pos")
+    ("]" . "jump_to_saved_pos")
     ("i" . "toggle_inverted_mode")
     ("m" . "toggle_mark_link")
     ("f" . "jump_to_link")

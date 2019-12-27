@@ -114,11 +114,11 @@ class AppBuffer(Buffer):
     def jump_to_percent(self):
         self.buffer_widget.send_input_message("Jump to Percent: ", "jump_percent")
 
-    def remember_current_position(self):
-        self.buffer_widget.remember_current_position()
+    def save_current_pos(self):
+        self.buffer_widget.save_current_pos()
 
-    def remember_jump(self):
-        self.buffer_widget.remember_jump()
+    def jump_to_saved_pos(self):
+        self.buffer_widget.jump_to_saved_pos()
 
     def toggle_inverted_mode(self):
         self.buffer_widget.toggle_inverted_mode()
@@ -237,11 +237,11 @@ class PdfViewerWidget(QWidget):
 
         self.remember_offset = None
 
-    def remember_current_position(self):
+    def save_current_pos(self):
         self.remember_offset = self.scroll_offset
         self.message_to_emacs.emit("Remembered current position.")
 
-    def remember_jump(self):
+    def jump_to_saved_pos(self):
         if self.remember_offset is None:
             self.message_to_emacs.emit("Cannot jump from this position.")
         else:
@@ -572,7 +572,7 @@ class PdfViewerWidget(QWidget):
         key = str(key).upper()
         if key in self.jump_link_key_cache_dict:
             link = self.jump_link_key_cache_dict[key]
-            self.remember_current_position()
+            self.save_current_pos()
             self.jump_to_page(link["page"] + 1)
         self.delete_all_mark_jump_link_tips()
         self.update()
