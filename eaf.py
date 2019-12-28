@@ -289,8 +289,8 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def store_emacs_var(self, var_dict_string):
-        for var_pair in var_dict_string.split(":"):
-            (var_name, var_value) = var_pair.split(",")
+        for var_pair in var_dict_string.split(","):
+            (var_name, var_value) = var_pair.split(":")
             for buffer in list(self.buffer_dict.values()):
                 buffer.emacs_var_dict[var_name] = var_value
                 buffer.update_settings()
@@ -399,7 +399,7 @@ class EAF(dbus.service.Object):
                 else:
                     print("No data present in session file, no need to restore session.")
         else:
-            print("Not found %s, no need restore session." % (self.session_file_path))
+            print("Cannot find %s, no need restore session." % (self.session_file_path))
 
 if __name__ == "__main__":
     import sys

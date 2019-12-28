@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Dec 26 22:26:34 2019 (-0500)
+;; Last-Updated: Sat Dec 28 00:52:53 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -409,6 +409,7 @@ For now only EAF browser app is supported."
            (bookmark-set cand)))))
 
 (defun eaf-call (method &rest args)
+  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
   (apply #'dbus-call-method
          :session                   ; use the session (not system) bus
          "com.lazycat.eaf"          ; service name
@@ -440,6 +441,7 @@ For now only EAF browser app is supported."
     (message "[EAF] Process starting...")))
 
 (defun eaf-stop-process ()
+  "Stop all EAF process and kill EAF buffers."
   (interactive)
   ;; Kill EAF buffers.
   (let ((count 0))
@@ -464,12 +466,10 @@ For now only EAF browser app is supported."
   (setq eaf-org-killed-file-list nil)
 
   ;; Kill process after kill buffer, make application can save session data.
-  (eaf-kill-python-process))
+  (eaf--kill-python-process))
 
-(defun eaf-kill-python-process ()
-  "Kill EAF background python process for debug.
-NOTE: this function just use for developer debug.
-Don't call this function if you not EAF developer."
+(defun eaf--kill-python-process ()
+  "Kill EAF background python process."
   (interactive)
   (if (process-live-p eaf-process)
       ;; Delete EAF server process.
@@ -479,6 +479,7 @@ Don't call this function if you not EAF developer."
     (message "[EAF] Process already terminated.")))
 
 (defun eaf-restart-process ()
+  "Stop and restart EAF process."
   (interactive)
   (eaf-stop-process)
   (eaf-start-process))
@@ -502,6 +503,7 @@ We need calcuate render allocation to make sure no black border around render co
     (list x y w h)))
 
 (defun eaf--generate-id ()
+  "Randomly generate a seven digit id used for EAF buffers."
   (format "%04x-%04x-%04x-%04x-%04x-%04x-%04x"
           (random (expt 16 4))
           (random (expt 16 4))
@@ -861,7 +863,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "Send variables defined in `eaf-var-list' to the Python side."
   (eaf-call "store_emacs_var"
             (string-join (cl-loop for (key . value) in eaf-var-list
-                                  collect (format "%s,%s" key value)) ":")))
+                                  collect (format "%s:%s" key value)) ",")))
 
 (defun eaf--open-internal (url app-name arguments)
   (let* ((buffer (eaf--create-buffer url app-name))
