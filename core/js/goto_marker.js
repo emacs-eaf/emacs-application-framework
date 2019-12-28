@@ -19,6 +19,8 @@
                 link.select();
             } else if(link.getAttribute('type') === 'submit'){
                 link.submit();
+            } else if(link.getAttribute('type') === 'checkbox'){
+                link.click();
             }
         } else if(link.nodeName.toLowerCase() === 'button'){
             link.click();
