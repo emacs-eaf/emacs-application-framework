@@ -523,7 +523,7 @@ class PdfViewerWidget(QWidget):
     def generate_random_key(self, count):
         letters = "ASDFHJKLQWEIOP"
         key_list = []
-        key_len = int(math.log10(count)) + 1
+        key_len = math.ceil(math.log(count) / math.log(len(letters)))
         while count > 0:
             key = ''.join(random.choices(letters, k=key_len))
             if key not in key_list:
