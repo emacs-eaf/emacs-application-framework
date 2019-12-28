@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 28 00:52:53 2019 (-0500)
+;; Last-Updated: Sat Dec 28 01:04:14 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -683,13 +683,14 @@ to edit EAF keybindings!" fun fun)))
     (eaf-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector)))))
 
 (defun eaf-set (sym val)
-  "Similar to `set', but store SYM with VAL in the EAF Python side.
+  "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
 
 For convenience, use the Lisp macro `eaf-setq' instead."
-  (map-put eaf-var-list sym val))
+  (map-put eaf-var-list sym val)
+  val)
 
 (defmacro eaf-setq (var val)
-  "Similar to `setq', but store VAR with VAL in the EAF Python side.
+  "Similar to `setq', but store VAR with VAL in EAF Python side, and return VAL.
 
 Use it as (eaf-setq var val)"
   `(eaf-set ',var ,val))
