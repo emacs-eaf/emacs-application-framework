@@ -163,11 +163,11 @@ class WebHitTestResult():
         self.m_linkUrl = self.page.url().toString()
         self.m_baseUrl = self.page.url().toString()
         self.viewportPos = self.page.mapToViewport(self.pos)
-        with open(os.path.join(os.path.dirname(__file__), "javascript", "open_in_new_tab.js"), "r") as f:
-            self.source = f.read()
+        with open(os.path.join(os.path.dirname(__file__), "js", "open_in_new_tab.js"), "r") as f:
+            self.open_in_new_tab_raw = f.read()
 
-        self.js = self.source.replace("%1", str(self.viewportPos.x())).replace("%2", str(self.viewportPos.y()))
-        self.dic = self.page.executeJavaScript(self.js)
+        self.open_in_new_tab_js = self.open_in_new_tab_raw.replace("%1", str(self.viewportPos.x())).replace("%2", str(self.viewportPos.y()))
+        self.dic = self.page.executeJavaScript(self.open_in_new_tab_js)
         if self.dic is None:
             return
 

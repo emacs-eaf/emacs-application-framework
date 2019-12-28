@@ -53,4 +53,4 @@
         e = e.parentElement;
     }
     return res;
-})();
+})()

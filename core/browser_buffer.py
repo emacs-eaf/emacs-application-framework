@@ -21,6 +21,7 @@
 
 from core.browser import BrowserView
 from core.buffer import Buffer
+import os
 
 class BrowserBuffer(Buffer):
 
@@ -36,6 +37,12 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
 
         self.search_term = ""
+
+        with open(os.path.join(os.path.dirname(__file__), "js", "get_markers.js"), "r") as f:
+            self.get_markers_js = f.read()
+
+        with open(os.path.join(os.path.dirname(__file__), "js", "goto_marker.js"), "r") as f:
+            self.goto_marker_raw = f.read()
 
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
@@ -66,6 +73,12 @@ class BrowserBuffer(Buffer):
             self._search_text(str(result_content))
         elif result_type == "search_text_backward":
             self._search_text(str(result_content), True)
+        elif result_type == "jump_link":
+            self.jump_to_link(str(result_content))
+
+    def cancel_input_message(self, result_type):
+        if result_type == "jump_link":
+            self.cleanup_links()
 
     def search_text_forward(self):
         if self.search_term == "":
@@ -143,3 +156,16 @@ class BrowserBuffer(Buffer):
 
     def get_url(self):
         return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
+
+    def fetch_links(self):
+        # self.buffer_widget.web_page.executeJavaScript(self.get_markers_js)
+        self.eval_js(self.get_markers_js);
+        self.send_input_message("Open Link: ", "jump_link");
+
+    def jump_to_link(self, marker):
+        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
+        self.buffer_widget.web_page.executeJavaScript(self.goto_marker_js);
+        self.cleanup_links()
+
+    def cleanup_links(self):
+        self.buffer_widget.web_page.executeJavaScript("document.querySelector('.markerContainer').remove();")
