@@ -139,6 +139,7 @@ qt_key_dict = {
     '''<down>''': Qt.Key_Down,
     '''<prior>''': Qt.Key_PageUp,
     '''<next>''': Qt.Key_PageDown,
+    '''<delete>''': Qt.Key_Delete
 }
 
 qt_text_dict = {

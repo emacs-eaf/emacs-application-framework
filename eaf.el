@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Dec 29 00:55:29 2019 (-0500)
+;; Last-Updated: Sun Dec 29 01:14:17 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -94,7 +94,7 @@
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
     (define-key map (vector 'remap #'keyboard-quit) #'eaf-keyboard-quit)
     (define-key map (vector 'remap #'self-insert-command) #'eaf-send-key)
-    (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>"))
+    (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>"))
       (define-key map (kbd single-key) #'eaf-send-key))
     map)
   "Keymap for default bindings available in all apps.")
