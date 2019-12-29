@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Dec 29 01:14:17 2019 (-0500)
+;; Last-Updated: Sun Dec 29 11:46:35 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -210,7 +210,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-w" . "kill_text")
     ("M-s" . "open_link")
-    ("M-S" . "open_link_new_tab")
+    ("M-S" . "open_link_new_buffer")
     ("C-/" . "undo_action")
     ("M-_" . "redo_action")
     ("M-w" . "copy_text")

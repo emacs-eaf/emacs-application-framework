@@ -1,6 +1,6 @@
 (function() {
     let key = "%1";
-    let newTab = %2;
+    let newBuffer = %2;
     let markers = document.querySelectorAll('.marker');
     let match;
     for(let i = 0; i < markers.length; i++) {
@@ -18,7 +18,7 @@
            (link.getAttribute('href') === '')){ // special href case that's button
             link.click();
         } else if(link.href != undefined){
-            if(newTab){
+            if(newBuffer){
                 window.open(link.href);
             } else {
                 window.open(link.href, '_self');

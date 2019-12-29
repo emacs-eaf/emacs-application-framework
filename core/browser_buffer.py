@@ -75,11 +75,11 @@ class BrowserBuffer(Buffer):
             self._search_text(str(result_content), True)
         elif result_type == "jump_link":
             self.jump_to_link(str(result_content))
-        elif result_type == "jump_link_new_tab":
+        elif result_type == "jump_link_new_buffer":
             self.jump_to_link(str(result_content), "true")
 
     def cancel_input_message(self, result_type):
-        if result_type == "jump_link" or result_type == "jump_link_new_tab":
+        if result_type == "jump_link" or result_type == "jump_link_new_buffer":
             self.cleanup_links()
 
     def search_text_forward(self):
@@ -169,12 +169,12 @@ class BrowserBuffer(Buffer):
         self.eval_js(self.get_markers_js);
         self.send_input_message("Open Link: ", "jump_link");
 
-    def open_link_new_tab(self):
+    def open_link_new_buffer(self):
         self.eval_js(self.get_markers_js);
-        self.send_input_message("Open Link in New Tab: ", "jump_link_new_tab");
+        self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
 
-    def jump_to_link(self, marker, new_tab = "false"):
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker)).replace("%2", new_tab);
+    def jump_to_link(self, marker, new_buffer = "false"):
+        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker)).replace("%2", new_buffer);
         self.buffer_widget.web_page.executeJavaScript(self.goto_marker_js);
         self.cleanup_links()
 
