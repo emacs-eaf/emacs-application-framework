@@ -21,10 +21,12 @@
         }
         return path.join(" > ");
     }
+
     function getCoords(link){
         let rect = link.getBoundingClientRect();
         return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(link) ];
     }
+
     function isElementOnScreen(rect){
         let clientHeight = document.documentElement.clientHeight;
         let clientWidth = document.documentElement.clientWidth;
@@ -32,15 +34,27 @@
                 rect[1] >= 0 && rect[1] <= clientWidth &&
                 rect[2] != 0 && rect[3] != 0);
     }
+
+    function hasCopy(validRects, rect){
+        for(let i = 0; i < validRects.length; i++) {
+            let each = validRects[i];
+            if(each[0] === rect[0] && each[1] === rect[1] && each[2] === rect[2] && each[3] === rect[3]){
+                return true;
+            }
+        }
+        return false;
+    }
+
     function addElementToRects(validRects, elements){
         let rect;
         for(let i = 0; i < elements.length; i++) {
             rect = getCoords(elements[i]);
-            if(isElementOnScreen(rect) && !validRects.includes(rect)){
+            if(isElementOnScreen(rect) && !hasCopy(validRects, rect)){
                 validRects.push(rect);
             }
         }
     }
+
     function generateKeys(markerContainer) {
         let letters = ['A', 'S', 'D', 'F', 'H', 'J', 'K', 'L', 'Q', 'W', 'E', 'O', 'P', 'N', 'M', 'X', 'C' ];
         let linkNum = markerContainer.children.length;
