@@ -28,8 +28,6 @@
         return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(link) ];
     }
     function isElementOnScreen(rect){
-        // let topOffset  = window.pageYOffset || document.documentElement.scrollTop;
-        // let leftOffset = window.pageXOffset || document.documentElement.scrollLeft;
         let clientHeight = document.documentElement.clientHeight;
         let clientWidth = document.documentElement.clientWidth;
         return (rect[0] >= 0 && rect[0] <= clientHeight &&
@@ -46,7 +44,7 @@
         }
     }
     function generateKeys(markerContainer) {
-        let letters = ['A', 'S', 'D', 'F', 'H', 'J', 'K', 'L', 'Q', 'W', 'E', 'I', 'O', 'P'];
+        let letters = ['A', 'S', 'D', 'F', 'H', 'J', 'K', 'L', 'Q', 'W', 'E', 'O', 'P', 'N', 'M', 'X', 'C' ];
         let linkNum = markerContainer.children.length;
         let keyLen = Math.ceil(Math.log(linkNum)/Math.log(letters.length));
         let keys = [];

@@ -169,7 +169,6 @@ class BrowserBuffer(Buffer):
 
     def jump_to_link(self, marker, new_tab = "false"):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker)).replace("%2", new_tab);
-        print(self.goto_marker_js)
         self.buffer_widget.web_page.executeJavaScript(self.goto_marker_js);
         self.cleanup_links()
 
