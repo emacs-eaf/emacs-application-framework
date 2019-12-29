@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Dec 29 00:55:29 2019 (-0500)
+;; Last-Updated: Sun Dec 29 01:06:14 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -134,9 +134,7 @@ name of the current app. Each app can setup app hooks by using
 `eaf-<app-name>-hook'. This hook runs after the app buffer has
 been initialized."
   ;; Split window combinations proportionally.
-  ;; FIXME: this changes this setting globally for the user
-  ;; which may not want this, introduce EAF user option?
-  (setq window-combination-resize t)
+  (setq-local window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
   (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
   ;; copy default value in case user already has bindings there
