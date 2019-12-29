@@ -134,9 +134,7 @@ name of the current app. Each app can setup app hooks by using
 `eaf-<app-name>-hook'. This hook runs after the app buffer has
 been initialized."
   ;; Split window combinations proportionally.
-  ;; FIXME: this changes this setting globally for the user
-  ;; which may not want this, introduce EAF user option?
-  (setq window-combination-resize t)
+  (setq-local window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
   (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
   ;; copy default value in case user already has bindings there
