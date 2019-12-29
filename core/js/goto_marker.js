@@ -12,7 +12,12 @@
     if(match != undefined){
         let selector = match.getAttribute('pointed-link');
         let link = document.querySelector(selector);
-        if(link.href != undefined){
+        if((link.nodeName.toLowerCase() === 'button') || // normal button
+           (link.hasAttribute('aria-haspopup')) || // menu button
+           (link.getAttribute('role') === 'button') || // role="button" buttons
+           (link.getAttribute('href') === '')){ // special href case that's button
+            link.click();
+        } else if(link.href != undefined){
             if(newTab){
                 window.open(link.href);
             } else {
@@ -27,8 +32,6 @@
             } else if(link.getAttribute('type') === 'checkbox'){
                 link.click();
             }
-        } else if(link.nodeName.toLowerCase() === 'button'){
-            link.click();
         }
     }
-})()
+})();

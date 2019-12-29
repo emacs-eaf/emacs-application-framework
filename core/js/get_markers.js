@@ -1,16 +1,14 @@
 (function() {
     function cssSelector(el) {
-        if (!(el instanceof Element))
-            return;
-        var path = [];
+        let path = [];
         while (el.nodeType === Node.ELEMENT_NODE) {
-            var selector = el.nodeName.toLowerCase();
+            let selector = el.nodeName.toLowerCase();
             if (el.id) {
                 selector += '#' + el.id;
                 path.unshift(selector);
                 break;
             } else {
-                var sib = el, nth = 1;
+                let sib = el, nth = 1;
                 while (sib = sib.previousElementSibling) {
                     if (sib.nodeName.toLowerCase() == selector)
                         nth++;
@@ -38,7 +36,7 @@
         let rect;
         for(let i = 0; i < elements.length; i++) {
             rect = getCoords(elements[i]);
-            if(isElementOnScreen(rect)){
+            if(isElementOnScreen(rect) && !validRects.includes(rect)){
                 validRects.push(rect);
             }
         }
@@ -70,9 +68,11 @@
     }
 
     let validRects = [];
-    addElementToRects(validRects, document.links);
-    addElementToRects(validRects, document.querySelectorAll('button'));
-    addElementToRects(validRects, document.querySelectorAll('input'));
+    addElementToRects(validRects, document.links); // collect links
+    addElementToRects(validRects, document.querySelectorAll('input')); // collect inputs
+    addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
+    addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
+    addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');
@@ -88,4 +88,4 @@
         markerContainer.appendChild(marker);
     }
     return generateKeys(markerContainer);
-})()
+})();
