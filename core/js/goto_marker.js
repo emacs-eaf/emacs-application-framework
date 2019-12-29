@@ -1,5 +1,6 @@
 (function() {
     let key = "%1";
+    let newTab = %2;
     let markers = document.querySelectorAll('.marker');
     let match;
     for(let i = 0; i < markers.length; i++) {
@@ -12,7 +13,11 @@
         let selector = match.getAttribute('pointed-link');
         let link = document.querySelector(selector);
         if(link.href != undefined){
-            window.open(link.href, '_self');
+            if(newTab){
+                window.open(link.href);
+            } else {
+                window.open(link.href, '_self');
+            }
         }else if(link.nodeName.toLowerCase() === 'input'){
             if(link.getAttribute('type') === 'text'){
                 link.focus();
