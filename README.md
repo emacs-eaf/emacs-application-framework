@@ -111,7 +111,7 @@ Package info:
 
 To run `eaf-open` on the current file under the cursor in `dired`, call `eaf-open-this-from-dired`.
 
-You can also use the command `eaf-google-it` as a shortcut to quickly google `symbol-at-point` or an active region using EAF Browser. Similarly, you can create your own functions if you prefer to use DuckDuckGo or other browsers.
+You can also use the command `eaf-google-it` as a shortcut to quickly google `symbol-at-point` or an active region using EAF Browser. Similarly, you can create your own functions if you prefer to use DuckDuckGo or other search engines.
 
 ```
 NOTE:
