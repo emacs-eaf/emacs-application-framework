@@ -120,6 +120,12 @@ class BrowserBuffer(Buffer):
     def zoom_reset(self):
         self.buffer_widget.zoom_reset()
 
+    def scroll_left(self):
+        self.eval_js("window.scrollBy(-50, 0)")
+
+    def scroll_right(self):
+        self.eval_js("window.scrollBy(50, 0)")
+
     def scroll_up(self):
         self.eval_js("window.scrollBy(0, 50)")
 

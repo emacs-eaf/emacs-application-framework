@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Dec 28 19:30:54 2019 (-0500)
+;; Last-Updated: Sun Dec 29 00:55:29 2019 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -204,6 +204,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-r" . "search_text_backward")
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
+    ("C-f" . "scroll_right")
+    ("C-b" . "scroll_left")
     ("C-v" . "scroll_up_page")
     ("C-y" . "yank_text")
     ("C-w" . "kill_text")
