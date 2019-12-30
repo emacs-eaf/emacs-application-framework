@@ -38,7 +38,7 @@
     function hasCopy(validRects, rect){
         for(let i = 0; i < validRects.length; i++) {
             let each = validRects[i];
-            if(each[0] === rect[0] && each[1] === rect[1] && each[2] === rect[2] && each[3] === rect[3]){
+            if(each[0] === rect[0] && each[1] === rect[1]){
                 return true;
             }
         }
@@ -71,7 +71,7 @@
                 for (let i = 0; i < keyLen; i++) {
                     let mark = document.createElement('span');
                     mark.setAttribute('class', 'mark');
-                    mark.setAttribute('style', 'font-size: small');
+                    mark.setAttribute('style', 'font-size: small; font-weight: bold;');
                     mark.textContent = k.charAt(i);
                     markerContainer.children[linkNum].appendChild(mark);
                 }
