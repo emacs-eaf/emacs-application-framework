@@ -24,13 +24,13 @@
                 window.open(link.href, '_self');
             }
         }else if(link.nodeName.toLowerCase() === 'input'){
-            if(link.getAttribute('type') === 'text'){
-                link.focus();
-                link.select();
-            } else if(link.getAttribute('type') === 'submit'){
+            if(link.getAttribute('type') === 'submit'){
                 link.submit();
             } else if(link.getAttribute('type') === 'checkbox'){
                 link.click();
+            } else {
+                link.focus();
+                link.select();
             }
         }
     }
