@@ -38,7 +38,7 @@ class AppBuffer(Buffer):
             self.buffer_widget.add_subscription(result_content)
 
     def add_subscription(self):
-        self.buffer_widget.send_input_message("Add subscription: ", "add_subscription")
+        self.buffer_widget.send_input_message("Subscribe to RSS feed: ", "add_subscription")
 
 class RSSReaderWidget(QWidget):
 
