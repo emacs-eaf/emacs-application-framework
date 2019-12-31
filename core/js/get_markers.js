@@ -95,8 +95,10 @@
     for(let i = 0; i < validRects.length; i++) {
         let marker = document.createElement('div');
         marker.setAttribute('class', 'marker');
-        marker.setAttribute('style', 'left: ' + validRects[i][1] + 'px; top: '+ validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
-                            ' background-color: yellow; border: 1px solid red');
+        marker.setAttribute('style', 'left: ' +
+                            validRects[i][1] + 'px; top: ' +
+                            validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
+                            ' background-color: yellow; border: 1px solid gold; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px;');
         marker.setAttribute('pointed-link', validRects[i][4]);
 
         markerContainer.appendChild(marker);
