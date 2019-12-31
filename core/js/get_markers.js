@@ -71,7 +71,7 @@
                 for (let i = 0; i < keyLen; i++) {
                     let mark = document.createElement('span');
                     mark.setAttribute('class', 'mark');
-                    mark.setAttribute('style', 'font-size: small; font-weight: bold;');
+                    mark.setAttribute('style', 'font-size: 12px; font-weight: bold;');
                     mark.textContent = k.charAt(i);
                     markerContainer.children[linkNum].appendChild(mark);
                 }
@@ -98,7 +98,7 @@
         marker.setAttribute('style', 'left: ' +
                             validRects[i][1] + 'px; top: ' +
                             validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
-                            ' background-color: yellow; border: 1px solid gold; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px;');
+                            ' background-color: #ffdb60; border: 1px solid #c38a22; padding-left: 3px; padding-right: 3px;');
         marker.setAttribute('pointed-link', validRects[i][4]);
 
         markerContainer.appendChild(marker);
