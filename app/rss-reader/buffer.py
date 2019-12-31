@@ -19,9 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QColor, QPainter, QFont, QTextDocument
-from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QApplication, QWidget, QListWidget, QVBoxLayout, QLabel, QPushButton, QListWidgetItem
+from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QApplication, QWidget, QListWidget, QVBoxLayout, QLabel, QPushButton, QListWidgetItem, QStackedWidget, QSizePolicy
 from core.buffer import Buffer
 from PyQt5 import QtWidgets, QtCore
 from core.browser import BrowserView
@@ -33,9 +33,12 @@ class AppBuffer(Buffer):
 
         self.add_widget(RSSReaderWidget())
 
-        self.fetchThread = FetchRSSThread()
-        self.fetchThread.fetchRSS.connect(self.buffer_widget.handle_rss)
-        self.fetchThread.start()
+    def handle_input_message(self, result_type, result_content):
+        if result_type == "add_subscription":
+            self.buffer_widget.add_subscription(result_content)
+
+    def add_subscription(self):
+        self.buffer_widget.send_input_message("Add subscription: ", "add_subscription")
 
 class RSSReaderWidget(QWidget):
 
@@ -53,6 +56,7 @@ class RSSReaderWidget(QWidget):
 
         self.article_area = QWidget()
         self.article_list = QListWidget()
+        self.article_list.verticalScrollBar().setStyleSheet("QScrollBar {width:0px;}");
         article_layout = QVBoxLayout()
         article_layout.setSpacing(0)
         article_layout.setContentsMargins(0, 0, 0, 0)
@@ -67,15 +71,43 @@ class RSSReaderWidget(QWidget):
 
         self.article_area.setLayout(article_layout)
 
+        self.welcome_page = QWidget()
+        self.welcome_page_box = QVBoxLayout()
+        self.welcome_page_box.setSpacing(10)
+        self.welcome_page_box.setContentsMargins(0, 0, 0, 0)
+
+        welcome_title_label = QLabel("Welcome to EAF RSS Reader!")
+        welcome_title_label.setFont(QFont('Arial', 24))
+        welcome_title_label.setStyleSheet("QLabel {color: black; font-weight: bold; margin: 20px;}")
+        welcome_title_label.setAlignment(Qt.AlignHCenter)
+
+        add_subscription_label = QLabel("Press key 'a' to add subscription")
+        add_subscription_label.setFont(QFont('Arial', 20))
+        add_subscription_label.setStyleSheet("QLabel {color: #333;}")
+        add_subscription_label.setAlignment(Qt.AlignHCenter)
+
+        self.welcome_page_box.addStretch(1)
+        self.welcome_page_box.addWidget(welcome_title_label)
+        self.welcome_page_box.addWidget(add_subscription_label)
+        self.welcome_page_box.addStretch(1)
+
+        self.welcome_page.setLayout(self.welcome_page_box)
+
+        self.right_area = QStackedWidget()
+        self.right_area.addWidget(self.welcome_page)
+        self.right_area.addWidget(self.article_area)
+
+        self.right_area.setCurrentIndex(0)
+
         hbox = QHBoxLayout()
         hbox.setSpacing(0)
         hbox.setContentsMargins(0, 0, 0, 0)
 
         hbox.addWidget(self.feed_area)
-        hbox.addWidget(self.article_area)
+        hbox.addWidget(self.right_area)
 
         hbox.setStretchFactor(self.feed_area, 1)
-        hbox.setStretchFactor(self.article_area, 3)
+        hbox.setStretchFactor(self.right_area, 3)
 
         self.setLayout(hbox)
 
@@ -84,7 +116,17 @@ class RSSReaderWidget(QWidget):
     def handle_article(self, article_item):
         self.browser.setUrl(QUrl(article_item.post_link))
 
-    def handle_rss(self, feed_object):
+    def add_subscription(self, feed_link):
+        # https://sachachua.com/blog/feed/
+
+        self.fetchThread = FetchRSSThread(feed_link)
+        self.fetchThread.fetch_rss.connect(self.handle_rss)
+        self.fetchThread.invalid_rss.connect(self.handle_invalid_rss)
+        self.fetchThread.start()
+
+    def handle_rss(self, feed_object, feed_title):
+        self.right_area.setCurrentIndex(1)
+
         feed_item = QListWidgetItem(self.feed_list)
         feed_item_widget = RSSFeedItem(feed_object, len(feed_object.entries))
         feed_item.setSizeHint(feed_item_widget.sizeHint())
@@ -101,16 +143,26 @@ class RSSReaderWidget(QWidget):
             self.article_list.addItem(item)
             self.article_list.setItemWidget(item, item_widget)
 
-class FetchRSSThread(QtCore.QThread):
-    fetchRSS = QtCore.pyqtSignal(object)
+    def handle_invalid_rss(self, feed_link):
+        self.message_to_emacs.emit("Invalid feed link: " + feed_link)
 
-    def __init__(self):
+class FetchRSSThread(QtCore.QThread):
+    fetch_rss = QtCore.pyqtSignal(object, str)
+    invalid_rss = QtCore.pyqtSignal(str)
+
+    def __init__(self, feed_link):
         super().__init__()
+        self.feed_link = feed_link
 
     def run(self):
-        d = feedparser.parse('https://sachachua.com/blog/feed/')
-        # d = feedparser.parse('https://planet.emacslife.com/atom.xml')
-        self.fetchRSS.emit(d)
+        try:
+            d = feedparser.parse(self.feed_link)
+            self.fetch_rss.emit(d, d.feed.title)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
+            self.invalid_rss.emit(self.feed_link)
 
 class RSSFeedItem(QWidget):
 
@@ -198,7 +250,7 @@ if __name__ == '__main__':
     w.show()
 
     fetchThread = FetchRSSThread()
-    fetchThread.fetchRSS.connect(w.handle_rss)
+    fetchThread.fetch_rss.connect(w.handle_rss)
     fetchThread.start()
 
     sys.exit(app.exec_())

@@ -282,6 +282,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Camera."
   :type 'cons)
 
+(defcustom eaf-rss-reader-keybinding
+  '(("a" . "add_subscription"))
+  "The keybinding of EAF RSS Reader."
+  :type 'cons)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
   "The extension list of pdf application."
@@ -320,7 +325,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
     ("markdown-previewer" . eaf-browser-keybinding)
-    ("org-previewer" . eaf-browser-keybinding))
+    ("org-previewer" . eaf-browser-keybinding)
+    ("rss-reader" . eaf-rss-reader-keybinding))
   "Mapping app names to keybinding variables.
 
 Any new app should add the its name and the corresponding

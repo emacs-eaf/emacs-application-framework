@@ -35,7 +35,6 @@ class AppBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, False, QColor(0, 0, 0, 255))
 
         self.add_widget(PdfViewerWidget(url, QColor(0, 0, 0, 255)))
-        self.buffer_widget.send_input_message = self.send_input_message
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
     def handle_input_message(self, result_type, result_content):
