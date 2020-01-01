@@ -26,6 +26,7 @@ from core.buffer import Buffer
 from PyQt5 import QtWidgets, QtCore
 from core.browser import BrowserView
 import feedparser
+import json
 import os
 
 class AppBuffer(Buffer):
@@ -46,7 +47,7 @@ class RSSReaderWidget(QWidget):
     def __init__(self):
         super(RSSReaderWidget, self).__init__()
 
-        self.feed_file_path = os.path.expanduser("~/.emacs.d/eaf/rss-reader/feeds.txt")
+        self.feed_file_path = os.path.expanduser("~/.emacs.d/eaf/rss-reader/feeds.json")
 
         self.feed_area = QWidget()
         self.feed_list = QListWidget()
@@ -114,20 +115,60 @@ class RSSReaderWidget(QWidget):
 
         self.setLayout(hbox)
 
+        self.feed_list.itemActivated.connect(self.handle_feed)
         self.article_list.itemActivated.connect(self.handle_article)
+
+        self.feed_object_dict = {}
+
+        self.fetch_feeds()
+
+    def fetch_feeds(self):
+        if os.path.exists(self.feed_file_path):
+            try:
+                with open(self.feed_file_path, "r") as feed_file:
+                    feed_dict = json.loads(feed_file.read())
+                    for index, feed_link in enumerate(feed_dict):
+                        self.fetch_feed(feed_link, index == 0)
+            except Exception:
+                pass
+
+    def handle_feed(self, feed_item):
+        if feed_item.feed_link in self.feed_object_dict:
+            self.update_article_area(self.feed_object_dict[feed_item.feed_link])
 
     def handle_article(self, article_item):
         self.browser.setUrl(QUrl(article_item.post_link))
 
+    def fetch_feed(self, feed_link, refresh_ui):
+        fetchThread = FetchRSSThread(feed_link)
+        fetchThread.fetch_rss.connect(lambda f_object, f_link, f_title: self.handle_rss(f_object, f_link, f_title, refresh_ui))
+        fetchThread.invalid_rss.connect(self.handle_invalid_rss)
+
+        object_name = "feed_thread_" + feed_link
+        setattr(self, object_name, fetchThread)
+        getattr(self, object_name).start()
+
     def add_subscription(self, feed_link):
-        # https://sachachua.com/blog/feed/
+        if not self.feed_is_exits(feed_link):
+            self.fetch_feed(feed_link, True)
+        else:
+            self.message_to_emacs.emit("Feed has exists: " + feed_link)
 
-        self.fetchThread = FetchRSSThread(feed_link)
-        self.fetchThread.fetch_rss.connect(self.handle_rss)
-        self.fetchThread.invalid_rss.connect(self.handle_invalid_rss)
-        self.fetchThread.start()
+    def feed_is_exits(self, feed_link):
+        if not os.path.exists(self.feed_file_path):
+            return False
 
-    def save_feed(self, feed_link):
+        try:
+            with open(self.feed_file_path, "r") as feed_file:
+                feed_dict = json.loads(feed_file.read())
+                return feed_link in feed_dict
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
+            return False
+
+    def save_feed(self, feed_link, feed_title):
         if not os.path.exists(self.feed_file_path):
             basedir = os.path.dirname(self.feed_file_path)
             if not os.path.exists(basedir):
@@ -136,33 +177,57 @@ class RSSReaderWidget(QWidget):
             with open(self.feed_file_path, "a"):
                 os.utime(self.feed_file_path, None)
 
-        with open(self.feed_file_path, "r") as feed_file:
-            lines = map(lambda x: x.strip(), feed_file.readlines())
-            if feed_link not in lines:
-                with open(self.feed_file_path, "w") as f:
-                    f.write(feed_link + "\n")
-                self.message_to_emacs.emit("Add feed: " + feed_link)
+        try:
+            with open(self.feed_file_path, "r") as feed_file:
+                feed_dict = json.loads(feed_file.read())
+                if feed_link not in feed_dict:
+                    feed_dict[feed_link] = {
+                        "title": feed_title
+                    }
 
-    def handle_rss(self, feed_object, feed_link, feed_title):
-        self.save_feed(feed_link)
+                    with open(self.feed_file_path, "w") as f:
+                        f.write(json.dumps(feed_dict))
+
+                    self.message_to_emacs.emit("Add feed: " + feed_link)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
+            with open(self.feed_file_path, "w") as f:
+                f.write(json.dumps({feed_link : {
+                    "title": feed_title
+                }}))
+
+            self.message_to_emacs.emit("Add feed: " + feed_link)
+
+    def handle_rss(self, feed_object, feed_link, feed_title, refresh_ui):
+        self.feed_object_dict[feed_link] = feed_object
+
+        self.save_feed(feed_link, feed_title)
 
         self.right_area.setCurrentIndex(1)
 
         feed_item = QListWidgetItem(self.feed_list)
+        feed_item.feed_link = feed_link
         feed_item_widget = RSSFeedItem(feed_object, len(feed_object.entries))
         feed_item.setSizeHint(feed_item_widget.sizeHint())
         self.feed_list.addItem(feed_item)
         self.feed_list.setItemWidget(feed_item, feed_item_widget)
 
-        self.browser.setUrl(QUrl(feed_object.entries[0].link))
+        if refresh_ui:
+            self.update_article_area(feed_object)
 
-        for post in feed_object.entries:
-            item_widget = RSSArticleItem(post)
-            item = QListWidgetItem(self.article_list)
-            item.post_link = item_widget.post_link
-            item.setSizeHint(item_widget.sizeHint())
-            self.article_list.addItem(item)
-            self.article_list.setItemWidget(item, item_widget)
+    def update_article_area(self, feed_object):
+            self.browser.setUrl(QUrl(feed_object.entries[0].link))
+
+            self.article_list.clear()
+            for post in feed_object.entries:
+                item_widget = RSSArticleItem(post)
+                item = QListWidgetItem(self.article_list)
+                item.post_link = item_widget.post_link
+                item.setSizeHint(item_widget.sizeHint())
+                self.article_list.addItem(item)
+                self.article_list.setItemWidget(item, item_widget)
 
     def handle_invalid_rss(self, feed_link):
         self.message_to_emacs.emit("Invalid feed link: " + feed_link)
