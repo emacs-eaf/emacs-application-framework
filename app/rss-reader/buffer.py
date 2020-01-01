@@ -26,6 +26,7 @@ from core.buffer import Buffer
 from PyQt5 import QtWidgets, QtCore
 from core.browser import BrowserView
 import feedparser
+import os
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments):
@@ -44,6 +45,8 @@ class RSSReaderWidget(QWidget):
 
     def __init__(self):
         super(RSSReaderWidget, self).__init__()
+
+        self.feed_file_path = os.path.expanduser("~/.emacs.d/eaf/rss-reader/feeds.txt")
 
         self.feed_area = QWidget()
         self.feed_list = QListWidget()
@@ -124,7 +127,25 @@ class RSSReaderWidget(QWidget):
         self.fetchThread.invalid_rss.connect(self.handle_invalid_rss)
         self.fetchThread.start()
 
-    def handle_rss(self, feed_object, feed_title):
+    def save_feed(self, feed_link):
+        if not os.path.exists(self.feed_file_path):
+            basedir = os.path.dirname(self.feed_file_path)
+            if not os.path.exists(basedir):
+                os.makedirs(basedir)
+
+            with open(self.feed_file_path, "a"):
+                os.utime(self.feed_file_path, None)
+
+        with open(self.feed_file_path, "r") as feed_file:
+            lines = map(lambda x: x.strip(), feed_file.readlines())
+            if feed_link not in lines:
+                with open(self.feed_file_path, "w") as f:
+                    f.write(feed_link + "\n")
+                self.message_to_emacs.emit("Add feed: " + feed_link)
+
+    def handle_rss(self, feed_object, feed_link, feed_title):
+        self.save_feed(feed_link)
+
         self.right_area.setCurrentIndex(1)
 
         feed_item = QListWidgetItem(self.feed_list)
@@ -147,7 +168,7 @@ class RSSReaderWidget(QWidget):
         self.message_to_emacs.emit("Invalid feed link: " + feed_link)
 
 class FetchRSSThread(QtCore.QThread):
-    fetch_rss = QtCore.pyqtSignal(object, str)
+    fetch_rss = QtCore.pyqtSignal(object, str, str)
     invalid_rss = QtCore.pyqtSignal(str)
 
     def __init__(self, feed_link):
@@ -157,7 +178,7 @@ class FetchRSSThread(QtCore.QThread):
     def run(self):
         try:
             d = feedparser.parse(self.feed_link)
-            self.fetch_rss.emit(d, d.feed.title)
+            self.fetch_rss.emit(d, self.feed_link, d.feed.title)
         except Exception:
             import traceback
             traceback.print_exc()
