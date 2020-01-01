@@ -24,7 +24,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from io import BytesIO
-import cgi
+import html
 import http.server
 import mimetypes
 import os
@@ -202,7 +202,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             return None
         list.sort(key=lambda a: a.lower())
         f = BytesIO()
-        displaypath = cgi.escape(urllib.parse.unquote(self.path))
+        displaypath = html.escape(urllib.parse.unquote(self.path))
         f.write(b'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
         f.write(("<html>\n<title>Directory listing for %s</title>\n" % displaypath).encode())
         f.write(("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath).encode())
@@ -222,7 +222,7 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                 displayname = name + "@"
                 # Note: a link to a directory displays with @ and links with /
             f.write(('<li><a href="%s">%s</a>\n'
-                    % (urllib.parse.quote(linkname), cgi.escape(displayname))).encode())
+                    % (urllib.parse.quote(linkname), html.escape(displayname))).encode())
         f.write(b"</ul>\n<hr>\n</body>\n</html>\n")
         length = f.tell()
         f.seek(0)
