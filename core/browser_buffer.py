@@ -133,10 +133,10 @@ class BrowserBuffer(Buffer):
         self.eval_js("window.scrollBy(0, -50)")
 
     def scroll_up_page(self):
-        self.eval_js("window.scrollBy(0, screen.height)")
+        self.eval_js("window.scrollBy(0, document.documentElement.clientHeight)")
 
     def scroll_down_page(self):
-        self.eval_js("window.scrollBy(0, -screen.height)")
+        self.eval_js("window.scrollBy(0, -document.documentElement.clientHeight)")
 
     def scroll_to_begin(self):
         self.eval_js("window.scrollTo(0, 0)")
