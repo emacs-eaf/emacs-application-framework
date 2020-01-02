@@ -35,10 +35,10 @@ This framework mainly implements three functions:
 | <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
 |                                                    |                                                        |
 
-| Terminal Emulator                                 |
-| :--------:                                        |
-| <img src="./screenshot/terminal.png" width="400"> |
-|                                                   |
+| Terminal Emulator                                 | RSS Reader                                          |
+| :--------:                                        | :------:                                            |
+| <img src="./screenshot/terminal.png" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
+|                                                   |                                                     |
 
 ## Install EAF
 1. Clone this repository, add to ```load-path```, and add the following to ```.emacs```
