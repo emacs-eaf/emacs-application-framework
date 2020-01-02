@@ -283,7 +283,15 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-rss-reader-keybinding
-  '(("a" . "add_subscription"))
+  '(("a" . "add_subscription")
+    ("n" . "next_subscription")
+    ("p" . "prev_subscription")
+    ("N" . "last_subscription")
+    ("P" . "first_subscription")
+    ("j" . "next_article")
+    ("k" . "prev_article")
+    ("J" . "last_article")
+    ("K" . "first_article"))
   "The keybinding of EAF RSS Reader."
   :type 'cons)
 

@@ -42,6 +42,30 @@ class AppBuffer(Buffer):
     def add_subscription(self):
         self.buffer_widget.send_input_message("Subscribe to RSS feed: ", "add_subscription")
 
+    def next_subscription(self):
+        self.buffer_widget.next_subscription()
+
+    def prev_subscription(self):
+        self.buffer_widget.prev_subscription()
+
+    def next_article(self):
+        self.buffer_widget.next_article()
+
+    def prev_article(self):
+        self.buffer_widget.prev_article()
+
+    def first_subscription(self):
+        self.buffer_widget.first_subscription()
+
+    def last_subscription(self):
+        self.buffer_widget.last_subscription()
+
+    def first_article(self):
+        self.buffer_widget.first_article()
+
+    def last_article(self):
+        self.buffer_widget.last_article()
+
 class RSSReaderWidget(QWidget):
 
     def __init__(self):
@@ -51,7 +75,7 @@ class RSSReaderWidget(QWidget):
 
         self.feed_area = QWidget()
         self.feed_list = QListWidget()
-        self.feed_list.setStyleSheet( """QListWidget{background: #4D5250;}""")
+        self.feed_list.setStyleSheet( """QListView {background: #4D5250; show-decoration-selected: 1; selection-background-color: #464646;}""")
         panel_layout = QVBoxLayout()
         panel_layout.setSpacing(0)
         panel_layout.setContentsMargins(0, 0, 0, 0)
@@ -60,6 +84,7 @@ class RSSReaderWidget(QWidget):
 
         self.article_area = QWidget()
         self.article_list = QListWidget()
+        self.article_list.setStyleSheet( """QListView {background: #FFF; show-decoration-selected: 1; selection-background-color: #EEE;}""")
         self.article_list.verticalScrollBar().setStyleSheet("QScrollBar {width:0px;}");
         article_layout = QVBoxLayout()
         article_layout.setSpacing(0)
@@ -101,7 +126,10 @@ class RSSReaderWidget(QWidget):
         self.right_area.addWidget(self.welcome_page)
         self.right_area.addWidget(self.article_area)
 
-        self.right_area.setCurrentIndex(0)
+        if self.has_feed():
+            self.right_area.setCurrentIndex(1)
+        else:
+            self.right_area.setCurrentIndex(0)
 
         hbox = QHBoxLayout()
         hbox.setSpacing(0)
@@ -120,7 +148,20 @@ class RSSReaderWidget(QWidget):
 
         self.feed_object_dict = {}
 
+        self.init_select_line = False
+
         self.fetch_feeds()
+
+    def has_feed(self):
+        if os.path.exists(self.feed_file_path):
+            try:
+                with open(self.feed_file_path, "r") as feed_file:
+                    feed_dict = json.loads(feed_file.read())
+                    return True
+            except Exception:
+                return False
+
+        return False
 
     def fetch_feeds(self):
         if os.path.exists(self.feed_file_path):
@@ -218,19 +259,83 @@ class RSSReaderWidget(QWidget):
             self.update_article_area(feed_object)
 
     def update_article_area(self, feed_object):
-            self.browser.setUrl(QUrl(feed_object.entries[0].link))
+        self.browser.setUrl(QUrl(feed_object.entries[0].link))
 
-            self.article_list.clear()
-            for post in feed_object.entries:
-                item_widget = RSSArticleItem(post)
-                item = QListWidgetItem(self.article_list)
-                item.post_link = item_widget.post_link
-                item.setSizeHint(item_widget.sizeHint())
-                self.article_list.addItem(item)
-                self.article_list.setItemWidget(item, item_widget)
+        self.article_list.clear()
+        for post in feed_object.entries:
+            item_widget = RSSArticleItem(post)
+            item = QListWidgetItem(self.article_list)
+            item.post_link = item_widget.post_link
+            item.setSizeHint(item_widget.sizeHint())
+            self.article_list.addItem(item)
+            self.article_list.setItemWidget(item, item_widget)
+
+        self.article_list.setCurrentRow(0)
+
+        if not self.init_select_line:
+            self.init_select_line = True
+            self.feed_list.setCurrentRow(0)
 
     def handle_invalid_rss(self, feed_link):
         self.message_to_emacs.emit("Invalid feed link: " + feed_link)
+
+    def next_subscription(self):
+        feed_count = self.feed_list.count()
+        current_row = self.feed_list.currentRow()
+
+        if current_row < feed_count - 1:
+            self.feed_list.setCurrentRow(current_row + 1)
+            self.feed_list.scrollToItem(self.feed_list.currentItem())
+            self.handle_feed(self.feed_list.currentItem())
+
+    def prev_subscription(self):
+        current_row = self.feed_list.currentRow()
+
+        if current_row > 0:
+            self.feed_list.setCurrentRow(current_row - 1)
+            self.feed_list.scrollToItem(self.feed_list.currentItem())
+            self.handle_feed(self.feed_list.currentItem())
+
+    def first_subscription(self):
+        self.feed_list.setCurrentRow(0)
+        self.feed_list.scrollToItem(self.feed_list.currentItem())
+        self.handle_feed(self.feed_list.currentItem())
+
+    def last_subscription(self):
+        feed_count = self.feed_list.count()
+
+        self.feed_list.setCurrentRow(feed_count - 1)
+        self.feed_list.scrollToItem(self.feed_list.currentItem())
+        self.handle_feed(self.feed_list.currentItem())
+
+    def next_article(self):
+        article_count = self.article_list.count()
+        current_row = self.article_list.currentRow()
+
+        if current_row < article_count - 1:
+            self.article_list.setCurrentRow(current_row + 1)
+            self.article_list.scrollToItem(self.article_list.currentItem())
+            self.handle_article(self.article_list.currentItem())
+
+    def prev_article(self):
+        current_row = self.article_list.currentRow()
+
+        if current_row > 0:
+            self.article_list.setCurrentRow(current_row - 1)
+            self.article_list.scrollToItem(self.article_list.currentItem())
+            self.handle_article(self.article_list.currentItem())
+
+    def first_article(self):
+        self.article_list.setCurrentRow(0)
+        self.article_list.scrollToItem(self.article_list.currentItem())
+        self.handle_article(self.article_list.currentItem())
+
+    def last_article(self):
+        article_count = self.article_list.count()
+
+        self.article_list.setCurrentRow(article_count - 1)
+        self.article_list.scrollToItem(self.article_list.currentItem())
+        self.handle_article(self.article_list.currentItem())
 
 class FetchRSSThread(QtCore.QThread):
     fetch_rss = QtCore.pyqtSignal(object, str, str)
@@ -285,42 +390,20 @@ class RSSArticleItem(QWidget):
         except Exception:
             pass
 
-        layout = QVBoxLayout()
-        layout.setSpacing(0)
-        layout.setContentsMargins(10, 10, 0, 0)
-
-        post_info_widget = QWidget()
-        post_box = QHBoxLayout()
-        post_box.setSpacing(10)
-        post_box.setContentsMargins(0, 0, 0, 0)
+        article_layout = QHBoxLayout()
+        article_layout.setContentsMargins(10, 10, 0, 0)
 
         date_label = QLabel(date)
-        date_label.setFont(QFont('Arial', 18))
-        post_box.addWidget(date_label)
+        date_label.setFont(QFont('Arial', 16))
 
         title_label = QLabel(post.title)
-        title_label.setFont(QFont('Arial', 18))
-        post_box.addWidget(title_label)
+        title_label.setFont(QFont('Arial', 16))
 
-        author_label = QLabel("(" + post.author + ")")
-        author_label.setFont(QFont('Arial', 16))
-        post_box.addWidget(author_label)
+        article_layout.addWidget(date_label)
+        article_layout.addWidget(title_label)
+        article_layout.addStretch(1)
 
-        post_box.addStretch(1)
-
-        post_info_widget.setLayout(post_box)
-
-        description_doc = QTextDocument()
-        description_doc.setHtml(post.description)
-        description_label = QLabel(self.truncate_description(description_doc.toPlainText()))
-        description_label.setWordWrap(True)
-        description_label.setStyleSheet("color: #333")
-        description_label.setFont(QFont("Arial", 16))
-
-        layout.addWidget(post_info_widget)
-        layout.addWidget(description_label)
-
-        self.setLayout(layout)
+        self.setLayout(article_layout)
 
     def truncate_description(self, text):
         return (text[:90] + ' ...') if len(text) > 90 else text
