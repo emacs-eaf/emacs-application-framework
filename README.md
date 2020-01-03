@@ -91,6 +91,34 @@ Package info:
 | feedparser      | pip3                | Application    | RSS Reader: feed parser                            |
 | qtermwidget-git | compile from source | Application    | Terminal: QTermWidget, PyQt5 terminal emulator     |
 
+Pymupdf install note:
+
+1. Before install pymupdf, user should install mupdf and libmupdf, for example:
+   ```
+   sudo apt-get install mupdf libmupdf-dev
+   ```
+2. Find the version of mupdf installed, for example: 1.14,
+
+3. Try to install pymupdf with the below command:
+
+   ```
+   pip3 install pymupdf==1.14
+   ```
+
+   you will get error:
+
+   ```
+   Looking in indexes: http://mirrors.aliyun.com/pypi/simple/
+   Collecting pymupdf==1.14
+   Could not find a version that satisfies the requirement pymupdf==1.14 (from versions: 1.11.2, 1.12.5, 1.13.20, 1.14.19.post2, 1.14.19.2, 1.14.20, 1.14.21, 1.16.0, 1.16.1, 1.16.2, 1.16.3, 1.16.4, 1.16.5, 1.16.6, 1.16.7, 1.16.8, 1.16.9, 1.16.10)
+   No matching distribution found for pymupdf==1.14
+   ```
+   
+3. Finally run command:
+   ```
+   pip3 install pymupdf==1.14.21
+   ```
+
 
 ## Launch EAF Applications
 | Application Name   | Launch                                                                  |
