@@ -77,6 +77,10 @@ make
 sudo make install
 ```
 
+Note: make sure your default python is python3 instead of python2, if
+your default python is python2, the python2 binding will be installed,
+which does not work with eaf.
+
 Package info:
 
 | Package         | Package Repo        | Classification | Package Description                                |
