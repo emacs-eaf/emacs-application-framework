@@ -382,7 +382,7 @@ class EAF(dbus.service.Object):
                 session_file.truncate(0)
                 json.dump(session_dict, session_file)
 
-                print("Save session: ", buf.module_path, buf.url, buf_session_data)
+                print("Saved session: ", buf.module_path, buf.url, buf_session_data)
 
     def restore_buffer_session(self, buf):
         if os.path.exists(self.session_file_path):
@@ -397,13 +397,13 @@ class EAF(dbus.service.Object):
                     if buf.url in session_dict[buf.module_path]:
                         buf.restore_session_data(session_dict[buf.module_path][buf.url])
 
-                        print("Restored session: ", buf.buffer_id, buf.module_path, self.session_file_path)
+                        print("Session restored: ", buf.buffer_id, buf.module_path, self.session_file)
                     else:
-                        print("No session data about %s, no need to restore session." % (buf.url))
+                        print("Session is not restored, as no data about %s." % (buf.url))
                 else:
-                    print("No data present in session file, no need to restore session.")
+                    print("Session is not restored, as no data present in session file.")
         else:
-            print("Cannot find %s, no need restore session." % (self.session_file_path))
+            print("Session is not restored, as %s cannot be found." % (self.session_file))
 
 if __name__ == "__main__":
     import sys
@@ -413,7 +413,7 @@ if __name__ == "__main__":
 
     bus = dbus.SessionBus()
     if bus.request_name(EAF_DBUS_NAME) != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-        print("EAF process has startup.")
+        print("EAF process is already running.")
     else:
         emacs_width = emacs_height = 0
 
@@ -421,7 +421,7 @@ if __name__ == "__main__":
 
         eaf = EAF(sys.argv[1:])
 
-        print("EAF process start.")
+        print("EAF process starting...")
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(app.exec_())
