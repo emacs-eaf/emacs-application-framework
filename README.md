@@ -119,6 +119,9 @@ EAF use DBus' session bus, it must run in general user.
 Please don't run EAF with root user, root user just can access DBus's system bus.
 ```
 
+## Document
+You can check [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) to read document about keybinding, customize, docker, helm, framework and todolist.
+
 ## FAQ and Support
 
 ### How about EXWM? What makes EAF special?
