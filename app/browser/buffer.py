@@ -22,7 +22,7 @@
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-from core.browser_buffer import BrowserBuffer
+from core.browser import BrowserBuffer
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments):

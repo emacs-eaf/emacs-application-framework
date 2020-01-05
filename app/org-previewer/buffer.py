@@ -21,7 +21,7 @@
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
-from core.browser_buffer import BrowserBuffer
+from core.browser import BrowserBuffer
 import os
 
 class AppBuffer(BrowserBuffer):
