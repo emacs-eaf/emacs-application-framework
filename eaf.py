@@ -39,7 +39,7 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_width, emacs_height, emacs_config_dir
+        global emacs_width, emacs_height, eaf_config_dir
 
         dbus.service.Object.__init__(
             self,
@@ -49,14 +49,14 @@ class EAF(dbus.service.Object):
         (emacs_width, emacs_height, proxy_host, proxy_port, config_dir) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
-        emacs_config_dir = os.path.expanduser(config_dir)
+        eaf_config_dir = os.path.expanduser(config_dir)
 
         self.buffer_dict = {}
         self.view_dict = {}
 
         self.start_finish()
 
-        self.session_file_path = os.path.join(emacs_config_dir, "eaf", "session.json")
+        self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         # Set HTTP proxy.
         if proxy_host != "" and proxy_port != "":
@@ -121,11 +121,11 @@ class EAF(dbus.service.Object):
             return "EAF: Something went wrong when trying to import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
-        global emacs_width, emacs_height, emacs_config_dir
+        global emacs_width, emacs_height, eaf_config_dir
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, emacs_config_dir, arguments)
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments)
         app_buffer.module_path = module_path
 
         # Add buffer to buffer dict.
@@ -350,20 +350,20 @@ class EAF(dbus.service.Object):
 
     def save_buffer_session(self, buf):
         # Create config file it not exist.
-        if not os.path.exists(self.session_file_path):
-            basedir = os.path.dirname(self.session_file_path)
+        if not os.path.exists(self.session_file):
+            basedir = os.path.dirname(self.session_file)
             if not os.path.exists(basedir):
                 os.makedirs(basedir)
 
-            with open(self.session_file_path, 'a'):
-                os.utime(self.session_file_path, None)
+            with open(self.session_file, 'a'):
+                os.utime(self.session_file, None)
 
-            print("Create session file %s" % (self.session_file_path))
+            print("Create session file %s" % (self.session_file))
 
         # Save buffer session to file.
         buf_session_data = buf.save_session_data()
         if buf_session_data != "":
-            with open(self.session_file_path, "r+") as session_file:
+            with open(self.session_file, "r+") as session_file:
                 # Init session dict.
                 session_dict = {}
                 try:
@@ -386,8 +386,8 @@ class EAF(dbus.service.Object):
                 print("Saved session: ", buf.module_path, buf.url, buf_session_data)
 
     def restore_buffer_session(self, buf):
-        if os.path.exists(self.session_file_path):
-            with open(self.session_file_path, "r+") as session_file:
+        if os.path.exists(self.session_file):
+            with open(self.session_file, "r+") as session_file:
                 session_dict = {}
                 try:
                     session_dict = json.load(session_file)
@@ -417,7 +417,7 @@ if __name__ == "__main__":
         print("EAF process is already running.")
     else:
         emacs_width = emacs_height = 0
-        emacs_config_dir = ""
+        eaf_config_dir = ""
 
         app = QApplication(sys.argv)
 
