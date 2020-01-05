@@ -284,6 +284,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-rss-reader-keybinding
   '(("a" . "add_subscription")
+    ("d" . "delete_subscription")
     ("n" . "next_subscription")
     ("p" . "prev_subscription")
     ("N" . "last_subscription")

@@ -38,9 +38,15 @@ class AppBuffer(Buffer):
     def handle_input_message(self, result_type, result_content):
         if result_type == "add_subscription":
             self.buffer_widget.add_subscription(result_content)
+        elif result_type == "delete_subscription":
+            if result_content == "y":
+                self.buffer_widget.delete_subscription()
 
     def add_subscription(self):
         self.buffer_widget.send_input_message("Subscribe to RSS feed: ", "add_subscription")
+
+    def delete_subscription(self):
+        self.buffer_widget.send_input_message("Confirm delete current feed? (y or n): ", "delete_subscription")
 
     def next_subscription(self):
         self.buffer_widget.next_subscription()
@@ -157,7 +163,7 @@ class RSSReaderWidget(QWidget):
             try:
                 with open(self.feed_file_path, "r") as feed_file:
                     feed_dict = json.loads(feed_file.read())
-                    return True
+                    return len(feed_dict.keys()) > 0
             except Exception:
                 return False
 
@@ -194,6 +200,36 @@ class RSSReaderWidget(QWidget):
             self.fetch_feed(feed_link, True)
         else:
             self.message_to_emacs.emit("Feed has exists: " + feed_link)
+
+    def delete_subscription(self):
+        feed_count = self.feed_list.count()
+        current_row = self.feed_list.currentRow()
+        feed_link = self.feed_list.currentItem().feed_link
+        feed_title = self.feed_list.currentItem().feed_title
+
+        self.feed_list.takeItem(current_row)
+
+        with open(self.feed_file_path, "r") as feed_file:
+            feed_dict = json.loads(feed_file.read())
+            if feed_link in feed_dict:
+                del feed_dict[feed_link]
+
+                with open(self.feed_file_path, "w") as f:
+                    f.write(json.dumps(feed_dict))
+
+        if feed_count <= 1:
+            self.feed_list.clear()
+            self.article_list.clear()
+            self.browser.setUrl(QUrl(""))
+            self.right_area.setCurrentIndex(0)
+        elif current_row < feed_count - 1:
+            self.feed_list.setCurrentRow(current_row)
+            self.handle_feed(self.feed_list.currentItem())
+            self.message_to_emacs.emit("Remove feed: " + feed_title)
+        else:
+            self.feed_list.setCurrentRow(feed_count - 2)
+            self.handle_feed(self.feed_list.currentItem())
+            self.message_to_emacs.emit("Remove feed: " + feed_title)
 
     def feed_is_exits(self, feed_link):
         if not os.path.exists(self.feed_file_path):
@@ -250,6 +286,7 @@ class RSSReaderWidget(QWidget):
 
         feed_item = QListWidgetItem(self.feed_list)
         feed_item.feed_link = feed_link
+        feed_item.feed_title = feed_title
         feed_item_widget = RSSFeedItem(feed_object, len(feed_object.entries))
         feed_item.setSizeHint(feed_item_widget.sizeHint())
         self.feed_list.addItem(feed_item)
