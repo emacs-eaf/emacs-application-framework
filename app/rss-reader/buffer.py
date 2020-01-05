@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QApplication, QWi
 from core.buffer import Buffer
 from PyQt5 import QtWidgets, QtCore
 from core.browser import BrowserView
+from core.utils import touch
 import feedparser
 import json
 import os
@@ -39,13 +40,6 @@ class AppBuffer(Buffer):
         self.buffer_widget.browser.set_emacs_var = self.set_emacs_var
         self.buffer_widget.browser.eval_in_emacs = self.eval_in_emacs
         self.buffer_widget.browser.send_input_message = self.send_input_message
-
-    def handle_input_message(self, result_type, result_content):
-        if result_type == "add_subscription":
-            self.buffer_widget.add_subscription(result_content)
-        elif result_type == "delete_subscription":
-            if result_content == "y":
-                self.buffer_widget.delete_subscription()
 
     def add_subscription(self):
         self.buffer_widget.send_input_message("Subscribe to RSS feed: ", "add_subscription")
@@ -104,6 +98,11 @@ class AppBuffer(Buffer):
             self.buffer_widget.browser.jump_to_link(str(result_content))
         elif result_type == "jump_link_new_buffer":
             self.buffer_widget.browser.jump_to_link(str(result_content), "true")
+        elif result_type == "add_subscription":
+            self.buffer_widget.add_subscription(result_content)
+        elif result_type == "delete_subscription":
+            if result_content == "y":
+                self.buffer_widget.delete_subscription()
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer":
@@ -238,6 +237,8 @@ class RSSReaderWidget(QWidget):
             self.update_article_area(self.feed_object_dict[feed_item.feed_link])
 
     def handle_article(self, article_item):
+        article_item.mark_as_read()
+
         self.browser.setUrl(QUrl(article_item.post_link))
 
     def fetch_feed(self, feed_link, refresh_ui):
@@ -299,42 +300,41 @@ class RSSReaderWidget(QWidget):
 
             return False
 
-    def save_feed(self, feed_link, feed_title):
-        if not os.path.exists(self.feed_file_path):
-            basedir = os.path.dirname(self.feed_file_path)
-            if not os.path.exists(basedir):
-                os.makedirs(basedir)
+    def save_feed(self, feed_object, feed_link, feed_title):
+        touch(self.feed_file_path)
 
-            with open(self.feed_file_path, "a"):
-                os.utime(self.feed_file_path, None)
+        article_ids = list(map(lambda post: post.id, feed_object.entries))
 
         try:
             with open(self.feed_file_path, "r") as feed_file:
                 feed_dict = json.loads(feed_file.read())
                 if feed_link not in feed_dict:
                     feed_dict[feed_link] = {
-                        "title": feed_title
+                        "title": feed_title,
+                        "unread_articles": article_ids
                     }
 
-                    with open(self.feed_file_path, "w") as f:
-                        f.write(json.dumps(feed_dict))
-
+                    self.save_feed_dict(feed_dict)
                     self.message_to_emacs.emit("Add feed: " + feed_link)
         except Exception:
             import traceback
             traceback.print_exc()
 
-            with open(self.feed_file_path, "w") as f:
-                f.write(json.dumps({feed_link : {
-                    "title": feed_title
-                }}))
-
+            self.save_feed_dict({feed_link : {
+                "title": feed_title,
+                "unread_articles": article_ids
+            }})
             self.message_to_emacs.emit("Add feed: " + feed_link)
 
+    def save_feed_dict(self, feed_dict):
+        with open(self.feed_file_path, "w") as f:
+            f.write(json.dumps(feed_dict))
+
     def handle_rss(self, feed_object, feed_link, feed_title, refresh_ui):
+        feed_object.feed_link = feed_link
         self.feed_object_dict[feed_link] = feed_object
 
-        self.save_feed(feed_link, feed_title)
+        self.save_feed(feed_object, feed_link, feed_title)
 
         self.right_area.setCurrentIndex(1)
 
@@ -342,9 +342,22 @@ class RSSReaderWidget(QWidget):
         feed_item.feed_link = feed_link
         feed_item.feed_title = feed_title
         feed_item_widget = RSSFeedItem(feed_object, len(feed_object.entries))
+        feed_item.update_article_num = feed_item_widget.update_article_num
         feed_item.setSizeHint(feed_item_widget.sizeHint())
         self.feed_list.addItem(feed_item)
         self.feed_list.setItemWidget(feed_item, feed_item_widget)
+
+        unread_articles = []
+        with open(self.feed_file_path, "r") as feed_file:
+            feed_dict = json.loads(feed_file.read())
+            if feed_object.feed_link in feed_dict:
+                unread_articles = feed_dict[feed_object.feed_link]["unread_articles"]
+
+                for index in range(self.feed_list.count()):
+                    feed_item = self.feed_list.item(index)
+                    if feed_item.feed_link == feed_object.feed_link:
+                        feed_item.update_article_num(len(unread_articles))
+                        break
 
         if refresh_ui:
             self.update_article_area(feed_object)
@@ -353,13 +366,25 @@ class RSSReaderWidget(QWidget):
         self.browser.setUrl(QUrl(feed_object.entries[0].link))
 
         self.article_list.clear()
-        for post in feed_object.entries:
-            item_widget = RSSArticleItem(post)
+
+        unread_articles = []
+        with open(self.feed_file_path, "r") as feed_file:
+            feed_dict = json.loads(feed_file.read())
+            if feed_object.feed_link in feed_dict:
+                unread_articles = feed_dict[feed_object.feed_link]["unread_articles"]
+
+        for index, post in enumerate(feed_object.entries):
+            item_widget = RSSArticleItemWidget(feed_object, post, unread_articles)
             item = QListWidgetItem(self.article_list)
+            item.mark_as_read = item_widget.mark_as_read
             item.post_link = item_widget.post_link
             item.setSizeHint(item_widget.sizeHint())
+            item_widget.mark_article_read.connect(self.mark_article_read)
             self.article_list.addItem(item)
             self.article_list.setItemWidget(item, item_widget)
+
+            if index == 0:
+                item.mark_as_read()
 
         self.article_list.setCurrentRow(0)
 
@@ -369,6 +394,29 @@ class RSSReaderWidget(QWidget):
 
     def handle_invalid_rss(self, feed_link):
         self.message_to_emacs.emit("Invalid feed link: " + feed_link)
+
+    def mark_article_read(self, feed_link, post_link):
+        if os.path.exists(self.feed_file_path):
+            try:
+                with open(self.feed_file_path, "r") as feed_file:
+                    feed_dict = json.loads(feed_file.read())
+                    if feed_link in feed_dict:
+                        unread_articles = feed_dict[feed_link]["unread_articles"]
+
+                        if post_link in unread_articles:
+                            unread_articles.remove(post_link)
+                            feed_dict[feed_link]["unread_articles"] = unread_articles
+
+                            with open(self.feed_file_path, "w") as f:
+                                f.write(json.dumps(feed_dict))
+
+                        for index in range(self.feed_list.count()):
+                            feed_item = self.feed_list.item(index)
+                            if feed_item.feed_link == feed_link:
+                                feed_item.update_article_num(len(unread_articles))
+                                break
+            except Exception:
+                pass
 
     def next_subscription(self):
         feed_count = self.feed_list.count()
@@ -459,19 +507,24 @@ class RSSFeedItem(QWidget):
         title_label.setStyleSheet("color: #DDD")
         layout.addWidget(title_label)
 
-        number_label = QLabel(str(post_num))
-        number_label.setFont(QFont('Arial', 16))
-        number_label.setStyleSheet("color: #AAA")
+        self.number_label = QLabel(str(post_num))
+        self.number_label.setFont(QFont('Arial', 16))
+        self.number_label.setStyleSheet("color: #AAA")
         layout.addStretch(1)
-        layout.addWidget(number_label)
+        layout.addWidget(self.number_label)
 
         self.setLayout(layout)
 
-class RSSArticleItem(QWidget):
+    def update_article_num(self, num):
+        self.number_label.setText(str(num))
 
-    def __init__(self, post):
-        super(RSSArticleItem, self).__init__()
+class RSSArticleItemWidget(QWidget):
+    mark_article_read = QtCore.pyqtSignal(str, str)
 
+    def __init__(self, feed_object, post, unread_articles):
+        super(RSSArticleItemWidget, self).__init__()
+
+        self.feed_object = feed_object
         self.post_id = post.id
         self.post_link = post.link
 
@@ -484,12 +537,20 @@ class RSSArticleItem(QWidget):
         article_layout = QHBoxLayout()
         article_layout.setContentsMargins(10, 10, 0, 0)
 
+        self.status_label = QLabel("*")
+        self.status_label.setFont(QFont('Arial', 16))
+        if self.post_id in unread_articles:
+            self.status_label.setStyleSheet('''color: #008DFF;''')
+        else:
+            self.status_label.setStyleSheet('''color: #000;''')
+
         date_label = QLabel(date)
         date_label.setFont(QFont('Arial', 16))
 
         title_label = QLabel(post.title)
         title_label.setFont(QFont('Arial', 16))
 
+        article_layout.addWidget(self.status_label)
         article_layout.addWidget(date_label)
         article_layout.addWidget(title_label)
         article_layout.addStretch(1)
@@ -498,3 +559,8 @@ class RSSArticleItem(QWidget):
 
     def truncate_description(self, text):
         return (text[:90] + ' ...') if len(text) > 90 else text
+
+    def mark_as_read(self):
+        self.status_label.setStyleSheet('''color: #000;''')
+
+        self.mark_article_read.emit(self.feed_object.feed_link, self.post_id)
