@@ -35,6 +35,11 @@ class AppBuffer(Buffer):
 
         self.add_widget(RSSReaderWidget(config_dir))
 
+        self.buffer_widget.browser.message_to_emacs = self.message_to_emacs
+        self.buffer_widget.browser.set_emacs_var = self.set_emacs_var
+        self.buffer_widget.browser.eval_in_emacs = self.eval_in_emacs
+        self.buffer_widget.browser.send_input_message = self.send_input_message
+
     def handle_input_message(self, result_type, result_content):
         if result_type == "add_subscription":
             self.buffer_widget.add_subscription(result_content)
@@ -89,6 +94,37 @@ class AppBuffer(Buffer):
 
     def scroll_to_bottom(self):
         self.buffer_widget.browser.scroll_to_bottom()
+
+    def handle_input_message(self, result_type, result_content):
+        if result_type == "search_text_forward":
+            self.buffer_widget.browser._search_text(str(result_content))
+        elif result_type == "search_text_backward":
+            self.buffer_widget.browser._search_text(str(result_content), True)
+        elif result_type == "jump_link":
+            self.buffer_widget.browser.jump_to_link(str(result_content))
+        elif result_type == "jump_link_new_buffer":
+            self.buffer_widget.browser.jump_to_link(str(result_content), "true")
+
+    def cancel_input_message(self, result_type):
+        if result_type == "jump_link" or result_type == "jump_link_new_buffer":
+            self.buffer_widget.browser.cleanup_links()
+
+    def action_quit(self):
+        self.buffer_widget.browser.search_quit()
+
+    def open_link(self):
+        self.buffer_widget.browser.open_link()
+        self.send_input_message("Open Link: ", "jump_link");
+
+    def open_link_new_buffer(self):
+        self.buffer_widget.browser.open_link_new_buffer()
+        self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
+
+    def search_text_forward(self):
+        self.buffer_widget.browser.search_text_forward()
+
+    def search_text_backward(self):
+        self.buffer_widget.browser.search_text_backward()
 
 class RSSReaderWidget(QWidget):
 

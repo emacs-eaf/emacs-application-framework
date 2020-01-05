@@ -161,6 +161,8 @@ class EAF(dbus.service.Object):
         # Add create new window callback if module is browser
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
+        elif module_path == "app.rss-reader.buffer":
+            app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
 
         # Restore buffer session.
         self.restore_buffer_session(app_buffer)
