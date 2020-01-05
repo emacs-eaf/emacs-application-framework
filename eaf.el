@@ -326,7 +326,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-config-dir
-  "~/.emacs.d/"
+  user-emacs-directory
   "The directory use for store eaf applicatin config."
   :type 'string)
 
