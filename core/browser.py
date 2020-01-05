@@ -51,6 +51,38 @@ class BrowserView(QWebEngineView):
 
         self.load_cookie()
 
+        self.search_term = ""
+
+        with open(os.path.join(os.path.dirname(__file__), "js", "get_markers.js"), "r") as f:
+            self.get_markers_js = f.read()
+
+        with open(os.path.join(os.path.dirname(__file__), "js", "goto_marker.js"), "r") as f:
+            self.goto_marker_raw = f.read()
+
+    def _search_text(self, text, is_backward = False):
+        if self.search_term != text:
+            self.search_term = text
+        if is_backward:
+            self.web_page.findText(self.search_term, self.web_page.FindBackward)
+        else:
+            self.web_page.findText(self.search_term)
+
+    def search_text_forward(self):
+        if self.search_term == "":
+            self.send_input_message("Forward Search Text: ", "search_text_forward")
+        else:
+            self._search_text(self.search_term)
+
+    def search_text_backward(self):
+        if self.search_term == "":
+            self.send_input_message("Backward Search Text: ", "search_text_backward")
+        else:
+            self._search_text(self.search_term, True)
+
+    def search_quit(self):
+        if self.search_term != "":
+            self._search_text("")
+
     def select_text_change(self):
         modifiers = QApplication.keyboardModifiers()
         if modifiers == Qt.ControlModifier:
@@ -130,6 +162,71 @@ class BrowserView(QWebEngineView):
 
     def zoom_reset(self):
         self.setZoomFactor(1)
+
+    def eval_js(self, js):
+        self.web_page.runJavaScript(js)
+
+    def execute_js(self, js):
+        self.web_page.executeJavaScript(js)
+
+    def scroll_left(self):
+        self.eval_js("window.scrollBy(-50, 0)")
+
+    def scroll_right(self):
+        self.eval_js("window.scrollBy(50, 0)")
+
+    def scroll_up(self):
+        self.eval_js("window.scrollBy(0, 50)")
+
+    def scroll_down(self):
+        self.eval_js("window.scrollBy(0, -50)")
+
+    def scroll_up_page(self):
+        self.eval_js("window.scrollBy(0, document.documentElement.clientHeight)")
+
+    def scroll_down_page(self):
+        self.eval_js("window.scrollBy(0, -document.documentElement.clientHeight)")
+
+    def scroll_to_begin(self):
+        self.eval_js("window.scrollTo(0, 0)")
+
+    def scroll_to_bottom(self):
+        self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
+
+    def refresh_page(self):
+        self.reload()
+
+    def copy_text(self):
+        self.triggerPageAction(self.web_page.Copy)
+
+    def yank_text(self):
+        self.triggerPageAction(self.web_page.Paste)
+
+    def kill_text(self):
+        self.triggerPageAction(self.web_page.Cut)
+
+    def undo_action(self):
+        self.triggerPageAction(self.web_page.Undo)
+
+    def redo_action(self):
+        self.triggerPageAction(self.web_page.Redo)
+
+    def get_url(self):
+        return self.web_page.executeJavaScript("window.location.href;")
+
+    def cleanup_links(self):
+        self.web_page.executeJavaScript("document.querySelector('.markerContainer').remove();")
+
+    def open_link(self):
+        self.eval_js(self.get_markers_js);
+
+    def open_link_new_buffer(self):
+        self.eval_js(self.get_markers_js);
+
+    def jump_to_link(self, marker, new_buffer = "false"):
+        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker)).replace("%2", new_buffer);
+        self.execute_js(self.goto_marker_js);
+        self.cleanup_links()
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):

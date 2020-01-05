@@ -36,14 +36,6 @@ class BrowserBuffer(Buffer):
 
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
 
-        self.search_term = ""
-
-        with open(os.path.join(os.path.dirname(__file__), "js", "get_markers.js"), "r") as f:
-            self.get_markers_js = f.read()
-
-        with open(os.path.join(os.path.dirname(__file__), "js", "goto_marker.js"), "r") as f:
-            self.goto_marker_raw = f.read()
-
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
         return [self.buffer_widget.focusProxy()]
@@ -60,42 +52,25 @@ class BrowserBuffer(Buffer):
             else:
                 self.scroll_down()
 
-    def _search_text(self, text, is_backward = False):
-        if self.search_term != text:
-            self.search_term = text
-        if is_backward:
-            self.buffer_widget.web_page.findText(self.search_term, self.buffer_widget.web_page.FindBackward)
-        else:
-            self.buffer_widget.web_page.findText(self.search_term)
-
     def handle_input_message(self, result_type, result_content):
         if result_type == "search_text_forward":
-            self._search_text(str(result_content))
+            self.buffer_widget._search_text(str(result_content))
         elif result_type == "search_text_backward":
-            self._search_text(str(result_content), True)
+            self.buffer_widget._search_text(str(result_content), True)
         elif result_type == "jump_link":
-            self.jump_to_link(str(result_content))
+            self.buffer_widget.jump_to_link(str(result_content))
         elif result_type == "jump_link_new_buffer":
-            self.jump_to_link(str(result_content), "true")
+            self.buffer_widget.jump_to_link(str(result_content), "true")
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer":
-            self.cleanup_links()
+            self.buffer_widget.cleanup_links()
 
     def search_text_forward(self):
-        if self.search_term == "":
-            self.send_input_message("Forward Search Text: ", "search_text_forward")
-        else:
-            self._search_text(self.search_term)
+        self.buffer_widget.search_text_forward()
 
     def search_text_backward(self):
-        if self.search_term == "":
-            self.send_input_message("Backward Search Text: ", "search_text_backward")
-        else:
-            self._search_text(self.search_term, True)
-
-    def eval_js(self, js):
-        self.buffer_widget.web_page.runJavaScript(js)
+        self.buffer_widget.search_text_backward()
 
     def history_backward(self):
         self.buffer_widget.back()
@@ -108,8 +83,7 @@ class BrowserBuffer(Buffer):
         self.message_to_emacs.emit("Cleared all cookies.")
 
     def action_quit(self):
-        if self.search_term != "":
-            self._search_text("")
+        self.buffer_widget.search_quit()
 
     def zoom_out(self):
         self.buffer_widget.zoom_out()
@@ -121,62 +95,54 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.zoom_reset()
 
     def scroll_left(self):
-        self.eval_js("window.scrollBy(-50, 0)")
+        self.buffer_widget.scroll_left()
 
     def scroll_right(self):
-        self.eval_js("window.scrollBy(50, 0)")
+        self.buffer_widget.scroll_right()
 
     def scroll_up(self):
-        self.eval_js("window.scrollBy(0, 50)")
+        self.buffer_widget.scroll_up()
 
     def scroll_down(self):
-        self.eval_js("window.scrollBy(0, -50)")
+        self.buffer_widget.scroll_down()
 
     def scroll_up_page(self):
-        self.eval_js("window.scrollBy(0, document.documentElement.clientHeight)")
+        self.buffer_widget.scroll_up_page()
 
     def scroll_down_page(self):
-        self.eval_js("window.scrollBy(0, -document.documentElement.clientHeight)")
+        self.buffer_widget.scroll_down_page()
 
     def scroll_to_begin(self):
-        self.eval_js("window.scrollTo(0, 0)")
+        self.buffer_widget.scroll_to_begin()
 
     def scroll_to_bottom(self):
-        self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
+        self.buffer_widget.scroll_to_bottom()
 
     def refresh_page(self):
-        self.buffer_widget.reload()
+        self.buffer_widget.refresh_page()
 
     def copy_text(self):
-        self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Copy)
+        self.buffer_widget.copy_text()
 
     def yank_text(self):
-        self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Paste)
+        self.buffer_widget.yank_text()
 
     def kill_text(self):
-        self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Cut)
+        self.buffer_widget.kill_text()
 
     def undo_action(self):
-        self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Undo)
+        self.buffer_widget.undo_action()
 
     def redo_action(self):
-        self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Redo)
+        self.buffer_widget.redo_action()
 
     def get_url(self):
-        return self.buffer_widget.web_page.executeJavaScript("window.location.href;")
+        return self.buffer_widget.get_url()
 
     def open_link(self):
-        self.eval_js(self.get_markers_js);
+        self.buffer_widget.open_link()
         self.send_input_message("Open Link: ", "jump_link");
 
     def open_link_new_buffer(self):
-        self.eval_js(self.get_markers_js);
+        self.buffer_widget.open_link_new_buffer()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
-
-    def jump_to_link(self, marker, new_buffer = "false"):
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker)).replace("%2", new_buffer);
-        self.buffer_widget.web_page.executeJavaScript(self.goto_marker_js);
-        self.cleanup_links()
-
-    def cleanup_links(self):
-        self.buffer_widget.web_page.executeJavaScript("document.querySelector('.markerContainer').remove();")
