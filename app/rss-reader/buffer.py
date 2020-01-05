@@ -254,7 +254,7 @@ class RSSReaderWidget(QWidget):
         if not self.feed_is_exits(feed_link):
             self.fetch_feed(feed_link, True)
         else:
-            self.message_to_emacs.emit("Feed has exists: " + feed_link)
+            self.message_to_emacs.emit("Feed already exists: " + feed_link)
 
     def delete_subscription(self):
         feed_count = self.feed_list.count()
@@ -503,10 +503,10 @@ class RSSFeedItem(QWidget):
         layout = QHBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
 
-        title_label = QLabel(feed_object.feed.title)
-        title_label.setFont(QFont('Arial', 18))
-        title_label.setStyleSheet("color: #DDD")
-        layout.addWidget(title_label)
+        feed_title_label = QLabel(feed_object.feed.title)
+        feed_title_label.setFont(QFont('Arial', 18))
+        feed_title_label.setStyleSheet("color: #DDD")
+        layout.addWidget(feed_title_label)
 
         self.number_label = QLabel(str(post_num))
         self.number_label.setFont(QFont('Arial', 16))
@@ -538,22 +538,27 @@ class RSSArticleItemWidget(QWidget):
         article_layout = QHBoxLayout()
         article_layout.setContentsMargins(10, 10, 0, 0)
 
+        self.article_date_label = QLabel(date)
+        self.article_date_label.setFont(QFont('Arial', 16))
+
+        self.article_title_label = QLabel(post.title)
+        self.article_title_label.setFont(QFont('Arial', 16))
+
         self.status_label = QLabel("*")
-        self.status_label.setFont(QFont('Arial', 16))
+        self.status_label.setFont(QFont('Arial', 20))
+
         if self.post_id in unread_articles:
-            self.status_label.setStyleSheet('''color: #008DFF;''')
+            self.status_label.setStyleSheet("color: #008DFF")
+            self.article_date_label.setStyleSheet("color: #464646")
+            self.article_title_label.setStyleSheet("color: #464646")
         else:
-            self.status_label.setStyleSheet('''color: #000;''')
-
-        date_label = QLabel(date)
-        date_label.setFont(QFont('Arial', 16))
-
-        title_label = QLabel(post.title)
-        title_label.setFont(QFont('Arial', 16))
+            self.status_label.setStyleSheet("color: #9e9e9e")
+            self.article_date_label.setStyleSheet("color: #9e9e9e")
+            self.article_title_label.setStyleSheet("color: #9e9e9e")
 
         article_layout.addWidget(self.status_label)
-        article_layout.addWidget(date_label)
-        article_layout.addWidget(title_label)
+        article_layout.addWidget(self.article_date_label)
+        article_layout.addWidget(self.article_title_label)
         article_layout.addStretch(1)
 
         self.setLayout(article_layout)
@@ -562,6 +567,8 @@ class RSSArticleItemWidget(QWidget):
         return (text[:90] + ' ...') if len(text) > 90 else text
 
     def mark_as_read(self):
-        self.status_label.setStyleSheet('''color: #000;''')
+        self.status_label.setStyleSheet("color: #9e9e9e")
+        self.article_date_label.setStyleSheet("color: #9e9e9e")
+        self.article_title_label.setStyleSheet("color: #9e9e9e")
 
         self.mark_article_read.emit(self.feed_object.feed_link, self.post_id)
