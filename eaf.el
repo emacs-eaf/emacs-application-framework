@@ -292,7 +292,13 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("j" . "next_article")
     ("k" . "prev_article")
     ("J" . "last_article")
-    ("K" . "first_article"))
+    ("K" . "first_article")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
+    ("C-v" . "scroll_up_page")
+    ("M-v" . "scroll_down_page")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom"))
   "The keybinding of EAF RSS Reader."
   :type 'cons)
 

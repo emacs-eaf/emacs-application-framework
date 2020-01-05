@@ -72,6 +72,24 @@ class AppBuffer(Buffer):
     def last_article(self):
         self.buffer_widget.last_article()
 
+    def scroll_up(self):
+        self.buffer_widget.browser.scroll_up()
+
+    def scroll_down(self):
+        self.buffer_widget.browser.scroll_down()
+
+    def scroll_up_page(self):
+        self.buffer_widget.browser.scroll_up_page()
+
+    def scroll_down_page(self):
+        self.buffer_widget.browser.scroll_down_page()
+
+    def scroll_to_begin(self):
+        self.buffer_widget.browser.scroll_to_begin()
+
+    def scroll_to_bottom(self):
+        self.buffer_widget.browser.scroll_to_bottom()
+
 class RSSReaderWidget(QWidget):
 
     def __init__(self, config_dir):
