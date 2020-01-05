@@ -229,7 +229,7 @@ class WebHitTestResult():
 
 class BrowserCookieStorage:
     def __init__(self, config_dir):
-        self.cookie_file = os.path.join(config_dir, "eaf", "browser", "cookie", "cookie")
+        self.cookie_file = os.path.join(config_dir, "browser", "cookie", "cookie")
 
         touch(self.cookie_file)
 

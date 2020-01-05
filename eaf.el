@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Dec 29 11:46:35 2019 (-0500)
+;; Last-Updated: Sat Jan  4 21:55:30 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -325,11 +325,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of org previewer application."
   :type 'cons)
 
-(defcustom eaf-config-dir
-  user-emacs-directory
-  "The directory use for store eaf applicatin config."
-  :type 'string)
-
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -450,8 +445,8 @@ For now only EAF browser app is supported."
           (apply #'start-process
                  eaf-name
                  eaf-name
-                 eaf-python-command (append (list eaf-python-file) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port eaf-config-dir))
-                 ))
+                 eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
+                                            (list eaf-http-proxy-host eaf-http-proxy-port (concat user-emacs-directory "eaf")))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
      eaf-process

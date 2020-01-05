@@ -71,7 +71,7 @@ class RSSReaderWidget(QWidget):
     def __init__(self, config_dir):
         super(RSSReaderWidget, self).__init__()
 
-        self.feed_file_path = os.path.join(config_dir, "eaf", "rss-reader", "feeds.json")
+        self.feed_file_path = os.path.join(config_dir, "rss-reader", "feeds.json")
 
         self.feed_area = QWidget()
         self.feed_list = QListWidget()
