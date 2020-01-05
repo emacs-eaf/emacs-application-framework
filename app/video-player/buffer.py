@@ -27,7 +27,7 @@ from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments):
+    def __init__(self, buffer_id, url, config_dir, arguments):
         Buffer.__init__(self, buffer_id, url, arguments, True, QColor(0, 0, 0, 255))
 
         self.add_widget(VideoPlayerWidget())
@@ -104,4 +104,3 @@ class VideoPlayerWidget(QWidget):
     def seek_backward(self):
         video_position = self.media_player.position()
         self.media_player.setPosition(max(video_position - self.video_seek_durcation, 0))
-

@@ -39,23 +39,24 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_width, emacs_height
+        global emacs_width, emacs_height, emacs_config_dir
 
         dbus.service.Object.__init__(
             self,
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_width, emacs_height, proxy_host, proxy_port) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, config_dir) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
+        emacs_config_dir = os.path.expanduser(config_dir)
 
         self.buffer_dict = {}
         self.view_dict = {}
 
         self.start_finish()
 
-        self.session_file_path = os.path.expanduser("~/.emacs.d/eaf/session.json")
+        self.session_file_path = os.path.join(emacs_config_dir, "eaf", "session.json")
 
         # Set HTTP proxy.
         if proxy_host != "" and proxy_port != "":
@@ -120,11 +121,11 @@ class EAF(dbus.service.Object):
             return "EAF: Something went wrong when trying to import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
-        global emacs_width, emacs_height
+        global emacs_width, emacs_height, emacs_config_dir
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, arguments)
+        app_buffer = module.AppBuffer(buffer_id, url, emacs_config_dir, arguments)
         app_buffer.module_path = module_path
 
         # Add buffer to buffer dict.
@@ -416,6 +417,7 @@ if __name__ == "__main__":
         print("EAF process is already running.")
     else:
         emacs_width = emacs_height = 0
+        emacs_config_dir = ""
 
         app = QApplication(sys.argv)
 

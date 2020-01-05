@@ -325,6 +325,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of org previewer application."
   :type 'cons)
 
+(defcustom eaf-config-dir
+  "~/.emacs.d/"
+  "The directory use for store eaf applicatin config."
+  :type 'string)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -445,7 +450,7 @@ For now only EAF browser app is supported."
           (apply #'start-process
                  eaf-name
                  eaf-name
-                 eaf-python-command (append (list eaf-python-file) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port))
+                 eaf-python-command (append (list eaf-python-file) (eaf-get-render-size) (list eaf-http-proxy-host eaf-http-proxy-port eaf-config-dir))
                  ))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel

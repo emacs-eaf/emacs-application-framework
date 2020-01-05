@@ -25,8 +25,8 @@ from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from core.browser_buffer import BrowserBuffer
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, arguments):
-        BrowserBuffer.__init__(self, buffer_id, url, arguments, False, QColor(255, 255, 255, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, False, QColor(255, 255, 255, 255))
 
         self.buffer_widget.setUrl(QUrl(url))
         self.buffer_widget.titleChanged.connect(self.change_title)

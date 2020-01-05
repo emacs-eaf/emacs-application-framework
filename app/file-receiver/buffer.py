@@ -40,7 +40,7 @@ import urllib
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, argument):
+    def __init__(self, buffer_id, url, config_dir, argument):
         Buffer.__init__(self, buffer_id, url, argument, False, QColor(0, 0, 0, 255))
 
         self.add_widget(FileUploaderWidget(url, QColor(0, 0, 0, 255)))

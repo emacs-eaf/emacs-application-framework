@@ -25,10 +25,10 @@ import os
 
 class BrowserBuffer(Buffer):
 
-    def __init__(self, buffer_id, url, arguments, fit_to_view, background_color):
+    def __init__(self, buffer_id, url, config_dir, arguments, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, fit_to_view, background_color)
 
-        self.add_widget(BrowserView())
+        self.add_widget(BrowserView(config_dir))
 
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)

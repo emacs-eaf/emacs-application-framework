@@ -33,7 +33,7 @@ import sys
 import threading
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments):
+    def __init__(self, buffer_id, url, config_dir, arguments):
         Buffer.__init__(self, buffer_id, url, arguments, False, QColor(0, 0, 0, 255))
 
         self.add_widget(FileTransferWidget(url, QColor(0, 0, 0, 255)))

@@ -35,7 +35,7 @@ class BrowserView(QWebEngineView):
     open_url_in_new_tab = QtCore.pyqtSignal(str)
     translate_selected_text = QtCore.pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, config_dir):
         super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
@@ -44,7 +44,7 @@ class BrowserView(QWebEngineView):
         self.setPage(self.web_page)
 
         self.cookie_store = self.page().profile().cookieStore()
-        self.cookie_storage = BrowserCookieStorage()
+        self.cookie_storage = BrowserCookieStorage(config_dir)
         self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
 
         self.selectionChanged.connect(self.select_text_change)
@@ -228,8 +228,8 @@ class WebHitTestResult():
             self.m_mediaUrl = data.mediaUrl().toString()
 
 class BrowserCookieStorage:
-    def __init__(self):
-        self.cookie_file = os.path.expanduser("~/.emacs.d/eaf/browser/cookie/cookie")
+    def __init__(self, config_dir):
+        self.cookie_file = os.path.join(config_dir, "eaf", "browser", "cookie", "cookie")
 
         touch(self.cookie_file)
 

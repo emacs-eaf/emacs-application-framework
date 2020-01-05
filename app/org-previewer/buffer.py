@@ -25,8 +25,8 @@ from core.browser_buffer import BrowserBuffer
 import os
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, arguments):
-        BrowserBuffer.__init__(self, buffer_id, url, arguments, False, QColor(255, 255, 255, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, False, QColor(255, 255, 255, 255))
 
         self.url = url
 

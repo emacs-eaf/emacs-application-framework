@@ -30,10 +30,10 @@ import json
 import os
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments):
+    def __init__(self, buffer_id, url, config_dir, arguments):
         Buffer.__init__(self, buffer_id, url, arguments, True, QColor(0, 0, 0, 255))
 
-        self.add_widget(RSSReaderWidget())
+        self.add_widget(RSSReaderWidget(config_dir))
 
     def handle_input_message(self, result_type, result_content):
         if result_type == "add_subscription":
@@ -68,10 +68,10 @@ class AppBuffer(Buffer):
 
 class RSSReaderWidget(QWidget):
 
-    def __init__(self):
+    def __init__(self, config_dir):
         super(RSSReaderWidget, self).__init__()
 
-        self.feed_file_path = os.path.expanduser("~/.emacs.d/eaf/rss-reader/feeds.json")
+        self.feed_file_path = os.path.join(config_dir, "eaf", "rss-reader", "feeds.json")
 
         self.feed_area = QWidget()
         self.feed_list = QListWidget()
@@ -90,7 +90,7 @@ class RSSReaderWidget(QWidget):
         article_layout.setSpacing(0)
         article_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.browser = BrowserView()
+        self.browser = BrowserView(config_dir)
 
         article_layout.addWidget(self.article_list)
         article_layout.addWidget(self.browser)
@@ -407,19 +407,3 @@ class RSSArticleItem(QWidget):
 
     def truncate_description(self, text):
         return (text[:90] + ' ...') if len(text) > 90 else text
-
-if __name__ == '__main__':
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-
-    w = RSSReaderWidget()
-    w.resize(1920, 1080)
-    w.show()
-
-    fetchThread = FetchRSSThread()
-    fetchThread.fetch_rss.connect(w.handle_rss)
-    fetchThread.start()
-
-    sys.exit(app.exec_())
