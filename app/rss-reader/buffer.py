@@ -351,7 +351,8 @@ class RSSReaderWidget(QWidget):
         with open(self.feed_file_path, "r") as feed_file:
             feed_dict = json.loads(feed_file.read())
             if feed_object.feed_link in feed_dict:
-                unread_articles = feed_dict[feed_object.feed_link]["unread_articles"]
+                if "unread_articles" in feed_dict[feed_object.feed_link]:
+                    unread_articles = ["unread_articles"]
 
                 for index in range(self.feed_list.count()):
                     feed_item = self.feed_list.item(index)
@@ -370,7 +371,7 @@ class RSSReaderWidget(QWidget):
         unread_articles = []
         with open(self.feed_file_path, "r") as feed_file:
             feed_dict = json.loads(feed_file.read())
-            if feed_object.feed_link in feed_dict:
+            if feed_object.feed_link in feed_dict and "unread_articles" in feed_dict[feed_object.feed_link]:
                 unread_articles = feed_dict[feed_object.feed_link]["unread_articles"]
 
         for index, post in enumerate(feed_object.entries):

@@ -144,6 +144,9 @@ EAF use X11 XReparent technology to stick Qt5 window on Emacs buffer area, Wayla
 
 We recommend our users to use KDE, it's stable enough and supports X11 XReparent technology.
 
+### `[EAF] *eaf* aborted (core dumped)`
+Please check the `*eaf*` buffer, something is wrong on the Python side. Usually some Python dependencies are not installed correctly.
+
 ### Github Personal Access Tokens?
 If you use EAF Markdown Previewer, you need the access to a [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
 
