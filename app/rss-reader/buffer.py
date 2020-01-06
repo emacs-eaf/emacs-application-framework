@@ -20,10 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QColor, QPainter, QFont, QTextDocument
-from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QApplication, QWidget, QListWidget, QVBoxLayout, QLabel, QPushButton, QListWidgetItem, QStackedWidget, QSizePolicy
+from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QWidget, QListWidget, QVBoxLayout, QLabel, QListWidgetItem, QStackedWidget
 from core.buffer import Buffer
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
 from core.browser import BrowserView
 from core.utils import touch
 import feedparser

@@ -21,7 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QRect, QEvent
-from PyQt5.QtGui import QColor, QPixmap, QImage, QFont, QCursor
+from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from core.buffer import Buffer
@@ -737,7 +737,7 @@ class PdfViewerWidget(QWidget):
                 if len(bbox_list) >= 2:
                     tl_x, tl_y = 0, 0 # top left point
                     for index, bbox in enumerate(bbox_list[:-1]):
-                        if (tl_x == 0) or (tl_x == 0):
+                        if (tl_x == 0) or (tl_y == 0):
                             tl_x, tl_y = bbox[:2]
                         if bbox[0] > bbox_list[index + 1][2]:
                             br_x, br_y = bbox[2:] # bottom right
