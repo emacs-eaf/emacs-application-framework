@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtCore import QRect
 from PyQt5.QtGui import QColor, QPixmap, QPainter
 from PyQt5.QtWidgets import QWidget
 from core.buffer import Buffer
