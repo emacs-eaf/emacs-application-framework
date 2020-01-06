@@ -25,17 +25,23 @@ from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from core.buffer import Buffer
+from core.utils import touch
 import fitz
 import time
 import random
 import math
+import os
+import hashlib
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments):
         Buffer.__init__(self, buffer_id, url, arguments, False, QColor(0, 0, 0, 255))
 
-        self.add_widget(PdfViewerWidget(url, QColor(0, 0, 0, 255)))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255)))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
+
+    def get_table_file(self):
+        return self.buffer_widget.table_file_path
 
     def handle_input_message(self, result_type, result_content):
         if result_type == "jump_page":
@@ -161,10 +167,11 @@ class AppBuffer(Buffer):
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
-    def __init__(self, url, background_color):
+    def __init__(self, url, config_dir, background_color):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
+        self.config_dir = config_dir
         self.background_color = background_color
         self.installEventFilter(self)
         self.setMouseTracking(True)
@@ -235,6 +242,24 @@ class PdfViewerWidget(QWidget):
         self.is_page_just_changed = False
 
         self.remember_offset = None
+
+        # Save table in file for search framework, such as snails, search table to navigate.
+        table_info = ""
+        for info in self.document.getToC():
+            indentation_num = info[0]
+            title = info[1]
+            page = info[2]
+
+            table_info += str(page) + self.repeat_to_length(" ", indentation_num * 4) + title + "\n"
+
+        table_file_hash = hashlib.md5(self.url.encode()).hexdigest()
+        self.table_file_path = os.path.join(config_dir, "pdf-viewer", "table", table_file_hash)
+        touch(self.table_file_path)
+        with open(self.table_file_path, "w") as f:
+            f.write(table_info)
+
+    def repeat_to_length(self, string_to_expand, length):
+        return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
 
     def save_current_pos(self):
         self.remember_offset = self.scroll_offset
