@@ -342,6 +342,16 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of org previewer application."
   :type 'cons)
 
+(defcustom eaf-mua-get-html
+  '((gnus-user-agent    . eaf-gnus-get-html)
+    (mu4e-user-agent    . eaf-mu4e-get-html)
+    (notmuch-user-agent . eaf-notmuch-get-html))
+  "Association list with mail user agent as a KEY and a function as VALUE used
+to retrieve HTML part of a mail.
+
+The value of `mail-user-agent' has to be a KEY of `eaf-mua-get-html'."
+  :type 'alist)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -938,6 +948,67 @@ of `eaf--buffer-app-name' inside the EAF buffer."
     ;; Switch to new buffer if buffer create successful.
     (switch-to-buffer buf)
     (other-window +1)))
+
+(defun eaf--gnus-htmlp (part)
+  (when-let ((type (mm-handle-type part)))
+    (string= "text/html" (car type))))
+
+(defun eaf--notmuch-htmlp (part)
+  (when-let ((type (plist-get part :content-type)))
+    (string= "text/html" type)))
+
+(defun eaf--get-html-func ()
+  (if-let ((get-html (assoc-default mail-user-agent eaf-mua-get-html)))
+      get-html
+    (error "Mail User Agent \"%s\" not supported" mail-user-agent)))
+
+;;;###autoload
+(defun eaf-gnus-get-html ()
+  "Retrieve HTML part of the gnus mail"
+  (with-current-buffer gnus-original-article-buffer
+    (when-let* ((dissect (mm-dissect-buffer t t))
+		(buffer (if (bufferp (car dissect))
+			    (when (eaf--gnus-htmlp dissect)
+			      (car dissect))
+			  (car (cl-find-if #'eaf--gnus-htmlp (cdr dissect))))))
+      (with-current-buffer buffer
+	(buffer-string)))))
+
+(defun eaf-mu4e-get-html ()
+  "Retrieve HTML part of the mu4e mail"
+  (let ((msg mu4e~view-message))
+    (mu4e-message-field msg :body-html)))
+
+(defun eaf-notmuch-get-html ()
+  "Retrieve HTML part of the notmuch mail"
+  (when-let* ((msg (cond ((eq major-mode 'notmuch-show-mode)
+			  (notmuch-show-get-message-properties))
+			 ((eq major-mode 'notmuch-tree-mode)
+			  (notmuch-tree-get-message-properties))
+			 (t nil)))
+	      (body (plist-get msg :body))
+	      (parts (car body))
+	      (content (plist-get parts :content))
+	      (part (if (listp content)
+			(cl-find-if #'eaf--notmuch-htmlp content)
+		      (when (eaf--notmuch-htmlp parts)
+			parts))))
+    (notmuch-get-bodypart-text msg part notmuch-show-process-crypto)))
+
+(defun eaf-open-mail-as-html ()
+  "Open the html mail in EAF browser.
+
+The value of `mail-user-agent' has to be a KEY of the assoc list `eaf-mua-get-html'.
+In that way the corresponding function will be called to retrieve the HTML part of
+the current mail."
+  (interactive)
+  (when-let* ((get-html (eaf--get-html-func))
+	      (html (funcall get-html))
+	      (filename (concat (make-temp-name "eaf-mail-") ".html"))
+	      (file (concat (temporary-file-directory) filename)))
+    (with-temp-file file
+      (insert html))
+    (eaf-open file "browser" "temp_html_file")))
 
 ;;;###autoload
 (defun eaf-google-it ()
