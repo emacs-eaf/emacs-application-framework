@@ -23,12 +23,22 @@ from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from core.browser import BrowserBuffer
+import os
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, False, QColor(255, 255, 255, 255))
 
-        self.buffer_widget.setUrl(QUrl(url))
+        # When arguments is "temp_html_file", browser will load content of html file, then delete temp file.
+        # Usually use for render html mail.
+        if arguments == "temp_html_file":
+            with open(url, "r") as html_file:
+                self.buffer_widget.setHtml(html_file.read())
+                if os.path.exists(url):
+                    os.remove(url)
+        else:
+            self.buffer_widget.setUrl(QUrl(url))
+
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url)
         self.buffer_widget.translate_selected_text.connect(self.translate_text)
