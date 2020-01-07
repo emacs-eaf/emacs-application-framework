@@ -962,17 +962,16 @@ of `eaf--buffer-app-name' inside the EAF buffer."
       get-html
     (error "Mail User Agent \"%s\" not supported" mail-user-agent)))
 
-;;;###autoload
 (defun eaf-gnus-get-html ()
   "Retrieve HTML part of the gnus mail"
   (with-current-buffer gnus-original-article-buffer
     (when-let* ((dissect (mm-dissect-buffer t t))
-		(buffer (if (bufferp (car dissect))
-			    (when (eaf--gnus-htmlp dissect)
-			      (car dissect))
-			  (car (cl-find-if #'eaf--gnus-htmlp (cdr dissect))))))
+                (buffer (if (bufferp (car dissect))
+                            (when (eaf--gnus-htmlp dissect)
+                              (car dissect))
+                          (car (cl-find-if #'eaf--gnus-htmlp (cdr dissect))))))
       (with-current-buffer buffer
-	(buffer-string)))))
+        (buffer-string)))))
 
 (defun eaf-mu4e-get-html ()
   "Retrieve HTML part of the mu4e mail"
@@ -981,18 +980,18 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf-notmuch-get-html ()
   "Retrieve HTML part of the notmuch mail"
-  (when-let* ((msg (cond ((eq major-mode 'notmuch-show-mode)
-			  (notmuch-show-get-message-properties))
-			 ((eq major-mode 'notmuch-tree-mode)
-			  (notmuch-tree-get-message-properties))
-			 (t nil)))
-	      (body (plist-get msg :body))
-	      (parts (car body))
-	      (content (plist-get parts :content))
-	      (part (if (listp content)
-			(cl-find-if #'eaf--notmuch-htmlp content)
-		      (when (eaf--notmuch-htmlp parts)
-			parts))))
+  (when-let* ((msg (cond ((derived-mode-p 'notmuch-show-mode)
+                          (notmuch-show-get-message-properties))
+                         ((derived-mode-p 'notmuch-tree-mode)
+                          (notmuch-tree-get-message-properties))
+                         (t nil)))
+              (body (plist-get msg :body))
+              (parts (car body))
+              (content (plist-get parts :content))
+              (part (if (listp content)
+                        (cl-find-if #'eaf--notmuch-htmlp content)
+                      (when (eaf--notmuch-htmlp parts)
+                        parts))))
     (notmuch-get-bodypart-text msg part notmuch-show-process-crypto)))
 
 (defun eaf-open-mail-as-html ()
@@ -1002,10 +1001,8 @@ The value of `mail-user-agent' has to be a KEY of the assoc list `eaf-mua-get-ht
 In that way the corresponding function will be called to retrieve the HTML part of
 the current mail."
   (interactive)
-  (when-let* ((get-html (eaf--get-html-func))
-	      (html (funcall get-html))
-	      (filename (concat (make-temp-name "eaf-mail-") ".html"))
-	      (file (concat (temporary-file-directory) filename)))
+  (when-let* ((html (eaf--get-html-func))
+              (file (concat (temporary-file-directory) (make-temp-name "eaf-mail-") ".html")))
     (with-temp-file file
       (insert html))
     (eaf-open file "browser" "temp_html_file")))
