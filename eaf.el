@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jan  4 21:55:30 2020 (-0500)
+;; Last-Updated: Tue Jan  7 18:41:22 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -950,20 +950,23 @@ of `eaf--buffer-app-name' inside the EAF buffer."
     (other-window +1)))
 
 (defun eaf--gnus-htmlp (part)
+  "Determine whether the gnus mail PART is HTML."
   (when-let ((type (mm-handle-type part)))
     (string= "text/html" (car type))))
 
 (defun eaf--notmuch-htmlp (part)
+  "Determine whether the notmuch mail PART is HTML."
   (when-let ((type (plist-get part :content-type)))
     (string= "text/html" type)))
 
 (defun eaf--get-html-func ()
+  "The function returning a function used to extract HTML of different MUAs."
   (if-let ((get-html (assoc-default mail-user-agent eaf-mua-get-html)))
       get-html
-    (error "Mail User Agent \"%s\" not supported" mail-user-agent)))
+    (error "[EAF] MUA \"%s\" is not supported! See all supported MUAs in `eaf-mua-get-html'" mail-user-agent)))
 
 (defun eaf-gnus-get-html ()
-  "Retrieve HTML part of the gnus mail"
+  "Retrieve HTML part of a gnus mail."
   (with-current-buffer gnus-original-article-buffer
     (when-let* ((dissect (mm-dissect-buffer t t))
                 (buffer (if (bufferp (car dissect))
@@ -974,12 +977,12 @@ of `eaf--buffer-app-name' inside the EAF buffer."
         (buffer-string)))))
 
 (defun eaf-mu4e-get-html ()
-  "Retrieve HTML part of the mu4e mail"
+  "Retrieve HTML part of a mu4e mail."
   (let ((msg mu4e~view-message))
     (mu4e-message-field msg :body-html)))
 
 (defun eaf-notmuch-get-html ()
-  "Retrieve HTML part of the notmuch mail"
+  "Retrieve HTML part of a notmuch mail."
   (when-let* ((msg (cond ((derived-mode-p 'notmuch-show-mode)
                           (notmuch-show-get-message-properties))
                          ((derived-mode-p 'notmuch-tree-mode)
@@ -994,14 +997,16 @@ of `eaf--buffer-app-name' inside the EAF buffer."
                         parts))))
     (notmuch-get-bodypart-text msg part notmuch-show-process-crypto)))
 
+;;;###autoload
 (defun eaf-open-mail-as-html ()
-  "Open the html mail in EAF browser.
+  "Open the html mail in EAF Browser.
 
-The value of `mail-user-agent' has to be a KEY of the assoc list `eaf-mua-get-html'.
-In that way the corresponding function will be called to retrieve the HTML part of
-the current mail."
+The value of `mail-user-agent' must be a KEY of the alist `eaf-mua-get-html'.
+
+In that way the corresponding function will be called to retrieve the HTML
+ part of the current mail."
   (interactive)
-  (when-let* ((html (eaf--get-html-func))
+  (when-let* ((html (funcall (eaf--get-html-func)))
               (file (concat (temporary-file-directory) (make-temp-name "eaf-mail-") ".html")))
     (with-temp-file file
       (insert html))
