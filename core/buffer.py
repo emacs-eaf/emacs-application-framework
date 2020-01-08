@@ -277,11 +277,9 @@ class Buffer(QGraphicsScene):
 
         if event_string in ["TAB", "<backtab>"]:
             text = ""
-
-        if event_string == "<backtab>":
-            modifier = Qt.ShiftModifier
-
-        if event_string.isupper()    :
+            if event_string == "<backtab>":
+                modifier = Qt.ShiftModifier
+        elif event_string.isupper():
             modifier = Qt.ShiftModifier
 
         # print("Press: ", event_string)
