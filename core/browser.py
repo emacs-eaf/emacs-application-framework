@@ -224,9 +224,14 @@ class BrowserView(QWebEngineView):
     def open_link_new_buffer(self):
         self.eval_js(self.get_markers_js);
 
-    def jump_to_link(self, marker, new_buffer = "false"):
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker)).replace("%2", new_buffer);
-        self.execute_js(self.goto_marker_js);
+    def jump_to_link(self, marker, new_buffer="false"):
+        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
+        link = self.web_page.executeJavaScript(self.goto_marker_js)
+        if link != "":
+            if new_buffer == "false":
+                self.setUrl(QUrl(link))
+            else:
+                self.open_url_in_new_tab.emit(link)
         self.cleanup_links()
 
 class BrowserPage(QWebEnginePage):
