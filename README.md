@@ -1,14 +1,8 @@
-# What is Emacs Application Framework?
-Emacs Application Framework (EAF) is an application framework that extend GNU Emacs to an entire new universe of powerful GUI PyQt applications.
+# What is Emacs Application Framework (EAF)?
+EAF extends GNU Emacs to an entire universe of powerful GUI applications.
 
-EAF is also super extensible, developers can develop any PyQt program, and integrate it into Emacs through EAF.
-
-This framework mainly implements three functions:
-1. Integrate PyQt program window into Emacs Frame using Xlib Reparent technology
-2. Listening to EAF buffer's keyboard event flow and controlling the keyboard input of PyQt program via DBus IPC
-3. Created a window compositer to make the PyQt program window adapt Emacs's Window/Buffer design
-
-## Screenshots
+## Applications
+EAF is extensible, you can develop any PyQt program and integrate it into Emacs through EAF.
 
 | Browser                                          | Markdown Previewer                                          |
 | :--------:                                       | :----:                                                      |
@@ -93,36 +87,44 @@ Package info:
 
 
 ## Launch EAF Applications
-| Application Name   | Launch                                                                  |
-| :--------          | :----                                                                   |
-| Browser            | Type 'eaf-browser' RET https://www.google.com                           |
-| PDF Viewer         | Type 'eaf-open' RET pdf filepath                                        |
-| Video Player       | Type 'eaf-open' RET video filepath                                      |
-| Image Viewer       | Type 'eaf-open' RET image filepath                                      |
-| Markdown previewer | Type 'eaf-open' RET markdown filepath                                   |
-| Org file previewer | Type 'eaf-open' RET org filepath                                        |
-| Camera             | Type 'eaf-open-camera'                                                  |
-| Terminal           | Type 'eaf-open-terminal'                                                |
-| File Sender        | Type 'eaf-file-sender-qrcode', or use 'eaf-file-sender-qrcode-in-dired' |
-| File Receiver      | Type 'eaf-file-receiver-qrcode'                                         |
-| Airshare           | Type 'eaf-file-transfer-airshare'                                       |
-| RSS Reader         | Type 'eaf-open-rss-reader'                                              |
-| Demo               | Type 'eaf-open-demo'                                                    |
+| Application Name    | Launch                                                             |
+| :--------           | :----                                                              |
+| Browser             | `M-x eaf-browser` `RET` URL Path                                   |
+| HTML Email Renderer | `M-x eaf-open-mail-as-html` in `gnus`, `mu4e`, `notmuch` HTMl mail |
+| PDF Viewer          | `M-x eaf-open` `RET` PDF file                                      |
+| Video Player        | `M-x eaf-open` `RET` Video File                                    |
+| Image Viewer        | `M-x eaf-open` `RET` Image File                                    |
+| Markdown Previewer  | `M-x eaf-open` `RET` Markdown File                                 |
+| Org Previewer       | `M-x eaf-open` `RET` Org File                                      |
+| Camera              | `M-x eaf-open-camera`                                              |
+| Terminal            | `M-x eaf-open-terminal`                                            |
+| File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`  |
+| File Receiver       | `M-x eaf-file-receiver-qrcode`                                     |
+| Airshare            | `M-x eaf-file-transfer-airshare`                                   |
+| RSS Reader          | `M-x eaf-open-rss-reader`                                          |
+| Demo                | `M-x eaf-open-demo` to verify basic functionality                  |
 
-To run `eaf-open` on the current file under the cursor in `dired`, call `eaf-open-this-from-dired`.
-
-You can also use the command `eaf-google-it` as a shortcut to quickly google `symbol-at-point` or an active region using EAF Browser. Similarly, you can create your own functions if you prefer to use DuckDuckGo or other search engines.
+- To open the file under the cursor in `dired` using EF, use `eaf-open-this-from-dired` instead.
+- To quickly Google something using EAF Browser, use `eaf-google-it`. It defaults to `symbol-at-point` or a marked region. You can create your own function similarly if you prefer to use DuckDuckGo or other search engines.
 
 ```
 NOTE:
 EAF use DBus' session bus, it must run in general user.
-Please don't run EAF with root user, root user just can access DBus's system bus.
+Please don't run EAF with root user, a root user can only access DBus's system bus.
 ```
 
-## Document
-You can check [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) to read document about keybinding, customize, docker, helm, framework and todolist.
+## Wiki
+Please check the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) for documentations on Keybinding, Customization, EAF Structure and TODOLIST.
+
+You can also find helpful config tips to make EAF work with Docker, Helm.
 
 ## FAQ and Support
+
+### How does EAF make this possible?
+EAF implements three major functionalities:
+1. Integrate PyQt program window into Emacs frame using Xlib Reparent technology.
+2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via DBus IPC.
+3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
 ### How about EXWM? What makes EAF special?
 1. EAF gives you control over your program, while satisfying Emacs window design model. [EXWM](https://github.com/ch11ng/exwm) is only a tiling WM, that combines different applications together in an Emacs-like fashion. However, EXWM is unable to split the same application into two different windows while displaying different same application at the same time. For example, EAF is able to display same PDF on two different windows.
@@ -131,38 +133,21 @@ You can check [Wiki](https://github.com/manateelazycat/emacs-application-framewo
 4. EXWM, as a Windows Manager, does its job very well. Therefore, it doesn't have control and doesn't care at all how other program functions. For example, EXWM cannot control keyboard events of other programs. On the other hand, you can configure them in EAF either using existing features (see above) or write code to contribute to this repository.
 5. From a higher point of view, EAF is using Emacs' design principles to extend GUI programs. You have the ability to control good GUI programs using Emacs keybindings. To achieve the ultimate goal: live in Emacs ;)
 
-### Why this awesome framework doesn't works with MacOS or Windows?
+### EAF is (currently) Linux only. Why?
 There are mainly three obstacles:
-1. We don't use MacOS or Windows
-2. This framework need use X11 reparent to stick Qt5 window to emacs frame, but had trouble making X11 to work on MacOS.
-3. Had trouble making dbus/python-dbus work on MacOS High Sierra
-4. Had trouble making Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
+1. None of EAF's core developers use MacOS or Windows
+2. EAF uses X11 Reparent to stick Qt5 window to emacs frame, struggling to make X11 to work on MacOS.
+3. Strugglling to make dbus/python-dbus work on MacOS High Sierra
+4. Strugglling to make Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
 5. If you figure them out, PRs always welcome
 
-### Why not support Wayland?
-EAF use X11 XReparent technology to stick Qt5 window on Emacs buffer area, Wayland doesn't not support XReparent.
+### How about Wayland?
+EAF use X11 XReparent, Wayland doesn't support it as of now.
 
-We recommend our users to use KDE, it's stable enough and supports X11 XReparent technology.
+We recommend to use KDE out of all DEs, it's stable enough and supports X11 XReparent. You will get the best support because we ourselves use it.
 
 ### `[EAF] *eaf* aborted (core dumped)`
-Please check the `*eaf*` buffer, something is wrong on the Python side. Usually some Python dependencies are not installed correctly.
-
-### Github Personal Access Tokens?
-If you use EAF Markdown Previewer, you need the access to a [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token with code:
-
-```Elisp
-(setq eaf-grip-token "yourtokencode")
-```
-
-Otherwise, github will popup "times limit" error because so many people use grip. ;)
-
-### Proxy
-If you can't access most awesome internet services like me, you can configure the proxy settings.
-
-```Elisp
-(setq eaf-http-proxy-host "127.0.0.1")
-(setq eaf-http-proxy-port "1080")
-```
+Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
 
 ### "undefined symbol" error
 If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes, it's a bug of Arch.
@@ -171,6 +156,23 @@ You need use pip install all dependences after you upgrade your Arch system, the
 
 ```Elisp
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser --force-reinstall
+```
+
+### Github Personal Access Tokens?
+If you use EAF Markdown Previewer, you need the access to a [Personal access token](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token, then set token:
+
+```Elisp
+(setq eaf-grip-token "yourtokencode")
+```
+
+Otherwise, github might popup "times limit" error because there are just so many people using grip. ;)
+
+### Proxy
+If you need to use proxy to access internet, you can configure the proxy settings.
+
+```Elisp
+(setq eaf-http-proxy-host "127.0.0.1")
+(setq eaf-http-proxy-port "1080")
 ```
 
 ## Report bug
