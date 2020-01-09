@@ -1,8 +1,8 @@
 # What is Emacs Application Framework (EAF)?
 EAF extends GNU Emacs to an entire universe of powerful GUI applications.
 
-## Applications
-EAF is extensible, you can develop any PyQt program and integrate it into Emacs through EAF.
+## EAF Application Overview
+EAF is extensible, you can develop any PyQt application and integrate it into Emacs.
 
 | Browser                                          | Markdown Previewer                                          |
 | :--------:                                       | :----:                                                      |
@@ -90,8 +90,8 @@ Package info:
 | Application Name    | Launch                                                             |
 | :--------           | :----                                                              |
 | Browser             | `M-x eaf-browser` `RET` URL Path                                   |
-| HTML Email Renderer | `M-x eaf-open-mail-as-html` in `gnus`, `mu4e`, `notmuch` HTMl mail |
-| PDF Viewer          | `M-x eaf-open` `RET` PDF file                                      |
+| HTML Email Renderer | `M-x eaf-open-mail-as-html` in `gnus`, `mu4e`, `notmuch` HTMl Mail |
+| PDF Viewer          | `M-x eaf-open` `RET` PDF File                                      |
 | Video Player        | `M-x eaf-open` `RET` Video File                                    |
 | Image Viewer        | `M-x eaf-open` `RET` Image File                                    |
 | Markdown Previewer  | `M-x eaf-open` `RET` Markdown File                                 |
