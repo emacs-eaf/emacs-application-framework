@@ -343,13 +343,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-mua-get-html
-  '((gnus-user-agent    . eaf-gnus-get-html)
-    (mu4e-user-agent    . eaf-mu4e-get-html)
-    (notmuch-user-agent . eaf-notmuch-get-html))
-  "Association list with mail user agent as a KEY and a function as VALUE used
-to retrieve HTML part of a mail.
-
-The value of `mail-user-agent' has to be a KEY of `eaf-mua-get-html'."
+  '(("^gnus-" . eaf-gnus-get-html)
+    ("^mu4e-" . eaf-mu4e-get-html)
+    ("^notmuch-" . eaf-notmuch-get-html))
+  "An alist regex mapping a MUA `major-mode' to a function to retrieve HTML part of a mail."
   :type 'alist)
 
 (defvar eaf-app-binding-alist
@@ -961,9 +958,11 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf--get-html-func ()
   "The function returning a function used to extract HTML of different MUAs."
-  (if-let ((get-html (assoc-default mail-user-agent eaf-mua-get-html)))
-      get-html
-    (error "[EAF] MUA \"%s\" is not supported! See all supported MUAs in `eaf-mua-get-html'" mail-user-agent)))
+  (catch 'get-html
+    (cl-loop for (regex . func) in eaf-mua-get-html
+             do (when (string-match regex (symbol-name major-mode))
+                  (throw 'get-html func))
+             finally return (error "[EAF] You are either not in a MUA buffer or your MUA is not supported!"))))
 
 (defun eaf-gnus-get-html ()
   "Retrieve HTML part of a gnus mail."
