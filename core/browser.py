@@ -129,12 +129,7 @@ class BrowserView(QWebEngineView):
 
                 modifiers = QApplication.keyboardModifiers()
 
-                if modifiers != Qt.ControlModifier:
-                    # Load url in current tab.
-                    self.setUrl(QUrl(result))
-                else:
-                    # Load url in new tab if user press ctrl modifier.
-                    self.open_url_in_new_tab.emit(result)
+                self.open_url(result, modifiers == Qt.ControlModifier)
 
                 return True
 
@@ -154,6 +149,12 @@ class BrowserView(QWebEngineView):
                 return True
 
         return super(QWebEngineView, self).eventFilter(obj, event)
+
+    def open_url(self, url, new_tab):
+        if new_tab:
+            self.open_url_in_new_tab.emit(url)
+        else:
+            self.setUrl(QUrl(url))
 
     def zoom_in(self):
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
@@ -224,14 +225,11 @@ class BrowserView(QWebEngineView):
     def open_link_new_buffer(self):
         self.eval_js(self.get_markers_js);
 
-    def jump_to_link(self, marker, new_buffer="false"):
+    def jump_to_link(self, marker, new_buffer=False):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
         link = self.web_page.executeJavaScript(self.goto_marker_js)
         if link != "":
-            if new_buffer == "false":
-                self.setUrl(QUrl(link))
-            else:
-                self.open_url_in_new_tab.emit(link)
+            self.open_url(link, new_buffer)
         self.cleanup_links()
 
 class BrowserPage(QWebEnginePage):
@@ -391,7 +389,7 @@ class BrowserBuffer(Buffer):
         elif result_type == "jump_link":
             self.buffer_widget.jump_to_link(str(result_content))
         elif result_type == "jump_link_new_buffer":
-            self.buffer_widget.jump_to_link(str(result_content), "true")
+            self.buffer_widget.jump_to_link(str(result_content), True)
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer":
