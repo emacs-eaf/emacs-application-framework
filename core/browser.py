@@ -26,6 +26,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineC
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.utils import touch
 from core.buffer import Buffer
+from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
 
 MOUSE_BACK_BUTTON = 8
@@ -66,8 +67,34 @@ class BrowserView(QWebEngineView):
         self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
         touch(self.history_log_file_path)
         with open(self.history_log_file_path, "a") as f:
-            f.write(title + " " + self.url().toString() + "\n")
+            filtered_url = self.filter_url(self.url().toString())
+            if title == self.url().toString():
+                f.write(filtered_url + " " + filtered_url + "\n")
+            else:
+                f.write(title + " " + filtered_url + "\n")
 
+        self.remove_duplicate_history()
+
+    def filter_url(self, url):
+        parsed = urlparse(url)
+        qd = parse_qs(parsed.query, keep_blank_values=True)
+        filtered = dict((k, v) for k, v in qd.items()
+                        # Remove google' track parameters.
+                        if not k.startswith("gs_l")
+                        and not k.startswith("ved")
+                        and not k.startswith("uact")
+                        and not k.startswith("ei")
+                        and not k.startswith("newwindow"))
+        return urlunparse([
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            parsed.params,
+            urlencode(filtered, doseq=True), # query string
+            parsed.fragment
+        ])
+
+    def remove_duplicate_history(self):
         lines_seen = set() # holds lines already seen
         with open(self.history_log_file_path, "r") as f:
             lines = f.readlines()
