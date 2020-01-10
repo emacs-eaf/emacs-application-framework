@@ -40,6 +40,7 @@ class BrowserView(QWebEngineView):
         super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
+        self.config_dir = config_dir
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
@@ -49,6 +50,7 @@ class BrowserView(QWebEngineView):
         self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
 
         self.selectionChanged.connect(self.select_text_change)
+        self.titleChanged.connect(self.record_history)
 
         self.load_cookie()
 
@@ -59,6 +61,22 @@ class BrowserView(QWebEngineView):
 
         with open(os.path.join(os.path.dirname(__file__), "js", "goto_marker.js"), "r") as f:
             self.goto_marker_raw = f.read()
+
+    def record_history(self, title):
+        self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
+        touch(self.history_log_file_path)
+        with open(self.history_log_file_path, "a") as f:
+            f.write(title + " " + self.url().toString() + "\n")
+
+        lines_seen = set() # holds lines already seen
+        with open(self.history_log_file_path, "r") as f:
+            lines = f.readlines()
+
+        with open(self.history_log_file_path, "w") as f:
+            for line in lines:
+                if line not in lines_seen: # not a duplicate
+                    f.write(line)
+                    lines_seen.add(line)
 
     def _search_text(self, text, is_backward = False):
         if self.search_term != text:
@@ -368,6 +386,9 @@ class BrowserBuffer(Buffer):
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
         return [self.buffer_widget.focusProxy()]
+
+    def get_history_log_file(self):
+        return self.buffer_widget.history_log_file_path
 
     def scroll(self, scroll_direction, scroll_type):
         if scroll_type == "page":
