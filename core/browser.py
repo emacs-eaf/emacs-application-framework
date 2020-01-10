@@ -81,6 +81,8 @@ class BrowserView(QWebEngineView):
         filtered = dict((k, v) for k, v in qd.items()
                         # Remove google' track parameters.
                         if not k.startswith("gs_l")
+                        and not k.startswith("safe")
+                        and not k.startswith("oq")
                         and not k.startswith("ved")
                         and not k.startswith("uact")
                         and not k.startswith("ei")
