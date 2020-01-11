@@ -171,8 +171,15 @@ Otherwise, github might popup "times limit" error because there are just so many
 If you need to use proxy to access internet, you can configure the proxy settings.
 
 ```Elisp
-(setq eaf-http-proxy-host "127.0.0.1")
-(setq eaf-http-proxy-port "1080")
+(setq eaf-proxy-type "http")
+(setq eaf-proxy-host "127.0.0.1")
+(setq eaf-proxy-port "1080")
+```
+
+If you use Socks5 as local proxy, you can set proxy type with:
+
+```Elisp
+(setq eaf-proxy-type "socks5")
 ```
 
 ## Report bug
