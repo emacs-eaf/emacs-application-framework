@@ -104,7 +104,7 @@ Package info:
 | RSS Reader          | `M-x eaf-open-rss-reader`                                          |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                  |
 
-- To open the file under the cursor in `dired` using EF, use `eaf-open-this-from-dired` instead.
+- To open the file under the cursor in `dired` using EAF, use `eaf-open-this-from-dired` instead.
 - To quickly Google something using EAF Browser, use `eaf-google-it`. It defaults to `symbol-at-point` or a marked region. You can create your own function similarly if you prefer to use DuckDuckGo or other search engines.
 
 ```
@@ -171,8 +171,15 @@ Otherwise, github might popup "times limit" error because there are just so many
 If you need to use proxy to access internet, you can configure the proxy settings.
 
 ```Elisp
-(setq eaf-http-proxy-host "127.0.0.1")
-(setq eaf-http-proxy-port "1080")
+(setq eaf-proxy-type "http")
+(setq eaf-proxy-host "127.0.0.1")
+(setq eaf-proxy-port "1080")
+```
+
+If you use Socks5 as local proxy, you can set proxy type with:
+
+```Elisp
+(setq eaf-proxy-type "socks5")
 ```
 
 ## Report bug
