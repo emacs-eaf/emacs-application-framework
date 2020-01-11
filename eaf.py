@@ -63,7 +63,7 @@ class EAF(dbus.service.Object):
             proxy = QNetworkProxy()
             if proxy_type == "socks5":
                 proxy.setType(QNetworkProxy.Socks5Proxy)
-            else:
+            elif proxy_type == "http":
                 proxy.setType(QNetworkProxy.HttpProxy)
 
             proxy.setHostName(proxy_host)
