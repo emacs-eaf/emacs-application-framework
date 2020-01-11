@@ -470,7 +470,7 @@ For now only EAF browser app is supported."
                  eaf-name
                  eaf-name
                  eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
-                                            (list eaf-http-proxy-host eaf-http-proxy-port (concat user-emacs-directory "eaf")))))
+                                            (list eaf-proxy-host eaf-proxy-port eaf-proxy-type (concat user-emacs-directory "eaf")))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
      eaf-process
