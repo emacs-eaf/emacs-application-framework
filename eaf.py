@@ -46,7 +46,7 @@ class EAF(dbus.service.Object):
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_width, emacs_height, proxy_host, proxy_port, config_dir) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.expanduser(config_dir)
@@ -58,10 +58,14 @@ class EAF(dbus.service.Object):
 
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
-        # Set HTTP proxy.
+        # Set Network proxy.
         if proxy_host != "" and proxy_port != "":
             proxy = QNetworkProxy()
-            proxy.setType(QNetworkProxy.HttpProxy)
+            if proxy_type == "socks5":
+                proxy.setType(QNetworkProxy.Socks5Proxy)
+            else:
+                proxy.setType(QNetworkProxy.HttpProxy)
+
             proxy.setHostName(proxy_host)
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
