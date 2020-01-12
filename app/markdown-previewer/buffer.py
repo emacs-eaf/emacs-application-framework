@@ -29,8 +29,8 @@ import subprocess
 import threading
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, False, QColor(255, 255, 255, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, False, QColor(255, 255, 255, 255))
 
         # Get free port to render markdown.
         self.port = self.get_free_port()

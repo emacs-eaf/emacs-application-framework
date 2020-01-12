@@ -27,8 +27,8 @@ from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments):
-        Buffer.__init__(self, buffer_id, url, arguments, True, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, True, QColor(0, 0, 0, 255))
 
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)

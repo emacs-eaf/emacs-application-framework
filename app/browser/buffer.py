@@ -27,8 +27,8 @@ from core.utils import touch
 import os
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, False, QColor(255, 255, 255, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, False, QColor(255, 255, 255, 255))
 
         self.config_dir = config_dir
 
@@ -48,6 +48,13 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url)
         self.buffer_widget.translate_selected_text.connect(self.translate_text)
+
+        settings = QWebEngineSettings.globalSettings()
+        try:
+            settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
+            settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
+        except Exception:
+            pass
 
     def clear_history(self):
         if os.path.exists(self.history_log_file_path):
@@ -78,11 +85,3 @@ class AppBuffer(BrowserBuffer):
                 if line not in lines_seen: # not a duplicate
                     f.write(line)
                     lines_seen.add(line)
-
-    def update_settings(self):
-        settings = QWebEngineSettings.globalSettings()
-        try:
-            settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
-            settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
-        except Exception:
-            pass

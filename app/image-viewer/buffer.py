@@ -27,8 +27,8 @@ from core.buffer import Buffer
 import os
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments):
-        Buffer.__init__(self, buffer_id, url, arguments, False, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, False, QColor(0, 0, 0, 255))
 
         self.add_widget(ImageViewerWidget(url, QColor(0, 0, 0, 255)))
         self.buffer_widget.render_image.connect(self.change_title)

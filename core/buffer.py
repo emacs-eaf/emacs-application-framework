@@ -157,12 +157,13 @@ class Buffer(QGraphicsScene):
     set_emacs_var = QtCore.pyqtSignal(str, str)
     eval_in_emacs = QtCore.pyqtSignal(str)
 
-    def __init__(self, buffer_id, url, arguments, fit_to_view, background_color):
+    def __init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
 
         self.buffer_id = buffer_id
         self.url = url
         self.arguments = arguments
+        self.emacs_var_dict = emacs_var_dict
         self.fit_to_view = fit_to_view
         self.background_color = background_color
         self.setBackgroundBrush(QBrush(self.background_color))
@@ -173,7 +174,6 @@ class Buffer(QGraphicsScene):
         self.progressbar_progress = 0
         self.progressbar_color = QColor(233, 129, 35, 255)
         self.progressbar_height = 2
-        self.emacs_var_dict = {}
 
     def drawForeground(self, painter, rect):
         if self.draw_progressbar:
@@ -291,9 +291,6 @@ class Buffer(QGraphicsScene):
             QApplication.sendEvent(widget, key_press)
 
         self.fake_key_event_filter(event_string)
-
-    def update_settings(self):
-        pass
 
     def get_url(self):
         return self.url

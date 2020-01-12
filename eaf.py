@@ -134,11 +134,7 @@ class EAF(dbus.service.Object):
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments)
-
-        app_buffer.emacs_var_dict = self.emacs_var_dict
-        app_buffer.update_settings()
-
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict)
         app_buffer.module_path = module_path
 
         # Add buffer to buffer dict.
