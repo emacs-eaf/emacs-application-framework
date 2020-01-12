@@ -104,7 +104,7 @@ Package info:
 | RSS Reader          | `M-x eaf-open-rss-reader`                                          |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                  |
 
-- To open the file under the cursor in `dired` using EF, use `eaf-open-this-from-dired` instead.
+- To open the file under the cursor in `dired` using EAF, use `eaf-open-this-from-dired` instead.
 - To quickly Google something using EAF Browser, use `eaf-google-it`. It defaults to `symbol-at-point` or a marked region. You can create your own function similarly if you prefer to use DuckDuckGo or other search engines.
 
 ```

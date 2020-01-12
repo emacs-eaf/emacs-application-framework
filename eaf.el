@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jan  7 18:41:22 2020 (-0500)
+;; Last-Updated: Sat Jan 11 23:24:19 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -165,9 +165,14 @@ been initialized."
 
 (defvar eaf-grip-token nil)
 
-(defvar eaf-http-proxy-host "")
+(defvar eaf-proxy-host ""
+  "Proxy Host used by EAF Browser.")
 
-(defvar eaf-http-proxy-port "")
+(defvar eaf-proxy-port ""
+  "Proxy Port used by EAF Browser.")
+
+(defvar eaf-proxy-type ""
+  "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\".")
 
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, calling `eaf-open-this-from-dired' determines file types to open.
@@ -214,7 +219,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-w" . "copy_text")
     ("M-f" . "history_forward")
     ("M-b" . "history_backward")
-    ("M-q" . "clean_all_cookie")
+    ("M-q" . "clear_all_cookies")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
@@ -683,8 +688,9 @@ to edit EAF keybindings!" fun fun)))
 
 (defun eaf--monitor-buffer-kill ()
   "Function monitoring when an EAF buffer is killed."
-  (eaf-call "kill_buffer" eaf--buffer-id)
-  (message "[EAF] Killed %s." eaf--buffer-id))
+  (ignore-errors
+    (eaf-call "kill_buffer" eaf--buffer-id)
+    (message "[EAF] Killed %s." eaf--buffer-id)))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed, kill all EAF buffers."
