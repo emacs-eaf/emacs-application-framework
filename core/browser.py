@@ -140,8 +140,8 @@ class BrowserView(QWebEngineView):
         for cookie in self.cookie_storage.load_cookie():
             self.cookie_store.setCookie(cookie)
 
-    def clean_cookie(self):
-        self.cookie_storage.clean_cookie(self.cookie_store)
+    def clear_cookies(self):
+        self.cookie_storage.clear_cookies(self.cookie_store)
 
     def createWindow(self, window_type):
         return self.create_new_browser_window_callback()
@@ -394,7 +394,7 @@ class BrowserCookieStorage:
         raw = cookie.toRawForm()
         self.save_cookie(raw)
 
-    def clean_cookie(self, cookie_store):
+    def clear_cookies(self, cookie_store):
         cookie_store.deleteAllCookies()
 
         open(self.cookie_file, 'w').close()
@@ -457,8 +457,8 @@ class BrowserBuffer(Buffer):
     def history_forward(self):
         self.buffer_widget.forward()
 
-    def clean_all_cookie(self):
-        self.buffer_widget.clean_cookie()
+    def clear_all_cookies(self):
+        self.buffer_widget.clear_cookies()
         self.message_to_emacs.emit("Cleared all cookies.")
 
     def action_quit(self):

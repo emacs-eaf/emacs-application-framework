@@ -214,7 +214,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-w" . "copy_text")
     ("M-f" . "history_forward")
     ("M-b" . "history_backward")
-    ("M-q" . "clean_all_cookie")
+    ("M-q" . "clear_all_cookies")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
