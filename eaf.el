@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jan 11 23:24:19 2020 (-0500)
+;; Last-Updated: Sat Jan 11 23:23:20 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -193,6 +193,7 @@ Otherwise they will be opened normally with `dired-find-file'.")
     (eaf-camera-save-path . "~/Downloads")
     (eaf-browser-enable-plugin . "true")
     (eaf-browser-enable-javascript . "true")
+    (eaf-browser-remember-history . "true")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -220,6 +221,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-f" . "history_forward")
     ("M-b" . "history_backward")
     ("M-q" . "clear_all_cookies")
+    ("C-M-q" . "clear_history")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
