@@ -477,7 +477,9 @@ For now only EAF browser app is supported."
                  eaf-name
                  eaf-name
                  eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
-                                            (list eaf-proxy-host eaf-proxy-port eaf-proxy-type (concat user-emacs-directory "eaf")))))
+                                            (list eaf-proxy-host eaf-proxy-port eaf-proxy-type (concat user-emacs-directory "eaf"))
+                                            (list (string-join (cl-loop for (key . value) in eaf-var-list
+                                                                        collect (format "%s:%s" key value)) ",")))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
      eaf-process
@@ -902,17 +904,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf-read-string (interactive-string)
   "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
   (condition-case nil (read-string interactive-string) (quit nil)))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "get_emacs_var"
- #'eaf--send-var-to-python)
-
-(defun eaf--send-var-to-python ()
-  "Send variables defined in `eaf-var-list' to the Python side."
-  (eaf-call "store_emacs_var"
-            (string-join (cl-loop for (key . value) in eaf-var-list
-                                  collect (format "%s:%s" key value)) ",")))
 
 (defun eaf--open-internal (url app-name arguments)
   (let* ((buffer (eaf--create-buffer url app-name))

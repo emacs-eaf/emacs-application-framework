@@ -46,10 +46,15 @@ class EAF(dbus.service.Object):
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.expanduser(config_dir)
+
+        self.emacs_var_dict = {}
+        for var_pair in var_dict_string.split(","):
+            (var_name, var_value) = var_pair.split(":")
+            self.emacs_var_dict[var_name] = var_value
 
         self.buffer_dict = {}
         self.view_dict = {}
@@ -130,6 +135,10 @@ class EAF(dbus.service.Object):
         # Create application buffer.
         module = importlib.import_module(module_path)
         app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments)
+
+        app_buffer.emacs_var_dict = self.emacs_var_dict
+        app_buffer.update_settings()
+
         app_buffer.module_path = module_path
 
         # Add buffer to buffer dict.
@@ -146,9 +155,6 @@ class EAF(dbus.service.Object):
 
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
-
-        # Get variables defined in emacs.
-        self.get_emacs_var()
 
         # Handle buffer close request.
         app_buffer.close_buffer.connect(self.request_kill_buffer)
@@ -298,14 +304,6 @@ class EAF(dbus.service.Object):
             if buffer.buffer_id == buffer_id:
                 buffer.cancel_input_message(callback_type)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
-    def store_emacs_var(self, var_dict_string):
-        for var_pair in var_dict_string.split(","):
-            (var_name, var_value) = var_pair.split(":")
-            for buffer in list(self.buffer_dict.values()):
-                buffer.emacs_var_dict[var_name] = var_value
-                buffer.update_settings()
-
     @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):
         pass
@@ -348,10 +346,6 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def eval_in_emacs(self, elisp_code_string):
-        pass
-
-    @dbus.service.signal(EAF_DBUS_NAME)
-    def get_emacs_var(self):
         pass
 
     def save_buffer_session(self, buf):
