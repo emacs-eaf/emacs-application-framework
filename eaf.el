@@ -194,6 +194,7 @@ Otherwise they will be opened normally with `dired-find-file'.")
     (eaf-browser-enable-plugin . "true")
     (eaf-browser-enable-javascript . "true")
     (eaf-browser-remember-history . "true")
+    (eaf-browser-default-zoom . "1.0")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
