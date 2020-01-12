@@ -683,8 +683,9 @@ to edit EAF keybindings!" fun fun)))
 
 (defun eaf--monitor-buffer-kill ()
   "Function monitoring when an EAF buffer is killed."
-  (eaf-call "kill_buffer" eaf--buffer-id)
-  (message "[EAF] Killed %s." eaf--buffer-id))
+  (ignore-errors
+    (eaf-call "kill_buffer" eaf--buffer-id)
+    (message "[EAF] Killed %s." eaf--buffer-id)))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed, kill all EAF buffers."
