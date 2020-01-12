@@ -165,15 +165,6 @@ been initialized."
 
 (defvar eaf-grip-token nil)
 
-(defvar eaf-proxy-host ""
-  "Proxy Host used by EAF Browser.")
-
-(defvar eaf-proxy-port ""
-  "Proxy Port used by EAF Browser.")
-
-(defvar eaf-proxy-type ""
-  "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\".")
-
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, calling `eaf-open-this-from-dired' determines file types to open.
 
@@ -356,6 +347,19 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("^notmuch-" . eaf-notmuch-get-html))
   "An alist regex mapping a MUA `major-mode' to a function to retrieve HTML part of a mail."
   :type 'alist)
+
+
+(defcustom eaf-proxy-host ""
+  "Proxy Host used by EAF Browser."
+  :type 'string)
+
+(defcustom eaf-proxy-port ""
+  "Proxy Port used by EAF Browser."
+  :type 'string)
+
+(defcustom eaf-proxy-type ""
+  "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
+  :type 'string)
 
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
