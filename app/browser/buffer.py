@@ -90,5 +90,5 @@ class AppBuffer(BrowserBuffer):
                     f.write(line)
                     lines_seen.add(line)
 
-    def new_blank_tab(self):
+    def new_blank_page(self):
         self.buffer_widget.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
