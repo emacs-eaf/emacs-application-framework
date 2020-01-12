@@ -48,7 +48,10 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url)
         self.buffer_widget.translate_selected_text.connect(self.translate_text)
-        self.buffer_widget.setZoomFactor(float(self.emacs_var_dict["eaf-browser-default-zoom"]))
+
+        # Reset to default zoom when page init or url changed.
+        self.reset_default_zoom()
+        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
 
         settings = QWebEngineSettings.globalSettings()
         try:

@@ -498,3 +498,6 @@ class BrowserBuffer(Buffer):
     def open_link_new_buffer(self):
         self.buffer_widget.open_link_new_buffer()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
+
+    def reset_default_zoom(self):
+        self.buffer_widget.setZoomFactor(float(self.emacs_var_dict["eaf-browser-default-zoom"]))
