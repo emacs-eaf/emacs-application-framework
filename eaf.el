@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jan  7 18:41:22 2020 (-0500)
+;; Last-Updated: Sat Jan 11 23:24:19 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -165,9 +165,14 @@ been initialized."
 
 (defvar eaf-grip-token nil)
 
-(defvar eaf-http-proxy-host "")
+(defvar eaf-proxy-host ""
+  "Proxy Host used by EAF Browser.")
 
-(defvar eaf-http-proxy-port "")
+(defvar eaf-proxy-port ""
+  "Proxy Port used by EAF Browser.")
+
+(defvar eaf-proxy-type ""
+  "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\".")
 
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, calling `eaf-open-this-from-dired' determines file types to open.
