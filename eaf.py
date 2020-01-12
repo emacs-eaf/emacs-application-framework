@@ -52,8 +52,8 @@ class EAF(dbus.service.Object):
         eaf_config_dir = os.path.expanduser(config_dir)
 
         self.emacs_var_dict = {}
-        for var_pair in var_dict_string.split(","):
-            (var_name, var_value) = var_pair.split(":")
+        for var_pair in var_dict_string.split("ᛡ"):
+            (var_name, var_value) = var_pair.split("ᛝ")
             self.emacs_var_dict[var_name] = var_value
 
         self.buffer_dict = {}

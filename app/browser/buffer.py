@@ -89,3 +89,6 @@ class AppBuffer(BrowserBuffer):
                 if line not in lines_seen: # not a duplicate
                     f.write(line)
                     lines_seen.add(line)
+
+    def new_blank_tab(self):
+        self.buffer_widget.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))

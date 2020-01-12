@@ -186,6 +186,7 @@ Otherwise they will be opened normally with `dired-find-file'.")
     (eaf-browser-enable-javascript . "true")
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
+    (eaf-browser-blank-page-url . "https://www.google.com")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -217,6 +218,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
+    ("M-t" . "new_blank_tab")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
@@ -484,7 +486,7 @@ For now only EAF browser app is supported."
                  eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
                                             (list eaf-proxy-host eaf-proxy-port eaf-proxy-type (concat user-emacs-directory "eaf"))
                                             (list (string-join (cl-loop for (key . value) in eaf-var-list
-                                                                        collect (format "%s:%s" key value)) ",")))))
+                                                                        collect (format "%sᛝ%s" key value)) "ᛡ")))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
      eaf-process
@@ -1092,8 +1094,11 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (define-obsolete-function-alias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;###autoload
-(defun eaf-open (url &optional app-name arguments)
+(defun eaf-open (url &optional app-name arguments open-always)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
+
+Default, `eaf-open' will switch to buffer if url is exists.
+`eaf-open' always open new buffer if option OPEN-ALWAYS is non-nil.
 
 When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "F[EAF] Open with EAF App: ")
@@ -1132,8 +1137,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
                     (throw 'found-match-buffer t)))))
             ;; Switch to exists buffer,
             ;; if no match buffer found, call `eaf--open-internal'.
-            (if exists-eaf-buffer
-                (eaf--display-app-buffer app-name exists-eaf-buffer)
+            (if (and exists-eaf-buffer
+                     (not open-always))
+                (progn
+                  (eaf--display-app-buffer app-name exists-eaf-buffer)
+                  (message (concat "[EAF/" app-name "] " "Switch to %s") url))
               (eaf--open-internal url app-name arguments)
               (message (concat "[EAF/" app-name "] " "Opening %s") url)))
         ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
