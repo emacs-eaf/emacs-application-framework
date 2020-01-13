@@ -139,7 +139,7 @@ There are mainly three obstacles:
 2. EAF uses X11 Reparent to stick Qt5 window to emacs frame, struggling to make X11 to work on MacOS.
 3. Strugglling to make dbus/python-dbus work on MacOS High Sierra
 4. Strugglling to make Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
-5. If you figure them out, PRs always welcome
+5. If you've figure them out, PRs are always welcome
 
 ### How about Wayland?
 EAF use X11 XReparent, Wayland doesn't support it as of now.
