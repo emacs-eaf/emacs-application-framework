@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Jan 13 00:14:30 2020 (-0500)
+;; Last-Updated: Mon Jan 13 02:37:04 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -879,34 +879,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
               (rename-buffer title)
               (throw 'find-buffer t))))))))
 
-(defun eaf-browser-goto-history ()
-  "Search and open a link from the EAF Browser history.
-
-This function works best if a fuzzy searh package is enabled."
-  (interactive)
-  (let ((browser-history-file-path
-         (concat user-emacs-directory
-                 (file-name-as-directory "eaf")
-                 (file-name-as-directory "browser")
-                 (file-name-as-directory "history")
-                 "log.txt")))
-    (when (file-exists-p browser-history-file-path)
-      (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
-                                             (split-string (buffer-string) "\n" t)))
-             (history (completing-read "[EAF/browser] Goto History: " history-list))
-             (history-url (progn (string-match "[^\s]+$" history)
-                                 (match-string 0 history))))
-        (when history-url
-          (eaf-open-browser history-url))))))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "open_buffer_url"
- #'eaf-open-buffer-url)
-
-(defun eaf-open-buffer-url (url)
-  (eaf-open-browser url))
-
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "translate_text"
@@ -1038,23 +1010,15 @@ In that way the corresponding function will be called to retrieve the HTML
     (eaf-open file "browser" "temp_html_file")))
 
 ;;;###autoload
-(defun eaf-google-it ()
-  "Google symbol or region string."
-  (interactive)
-  (let* ((current-symbol (if mark-active
-                             (buffer-substring (region-beginning) (region-end))
-                           (symbol-at-point)))
-         (search-string (read-string (format "[EAF/browser] Google (%s): " current-symbol))))
-    (if (string-blank-p search-string)
-        (when current-symbol
-          (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" current-symbol)))
-      (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" search-string)))))
-
-;;;###autoload
 (defun eaf-open-rss-reader ()
   "Open EAF RSS Reader."
   (interactive)
   (eaf-open "RSS Reader" "rss-reader"))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "open_buffer_url"
+ #'eaf-open-browser)
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
@@ -1070,6 +1034,39 @@ In that way the corresponding function will be called to retrieve the HTML
           (setq url (concat "http://" url)))
         (eaf-open url "browser" arguments))
     (message "[EAF/browser] %s is an invalid URL." url)))
+
+;;;###autoload
+(defun eaf-open-browser-with-history ()
+  "A wrapper around `eaf-open-browser' that provides browser history candidates.
+
+This function works best if paired with a fuzzy search package."
+  (interactive)
+  (let ((browser-history-file-path
+         (concat user-emacs-directory
+                 (file-name-as-directory "eaf")
+                 (file-name-as-directory "browser")
+                 (file-name-as-directory "history")
+                 "log.txt")))
+    (when (file-exists-p browser-history-file-path)
+      (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
+                                             (split-string (buffer-string) "\n" t)))
+             (history (completing-read "[EAF/browser] Enter URL or Goto History: " history-list))
+             (history-url (when (string-match "[^\s]+$" history)
+                            (match-string 0 history))))
+        (eaf-open-browser history-url)))))
+
+;;;###autoload
+(defun eaf-google-it ()
+  "Google symbol or region string."
+  (interactive)
+  (let* ((current-symbol (if mark-active
+                             (buffer-substring (region-beginning) (region-end))
+                           (symbol-at-point)))
+         (search-string (read-string (format "[EAF/browser] Google (%s): " current-symbol))))
+    (if (string-blank-p search-string)
+        (when current-symbol
+          (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" current-symbol)))
+      (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" search-string)))))
 
 ;;;###autoload
 (define-obsolete-function-alias 'eaf-open-url #'eaf-open-browser)
