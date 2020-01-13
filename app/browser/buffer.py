@@ -25,6 +25,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from core.browser import BrowserBuffer
 from core.utils import touch
 import os
+import re
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
@@ -43,6 +44,8 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setUrl(QUrl(url))
 
         self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
+
+        self.history_url_pattern = re.compile("(.*?)\s([^\s]+)$")
 
         self.buffer_widget.titleChanged.connect(self.record_history)
         self.buffer_widget.titleChanged.connect(self.change_title)
@@ -67,28 +70,27 @@ class AppBuffer(BrowserBuffer):
         else:
             self.message_to_emacs.emit("There is no browsing history.")
 
-    def record_history(self, title):
+    def record_history(self, new_title):
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
             touch(self.history_log_file_path)
-            with open(self.history_log_file_path, "a") as f:
-                filtered_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
-                if title == self.buffer_widget.url().toString():
-                    f.write(filtered_url + " " + filtered_url + "\n")
-                else:
-                    f.write(title + " " + filtered_url + "\n")
+            with open(self.history_log_file_path, "r") as f:
+                lines = f.readlines()
 
-            self.remove_duplicate_history()
+            new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
+            exists = False
+            with open(self.history_log_file_path, "w") as f:
+                for line in lines:
+                    title = re.match(self.history_url_pattern, line).group(1)
+                    url = re.match(self.history_url_pattern, line).group(2)
 
-    def remove_duplicate_history(self):
-        lines_seen = set() # holds lines already seen
-        with open(self.history_log_file_path, "r") as f:
-            lines = f.readlines()
-
-        with open(self.history_log_file_path, "w") as f:
-            for line in lines:
-                if line not in lines_seen: # not a duplicate
-                    f.write(line)
-                    lines_seen.add(line)
+                    if url == new_url:
+                        exists = True
+                        if new_title != title:
+                            f.write(new_title + " " + new_url + "\n")
+                    else:
+                        f.write(line)
+                if not exists:
+                    f.write(new_title + " " + new_url + "\n")
 
     def new_blank_page(self):
         self.buffer_widget.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))

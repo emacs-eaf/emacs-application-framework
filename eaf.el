@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jan 11 23:23:20 2020 (-0500)
+;; Last-Updated: Mon Jan 13 00:14:30 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -878,6 +878,26 @@ of `eaf--buffer-app-name' inside the EAF buffer."
               (setq-local eaf--bookmark-title title)
               (rename-buffer title)
               (throw 'find-buffer t))))))))
+
+(defun eaf-browser-goto-history ()
+  "Search and open a link from the EAF Browser history.
+
+This function works best if a fuzzy searh package is enabled."
+  (interactive)
+  (let ((browser-history-file-path
+         (concat user-emacs-directory
+                 (file-name-as-directory "eaf")
+                 (file-name-as-directory "browser")
+                 (file-name-as-directory "history")
+                 "log.txt")))
+    (when (file-exists-p browser-history-file-path)
+      (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
+                                             (split-string (buffer-string) "\n" t)))
+             (history (completing-read "[EAF/browser] Goto History: " history-list))
+             (history-url (progn (string-match "[^\s]+$" history)
+                                 (match-string 0 history))))
+        (when history-url
+          (eaf-open-browser history-url))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
