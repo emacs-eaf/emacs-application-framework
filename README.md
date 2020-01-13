@@ -87,25 +87,25 @@ Package info:
 
 
 ## Launch EAF Applications
-| Application Name    | Launch                                                             |
-| :--------           | :----                                                              |
-| Browser             | `M-x eaf-browser` `RET` URL Path                                   |
-| HTML Email Renderer | `M-x eaf-open-mail-as-html` in `gnus`, `mu4e`, `notmuch` HTMl Mail |
-| PDF Viewer          | `M-x eaf-open` `RET` PDF File                                      |
-| Video Player        | `M-x eaf-open` `RET` Video File                                    |
-| Image Viewer        | `M-x eaf-open` `RET` Image File                                    |
-| Markdown Previewer  | `M-x eaf-open` `RET` Markdown File                                 |
-| Org Previewer       | `M-x eaf-open` `RET` Org File                                      |
-| Camera              | `M-x eaf-open-camera`                                              |
-| Terminal            | `M-x eaf-open-terminal`                                            |
-| File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`  |
-| File Receiver       | `M-x eaf-file-receiver-qrcode`                                     |
-| Airshare            | `M-x eaf-file-transfer-airshare`                                   |
-| RSS Reader          | `M-x eaf-open-rss-reader`                                          |
-| Demo                | `M-x eaf-open-demo` to verify basic functionality                  |
+| Application Name    | Launch                                                                 |
+| :--------           | :----                                                                  |
+| Browser             | `M-x eaf-open-browser` Search or Goto URL                              |
+|                     | `M-x eaf-open-browser-with-history` Search or Goto URL or Goto History |
+| HTML Email Renderer | `M-x eaf-open-mail-as-html` in `gnus`, `mu4e`, `notmuch` HTMl Mail     |
+| PDF Viewer          | `M-x eaf-open` PDF File                                                |
+| Video Player        | `M-x eaf-open` Video File                                              |
+| Image Viewer        | `M-x eaf-open` Image File                                              |
+| Markdown Previewer  | `M-x eaf-open` Markdown File                                           |
+| Org Previewer       | `M-x eaf-open` Org File                                                |
+| Camera              | `M-x eaf-open-camera`                                                  |
+| Terminal            | `M-x eaf-open-terminal`                                                |
+| File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`      |
+| File Receiver       | `M-x eaf-file-receiver-qrcode`                                         |
+| Airshare            | `M-x eaf-file-transfer-airshare`                                       |
+| RSS Reader          | `M-x eaf-open-rss-reader`                                              |
+| Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
 - To open the file under the cursor in `dired` using EAF, use `eaf-open-this-from-dired` instead.
-- To quickly Google something using EAF Browser, use `eaf-google-it`. It defaults to `symbol-at-point` or a marked region. You can create your own function similarly if you prefer to use DuckDuckGo or other search engines.
 
 ```
 NOTE:
@@ -139,7 +139,7 @@ There are mainly three obstacles:
 2. EAF uses X11 Reparent to stick Qt5 window to emacs frame, struggling to make X11 to work on MacOS.
 3. Strugglling to make dbus/python-dbus work on MacOS High Sierra
 4. Strugglling to make Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
-5. If you figure them out, PRs always welcome
+5. If you've figure them out, PRs are always welcome
 
 ### How about Wayland?
 EAF use X11 XReparent, Wayland doesn't support it as of now.
