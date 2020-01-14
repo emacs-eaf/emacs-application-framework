@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Jan 13 02:37:04 2020 (-0500)
+;; Last-Updated: Mon Jan 13 18:53:47 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -170,6 +170,11 @@ been initialized."
 
 EAF unrecognizable files will be opened by `dired-find-alternate-file' normally.
 Otherwise they will be opened normally with `dired-find-file'.")
+
+(defvar eaf-browser-default-search-engine 'google
+  "The default search engine used by `eaf-open-broser' and `eaf-search-it'.
+
+EAF currently supports 'google or 'duckduckgo only.")
 
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
@@ -1022,18 +1027,18 @@ In that way the corresponding function will be called to retrieve the HTML
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
-  "Open EAF browser application given a URL and ARGUMENTS."
-  (interactive "M[EAF/browser] Enter URL: ")
+  "Open EAF browser application given a URL and ARGUMENTS.
+
+If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal."
+  (interactive "M[EAF/browser] Search / Enter URL: ")
   ;; Validate URL legitimacy
-  (if (and (not (string-prefix-p "/" url))
-           (not (string-prefix-p "~" url))
-           (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.]\\{1\\}[a-z0-9]+\\)*.+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url))
+  (if (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
       (progn
         (unless (or (string-prefix-p "http://" url)
                     (string-prefix-p "https://" url))
           (setq url (concat "http://" url)))
         (eaf-open url "browser" arguments))
-    (message "[EAF/browser] %s is an invalid URL." url)))
+    (eaf-search-it url)))
 
 ;;;###autoload
 (defun eaf-open-browser-with-history ()
@@ -1050,23 +1055,34 @@ This function works best if paired with a fuzzy search package."
     (when (file-exists-p browser-history-file-path)
       (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
                                              (split-string (buffer-string) "\n" t)))
-             (history (completing-read "[EAF/browser] Enter URL or Goto History: " history-list))
+             (history (completing-read "[EAF/browser] Search / Enter URL / Goto History: " history-list))
              (history-url (when (string-match "[^\s]+$" history)
                             (match-string 0 history))))
         (eaf-open-browser history-url)))))
 
 ;;;###autoload
-(defun eaf-google-it ()
-  "Google symbol or region string."
+(defun eaf-search-it (&optional search-string)
+  "Search SEARCH-STRING using a search engine.
+
+The search engine is specified in `eaf-browser-default-search-engine'.
+
+If called interactively, SEARCH-STRING is defaulted to symbol or region string.
+The user is able to enter a customized SEARCH-STRING."
   (interactive)
-  (let* ((current-symbol (if mark-active
-                             (buffer-substring (region-beginning) (region-end))
-                           (symbol-at-point)))
-         (search-string (read-string (format "[EAF/browser] Google (%s): " current-symbol))))
-    (if (string-blank-p search-string)
-        (when current-symbol
-          (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" current-symbol)))
-      (eaf-open-browser (format "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s" search-string)))))
+  (let ((link (cond ((equal eaf-browser-default-search-engine 'google)
+                     "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
+                    ((equal eaf-browser-default-search-engine 'duckduckgo)
+                     "https://duckduckgo.com/?q=%s")
+                    (t (error "[EAF/browser] `eaf-browser-default-search-engine' is unknown to EAF!"))))
+        (current-symbol (if mark-active
+                            (buffer-substring (region-beginning) (region-end))
+                          (symbol-at-point))))
+    (if search-string
+        (eaf-open-browser (format link search-string))
+      (let ((search-string (read-string (format "[EAF/browser] Search (%s): " current-symbol))))
+        (if (string-blank-p search-string)
+            (eaf-open-browser (format link current-symbol))
+          (eaf-open-browser (format link search-string)))))))
 
 ;;;###autoload
 (define-obsolete-function-alias 'eaf-open-url #'eaf-open-browser)
