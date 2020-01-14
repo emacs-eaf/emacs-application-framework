@@ -71,11 +71,7 @@ class AppBuffer(BrowserBuffer):
             self.message_to_emacs.emit("There is no browsing history.")
 
     def record_history(self, new_title):
-        if self.arguments == "temp_html_file":
-            pass
-        elif new_title == "about:blank":
-            pass
-        elif self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+        if self.arguments != "temp_html_file" and new_title != "about:blank" and self.emacs_var_dict["eaf-browser-remember-history"] == "true":
             touch(self.history_log_file_path)
             with open(self.history_log_file_path, "r") as f:
                 lines = f.readlines()
