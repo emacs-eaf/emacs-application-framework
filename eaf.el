@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Jan 13 19:32:37 2020 (-0500)
+;; Last-Updated: Tue Jan 14 00:36:40 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1030,7 +1030,7 @@ In that way the corresponding function will be called to retrieve the HTML
   "Open EAF browser application given a URL and ARGUMENTS.
 
 If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal."
-  (interactive "M[EAF/browser] Search / Enter URL: ")
+  (interactive "M[EAF/browser] Search || URL: ")
   ;; Validate URL legitimacy
   (if (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
       (progn
@@ -1055,7 +1055,7 @@ This function works best if paired with a fuzzy search package."
     (when (file-exists-p browser-history-file-path)
       (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
                                              (split-string (buffer-string) "\n" t)))
-             (history (completing-read "[EAF/browser] Search / Enter URL / Goto History: " history-list))
+             (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
              (history-url (when (string-match "[^\s]+$" history)
                             (match-string 0 history))))
         (if (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url)
@@ -1135,7 +1135,7 @@ Default, `eaf-open' will switch to buffer if url is exists.
 `eaf-open' always open new buffer if option OPEN-ALWAYS is non-nil.
 
 When called interactively, URL accepts a file that can be opened by EAF."
-  (interactive "F[EAF] Open with EAF App: ")
+  (interactive "F[EAF] EAF Open: ")
   ;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
