@@ -1032,7 +1032,11 @@ In that way the corresponding function will be called to retrieve the HTML
 If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal."
   (interactive "M[EAF/browser] Search || URL: ")
   ;; Validate URL legitimacy
-  (if (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+  (if (or
+       ;; Normal url address.
+       (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+       ;; Localhost url.
+       (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))
       (progn
         (unless (or (string-prefix-p "http://" url)
                     (string-prefix-p "https://" url))
