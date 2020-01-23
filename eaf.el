@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jan 14 00:36:40 2020 (-0500)
+;; Last-Updated: Wed Jan 22 23:11:57 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1062,7 +1062,8 @@ This function works best if paired with a fuzzy search package."
              (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
              (history-url (when (string-match "[^\s]+$" history)
                             (match-string 0 history))))
-        (if (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url)
+        (if (and history-url
+                 (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url))
             (eaf-open-browser history-url)
           (eaf-open-browser history))))))
 
