@@ -31,7 +31,7 @@ EAF is extensible, you can develop any PyQt application and integrate it into Em
 
 | Terminal Emulator                                 | RSS Reader                                          |
 | :--------:                                        | :------:                                            |
-| <img src="./screenshot/terminal.png" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
+| <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
 |                                                   |                                                     |
 
 ## Install EAF
@@ -62,28 +62,32 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
 ```
 
-3. Compile ```qtermwidget-git``` use the following command:
-```Elisp
-git clone https://github.com/lxqt/qtermwidget.git --depth=1
-mkdir build && cd build
-cmake .. -DQTERMWIDGET_BUILD_PYTHON_BINDING=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr
-make
-sudo make install
+3. Install and config ```wetty```:
+```Bash
+# Install wetty
+sudo yarn global add wetty
+
+# Make wetty login with public key
+ssh-keygen
+cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+
+# You need add below in .bashrc if you are Chinese
+echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
 Package info:
 
-| Package         | Package Repo        | Classification | Package Description                                |
-| :--------       | :----               | :------        | :------                                            |
-| dbus-python     | pip3                | Core           | DBus IPC to communicate python with elisp          |
-| python-xlib     | pip3                | Core           | Stick app window into Emacs frame                  |
-| pyqt5           | pip3                | Core           | GUI library required for applications              |
-| pyqtwebengine   | pip3                | Core           | Browser: QtWebEngine for browser application       |
-| pymupdf         | pip3                | Application    | PDF Viewer: Rendering engine                       |
-| grip            | pip3                | Application    | Markdown Previewer: Markdown render server         |
-| qrcode          | pip3                | Application    | File Transfer: Render QR code pointing local files |
-| feedparser      | pip3                | Application    | RSS Reader: feed parser                            |
-| qtermwidget-git | compile from source | Application    | Terminal: QTermWidget, PyQt5 terminal emulator     |
+| Package       | Package Repo | Classification | Package Description                                |
+| :--------     | :----        | :------        | :------                                            |
+| dbus-python   | pip3         | Core           | DBus IPC to communicate python with elisp          |
+| python-xlib   | pip3         | Core           | Stick app window into Emacs frame                  |
+| pyqt5         | pip3         | Core           | GUI library required for applications              |
+| pyqtwebengine | pip3         | Core           | Browser: QtWebEngine for browser application       |
+| pymupdf       | pip3         | Application    | PDF Viewer: Rendering engine                       |
+| grip          | pip3         | Application    | Markdown Previewer: Markdown render server         |
+| qrcode        | pip3         | Application    | File Transfer: Render QR code pointing local files |
+| feedparser    | pip3         | Application    | RSS Reader: feed parser                            |
+| wetty         | yarn         | Application    | Terminal: Share SSH over Web                       |
 
 
 ## Launch EAF Applications

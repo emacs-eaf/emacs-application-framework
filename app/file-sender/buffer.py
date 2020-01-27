@@ -24,11 +24,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from core.buffer import Buffer
+from core.utils import get_free_port
 import http.server as BaseHTTPServer
 import os
 import qrcode
 import shutil
-import socket
 import sys
 import threading
 
@@ -130,24 +130,12 @@ class FileTransferWidget(QWidget):
             print("Network is unreachable")
             sys.exit()
 
-    def get_free_port(self):
-        """
-        Determines a free port using sockets.
-        """
-        free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        free_socket.bind(('0.0.0.0', 0))
-        free_socket.listen(5)
-        port = free_socket.getsockname()[1]
-        free_socket.close()
-
-        return port
-
     def start_server(self, filename):
         global local_file_path
 
         local_file_path = filename
 
-        self.port = self.get_free_port()
+        self.port = get_free_port()
         self.local_ip = self.get_local_ip()
         self.set_address("http://{0}:{1}/{2}".format(self.local_ip, self.port, filename))
 

@@ -19,30 +19,48 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtGui import QColor, QFont
-from core.buffer import Buffer
-import QTermWidget
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QColor
+from core.browser import BrowserBuffer
+from core.utils import PostGui, get_free_port
+import os
+import subprocess
+import signal
+import threading
+import getpass
 
-class AppBuffer(Buffer):
+class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, True, QColor(0, 0, 0, 255))
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, False, QColor(255, 255, 255, 255))
 
-        self.add_widget(QTermWidget.QTermWidget())
+        # Get free port to render markdown.
+        self.port = get_free_port()
+        self.url = url
 
-        self.buffer_widget.setTerminalFont(QFont('Source Code Pro', 14))
-        self.buffer_widget.setColorScheme('Linux')
+        # Start wetty process.
+        self.background_process = subprocess.Popen(
+            "wetty -p {0} --base / --sshuser {1} --sshauth publickey -c bash".format(self.port, getpass.getuser()),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True)
 
-        self.buffer_widget.finished.connect(self.request_close_buffer)
+        # Add timer make load markdown preview link after grip process start finish.
+        threading.Timer(1, self.load_wetty_server).start()
 
-    def get_key_event_widgets(self):
-        return self.buffer_widget.children()
+        self.reset_default_zoom()
 
-    def fake_key_event_filter(self, event_string):
-        if event_string == "RET":
-            self.buffer_widget.sendText("\n")
+    @PostGui()
+    def load_wetty_server(self):
+        self.buffer_widget.setUrl(QUrl("http://localhost:{0}".format(self.port)))
 
-    def zoom_out(self):
-        self.buffer_widget.zoomOut()
+        paths = os.path.split(self.url)
+        if len(paths) > 0:
+            self.change_title(paths[-1])
 
-    def zoom_in(self):
-        self.buffer_widget.zoomIn()
+    def handle_destroy(self):
+        os.killpg(os.getpgid(self.background_process.pid), signal.SIGTERM)
+
+        self.before_destroy_hook.emit()
+
+        if self.buffer_widget is not None:
+            self.buffer_widget.destroy()

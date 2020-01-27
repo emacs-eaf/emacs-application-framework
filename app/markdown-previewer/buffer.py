@@ -22,9 +22,8 @@
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
-from core.utils import PostGui
+from core.utils import PostGui, get_free_port
 import os
-import socket
 import subprocess
 import threading
 
@@ -33,7 +32,7 @@ class AppBuffer(BrowserBuffer):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, False, QColor(255, 255, 255, 255))
 
         # Get free port to render markdown.
-        self.port = self.get_free_port()
+        self.port = get_free_port()
         self.url = url
 
         # Start markdown render process.
@@ -45,18 +44,6 @@ class AppBuffer(BrowserBuffer):
         # Add timer make load markdown preview link after grip process start finish.
         timer = threading.Timer(2, self.load_markdown_server)
         timer.start()
-
-    def get_free_port(self):
-        """
-        Determines a free port using sockets.
-        """
-        free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        free_socket.bind(('0.0.0.0', 0))
-        free_socket.listen(5)
-        port = free_socket.getsockname()[1]
-        free_socket.close()
-
-        return port
 
     @PostGui()
     def load_markdown_server(self):
