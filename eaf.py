@@ -51,13 +51,11 @@ class EAF(dbus.service.Object):
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.expanduser(config_dir)
 
-        self.emacs_var_dict = {}
-        for var_pair in var_dict_string.split("ᛡ"):
-            (var_name, var_value) = var_pair.split("ᛝ")
-            self.emacs_var_dict[var_name] = var_value
-
         self.buffer_dict = {}
         self.view_dict = {}
+        self.emacs_var_dict = {}
+        
+        self.update_emacs_var_dict(var_dict_string)
 
         self.start_finish()
 
@@ -74,6 +72,15 @@ class EAF(dbus.service.Object):
             proxy.setHostName(proxy_host)
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
+    def update_emacs_var_dict(self, var_dict_string):
+        for var_pair in var_dict_string.split("ᛡ"):
+            (var_name, var_value) = var_pair.split("ᛝ")
+            self.emacs_var_dict[var_name] = var_value
+
+        for buffer in list(self.buffer_dict.values()):
+            buffer.emacs_var_dict = self.emacs_var_dict
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ssss", out_signature="s")
     def new_buffer(self, buffer_id, url, app_name, arguments):

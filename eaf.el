@@ -479,6 +479,10 @@ For now only EAF browser app is supported."
 (defun eaf-get-emacs-xid (frame)
   (frame-parameter frame 'window-id))
 
+(defun eaf-serialization-var-list ()
+  (string-join (cl-loop for (key . value) in eaf-var-list
+                        collect (format "%sᛝ%s" key value)) "ᛡ"))
+
 (defun eaf-start-process ()
   "Start EAF process if it hasn't started yet."
   (interactive)
@@ -490,8 +494,7 @@ For now only EAF browser app is supported."
                  eaf-name
                  eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
                                             (list eaf-proxy-host eaf-proxy-port eaf-proxy-type (concat user-emacs-directory "eaf"))
-                                            (list (string-join (cl-loop for (key . value) in eaf-var-list
-                                                                        collect (format "%sᛝ%s" key value)) "ᛡ")))))
+                                            (list (eaf-serialization-var-list)))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
      eaf-process
@@ -749,6 +752,8 @@ to edit EAF keybindings!" fun fun)))
 
 For convenience, use the Lisp macro `eaf-setq' instead."
   (map-put eaf-var-list sym val)
+  ;; Update python side variable dynamically.
+  (eaf-call "update_emacs_var_dict" (eaf-serialization-var-list))
   val)
 
 (defmacro eaf-setq (var val)
