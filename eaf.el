@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Jan 22 23:11:57 2020 (-0500)
+;; Last-Updated: Mon Jan 27 22:28:01 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -752,8 +752,9 @@ to edit EAF keybindings!" fun fun)))
 
 For convenience, use the Lisp macro `eaf-setq' instead."
   (map-put eaf-var-list sym val)
-  ;; Update python side variable dynamically.
-  (eaf-call "update_emacs_var_dict" (eaf-serialization-var-list))
+  (when (process-live-p eaf-process)
+    ;; Update python side variable dynamically.
+    (eaf-call "update_emacs_var_dict" (eaf-serialization-var-list)))
   val)
 
 (defmacro eaf-setq (var val)
