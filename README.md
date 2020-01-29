@@ -186,6 +186,12 @@ If you use Socks5 as local proxy, you can set proxy type with:
 (setq eaf-proxy-type "socks5")
 ```
 
+## EAF in the community
+
+A list of other community packages that use EAF to enhance their graphical experiences in Emacs! Please make a PR to add yourself to the list!
+
+* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+
 ## Report bug
 
 For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
