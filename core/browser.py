@@ -522,7 +522,7 @@ class BrowserBuffer(Buffer):
         if text != None:
             self.buffer_widget.eval_in_emacs.emit('''(eaf-browser-edit-focus-text "{0}" "{1}")'''.format(self.buffer_id, text))
         else:
-            self.buffer_widget.eval_in_emacs.emit('''(message "No active elemenet is focus")''')
+            self.message_to_emacs.emit("No active input element.")
 
     def set_focus_text(self, new_text):
         self.buffer_widget.set_focus_text(new_text)

@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Jan 27 22:28:01 2020 (-0500)
+;; Last-Updated: Thu Jan 30 09:38:24 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -113,8 +113,8 @@ Don't modify this map directly.  To bind keys for all apps use
     (define-key map (kbd "C-c C-c") #'eaf-browser-edit-buffer-confirm)
     map))
 
-(define-derived-mode eaf-browser-edit-mode text-mode "EAF BROWSER EDIT"
-  )
+(define-derived-mode eaf-browser-edit-mode text-mode "EAF/browser EDIT"
+  "The major mode to edit focus text input.")
 
 (defun eaf-describe-bindings ()
   "Like `describe-bindings' for EAF buffers."
@@ -1263,12 +1263,14 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf-open dir "file-receiver"))
 
 (defun eaf-browser-edit-buffer-cancel ()
+  "Cancel EAF Browser focus text input and closes the buffer."
   (interactive)
-  (delete-window)
   (kill-buffer)
-  (message "Cancel edit"))
+  (delete-window)
+  (message "[EAF/browser] Edit cancelled!"))
 
 (defun eaf-browser-edit-buffer-confirm ()
+  "Confirm EAF Browser focus text input and send the text to EAF Browser."
   (interactive)
   (eaf-call "update_browser_focus_text" eaf-browser-buffer-id (buffer-string))
   (kill-buffer)
