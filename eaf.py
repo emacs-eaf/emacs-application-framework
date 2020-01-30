@@ -54,7 +54,7 @@ class EAF(dbus.service.Object):
         self.buffer_dict = {}
         self.view_dict = {}
         self.emacs_var_dict = {}
-        
+
         self.update_emacs_var_dict(var_dict_string)
 
         self.start_finish()
@@ -306,6 +306,12 @@ class EAF(dbus.service.Object):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.cancel_input_message(callback_type)
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def update_browser_focus_text(self, buffer_id, new_text):
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                buffer.set_focus_text(new_text)
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):

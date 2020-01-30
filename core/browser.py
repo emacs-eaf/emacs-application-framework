@@ -62,6 +62,12 @@ class BrowserView(QWebEngineView):
         with open(os.path.join(os.path.dirname(__file__), "js", "goto_marker.js"), "r") as f:
             self.goto_marker_raw = f.read()
 
+        with open(os.path.join(os.path.dirname(__file__), "js", "get_focus_text.js"), "r") as f:
+            self.get_focus_text_js = f.read()
+
+        with open(os.path.join(os.path.dirname(__file__), "js", "set_focus_text.js"), "r") as f:
+            self.set_focus_text_raw = f.read()
+
     def filter_url(self, url):
         parsed = urlparse(url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
@@ -254,6 +260,13 @@ class BrowserView(QWebEngineView):
         if link != "":
             self.open_url(link, new_buffer)
         self.cleanup_links()
+
+    def get_focus_text(self):
+        return self.web_page.executeJavaScript(self.get_focus_text_js)
+
+    def set_focus_text(self, new_text):
+        self.set_focus_text_js = self.set_focus_text_raw.replace("%1", new_text);
+        self.web_page.executeJavaScript(self.set_focus_text_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -502,3 +515,13 @@ class BrowserBuffer(Buffer):
     def reset_default_zoom(self):
         if hasattr(self, "buffer_widget"):
             self.buffer_widget.setZoomFactor(float(self.emacs_var_dict["eaf-browser-default-zoom"]))
+
+    def edit_focus_text(self):
+        text = self.buffer_widget.get_focus_text()
+        if text != None:
+            self.buffer_widget.eval_in_emacs.emit('''(eaf-browser-edit-focus-text "{0}" "{1}")'''.format(self.buffer_id, text))
+        else:
+            self.buffer_widget.eval_in_emacs.emit('''(message "No active elemenet is focus")''')
+
+    def set_focus_text(self, new_text):
+        self.buffer_widget.set_focus_text(new_text)

@@ -106,6 +106,15 @@ Don't modify this map directly.  To bind keys for all apps use
 `eaf-mode-map*' and to bind keys for individual apps use
 `eaf-bind-key'.")
 
+(defvar eaf-browser-edit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-k") #'eaf-browser-edit-buffer-cancel)
+    (define-key map (kbd "C-c C-c") #'eaf-browser-edit-buffer-confirm)
+    map))
+
+(define-derived-mode eaf-browser-edit-mode text-mode "EAF BROWSER EDIT"
+  )
+
 (defun eaf-describe-bindings ()
   "Like `describe-bindings' for EAF buffers."
   (interactive)
@@ -211,6 +220,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-v" . "scroll_up_page")
     ("C-y" . "yank_text")
     ("C-w" . "kill_text")
+    ("M-e" . "edit_focus_text")
     ("M-s" . "open_link")
     ("M-S" . "open_link_new_buffer")
     ("C-/" . "undo_action")
@@ -1251,6 +1261,27 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "D[EAF/file-receiver] Specify Destination: ")
   (eaf-open dir "file-receiver"))
 
+(defun eaf-browser-edit-buffer-cancel ()
+  (interactive)
+  (delete-window)
+  (kill-buffer)
+  (message "Cancel edit"))
+
+(defun eaf-browser-edit-buffer-confirm ()
+  (interactive)
+  (eaf-call "update_browser_focus_text" eaf-browser-buffer-id (buffer-string))
+  (kill-buffer)
+  (delete-window))
+
+(defun eaf-browser-edit-focus-text (browser-buffer-id focus-text)
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-browser-edit-focus-text-%s" browser-buffer-id))))
+    (switch-to-buffer edit-text-buffer)
+    (eaf-browser-edit-mode)
+    (setq-local eaf-browser-buffer-id browser-buffer-id)
+    (insert focus-text)
+    ))
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
   (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
