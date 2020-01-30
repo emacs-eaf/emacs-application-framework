@@ -92,6 +92,7 @@
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
+    (define-key map (kbd "M-/") #'eaf-get-path-or-url)
     (define-key map (vector 'remap #'keyboard-quit) #'eaf-keyboard-quit)
     (define-key map (vector 'remap #'self-insert-command) #'eaf-send-key)
     (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>"))
