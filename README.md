@@ -105,7 +105,7 @@ Package info:
 | Terminal            | `M-x eaf-open-terminal`                                                |
 | File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`      |
 | File Receiver       | `M-x eaf-file-receiver-qrcode`                                         |
-| Airshare            | `M-x eaf-file-transfer-airshare`                                       |
+| Airshare            | `M-x eaf-open-airshare`                                                |
 | RSS Reader          | `M-x eaf-open-rss-reader`                                              |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
