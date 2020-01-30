@@ -174,6 +174,8 @@ class EAF(dbus.service.Object):
         # Add create new window callback if module is browser
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
+
+            app_buffer.get_focus_text.connect(self.browser_edit_focus_text)
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
 
@@ -355,6 +357,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def eval_in_emacs(self, elisp_code_string):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def browser_edit_focus_text(self, buffer_id, focus_text):
         pass
 
     def save_buffer_session(self, buf):

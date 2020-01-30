@@ -391,6 +391,8 @@ class BrowserCookieStorage:
 
 class BrowserBuffer(Buffer):
 
+    get_focus_text = QtCore.pyqtSignal(str, str)
+
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
 
@@ -520,7 +522,7 @@ class BrowserBuffer(Buffer):
     def edit_focus_text(self):
         text = self.buffer_widget.get_focus_text()
         if text != None:
-            self.buffer_widget.eval_in_emacs.emit('''(eaf-browser-edit-focus-text "{0}" "{1}")'''.format(self.buffer_id, text))
+            self.get_focus_text.emit(self.buffer_id, text)
         else:
             self.message_to_emacs.emit("No active input element.")
 
