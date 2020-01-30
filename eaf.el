@@ -93,6 +93,7 @@
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
     (define-key map (kbd "M-/") #'eaf-get-path-or-url)
+    (define-key map (kbd "M-[") #'eaf-share-path-or-url)
     (define-key map (vector 'remap #'keyboard-quit) #'eaf-keyboard-quit)
     (define-key map (vector 'remap #'self-insert-command) #'eaf-send-key)
     (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>"))
@@ -608,6 +609,11 @@ When called interactively, copy to ‘kill-ring’."
           (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
         (eaf-call "call_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
+
+(defun eaf-share-path-or-url ()
+  "Share the current file path or web URL as QRCode."
+  (interactive)
+  (eaf-open (eaf-get-path-or-url) "airshare"))
 
 (defun eaf--make-proxy-function (fun)
   "Define elisp command which can call python function string FUN."
