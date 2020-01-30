@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jan 30 13:29:30 2020 (-0500)
+;; Last-Updated: Thu Jan 30 18:08:40 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1234,16 +1234,18 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-file-transfer-airshare ()
-  "Open EAF Airshare application."
+(defun eaf-open-airshare ()
+  "Open EAF Airshare application, share text string with your phone."
   (interactive)
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "[EAF/airshare] Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "[EAF/airshare] Share Text (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")))
+
+(define-obsolete-function-alias 'eaf-file-transfer-airshare #'eaf-open-airshare)
 
 (defun eaf-file-sender-qrcode (file)
   "Open EAF File Sender application.
