@@ -1276,7 +1276,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (kill-buffer)
   (delete-window))
 
-(defun eaf-browser-edit-focus-text (browser-buffer-id focus-text)
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "browser_edit_focus_text"
+ #'eaf--browser-edit-focus-text)
+
+(defun eaf--browser-edit-focus-text (browser-buffer-id focus-text)
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-browser-edit-focus-text-%s" browser-buffer-id))))
