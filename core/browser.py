@@ -28,6 +28,7 @@ from core.utils import touch
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
+import base64
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
@@ -265,7 +266,7 @@ class BrowserView(QWebEngineView):
         return self.web_page.executeJavaScript(self.get_focus_text_js)
 
     def set_focus_text(self, new_text):
-        self.set_focus_text_js = self.set_focus_text_raw.replace("%1", new_text);
+        self.set_focus_text_js = self.set_focus_text_raw.replace("%1", str(base64.b64encode(new_text.encode("utf-8")), "utf-8"));
         self.web_page.executeJavaScript(self.set_focus_text_js)
 
 class BrowserPage(QWebEnginePage):
