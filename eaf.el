@@ -1272,7 +1272,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf-browser-edit-buffer-confirm ()
   "Confirm EAF Browser focus text input and send the text to EAF Browser."
   (interactive)
-  (eaf-call "update_browser_focus_text" eaf-browser-buffer-id (buffer-string))
+  ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
+  ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
+  (eaf-call "update_browser_focus_text"
+            (replace-regexp-in-string "eaf-browser-edit-focus-text-" "" (buffer-name))
+            (buffer-string))
   (kill-buffer)
   (delete-window))
 
@@ -1287,7 +1291,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-browser-edit-focus-text-%s" browser-buffer-id))))
     (switch-to-buffer edit-text-buffer)
     (eaf-browser-edit-mode)
-    (setq-local eaf-browser-buffer-id browser-buffer-id)
     (insert focus-text)
     ))
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
