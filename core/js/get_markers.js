@@ -35,6 +35,11 @@
                 rect[2] != 0 && rect[3] != 0);
     }
 
+    function isElementOnTop(element, rect){
+        let topElement = document.elementFromPoint(rect[1], rect[0]);
+        return element.isSameNode(topElement) || element.contains(topElement);
+    }
+
     function hasCopy(validRects, rect){
         for(let i = 0; i < validRects.length; i++) {
             let each = validRects[i];
@@ -49,7 +54,9 @@
         let rect;
         for(let i = 0; i < elements.length; i++) {
             rect = getCoords(elements[i]);
-            if(isElementOnScreen(rect) && !hasCopy(validRects, rect)){
+            if(isElementOnScreen(rect)
+               && isElementOnTop(elements[i], rect)
+               && !hasCopy(validRects, rect)){
                 validRects.push(rect);
             }
         }
@@ -87,6 +94,7 @@
     addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
     addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
     addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
+    addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');

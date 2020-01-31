@@ -258,9 +258,12 @@ class BrowserView(QWebEngineView):
     def jump_to_link(self, marker, new_buffer=False):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
         link = self.web_page.executeJavaScript(self.goto_marker_js)
+        self.cleanup_links()
         if link != "":
             self.open_url(link, new_buffer)
-        self.cleanup_links()
+        else:
+            self.message_to_emacs.emit("Marker incorrect, cannot jump to link.")
+
 
     def get_focus_text(self):
         return self.web_page.executeJavaScript(self.get_focus_text_js)
