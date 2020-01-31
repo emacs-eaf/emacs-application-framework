@@ -574,5 +574,29 @@ class BrowserBuffer(Buffer):
         else:
             self.history_forward()
 
+    def insert_or_scroll_left(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.scroll_left()
+
+    def insert_or_scroll_right(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.scroll_right()
+
+    def insert_or_new_blank_page(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.new_blank_page()
+
+    def insert_or_refresh_page(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.refresh_page()
+
     def clear_focus(self):
         self.buffer_widget.clear_focus()
