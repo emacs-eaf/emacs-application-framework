@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jan 30 18:08:40 2020 (-0500)
-;;           By: Mingde (Matthew) Zeng
+;; Last-Updated: 2020-01-31 22:42:53
+;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -246,7 +246,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
     ("r" . "insert_or_refresh_page")
-    ("ESC" . "clear_focus")
+    ("M-u" . "clear_focus")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
