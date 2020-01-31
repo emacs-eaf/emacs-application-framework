@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jan 30 09:38:24 2020 (-0500)
+;; Last-Updated: Thu Jan 30 18:08:40 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1079,16 +1079,17 @@ This function works best if paired with a fuzzy search package."
                  (file-name-as-directory "browser")
                  (file-name-as-directory "history")
                  "log.txt")))
-    (when (file-exists-p browser-history-file-path)
-      (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
-                                             (split-string (buffer-string) "\n" t)))
-             (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
-             (history-url (when (string-match "[^\s]+$" history)
-                            (match-string 0 history))))
-        (if (and history-url
-                 (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url))
-            (eaf-open-browser history-url)
-          (eaf-open-browser history))))))
+    (if (file-exists-p browser-history-file-path)
+        (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
+                                               (split-string (buffer-string) "\n" t)))
+               (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
+               (history-url (when (string-match "[^\s]+$" history)
+                              (match-string 0 history))))
+          (if (and history-url
+                   (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url))
+              (eaf-open-browser history-url)
+            (eaf-open-browser history)))
+      (call-interactively 'eaf-open-browser))))
 
 (defun eaf-search-it (&optional search-string)
   "Search SEARCH-STRING using a search engine.
@@ -1233,16 +1234,18 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-file-transfer-airshare ()
-  "Open EAF Airshare application."
+(defun eaf-open-airshare ()
+  "Open EAF Airshare application, share text string with your phone."
   (interactive)
   (let* ((current-symbol (if (use-region-p)
                              (buffer-substring-no-properties (region-beginning) (region-end))
                            (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "[EAF/airshare] Info (%s): " current-symbol)))))
+         (input-string (string-trim (read-string (format "[EAF/airshare] Share Text (%s): " current-symbol)))))
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")))
+
+(define-obsolete-function-alias 'eaf-file-transfer-airshare #'eaf-open-airshare)
 
 (defun eaf-file-sender-qrcode (file)
   "Open EAF File Sender application.
@@ -1297,6 +1300,13 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-browser-edit-focus-text-%s" browser-buffer-id))))
     (switch-to-buffer edit-text-buffer)
     (eaf-browser-edit-mode)
+    (setq header-line-format
+          (substitute-command-keys
+           (concat
+            "\\<eaf-browser-edit-mode-map>"
+            " EAF/browser EDIT: "
+            "Confirm with `\\[eaf-browser-edit-buffer-confirm]', "
+            "Cancel with `\\[eaf-browser-edit-buffer-cancel]'. ")))
     (insert focus-text)
     ))
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
