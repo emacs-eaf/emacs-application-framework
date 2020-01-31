@@ -1300,6 +1300,13 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-browser-edit-focus-text-%s" browser-buffer-id))))
     (switch-to-buffer edit-text-buffer)
     (eaf-browser-edit-mode)
+    (setq header-line-format
+          (substitute-command-keys
+           (concat
+            "\\<eaf-browser-edit-mode-map>"
+            " EAF/browser EDIT: "
+            "Confirm with `\\[eaf-browser-edit-buffer-confirm]', "
+            "Cancel with `\\[eaf-browser-edit-buffer-cancel]'. ")))
     (insert focus-text)
     ))
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
