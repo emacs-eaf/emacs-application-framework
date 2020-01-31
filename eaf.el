@@ -1067,7 +1067,7 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
   ;; Validate URL legitimacy
   (if (or
        ;; Normal url address.
-       (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+       (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
        ;; Localhost url.
        (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))
       (progn
@@ -1096,7 +1096,7 @@ This function works best if paired with a fuzzy search package."
                (history-url (when (string-match "[^\s]+$" history)
                               (match-string 0 history))))
           (if (and history-url
-                   (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{2,5\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url))
+                   (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url))
               (eaf-open-browser history-url)
             (eaf-open-browser history)))
       (call-interactively 'eaf-open-browser))))
