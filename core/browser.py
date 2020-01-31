@@ -562,5 +562,17 @@ class BrowserBuffer(Buffer):
         else:
             self.open_link_new_buffer()
 
+    def insert_or_history_backward(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.history_backward()
+
+    def insert_or_history_forward(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.history_forward()
+
     def clear_focus(self):
         self.buffer_widget.clear_focus()

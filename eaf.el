@@ -240,6 +240,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("k" . "insert_or_scroll_down")
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
+    ("H" . "insert_or_history_backward")
+    ("L" . "insert_or_history_forward")
     ("ESC" . "clear_focus")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
