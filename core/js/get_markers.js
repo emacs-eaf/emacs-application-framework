@@ -37,7 +37,7 @@
 
     function isElementOnTop(element, rect){
         let topElement = document.elementFromPoint(rect[1], rect[0]);
-        return element.isSameNode(topElement) || element.contains(topElement);
+        return element.isSameNode(topElement) || element.contains(topElement) || topElement.contains(element);
     }
 
     function hasCopy(validRects, rect){
@@ -77,7 +77,7 @@
                 keys.push(k);
                 for (let i = 0; i < keyLen; i++) {
                     let mark = document.createElement('span');
-                    mark.setAttribute('class', 'mark');
+                    mark.setAttribute('class', 'link-mark');
                     mark.setAttribute('style', 'font-size: 12px; font-weight: bold;');
                     mark.textContent = k.charAt(i);
                     markerContainer.children[linkNum].appendChild(mark);
