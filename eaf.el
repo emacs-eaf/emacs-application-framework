@@ -236,6 +236,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
+    ("j" . "insert_or_scroll_up")
+    ("k" . "insert_or_scroll_down")
+    ("f" . "insert_or_open_link")
+    ("F" . "insert_or_open_link_new_buffer")
+    ("ESC" . "clear_focus")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
@@ -624,7 +629,7 @@ When called interactively, copy to ‘kill-ring’."
           (interactive)
           ;; Ensure this is only called from EAF buffer
           (if (derived-mode-p 'eaf-mode)
-              (eaf-call "execute_function" eaf--buffer-id fun)
+              (eaf-call "execute_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
             (user-error "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
@@ -761,8 +766,7 @@ to edit EAF keybindings!" fun fun)))
 (defun eaf-send-key ()
   "Directly send key to EAF Python side."
   (interactive)
-  (with-current-buffer (current-buffer)
-    (eaf-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector)))))
+  (eaf-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.

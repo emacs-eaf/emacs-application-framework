@@ -69,6 +69,9 @@ class BrowserView(QWebEngineView):
         with open(os.path.join(os.path.dirname(__file__), "js", "set_focus_text.js"), "r") as f:
             self.set_focus_text_raw = f.read()
 
+        with open(os.path.join(os.path.dirname(__file__), "js", "clear_focus.js"), "r") as f:
+            self.clear_focus_js = f.read()
+
     def filter_url(self, url):
         parsed = urlparse(url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
@@ -268,6 +271,9 @@ class BrowserView(QWebEngineView):
     def set_focus_text(self, new_text):
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", str(base64.b64encode(new_text.encode("utf-8")), "utf-8"));
         self.web_page.executeJavaScript(self.set_focus_text_js)
+
+    def clear_focus(self):
+        self.web_page.executeJavaScript(self.clear_focus_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -528,3 +534,33 @@ class BrowserBuffer(Buffer):
 
     def set_focus_text(self, new_text):
         self.buffer_widget.set_focus_text(new_text)
+
+    def is_focus(self):
+        return self.buffer_widget.get_focus_text() != None
+
+    def insert_or_scroll_up(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.scroll_up()
+
+    def insert_or_scroll_down(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.scroll_down()
+
+    def insert_or_open_link(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.open_link()
+
+    def insert_or_open_link_new_buffer(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.open_link_new_buffer()
+
+    def clear_focus(self):
+        self.buffer_widget.clear_focus()

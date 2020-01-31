@@ -175,6 +175,8 @@ class Buffer(QGraphicsScene):
         self.progressbar_color = QColor(233, 129, 35, 255)
         self.progressbar_height = 2
 
+        self.current_event_string = ""
+
     def drawForeground(self, painter, rect):
         if self.draw_progressbar:
             painter.setBrush(self.progressbar_color)
