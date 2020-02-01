@@ -236,6 +236,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
+    ("SPC" . "insert_or_scroll_up_page")
     ("j" . "insert_or_scroll_up")
     ("k" . "insert_or_scroll_down")
     ("h" . "insert_or_scroll_left")

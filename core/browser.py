@@ -550,6 +550,12 @@ class BrowserBuffer(Buffer):
         else:
             self.scroll_down()
 
+    def insert_or_scroll_up_page(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.scroll_up_page()
+
     def insert_or_open_link(self):
         if self.is_focus():
             self.fake_key_event(self.current_event_string)
