@@ -646,5 +646,11 @@ class BrowserBuffer(Buffer):
         else:
             self.refresh_page()
 
+    def insert_or_close_buffer(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.request_close_buffer()
+
     def clear_focus(self):
         self.buffer_widget.clear_focus()

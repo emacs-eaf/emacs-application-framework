@@ -250,6 +250,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("t" . "insert_or_new_blank_page")
     ("r" . "insert_or_refresh_page")
     ("g" . "insert_or_scroll_to_begin")
+    ("x" . "insert_or_close_buffer")
     ("G" . "insert_or_scroll_to_bottom")
     ("M-u" . "clear_focus")
     ("<f5>" . "refresh_page"))
