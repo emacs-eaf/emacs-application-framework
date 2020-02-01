@@ -106,7 +106,7 @@
         marker.setAttribute('style', 'left: ' +
                             validRects[i][1] + 'px; top: ' +
                             validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
-                            ' background-color: #ffdb60; border: 1px solid #c38a22; padding-left: 3px; padding-right: 3px;');
+                            ' background-color: #ffdb60; border: 1px solid #c38a22; padding-left: 3px; padding-right: 3px; border-radius: 3px;');
         marker.setAttribute('pointed-link', validRects[i][4]);
 
         markerContainer.appendChild(marker);
