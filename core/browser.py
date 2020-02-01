@@ -658,5 +658,17 @@ class BrowserBuffer(Buffer):
         else:
             self.request_close_buffer()
 
+    def insert_or_goto_left_tab(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.goto_left_tab.emit()
+
+    def insert_or_goto_right_tab(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.goto_right_tab.emit()
+
     def clear_focus(self):
         self.buffer_widget.clear_focus()

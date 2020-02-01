@@ -238,6 +238,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
+    ("J" . "insert_or_goto_left_tab")
+    ("K" . "insert_or_goto_right_tab")
     ("j" . "insert_or_scroll_up")
     ("k" . "insert_or_scroll_down")
     ("h" . "insert_or_scroll_left")
@@ -1089,6 +1091,26 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "open_url_in_background_tab"
  #'eaf-open-browser-in-background)
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "goto_left_tab"
+ #'eaf-goto-left-tab)
+
+(defun eaf-goto-left-tab ()
+  (interactive)
+  (when (ignore-errors (require 'awesome-tab))
+    (awesome-tab-backward-tab)))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "goto_right_tab"
+ #'eaf-goto-right-tab)
+
+(defun eaf-goto-right-tab ()
+  (interactive)
+  (when (ignore-errors (require 'awesome-tab))
+    (awesome-tab-forward-tab)))
 
 ;;;###autoload
 (defun eaf-open-browser-in-background (url &optional arguments)

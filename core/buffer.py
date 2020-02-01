@@ -157,6 +157,8 @@ class Buffer(QGraphicsScene):
     message_to_emacs = QtCore.pyqtSignal(str)
     set_emacs_var = QtCore.pyqtSignal(str, str)
     eval_in_emacs = QtCore.pyqtSignal(str)
+    goto_left_tab = QtCore.pyqtSignal()
+    goto_right_tab = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
