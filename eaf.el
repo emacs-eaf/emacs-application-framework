@@ -195,6 +195,10 @@ EAF currently supports 'google or 'duckduckgo only.")
   "The Python interpreter used to run eaf.py."
   :type 'string)
 
+(defcustom eaf-cache-dir (expand-file-name (locate-user-emacs-file "eaf/"))
+  "Directory where eaf will store files."
+  :type 'directory)
+
 (defcustom eaf-var-list
   '(
     (eaf-camera-save-path . "~/Downloads")
@@ -527,7 +531,7 @@ For now only EAF browser app is supported."
                  eaf-name
                  eaf-name
                  eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
-                                            (list eaf-proxy-host eaf-proxy-port eaf-proxy-type (concat user-emacs-directory "eaf"))
+                                            (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-cache-dir)
                                             (list (eaf-serialization-var-list)))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
@@ -1126,8 +1130,7 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
 This function works best if paired with a fuzzy search package."
   (interactive)
   (let ((browser-history-file-path
-         (concat user-emacs-directory
-                 (file-name-as-directory "eaf")
+         (concat eaf-cache-dir
                  (file-name-as-directory "browser")
                  (file-name-as-directory "history")
                  "log.txt")))
