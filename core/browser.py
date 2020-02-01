@@ -162,7 +162,10 @@ class BrowserView(QWebEngineView):
 
                 modifiers = QApplication.keyboardModifiers()
 
-                self.open_url(result, modifiers == Qt.ControlModifier)
+                if modifiers == Qt.ControlModifier:
+                    self.open_url_new_buffer(result)
+                else:
+                    self.open_url(result)
 
                 return True
 
@@ -183,11 +186,11 @@ class BrowserView(QWebEngineView):
 
         return super(QWebEngineView, self).eventFilter(obj, event)
 
-    def open_url(self, url, new_tab):
-        if new_tab:
-            self.open_url_in_new_tab.emit(url)
-        else:
-            self.setUrl(QUrl(url))
+    def open_url(self, url):
+        self.setUrl(QUrl(url))
+
+    def open_url_new_buffer(self, url):
+        self.open_url_in_new_tab.emit(url)
 
     def zoom_in(self):
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
@@ -258,12 +261,19 @@ class BrowserView(QWebEngineView):
     def open_link_new_buffer(self):
         self.eval_js(self.get_markers_js);
 
-    def jump_to_link(self, marker, new_buffer=False):
+    def jump_to_link(self, marker):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
         link = self.web_page.executeJavaScript(self.goto_marker_js)
         self.cleanup_links()
         if link != "":
-            self.open_url(link, new_buffer)
+            self.open_url(link)
+
+    def jump_to_link_new_buffer(self, marker):
+        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
+        link = self.web_page.executeJavaScript(self.goto_marker_js)
+        self.cleanup_links()
+        if link != "":
+            self.open_url_new_buffer(link)
 
     def get_focus_text(self):
         return self.web_page.executeJavaScript(self.get_focus_text_js)
@@ -434,7 +444,7 @@ class BrowserBuffer(Buffer):
         elif result_type == "jump_link":
             self.buffer_widget.jump_to_link(str(result_content))
         elif result_type == "jump_link_new_buffer":
-            self.buffer_widget.jump_to_link(str(result_content), True)
+            self.buffer_widget.jump_to_link_new_buffer(str(result_content))
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer":
