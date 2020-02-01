@@ -153,8 +153,8 @@ class EAF(dbus.service.Object):
 
         # Monitor buffer signals.
         app_buffer.update_title.connect(self.update_buffer_title)
-        app_buffer.open_url.connect(self.open_buffer_url)
         app_buffer.translate_text.connect(self.translate_text)
+        app_buffer.open_url_in_new_tab.connect(self.open_url_in_new_tab)
 
         # Send message to emacs.
         app_buffer.input_message.connect(self.input_message)
@@ -174,8 +174,8 @@ class EAF(dbus.service.Object):
         # Add create new window callback if module is browser
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
-
             app_buffer.get_focus_text.connect(self.browser_edit_focus_text)
+
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
 
@@ -330,7 +330,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def open_buffer_url(self, url):
+    def open_url_in_new_tab(self, url):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

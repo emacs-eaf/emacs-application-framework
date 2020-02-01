@@ -1058,7 +1058,7 @@ In that way the corresponding function will be called to retrieve the HTML
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "open_buffer_url"
+ "com.lazycat.eaf" "open_url_in_new_tab"
  #'eaf-open-browser)
 
 ;;;###autoload
