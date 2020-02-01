@@ -573,119 +573,89 @@ class BrowserBuffer(Buffer):
     def is_focus(self):
         return self.buffer_widget.get_focus_text() != None
 
+    def insert_or_do(func):
+        def _do(self, *args, **kwargs):
+            if self.is_focus():
+                self.fake_key_event(self.current_event_string)
+            else:
+                func(self, *args, **kwargs)
+        return _do
+
+    @insert_or_do
     def insert_or_scroll_up(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_up()
+        self.scroll_up()
 
+    @insert_or_do
     def insert_or_scroll_down(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_down()
+        self.scroll_down()
 
+    @insert_or_do
     def insert_or_scroll_down_page(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_down_page()
+        self.scroll_down_page()
 
+    @insert_or_do
     def insert_or_scroll_up_page(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_up_page()
+        self.scroll_up_page()
 
+    @insert_or_do
     def insert_or_scroll_to_begin(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_to_begin()
+        self.scroll_to_begin()
 
+    @insert_or_do
     def insert_or_scroll_to_bottom(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_to_bottom()
+        self.scroll_to_bottom()
 
+    @insert_or_do
     def insert_or_open_link(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.open_link()
+        self.open_link()
 
+    @insert_or_do
     def insert_or_open_link_new_buffer(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.open_link_new_buffer()
+        self.open_link_new_buffer()
 
+    @insert_or_do
     def insert_or_open_link_background_buffer(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.open_link_background_buffer()
+        self.open_link_background_buffer()
 
+    @insert_or_do
     def insert_or_history_backward(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.history_backward()
+        self.history_backward()
 
+    @insert_or_do
     def insert_or_history_forward(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.history_forward()
+        self.history_forward()
 
+    @insert_or_do
     def insert_or_scroll_left(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_left()
+        self.scroll_left()
 
+    @insert_or_do
     def insert_or_scroll_right(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.scroll_right()
+        self.scroll_right()
 
+    @insert_or_do
     def insert_or_new_blank_page(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.new_blank_page()
+        self.new_blank_page()
 
+    @insert_or_do
     def insert_or_refresh_page(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.refresh_page()
+        self.refresh_page()
 
+    @insert_or_do
     def insert_or_close_buffer(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.request_close_buffer()
+        self.request_close_buffer()
 
+    @insert_or_do
     def insert_or_goto_left_tab(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.goto_left_tab.emit()
+        self.goto_left_tab.emit()
 
+    @insert_or_do
     def insert_or_goto_right_tab(self):
-        if self.is_focus():
-            self.fake_key_event(self.current_event_string)
-        else:
-            self.goto_right_tab.emit()
+        self.goto_right_tab.emit()
 
+    @insert_or_do
     def select_all_or_input_text(self):
-        if self.is_focus():
-            self.buffer_widget.select_input_text()
-        else:
-            self.buffer_widget.select_all()
+        self.buffer_widget.select_all()
 
     def clear_focus(self):
         self.buffer_widget.clear_focus()
