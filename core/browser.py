@@ -259,7 +259,7 @@ class BrowserView(QWebEngineView):
     def cleanup_links(self):
         self.web_page.executeJavaScript("document.querySelector('.markerContainer').remove();")
 
-    def get_link_makers(self):
+    def get_link_markers(self):
         self.eval_js(self.get_markers_js);
 
     def jump_to_link(self, marker):
@@ -534,15 +534,15 @@ class BrowserBuffer(Buffer):
         return self.buffer_widget.get_url()
 
     def open_link(self):
-        self.buffer_widget.get_link_makers()
+        self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link: ", "jump_link");
 
     def open_link_new_buffer(self):
-        self.buffer_widget.get_link_makers()
+        self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
 
     def open_link_background_buffer(self):
-        self.buffer_widget.get_link_makers()
+        self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
 
     def reset_default_zoom(self):
