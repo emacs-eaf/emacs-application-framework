@@ -73,6 +73,9 @@ class BrowserView(QWebEngineView):
         with open(os.path.join(os.path.dirname(__file__), "js", "clear_focus.js"), "r") as f:
             self.clear_focus_js = f.read()
 
+        with open(os.path.join(os.path.dirname(__file__), "js", "select_input_text.js"), "r") as f:
+            self.select_input_text_js = f.read()
+
     def filter_url(self, url):
         parsed = urlparse(url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
@@ -252,6 +255,14 @@ class BrowserView(QWebEngineView):
 
     def redo_action(self):
         self.triggerPageAction(self.web_page.Redo)
+
+    def select_all(self):
+        # We need window focus before select all text.
+        self.web_page.executeJavaScript("window.focus()")
+        self.triggerPageAction(self.web_page.SelectAll)
+
+    def select_input_text(self):
+        self.web_page.executeJavaScript(self.select_input_text_js)
 
     def get_url(self):
         return self.web_page.executeJavaScript("window.location.href;")
@@ -669,6 +680,12 @@ class BrowserBuffer(Buffer):
             self.fake_key_event(self.current_event_string)
         else:
             self.goto_right_tab.emit()
+
+    def select_all_or_input_text(self):
+        if self.is_focus():
+            self.buffer_widget.select_input_text()
+        else:
+            self.buffer_widget.select_all()
 
     def clear_focus(self):
         self.buffer_widget.clear_focus()

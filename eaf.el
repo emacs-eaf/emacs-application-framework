@@ -256,6 +256,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("g" . "insert_or_scroll_to_begin")
     ("x" . "insert_or_close_buffer")
     ("G" . "insert_or_scroll_to_bottom")
+    ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
