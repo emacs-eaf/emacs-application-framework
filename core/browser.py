@@ -653,9 +653,11 @@ class BrowserBuffer(Buffer):
     def insert_or_goto_right_tab(self):
         self.goto_right_tab.emit()
 
-    @insert_or_do
     def select_all_or_input_text(self):
-        self.buffer_widget.select_all()
+        if self.is_focus():
+            self.buffer_widget.select_input_text()
+        else:
+            self.buffer_widget.select_all()
 
     def clear_focus(self):
         self.buffer_widget.clear_focus()
