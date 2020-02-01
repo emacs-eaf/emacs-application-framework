@@ -1,4 +1,4 @@
-;;; eaf.el --- Emacs application framework  -*- lexical-binding: t; -*-
+;; eaf.el --- Emacs application framework  -*- lexical-binding: t; -*-
 
 ;; Filename: eaf.el
 ;; Description: Emacs application framework
@@ -225,6 +225,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-e" . "edit_focus_text")
     ("M-s" . "open_link")
     ("M-S" . "open_link_new_buffer")
+    ("M-d" . "open_link_background_buffer")
     ("C-/" . "undo_action")
     ("M-_" . "redo_action")
     ("M-w" . "copy_text")
@@ -243,6 +244,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("l" . "insert_or_scroll_right")
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
+    ("d" . "insert_or_open_link_background_buffer")
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
@@ -1079,6 +1081,17 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
           (setq url (concat "http://" url)))
         (eaf-open url "browser" arguments))
     (eaf-search-it url)))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "open_url_in_background_tab"
+ #'eaf-open-browser-in-background)
+
+;;;###autoload
+(defun eaf-open-browser-in-background (url &optional arguments)
+  (let ((save-buffer (current-buffer)))
+    (eaf-open-browser url arguments)
+    (switch-to-buffer save-buffer)))
 
 ;;;###autoload
 (defun eaf-open-browser-with-history ()

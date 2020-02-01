@@ -36,6 +36,7 @@ MOUSE_FORWARD_BUTTON = 16
 class BrowserView(QWebEngineView):
 
     open_url_in_new_tab = QtCore.pyqtSignal(str)
+    open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_selected_text = QtCore.pyqtSignal(str)
 
     def __init__(self, config_dir):
@@ -192,6 +193,9 @@ class BrowserView(QWebEngineView):
     def open_url_new_buffer(self, url):
         self.open_url_in_new_tab.emit(url)
 
+    def open_url_background_buffer(self, url):
+        self.open_url_in_background_tab.emit(url)
+
     def zoom_in(self):
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
 
@@ -255,10 +259,7 @@ class BrowserView(QWebEngineView):
     def cleanup_links(self):
         self.web_page.executeJavaScript("document.querySelector('.markerContainer').remove();")
 
-    def open_link(self):
-        self.eval_js(self.get_markers_js);
-
-    def open_link_new_buffer(self):
+    def get_link_makers(self):
         self.eval_js(self.get_markers_js);
 
     def jump_to_link(self, marker):
@@ -274,6 +275,13 @@ class BrowserView(QWebEngineView):
         self.cleanup_links()
         if link != "":
             self.open_url_new_buffer(link)
+
+    def jump_to_link_background_buffer(self, marker):
+        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
+        link = self.web_page.executeJavaScript(self.goto_marker_js)
+        self.cleanup_links()
+        if link != "":
+            self.open_url_background_buffer(link)
 
     def get_focus_text(self):
         return self.web_page.executeJavaScript(self.get_focus_text_js)
@@ -445,9 +453,11 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.jump_to_link(str(result_content))
         elif result_type == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content))
+        elif result_type == "jump_link_background_buffer":
+            self.buffer_widget.jump_to_link_background_buffer(str(result_content))
 
     def cancel_input_message(self, result_type):
-        if result_type == "jump_link" or result_type == "jump_link_new_buffer":
+        if result_type == "jump_link" or result_type == "jump_link_new_buffer" or result_type == "jump_link_background_buffer":
             self.buffer_widget.cleanup_links()
 
     def search_text_forward(self):
@@ -524,12 +534,16 @@ class BrowserBuffer(Buffer):
         return self.buffer_widget.get_url()
 
     def open_link(self):
-        self.buffer_widget.open_link()
+        self.buffer_widget.get_link_makers()
         self.send_input_message("Open Link: ", "jump_link");
 
     def open_link_new_buffer(self):
-        self.buffer_widget.open_link_new_buffer()
+        self.buffer_widget.get_link_makers()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
+
+    def open_link_background_buffer(self):
+        self.buffer_widget.get_link_makers()
+        self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
 
     def reset_default_zoom(self):
         if hasattr(self, "buffer_widget"):
@@ -589,6 +603,12 @@ class BrowserBuffer(Buffer):
             self.fake_key_event(self.current_event_string)
         else:
             self.open_link_new_buffer()
+
+    def insert_or_open_link_background_buffer(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.open_link_background_buffer()
 
     def insert_or_history_backward(self):
         if self.is_focus():

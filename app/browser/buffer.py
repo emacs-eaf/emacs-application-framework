@@ -51,6 +51,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.titleChanged.connect(self.change_title)
         self.buffer_widget.translate_selected_text.connect(self.translate_text)
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url_in_new_tab)
+        self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
 
         # Reset to default zoom when page init or url changed.
         self.reset_default_zoom()
