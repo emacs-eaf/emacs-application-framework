@@ -62,30 +62,35 @@
         }
     }
 
+    function cAdd1(keyCounter, index, maxDigit){
+        if(keyCounter[index] + 1 == maxDigit){
+            keyCounter[index] = 0;
+            cAdd1(keyCounter, index + 1, maxDigit);
+        } else {
+            keyCounter[index]++;
+        }
+    }
+
     function generateKeys(markerContainer) {
-        let letters = ['A', 'S', 'D', 'F', 'H', 'J', 'K', 'L', 'Q', 'W', 'E', 'O', 'P', 'N', 'M', 'X', 'C' ];
+        let letters = ['A', 'S', 'D', 'F', 'Q', 'W', 'E', 'X', 'C', 'H', 'J', 'K', 'L', 'O', 'P', 'N', 'M'];
         let linkNum = markerContainer.children.length;
         let keyLen = linkNum == 1 ? 1 : Math.ceil(Math.log(linkNum)/Math.log(letters.length));
-        let keys = [];
-        while(linkNum > 0) {
-            let k = "";
-            for (let i = 0; i < keyLen; i++) {
-                k += letters[Math.floor(Math.random()*letters.length)];
+        let keyCounter = [];
+        for(let i = 0; i < keyLen; i++) keyCounter[i] = 0;
+        for(let l = 0; l < linkNum; l++) {
+            let keyStr = '';
+            for(let k = 0; k < keyLen; k++) {
+                let mark = document.createElement('span');
+                mark.setAttribute('class', 'link-mark');
+                mark.setAttribute('style', 'font-size: 12px; font-weight: bold;');
+                let key = letters[keyCounter[k]];
+                mark.textContent = key;
+                markerContainer.children[l].appendChild(mark);
+                keyStr += key;
+                cAdd1(keyCounter, 0, letters.length);
             }
-            if(!keys.includes(k)) {
-                linkNum--;
-                keys.push(k);
-                for (let i = 0; i < keyLen; i++) {
-                    let mark = document.createElement('span');
-                    mark.setAttribute('class', 'link-mark');
-                    mark.setAttribute('style', 'font-size: 12px; font-weight: bold;');
-                    mark.textContent = k.charAt(i);
-                    markerContainer.children[linkNum].appendChild(mark);
-                }
-                markerContainer.children[linkNum].setAttribute('key', k);
-            }
+            markerContainer.children[l].setAttribute('key', keyStr);
         }
-        return keys;
     }
 
     let validRects = [];
@@ -111,5 +116,5 @@
 
         markerContainer.appendChild(marker);
     }
-    return generateKeys(markerContainer);
+    generateKeys(markerContainer);
 })();
