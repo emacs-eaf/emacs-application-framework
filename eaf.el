@@ -646,7 +646,12 @@ When called interactively, copy to ‘kill-ring’."
           (interactive)
           ;; Ensure this is only called from EAF buffer
           (if (derived-mode-p 'eaf-mode)
-              (eaf-call "execute_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
+              (let* ((or-elfun-regex ".+_or_elfun")
+                     (or-elfun-prefix (when (string-match or-elfun-regex fun)
+                                        (match-string 0 fun)))
+                     (pyfun (if or-elfun-prefix or-elfun-prefix fun))
+                     (elfun (if or-elfun-prefix (substring fun (1+ (length or-elfun-prefix))) "")))
+                (eaf-call "execute_function" eaf--buffer-id pyfun (key-description (this-command-keys-vector)) elfun))
             (user-error "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.

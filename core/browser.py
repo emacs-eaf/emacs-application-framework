@@ -681,6 +681,12 @@ class BrowserBuffer(Buffer):
         else:
             self.goto_right_tab.emit()
 
+    def insert_or_elfun(self):
+        if self.is_focus():
+            self.fake_key_event(self.current_event_string)
+        else:
+            self.eval_in_emacs.emit(format("(funcall '{})".format(self.elfun)))
+
     def select_all_or_input_text(self):
         if self.is_focus():
             self.buffer_widget.select_input_text()

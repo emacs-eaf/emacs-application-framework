@@ -268,12 +268,13 @@ class EAF(dbus.service.Object):
             self.buffer_dict[buffer_id].handle_destroy()
             self.buffer_dict.pop(buffer_id, None)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
-    def execute_function(self, buffer_id, function_name, event_string):
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ssss", out_signature="")
+    def execute_function(self, buffer_id, function_name, event_string, elfun=""):
         if buffer_id in self.buffer_dict:
             try:
                 buffer = self.buffer_dict[buffer_id]
                 buffer.current_event_string = event_string
+                buffer.elfun = elfun
                 buffer.execute_function(function_name)
             except AttributeError:
                 import traceback

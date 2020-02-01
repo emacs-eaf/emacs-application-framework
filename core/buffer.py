@@ -179,6 +179,7 @@ class Buffer(QGraphicsScene):
         self.progressbar_height = 2
 
         self.current_event_string = ""
+        self.elfun = ""
 
     def drawForeground(self, painter, rect):
         if self.draw_progressbar:
