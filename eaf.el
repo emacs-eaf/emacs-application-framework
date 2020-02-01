@@ -7,8 +7,8 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: 2020-01-31 22:42:53
-;;           By: Andy Stewart
+;; Last-Updated: Fri Jan 31 23:47:21 2020 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -244,7 +244,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("l" . "insert_or_scroll_right")
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
-    ("d" . "insert_or_open_link_background_buffer")
+    ("D" . "insert_or_open_link_background_buffer")
+    ("d" . "insert_or_scroll_up_page")
+    ("u" . "insert_or_scroll_down_page")
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
