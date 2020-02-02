@@ -458,11 +458,11 @@ class BrowserBuffer(Buffer):
         elif result_type == "search_text_backward":
             self.buffer_widget._search_text(str(result_content), True)
         elif result_type == "jump_link":
-            self.buffer_widget.jump_to_link(str(result_content))
+            self.buffer_widget.jump_to_link(str(result_content).strip())
         elif result_type == "jump_link_new_buffer":
-            self.buffer_widget.jump_to_link_new_buffer(str(result_content))
+            self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
         elif result_type == "jump_link_background_buffer":
-            self.buffer_widget.jump_to_link_background_buffer(str(result_content))
+            self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer" or result_type == "jump_link_background_buffer":
