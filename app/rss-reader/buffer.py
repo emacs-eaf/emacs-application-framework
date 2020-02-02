@@ -302,7 +302,7 @@ class RSSReaderWidget(QWidget):
     def save_feed(self, feed_object, feed_link, feed_title):
         touch(self.feed_file_path)
 
-        article_ids = list(map(lambda post: post.id, feed_object.entries))
+        article_ids = list(map(lambda post: post.id if hasattr(post, 'id')  else post.link, feed_object.entries))
 
         try:
             with open(self.feed_file_path, "r") as feed_file:
@@ -533,7 +533,7 @@ class RSSArticleItemWidget(QWidget):
         super(RSSArticleItemWidget, self).__init__()
 
         self.feed_object = feed_object
-        self.post_id = post.id
+        self.post_id = post.id if hasattr(post, 'id')  else post.link
         self.post_link = post.link
 
         date = ""
