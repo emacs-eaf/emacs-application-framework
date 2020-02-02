@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jan 31 23:47:21 2020 (-0500)
+;; Last-Updated: Sat Feb  1 23:22:12 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -367,7 +367,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-image-extension-list
-  '("jpg" "jpeg" "png" "bmp")
+  '("jpg" "JPG" "jpeg" "png" "bmp")
   "The extension list of image viewer application."
   :type 'cons)
 

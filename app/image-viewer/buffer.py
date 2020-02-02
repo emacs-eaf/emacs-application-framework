@@ -59,7 +59,7 @@ class ImageViewerWidget(QWidget):
 
     def load_next_image(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
-        images = list(filter(lambda f: f.endswith(".jpg") or f.endswith(".jpeg") or f.endswith(".png"), files))
+        images = list(filter(lambda f: f.endswith(".jpg") or f.endswith(".JPG") or f.endswith(".jpeg") or f.endswith(".png"), files))
         if self.image_name in images:
             image_index = images.index(self.image_name)
             if image_index == len(images) - 1:
@@ -71,7 +71,7 @@ class ImageViewerWidget(QWidget):
 
     def load_prev_image(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
-        images = list(filter(lambda f: f.endswith(".jpg") or f.endswith(".jpeg") or f.endswith(".png"), files))
+        images = list(filter(lambda f: f.endswith(".jpg") or f.endswith(".JPG") or f.endswith(".jpeg") or f.endswith(".png"), files))
         if self.image_name in images:
             image_index = images.index(self.image_name)
             if image_index == 0:

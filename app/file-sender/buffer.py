@@ -31,6 +31,7 @@ import qrcode
 import shutil
 import sys
 import threading
+import socket
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
