@@ -58,23 +58,15 @@ class BrowserView(QWebEngineView):
 
         self.search_term = ""
 
-        with open(os.path.join(os.path.dirname(__file__), "js", "get_markers.js"), "r") as f:
-            self.get_markers_js = f.read()
+        self.get_markers_js = self.read_js_content("get_markers.js")
+        self.goto_marker_raw = self.read_js_content("goto_marker.js")
+        self.get_focus_text_js = self.read_js_content("get_focus_text.js")
+        self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
+        self.clear_focus_js = self.read_js_content("clear_focus.js")
+        self.select_input_text_js = self.read_js_content("select_input_text.js")
 
-        with open(os.path.join(os.path.dirname(__file__), "js", "goto_marker.js"), "r") as f:
-            self.goto_marker_raw = f.read()
-
-        with open(os.path.join(os.path.dirname(__file__), "js", "get_focus_text.js"), "r") as f:
-            self.get_focus_text_js = f.read()
-
-        with open(os.path.join(os.path.dirname(__file__), "js", "set_focus_text.js"), "r") as f:
-            self.set_focus_text_raw = f.read()
-
-        with open(os.path.join(os.path.dirname(__file__), "js", "clear_focus.js"), "r") as f:
-            self.clear_focus_js = f.read()
-
-        with open(os.path.join(os.path.dirname(__file__), "js", "select_input_text.js"), "r") as f:
-            self.select_input_text_js = f.read()
+    def read_js_content(self, js_file):
+        return open(os.path.join(os.path.dirname(__file__), "js", js_file), "r").read()
 
     def filter_url(self, url):
         parsed = urlparse(url)
