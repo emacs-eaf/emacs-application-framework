@@ -31,8 +31,7 @@
                 link.click();
             } else {
                 link.focus();
-
-                // We ned move cursor to end of input after focus input.
+                // Move cursor to the end of line after focus.
                 moveCursorToEnd(link);
             }
         } else if((link.nodeName.toLowerCase() === 'button') || // normal button
