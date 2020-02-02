@@ -97,6 +97,7 @@
     addElementToRects(validRects, document.links); // collect links
     addElementToRects(validRects, document.querySelectorAll('input')); // collect inputs
     addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
+    addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect btn buttons
     addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
     addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
     addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea

@@ -11,14 +11,7 @@
     if(match != undefined){
         let selector = match.getAttribute('pointed-link');
         let link = document.querySelector(selector);
-        if(link.href != undefined && link.href != '' && link.getAttribute('href') != ''){
-            return link.href;
-        }else if((link.nodeName.toLowerCase() === 'button') || // normal button
-                 (link.hasAttribute('aria-haspopup')) || // menu button
-                 (link.getAttribute('role') === 'button') || // role="button" buttons
-                 (link.getAttribute('href') === '')){ // special href case that's button
-            link.click();
-        } else if(link.nodeName.toLowerCase() === 'input'){
+        if(link.nodeName.toLowerCase() === 'input'){
             if(link.getAttribute('type') === 'submit'){
                 link.submit();
             } else if(link.getAttribute('type') === 'checkbox'){
@@ -27,8 +20,17 @@
                 link.focus();
                 link.select();
             }
+        } else if((link.nodeName.toLowerCase() === 'button') || // normal button
+                  (link.hasAttribute('aria-haspopup')) || // menu button
+                  (link.getAttribute('role') === 'button') || // role="button" buttons
+                  (link.classList.contains('btn')) || // class="btn" buttons
+                  (link.getAttribute('href') === '')){ // special href case that's button
+            link.click();
         } else if(link.nodeName.toLowerCase() === 'textarea'){
             link.focus();
+            link.select();
+        } else if(link.href != undefined && link.href != '' && link.getAttribute('href') != ''){
+            return link.href;
         }
     }
     return "";
