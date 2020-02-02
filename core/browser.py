@@ -209,7 +209,7 @@ class BrowserView(QWebEngineView):
         self.web_page.runJavaScript(js)
 
     def execute_js(self, js):
-        self.web_page.executeJavaScript(js)
+        return self.web_page.executeJavaScript(js)
 
     def scroll_left(self):
         self.eval_js("window.scrollBy(-50, 0)")
@@ -255,51 +255,51 @@ class BrowserView(QWebEngineView):
 
     def select_all(self):
         # We need window focus before select all text.
-        self.web_page.executeJavaScript("window.focus()")
+        self.execute_js("window.focus()")
         self.triggerPageAction(self.web_page.SelectAll)
 
     def select_input_text(self):
-        self.web_page.executeJavaScript(self.select_input_text_js)
+        self.execute_js(self.select_input_text_js)
 
     def get_url(self):
-        return self.web_page.executeJavaScript("window.location.href;")
+        return self.execute_js("window.location.href;")
 
     def cleanup_links(self):
-        self.web_page.executeJavaScript("document.querySelector('.markerContainer').remove();")
+        self.execute_js("document.querySelector('.markerContainer').remove();")
 
     def get_link_markers(self):
-        self.eval_js(self.get_markers_js);
+        return self.execute_js(self.get_markers_js);
 
     def jump_to_link(self, marker):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.web_page.executeJavaScript(self.goto_marker_js)
+        link = self.execute_js(self.goto_marker_js)
         self.cleanup_links()
         if link != "":
             self.open_url(link)
 
     def jump_to_link_new_buffer(self, marker):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.web_page.executeJavaScript(self.goto_marker_js)
+        link = self.execute_js(self.goto_marker_js)
         self.cleanup_links()
         if link != "":
             self.open_url_new_buffer(link)
 
     def jump_to_link_background_buffer(self, marker):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.web_page.executeJavaScript(self.goto_marker_js)
+        link = self.execute_js(self.goto_marker_js)
         self.cleanup_links()
         if link != "":
             self.open_url_background_buffer(link)
 
     def get_focus_text(self):
-        return self.web_page.executeJavaScript(self.get_focus_text_js)
+        return self.execute_js(self.get_focus_text_js)
 
     def set_focus_text(self, new_text):
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", str(base64.b64encode(new_text.encode("utf-8")), "utf-8"));
-        self.web_page.executeJavaScript(self.set_focus_text_js)
+        self.execute_js(self.set_focus_text_js)
 
     def clear_focus(self):
-        self.web_page.executeJavaScript(self.clear_focus_js)
+        self.execute_js(self.clear_focus_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
