@@ -597,11 +597,11 @@ We need calcuate render allocation to make sure no black border around render co
     (mapcar (lambda (x) (format "%s" x)) (list width height))))
 
 (defun eaf-get-window-allocation (&optional window)
-  (let* ((window-edges (window-inside-pixel-edges window))
+  (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
          (y (nth 1 window-edges))
          (w (- (nth 2 window-edges) x))
-         (h (- (nth 3 window-edges) y)))
+         (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
     (list x y w h)))
 
 (defun eaf--generate-id ()
