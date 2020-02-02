@@ -30,9 +30,9 @@
             } else if(link.getAttribute('type') === 'checkbox'){
                 link.click();
             } else {
-                link.focus();
-                // Move cursor to the end of line after focus.
-                moveCursorToEnd(link);
+                link.focus();   // focus
+                link.click();   // show blink cursor
+                moveCursorToEnd(link); // move cursor to the end of line after focus.
             }
         } else if((link.nodeName.toLowerCase() === 'button') || // normal button
                   (link.hasAttribute('aria-haspopup')) || // menu button
