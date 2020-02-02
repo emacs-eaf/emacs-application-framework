@@ -182,10 +182,21 @@ been initialized."
 EAF unrecognizable files will be opened by `dired-find-alternate-file' normally.
 Otherwise they will be opened normally with `dired-find-file'.")
 
-(defvar eaf-browser-default-search-engine 'google
-  "The default search engine used by `eaf-open-broser' and `eaf-search-it'.
+(defcustom eaf-browser-search-engines `(("google" . "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
+                                        ("duckduckgo" . "https://duckduckgo.com/?q=%s"))
+  "The default search engines offered by EAF.
 
-EAF currently supports 'google or 'duckduckgo only.")
+Each element has the form (NAME . URL).
+ NAME is a search engine name, as a string.
+ URL pecifies the url format for the search engine.
+  It should have a %s as placeholder for search string."
+  :type '(alist :key-type (string :tag "Search engine name")
+                :value-type (string :tag "Search engine url")))
+
+(defvar eaf-browser-default-search-engine "google"
+  "The default search engine used by `eaf-open-browser' and `eaf-search-it'.
+
+It must defined at `eaf-browser-search-engines'.")
 
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
@@ -1148,22 +1159,27 @@ This function works best if paired with a fuzzy search package."
             (eaf-open-browser history)))
       (call-interactively 'eaf-open-browser))))
 
-(defun eaf-search-it (&optional search-string)
-  "Search SEARCH-STRING using a search engine.
-
-The search engine is specified in `eaf-browser-default-search-engine'.
+;;;###autoload
+(defun eaf-search-it (&optional search-string search-engine)
+  "Use SEARCH-ENGINE search SEARCH-STRING.
 
 If called interactively, SEARCH-STRING is defaulted to symbol or region string.
-The user is able to enter a customized SEARCH-STRING."
+The user is able to enter a customized SEARCH-STRING. SEARCH-ENGINE is defaulted
+to `eaf-browser-default-search-engine'. with a prefix arg, the user is able to
+choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
-  (let ((link (cond ((equal eaf-browser-default-search-engine 'google)
-                     "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
-                    ((equal eaf-browser-default-search-engine 'duckduckgo)
-                     "https://duckduckgo.com/?q=%s")
-                    (t (error "[EAF/browser] `eaf-browser-default-search-engine' is unknown to EAF!"))))
-        (current-symbol (if mark-active
-                            (buffer-substring (region-beginning) (region-end))
-                          (symbol-at-point))))
+  (let* ((real-search-engine (if current-prefix-arg
+                                 (let ((all-search-engine (mapcar #'car eaf-browser-search-engines)))
+                                   (completing-read
+		                    (format "Choose search engine (default %s): " eaf-browser-default-search-engine)
+                                    all-search-engine nil t nil nil eaf-browser-default-search-engine))
+                               (or search-engine eaf-browser-default-search-engine)))
+         (link (or (cdr (assoc real-search-engine
+                               eaf-browser-search-engines))
+                   (error (format "[EAF/browser] search engine %s is unknown to EAF!" real-search-engine))))
+         (current-symbol (if mark-active
+                             (buffer-substring (region-beginning) (region-end))
+                           (symbol-at-point))))
     (if search-string
         (eaf-open-browser (format link search-string))
       (let ((search-string (read-string (format "[EAF/browser] Search (%s): " current-symbol))))
