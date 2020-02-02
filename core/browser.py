@@ -542,16 +542,25 @@ class BrowserBuffer(Buffer):
         return self.buffer_widget.get_url()
 
     def open_link(self):
-        self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link: ", "jump_link");
+        linkState = self.buffer_widget.get_link_markers()
+        if linkState == "complete":
+            self.send_input_message("Open Link: ", "jump_link");
+        else:
+            self.message_to_emacs.emit("Webpage is not ready")
 
     def open_link_new_buffer(self):
-        self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
+        linkState = self.buffer_widget.get_link_markers()
+        if linkState == "complete":
+            self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
+        else:
+            self.message_to_emacs.emit("Webpage is not ready")
 
     def open_link_background_buffer(self):
-        self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
+        linkState = self.buffer_widget.get_link_markers()
+        if linkState == "complete":
+            self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
+        else:
+            self.message_to_emacs.emit("Webpage is not ready")
 
     def reset_default_zoom(self):
         if hasattr(self, "buffer_widget"):
