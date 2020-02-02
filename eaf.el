@@ -1093,17 +1093,24 @@ In that way the corresponding function will be called to retrieve the HTML
 If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal."
   (interactive "M[EAF/browser] Search || URL: ")
   ;; Validate URL legitimacy
-  (if (or
-       ;; Normal url address.
-       (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
-       ;; Localhost url.
-       (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))
-      (progn
-        (unless (or (string-prefix-p "http://" url)
-                    (string-prefix-p "https://" url))
-          (setq url (concat "http://" url)))
-        (eaf-open url "browser" arguments))
+  (if (eaf-is-valid-url url)
+      (eaf-open (eaf-wrap-url url) "browser" arguments)
     (eaf-search-it url)))
+
+(defun eaf-is-valid-url (url)
+  "Return non-nil if url is valid."
+  (or
+   ;; Normal url address.
+   (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+   ;; Localhost url.
+   (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url)))
+
+(defun eaf-wrap-url (url)
+  "Wrap url with http:// if url not include scheme."
+  (if (or (string-prefix-p "http://" url)
+          (string-prefix-p "https://" url))
+      url
+    (concat "http://" url)))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1171,7 +1178,7 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (let* ((real-search-engine (if current-prefix-arg
                                  (let ((all-search-engine (mapcar #'car eaf-browser-search-engines)))
                                    (completing-read
-		                    (format "Choose search engine (default %s): " eaf-browser-default-search-engine)
+                                    (format "Choose search engine (default %s): " eaf-browser-default-search-engine)
                                     all-search-engine nil t nil nil eaf-browser-default-search-engine))
                                (or search-engine eaf-browser-default-search-engine)))
          (link (or (cdr (assoc real-search-engine
