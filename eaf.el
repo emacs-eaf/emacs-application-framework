@@ -1098,7 +1098,7 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
     (eaf-search-it url)))
 
 (defun eaf-is-valid-url (url)
-  "Return non-nil if url is valid."
+  "Return non-nil if URL is valid."
   (or
    ;; Normal url address.
    (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
@@ -1106,7 +1106,7 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
    (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url)))
 
 (defun eaf-wrap-url (url)
-  "Wrap url with http:// if url not include scheme."
+  "Wraps URL with prefix http:// if URL does not include it."
   (if (or (string-prefix-p "http://" url)
           (string-prefix-p "https://" url))
       url
@@ -1161,7 +1161,7 @@ This function works best if paired with a fuzzy search package."
                (history-url (when (string-match "[^\s]+$" history)
                               (match-string 0 history))))
           (if (and history-url
-                   (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" history-url))
+                   (eaf-is-valid-url history-url))
               (eaf-open-browser history-url)
             (eaf-open-browser history)))
       (call-interactively 'eaf-open-browser))))
