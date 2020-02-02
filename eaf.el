@@ -918,6 +918,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  "com.lazycat.eaf" "update_buffer_title"
  #'eaf--update-buffer-title)
 
+(defvar eaf-buffer-title-format "%s")
+
 (defun eaf--update-buffer-title (bid title)
   (when (> (length title) 0)
     (catch 'find-buffer
@@ -929,7 +931,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
                    (equal eaf--buffer-id bid))
               (setq mode-name (concat "EAF/" eaf--buffer-app-name))
               (setq-local eaf--bookmark-title title)
-              (rename-buffer title)
+              (rename-buffer (format eaf-buffer-title-format title))
               (throw 'find-buffer t))))))))
 
 (dbus-register-signal
