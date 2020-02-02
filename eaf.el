@@ -599,7 +599,7 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-get-window-allocation (&optional window)
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
-         (y (+ (nth 1 window-edges) (window-header-line-height)))
+         (y (+ (nth 1 window-edges) (window-header-line-height window)))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
     (list x y w h)))
