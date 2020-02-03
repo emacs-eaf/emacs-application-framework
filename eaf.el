@@ -194,10 +194,11 @@ Each element has the form (NAME . URL).
   :type '(alist :key-type (string :tag "Search engine name")
                 :value-type (string :tag "Search engine url")))
 
-(defvar eaf-browser-default-search-engine "google"
+(defcustom eaf-browser-default-search-engine "google"
   "The default search engine used by `eaf-open-browser' and `eaf-search-it'.
 
-It must defined at `eaf-browser-search-engines'.")
+It must defined at `eaf-browser-search-engines'."
+  :type 'string)
 
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
