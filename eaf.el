@@ -92,6 +92,7 @@
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
+    (define-key map (kbd "C-c e") #'eaf-open-external)
     (define-key map (kbd "M-/") #'eaf-get-path-or-url)
     (define-key map (kbd "M-[") #'eaf-share-path-or-url)
     (define-key map (vector 'remap #'keyboard-quit) #'eaf-keyboard-quit)
@@ -515,6 +516,18 @@ For now only EAF browser app is supported."
              (user-error "This command can only be called in an EAF buffer!"))
            ;; create new one for current buffer with provided name
            (bookmark-set cand)))))
+
+(defun eaf-open-external ()
+  "Command to open current path or url with external application."
+  (interactive)
+  (let ((path-or-url (eaf-get-path-or-url)))
+    (cond ((string-equal system-type "windows-nt")
+           (w32-shell-execute "open" path-or-url))
+          ((string-equal system-type "darwin")
+           (concat "open " (shell-quote-argument path-or-url)))
+          ((string-equal system-type "gnu/linux")
+           (let ((process-connection-type nil))
+             (start-process "" nil "xdg-open" path-or-url))))))
 
 (defun eaf-call (method &rest args)
   "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
