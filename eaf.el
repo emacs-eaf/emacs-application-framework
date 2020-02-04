@@ -311,7 +311,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("f" . "jump_to_link")
     ("M-w" . "copy_select")
     ("C-s" . "search_text_forward")
-    ("C-r" . "search_text_backward"))
+    ("C-r" . "search_text_backward")
+    ("h" . "add_annot_highlight"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
