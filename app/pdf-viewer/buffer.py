@@ -164,6 +164,11 @@ class AppBuffer(Buffer):
         else:
             self.message_to_emacs.emit("Cannot copy, you haven't select anything!")
 
+    def add_annot_highlight(self):
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.highlight_select_char_area()
+            self.buffer_widget.cleanup_select()
+
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
 
@@ -299,7 +304,7 @@ class PdfViewerWidget(QWidget):
         # cache page char_dict
         if self.char_dict[index] is None:
             self.char_dict[index] = self.get_page_char_rect_list(index)
-            self.select_area_annot_cache_dict[index] = []
+            self.select_area_annot_cache_dict[index] = None
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
@@ -741,12 +746,16 @@ class PdfViewerWidget(QWidget):
                     string += "\n\n"    # add new line on page end.
         return string
 
+    def highlight_select_char_area(self):
+        for key in self.select_area_annot_cache_dict.keys():
+            self.select_area_annot_cache_dict[key] = None
+        self.document.saveIncr()
+
     def cleanup_select(self):
         self.is_select_mode = False
         self.delete_all_mark_select_area()
         self.page_cache_pixmap_dict.clear()
         self.update()
-
 
     def mark_select_char_area(self):
         page_dict = self.get_select_char_list()
@@ -777,42 +786,32 @@ class PdfViewerWidget(QWidget):
 
             line_rect_list = list(map(lambda x: fitz.Rect(x), line_rect_list))
 
-            # if some annot exists, will skip again add annot.
             page = self.document[page_index]
-            duplicate_rect = []
-            for annot in self.select_area_annot_cache_dict[page_index]:
-                if annot.parent:
-                    if annot.rect in line_rect_list:
-                        duplicate_rect.append(annot.rect)
-                    else:
-                        page.deleteAnnot(annot)
+            old_annot = self.select_area_annot_cache_dict[page_index]
+            if old_annot:
+                page.deleteAnnot(old_annot)
 
-            annot_list = []
-            for rect in line_rect_list:
-                if rect in duplicate_rect:
-                    continue
-                annot = page.addHighlightAnnot(rect.quad)
-                annot.parent = page
-                annot_list.append(annot)
+            quad_list = list(map(lambda x: x.quad, line_rect_list))
+            annot = page.addHighlightAnnot(quad_list)
+            annot.parent = page
 
-            # refresh annot cache
-            self.select_area_annot_cache_dict[page_index] = annot_list + duplicate_rect
+            # refresh annot
+            self.select_area_annot_cache_dict[page_index] = annot
 
         self.page_cache_pixmap_dict.clear()
         self.update()
 
     def delete_all_mark_select_area(self):
         if self.select_area_annot_cache_dict:
-            for page_index, annot_list in self.select_area_annot_cache_dict.items():
+            for page_index, annot in self.select_area_annot_cache_dict.items():
                 page = self.document[page_index]
-                for annot in annot_list:
-                    if annot.parent:
+                if annot and annot.parent:
                         page.deleteAnnot(annot)
+                self.select_area_annot_cache_dict[page_index] = None # restore cache
         self.last_char_page_index = None
         self.last_char_rect_index = None
         self.start_char_page_index = None
         self.start_char_rect_index = None
-        map(lambda x: x.clear(), self.select_area_annot_cache_dict)
 
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
