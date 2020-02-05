@@ -93,32 +93,29 @@
         }
     }
 
-    if(document.readyState === 'complete'){
-        let validRects = [];
-        addElementToRects(validRects, document.links); // collect links
-        addElementToRects(validRects, document.querySelectorAll('input')); // collect inputs
-        addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
-        addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect btn buttons
-        addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
-        addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
-        addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea
+    let validRects = [];
+    addElementToRects(validRects, document.links); // collect links
+    addElementToRects(validRects, document.querySelectorAll('input')); // collect inputs
+    addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
+    addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect btn buttons
+    addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
+    addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
+    addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea
 
-        let body = document.querySelector('body');
-        let markerContainer = document.createElement('div');
-        markerContainer.setAttribute('class', 'markerContainer');
-        body.insertAdjacentElement('afterend', markerContainer);
-        for(let i = 0; i < validRects.length; i++) {
-            let marker = document.createElement('div');
-            marker.setAttribute('class', 'marker');
-            marker.setAttribute('style', 'left: ' +
-                                validRects[i][1] + 'px; top: ' +
-                                validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
-                                ' background-color: #ffdb60; border: 1px solid #c38a22; padding-left: 3px; padding-right: 3px; border-radius: 3px;');
-            marker.setAttribute('pointed-link', validRects[i][4]);
+    let body = document.querySelector('body');
+    let markerContainer = document.createElement('div');
+    markerContainer.setAttribute('class', 'markerContainer');
+    body.insertAdjacentElement('afterend', markerContainer);
+    for(let i = 0; i < validRects.length; i++) {
+        let marker = document.createElement('div');
+        marker.setAttribute('class', 'marker');
+        marker.setAttribute('style', 'left: ' +
+                            validRects[i][1] + 'px; top: ' +
+                            validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
+                            ' background-color: #ffdb60; border: 1px solid #c38a22; padding-left: 3px; padding-right: 3px; border-radius: 3px;');
+        marker.setAttribute('pointed-link', validRects[i][4]);
 
-            markerContainer.appendChild(marker);
-        }
-        generateKeys(markerContainer);
+        markerContainer.appendChild(marker);
     }
-    return document.readyState;
+    generateKeys(markerContainer);
 })();
