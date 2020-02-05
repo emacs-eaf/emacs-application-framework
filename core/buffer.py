@@ -290,7 +290,10 @@ class Buffer(QGraphicsScene):
         # print("Press: ", event_string)
 
         # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
-        key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], modifier, text)
+        try:
+            key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], modifier, text)
+        except:
+            key_press = QKeyEvent(QEvent.KeyPress, Qt.Key_unknown, modifier, text)
 
         for widget in self.get_key_event_widgets():
             QApplication.sendEvent(widget, key_press)
