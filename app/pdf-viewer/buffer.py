@@ -162,7 +162,7 @@ class AppBuffer(Buffer):
             self.message_to_emacs.emit(content)
             self.buffer_widget.cleanup_select()
         else:
-            self.message_to_emacs.emit("Cannot copy, you haven't select anything!")
+            self.message_to_emacs.emit("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
