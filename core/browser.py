@@ -38,6 +38,7 @@ class BrowserView(QWebEngineView):
     open_url_in_new_tab = QtCore.pyqtSignal(str)
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_selected_text = QtCore.pyqtSignal(str)
+    trigger_focus_event = QtCore.pyqtSignal(str)
 
     def __init__(self, config_dir):
         super(QWebEngineView, self).__init__()
@@ -142,6 +143,12 @@ class BrowserView(QWebEngineView):
         return QWebEngineView.event(self, event)
 
     def eventFilter(self, obj, event):
+        # Focus emacs buffer when user click view.
+        if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
+                            QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel]:
+            # Send mouse event to applicatin view.
+            self.trigger_focus_event.emit("{0},{1}".format(event.globalX(), event.globalY()))
+
         if event.type() == QEvent.MouseButtonRelease:
             hit = self.web_page.hitTestContent(event.pos())
             clicked_url = hit.linkUrl()
