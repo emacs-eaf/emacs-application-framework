@@ -27,9 +27,8 @@
             link.focus();
         }else if(link.nodeName.toLowerCase() === 'input' ||
            link.nodeName.toLowerCase() === 'textarea') {
-            if(link.getAttribute('type') === 'submit'){
-                link.submit();
-            } else if(link.getAttribute('type') === 'checkbox'){
+            if((link.getAttribute('type') === 'submit') ||
+               (link.getAttribute('type') === 'checkbox')){
                 link.click();
             } else {
                 link.focus();   // focus
