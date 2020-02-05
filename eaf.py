@@ -178,6 +178,7 @@ class EAF(dbus.service.Object):
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
             app_buffer.get_focus_text.connect(self.browser_edit_focus_text)
+            app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
 
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
