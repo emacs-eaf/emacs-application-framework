@@ -101,6 +101,7 @@
     addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
     addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
     addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea
+    addElementToRects(validRects, document.querySelectorAll('select')); // collect select
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');

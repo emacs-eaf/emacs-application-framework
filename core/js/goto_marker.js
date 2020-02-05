@@ -23,7 +23,9 @@
     if(match != undefined){
         let selector = match.getAttribute('pointed-link');
         let link = document.querySelector(selector);
-        if(link.nodeName.toLowerCase() === 'input' ||
+        if(link.nodeName.toLowerCase() === 'select'){
+            link.focus();
+        }else if(link.nodeName.toLowerCase() === 'input' ||
            link.nodeName.toLowerCase() === 'textarea') {
             if(link.getAttribute('type') === 'submit'){
                 link.submit();
@@ -38,7 +40,8 @@
                   (link.hasAttribute('aria-haspopup')) || // menu button
                   (link.getAttribute('role') === 'button') || // role="button" buttons
                   (link.classList.contains('btn')) || // class="btn" buttons
-                  (link.getAttribute('href') === '')){ // special href case that's button
+                  (link.getAttribute('href') === '') || // special href button
+                  (link.getAttribute('href') === '#')){  // special href # button
             link.click();
         } else if(link.href != undefined && link.href != '' && link.getAttribute('href') != ''){
             return link.href;
