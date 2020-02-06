@@ -1092,6 +1092,7 @@ In that way the corresponding function will be called to retrieve the HTML
  part of the current mail."
   (interactive)
   (when-let* ((html (funcall (eaf--get-html-func)))
+              (default-directory user-emacs-directory) ; force (temporary-file-directory) to ignore remote directory
               (file (concat (temporary-file-directory) (make-temp-name "eaf-mail-") ".html")))
     (with-temp-file file
       (insert html))
