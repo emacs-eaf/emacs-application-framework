@@ -537,12 +537,15 @@ class BrowserBuffer(Buffer):
 
     def copy_text(self):
         self.buffer_widget.copy_text()
+        self.message_to_emacs.emit("Copy selected text.")
 
     def yank_text(self):
         self.buffer_widget.yank_text()
+        self.message_to_emacs.emit("Yank text.")
 
     def kill_text(self):
         self.buffer_widget.kill_text()
+        self.message_to_emacs.emit("Kill text.")
 
     def undo_action(self):
         self.buffer_widget.undo_action()
