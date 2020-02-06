@@ -275,6 +275,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("G" . "insert_or_scroll_to_bottom")
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
+    ("M-i" . "eval_js_file")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
@@ -974,16 +975,21 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  "com.lazycat.eaf" "input_message"
  #'eaf--input-message)
 
-(defun eaf--input-message (input-buffer-id interactive-string callback-type)
+(defun eaf--input-message (input-buffer-id interactive-string callback-type interactive_type)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
-  (let* ((input-message (eaf-read-string (concat "[EAF/" eaf--buffer-app-name "] " interactive-string))))
+  (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive_type)))
     (if input-message
         (eaf-call "handle_input_message" input-buffer-id callback-type input-message)
       (eaf-call "cancel_input_message" input-buffer-id callback-type))))
 
-(defun eaf-read-string (interactive-string)
+(defun eaf-read-input (interactive-string interactive_type)
   "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
-  (condition-case nil (read-string interactive-string) (quit nil)))
+  (condition-case nil
+      (cond ((string-equal interactive_type "string")
+             (read-string interactive-string))
+            ((string-equal interactive_type "file")
+             (expand-file-name (read-file-name interactive-string))))
+    (quit nil)))
 
 (defun eaf--open-internal (url app-name arguments)
   (let* ((buffer (eaf--create-buffer url app-name))

@@ -354,7 +354,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def input_message(self, buffer_id, message, callback_type):
+    def input_message(self, buffer_id, message, callback_type, input_type):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

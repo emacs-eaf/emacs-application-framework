@@ -215,6 +215,9 @@ class BrowserView(QWebEngineView):
     def eval_js(self, js):
         self.web_page.runJavaScript(js)
 
+    def eval_js_file(self, js_file):
+        self.eval_js(self.read_js_content(js_file))
+
     def execute_js(self, js):
         return self.web_page.executeJavaScript(js)
 
@@ -470,6 +473,8 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
         elif result_type == "jump_link_background_buffer":
             self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
+        elif result_type == "eval_js_file":
+            self.buffer_widget.eval_js_file(str(result_content))
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer" or result_type == "jump_link_background_buffer":
@@ -665,3 +670,6 @@ class BrowserBuffer(Buffer):
 
     def clear_focus(self):
         self.buffer_widget.clear_focus()
+
+    def eval_js_file(self):
+        self.send_input_message("Eval JS: ", "eval_js_file", "file")
