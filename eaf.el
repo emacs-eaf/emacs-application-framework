@@ -220,6 +220,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
     (eaf-browser-blank-page-url . "https://www.google.com")
+    (eaf-browser-dark-mode . "false")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 

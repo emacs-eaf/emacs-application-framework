@@ -65,6 +65,7 @@ class BrowserView(QWebEngineView):
         self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
+        self.dark_mode_js = self.read_js_content("dark_mode.js")
 
     def read_js_content(self, js_file):
         return open(os.path.join(os.path.dirname(__file__), "js", js_file), "r").read()
@@ -310,6 +311,9 @@ class BrowserView(QWebEngineView):
 
     def clear_focus(self):
         self.execute_js(self.clear_focus_js)
+
+    def dark_mode(self):
+        self.execute_js(self.dark_mode_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -676,3 +680,6 @@ class BrowserBuffer(Buffer):
 
     def eval_js_file(self):
         self.send_input_message("Eval JS: ", "eval_js_file", "file")
+
+    def dark_mode(self):
+        self.buffer_widget.dark_mode()

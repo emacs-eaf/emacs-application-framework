@@ -64,6 +64,15 @@ class AppBuffer(BrowserBuffer):
         except Exception:
             pass
 
+        self.buffer_widget.loadFinished.connect(self.adjust_dark_mode)
+
+    def adjust_dark_mode(self):
+        try:
+            if self.emacs_var_dict["eaf-browser-dark-mode"] == "true":
+                self.dark_mode()
+        except Exception:
+            pass
+
     def clear_history(self):
         if os.path.exists(self.history_log_file_path):
             os.remove(self.history_log_file_path)
