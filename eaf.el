@@ -1121,11 +1121,15 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
 
 (defun eaf-is-valid-url (url)
   "Return non-nil if URL is valid."
-  (or
-   ;; Normal url address.
-   (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
-   ;; Localhost url.
-   (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url)))
+  (and
+   ;; URL should not include blank char.
+   (< (length (split-string url)) 2)
+   ;; Use regexp matching URL.
+   (or
+    ;; Normal url address.
+    (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+    ;; Localhost url.
+    (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))))
 
 (defun eaf-wrap-url (url)
   "Wraps URL with prefix http:// if URL does not include it."
