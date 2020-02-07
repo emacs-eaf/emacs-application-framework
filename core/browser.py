@@ -22,7 +22,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtNetwork import QNetworkCookie
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.utils import touch
 from core.buffer import Buffer
@@ -443,6 +443,10 @@ class BrowserBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
 
         self.add_widget(BrowserView(config_dir))
+
+        # Set User Agent with Firefox's one to make EAF browser can login in Google account.
+        self.profile = QWebEngineProfile(self.buffer_widget)
+        self.profile.defaultProfile().setHttpUserAgent("Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/72.0")
 
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
