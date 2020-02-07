@@ -39,7 +39,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.setUrl(QUrl("file://" + self.url))
 
     def is_image_file(self, f):
-        return Path(f).suffix in ["jpg", "jpeg", "png", "bmp", "gif"]
+        return Path(f).suffix.lower() in ["jpg", "jpeg", "png", "bmp", "gif"]
 
     def get_same_dir_images(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
