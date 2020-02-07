@@ -1226,13 +1226,14 @@ choose a search engine defined in `eaf-browser-search-engines'"
                    (error (format "[EAF/browser] search engine %s is unknown to EAF!" real-search-engine))))
          (current-symbol (if mark-active
                              (buffer-substring (region-beginning) (region-end))
-                           (symbol-at-point))))
-    (if search-string
-        (eaf-open-browser (format link search-string))
-      (let ((search-string (read-string (format "[EAF/browser] Search (%s): " current-symbol))))
-        (if (string-blank-p search-string)
-            (eaf-open-browser (format link current-symbol))
-          (eaf-open-browser (format link search-string)))))))
+                           (symbol-at-point)))
+         (search-url (if search-string
+                         (format link search-string)
+                       (let ((search-string (read-string (format "[EAF/browser] Search (%s): " current-symbol))))
+                         (if (string-blank-p search-string)
+                             (format link current-symbol)
+                           (format link search-string))))))
+    (eaf-open search-url "browser")))
 
 ;;;###autoload
 (define-obsolete-function-alias 'eaf-open-url #'eaf-open-browser)
