@@ -396,7 +396,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-image-extension-list
-  '("jpg" "JPG" "jpeg" "png" "bmp")
+  '("jpg" "jpeg" "png" "bmp" "gif")
   "The extension list of image viewer application."
   :type 'cons)
 
@@ -1261,13 +1261,16 @@ choose a search engine defined in `eaf-browser-search-engines'"
            return app))
 
 ;;;###autoload
+(defun eaf-get-file-name-extension (file)
+  (downcase (file-name-extension file)))
+
 (defun eaf-open-this-from-dired ()
   "Open html/pdf/image/video files whenever possible with EAF in dired.
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
     (cond ((eaf--get-app-for-extension
-            (file-name-extension file))
+            (eaf-get-file-name-extension file))
            (eaf-open file))
           (eaf-find-alternate-file-in-dired
            (dired-find-alternate-file))
@@ -1290,7 +1293,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
-    (let* ((extension-name (file-name-extension url)))
+    (let* ((extension-name (eaf-get-file-name-extension url)))
       ;; Initialize app name, url and arguments
       (setq app-name (eaf--get-app-for-extension extension-name))
       (when (equal app-name "markdown-previewer")

@@ -23,6 +23,7 @@ from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
 from core.utils import PostGui
+from pathlib import Path
 import os
 
 class AppBuffer(BrowserBuffer):
@@ -38,7 +39,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.setUrl(QUrl("file://" + self.url))
 
     def is_image_file(self, f):
-        return f.endswith(".jpg") or f.endswith(".JPG") or f.endswith(".jpeg") or f.endswith(".png")
+        return Path(f).suffix in ["jpg", "jpeg", "png", "bmp", "gif"]
 
     def get_same_dir_images(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
