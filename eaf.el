@@ -373,8 +373,13 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-pdf-extension-list
-  '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
+  '("pdf" "xps" "oxps" "cbz" "fb2" "fbz" "djvu")
   "The extension list of pdf application."
+  :type 'cons)
+
+(defcustom eaf-epub-extension-list
+  '("epub")
+  "The extension list of epub application."
   :type 'cons)
 
 (defcustom eaf-markdown-extension-list
@@ -459,6 +464,7 @@ A bookmark handler function is used as
 
 (defvar eaf-app-extensions-alist
   '(("pdf-viewer" . eaf-pdf-extension-list)
+    ("epub-viewer" . eaf-epub-extension-list)
     ("markdown-previewer" . eaf-markdown-extension-list)
     ("image-viewer" . eaf-image-extension-list)
     ("video-player" . eaf-video-extension-list)
