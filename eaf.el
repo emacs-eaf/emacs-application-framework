@@ -396,7 +396,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-image-extension-list
-  '("jpg" "jpeg" "png" "bmp" "gif")
+  '("jpg" "jpeg" "png" "bmp" "gif" "svg" "webp")
   "The extension list of image viewer application."
   :type 'cons)
 
