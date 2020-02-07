@@ -252,8 +252,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-q" . "clear_all_cookies")
     ("C-M-q" . "clear_history")
     ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom")
+    ("M->" . "scroll_to_begin")
+    ("M-<" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
     ("J" . "insert_or_goto_left_tab")
@@ -326,8 +326,21 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-image-viewer-keybinding
-  '(("j" . "load_next_image")
-    ("k" . "load_prev_image"))
+  '(("n" . "load_next_image")
+    ("p" . "load_prev_image")
+    ("SPC" . "load_prev_image")
+    ("-" . "zoom_out")
+    ("=" . "zoom_in")
+    ("0" . "zoom_reset")
+    ("j" . "scroll_up")
+    ("k" . "scroll_down")
+    ("h" . "scroll_left")
+    ("l" . "scroll_right")
+    ("," . "scroll_up_page")
+    ("." . "scroll_down_page")
+    (">" . "scroll_to_begin")
+    ("<" . "scroll_to_bottom")
+    )
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
@@ -367,8 +380,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-p" . "scroll_down")
     ("C-v" . "scroll_up_page")
     ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom"))
+    ("M->" . "scroll_to_begin")
+    ("M-<" . "scroll_to_bottom"))
   "The keybinding of EAF RSS Reader."
   :type 'cons)
 
