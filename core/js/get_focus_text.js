@@ -1,4 +1,10 @@
 (function() {
     const activeElement = document.activeElement;
-    return activeElement.value;
+    var inputs = ["input", "select", "textarea"];
+
+    if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
+        return activeElement.value;
+    } else {
+        return undefine;
+    }
 })();
