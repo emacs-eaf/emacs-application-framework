@@ -452,11 +452,7 @@ if __name__ == "__main__":
         emacs_width = emacs_height = 0
         eaf_config_dir = ""
 
-        # Make sure EAF browser can read local file, such as, pdf, epub etc.
-        qapp_args = sys.argv.copy()
-        qapp_args.append("--disable-web-security")
-
-        app = QApplication(qapp_args)
+        app = QApplication(sys.argv)
 
         eaf = EAF(sys.argv[1:])
 
