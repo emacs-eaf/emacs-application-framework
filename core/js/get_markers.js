@@ -81,17 +81,74 @@
             let keyStr = '';
             for(let k = 0; k < keyLen; k++) {
                 let mark = document.createElement('span');
-                mark.setAttribute('class', 'link-mark');
-                mark.setAttribute('style', 'font-size: 12px; font-weight: bold;');
+                mark.setAttribute('class', 'eaf-mark');
                 let key = letters[keyCounter[k]];
                 mark.textContent = key;
                 markerContainer.children[l].appendChild(mark);
                 keyStr += key;
                 cAdd1(keyCounter, 0, letters.length);
             }
-            markerContainer.children[l].setAttribute('key', keyStr);
+            markerContainer.children[l].id = keyStr;
         }
     }
+
+    let style = document.createElement('style');
+    document.head.appendChild(style);
+    style.type = 'text/css';
+    style.setAttribute('class', 'eaf-style');
+    style.appendChild(document.createTextNode('\
+.eaf-mark {\
+background: none;\
+border: none;\
+bottom: auto;\
+box-shadow: none;\
+color: black !important;\
+cursor: auto;\
+display: inline;\
+float: none;\
+font-size: inherit;\
+font-variant: normal;\
+font-weight: bold;\
+height: auto;\
+left: auto;\
+letter-spacing: 0;\
+line-height: 100%;\
+margin: 0;\
+max-height: none;\
+max-width: none;\
+min-height: 0;\
+min-width: 0;\
+opacity: 1;\
+padding: 0;\
+position: static;\
+right: auto;\
+text-align: left;\
+text-decoration: none;\
+text-indent: 0;\
+text-shadow: none;\
+text-transform: none;\
+top: auto;\
+vertical-align: baseline;\
+white-space: normal;\
+width: auto;\
+z-index: 100000;\
+}'));
+
+    style.appendChild(document.createTextNode('\
+.eaf-marker {\
+position: fixed;\
+display: block;\
+white-space: nowrap;\
+overflow: hidden;\
+font-size: 11.5px;\
+background: linear-gradient(to bottom, #ffdd6e 0%, #deb050 100%);\
+padding-left: 3px;\
+padding-right: 3px;\
+border: 1px solid #c38a22;\
+border-radius: 3px;\
+box-shadow: 0px 3px 7px 0px rgba(0, 0, 0, 0.3);\
+z-index: 100000;\
+}'));
 
     let validRects = [];
     addElementToRects(validRects, document.links); // collect links
@@ -105,15 +162,12 @@
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');
-    markerContainer.setAttribute('class', 'markerContainer');
+    markerContainer.setAttribute('class', 'eaf-marker-container');
     body.insertAdjacentElement('afterend', markerContainer);
     for(let i = 0; i < validRects.length; i++) {
         let marker = document.createElement('div');
-        marker.setAttribute('class', 'marker');
-        marker.setAttribute('style', 'left: ' +
-                            validRects[i][1] + 'px; top: ' +
-                            validRects[i][0] + 'px; z-index: 100000; position: fixed; ' +
-                            ' background-color: #ffdb60; border: 1px solid #c38a22; padding-left: 3px; padding-right: 3px; border-radius: 3px;');
+        marker.setAttribute('class', 'eaf-marker');
+        marker.setAttribute('style', 'left: ' + validRects[i][1] + 'px; top: ' + validRects[i][0] + 'px;');
         marker.setAttribute('pointed-link', validRects[i][4]);
 
         markerContainer.appendChild(marker);

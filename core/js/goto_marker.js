@@ -1,9 +1,9 @@
 (function() {
     let key = "%1";
-    let markers = document.querySelectorAll('.marker');
+    let markers = document.querySelectorAll('.eaf-marker');
     let match;
     for(let i = 0; i < markers.length; i++) {
-        if(markers[i].getAttribute('key') === key.toUpperCase()) {
+        if(markers[i].id === key.toUpperCase()) {
             match = markers[i];
             break;
         }

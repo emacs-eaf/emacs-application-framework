@@ -276,7 +276,8 @@ class BrowserView(QWebEngineView):
         return self.execute_js("window.location.href;")
 
     def cleanup_links(self):
-        self.execute_js("document.querySelector('.markerContainer').remove();")
+        self.eval_js("document.querySelector('.eaf-marker-container').remove();")
+        self.eval_js("document.querySelector('.eaf-style').remove();")
 
     def get_link_markers(self):
         return self.execute_js(self.get_markers_js);
