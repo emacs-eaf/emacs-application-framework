@@ -36,8 +36,8 @@
     }
 
     function isElementOnTop(element, rect){
-        let topElement = document.elementFromPoint(rect[1], rect[0]);
-        return element.isSameNode(topElement) || element.contains(topElement) || topElement.contains(element);
+        let topElement = document.elementFromPoint((rect[1] + rect[2])/2, (rect[0] + rect[3])/2);
+        return topElement != undefined && (element.isSameNode(topElement) || element.contains(topElement) || topElement.contains(element));
     }
 
     function hasCopy(validRects, rect){
