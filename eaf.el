@@ -482,6 +482,16 @@ A bookmark handler function is used as
 A new app can use this to configure extensions which should
 handled by it.")
 
+(defvar eaf--monitor-configuration-p t
+  "When this variable is non-nil, `eaf-monitor-configuration-change' execute.
+This variable use to open buffer in backend and avoid graphics blink.
+
+EAF call python method `new_buffer' to create EAF application buffer.
+EAF call python method `update_views' to create EAF application view.
+
+Python process only create application view when Emacs window or buffer state change.")
+
+(defvar eaf-buffer-title-format "%s")
 
 (defvar-local eaf--bookmark-title nil)
 
@@ -751,7 +761,8 @@ to edit EAF keybindings!" fun fun)))
     (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
-  (when (process-live-p eaf-process)
+  (when (and eaf--monitor-configuration-p
+             (process-live-p eaf-process))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
@@ -958,8 +969,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "update_buffer_title"
  #'eaf--update-buffer-title)
-
-(defvar eaf-buffer-title-format "%s")
 
 (defun eaf--update-buffer-title (bid title)
   (when (> (length title) 0)
@@ -1179,9 +1188,11 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
 
 ;;;###autoload
 (defun eaf-open-browser-in-background (url &optional arguments)
+  (setq eaf--monitor-configuration-p nil)
   (let ((save-buffer (current-buffer)))
     (eaf-open-browser url arguments)
-    (switch-to-buffer save-buffer)))
+    (switch-to-buffer save-buffer))
+  (setq eaf--monitor-configuration-p t))
 
 ;;;###autoload
 (defun eaf-open-browser-with-history ()
