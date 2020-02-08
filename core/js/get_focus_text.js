@@ -5,6 +5,6 @@
     if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
         return activeElement.value;
     } else {
-        return undefine;
+        return undefined;
     }
 })();
