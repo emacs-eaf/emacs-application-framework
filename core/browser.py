@@ -235,16 +235,16 @@ class BrowserView(QWebEngineView):
         self.eval_js("window.scrollBy(0, -50)")
 
     def scroll_up_page(self):
-        self.eval_js("window.scrollBy(0, document.documentElement.clientHeight)")
+        self.eval_js("window.scrollBy({left: 0, top: document.documentElement.clientHeight, behavior: 'smooth'})")
 
     def scroll_down_page(self):
-        self.eval_js("window.scrollBy(0, -document.documentElement.clientHeight)")
+        self.eval_js("window.scrollBy({left: 0, top: -document.documentElement.clientHeight, behavior: 'smooth'})")
 
     def scroll_to_begin(self):
-        self.eval_js("window.scrollTo(0, 0)")
+        self.eval_js("window.scrollTo({left: 0, top: 0, behavior: 'smooth'})")
 
     def scroll_to_bottom(self):
-        self.eval_js("window.scrollBy(0, document.body.scrollHeight)")
+        self.eval_js("window.scrollBy({left: 0, top: document.body.scrollHeight, behavior: 'smooth'})")
 
     def refresh_page(self):
         self.reload()
