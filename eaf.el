@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Feb  1 23:22:12 2020 (-0500)
+;; Last-Updated: Sat Feb  8 20:06:39 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -129,10 +129,10 @@ Don't modify this map directly.  To bind keys for all apps use
   "Internal id used by EAF app.")
 
 (defvar-local eaf--buffer-url nil
-  "The buffer url.")
+  "The EAF buffer url.")
 
 (defvar-local eaf--buffer-app-name nil
-  "The buffer app name.")
+  "The EAF buffer app-name.")
 
 (define-derived-mode eaf-mode fundamental-mode "EAF"
   "Major mode for Emacs Application Framework buffers.
@@ -161,11 +161,11 @@ been initialized."
 
 (defvar eaf-process nil)
 
-(defvar eaf-first-start-url nil)
+(defvar eaf--first-start-url nil)
 
-(defvar eaf-first-start-app-name nil)
+(defvar eaf--first-start-app-name nil)
 
-(defvar eaf-first-start-arguments nil)
+(defvar eaf--first-start-arguments nil)
 
 (defvar eaf-org-file-list '())
 
@@ -573,10 +573,13 @@ For now only EAF browser app is supported."
                         collect (format "%sᛝ%s" key value)) "ᛡ"))
 
 (defun eaf-start-process ()
-  "Start EAF process if it hasn't started yet."
-  (interactive)
-  (if (process-live-p eaf-process)
-      (message "[EAF] Process has started.")
+  "Start EAF process if it isn't started."
+  (cond
+   ((or (eq eaf--first-start-url nil) (eq eaf--first-start-app-name nil) (eq eaf--first-start-arguments nil))
+    (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
+   ((process-live-p eaf-process)
+    (message "[EAF] Process is already running."))
+   (t
     (setq eaf-process
           (apply #'start-process
                  eaf-name
@@ -591,10 +594,12 @@ For now only EAF browser app is supported."
          (when (string-prefix-p "exited abnormally with code" event)
            (switch-to-buffer eaf-name))
          (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
-    (message "[EAF] Process starting...")))
+    (message "[EAF] Process starting..."))))
 
-(defun eaf-stop-process ()
-  "Stop all EAF process and kill EAF buffers."
+(defun eaf-stop-process (&optional restart)
+  "Stop EAF process and kill all EAF buffers.
+
+When RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
   ;; Kill EAF buffers.
   (let ((count 0))
@@ -605,12 +610,15 @@ For now only EAF browser app is supported."
         (kill-buffer buffer)))
     ;; Just report to me when EAF buffer exists.
     (if (> count 1)
-        (message "[EAF] Killed EAF %s buffer%s" count (if (> count 1) "s" ""))))
+        (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s" ""))))
+  (when (get-buffer eaf-name)
+    (kill-buffer eaf-name))
 
-  ;; Clean cache url and app name, avoid next start process to open buffer.
-  (setq eaf-first-start-url nil)
-  (setq eaf-first-start-app-name nil)
-  (setq eaf-first-start-arguments nil)
+  ;; Clear cached URL and app-name, avoid next start process to open buffer.
+  (unless restart
+    (setq eaf--first-start-url nil)
+    (setq eaf--first-start-app-name nil)
+    (setq eaf--first-start-arguments nil))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
@@ -634,7 +642,7 @@ For now only EAF browser app is supported."
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
   (interactive)
-  (eaf-stop-process)
+  (eaf-stop-process t)
   (eaf-start-process))
 
 (defun eaf-get-render-size ()
@@ -958,12 +966,12 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "start_finish"
- #'eaf--start-finish)
+ "com.lazycat.eaf" "first_start"
+ #'eaf--first-start)
 
-(defun eaf--start-finish ()
+(defun eaf--first-start ()
   "Call `eaf--open-internal' after receive `start_finish' signal from server process."
-  (eaf--open-internal eaf-first-start-url eaf-first-start-app-name eaf-first-start-arguments))
+  (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1222,8 +1230,8 @@ This function works best if paired with a fuzzy search package."
   "Use SEARCH-ENGINE search SEARCH-STRING.
 
 If called interactively, SEARCH-STRING is defaulted to symbol or region string.
-The user is able to enter a customized SEARCH-STRING. SEARCH-ENGINE is defaulted
-to `eaf-browser-default-search-engine'. with a prefix arg, the user is able to
+The user can enter a customized SEARCH-STRING.  SEARCH-ENGINE is defaulted
+to `eaf-browser-default-search-engine' with a prefix arg, the user is able to
 choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (let* ((real-search-engine (if current-prefix-arg
@@ -1295,7 +1303,7 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (defun eaf-open (url &optional app-name arguments open-always)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
 
-Default, `eaf-open' will switch to buffer if url is exists.
+By default, `eaf-open' will switch to buffer if corresponding url exists.
 `eaf-open' always open new buffer if option OPEN-ALWAYS is non-nil.
 
 When called interactively, URL accepts a file that can be opened by EAF."
@@ -1315,47 +1323,48 @@ When called interactively, URL accepts a file that can be opened by EAF."
                   (read-string (concat "[EAF/" app-name "] Fill your own Github token (or set `eaf-grip-token' with token string): ")))))
       (when (equal app-name "browser")
         (setq url (concat "file://" url)))))
+  ;; Now that app-name should hopefully be set
+  (unless app-name
+    ;; Output error to user if app-name is empty string.
+    (user-error
+     (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
+             (cond
+              ((not (or (string-prefix-p "/" url)
+                        (string-prefix-p "~" url))) "File %s cannot be opened.")
+              ((file-exists-p url) "File %s cannot be opened.")
+              (t "File %s does not exist.")))
+     url))
   (unless arguments (setq arguments ""))
   ;; Hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-  ;; Now that app-name should hopefully be set
-  (if app-name
-      ;; Open url with EAF application if app-name is not empty.
-      (if (process-live-p eaf-process)
-          (let (exists-eaf-buffer)
-            ;; Try to open buffer
-            (catch 'found-match-buffer
-              (dolist (buffer (buffer-list))
-                (set-buffer buffer)
-                (when (derived-mode-p 'eaf-mode)
-                  (when (and (string= eaf--buffer-url url)
-                             (string= eaf--buffer-app-name app-name))
-                    (setq exists-eaf-buffer buffer)
-                    (throw 'found-match-buffer t)))))
-            ;; Switch to exists buffer,
-            ;; if no match buffer found, call `eaf--open-internal'.
-            (if (and exists-eaf-buffer
-                     (not open-always))
-                (progn
-                  (eaf--display-app-buffer app-name exists-eaf-buffer)
-                  (message (concat "[EAF/" app-name "] " "Switch to %s") url))
-              (eaf--open-internal url app-name arguments)
-              (message (concat "[EAF/" app-name "] " "Opening %s") url)))
-        ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
-        (setq eaf-first-start-url url)
-        (setq eaf-first-start-app-name app-name)
-        (setq eaf-first-start-arguments arguments)
-        (eaf-start-process)
-        (message (concat "[EAF/" app-name "] " "Opening %s") url))
-    ;; Output something to user if app-name is empty string.
-    (message (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
-                     (cond
-                      ((not (or (string-prefix-p "/" url)
-                                (string-prefix-p "~" url))) "Cannot open file %s.")
-                      ((file-exists-p url) "Cannot open file %s.")
-                      (t "File %s does not exist.")))
-             url)))
+  ;; Open URL with EAF application
+  (if (process-live-p eaf-process)
+      (let (exists-eaf-buffer)
+        ;; Try to open buffer
+        (catch 'found-match-buffer
+          (dolist (buffer (buffer-list))
+            (set-buffer buffer)
+            (when (derived-mode-p 'eaf-mode)
+              (when (and (string= eaf--buffer-url url)
+                         (string= eaf--buffer-app-name app-name))
+                (setq exists-eaf-buffer buffer)
+                (throw 'found-match-buffer t)))))
+        ;; Switch to exists buffer,
+        ;; if no match buffer found, call `eaf--open-internal'.
+        (if (and exists-eaf-buffer
+                 (not open-always))
+            (progn
+              (eaf--display-app-buffer app-name exists-eaf-buffer)
+              (message (concat "[EAF/" app-name "] " "Switch to %s") url))
+          (eaf--open-internal url app-name arguments)
+          (message (concat "[EAF/" app-name "] " "Opening %s") url)))
+    ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
+    (setq eaf--first-start-url url)
+    (setq eaf--first-start-app-name app-name)
+    (setq eaf--first-start-arguments arguments)
+    (eaf-start-process)
+    (message (concat "[EAF/" app-name "] " "Opening %s") url)))
 
 (defun eaf--display-app-buffer (app-name buffer)
   (let ((display-fun (or (cdr (assoc app-name

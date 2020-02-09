@@ -57,7 +57,7 @@ class EAF(dbus.service.Object):
 
         self.update_emacs_var_dict(var_dict_string)
 
-        self.start_finish()
+        self.first_start()
 
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
@@ -326,7 +326,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def start_finish(self):
+    def first_start(self):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
