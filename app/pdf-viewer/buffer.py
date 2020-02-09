@@ -871,13 +871,12 @@ class PdfViewerWidget(QWidget):
         return page, annot
 
     def annot_handler(self, action=None):
-
         page, annot = self.hover_annot()
-
         if annot.parent:
             if action == "delete":
                 page.deleteAnnot(annot)
 
+        self.is_hover_annot = False
         self.document.saveIncr()
         self.page_cache_pixmap_dict.clear()
         self.update()
