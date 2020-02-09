@@ -44,6 +44,8 @@
             link.click();
         } else if(link.href != undefined && link.href != '' && link.getAttribute('href') != ''){
             return link.href;
+        } else if(link.nodeName.toLowerCase() === 'a') {
+            link.click(); // most general a tag without href
         }
     }
     return "";

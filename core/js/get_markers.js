@@ -152,6 +152,7 @@ z-index: 100000;\
 
     let validRects = [];
     addElementToRects(validRects, document.links); // collect links
+    addElementToRects(validRects, document.querySelectorAll('a')); // collect a tag without href
     addElementToRects(validRects, document.querySelectorAll('input')); // collect inputs
     addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
     addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect btn buttons
