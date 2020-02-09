@@ -317,7 +317,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("h" . "add_annot_highlight")
     ("u" . "add_annot_underline")
     ("s" . "add_annot_squiggly")
-    ("d" . "add_annot_strikeout"))
+    ("d" . "add_annot_strikeout_or_delete_annot"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 

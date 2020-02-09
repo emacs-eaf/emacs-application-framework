@@ -21,7 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QRect, QEvent
-from PyQt5.QtGui import QColor, QPixmap, QImage, QFont
+from PyQt5.QtGui import QColor, QPixmap, QImage, QFont, QCursor
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from core.buffer import Buffer
@@ -168,9 +168,11 @@ class AppBuffer(Buffer):
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.annot_select_char_area("highlight")
 
-    def add_annot_strikeout(self):
+    def add_annot_strikeout_or_delete_annot(self):
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.annot_select_char_area("strikeout")
+        elif self.buffer_widget.is_hover_annot:
+            self.buffer_widget.annot_handler("delete")
 
     def add_annot_underline(self):
         if self.buffer_widget.is_select_mode:
@@ -229,10 +231,12 @@ class PdfViewerWidget(QWidget):
         self.last_char_rect_index = None
         self.last_char_page_index = None
         self.select_area_annot_cache_dict = {}
+        self.select_area_annot_quad_cache_dict = {}
         self.char_dict = {k:None for k in range(self.page_total_number)}
 
-        # annot list
-        self.select_area_annot_quad_cache_dict = {}
+        # annot
+        self.is_hover_annot = False
+
         # Init scroll attributes.
         self.scroll_step = 20
         self.scroll_offset = 0
@@ -714,9 +718,9 @@ class PdfViewerWidget(QWidget):
 
         return chars_list
 
-    def get_char_rect_index(self, event):
+    def get_char_rect_index(self):
         offset = 15
-        ex, ey, page_index = self.get_event_absolute_position(event)
+        ex, ey, page_index = self.get_cursor_absolute_position()
         if ex and ey and page_index:
             rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
             for char_index, char in enumerate(self.char_dict[page_index]):
@@ -779,6 +783,7 @@ class PdfViewerWidget(QWidget):
 
             new_annot.parent = page
         self.document.saveIncr()
+        self.select_area_annot_quad_cache_dict.clear()
 
     def cleanup_select(self):
         self.is_select_mode = False
@@ -843,6 +848,40 @@ class PdfViewerWidget(QWidget):
         self.start_char_page_index = None
         self.start_char_rect_index = None
 
+    def hover_annot(self):
+        ex, ey, page_index = self.get_cursor_absolute_position()
+        page = self.document[page_index]
+        annots = page.annots()
+        if not annots:
+            return None
+
+        annot = None        # annots is generator, will probably cause annot don't assign
+        for annot in annots:
+            if annot.rect.contains(fitz.Point(ex, ey)):
+                self.is_hover_annot = True
+                annot.setOpacity(0.5)
+                self.message_to_emacs.emit("[d]Delete Annot")
+            else:
+                annot.setOpacity(1) # restore annot
+                self.is_hover_annot = False
+            annot.update()
+
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+        return page, annot
+
+    def annot_handler(self, action=None):
+
+        page, annot = self.hover_annot()
+
+        if annot.parent:
+            if action == "delete":
+                page.deleteAnnot(annot)
+
+        self.document.saveIncr()
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
 
@@ -854,10 +893,10 @@ class PdfViewerWidget(QWidget):
             self.scroll_offset = new_offset
             self.update()
 
-    def get_event_absolute_position(self, event):
+    def get_cursor_absolute_position(self):
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
-        pos = event.pos()
+        ex, ey = QCursor.pos().x(), QCursor.pos().y()
 
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
@@ -865,21 +904,21 @@ class PdfViewerWidget(QWidget):
                 render_x = int((self.rect().width() - render_width) / 2)
 
                 # computer absolute coordinate of page
-                x = (pos.x() - render_x) * 1.0 / self.scale
-                if pos.y() + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
+                x = (ex - render_x) * 1.0 / self.scale
+                if ey + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
                     page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
                     page_index = index
                 else:
                     # if display two pages, pos.y() will add page_padding
                     page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
                     page_index = index + 1
-                y = (pos.y() + page_offset) * 1.0 / self.scale
+                y = (ey + page_offset) * 1.0 / self.scale
 
                 return x, y, page_index
         return None, None, None
 
-    def get_event_link(self, event):
-        ex, ey, page_index = self.get_event_absolute_position(event)
+    def get_event_link(self):
+        ex, ey, page_index = self.get_cursor_absolute_position()
         if page_index is None:
             return None
 
@@ -892,8 +931,8 @@ class PdfViewerWidget(QWidget):
 
         return None
 
-    def get_double_click_word(self, event):
-        ex, ey, page_index = self.get_event_absolute_position(event)
+    def get_double_click_word(self):
+        ex, ey, page_index = self.get_cursor_absolute_position()
         if page_index is None:
             return None
         page = self.document[page_index]
@@ -909,17 +948,20 @@ class PdfViewerWidget(QWidget):
     def eventFilter(self, obj, event):
         if event.type() == QEvent.MouseMove:
             if self.is_select_mode:
-                rect_index, page_index = self.get_char_rect_index(event)
+                rect_index, page_index = self.get_char_rect_index()
                 if rect_index and page_index:
                     if self.start_char_rect_index is None or self.start_char_page_index is None:
                         self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
                     else:
                         self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
                         self.mark_select_char_area()
+            else:
+                self.hover_annot()
+
 
         elif event.type() == QEvent.MouseButtonPress:
             if event.button() == Qt.LeftButton:
-                event_link = self.get_event_link(event)
+                event_link = self.get_event_link()
                 if event_link:
                     self.jump_to_page(event_link["page"] + 1)
 
@@ -927,7 +969,7 @@ class PdfViewerWidget(QWidget):
             if self.is_mark_search:
                 self.cleanup_search()
             if event.button() == Qt.RightButton:
-                double_click_word = self.get_double_click_word(event)
+                double_click_word = self.get_double_click_word()
                 if double_click_word:
                     self.translate_double_click_word.emit(double_click_word)
             elif event.button() == Qt.LeftButton:
