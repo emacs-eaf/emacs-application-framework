@@ -166,8 +166,19 @@ class AppBuffer(Buffer):
 
     def add_annot_highlight(self):
         if self.buffer_widget.is_select_mode:
-            self.buffer_widget.highlight_select_char_area()
-            self.buffer_widget.cleanup_select()
+            self.buffer_widget.annot_select_char_area("highlight")
+
+    def add_annot_strikeout(self):
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.annot_select_char_area("strikeout")
+
+    def add_annot_underline(self):
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.annot_select_char_area("underline")
+
+    def add_annot_squiggly(self):
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.annot_select_char_area("squiggly")
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -219,6 +230,8 @@ class PdfViewerWidget(QWidget):
         self.select_area_annot_cache_dict = {}
         self.char_dict = {k:None for k in range(self.page_total_number)}
 
+        # annot list
+        self.select_area_annot_quad_cache_dict = {}
         # Init scroll attributes.
         self.scroll_step = 20
         self.scroll_offset = 0
@@ -746,9 +759,21 @@ class PdfViewerWidget(QWidget):
                     string += "\n\n"    # add new line on page end.
         return string
 
-    def highlight_select_char_area(self):
-        for key in self.select_area_annot_cache_dict.keys():
-            self.select_area_annot_cache_dict[key] = None
+    def annot_select_char_area(self, annot_type="highlight"):
+        self.cleanup_select()   # needs first cleanup select highlight mark.
+        for page_index, quad_list in self.select_area_annot_quad_cache_dict.items():
+            page = self.document[page_index]
+
+            if annot_type == "highlight":
+                new_annot = page.addHighlightAnnot(quad_list)
+            elif annot_type == "strikeout":
+                new_annot = page.addStrikeoutAnnot(quad_list)
+            elif annot_type == "underline":
+                new_annot = page.addUnderlineAnnot(quad_list)
+            elif annot_type == "squiggly":
+                new_annot = page.addSquigglyAnnot(quad_list)
+
+            new_annot.parent = page
         self.document.saveIncr()
 
     def cleanup_select(self):
@@ -797,6 +822,7 @@ class PdfViewerWidget(QWidget):
 
             # refresh annot
             self.select_area_annot_cache_dict[page_index] = annot
+            self.select_area_annot_quad_cache_dict[page_index] = quad_list
 
         self.page_cache_pixmap_dict.clear()
         self.update()
