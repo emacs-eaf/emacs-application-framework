@@ -138,7 +138,7 @@ class AppBuffer(Buffer):
     def action_quit(self):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.cleanup_search()
-        if self.buffer_widget.is_mark_link:
+        if self.buffer_widget.is_jump_link:
             self.buffer_widget.cleanup_links()
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.cleanup_select()
@@ -213,6 +213,7 @@ class PdfViewerWidget(QWidget):
         self.mark_link_annot_cache_dict = {}
 
         #jump link
+        self.is_jump_link = False
         self.jump_link_key_cache_dict = {}
         self.jump_link_annot_cache_dict = {}
 
@@ -304,11 +305,9 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
             self.page_cache_trans = fitz.Matrix(scale, scale)
 
+        page = self.document[index]
         if self.is_mark_link:
             page = self.add_mark_link(index)
-        else:
-            self.delete_all_mark_link()
-            page = self.document[index]
 
         # follow page search text
         if self.is_mark_search:
@@ -537,8 +536,12 @@ class PdfViewerWidget(QWidget):
         # Re-render page.
         self.update()
 
-    def toggle_mark_link(self):
-        self.is_mark_link = not self.is_mark_link
+    def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
+        if self.is_mark_link:
+            self.cleanup_mark_link()
+        else:
+            self.is_mark_link = True
+
         self.page_cache_pixmap_dict.clear()
         self.update()
 
@@ -553,14 +556,14 @@ class PdfViewerWidget(QWidget):
             self.mark_link_annot_cache_dict[index] = annot_list
         return page
 
-    def delete_all_mark_link(self):
-        if (not self.is_mark_link) and self.mark_link_annot_cache_dict:
+    def cleanup_mark_link(self):
+        if self.mark_link_annot_cache_dict:
             for index in self.mark_link_annot_cache_dict.keys():
                 page = self.document[index]
                 for annot in self.mark_link_annot_cache_dict[index]:
                     page.deleteAnnot(annot)
+        self.is_mark_link = False
         self.mark_link_annot_cache_dict.clear()
-        self.update()
 
     def generate_random_key(self, count):
         letters = "ASDFHJKLQWEIOP"
@@ -611,6 +614,7 @@ class PdfViewerWidget(QWidget):
         self.jump_link_annot_cache_dict.clear()
 
     def jump_to_link(self, key):
+        self.is_jump_link = True
         key = str(key).upper()
         if key in self.jump_link_key_cache_dict:
             link = self.jump_link_key_cache_dict[key]
@@ -621,7 +625,7 @@ class PdfViewerWidget(QWidget):
         self.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
 
     def cleanup_links(self):
-        self.is_mark_link = False
+        self.is_jump_link = False
         self.delete_all_mark_jump_link_tips()
         self.page_cache_pixmap_dict.clear()
 
