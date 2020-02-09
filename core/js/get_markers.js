@@ -160,6 +160,7 @@ z-index: 100000;\
     addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
     addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea
     addElementToRects(validRects, document.querySelectorAll('select')); // collect select
+    addElementToRects(validRects, document.querySelectorAll('summary')); // collect summary
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');

@@ -36,6 +36,7 @@
                 moveCursorToEnd(link); // move cursor to the end of line after focus.
             }
         } else if((link.nodeName.toLowerCase() === 'button') || // normal button
+                  (link.nodeName.toLowerCase() === 'summary') || // summary button
                   (link.hasAttribute('aria-haspopup')) || // menu button
                   (link.getAttribute('role') === 'button') || // role="button" buttons
                   (link.classList.contains('btn')) || // class="btn" buttons
