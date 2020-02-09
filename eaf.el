@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Feb  8 20:06:39 2020 (-0500)
+;; Last-Updated: Sat Feb  8 20:14:10 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -252,8 +252,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-q" . "clear_all_cookies")
     ("C-M-q" . "clear_history")
     ("M-v" . "scroll_down_page")
-    ("M->" . "scroll_to_begin")
-    ("M-<" . "scroll_to_bottom")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
     ("J" . "insert_or_goto_left_tab")
@@ -338,9 +338,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("l" . "scroll_right")
     ("," . "scroll_up_page")
     ("." . "scroll_down_page")
-    (">" . "scroll_to_begin")
-    ("<" . "scroll_to_bottom")
-    )
+    ("<" . "scroll_to_begin")
+    (">" . "scroll_to_bottom"))
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
@@ -380,8 +379,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-p" . "scroll_down")
     ("C-v" . "scroll_up_page")
     ("M-v" . "scroll_down_page")
-    ("M->" . "scroll_to_begin")
-    ("M-<" . "scroll_to_bottom"))
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom"))
   "The keybinding of EAF RSS Reader."
   :type 'cons)
 
