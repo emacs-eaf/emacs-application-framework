@@ -152,15 +152,15 @@ z-index: 100000;\
 
     let validRects = [];
     addElementToRects(validRects, document.links); // collect links
-    addElementToRects(validRects, document.querySelectorAll('a')); // collect a tag without href
-    addElementToRects(validRects, document.querySelectorAll('input')); // collect inputs
-    addElementToRects(validRects, document.querySelectorAll('button')); // collect buttons
-    addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect btn buttons
+    addElementToRects(validRects, document.querySelectorAll('a')); // collect <a> without href
+    addElementToRects(validRects, document.querySelectorAll('input')); // collect <input>
+    addElementToRects(validRects, document.querySelectorAll('button')); // collect <button>
+    addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect class=btn buttons
     addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
     addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
-    addElementToRects(validRects, document.querySelectorAll('textarea')); // collect textarea
-    addElementToRects(validRects, document.querySelectorAll('select')); // collect select
-    addElementToRects(validRects, document.querySelectorAll('summary')); // collect summary
+    addElementToRects(validRects, document.querySelectorAll('textarea')); // collect <textarea>
+    addElementToRects(validRects, document.querySelectorAll('select')); // collect <select>
+    addElementToRects(validRects, document.querySelectorAll('summary')); // collect <summary>
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');

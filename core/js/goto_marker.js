@@ -1,14 +1,4 @@
 (function() {
-    let key = "%1";
-    let markers = document.querySelectorAll('.eaf-marker');
-    let match;
-    for(let i = 0; i < markers.length; i++) {
-        if(markers[i].id === key.toUpperCase()) {
-            match = markers[i];
-            break;
-        }
-    }
-
     function moveCursorToEnd(el) {
         if (typeof el.selectionStart == "number") {
             el.selectionStart = el.selectionEnd = el.value.length;
@@ -20,9 +10,20 @@
         }
     }
 
+    let key = "%1";
+    let markers = document.querySelectorAll('.eaf-marker');
+    let match;
+    for(let i = 0; i < markers.length; i++) {
+        if(markers[i].id === key.toUpperCase()) {
+            match = markers[i];
+            break;
+        }
+    }
+
     if(match != undefined){
         let selector = match.getAttribute('pointed-link');
         let link = document.querySelector(selector);
+
         if(link.nodeName.toLowerCase() === 'select'){
             link.focus();
         }else if(link.nodeName.toLowerCase() === 'input' ||

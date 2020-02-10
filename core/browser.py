@@ -223,28 +223,28 @@ class BrowserView(QWebEngineView):
         return self.web_page.executeJavaScript(js)
 
     def scroll_left(self):
-        self.eval_js("window.scrollBy(-50, 0)")
+        self.eval_js("document.scrollingElement.scrollBy(-35, 0)")
 
     def scroll_right(self):
-        self.eval_js("window.scrollBy(50, 0)")
+        self.eval_js("document.scrollingElement.scrollBy(35, 0)")
 
     def scroll_up(self):
-        self.eval_js("window.scrollBy(0, 50)")
+        self.eval_js("document.scrollingElement.scrollBy(0, 50)")
 
     def scroll_down(self):
-        self.eval_js("window.scrollBy(0, -50)")
+        self.eval_js("document.scrollingElement.scrollBy(0, -50)")
 
     def scroll_up_page(self):
-        self.eval_js("window.scrollBy({left: 0, top: document.documentElement.clientHeight, behavior: 'smooth'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: 'smooth'})")
 
     def scroll_down_page(self):
-        self.eval_js("window.scrollBy({left: 0, top: -document.documentElement.clientHeight, behavior: 'smooth'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: 'smooth'})")
 
     def scroll_to_begin(self):
         self.eval_js("window.scrollTo({left: 0, top: 0, behavior: 'smooth'})")
 
     def scroll_to_bottom(self):
-        self.eval_js("window.scrollBy({left: 0, top: document.body.scrollHeight, behavior: 'smooth'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: document.body.scrollHeight, behavior: 'smooth'})")
 
     def refresh_page(self):
         self.reload()
