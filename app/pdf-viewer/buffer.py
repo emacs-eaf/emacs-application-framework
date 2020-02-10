@@ -899,7 +899,8 @@ class PdfViewerWidget(QWidget):
     def get_cursor_absolute_position(self):
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
-        ex, ey = QCursor.pos().x(), QCursor.pos().y()
+        pos = self.mapFromGlobal(QCursor.pos()) # map global coordinate to widget coordinate.
+        ex, ey = pos.x(), pos.y()
 
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
@@ -964,7 +965,6 @@ class PdfViewerWidget(QWidget):
                         self.mark_select_char_area()
             else:
                 self.hover_annot()
-
 
         elif event.type() == QEvent.MouseButtonPress:
             if event.button() == Qt.LeftButton:
