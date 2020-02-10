@@ -851,11 +851,15 @@ class PdfViewerWidget(QWidget):
     def hover_annot(self):
         ex, ey, page_index = self.get_cursor_absolute_position()
         page = self.document[page_index]
-        annots = page.annots()
-        if not annots:
+        annot = page.firstAnnot
+        if not annot:
             return None
 
-        annot = None        # annots is generator, will probably cause annot don't assign
+        annots = []
+        while annot:
+            annots.append(annot)
+            annot = annot.next
+
         for annot in annots:
             if annot.rect.contains(fitz.Point(ex, ey)):
                 self.is_hover_annot = True
@@ -945,6 +949,10 @@ class PdfViewerWidget(QWidget):
             return rect_words[0][4]
 
     def eventFilter(self, obj, event):
+        if event.type() in [QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.MouseButtonPress]:
+            if not self.document.isPDF:
+                return False
+
         if event.type() == QEvent.MouseMove:
             if self.is_select_mode:
                 rect_index, page_index = self.get_char_rect_index()
