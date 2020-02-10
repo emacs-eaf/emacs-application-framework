@@ -861,7 +861,7 @@ class PdfViewerWidget(QWidget):
             annot = annot.next
 
         for annot in annots:
-            if annot.rect.contains(fitz.Point(ex, ey)):
+            if fitz.Point(ex, ey):
                 self.is_hover_annot = True
                 annot.setOpacity(0.5)
                 self.message_to_emacs.emit("[d]Delete Annot")
