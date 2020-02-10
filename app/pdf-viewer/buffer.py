@@ -949,6 +949,10 @@ class PdfViewerWidget(QWidget):
             return rect_words[0][4]
 
     def eventFilter(self, obj, event):
+        if event.type() in [QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.MouseButtonPress]:
+            if not self.document.isPDF:
+                return False
+
         if event.type() == QEvent.MouseMove:
             if self.is_select_mode:
                 rect_index, page_index = self.get_char_rect_index()
