@@ -198,16 +198,16 @@ If we missed your package, please make a PR to add it to the list.
 
 For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
 
-If you have any problem with EAF, please use command "emacs -Q" to start Emacs without any customizations. Then re-test your workflow. If "emacs -Q" works fine, it's must be something wrong with your emacs config file.
+If you encounter any problem with EAF, please use command `emacs -q` with minimal setups and re-test to see if the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your emacs config.
 
 If the problem persists, please [report bug here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
 
 ## Join Us
 Do you want to make Emacs a real operating system?
 
-Do you want to live in emacs more comfortably?
+Do you want to live in Emacs more comfortably?
 
-Want to create unparalleled plugins to extend emacs?
+Want to create unparalleled plugins to extend Emacs?
 
 [Let's hack together!](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
 

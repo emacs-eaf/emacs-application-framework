@@ -72,7 +72,7 @@
     }
 
     function generateKeys(markerContainer) {
-        let letters = ['A', 'S', 'D', 'F', 'Q', 'W', 'E', 'X', 'C', 'H', 'J', 'K', 'L', 'O', 'P', 'N', 'M'];
+        let letters = ['A', 'S', 'D', 'F', 'H', 'J', 'K', 'L', 'W', 'E', 'I', 'O', 'P', 'C', 'N', 'M'];
         let linkNum = markerContainer.children.length;
         let keyLen = linkNum == 1 ? 1 : Math.ceil(Math.log(linkNum)/Math.log(letters.length));
         let keyCounter = [];
