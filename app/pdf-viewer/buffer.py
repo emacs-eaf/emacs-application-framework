@@ -37,7 +37,7 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, False, QColor(0, 0, 0, 255))
 
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255)))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
     def get_table_file(self):
@@ -182,15 +182,29 @@ class AppBuffer(Buffer):
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.annot_select_char_area("squiggly")
 
+    def add_annot_text_or_edit_annot(self):
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.get_focus_text.emit(self.buffer_id, "")
+        elif self.buffer_widget.is_hover_annot:
+            self.buffer_widget.annot_handler("edit")
+
+    def set_focus_text(self, new_text):
+        if self.buffer_widget.is_select_mode:
+            self.buffer_widget.annot_select_char_area("text", new_text)
+        elif self.buffer_widget.is_hover_annot:
+            self.buffer_widget.update_annot_text(new_text)
+
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
+    get_focus_text = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, url, config_dir, background_color):
+    def __init__(self, url, config_dir, background_color, buffer_id):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
         self.config_dir = config_dir
         self.background_color = background_color
+        self.buffer_id = buffer_id
         self.installEventFilter(self)
         self.setMouseTracking(True)
 
@@ -767,7 +781,7 @@ class PdfViewerWidget(QWidget):
                     string += "\n\n"    # add new line on page end.
         return string
 
-    def annot_select_char_area(self, annot_type="highlight"):
+    def annot_select_char_area(self, annot_type="highlight", text=None):
         self.cleanup_select()   # needs first cleanup select highlight mark.
         for page_index, quad_list in self.select_area_annot_quad_cache_dict.items():
             page = self.document[page_index]
@@ -780,6 +794,9 @@ class PdfViewerWidget(QWidget):
                 new_annot = page.addUnderlineAnnot(quad_list)
             elif annot_type == "squiggly":
                 new_annot = page.addSquigglyAnnot(quad_list)
+            elif annot_type == "text":
+                point = quad_list[-1].lr # lower right point
+                new_annot = page.addTextAnnot(point, text, icon="Note")
 
             new_annot.parent = page
         self.document.saveIncr()
@@ -864,7 +881,7 @@ class PdfViewerWidget(QWidget):
             if fitz.Point(ex, ey) in annot.rect:
                 self.is_hover_annot = True
                 annot.setOpacity(0.5)
-                self.message_to_emacs.emit("[d]Delete Annot")
+                self.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
             else:
                 annot.setOpacity(1) # restore annot
                 self.is_hover_annot = False
@@ -874,16 +891,29 @@ class PdfViewerWidget(QWidget):
         self.update()
         return page, annot
 
+    def save_annot(self):
+        self.document.saveIncr()
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+
     def annot_handler(self, action=None):
         page, annot = self.hover_annot()
         if annot.parent:
             if action == "delete":
                 page.deleteAnnot(annot)
+                self.save_annot()
+            if action == "edit":
+                if annot.type[0] == 0:
+                    self.get_focus_text.emit(self.buffer_id, annot.info["content"])
+                else:
+                    self.message_to_emacs.emit("Cannot edit. Only support text annot type.")
 
-        self.is_hover_annot = False
-        self.document.saveIncr()
-        self.page_cache_pixmap_dict.clear()
-        self.update()
+    def update_annot_text(self, annot_text):
+        page, annot = self.hover_annot()
+        if annot.parent:
+            annot.setInfo(content=annot_text)
+            annot.update()
+        self.save_annot()
 
     def jump_to_page(self, page_num):
         self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))

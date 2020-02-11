@@ -109,13 +109,13 @@ Don't modify this map directly.  To bind keys for all apps use
 `eaf-mode-map*' and to bind keys for individual apps use
 `eaf-bind-key'.")
 
-(defvar eaf-browser-edit-mode-map
+(defvar eaf-edit-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-k") #'eaf-browser-edit-buffer-cancel)
-    (define-key map (kbd "C-c C-c") #'eaf-browser-edit-buffer-confirm)
+    (define-key map (kbd "C-c C-k") #'eaf-edit-buffer-cancel)
+    (define-key map (kbd "C-c C-c") #'eaf-edit-buffer-confirm)
     map))
 
-(define-derived-mode eaf-browser-edit-mode text-mode "EAF/browser EDIT"
+(define-derived-mode eaf-edit-mode text-mode "EAF/edit"
   "The major mode to edit focus text input.")
 
 (defun eaf-describe-bindings ()
@@ -317,7 +317,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("h" . "add_annot_highlight")
     ("u" . "add_annot_underline")
     ("s" . "add_annot_squiggly")
-    ("d" . "add_annot_strikeout_or_delete_annot"))
+    ("d" . "add_annot_strikeout_or_delete_annot")
+    ("e" . "add_annot_text_or_edit_annot"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
@@ -1417,42 +1418,42 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "D[EAF/file-receiver] Specify Destination: ")
   (eaf-open dir "file-receiver"))
 
-(defun eaf-browser-edit-buffer-cancel ()
+(defun eaf-edit-buffer-cancel ()
   "Cancel EAF Browser focus text input and closes the buffer."
   (interactive)
   (kill-buffer)
   (delete-window)
-  (message "[EAF/browser] Edit cancelled!"))
+  (message "[EAF/%s] Edit cancelled!" eaf--buffer-app-name))
 
-(defun eaf-browser-edit-buffer-confirm ()
+(defun eaf-edit-buffer-confirm ()
   "Confirm EAF Browser focus text input and send the text to EAF Browser."
   (interactive)
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
-  (eaf-call "update_browser_focus_text"
-            (replace-regexp-in-string "eaf-browser-edit-focus-text-" "" (buffer-name))
+  (eaf-call "update_focus_text"
+            (replace-regexp-in-string "eaf-\\(.*?\\)-edit-focus-text-" "" (buffer-name))
             (buffer-string))
   (kill-buffer)
   (delete-window))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "browser_edit_focus_text"
- #'eaf--browser-edit-focus-text)
+ "com.lazycat.eaf" "edit_focus_text"
+ #'eaf--edit-focus-text)
 
-(defun eaf--browser-edit-focus-text (browser-buffer-id focus-text)
+(defun eaf--edit-focus-text (buffer-id focus-text)
   (split-window-below -10)
   (other-window 1)
-  (let ((edit-text-buffer (generate-new-buffer (format "eaf-browser-edit-focus-text-%s" browser-buffer-id))))
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
     (switch-to-buffer edit-text-buffer)
-    (eaf-browser-edit-mode)
+    (eaf-edit-mode)
     (setq header-line-format
           (substitute-command-keys
            (concat
-            "\\<eaf-browser-edit-mode-map>"
-            " EAF/browser EDIT: "
-            "Confirm with `\\[eaf-browser-edit-buffer-confirm]', "
-            "Cancel with `\\[eaf-browser-edit-buffer-cancel]'. ")))
+            "\\<eaf-edit-mode-map>"
+            " EAF/" eaf--buffer-app-name " EDIT: "
+            "Confirm with `\\[eaf-edit-buffer-confirm]', "
+            "Cancel with `\\[eaf-edit-buffer-cancel]'. ")))
     (insert focus-text)
     ))
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
