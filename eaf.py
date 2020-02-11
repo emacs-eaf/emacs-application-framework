@@ -177,11 +177,14 @@ class EAF(dbus.service.Object):
         # Add create new window callback if module is browser
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
-            app_buffer.get_focus_text.connect(self.browser_edit_focus_text)
+            app_buffer.get_focus_text.connect(self.edit_focus_text)
             app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
 
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
+
+        elif module_path == "app.pdf-viewer.buffer":
+            app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
         # Restore buffer session.
         self.restore_buffer_session(app_buffer)
@@ -316,7 +319,7 @@ class EAF(dbus.service.Object):
                 buffer.cancel_input_message(callback_type)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
-    def update_browser_focus_text(self, buffer_id, new_text):
+    def update_focus_text(self, buffer_id, new_text):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.set_focus_text(new_text)
@@ -378,7 +381,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def browser_edit_focus_text(self, buffer_id, focus_text):
+    def edit_focus_text(self, buffer_id, focus_text):
         pass
 
     def save_buffer_session(self, buf):
