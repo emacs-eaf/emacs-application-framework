@@ -56,13 +56,13 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-2. Make sure to have ```python3``` installed, and use ```pip3``` to install EAF dependencies:
+2. Make sure to have ```python3``` installed, and use ```pip3``` to install EAF dependencies (see below list for details):
 
 ```Elisp
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
 ```
 
-3. Install and config ```wetty```:
+3. (For EAF Terminal to work *only*) Install and configure ```wetty```:
 ```Bash
 # Install wetty
 sudo yarn global add wetty
@@ -75,20 +75,20 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
-Package info:
+### Dependency List
+Packages listed as **Core** are mandatory to make EAF to work, whereas packages listed as **Application** are optional - install if you want the corresponding EAF feature.
 
-| Package       | Package Repo | Classification | Package Description                                |
-| :--------     | :----        | :------        | :------                                            |
-| dbus-python   | pip3         | Core           | DBus IPC to communicate python with elisp          |
-| python-xlib   | pip3         | Core           | Stick app window into Emacs frame                  |
-| pyqt5         | pip3         | Core           | GUI library required for applications              |
-| pyqtwebengine | pip3         | Core           | Browser: QtWebEngine for browser application       |
-| pymupdf       | pip3         | Application    | PDF Viewer: Rendering engine                       |
-| grip          | pip3         | Application    | Markdown Previewer: Markdown render server         |
-| qrcode        | pip3         | Application    | File Transfer: Render QR code pointing local files |
-| feedparser    | pip3         | Application    | RSS Reader: feed parser                            |
-| wetty         | yarn         | Application    | Terminal: Share SSH over Web                       |
-
+| Package       | Package Repo | Classification | Description and Depended by ...                         |
+| :--------     | :----        | :------        | :------                                                 |
+| pyqt5         | pip3         | Core           | Essential GUI library                                   |
+| dbus-python   | pip3         | Core           | DBus IPC to connect Python with Elisp                   |
+| python-xlib   | pip3         | Core           | Stick application window into Emacs frame               |
+| pyqtwebengine | pip3         | Core           | Depended by EAF Browser and some other EAF Applications |
+| pymupdf       | pip3         | Application    | Depended by EAF PDF Viewer                              |
+| grip          | pip3         | Application    | Depended by EAF Markdown Previewer                      |
+| qrcode        | pip3         | Application    | Depended by EAF File Transfer                           |
+| feedparser    | pip3         | Application    | Depended by EAF RSS Reader                              |
+| wetty         | yarn         | Application    | Depended by EAF Terminal                                |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
