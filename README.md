@@ -131,7 +131,7 @@ EAF implements three major functionalities:
 3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
 ### How about EXWM? What makes EAF special?
-1. EAF gives you control over your program, while satisfying Emacs window design model. [EXWM](https://github.com/ch11ng/exwm) is only a tiling WM, that combines different applications together in an Emacs-like fashion. However, EXWM is unable to split the same application into two different windows while displaying different same application at the same time. For example, EAF is able to display same PDF on two different windows.
+1. EAF gives you control over your program, while satisfying Emacs window design model. [EXWM](https://github.com/ch11ng/exwm) is only a Windows Manager, that combines different applications together in an Emacs-like fashion. EXWM is unable to split the same application into two different windows while displaying the same application in parallel. On the other hand, EAF is able to display the same PDF on two different windows.
 2. EAF essentially provides Emacs a secondary scripting language ([this topic had been brought up again in EmacsConf2019](https://media.emacsconf.org/2019/26.html) and [reddit](https://www.reddit.com/r/emacs/comments/e1wfoe/emacs_the_editor_for_the_next_40_years/)). Emacs Lisp doesn't render graphics very well, especially it doesn't play nicely with the browser. This is (an example of) where PyQt5 can come in handy.
 3. With DBus IPC, EAF can use Python to control Emacs Lisp, conversely also true that Emacs Lisp can control Qt rendering and Python code.
 4. EXWM, as a Windows Manager, does its job very well. Therefore, it doesn't have control and doesn't care at all how other program functions. For example, EXWM cannot control keyboard events of other programs. On the other hand, you can configure them in EAF either using existing features (see above) or write code to contribute to this repository.
@@ -139,7 +139,7 @@ EAF implements three major functionalities:
 
 ### EAF is (currently) Linux only. Why?
 There are mainly three obstacles:
-1. None of EAF's core developers use MacOS or Windows
+1. None of EAF's core developers use MacOS or Windows or BSD family OS.
 2. EAF uses X11 Reparent to stick Qt5 window to emacs frame, struggling to make X11 to work on MacOS.
 3. Strugglling to make dbus/python-dbus work on MacOS High Sierra
 4. Strugglling to make Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
