@@ -216,6 +216,7 @@ class Buffer(QGraphicsScene):
         self.buffer_widget.set_emacs_var = self.set_emacs_var
         self.buffer_widget.eval_in_emacs = self.eval_in_emacs
         self.buffer_widget.send_input_message = self.send_input_message
+        self.buffer_widget.buffer = self
 
     def handle_destroy(self):
         self.before_destroy_hook.emit()
