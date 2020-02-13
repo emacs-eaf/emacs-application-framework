@@ -79,7 +79,6 @@ class BrowserView(QWebEngineView):
         else:
             filtered = dict((k, v) for k, v in qd.items())
 
-        print(parsed.netloc, parsed.path)
         return urlunparse([
             parsed.scheme,
             parsed.netloc,
@@ -447,6 +446,12 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.loadFinished.connect(self.stop_progress)
 
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
+
+    def handle_destroy(self):
+        # Load blank page to stop video playing, such as youtube.com.
+        self.buffer_widget.open_url("about:blank")
+
+        super.handle_destroy(self)
 
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.

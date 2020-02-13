@@ -60,7 +60,4 @@ class AppBuffer(BrowserBuffer):
     def handle_destroy(self):
         os.killpg(os.getpgid(self.background_process.pid), signal.SIGTERM)
 
-        self.before_destroy_hook.emit()
-
-        if self.buffer_widget is not None:
-            self.buffer_widget.destroy()
+        super.handle_destroy(self)
