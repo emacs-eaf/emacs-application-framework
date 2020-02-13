@@ -222,7 +222,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-blank-page-url . "https://www.google.com")
     (eaf-browser-dark-mode . "false")
     (eaf-browser-scroll-behavior . "auto")
-    (eaf-browser-marker-letters . "ASDFHJKLWEIOPCNM")
+    (eaf-browser-marker-letters . "ASDFHJKLWEOPCNM")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
