@@ -73,20 +73,13 @@ class BrowserView(QWebEngineView):
     def filter_url(self, url):
         parsed = urlparse(url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
-        filtered = dict((k, v) for k, v in qd.items()
-                        # Remove google' track parameters.
-                        if not k.startswith("gs_l")
-                        and not k.startswith("safe")
-                        and not k.startswith("oq")
-                        and not k.startswith("sa")
-                        and not k.startswith("start")
-                        and not k.startswith("biw")
-                        and not k.startswith("bih")
-                        and not k.startswith("tbs")
-                        and not k.startswith("ved")
-                        and not k.startswith("uact")
-                        and not k.startswith("ei")
-                        and not k.startswith("newwindow"))
+        if parsed.netloc.startswith("www.google.com"):
+            # Only save search parameters for Google, avoid duplicate url for same keyword.
+            filtered = dict((k, v) for k, v in qd.items() if k.startswith("q"))
+        else:
+            filtered = dict((k, v) for k, v in qd.items())
+
+        print(parsed.netloc, parsed.path)
         return urlunparse([
             parsed.scheme,
             parsed.netloc,
