@@ -37,7 +37,7 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, False, QColor(0, 0, 0, 255))
 
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
     def get_table_file(self):
@@ -198,7 +198,7 @@ class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, url, config_dir, background_color, buffer_id):
+    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
@@ -207,6 +207,7 @@ class PdfViewerWidget(QWidget):
         self.buffer_id = buffer_id
         self.installEventFilter(self)
         self.setMouseTracking(True)
+        self.emacs_var_dict = emacs_var_dict
 
         # Load document first.
         self.document = fitz.open(url)
@@ -584,7 +585,7 @@ class PdfViewerWidget(QWidget):
         self.mark_link_annot_cache_dict.clear()
 
     def generate_random_key(self, count):
-        letters = "ASDFHJKLQWEIOP"
+        letters = self.emacs_var_dict["eaf-marker-letters"]
         key_list = []
         key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
         while count > 0:
