@@ -78,17 +78,17 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ### Dependency List
 Packages listed as **Core** are mandatory to make EAF to work, whereas packages listed as **Application** are optional - install if you want the corresponding EAF feature.
 
-| Package       | Package Repo | Classification | Description and Depended by ...                         |
-| :--------     | :----        | :------        | :------                                                 |
-| pyqt5         | pip3         | Core           | Essential GUI library                                   |
-| dbus-python   | pip3         | Core           | DBus IPC to connect Python with Elisp                   |
-| python-xlib   | pip3         | Core           | Stick application window into Emacs frame               |
-| pyqtwebengine | pip3         | Core           | Depended by EAF Browser and some other EAF Applications |
-| pymupdf       | pip3         | Application    | Depended by EAF PDF Viewer                              |
-| grip          | pip3         | Application    | Depended by EAF Markdown Previewer                      |
-| qrcode        | pip3         | Application    | Depended by EAF File Transfer                           |
-| feedparser    | pip3         | Application    | Depended by EAF RSS Reader                              |
-| wetty         | yarn         | Application    | Depended by EAF Terminal                                |
+| Package       | Package Repo | Classification | Description and Depended by ...                         | Tips                                     |
+| :--------     | :----        | :------        | :------                                                 | :------                                  |
+| pyqt5         | pip3         | Core           | Essential GUI library                                   |                                          |
+| dbus-python   | pip3         | Core           | DBus IPC to connect Python with Elisp                   |                                          |
+| python-xlib   | pip3         | Core           | Stick application window into Emacs frame               |                                          |
+| pyqtwebengine | pip3         | Core           | Depended by EAF Browser and some other EAF Applications |                                          |
+| pymupdf       | pip3         | Application    | Depended by EAF PDF Viewer                              | pip3 install pymupdf==<suitable-version> |
+| grip          | pip3         | Application    | Depended by EAF Markdown Previewer                      |                                          |
+| qrcode        | pip3         | Application    | Depended by EAF File Transfer                           |                                          |
+| feedparser    | pip3         | Application    | Depended by EAF RSS Reader                              |                                          |
+| wetty         | yarn         | Application    | Depended by EAF Terminal                                |                                          |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
