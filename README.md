@@ -35,7 +35,17 @@ EAF is extensible, you can develop any PyQt application and integrate it into Em
 |                                                   |                                                     |
 
 ## Install EAF
-1. Clone this repository, add to ```load-path```, and add the following to ```.emacs```
+1. For Arch Linux users, you can find [emacs-eaf](https://aur.archlinux.org/packages/emacs-eaf/) in AUR. Install it and jump to step 4.
+
+2. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
+
+```Elisp
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
+```
+
+3. Clone this git repository.
+
+4. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to your Emacs config:
 
 ```Elisp
 (require 'eaf)
@@ -45,7 +55,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
 
 ```Elisp
 (use-package eaf
-  :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
+  :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :custom
   (eaf-find-alternate-file-in-dired t)
   :config
@@ -56,13 +66,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-2. Make sure to have ```python3``` installed, and use ```pip3``` to install EAF dependencies (see below list for details):
-
-```Elisp
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
-```
-
-3. (For EAF Terminal to work *only*) Install and configure ```wetty```:
+5. For EAF Terminal to work *only*: Install and configure ```wetty```:
 ```Bash
 # Install wetty
 sudo yarn global add wetty
@@ -140,7 +144,7 @@ EAF implements three major functionalities:
 ### EAF is (currently) Linux only. Why?
 There are mainly three obstacles:
 1. None of EAF's core developers use MacOS or Windows or BSD family OS.
-2. EAF uses X11 Reparent to stick Qt5 window to emacs frame, struggling to make X11 to work on MacOS.
+2. EAF uses X11 Reparent to stick Qt5 window to Emacs frame, struggling to make X11 to work on MacOS.
 3. Strugglling to make dbus/python-dbus work on MacOS High Sierra
 4. Strugglling to make Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
 5. If you've figure them out, PRs are always welcome
@@ -198,7 +202,7 @@ If we missed your package, please make a PR to add it to the list.
 
 For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
 
-If you encounter any problem with EAF, please use command `emacs -q` with minimal setups and re-test to see if the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your emacs config.
+If you encounter any problem with EAF, please use command `emacs -q` with minimal setups and re-test to see if the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your Emacs config.
 
 If the problem persists, please [report bug here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
 
