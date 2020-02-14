@@ -149,9 +149,10 @@ been initialized."
   (setq-local window-combination-resize t)
   (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
   (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
-  ;; copy default value in case user already has bindings there
-  (setq-local emulation-mode-map-alists
-              (default-value 'emulation-mode-map-alists))
+  ;; Copy default value in case user already has bindings there
+  (setq-local emulation-mode-map-alists (default-value 'emulation-mode-map-alists))
+  ;; Disable cursor in eaf buffer.
+  (setq-local cursor-type nil)
   (push (list (cons t eaf-mode-map))
         emulation-mode-map-alists)
   (add-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill nil t)
