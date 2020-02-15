@@ -79,7 +79,7 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
-6. For EAF Browser download to work, please install ```aria2c``` and ```aria2p```
+6. For EAF Browser download to work, please install ```aria2``` and ```aria2p```
 
 ### Dependency List
 Packages listed as **Core** are mandatory to make EAF to work, whereas packages listed as **Application** are optional - install if you want the corresponding EAF feature.
@@ -95,7 +95,7 @@ Packages listed as **Core** are mandatory to make EAF to work, whereas packages 
 | qrcode        | pip3         | Application    | Depended by EAF File Transfer                           |
 | feedparser    | pip3         | Application    | Depended by EAF RSS Reader                              |
 | aria2p        | pip3         | Application    | Depended by EAF Browser                                 |
-| aria2c        | pacman       | Application    | Depended by EAF Browser                                 |
+| aria2         | pacman       | Application    | Depended by EAF Browser                                 |
 | wetty         | yarn         | Application    | Depended by EAF Terminal                                |
 
 ## Launch EAF Applications
