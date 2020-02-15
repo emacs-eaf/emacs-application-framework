@@ -40,7 +40,7 @@ EAF is extensible, you can develop any PyQt application and integrate it into Em
 2. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
 
 ```Elisp
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
 ```
 
 3. Clone this git repository.
@@ -79,6 +79,8 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
+6. For EAF Browser download to work, please install ```aria2c``` and ```aria2p```
+
 ### Dependency List
 Packages listed as **Core** are mandatory to make EAF to work, whereas packages listed as **Application** are optional - install if you want the corresponding EAF feature.
 
@@ -92,6 +94,8 @@ Packages listed as **Core** are mandatory to make EAF to work, whereas packages 
 | grip          | pip3         | Application    | Depended by EAF Markdown Previewer                      |
 | qrcode        | pip3         | Application    | Depended by EAF File Transfer                           |
 | feedparser    | pip3         | Application    | Depended by EAF RSS Reader                              |
+| aria2p        | pip3         | Application    | Depended by EAF Browser                                 |
+| aria2c        | pacman       | Application    | Depended by EAF Browser                                 |
 | wetty         | yarn         | Application    | Depended by EAF Terminal                                |
 
 ## Launch EAF Applications
@@ -163,7 +167,7 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
 ```Elisp
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser --force-reinstall
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p --force-reinstall
 ```
 
 ### Github Personal Access Tokens?
