@@ -79,7 +79,7 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
-6. For EAF Browser download to work, please install ```aria2``` and ```aria2p```
+6. For EAF Browser download to work, please install ```aria2```.
 
 ### Dependency List
 Packages listed as **Core** are mandatory to make EAF to work, whereas packages listed as **Application** are optional - install if you want the corresponding EAF feature.
@@ -147,20 +147,23 @@ EAF implements three major functionalities:
 Both projects only from the interface is very similar to the senses, EAF and EXWM on the design goals are two completely different projects, please do not do meaningless comparison, thanks!
 
 ### EAF is (currently) Linux only. Why?
-There are mainly three obstacles:
+Below are mainly obstacles:
 1. None of EAF's core developers use MacOS or Windows or BSD family OS.
-2. EAF uses X11 Reparent to stick Qt5 window to Emacs frame, struggling to make X11 to work on MacOS.
-3. Strugglling to make dbus/python-dbus work on MacOS High Sierra
-4. Strugglling to make Qt5 QGraphicsView/QGraphicsScene work on MacOS, specifically QGraphicsVideoItem cannot work.
-5. If you've figure them out, PRs are always welcome
+2. EAF uses X11 Reparent to stick Qt5 window to Emacs frame, we know that other OS how to implement similar techniques.
+3. DBus is Linux-specific technical, it's difficult to support DBus in other OS.
+4. Qt5's QGraphicsScene technology not work on MacOS.
+
+If you've figure them out, PRs are always welcome
 
 ### How about Wayland?
 EAF use X11 XReparent, Wayland doesn't support it as of now.
 
-We recommend to use KDE out of all DEs, it's stable enough and supports X11 XReparent. You will get the best support because we ourselves use it.
+We recommend to use KDE or Xfce, they supports X11 XReparent and handling of keyboard focus events correctly. Other DE, LightDE or TileWM not support EAf very well, such as ```i3wm``` or ```awesome```.
 
 ### `[EAF] *eaf* aborted (core dumped)`
 Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
+
+If Python dependences is ok, please send issue `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
 
 ### "undefined symbol" error
 If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes, it's a bug of Arch.

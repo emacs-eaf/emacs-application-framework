@@ -1,5 +1,5 @@
 # 什么是 Emacs Application Framework (EAF)? [English Version](https://github.com/manateelazycat/emacs-application-framework/blob/master/README.md)
-EAF 是一个全新的图形应用框架，扩展Emacs的多媒体能力，最终达到 Live in Emacs 的项目目标。
+EAF 是一个全新的图形应用框架，扩展Emacs的多媒体能力，最终达到 Live in Emacs 的目标。
 
 ## EAF 应用展示
 EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集成在Emacs中。
@@ -79,10 +79,10 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
-6. 浏览器的下载功能依赖aria2, 需要你安装 ```aria2``` 和 ```aria2p``` 这两个工具
+6. 浏览器的下载功能依赖aria2, 还需要你额外安装 ```aria2``` 这个工具。
 
 ### 依赖列表说明
-**核心**分类表示必须的功能，这些包必须安装好EAF才能工作，**应用**分类表示可选，只有当你需要对应的应用时你才需要安装这些依赖，当然我们推荐你把所有依赖都安装，到你使用的时候就不用再次折腾。
+**核心** 分类表示必备依赖，这些包必须安装好EAF才能工作，**应用** 分类表示可选依赖，只有当你需要对应的应用时，你才需要安装这些依赖，当然我们推荐你把所有依赖都安装了，到你使用的时候就不用再次折腾。
 
 | 包名          | 安装方式 | 分类    | 解释                                                 |
 | :--------     | :----    | :------ | :------                                              |
@@ -104,12 +104,12 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | 浏览器           | `M-x eaf-open-browser` 在浏览器中打开或搜索                                 |
 |                  | `M-x eaf-open-browser-with-history` 搜索历史或者打开URL                     |
 | HTML邮件渲染     | `M-x eaf-open-mail-as-html` 在 `gnus`, `mu4e`, `notmuch` 等邮件客户端中执行 |
-| PDF阅读器        | `M-x eaf-open` 输入PD文件                                                   |
+| PDF阅读器        | `M-x eaf-open` 输入PDF文件                                                   |
 | 视频播放器       | `M-x eaf-open` 输入视频文件                                                 |
 | 图片浏览器       | `M-x eaf-open` 输入图片文件                                                 |
 | Markdown预览程序 | `M-x eaf-open` 输入markdown文件                                             |
 | Org-mode预览程序 | `M-x eaf-open` 输入org文件                                                  |
-| 摄像头           | `M-x eaf-open-camera`                                                       |
+| 摄像头程序           | `M-x eaf-open-camera`                                                       |
 | 终端模拟器       | `M-x eaf-open-terminal`                                                     |
 | 二维码下载文件   | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`           |
 | 二维码上传文件   | `M-x eaf-file-receiver-qrcode`                                              |
@@ -121,7 +121,7 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 
 ```
 注意：
-EAF使用DBus的不同权限总线 (session bus), 请不要用 sudo 来启动EAF, root用户只能访问系统权限总线 (system bus)
+EAF使用DBus的普通权限总线 (session bus), 请不要用 sudo 来启动EAF, root用户只能访问系统权限总线 (system bus)
 ```
 
 ## Wiki
@@ -151,20 +151,20 @@ EAF和EXWM在设计上是两个完全不同的项目，所以请大家多多学�
 1. 核心开发者主要使用Manjaro Linux, 目前为止，核心开发者并不使用其他操作系统，比如MacOS， Windows， BSD
 2. EAF跨进程窗口混合技术依赖Linux下的X11 XReparent技术，其他操作系统可能有类似的技术，但是核心开发者不熟悉其他操作系统的底层技术
 3. DBus是Linux下专用的进程间通讯技术，其他操作系统可能无法支持DBus
-4. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口，也就无法支持Emacs的Buffer/Window模型
+4. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
 
-欢迎别的操作系统黑客移植EAF，主要的技术障碍就只有三个：XReparent, IPC, QGraphicsScene
+欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有三个：XReparent, DBus, QGraphicsScene
 
 ### 为什么不支持Wayland?
 EAF依赖X11的XReparent技术, Wayland并不支持跨进程窗口融合技术
 
-我们推荐你使用KDE或者Xfce这两个桌面环境，他们对XReparent技术有很好的支持，其他的轻量级窗口管理器和平铺窗口管理器对XReparent技术的支持和焦点处理不完备，没法很好的支持EAF，比如i3wm, awesome都无法使EAF正常工作。
+我们推荐你使用KDE或者Xfce这两个桌面环境，他们对XReparent技术有很好的支持，其他的轻量级窗口管理器和平铺窗口管理器对XReparent技术的支持和键盘焦点处理不完备，没法很好的支持EAF，比如i3wm, awesome都无法使EAF正常工作。
 
 ### `[EAF] 奔溃了怎么办？
-请检查 `*eaf*` 这个窗口的内容，通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue, 那里面有很多线索。
+请检查 `*eaf*` 这个窗口的内容，通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue, 那里面有很多线索可以帮助我们排查问题。
 
 ### "undefined symbol" 错误
-如果你启动的时候发现 "undefined symbol" 错误, 并且你使用的是Arch系统，那肯定是因为Arch自身的bug，Arch系统每次升级以后重新使用pip3安装一次Python依赖包就可以解决这个问题:
+如果你启动的时候发现 "undefined symbol" 错误, 并且你使用的是Arch系统，那肯定是因为Arch自身的bug，Arch系统每次升级以后, 重新使用pip3安装一次Python依赖包就可以解决这个问题:
 
 ```Elisp
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p --force-reinstall
@@ -180,7 +180,7 @@ Markdown预览程序依赖grip, 你需要访问[Github Personal access token](ht
 如果不设置个人标记，Github会弹出 "超出使用次数" 的错误。
 
 ### 代理
-可以通过下面设置来实现代理访问互联网：
+可以通过下面设置来通过代理访问互联网：
 
 ```Elisp
 (setq eaf-proxy-type "http")
@@ -202,11 +202,11 @@ Markdown预览程序依赖grip, 你需要访问[Github Personal access token](ht
 
 ## 反馈问题
 
-反馈安装和配置问题之前，请先阅读[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)！
+### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)!!!
 
-如果你遇到任何问题, 请先用命令 `emacs -q` 并只添加EAF做一个对比测试，如果 `emacs -q` 的时候可以工作，请检查你个人的配置文件。
+如果你遇到任何问题, 请先用命令 `emacs -q` 并只添加EAF配置，做一个对比测试，如果 `emacs -q` 的时候可以工作，请检查你个人的配置文件。
 
-如果问题依旧，请到[这里](https://github.com/manateelazycat/emacs-application-framework/issues/new)反馈。
+如果```emacs -q```环境下问题依旧，请到[这里](https://github.com/manateelazycat/emacs-application-framework/issues/new)反馈。
 
 ## 加入我们
 你想把Emacs开发成一个操作系统吗？
