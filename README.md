@@ -138,12 +138,13 @@ EAF implements three major functionalities:
 2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via DBus IPC.
 3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
-### How about EXWM? What makes EAF special?
-1. EAF gives you control over your program, while satisfying Emacs window design model. [EXWM](https://github.com/ch11ng/exwm) is only a Windows Manager, that combines different applications together in an Emacs-like fashion. EXWM is unable to split the same application into two different windows while displaying the same application in parallel. On the other hand, EAF is able to display the same PDF on two different windows.
-2. EAF essentially provides Emacs a secondary scripting language ([this topic had been brought up again in EmacsConf2019](https://media.emacsconf.org/2019/26.html) and [reddit](https://www.reddit.com/r/emacs/comments/e1wfoe/emacs_the_editor_for_the_next_40_years/)). Emacs Lisp doesn't render graphics very well, especially it doesn't play nicely with the browser. This is (an example of) where PyQt5 can come in handy.
-3. With DBus IPC, EAF can use Python to control Emacs Lisp, conversely also true that Emacs Lisp can control Qt rendering and Python code.
-4. EXWM, as a Windows Manager, does its job very well. Therefore, it doesn't have control and doesn't care at all how other program functions. For example, EXWM cannot control keyboard events of other programs. On the other hand, you can configure them in EAF either using existing features (see above) or write code to contribute to this repository.
-5. From a higher point of view, EAF is using Emacs' design principles to extend GUI programs. You have the ability to control good GUI programs using Emacs keybindings. To achieve the ultimate goal: live in Emacs ;)
+### EAF vs EXWM?
+1. The goal of EAF and EXWM are to improve collaboration efficiency Emacs and other tools.
+2. EXWM is a X11 Window Manager, control other tools by keyboard; EAF is not a Window Manager, it use Emacs as a Window Manager.
+3. The goal of EAF is create PyQt5 application to expand the multimedia capabilities of Emacs, the ultimate goal is "Live In Emacs".
+4. According to EAF programming model, you can use Elisp control Python code, vice versa, you even can use Elisp control JavaScript code in browser, or any other tools.
+
+Both projects only from the interface is very similar to the senses, EAF and EXWM on the design goals are two completely different projects, please do not do meaningless comparison, thanks!
 
 ### EAF is (currently) Linux only. Why?
 There are mainly three obstacles:
