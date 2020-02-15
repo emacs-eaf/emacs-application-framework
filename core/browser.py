@@ -24,11 +24,12 @@ from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch
+from core.utils import touch, is_port_in_use
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
 import base64
+import subprocess
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
@@ -66,6 +67,9 @@ class BrowserView(QWebEngineView):
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
         self.dark_mode_js = self.read_js_content("dark_mode.js")
+
+    def open_download_manage_page(self):
+        self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-webui", "index.html")))
 
     def read_js_content(self, js_file):
         return open(os.path.join(os.path.dirname(__file__), "js", js_file), "r").read()
@@ -447,6 +451,16 @@ class BrowserBuffer(Buffer):
 
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
 
+        self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
+
+    def handle_download_request(self, download_item):
+        self.try_start_aria2_daemon()
+
+        with open(os.devnull, "w") as null_file:
+            subprocess.Popen(["aria2p", "add", download_item.url().toString()], stdout=null_file)
+
+        self.message_to_emacs.emit("Start download: " + download_item.url().toString())
+
     def handle_destroy(self):
         # Load blank page to stop video playing, such as youtube.com.
         self.buffer_widget.open_url("about:blank")
@@ -520,6 +534,30 @@ class BrowserBuffer(Buffer):
 
     def scroll_right(self):
         self.buffer_widget.scroll_right()
+
+    def try_start_aria2_daemon(self):
+        if not is_port_in_use(6800):
+            with open(os.devnull, "w") as null_file:
+                aria2_args = ["aria2c"]
+
+                aria2_args.append("-d")
+                aria2_args.append(os.path.expanduser(str(self.emacs_var_dict["eaf-browser-aria2-download-path"])))
+
+                aria2_proxy_host = str(self.emacs_var_dict["eaf-browser-aria2-proxy-host"])
+                aria2_proxy_port = str(self.emacs_var_dict["eaf-browser-aria2-proxy-port"])
+
+                if aria2_proxy_host != "" and aria2_proxy_port != "":
+                    aria2_args.append("--all-proxy")
+                    aria2_args.append("http://{0}:{1}".format(aria2_proxy_host, aria2_proxy_port))
+
+                aria2_args.append("--enable-rpc")
+                aria2_args.append("--rpc-listen-all")
+
+                subprocess.Popen(aria2_args, stdout=null_file)
+
+    def open_download_manage_page(self):
+        self.try_start_aria2_daemon()
+        self.buffer_widget.open_download_manage_page()
 
     def scroll_up(self):
         self.buffer_widget.scroll_up()
@@ -655,6 +693,10 @@ class BrowserBuffer(Buffer):
     @insert_or_do
     def insert_or_new_blank_page(self):
         self.new_blank_page()
+
+    @insert_or_do
+    def insert_or_open_download_manage_page(self):
+        self.open_download_manage_page()
 
     @insert_or_do
     def insert_or_refresh_page(self):

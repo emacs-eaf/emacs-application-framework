@@ -223,6 +223,9 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-blank-page-url . "https://www.google.com")
     (eaf-browser-dark-mode . "false")
     (eaf-browser-scroll-behavior . "auto")
+    (eaf-browser-aria2-proxy-host . "")
+    (eaf-browser-aria2-proxy-port . "")
+    (eaf-browser-aria2-download-path . "~/Downloads")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
@@ -273,6 +276,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
+    ("i" . "insert_or_open_download_manage_page")
     ("r" . "insert_or_refresh_page")
     ("g" . "insert_or_scroll_to_begin")
     ("x" . "insert_or_close_buffer")
@@ -1163,6 +1167,9 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
    (< (length (split-string url)) 2)
    ;; Use regexp matching URL.
    (or
+    (and
+     (string-prefix-p "file://" url)
+     (string-suffix-p ".html" url))
     ;; Normal url address.
     (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
     ;; Localhost url.
@@ -1171,7 +1178,8 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
 (defun eaf-wrap-url (url)
   "Wraps URL with prefix http:// if URL does not include it."
   (if (or (string-prefix-p "http://" url)
-          (string-prefix-p "https://" url))
+          (string-prefix-p "https://" url)
+          (string-prefix-p "file://" url))
       url
     (concat "http://" url)))
 
