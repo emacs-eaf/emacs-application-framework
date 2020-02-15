@@ -283,7 +283,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("G" . "insert_or_scroll_to_bottom")
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
-    ("M-i" . "eval_js_file")
+    ("M-i" . "open_download_manage_page")
+    ("M-p" . "eval_js_file")
     ("<f5>" . "refresh_page"))
   "The keybinding of EAF Browser."
   :type 'cons)
