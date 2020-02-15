@@ -90,8 +90,14 @@ class AppBuffer(BrowserBuffer):
             exists = False
             with open(self.history_log_file_path, "w") as f:
                 for line in lines:
-                    title = re.match(self.history_url_pattern, line).group(1)
-                    url = re.match(self.history_url_pattern, line).group(2)
+                    line_match = re.match(self.history_url_pattern, line)
+                    
+                    if line_match != None:
+                        title = line_match.group(1)
+                        url = line_match.group(2)
+                    else:
+                        title = ""
+                        url = line
 
                     if url == new_url:
                         exists = True
