@@ -1,4 +1,4 @@
-# What is Emacs Application Framework (EAF)?
+# What is Emacs Application Framework (EAF)? [中文版本](https://github.com/manateelazycat/emacs-application-framework/blob/master/README_CN.md)
 EAF extends GNU Emacs to an entire universe of powerful GUI applications.
 
 ## EAF Application Overview
