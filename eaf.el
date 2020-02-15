@@ -223,9 +223,9 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-blank-page-url . "https://www.google.com")
     (eaf-browser-dark-mode . "false")
     (eaf-browser-scroll-behavior . "auto")
+    (eaf-browser-download-path . "~/Downloads")
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
-    (eaf-browser-aria2-download-path . "~/Downloads")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.

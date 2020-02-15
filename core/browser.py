@@ -541,7 +541,7 @@ class BrowserBuffer(Buffer):
                 aria2_args = ["aria2c"]
 
                 aria2_args.append("-d")
-                aria2_args.append(os.path.expanduser(str(self.emacs_var_dict["eaf-browser-aria2-download-path"])))
+                aria2_args.append(os.path.expanduser(str(self.emacs_var_dict["eaf-browser-download-path"])))
 
                 aria2_proxy_host = str(self.emacs_var_dict["eaf-browser-aria2-proxy-host"])
                 aria2_proxy_port = str(self.emacs_var_dict["eaf-browser-aria2-proxy-port"])
