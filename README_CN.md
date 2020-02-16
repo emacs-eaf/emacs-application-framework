@@ -1,4 +1,6 @@
-# 什么是 Emacs Application Framework (EAF)? [English Version](https://github.com/manateelazycat/emacs-application-framework/blob/master/README.md)
+You are reading Chinese version, International users please read [English Version](https://github.com/manateelazycat/emacs-application-framework/blob/master/README.md)
+
+# 什么是 Emacs Application Framework (EAF)?
 EAF 是一个全新的图形应用框架，扩展Emacs的多媒体能力，最终达到 Live in Emacs 的目标。
 
 ## EAF 应用展示
