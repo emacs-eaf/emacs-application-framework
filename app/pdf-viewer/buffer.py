@@ -637,11 +637,18 @@ class PdfViewerWidget(QWidget):
         key = key.upper()
         if key in self.jump_link_key_cache_dict:
             link = self.jump_link_key_cache_dict[key]
-            self.save_current_pos()
-            self.jump_to_page(link["page"] + 1)
-        self.delete_all_mark_jump_link_tips()
-        self.update()
-        self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
+            if "page" in link:
+                self.cleanup_links()
+
+                self.save_current_pos()
+                self.jump_to_page(link["page"] + 1)
+
+                self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
+            elif "uri" in link:
+                self.cleanup_links()
+
+                self.buffer.open_url_in_new_tab.emit(link["uri"])
+                self.buffer.message_to_emacs.emit("Open " + link["uri"])
 
     def cleanup_links(self):
         self.is_jump_link = False
