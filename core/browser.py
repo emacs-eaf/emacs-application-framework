@@ -30,6 +30,7 @@ from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
 import base64
 import subprocess
+import re
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
@@ -442,6 +443,11 @@ class BrowserBuffer(Buffer):
 
         self.add_widget(BrowserView(config_dir))
 
+        self.config_dir = config_dir
+        self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
+        self.history_url_pattern = re.compile("(.*?)\s([^\s]+)$")
+        self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
+
         # Set User Agent with Firefox's one to make EAF browser can login in Google account.
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent("Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/72.0")
@@ -633,6 +639,75 @@ class BrowserBuffer(Buffer):
     def is_focus(self):
         return self.buffer_widget.get_focus_text() != None
 
+    def record_history(self, new_title):
+        if self.arguments != "temp_html_file" and new_title != "about:blank" and self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+            touch(self.history_log_file_path)
+            with open(self.history_log_file_path, "r") as f:
+                lines = f.readlines()
+
+            new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
+            exists = False
+            with open(self.history_log_file_path, "w") as f:
+                for line in lines:
+                    line_match = re.match(self.history_url_pattern, line)
+
+                    if line_match != None:
+                        title = line_match.group(1)
+                        url = line_match.group(2)
+                    else:
+                        title = ""
+                        url = line
+
+                    if url == new_url:
+                        exists = True
+                        if new_title != title:
+                            f.write(new_title + " " + new_url + "\n")
+                    else:
+                        f.write(line)
+                if not exists:
+                    f.write(new_title + " " + new_url + "\n")
+
+    def adjust_dark_mode(self):
+        try:
+            if self.emacs_var_dict["eaf-browser-dark-mode"] == "true":
+                self.dark_mode()
+        except Exception:
+            pass
+
+    def new_blank_page(self):
+        self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
+
+    def clear_history(self):
+        if os.path.exists(self.history_log_file_path):
+            os.remove(self.history_log_file_path)
+            self.message_to_emacs.emit("Cleared browsing history.")
+        else:
+            self.message_to_emacs.emit("There is no browsing history.")
+
+    def record_close_page(self, url):
+        if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+            touch(self.history_close_file_path)
+            with open(self.history_close_file_path, "a") as f:
+                f.write("{0}\n".format(url))
+
+    def recover_prev_close_page(self):
+        if os.path.exists(self.history_close_file_path):
+            with open(self.history_close_file_path, "r") as f:
+                close_urls = f.readlines()
+
+                if len(close_urls) > 0:
+                    # We need use rstrip remove \n char from url record.
+                    prev_close_url = close_urls.pop().rstrip()
+
+                    self.open_url_in_new_tab.emit(prev_close_url)
+                    open(self.history_close_file_path, "w").writelines(close_urls)
+
+                    self.message_to_emacs.emit("Recovery {0}".format(prev_close_url))
+                else:
+                    self.message_to_emacs.emit("No page need recovery.")
+        else:
+            self.message_to_emacs.emit("No page need recovery.")
+
     def insert_or_do(func):
         def _do(self, *args, **kwargs):
             if self.is_focus():
@@ -640,6 +715,10 @@ class BrowserBuffer(Buffer):
             else:
                 func(self, *args, **kwargs)
         return _do
+
+    @insert_or_do
+    def insert_or_recover_prev_close_page(self):
+        self.recover_prev_close_page()
 
     @insert_or_do
     def insert_or_scroll_up(self):

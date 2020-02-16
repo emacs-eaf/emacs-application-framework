@@ -276,7 +276,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
-    ("T" . "recover_prev_close_page")
+    ("T" . "insert_or_recover_prev_close_page")
     ("i" . "insert_or_open_download_manage_page")
     ("r" . "insert_or_refresh_page")
     ("g" . "insert_or_scroll_to_begin")
