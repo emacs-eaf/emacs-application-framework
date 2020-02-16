@@ -36,16 +36,11 @@ class AppBuffer(Buffer):
 
         self.add_widget(RSSReaderWidget(config_dir))
 
-        self.buffer_widget.browser.message_to_emacs = self.message_to_emacs
-        self.buffer_widget.browser.set_emacs_var = self.set_emacs_var
-        self.buffer_widget.browser.eval_in_emacs = self.eval_in_emacs
-        self.buffer_widget.browser.send_input_message = self.send_input_message
-
     def add_subscription(self):
-        self.buffer_widget.send_input_message("Subscribe to RSS feed: ", "add_subscription")
+        self.send_input_message("Subscribe to RSS feed: ", "add_subscription")
 
     def delete_subscription(self):
-        self.buffer_widget.send_input_message("Are you sure you want to delete the current feed? (y or n): ", "delete_subscription")
+        self.send_input_message("Are you sure you want to delete the current feed? (y or n): ", "delete_subscription")
 
     def next_subscription(self):
         self.buffer_widget.next_subscription()
@@ -166,7 +161,7 @@ class RSSReaderWidget(QWidget):
 
         welcome_title_label = QLabel("Welcome to EAF RSS Reader!")
         welcome_title_label.setFont(QFont('Arial', 24))
-        welcome_title_label.setStyleSheet("QLabel {color: white; font-weight: bold; margin: 20px;}")
+        welcome_title_label.setStyleSheet("QLabel {color: #333; font-weight: bold; margin: 20px;}")
         welcome_title_label.setAlignment(Qt.AlignHCenter)
 
         add_subscription_label = QLabel("Press 'a' to subscribe to a feed!")
@@ -254,7 +249,7 @@ class RSSReaderWidget(QWidget):
         if not self.feed_exists(feed_link):
             self.fetch_feed(feed_link, True)
         else:
-            self.message_to_emacs.emit("Feed already exists: " + feed_link)
+            self.buffer.message_to_emacs.emit("Feed already exists: " + feed_link)
 
     def delete_subscription(self):
         feed_count = self.feed_list.count()
@@ -283,7 +278,7 @@ class RSSReaderWidget(QWidget):
             else:
                 self.feed_list.setCurrentRow(feed_count - 2)
             self.handle_feed(self.feed_list.currentItem())
-            self.message_to_emacs.emit("Removed feed: " + feed_title)
+            self.buffer.message_to_emacs.emit("Removed feed: " + feed_title)
 
     def feed_exists(self, feed_link):
         if not os.path.exists(self.feed_file_path):
@@ -314,7 +309,7 @@ class RSSReaderWidget(QWidget):
                     }
 
                     self.save_feed_dict(feed_dict)
-                    self.message_to_emacs.emit("Add feed: " + feed_link)
+                    self.buffer.message_to_emacs.emit("Add feed: " + feed_link)
         except Exception:
             import traceback
             traceback.print_exc()
@@ -323,7 +318,7 @@ class RSSReaderWidget(QWidget):
                 "title": feed_title,
                 "unread_articles": article_ids
             }})
-            self.message_to_emacs.emit("Add feed: " + feed_link)
+            self.buffer.message_to_emacs.emit("Add feed: " + feed_link)
 
     def save_feed_dict(self, feed_dict):
         with open(self.feed_file_path, "w") as f:
@@ -393,7 +388,7 @@ class RSSReaderWidget(QWidget):
             self.feed_list.setCurrentRow(0)
 
     def handle_invalid_rss(self, feed_link):
-        self.message_to_emacs.emit("Invalid feed link: " + feed_link)
+        self.buffer.message_to_emacs.emit("Invalid feed link: " + feed_link)
 
     def mark_article_read(self, feed_link, post_link):
         if os.path.exists(self.feed_file_path):
@@ -427,7 +422,7 @@ class RSSReaderWidget(QWidget):
             self.feed_list.scrollToItem(self.feed_list.currentItem())
             self.handle_feed(self.feed_list.currentItem())
         else:
-            self.message_to_emacs.emit("End of subscribed feeds")
+            self.buffer.message_to_emacs.emit("End of subscribed feeds")
 
     def prev_subscription(self):
         current_row = self.feed_list.currentRow()
@@ -437,7 +432,7 @@ class RSSReaderWidget(QWidget):
             self.feed_list.scrollToItem(self.feed_list.currentItem())
             self.handle_feed(self.feed_list.currentItem())
         else:
-            self.message_to_emacs.emit("Beginning of subscribed feeds")
+            self.buffer.message_to_emacs.emit("Beginning of subscribed feeds")
 
     def first_subscription(self):
         self.feed_list.setCurrentRow(0)
@@ -460,7 +455,7 @@ class RSSReaderWidget(QWidget):
             self.article_list.scrollToItem(self.article_list.currentItem())
             self.handle_article(self.article_list.currentItem())
         else:
-            self.message_to_emacs.emit("End of articles")
+            self.buffer.message_to_emacs.emit("End of articles")
 
     def prev_article(self):
         current_row = self.article_list.currentRow()
@@ -470,7 +465,7 @@ class RSSReaderWidget(QWidget):
             self.article_list.scrollToItem(self.article_list.currentItem())
             self.handle_article(self.article_list.currentItem())
         else:
-            self.message_to_emacs.emit("Beginning of articles")
+            self.buffer.message_to_emacs.emit("Beginning of articles")
 
     def first_article(self):
         self.article_list.setCurrentRow(0)

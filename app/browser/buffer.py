@@ -91,7 +91,7 @@ class AppBuffer(BrowserBuffer):
             with open(self.history_log_file_path, "w") as f:
                 for line in lines:
                     line_match = re.match(self.history_url_pattern, line)
-                    
+
                     if line_match != None:
                         title = line_match.group(1)
                         url = line_match.group(2)
@@ -109,4 +109,4 @@ class AppBuffer(BrowserBuffer):
                     f.write(new_title + " " + new_url + "\n")
 
     def new_blank_page(self):
-        self.buffer_widget.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
+        self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))

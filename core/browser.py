@@ -102,13 +102,13 @@ class BrowserView(QWebEngineView):
 
     def search_text_forward(self):
         if self.search_term == "":
-            self.send_input_message("Forward Search Text: ", "search_text_forward")
+            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
             self._search_text(self.search_term)
 
     def search_text_backward(self):
         if self.search_term == "":
-            self.send_input_message("Backward Search Text: ", "search_text_backward")
+            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 

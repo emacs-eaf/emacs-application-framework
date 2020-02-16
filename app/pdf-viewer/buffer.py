@@ -114,10 +114,10 @@ class AppBuffer(Buffer):
         self.buffer_widget.zoom_out()
 
     def jump_to_page(self):
-        self.buffer_widget.send_input_message("Jump to Page: ", "jump_page")
+        self.send_input_message("Jump to Page: ", "jump_page")
 
     def jump_to_percent(self):
-        self.buffer_widget.send_input_message("Jump to Percent: ", "jump_percent")
+        self.send_input_message("Jump to Percent: ", "jump_percent")
 
     def save_current_pos(self):
         self.buffer_widget.save_current_pos()
@@ -133,7 +133,7 @@ class AppBuffer(Buffer):
 
     def jump_to_link(self):
         self.buffer_widget.add_mark_jump_link_tips()
-        self.buffer_widget.send_input_message("Jump to Link: ", "jump_link")
+        self.send_input_message("Jump to Link: ", "jump_link")
 
     def action_quit(self):
         if self.buffer_widget.is_mark_search:
@@ -147,13 +147,13 @@ class AppBuffer(Buffer):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.jump_next_match()
         else:
-            self.buffer_widget.send_input_message("Search Text: ", "search_text")
+            self.send_input_message("Search Text: ", "search_text")
 
     def search_text_backward(self):
         if self.buffer_widget.is_mark_search:
             self.buffer_widget.jump_last_match()
         else:
-            self.buffer_widget.send_input_message("Search Text: ", "search_text")
+            self.send_input_message("Search Text: ", "search_text")
 
     def copy_select(self):
         if self.buffer_widget.is_select_mode:
@@ -301,17 +301,17 @@ class PdfViewerWidget(QWidget):
 
     def save_current_pos(self):
         self.remember_offset = self.scroll_offset
-        self.message_to_emacs.emit("Saved current position.")
+        self.buffer.message_to_emacs.emit("Saved current position.")
 
     def jump_to_saved_pos(self):
         if self.remember_offset is None:
-            self.message_to_emacs.emit("Cannot jump from this position.")
+            self.buffer.message_to_emacs.emit("Cannot jump from this position.")
         else:
             current_scroll_offset = self.scroll_offset
             self.scroll_offset = self.remember_offset
             self.update()
             self.remember_offset = current_scroll_offset
-            self.message_to_emacs.emit("Jumped to saved position.")
+            self.buffer.message_to_emacs.emit("Jumped to saved position.")
 
     def get_page_pixmap(self, index, scale):
         # Just return cache pixmap when found match index and scale in cache dict.
@@ -634,14 +634,14 @@ class PdfViewerWidget(QWidget):
 
     def jump_to_link(self, key):
         self.is_jump_link = True
-        key = str(key).upper()
+        key = key.upper()
         if key in self.jump_link_key_cache_dict:
             link = self.jump_link_key_cache_dict[key]
             self.save_current_pos()
             self.jump_to_page(link["page"] + 1)
         self.delete_all_mark_jump_link_tips()
         self.update()
-        self.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
+        self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
 
     def cleanup_links(self):
         self.is_jump_link = False
@@ -681,26 +681,26 @@ class PdfViewerWidget(QWidget):
                     search_text_index += 1
         self.update()
         if(len(self.search_text_offset_list) == 0):
-            self.message_to_emacs.emit("No results found with \"" + text + "\".")
+            self.buffer.message_to_emacs.emit("No results found with \"" + text + "\".")
             self.is_mark_search = False
         else:
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
-            self.message_to_emacs.emit("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
+            self.buffer.message_to_emacs.emit("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
 
     def jump_next_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index + 1) % len(self.search_text_offset_list)
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
-            self.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
+            self.buffer.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def jump_last_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index - 1) % len(self.search_text_offset_list)
             self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
-            self.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
+            self.buffer.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def cleanup_search(self):
-        self.message_to_emacs.emit("Unmarked all matched results.")
+        self.buffer.message_to_emacs.emit("Unmarked all matched results.")
         if self.search_text_annot_cache_dict:
             for page_index in self.search_text_annot_cache_dict.keys():
                 page = self.document[page_index]
@@ -882,7 +882,7 @@ class PdfViewerWidget(QWidget):
             if fitz.Point(ex, ey) in annot.rect:
                 self.is_hover_annot = True
                 annot.setOpacity(0.5)
-                self.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
+                self.buffer.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
             else:
                 annot.setOpacity(1) # restore annot
                 self.is_hover_annot = False
@@ -907,7 +907,7 @@ class PdfViewerWidget(QWidget):
                 if annot.type[0] == 0:
                     self.get_focus_text.emit(self.buffer_id, annot.info["content"])
                 else:
-                    self.message_to_emacs.emit("Cannot edit. Only support text annot type.")
+                    self.buffer.message_to_emacs.emit("Cannot edit. Only support text annot type.")
 
     def update_annot_text(self, annot_text):
         page, annot = self.hover_annot()
