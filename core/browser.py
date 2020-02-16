@@ -434,6 +434,7 @@ class BrowserCookieStorage:
 
 class BrowserBuffer(Buffer):
 
+    close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
@@ -462,6 +463,8 @@ class BrowserBuffer(Buffer):
         self.message_to_emacs.emit("Start download: " + download_item.url().toString())
 
     def handle_destroy(self):
+        self.close_page.emit(self.buffer_widget.url().toString())
+
         # Load blank page to stop video playing, such as youtube.com.
         self.buffer_widget.open_url("about:blank")
 

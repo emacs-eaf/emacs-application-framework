@@ -276,6 +276,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
+    ("T" . "recover_prev_close_page")
     ("i" . "insert_or_open_download_manage_page")
     ("r" . "insert_or_refresh_page")
     ("g" . "insert_or_scroll_to_begin")
@@ -551,7 +552,7 @@ For now only EAF browser app is supported."
            (bookmark-jump cand))
           (t
            (unless (derived-mode-p 'eaf-mode)
-             (user-error "This command can only be called in an EAF buffer!"))
+             (message "This command can only be called in an EAF buffer!"))
            ;; create new one for current buffer with provided name
            (bookmark-set cand)))))
 
@@ -587,7 +588,7 @@ For now only EAF browser app is supported."
   "Start EAF process if it isn't started."
   (cond
    ((or (eq eaf--first-start-url nil) (eq eaf--first-start-app-name nil) (eq eaf--first-start-arguments nil))
-    (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
+    (message "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((process-live-p eaf-process)
     (message "[EAF] Process is already running."))
    (t
@@ -704,7 +705,7 @@ When called interactively, copy to ‘kill-ring’."
       (if (called-interactively-p 'any)
           (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
         (eaf-call "call_function" eaf--buffer-id "get_url"))
-    (user-error "This command can only be called in an EAF buffer!")))
+    (message "This command can only be called in an EAF buffer!")))
 
 (defun eaf-share-path-or-url ()
   "Share the current file path or web URL as QRCode."
@@ -721,7 +722,7 @@ When called interactively, copy to ‘kill-ring’."
           ;; Ensure this is only called from EAF buffer
           (if (derived-mode-p 'eaf-mode)
               (eaf-call "execute_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
-            (user-error "%s command can only be called in an EAF buffer!" sym)))
+            (message "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
 
@@ -1323,7 +1324,7 @@ By default, `eaf-open' will switch to buffer if corresponding url exists.
 
 When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "F[EAF] EAF Open: ")
-  ;; Try to set app-name along with url if app-name is unset.
+;; Try to set app-name along with url if app-name is unset.
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
@@ -1341,7 +1342,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
-    (user-error
+    (message
      (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
              (cond
               ((not (or (string-prefix-p "/" url)

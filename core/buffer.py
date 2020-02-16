@@ -215,6 +215,7 @@ class Buffer(QGraphicsScene):
         self.buffer_widget.buffer = self
 
     def handle_destroy(self):
+        # Record close page before close action.
         self.before_destroy_hook.emit()
 
         if self.buffer_widget is not None:

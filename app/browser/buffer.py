@@ -44,8 +44,9 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setUrl(QUrl(url))
 
         self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
-
         self.history_url_pattern = re.compile("(.*?)\s([^\s]+)$")
+
+        self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
 
         self.buffer_widget.titleChanged.connect(self.record_history)
         self.buffer_widget.titleChanged.connect(self.change_title)
@@ -66,12 +67,37 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.loadFinished.connect(self.adjust_dark_mode)
 
+        self.close_page.connect(self.record_close_page)
+
     def adjust_dark_mode(self):
         try:
             if self.emacs_var_dict["eaf-browser-dark-mode"] == "true":
                 self.dark_mode()
         except Exception:
             pass
+
+    def record_close_page(self, url):
+        touch(self.history_close_file_path)
+        with open(self.history_close_file_path, "a") as f:
+            f.write("{0}\n".format(url))
+
+    def recover_prev_close_page(self):
+        if os.path.exists(self.history_close_file_path):
+            with open(self.history_close_file_path, "r") as f:
+                close_urls = f.readlines()
+
+                if len(close_urls) > 0:
+                    # We need use rstrip remove \n char from url record.
+                    prev_close_url = close_urls.pop().rstrip()
+
+                    self.open_url_in_new_tab.emit(prev_close_url)
+                    open(self.history_close_file_path, "w").writelines(close_urls)
+
+                    self.message_to_emacs.emit("Recovery {0}".format(prev_close_url))
+                else:
+                    self.message_to_emacs.emit("No page need recovery.")
+        else:
+            self.message_to_emacs.emit("No page need recovery.")
 
     def clear_history(self):
         if os.path.exists(self.history_log_file_path):
