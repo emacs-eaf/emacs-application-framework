@@ -147,38 +147,7 @@ class BrowserView(QWebEngineView):
             # Send mouse event to applicatin view.
             self.trigger_focus_event.emit("{0},{1}".format(event.globalX(), event.globalY()))
 
-        if event.type() == QEvent.MouseButtonRelease:
-            hit = self.web_page.hitTestContent(event.pos())
-            clicked_url = hit.linkUrl()
-            base_url = hit.baseUrl()
-
-            if clicked_url is not None and base_url is not None and clicked_url != base_url and clicked_url != '':
-                result = ""
-
-                if 'http://' in clicked_url or 'https://' in clicked_url:
-                    result = clicked_url
-                elif clicked_url == "#":
-                    result = base_url + clicked_url
-                else:
-                    # Don't open url in EAF if clicked_url is not start with http/ftp or #
-                    result = "http://" + base_url.split("/")[2] + clicked_url
-
-                    event.accept()
-                    return False
-
-                modifiers = QApplication.keyboardModifiers()
-
-                if modifiers == Qt.ControlModifier:
-                    self.open_url_new_buffer(result)
-                else:
-                    self.open_url(result)
-
-                return True
-
-            event.accept()
-            return False
-
-        elif event.type() == QEvent.MouseButtonPress:
+        if event.type() == QEvent.MouseButtonPress:
             if event.button() == MOUSE_FORWARD_BUTTON:
                 self.forward()
 
@@ -217,7 +186,7 @@ class BrowserView(QWebEngineView):
         self.eval_js(self.read_js_content(js_file))
 
     def execute_js(self, js):
-        return self.web_page.executeJavaScript(js)
+        return self.web_page.execute_javascript(js)
 
     def scroll_left(self):
         self.eval_js("document.scrollingElement.scrollBy(-35, 0)")
@@ -263,11 +232,11 @@ class BrowserView(QWebEngineView):
 
     def select_all(self):
         # We need window focus before select all text.
-        self.execute_js("window.focus()")
+        self.eval_js("window.focus()")
         self.triggerPageAction(self.web_page.SelectAll)
 
     def select_input_text(self):
-        self.execute_js(self.select_input_text_js)
+        self.eval_js(self.select_input_text_js)
 
     def get_url(self):
         return self.execute_js("window.location.href;")
@@ -279,24 +248,24 @@ class BrowserView(QWebEngineView):
     def get_link_markers(self):
         return self.execute_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
 
-    def jump_to_link(self, marker):
+    def get_marker_link(self, marker):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
         link = self.execute_js(self.goto_marker_js)
         self.cleanup_links()
+        return link
+
+    def jump_to_link(self, marker):
+        link = self.get_marker_link(marker)
         if link != "":
             self.open_url(link)
 
     def jump_to_link_new_buffer(self, marker):
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.execute_js(self.goto_marker_js)
-        self.cleanup_links()
+        link = self.get_marker_link(marker)
         if link != "":
             self.open_url_new_buffer(link)
 
     def jump_to_link_background_buffer(self, marker):
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.execute_js(self.goto_marker_js)
-        self.cleanup_links()
+        link = self.get_marker_link(marker)
         if link != "":
             self.open_url_background_buffer(link)
 
@@ -305,109 +274,32 @@ class BrowserView(QWebEngineView):
 
     def set_focus_text(self, new_text):
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", str(base64.b64encode(new_text.encode("utf-8")), "utf-8"));
-        self.execute_js(self.set_focus_text_js)
+        self.eval_js(self.set_focus_text_js)
 
     def clear_focus(self):
-        self.execute_js(self.clear_focus_js)
+        self.eval_js(self.clear_focus_js)
 
     def dark_mode(self):
-        self.execute_js(self.dark_mode_js)
+        self.eval_js(self.dark_mode_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
         QWebEnginePage.__init__(self)
 
-    def hitTestContent(self, pos):
-        return WebHitTestResult(self, pos)
-
-    def mapToViewport(self, pos):
-        return QPointF(pos.x(), pos.y())
-
-    def executeJavaScript(self, scriptSrc):
+    def execute_javascript(self, script_src):
         self.loop = QEventLoop()
         self.result = QVariant()
         QTimer.singleShot(250, self.loop.quit)
 
-        self.runJavaScript(scriptSrc, self.callbackJS)
+        self.runJavaScript(script_src, self.callback_js)
         self.loop.exec_()
         self.loop = None
         return self.result
 
-    def callbackJS(self, res):
+    def callback_js(self, res):
         if self.loop is not None and self.loop.isRunning():
             self.result = res
             self.loop.quit()
-
-class WebHitTestResult():
-    def __init__(self, page, pos):
-        self.page = page
-        self.pos = pos
-        self.m_linkUrl = self.page.url().toString()
-        self.m_baseUrl = self.page.url().toString()
-        self.viewportPos = self.page.mapToViewport(self.pos)
-        with open(os.path.join(os.path.dirname(__file__), "js", "open_in_new_tab.js"), "r") as f:
-            self.open_in_new_tab_raw = f.read()
-
-        self.open_in_new_tab_js = self.open_in_new_tab_raw.replace("%1", str(self.viewportPos.x())).replace("%2", str(self.viewportPos.y()))
-        self.dic = self.page.executeJavaScript(self.open_in_new_tab_js)
-        if self.dic is None:
-            return
-
-        self.m_isNull = False
-        self.m_baseUrl = self.dic["baseUrl"]
-        self.m_alternateText = self.dic["alternateText"]
-        self.m_imageUrl = self.dic["imageUrl"]
-        self.m_isContentEditable = self.dic["contentEditable"]
-        self.m_isContentSelected = self.dic["contentSelected"]
-        self.m_linkTitle = self.dic["linkTitle"]
-        self.m_linkUrl = self.dic["linkUrl"]
-        self.m_mediaUrl = self.dic["mediaUrl"]
-        try:
-            self.m_mediaPaused = self.dic["mediaPaused"]
-            self.m_mediaMuted = self.dic["mediaMuted"]
-        except Exception:
-            pass
-        self.m_tagName = self.dic["tagName"]
-
-    def linkUrl(self):
-        return self.m_linkUrl
-
-    def isContentEditable(self):
-        return self.m_isContentEditable
-
-    def isContentSelected(self):
-        return self.m_isContentSelected
-
-    def imageUrl(self):
-        try:
-            return self.m_imageUrl
-        except Exception:
-            return ""
-
-    def mediaUrl(self):
-        return self.m_mediaUrl
-
-    def baseUrl(self):
-        return self.m_baseUrl
-
-    def updateWithContextMenuData(self, data):
-        if data.isValid():
-            pass
-        else:
-            return
-
-        self.m_linkTitle = data.linkText()
-        self.m_linkUrl = data.linkUrl().toString()
-        self.m_isContentEditable = data.isContentEditable()
-        if data.selectedText() == "":
-            self.m_isContentSelected = False
-        else:
-            self.m_isContentSelected = True
-
-        if data.mediaType() == QWebEngineContextMenuData.MediaTypeImage:
-            self.m_imageUrl = data.mediaUrl().toString()
-        elif data.mediaType() == QWebEngineContextMenuData.MediaTypeAudio or data.mediaType() == QWebEngineContextMenuData.MediaTypeVideo:
-            self.m_mediaUrl = data.mediaUrl().toString()
 
 class BrowserCookieStorage:
     def __init__(self, config_dir):
