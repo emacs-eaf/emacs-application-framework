@@ -58,6 +58,6 @@ class AppBuffer(BrowserBuffer):
             self.change_title(paths[-1])
 
     def handle_destroy(self):
-        os.killpg(os.getpgid(self.background_process.pid), signal.SIGTERM)
+        os.kill(self.background_process.pid, signal.SIGTERM)
 
         super.handle_destroy(self)
