@@ -246,7 +246,7 @@ class BrowserView(QWebEngineView):
         self.eval_js("document.querySelector('.eaf-style').remove();")
 
     def get_link_markers(self):
-        return self.execute_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+        self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
 
     def get_marker_link(self, marker):
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
