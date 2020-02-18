@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Feb  8 20:14:10 2020 (-0500)
+;; Last-Updated: Tue Feb 18 15:49:48 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1230,8 +1230,8 @@ This function works best if paired with a fuzzy search package."
                  (file-name-as-directory "history")
                  "log.txt")))
     (if (file-exists-p browser-history-file-path)
-        (let* ((history-list (with-temp-buffer (insert-file-contents browser-history-file-path)
-                                               (split-string (buffer-string) "\n" t)))
+        (let* ((history-list (reverse (with-temp-buffer (insert-file-contents browser-history-file-path)
+                                                        (split-string (buffer-string) "\n" t))))
                (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
                (history-url (when (string-match "[^\s]+$" history)
                               (match-string 0 history))))

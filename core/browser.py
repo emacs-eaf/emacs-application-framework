@@ -341,7 +341,8 @@ class BrowserBuffer(Buffer):
 
         self.config_dir = config_dir
         self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
-        self.history_url_pattern = re.compile("(.*?)\s([^\s]+)$")
+        self.history_url_pattern = re.compile("(.*)\s(https?:[^\s]+)$")
+        self.short_url_pattern = re.compile("https?://(.+)")
         self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
 
         # Set User Agent with Firefox's one to make EAF browser can login in Google account.
@@ -483,11 +484,9 @@ class BrowserBuffer(Buffer):
                 lines = f.readlines()
 
             new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
-            exists = False
             with open(self.history_log_file_path, "w") as f:
                 for line in lines:
                     line_match = re.match(self.history_url_pattern, line)
-
                     if line_match != None:
                         title = line_match.group(1)
                         url = line_match.group(2)
@@ -495,14 +494,12 @@ class BrowserBuffer(Buffer):
                         title = ""
                         url = line
 
-                    if url == new_url:
-                        exists = True
-                        if new_title != title:
-                            f.write(new_title + " " + new_url + "\n")
-                    else:
+                    short_url = re.match(self.short_url_pattern, url)
+                    short_new_url = re.match(self.short_url_pattern, new_url)
+                    if short_url != None and short_new_url != None and short_url.group(1) != short_new_url.group(1):
                         f.write(line)
-                if not exists:
-                    f.write(new_title + " " + new_url + "\n")
+
+                f.write(new_title + " " + new_url + "\n")
 
     def adjust_dark_mode(self):
         try:
