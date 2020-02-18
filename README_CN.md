@@ -48,7 +48,7 @@ sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcod
 3. 使用 ```git clone``` 下载这个仓库.
 
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
 4. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:

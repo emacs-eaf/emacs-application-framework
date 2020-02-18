@@ -48,7 +48,7 @@ sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcod
 3. Clone this repository.
 
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
 4. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
