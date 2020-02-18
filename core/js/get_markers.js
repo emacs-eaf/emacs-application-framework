@@ -54,9 +54,9 @@
         let rect;
         for(let i = 0; i < elements.length; i++) {
             rect = getCoords(elements[i]);
-            if(isElementOnScreen(rect)
-               && isElementOnTop(elements[i], rect)
-               && !hasCopy(validRects, rect)){
+            if(!hasCopy(validRects, rect) &&
+               isElementOnScreen(rect) &&
+               isElementOnTop(elements[i], rect)){
                 validRects.push(rect);
             }
         }
