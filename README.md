@@ -36,6 +36,13 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 | <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
 |                                                   |                                                     |
 
+| Aria2 Download Manager                         |
+| :--------:                                     |
+| <img src="./screenshot/aria2.gif" width="400"> |
+|                                                |
+
+
+
 ## Install
 1. For Arch Linux users, one can install [emacs-eaf](https://aur.archlinux.org/packages/emacs-eaf/) in AUR and jump to step 4.
 
