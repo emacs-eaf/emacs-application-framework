@@ -68,6 +68,7 @@ class BrowserView(QWebEngineView):
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
         self.dark_mode_js = self.read_js_content("dark_mode.js")
+        self.get_selection_text_js = self.read_js_content("get_selection_text.js")
 
     def open_download_manage_page(self):
         self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-webui", "index.html")))
@@ -211,6 +212,9 @@ class BrowserView(QWebEngineView):
 
     def scroll_to_bottom(self):
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+
+    def get_selection_text(self):
+        return self.execute_js(self.get_selection_text_js)
 
     def refresh_page(self):
         self.reload()
@@ -483,7 +487,7 @@ class BrowserBuffer(Buffer):
 
     def copy_text(self):
         self.buffer_widget.copy_text()
-        self.message_to_emacs.emit("Copy selected text.")
+        self.message_to_emacs.emit("Copy '" + self.buffer_widget.get_selection_text() + "'")
 
     def yank_text(self):
         self.buffer_widget.yank_text()
