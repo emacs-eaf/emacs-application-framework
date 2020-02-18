@@ -300,3 +300,12 @@ class Buffer(QGraphicsScene):
 
     def get_url(self):
         return self.url
+
+    def build_widget_method(self, method_name, widget_method_name=None, message=None):
+        if widget_method_name:
+            setattr(self, method_name, getattr(self.buffer_widget, widget_method_name))
+        else:
+            setattr(self, method_name, getattr(self.buffer_widget, method_name))
+
+        if message != None:
+            self.message_to_emacs.emit(message)

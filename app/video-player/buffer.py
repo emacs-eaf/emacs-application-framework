@@ -33,6 +33,9 @@ class AppBuffer(Buffer):
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
 
+        for method_name in ["play_backward", "play_forward"]:
+            self.build_widget_method(method_name)
+
     def all_views_hide(self):
         # Pause video before all views hdie, otherwise will got error "Internal data stream error".
         if self.buffer_widget.media_player.state() == QMediaPlayer.PlayingState:
@@ -57,12 +60,6 @@ class AppBuffer(Buffer):
         else:
             self.buffer_widget.media_player.play()
             self.buffer_widget.video_need_replay = True
-
-    def play_backward(self):
-        self.buffer_widget.seek_backward()
-
-    def play_forward(self):
-        self.buffer_widget.seek_forward()
 
 class VideoPlayerWidget(QWidget):
 

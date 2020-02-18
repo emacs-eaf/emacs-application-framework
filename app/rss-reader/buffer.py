@@ -36,53 +36,30 @@ class AppBuffer(Buffer):
 
         self.add_widget(RSSReaderWidget(config_dir))
 
+        for method_name in ["next_subscription", "prev_subscription", "next_article", "prev_article",
+                            "first_subscription", "last_subscription", "first_article", "last_article"]:
+            self.build_widget_method(method_name)
+
+        for method_name in ["scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
+                         "search_text_forward", "search_text_backward"]:
+            self.build_browser_method(method_name)
+
+        self.build_browser_method("action_quit", "search_quit")
+
+    def build_browser_method(self, method_name, widget_method_name=None, message=None):
+        if widget_method_name:
+            setattr(self, method_name, getattr(self.buffer_widget.browser, widget_method_name))
+        else:
+            setattr(self, method_name, getattr(self.buffer_widget.browser, method_name))
+
+        if message != None:
+            self.message_to_emacs.emit(message)
+
     def add_subscription(self):
         self.send_input_message("Subscribe to RSS feed: ", "add_subscription")
 
     def delete_subscription(self):
         self.send_input_message("Are you sure you want to delete the current feed? (y or n): ", "delete_subscription")
-
-    def next_subscription(self):
-        self.buffer_widget.next_subscription()
-
-    def prev_subscription(self):
-        self.buffer_widget.prev_subscription()
-
-    def next_article(self):
-        self.buffer_widget.next_article()
-
-    def prev_article(self):
-        self.buffer_widget.prev_article()
-
-    def first_subscription(self):
-        self.buffer_widget.first_subscription()
-
-    def last_subscription(self):
-        self.buffer_widget.last_subscription()
-
-    def first_article(self):
-        self.buffer_widget.first_article()
-
-    def last_article(self):
-        self.buffer_widget.last_article()
-
-    def scroll_up(self):
-        self.buffer_widget.browser.scroll_up()
-
-    def scroll_down(self):
-        self.buffer_widget.browser.scroll_down()
-
-    def scroll_up_page(self):
-        self.buffer_widget.browser.scroll_up_page()
-
-    def scroll_down_page(self):
-        self.buffer_widget.browser.scroll_down_page()
-
-    def scroll_to_begin(self):
-        self.buffer_widget.browser.scroll_to_begin()
-
-    def scroll_to_bottom(self):
-        self.buffer_widget.browser.scroll_to_bottom()
 
     def handle_input_message(self, result_type, result_content):
         if result_type == "search_text_forward":
@@ -103,9 +80,6 @@ class AppBuffer(Buffer):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer":
             self.buffer_widget.browser.cleanup_links()
 
-    def action_quit(self):
-        self.buffer_widget.browser.search_quit()
-
     def open_link(self):
         self.buffer_widget.browser.open_link()
         self.send_input_message("Open Link: ", "jump_link");
@@ -113,12 +87,6 @@ class AppBuffer(Buffer):
     def open_link_new_buffer(self):
         self.buffer_widget.browser.open_link_new_buffer()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
-
-    def search_text_forward(self):
-        self.buffer_widget.browser.search_text_forward()
-
-    def search_text_backward(self):
-        self.buffer_widget.browser.search_text_backward()
 
 class RSSReaderWidget(QWidget):
 

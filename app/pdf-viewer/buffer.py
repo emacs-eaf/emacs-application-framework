@@ -40,6 +40,11 @@ class AppBuffer(Buffer):
         self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
+        for method_name in ["scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_home", "scroll_to_end",
+                            "zoom_reset", "zoom_in", "zoom_out", "save_current_pos", "jump_to_saved_pos",
+                            "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
+            self.build_widget_method(method_name)
+
     def get_table_file(self):
         return self.buffer_widget.table_file_path
 
@@ -83,53 +88,11 @@ class AppBuffer(Buffer):
         self.buffer_widget.inverted_mode = inverted_mode == "True"
         self.buffer_widget.update()
 
-    def scroll_up(self):
-        self.buffer_widget.scroll_up()
-
-    def scroll_down(self):
-        self.buffer_widget.scroll_down()
-
-    def scroll_up_page(self):
-        self.buffer_widget.scroll_up_page()
-
-    def scroll_down_page(self):
-        self.buffer_widget.scroll_down_page()
-
-    def toggle_read_mode(self):
-        self.buffer_widget.toggle_read_mode()
-
-    def scroll_to_home(self):
-        self.buffer_widget.scroll_to_home()
-
-    def scroll_to_end(self):
-        self.buffer_widget.scroll_to_end()
-
-    def zoom_reset(self):
-        self.buffer_widget.zoom_reset()
-
-    def zoom_in(self):
-        self.buffer_widget.zoom_in()
-
-    def zoom_out(self):
-        self.buffer_widget.zoom_out()
-
     def jump_to_page(self):
         self.send_input_message("Jump to Page: ", "jump_page")
 
     def jump_to_percent(self):
         self.send_input_message("Jump to Percent: ", "jump_percent")
-
-    def save_current_pos(self):
-        self.buffer_widget.save_current_pos()
-
-    def jump_to_saved_pos(self):
-        self.buffer_widget.jump_to_saved_pos()
-
-    def toggle_inverted_mode(self):
-        self.buffer_widget.toggle_inverted_mode()
-
-    def toggle_mark_link(self):
-        self.buffer_widget.toggle_mark_link()
 
     def jump_to_link(self):
         self.buffer_widget.add_mark_jump_link_tips()

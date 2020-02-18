@@ -351,10 +351,22 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
         self.buffer_widget.loadFinished.connect(self.stop_progress)
-
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
 
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
+
+        for method_name in ["search_text_forward", "search_text_backward", "zoom_out", "zoom_in", "zoom_reset",
+                            "scroll_left", "scroll_right", "scroll_up", "scroll_down",
+                            "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
+                            "refresh_page", "undo_action", "redo_action", "get_url",
+                            "set_focus_text", "clear_focus", "dark_mode"]:
+            self.build_widget_method(method_name)
+
+        self.build_widget_method("history_backward", "back")
+        self.build_widget_method("history_forward", "forward")
+        self.build_widget_method("action_quit", "search_quit")
+        self.build_widget_method("yank_text", "yank_text", "Yank text.")
+        self.build_widget_method("kill_text", "kill_text", "Kill text.")
 
     def handle_download_request(self, download_item):
         self.try_start_aria2_daemon()
@@ -406,39 +418,9 @@ class BrowserBuffer(Buffer):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer" or result_type == "jump_link_background_buffer":
             self.buffer_widget.cleanup_links()
 
-    def search_text_forward(self):
-        self.buffer_widget.search_text_forward()
-
-    def search_text_backward(self):
-        self.buffer_widget.search_text_backward()
-
-    def history_backward(self):
-        self.buffer_widget.back()
-
-    def history_forward(self):
-        self.buffer_widget.forward()
-
     def clear_all_cookies(self):
         self.buffer_widget.clear_cookies()
         self.message_to_emacs.emit("Cleared all cookies.")
-
-    def action_quit(self):
-        self.buffer_widget.search_quit()
-
-    def zoom_out(self):
-        self.buffer_widget.zoom_out()
-
-    def zoom_in(self):
-        self.buffer_widget.zoom_in()
-
-    def zoom_reset(self):
-        self.buffer_widget.zoom_reset()
-
-    def scroll_left(self):
-        self.buffer_widget.scroll_left()
-
-    def scroll_right(self):
-        self.buffer_widget.scroll_right()
 
     def try_start_aria2_daemon(self):
         if not is_port_in_use(6800):
@@ -464,47 +446,9 @@ class BrowserBuffer(Buffer):
         self.try_start_aria2_daemon()
         self.buffer_widget.open_download_manage_page()
 
-    def scroll_up(self):
-        self.buffer_widget.scroll_up()
-
-    def scroll_down(self):
-        self.buffer_widget.scroll_down()
-
-    def scroll_up_page(self):
-        self.buffer_widget.scroll_up_page()
-
-    def scroll_down_page(self):
-        self.buffer_widget.scroll_down_page()
-
-    def scroll_to_begin(self):
-        self.buffer_widget.scroll_to_begin()
-
-    def scroll_to_bottom(self):
-        self.buffer_widget.scroll_to_bottom()
-
-    def refresh_page(self):
-        self.buffer_widget.refresh_page()
-
     def copy_text(self):
         self.buffer_widget.copy_text()
         self.message_to_emacs.emit("Copy '" + self.buffer_widget.get_selection_text() + "'")
-
-    def yank_text(self):
-        self.buffer_widget.yank_text()
-        self.message_to_emacs.emit("Yank text.")
-
-    def kill_text(self):
-        self.buffer_widget.kill_text()
-        self.message_to_emacs.emit("Kill text.")
-
-    def undo_action(self):
-        self.buffer_widget.undo_action()
-
-    def redo_action(self):
-        self.buffer_widget.redo_action()
-
-    def get_url(self):
-        return self.buffer_widget.get_url()
 
     def open_link(self):
         self.buffer_widget.get_link_markers()
@@ -528,9 +472,6 @@ class BrowserBuffer(Buffer):
             self.get_focus_text.emit(self.buffer_id, text)
         else:
             self.message_to_emacs.emit("No active input element.")
-
-    def set_focus_text(self, new_text):
-        self.buffer_widget.set_focus_text(new_text)
 
     def is_focus(self):
         return self.buffer_widget.get_focus_text() != None
@@ -698,11 +639,5 @@ class BrowserBuffer(Buffer):
         else:
             self.buffer_widget.select_all()
 
-    def clear_focus(self):
-        self.buffer_widget.clear_focus()
-
     def eval_js_file(self):
         self.send_input_message("Eval JS: ", "eval_js_file", "file")
-
-    def dark_mode(self):
-        self.buffer_widget.dark_mode()
