@@ -285,6 +285,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("-" . "insert_or_zoom_out")
     ("=" . "insert_or_zoom_in")
     ("0" . "insert_or_zoom_reset")
+    ("m" . "insert_or_save_as_bookmark")
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")

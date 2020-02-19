@@ -334,14 +334,6 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
 
-    insert_or_do_template = '''
-def insert_or_{0} ():
-    if self.is_focus():
-        self.fake_key_event(self.current_event_string)
-    else:
-        self.{0}()
-'''
-
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
 
@@ -381,7 +373,7 @@ def insert_or_{0} ():
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "open_link", "open_link_new_buffer", "open_link_background_buffer",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
-                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset"]:
+                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark"]:
             self.build_insert_or_do(method_name)
 
     def handle_download_request(self, download_item):

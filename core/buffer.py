@@ -309,3 +309,6 @@ class Buffer(QGraphicsScene):
 
         if message != None:
             self.message_to_emacs.emit(message)
+
+    def save_as_bookmark(self):
+        self.eval_in_emacs.emit('''(bookmark-set)''')
