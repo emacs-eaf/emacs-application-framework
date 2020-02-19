@@ -577,6 +577,10 @@ class BrowserBuffer(Buffer):
     def insert_or_goto_right_tab(self):
         self.goto_right_tab.emit()
 
+    @insert_or_do
+    def insert_or_open_url(self):
+        self.eval_in_emacs.emit('''(eaf-open-browser)''')
+
     def select_all_or_input_text(self):
         if self.is_focus():
             self.buffer_widget.select_input_text()
