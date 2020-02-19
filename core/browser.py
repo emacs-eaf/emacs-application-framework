@@ -579,7 +579,7 @@ class BrowserBuffer(Buffer):
 
     @insert_or_do
     def insert_or_open_url(self):
-        self.eval_in_emacs.emit('''(eaf-open-browser)''')
+        self.eval_in_emacs.emit('''(call-interactively 'eaf-open-browser)''')
 
     def select_all_or_input_text(self):
         if self.is_focus():
