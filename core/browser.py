@@ -178,7 +178,7 @@ class BrowserView(QWebEngineView):
         self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
 
     def zoom_reset(self):
-        self.setZoomFactor(1)
+        self.setZoomFactor(float(self.buffer.emacs_var_dict["eaf-browser-default-zoom"]))
 
     def eval_js(self, js):
         self.web_page.runJavaScript(js)
@@ -334,6 +334,14 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
 
+    insert_or_do_template = '''
+def insert_or_{0} ():
+    if self.is_focus():
+        self.fake_key_event(self.current_event_string)
+    else:
+        self.{0}()
+'''
+
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
 
@@ -368,6 +376,13 @@ class BrowserBuffer(Buffer):
         self.build_widget_method("action_quit", "search_quit")
         self.build_widget_method("yank_text", "yank_text", "Yank text.")
         self.build_widget_method("kill_text", "kill_text", "Kill text.")
+
+        for method_name in ["recover_prev_close_page", "scroll_up", "scroll_down", "scroll_left", "scroll_right",
+                            "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
+                            "open_link", "open_link_new_buffer", "open_link_background_buffer",
+                            "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
+                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset"]:
+            self.build_insert_or_do(method_name)
 
     def handle_download_request(self, download_item):
         self.try_start_aria2_daemon()
@@ -550,73 +565,13 @@ class BrowserBuffer(Buffer):
                 func(self, *args, **kwargs)
         return _do
 
-    @insert_or_do
-    def insert_or_recover_prev_close_page(self):
-        self.recover_prev_close_page()
-
-    @insert_or_do
-    def insert_or_scroll_up(self):
-        self.scroll_up()
-
-    @insert_or_do
-    def insert_or_scroll_down(self):
-        self.scroll_down()
-
-    @insert_or_do
-    def insert_or_scroll_down_page(self):
-        self.scroll_down_page()
-
-    @insert_or_do
-    def insert_or_scroll_up_page(self):
-        self.scroll_up_page()
-
-    @insert_or_do
-    def insert_or_scroll_to_begin(self):
-        self.scroll_to_begin()
-
-    @insert_or_do
-    def insert_or_scroll_to_bottom(self):
-        self.scroll_to_bottom()
-
-    @insert_or_do
-    def insert_or_open_link(self):
-        self.open_link()
-
-    @insert_or_do
-    def insert_or_open_link_new_buffer(self):
-        self.open_link_new_buffer()
-
-    @insert_or_do
-    def insert_or_open_link_background_buffer(self):
-        self.open_link_background_buffer()
-
-    @insert_or_do
-    def insert_or_history_backward(self):
-        self.history_backward()
-
-    @insert_or_do
-    def insert_or_history_forward(self):
-        self.history_forward()
-
-    @insert_or_do
-    def insert_or_scroll_left(self):
-        self.scroll_left()
-
-    @insert_or_do
-    def insert_or_scroll_right(self):
-        self.scroll_right()
-
-    @insert_or_do
-    def insert_or_new_blank_page(self):
-        self.new_blank_page()
-
-    @insert_or_do
-    def insert_or_open_download_manage_page(self):
-        self.open_download_manage_page()
-
-    @insert_or_do
-    def insert_or_refresh_page(self):
-        self.refresh_page()
+    def build_insert_or_do(self, method_name):
+        def _do ():
+            if self.is_focus():
+                self.fake_key_event(self.current_event_string)
+            else:
+                getattr(self, method_name)()
+        setattr(self, "insert_or_{}".format(method_name), _do)
 
     @insert_or_do
     def insert_or_close_buffer(self):
