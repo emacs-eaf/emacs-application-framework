@@ -306,6 +306,12 @@ class EAF(dbus.service.Object):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].fake_key_event(event_string)
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def send_key_sequence(self, buffer_id, event_string):
+        # Send event to buffer when found match buffer.
+        if buffer_id in self.buffer_dict:
+            self.buffer_dict[buffer_id].fake_key_sequence(event_string)
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def handle_input_message(self, buffer_id, callback_type, callback_result):
         for buffer in list(self.buffer_dict.values()):

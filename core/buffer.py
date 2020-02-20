@@ -298,6 +298,25 @@ class Buffer(QGraphicsScene):
 
         self.fake_key_event_filter(event_string)
 
+    def fake_key_sequence(self, event_string):
+        event_list = event_string.split("-")
+
+        if len(event_list) > 1:
+            for widget in [self.buffer_widget.focusProxy()]:
+                first_key = event_list[0]
+                last_key = event_list[-1]
+
+                modifier = Qt.NoModifier
+
+                if first_key == "C":
+                    modifier = Qt.ControlModifier
+                elif first_key == "M":
+                    modifier = Qt.AltModifier
+                elif first_key == "s":
+                    modifier = Qt.MetaModifier
+
+                QApplication.sendEvent(widget, QKeyEvent(QEvent.KeyPress, qt_key_dict[last_key], modifier, last_key))
+
     def get_url(self):
         return self.url
 
