@@ -22,7 +22,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtNetwork import QNetworkCookie
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.utils import touch, is_port_in_use
 from core.buffer import Buffer
@@ -353,8 +353,17 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.loadProgress.connect(self.update_progress)
         self.buffer_widget.loadFinished.connect(self.stop_progress)
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
+        self.buffer_widget.web_page.fullScreenRequested.connect(lambda r: r.accept())
 
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
+
+        settings = QWebEngineSettings.globalSettings()
+        try:
+            settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
+            settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
+            settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
+        except Exception:
+            pass
 
         for method_name in ["search_text_forward", "search_text_backward", "zoom_out", "zoom_in", "zoom_reset",
                             "scroll_left", "scroll_right", "scroll_up", "scroll_down",

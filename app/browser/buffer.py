@@ -21,7 +21,6 @@
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from core.browser import BrowserBuffer
 from core.utils import touch
 import os
@@ -42,21 +41,18 @@ class AppBuffer(BrowserBuffer):
         else:
             self.buffer_widget.setUrl(QUrl(url))
 
+        self.close_page.connect(self.record_close_page)
+
         self.buffer_widget.titleChanged.connect(self.record_history)
         self.buffer_widget.titleChanged.connect(self.change_title)
+
         self.buffer_widget.translate_selected_text.connect(self.translate_text)
+
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url_in_new_tab)
         self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
+
         self.buffer_widget.loadFinished.connect(self.adjust_dark_mode)
-        self.close_page.connect(self.record_close_page)
 
         # Reset to default zoom when page init or url changed.
         self.reset_default_zoom()
         self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
-
-        settings = QWebEngineSettings.globalSettings()
-        try:
-            settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
-            settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
-        except Exception:
-            pass
