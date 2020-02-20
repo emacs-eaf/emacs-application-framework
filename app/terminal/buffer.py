@@ -39,7 +39,7 @@ class AppBuffer(BrowserBuffer):
 
         # Start wetty process.
         self.background_process = subprocess.Popen(
-            "wetty -p {0} --base / --sshuser {1} --sshauth publickey -c bash".format(self.port, getpass.getuser()),
+            "wetty -p {0} --base / --sshuser {1} --sshauth publickey -c {2}".format(self.port, getpass.getuser(), os.environ["SHELL"]),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             shell=True)
