@@ -57,6 +57,8 @@ class BrowserView(QWebEngineView):
 
         self.selectionChanged.connect(self.select_text_change)
 
+        self.urlChanged.connect(lambda url: self.search_quit())
+
         self.load_cookie()
 
         self.search_term = ""
