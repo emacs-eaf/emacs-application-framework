@@ -485,12 +485,13 @@ class BrowserBuffer(Buffer):
         return self.buffer_widget.get_focus_text() != None
 
     def record_history(self, new_title):
-        if self.arguments != "temp_html_file" and new_title != "about:blank" and self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+        new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
+        if self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank" and \
+           self.emacs_var_dict["eaf-browser-remember-history"] == "true":
             touch(self.history_log_file_path)
             with open(self.history_log_file_path, "r") as f:
                 lines = f.readlines()
 
-            new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
             with open(self.history_log_file_path, "w") as f:
                 for line in lines:
                     line_match = re.match(self.history_url_pattern, line)
@@ -501,9 +502,9 @@ class BrowserBuffer(Buffer):
                         title = ""
                         url = line
 
-                    short_url = re.match(self.short_url_pattern, url)
                     short_new_url = re.match(self.short_url_pattern, new_url)
-                    if short_url != None and short_new_url != None and short_url.group(1) != short_new_url.group(1):
+                    short_url = re.match(self.short_url_pattern, url)
+                    if (short_new_url != None and short_url != None and short_url.group(1) != short_new_url.group(1)):
                         f.write(line)
 
                 f.write(new_title + " " + new_url + "\n")
@@ -579,7 +580,7 @@ class BrowserBuffer(Buffer):
 
     @insert_or_do
     def insert_or_open_url(self):
-        self.eval_in_emacs.emit('''(call-interactively 'eaf-open-browser)''')
+        self.eval_in_emacs.emit('''(call-interactively 'eaf-open-browser-with-history)''')
 
     def select_all_or_input_text(self):
         if self.is_focus():
