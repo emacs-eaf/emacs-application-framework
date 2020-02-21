@@ -1,7 +1,7 @@
-### You are reading Chinese version. International users please read [English Version](https://github.com/manateelazycat/emacs-application-framework/blob/master/README.md)
+[English](./README.md) | 简体中文
 
-# 什么是 Emacs Application Framework (EAF)?
-EAF 是一个全新的图形应用框架，扩展Emacs的多媒体能力，最终达到 Living in Emacs 的终极目标。
+# Emacs Application Framework (EAF)
+EAF 是一个全新的图形应用框架，通过扩展Emacs的多媒体能力，最终达到 Live in Emacs 的终极目标。
 
 ## EAF 应用展示
 EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集成在Emacs中。
@@ -91,7 +91,7 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 6. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
 
 ### 依赖列表
-**核心** 分类表示必备依赖，这些包必须安装好EAF才能工作，**应用** 分类表示可选依赖，只有当你需要对应的应用时，你才需要安装这些依赖，当然我们推荐你把所有依赖都安装了，到你使用的时候就不用再次折腾。
+**核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
 | 包名          | 安装方式      | 依赖                                                                 | 解释                                               |
 | :--------     | :----         | :------                                                              | :------                                            |
@@ -229,6 +229,7 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 ## 打赏
 如果我的作品让你的生活充满快乐，欢迎请我喝瓶啤酒，哈哈哈哈
 
+### ManateeLazyCat
 <p float="left">
     <img src="./screenshot/alipay.jpg" width="188">
     <img src="./screenshot/wechat.jpg" width="200">
