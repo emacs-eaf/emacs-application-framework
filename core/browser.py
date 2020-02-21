@@ -343,8 +343,8 @@ class BrowserBuffer(Buffer):
 
         self.config_dir = config_dir
         self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
-        self.history_url_pattern = re.compile("(.*)\s(https?:[^\s]+)$")
-        self.short_url_pattern = re.compile("https?://(.+)")
+        self.history_url_pattern = re.compile("(.*)\s((https?|file):[^\s]+)$")
+        self.short_url_pattern = re.compile("^(https?|file)://(.+)")
         self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
 
         # Set User Agent with Firefox's one to make EAF browser can login in Google account.
@@ -515,7 +515,7 @@ class BrowserBuffer(Buffer):
 
                     short_new_url = re.match(self.short_url_pattern, new_url)
                     short_url = re.match(self.short_url_pattern, url)
-                    if (short_new_url != None and short_url != None and short_url.group(1) != short_new_url.group(1)):
+                    if (short_new_url != None and short_url != None and short_url.group(2) != short_new_url.group(2)):
                         f.write(line)
 
                 f.write(new_title + " " + new_url + "\n")
