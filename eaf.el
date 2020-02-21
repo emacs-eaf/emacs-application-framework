@@ -111,6 +111,7 @@ Don't modify this map directly.  To bind keys for all apps use
 
 (defvar eaf-edit-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-t") #'eaf-edit-buffer-switch-to-org-mode)
     (define-key map (kbd "C-c C-k") #'eaf-edit-buffer-cancel)
     (define-key map (kbd "C-c C-c") #'eaf-edit-buffer-confirm)
     map))
@@ -1484,6 +1485,16 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (kill-buffer)
   (delete-window))
 
+(defun eaf-edit-buffer-switch-to-org-mode ()
+  "Switch to org-mode to edit table handly."
+  (interactive)
+  (org-mode)
+  (outline-show-all)
+  (beginning-of-buffer)
+  (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
+  (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
+  (eaf--edit-set-header-line))
+
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "edit_focus_text"
@@ -1495,15 +1506,22 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
     (switch-to-buffer edit-text-buffer)
     (eaf-edit-mode)
-    (setq header-line-format
-          (substitute-command-keys
-           (concat
-            "\\<eaf-edit-mode-map>"
-            " EAF/" eaf--buffer-app-name " EDIT: "
-            "Confirm with `\\[eaf-edit-buffer-confirm]', "
-            "Cancel with `\\[eaf-edit-buffer-cancel]'. ")))
+    (eaf--edit-set-header-line)
     (insert focus-text)
+    (beginning-of-buffer)
     ))
+
+(defun eaf--edit-set-header-line ()
+  (setq header-line-format
+        (substitute-command-keys
+         (concat
+          "\\<eaf-edit-mode-map>"
+          " EAF/" eaf--buffer-app-name " EDIT: "
+          "Confirm with `\\[eaf-edit-buffer-confirm]', "
+          "Cancel with `\\[eaf-edit-buffer-cancel]'. "
+          "Switch to org-mode with `\\[eaf-edit-buffer-switch-to-org-mode]'. "
+          ))))
+
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
   (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
