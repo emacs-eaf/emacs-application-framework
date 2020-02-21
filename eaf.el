@@ -365,10 +365,12 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   '(("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
+    ("C-S-c" . "copy_text")
+    ("C-S-v" . "yank_text")
+    ("C-c C-c" . "eaf-send-cancel-key-sequence")
     ("C-a" . "eaf-send-key-sequence")
     ("C-e" . "eaf-send-key-sequence")
     ("C-d" . "eaf-send-key-sequence")
-    ("C-c" . "eaf-send-key-sequence")
     ("C-n" . "eaf-send-key-sequence")
     ("C-p" . "eaf-send-key-sequence")
     ("C-r" . "eaf-send-key-sequence")
@@ -758,7 +760,7 @@ to edit EAF keybindings!" fun fun)))
                    do (define-key map (kbd key)
                         (cond ((symbolp fun)
                                fun)
-                              ((string-equal fun "eaf-send-key-sequence")
+                              ((member fun (list "eaf-send-key-sequence" "eaf-send-cancel-key-sequence"))
                                (intern fun))
                               (t
                                (eaf--make-proxy-function fun))))
@@ -888,6 +890,11 @@ to edit EAF keybindings!" fun fun)))
   "Directly send key sequence to EAF Python side."
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
+
+(defun eaf-send-cancel-key-sequence ()
+  "Send C-c to terminal."
+  (interactive)
+  (eaf-call "send_key_sequence" eaf--buffer-id "C-c"))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.

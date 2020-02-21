@@ -303,19 +303,20 @@ class Buffer(QGraphicsScene):
 
         if len(event_list) > 1:
             for widget in [self.buffer_widget.focusProxy()]:
-                first_key = event_list[0]
-                last_key = event_list[-1]
+                last_key = event_list[-1].lower()
+                modifiers = Qt.NoModifier
 
-                modifier = Qt.NoModifier
+                for modifier in event_list[0:-1]:
+                    if modifier == "C":
+                        modifiers |= Qt.ControlModifier
+                    elif modifier == "M":
+                        modifiers |= Qt.AltModifier
+                    elif modifier == "S":
+                        modifiers |= Qt.ShiftModifier
+                    elif modifier == "s":
+                        modifiers |= Qt.MetaModifier
 
-                if first_key == "C":
-                    modifier = Qt.ControlModifier
-                elif first_key == "M":
-                    modifier = Qt.AltModifier
-                elif first_key == "s":
-                    modifier = Qt.MetaModifier
-
-                QApplication.sendEvent(widget, QKeyEvent(QEvent.KeyPress, qt_key_dict[last_key], modifier, last_key))
+                QApplication.sendEvent(widget, QKeyEvent(QEvent.KeyPress, qt_key_dict[last_key], modifiers, last_key))
 
     def get_url(self):
         return self.url
