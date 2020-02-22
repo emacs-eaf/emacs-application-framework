@@ -343,6 +343,12 @@ class BrowserCookieStorage:
 
         open(self.cookie_file, 'w').close()
 
+class HistoryPage():
+    def __init__(self, title, url, hit):
+        self.title = title
+        self.url = url
+        self.hit = float(hit)
+
 class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
@@ -354,10 +360,26 @@ class BrowserBuffer(Buffer):
         self.add_widget(BrowserView(config_dir))
 
         self.config_dir = config_dir
-        self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
-        self.history_url_pattern = re.compile("(.*)\s((https?|file):[^\s]+)$")
-        self.short_url_pattern = re.compile("^(https?|file)://(.+)")
-        self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
+
+        self.history_list = []
+        if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+            self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
+
+            self.history_pattern = re.compile("^(.+)ᛝ(.+)ᛡ(.+)$")
+            self.noprefix_url_pattern = re.compile("^(https?|file)://(.+)")
+            self.nopostfix_url_pattern = re.compile("^[^#\?]*")
+            self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
+            touch(self.history_log_file_path)
+            with open(self.history_log_file_path, "r") as f:
+                raw_list = f.readlines()
+                for raw_his in raw_list:
+                    his_line = re.match(self.history_pattern, raw_his)
+                    if his_line is None: # Obsolete Old history format
+                        old_his = re.match("(.*)\s((https?|file):[^\s]+)$", raw_his)
+                        if old_his is not None:
+                            self.history_list.append(HistoryPage(old_his.group(1), old_his.group(2), 1))
+                    else:
+                        self.history_list.append(HistoryPage(his_line.group(1), his_line.group(2), his_line.group(3)))
 
         # Set User Agent with Firefox's one to make EAF browser can login in Google account.
         self.profile = QWebEngineProfile(self.buffer_widget)
@@ -509,37 +531,38 @@ class BrowserBuffer(Buffer):
 
     def record_history(self, new_title):
         new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
-        if self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank" and \
-           self.emacs_var_dict["eaf-browser-remember-history"] == "true":
-            if self.buffer_widget.filter_title(new_title) != "":
-                touch(self.history_log_file_path)
-                with open(self.history_log_file_path, "r") as f:
-                    lines = f.readlines()
+        if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.buffer_widget.filter_title(new_title) != "" and \
+           self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
+            # Throw traceback info if algorithm has bug and protection of historical record is not erased.
+            try:
+                noprefix_new_url_match = re.match(self.noprefix_url_pattern, new_url)
+                if noprefix_new_url_match is not None:
+                    found = False
+                    for history in self.history_list:
+                        noprefix_url_match = re.match(self.noprefix_url_pattern, history.url)
+                        if (noprefix_url_match is not None):
+                            noprefix_url = noprefix_url_match.group(2)
+                            noprefix_new_url = noprefix_new_url_match.group(2)
+                            nopostfix_new_url_match = re.match(self.nopostfix_url_pattern, noprefix_new_url)
+                            if(noprefix_url == noprefix_new_url): # found unique url
+                                history.title = new_title
+                                history.url = new_url
+                                history.hit += 0.5
+                                found = True
+                            elif (nopostfix_new_url_match is not None and noprefix_url == nopostfix_new_url_match.group()):
+                                # also increment parent
+                                history.hit += 0.25
 
-                # Throw traceback info if algorithm has bug and protection of historical record is not erased.
-                try:
-                    new_lines = []
-                    for line in lines:
-                        line_match = re.match(self.history_url_pattern, line)
-                        if line_match != None:
-                            title = line_match.group(1)
-                            url = line_match.group(2)
-                        else:
-                            title = ""
-                            url = line
+                    if not found:
+                        self.history_list.append(HistoryPage(new_title, new_url, 1))
 
-                        short_new_url = re.match(self.short_url_pattern, new_url)
-                        short_url = re.match(self.short_url_pattern, url)
-                        if (short_new_url != None and short_url != None and short_url.group(2) != short_new_url.group(2)):
-                            new_lines.append(line)
+                self.history_list.sort(key = lambda x: x.hit, reverse = True)
 
-                    new_lines.append("{0} {1}\n".format(new_title, new_url))
-
-                    with open(self.history_log_file_path, "w") as f:
-                        f.writelines(new_lines)
-                except Exception:
-                    import traceback
-                    self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
+                with open(self.history_log_file_path, "w") as f:
+                    f.writelines(map(lambda history: history.title + "ᛝ" + history.url + "ᛡ" + str(history.hit) + "\n", self.history_list))
+            except Exception:
+                import traceback
+                self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
 
     def adjust_dark_mode(self):
         try:

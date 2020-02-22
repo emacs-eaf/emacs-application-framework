@@ -1264,10 +1264,14 @@ This function works best if paired with a fuzzy search package."
          (concat eaf-config-location
                  (file-name-as-directory "browser")
                  (file-name-as-directory "history")
-                 "log.txt")))
+                 "log.txt"))
+        (history-pattern "^\\(.+\\)ᛝ\\(.+\\)ᛡ\\(.+\\)$"))
     (if (file-exists-p browser-history-file-path)
-        (let* ((history-list (reverse (with-temp-buffer (insert-file-contents browser-history-file-path)
-                                                        (split-string (buffer-string) "\n" t))))
+        (let* ((history-list (mapcar
+                              (lambda (h) (when (string-match history-pattern h)
+                                       (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                              (with-temp-buffer (insert-file-contents browser-history-file-path)
+                                                (split-string (buffer-string) "\n" t))))
                (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
                (history-url (when (string-match "[^\s]+$" history)
                               (match-string 0 history))))
