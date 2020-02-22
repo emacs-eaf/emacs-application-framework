@@ -152,7 +152,7 @@ class EAF(dbus.service.Object):
         app_buffer.buffer_widget.resize(emacs_width, emacs_height)
 
         # Monitor buffer signals.
-        app_buffer.update_title.connect(self.update_buffer_title)
+        app_buffer.update_details.connect(self.update_buffer_details)
         app_buffer.translate_text.connect(self.translate_text)
         app_buffer.open_url_in_new_tab.connect(self.open_url_in_new_tab)
         app_buffer.open_url_in_background_tab.connect(self.open_url_in_background_tab)
@@ -339,7 +339,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def update_buffer_title(self, buffer_id, title):
+    def update_buffer_details(self, buffer_id, title, url):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

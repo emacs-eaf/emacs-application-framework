@@ -55,4 +55,8 @@ class AppBuffer(BrowserBuffer):
 
         # Reset to default zoom when page init or url changed.
         self.reset_default_zoom()
-        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+        self.buffer_widget.urlChanged.connect(self.update_url)
+
+    def update_url(self, url):
+        self.reset_default_zoom()
+        self.url = self.buffer_widget.url().toString()

@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Feb 18 15:49:48 2020 (-0500)
+;; Last-Updated: Sat Feb 22 03:07:37 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1023,10 +1023,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "update_buffer_title"
- #'eaf--update-buffer-title)
+ "com.lazycat.eaf" "update_buffer_details"
+ #'eaf--update-buffer-details)
 
-(defun eaf--update-buffer-title (bid title)
+(defun eaf--update-buffer-details (buffer-id title url)
   (when (> (length title) 0)
     (catch 'find-buffer
       (dolist (window (window-list))
@@ -1034,9 +1034,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
           (with-current-buffer buffer
             (when (and
                    (derived-mode-p 'eaf-mode)
-                   (equal eaf--buffer-id bid))
+                   (equal eaf--buffer-id buffer-id))
               (setq mode-name (concat "EAF/" eaf--buffer-app-name))
               (setq-local eaf--bookmark-title title)
+              (setq-local eaf--buffer-url url)
               (rename-buffer (format eaf-buffer-title-format title))
               (throw 'find-buffer t))))))))
 
