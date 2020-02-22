@@ -540,16 +540,17 @@ class BrowserBuffer(Buffer):
                     found = False
                     for history in self.history_list:
                         noprefix_url_match = re.match(self.noprefix_url_pattern, history.url)
-                        if (noprefix_url_match is not None):
+                        if noprefix_url_match is not None:
                             noprefix_url = noprefix_url_match.group(2)
                             noprefix_new_url = noprefix_new_url_match.group(2)
                             nopostfix_new_url_match = re.match(self.nopostfix_url_pattern, noprefix_new_url)
-                            if(noprefix_url == noprefix_new_url): # found unique url
+
+                            if noprefix_url == noprefix_new_url: # found unique url
                                 history.title = new_title
                                 history.url = new_url
                                 history.hit += 0.5
                                 found = True
-                            elif (nopostfix_new_url_match is not None and noprefix_url == nopostfix_new_url_match.group()):
+                            elif nopostfix_new_url_match is not None and noprefix_url == nopostfix_new_url_match.group():
                                 # also increment parent
                                 history.hit += 0.25
 
