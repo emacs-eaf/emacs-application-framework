@@ -96,6 +96,18 @@ class BrowserView(QWebEngineView):
             parsed.fragment
         ])
 
+    def filter_title(self, title):
+        "If title is google url, we should drop this history, it's a temp redirect url."
+        try:
+            parsed = urlparse(title)
+            qd = parse_qs(parsed.query, keep_blank_values=True)
+            if parsed.netloc.startswith("www.google.com"):
+                return ""
+            else:
+                return title
+        except Exception:
+            return title
+
     def _search_text(self, text, is_backward = False):
         if self.search_term != text:
             self.search_term = text
@@ -499,26 +511,27 @@ class BrowserBuffer(Buffer):
         new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
         if self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank" and \
            self.emacs_var_dict["eaf-browser-remember-history"] == "true":
-            touch(self.history_log_file_path)
-            with open(self.history_log_file_path, "r") as f:
-                lines = f.readlines()
+            if self.buffer_widget.filter_title(new_title) != "":
+                touch(self.history_log_file_path)
+                with open(self.history_log_file_path, "r") as f:
+                    lines = f.readlines()
 
-            with open(self.history_log_file_path, "w") as f:
-                for line in lines:
-                    line_match = re.match(self.history_url_pattern, line)
-                    if line_match != None:
-                        title = line_match.group(1)
-                        url = line_match.group(2)
-                    else:
-                        title = ""
-                        url = line
+                with open(self.history_log_file_path, "w") as f:
+                    for line in lines:
+                        line_match = re.match(self.history_url_pattern, line)
+                        if line_match != None:
+                            title = line_match.group(1)
+                            url = line_match.group(2)
+                        else:
+                            title = ""
+                            url = line
 
-                    short_new_url = re.match(self.short_url_pattern, new_url)
-                    short_url = re.match(self.short_url_pattern, url)
-                    if (short_new_url != None and short_url != None and short_url.group(2) != short_new_url.group(2)):
-                        f.write(line)
+                        short_new_url = re.match(self.short_url_pattern, new_url)
+                        short_url = re.match(self.short_url_pattern, url)
+                        if (short_new_url != None and short_url != None and short_url.group(2) != short_new_url.group(2)):
+                            f.write(line)
 
-                f.write(new_title + " " + new_url + "\n")
+                    f.write(new_title + " " + new_url + "\n")
 
     def adjust_dark_mode(self):
         try:
