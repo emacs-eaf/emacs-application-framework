@@ -516,7 +516,9 @@ class BrowserBuffer(Buffer):
                 with open(self.history_log_file_path, "r") as f:
                     lines = f.readlines()
 
-                with open(self.history_log_file_path, "w") as f:
+                # Throw traceback info if algorithm has bug and protection of historical record is not erased.
+                try:
+                    new_lines = []
                     for line in lines:
                         line_match = re.match(self.history_url_pattern, line)
                         if line_match != None:
@@ -529,9 +531,15 @@ class BrowserBuffer(Buffer):
                         short_new_url = re.match(self.short_url_pattern, new_url)
                         short_url = re.match(self.short_url_pattern, url)
                         if (short_new_url != None and short_url != None and short_url.group(2) != short_new_url.group(2)):
-                            f.write(line)
+                            new_lines.append(line)
 
-                    f.write(new_title + " " + new_url + "\n")
+                    new_lines.append("{0} {1}\n".format(new_title, new_url))
+
+                    with open(self.history_log_file_path, "w") as f:
+                        f.writelines(new_lines)
+                except Exception:
+                    import traceback
+                    self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
 
     def adjust_dark_mode(self):
         try:
