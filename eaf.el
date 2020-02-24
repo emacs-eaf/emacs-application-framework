@@ -1190,29 +1190,24 @@ In that way the corresponding function will be called to retrieve the HTML
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
-  "Open EAF browser application given a URL and ARGUMENTS.
-
-If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal."
-  (interactive "M[EAF/browser] Search || URL: ")
-  ;; Validate URL legitimacy
-  (if (eaf-is-valid-url url)
-      (eaf-open (eaf-wrap-url url) "browser" arguments)
-    (eaf-search-it url)))
+  "Open EAF browser application given a URL and ARGUMENTS."
+  (interactive "M[EAF/browser] URL: ")
+  (eaf-open (eaf-wrap-url url) "browser" arguments))
 
 (defun eaf-is-valid-url (url)
   "Return non-nil if URL is valid."
-  (and
-   ;; URL should not include blank char.
-   (< (length (split-string url)) 2)
-   ;; Use regexp matching URL.
-   (or
-    (and
-     (string-prefix-p "file://" url)
-     (string-suffix-p ".html" url))
-    ;; Normal url address.
-    (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
-    ;; Localhost url.
-    (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))))
+  (and url
+       ;; URL should not include blank char.
+       (< (length (split-string url)) 2)
+       ;; Use regexp matching URL.
+       (or
+        (and
+         (string-prefix-p "file://" url)
+         (string-suffix-p ".html" url))
+        ;; Normal url address.
+        (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+        ;; Localhost url.
+        (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))))
 
 (defun eaf-wrap-url (url)
   "Wraps URL with prefix http:// if URL does not include it."
@@ -1259,28 +1254,31 @@ If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to sea
 (defun eaf-open-browser-with-history ()
   "A wrapper around `eaf-open-browser' that provides browser history candidates.
 
+If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal.
+
 This function works best if paired with a fuzzy search package."
   (interactive)
-  (let ((browser-history-file-path
-         (concat eaf-config-location
-                 (file-name-as-directory "browser")
-                 (file-name-as-directory "history")
-                 "log.txt"))
-        (history-pattern "^\\(.+\\)ᛝ\\(.+\\)ᛡ\\(.+\\)$"))
-    (if (file-exists-p browser-history-file-path)
-        (let* ((history-list (mapcar
-                              (lambda (h) (when (string-match history-pattern h)
-                                        (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
-                              (with-temp-buffer (insert-file-contents browser-history-file-path)
-                                                (split-string (buffer-string) "\n" t))))
-               (history (completing-read "[EAF/browser] Search || URL || History: " history-list))
-               (history-url (when (string-match "[^\s]+$" history)
-                              (match-string 0 history))))
-          (if (and history-url
-                   (eaf-is-valid-url history-url))
-              (eaf-open-browser history-url)
-            (eaf-open-browser history)))
-      (call-interactively 'eaf-open-browser))))
+  (let* ((browser-history-file-path
+          (concat eaf-config-location
+                  (file-name-as-directory "browser")
+                  (file-name-as-directory "history")
+                  "log.txt"))
+         (history-pattern "^\\(.+\\)ᛝ\\(.+\\)ᛡ\\(.+\\)$")
+         (history-file-exists (file-exists-p browser-history-file-path))
+         (history (completing-read
+                   "[EAF/browser] Search || URL || History: "
+                   (if history-file-exists
+                       (mapcar
+                        (lambda (h) (when (string-match history-pattern h)
+                                 (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                        (with-temp-buffer (insert-file-contents browser-history-file-path)
+                                          (split-string (buffer-string) "\n" t)))
+                     nil)))
+         (history-url (eaf-is-valid-url (when (string-match "[^\s]+$" history)
+                                          (match-string 0 history)))))
+    (cond (history-url (eaf-open-browser history-url))
+          ((eaf-is-valid-url history) (eaf-open-browser history))
+          (t (eaf-search-it history)))))
 
 ;;;###autoload
 (defun eaf-search-it (&optional search-string search-engine)
@@ -1513,7 +1511,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (eaf-edit-mode)
     (eaf--edit-set-header-line)
     (insert focus-text)
-    ;; When text line number above 
+    ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (beginning-of-buffer))
     ))
