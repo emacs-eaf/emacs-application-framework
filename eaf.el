@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Feb 22 03:07:37 2020 (-0500)
+;; Last-Updated: Tue Feb 25 09:57:21 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1195,19 +1195,21 @@ In that way the corresponding function will be called to retrieve the HTML
   (eaf-open (eaf-wrap-url url) "browser" arguments))
 
 (defun eaf-is-valid-url (url)
-  "Return non-nil if URL is valid."
-  (and url
-       ;; URL should not include blank char.
-       (< (length (split-string url)) 2)
-       ;; Use regexp matching URL.
-       (or
-        (and
-         (string-prefix-p "file://" url)
-         (string-suffix-p ".html" url))
-        ;; Normal url address.
-        (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
-        ;; Localhost url.
-        (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url))))
+  "Return the same URL if it is valid."
+  (when (and
+         url
+         ;; URL should not include blank char.
+         (< (length (split-string url)) 2)
+         ;; Use regexp matching URL.
+         (or
+          (and
+           (string-prefix-p "file://" url)
+           (string-suffix-p ".html" url))
+          ;; Normal url address.
+          (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
+          ;; Localhost url.
+          (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url)))
+    url))
 
 (defun eaf-wrap-url (url)
   "Wraps URL with prefix http:// if URL does not include it."
