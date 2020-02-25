@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link type="text/css" rel="stylesheet" href="jsmind.css" />
+
+        <script type="text/javascript" src="jsmind.js"></script>
+        <script type="text/javascript" src="jsmind.draggable.js"></script>
+        <script type="text/javascript" src="jsmind.screenshot.js"></script>
+        <style type="text/css">
+         html, body {
+             width: 100%;
+             height: 100%;
+             margin: 0;
+             padding: 0;
+         }
+
+         #jsmind_container{
+             width: 100%;
+             height: 100%;
+         }
+        </style>
+    </head>
+    <body>
+        <div id="jsmind_container"></div>
+
+        <script type="text/javascript">
+         var _jm = null;
+         function open_empty(){
+             var options = {
+                 container:'jsmind_container',
+                 theme:'greensea',
+                 editable:true
+             }
+             _jm = jsMind.show(options);
+         }
+
+         open_empty();
+
+         function add_node(){
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if(!selected_node) {
+                 _jm.move_node(selected_id,'_first_');
+             }
+
+             var nodeid = jsMind.util.uuid.newid();
+             var node = _jm.add_node(selected_node, nodeid, 'Topic');
+         }
+
+         function get_selected_nodeid(){
+             var selected_node = _jm.get_selected_node();
+             if(!!selected_node){
+                 return selected_node.id;
+             }else{
+                 return null;
+             }
+         }
+
+         function remove_node(){
+             var selected_id = get_selected_nodeid();
+             if(selected_id) {
+                 _jm.remove_node(selected_id);
+             }
+         }
+
+         function update_node_topic(topic) {
+             var selected_id = get_selected_nodeid();
+             if (selected_id) {
+                 _jm.update_node(selected_id, topic);
+             }
+         }
+        </script>
+    </body>
+</html>

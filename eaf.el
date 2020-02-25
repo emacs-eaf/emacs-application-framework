@@ -418,6 +418,15 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF RSS Reader."
   :type 'cons)
 
+(defcustom eaf-mindmap-keybinding
+  '(("TAB" . "add_sub_node")
+    ("DEL" . "remove_node")
+    ("M-o" . "remove_node")
+    ("M-m" . "update_node_topic")
+    )
+  "The keybinding of EAF Mindmap."
+  :type 'cons)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
   "The extension list of pdf application."
@@ -477,7 +486,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("terminal" . eaf-terminal-keybinding)
     ("markdown-previewer" . eaf-browser-keybinding)
     ("org-previewer" . eaf-browser-keybinding)
-    ("rss-reader" . eaf-rss-reader-keybinding))
+    ("rss-reader" . eaf-rss-reader-keybinding)
+    ("mindmap" . eaf-mindmap-keybinding)
+    )
   "Mapping app names to keybinding variables.
 
 Any new app should add the its name and the corresponding
@@ -1272,7 +1283,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                 (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1499,6 +1510,10 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
   (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
   (eaf--edit-set-header-line))
+
+(defun eaf-open-mindmap ()
+  (interactive)
+  (eaf-open "eaf-mindmap" "mindmap"))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
