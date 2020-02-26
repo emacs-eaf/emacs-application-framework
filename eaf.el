@@ -76,8 +76,17 @@
 (require 'subr-x)
 (require 'map)
 (require 'bookmark)
+(require 'seq)
 
 ;;; Code:
+
+
+;; Remove the relevant environment variables from the process-environment to disable QT scaling,
+;; let EAF qt program follow the system scale.
+(setq process-environment (seq-filter
+ (lambda(var)
+   (and (not (string-match-p "QT_SCALE_FACTOR" var))
+        (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var)))) process-environment))
 
 (defgroup eaf nil
   "Emacs Application Framework."
