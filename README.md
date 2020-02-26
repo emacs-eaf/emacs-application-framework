@@ -126,6 +126,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | File Receiver       | `M-x eaf-file-receiver-qrcode`                                         |
 | Airshare            | `M-x eaf-open-airshare`                                                |
 | RSS Reader          | `M-x eaf-open-rss-reader`                                              |
+| Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
 - To open the file under the cursor in `dired` using appropriate EAF Application, use `eaf-open-this-from-dired` instead.

@@ -124,6 +124,7 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | 二维码上传文件 | `M-x eaf-file-receiver-qrcode`                                              |
 | 无线分享       | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
 | RSS新闻阅读器  | `M-x eaf-open-rss-reader`                                                   |
+| 思维导图 | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 演示程序       | `M-x eaf-open-demo`                                                         |
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
