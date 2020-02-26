@@ -477,6 +477,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of org previewer application."
   :type 'cons)
 
+(defcustom eaf-mindmap-extension-list
+  '("emm")
+  "The extension list of mindmap application."
+  :type 'cons)
+
 (defcustom eaf-mua-get-html
   '(("^gnus-" . eaf-gnus-get-html)
     ("^mu4e-" . eaf-mu4e-get-html)
@@ -540,7 +545,9 @@ A bookmark handler function is used as
     ("image-viewer" . eaf-image-extension-list)
     ("video-player" . eaf-video-extension-list)
     ("browser" . eaf-browser-extension-list)
-    ("org-previewer" . eaf-org-extension-list))
+    ("org-previewer" . eaf-org-extension-list)
+    ("mindmap" . eaf-mindmap-extension-list)
+    )
   "Mapping app names to extension list variables.
 
 A new app can use this to configure extensions which should
