@@ -31,11 +31,13 @@ class AppBuffer(BrowserBuffer):
         self.url = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
         self.buffer_widget.setUrl(QUrl(self.url))
 
-    def add_sub_node(self):
-        self.buffer_widget.eval_js("add_node();")
+        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "add_sub_node", "remove_node"]:
+            self.build_js_method(method_name)
 
-    def remove_node(self):
-        self.buffer_widget.eval_js("remove_node();")
+    def build_js_method(self, method_name):
+        def _do ():
+            self.buffer_widget.eval_js("{}();".format(method_name))
+        setattr(self, method_name, _do)
 
     def update_node_topic(self):
         self.send_input_message("Update topic: ", "update_node_topic")

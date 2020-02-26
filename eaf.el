@@ -423,6 +423,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("DEL" . "remove_node")
     ("M-o" . "remove_node")
     ("M-m" . "update_node_topic")
+    ("M-r" . "refresh_page")
+    ("C--" . "zoom_out")
+    ("C-=" . "zoom_in")
+    ("C-0" . "zoom_reset")
     )
   "The keybinding of EAF Mindmap."
   :type 'cons)
@@ -1283,7 +1287,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))

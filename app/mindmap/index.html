@@ -33,12 +33,14 @@
                  theme:'greensea',
                  editable:true
              }
+
              _jm = jsMind.show(options);
+             _jm.select_node("root");
          }
 
          open_empty();
 
-         function add_node(){
+         function add_sub_node(){
              var selected_node = _jm.get_selected_node(); // as parent of new node
              if(!selected_node) {
                  _jm.move_node(selected_id,'_first_');
@@ -60,6 +62,7 @@
          function remove_node(){
              var selected_id = get_selected_nodeid();
              if(selected_id) {
+                 _jm.select_node(_jm.get_selected_node().parent);
                  _jm.remove_node(selected_id);
              }
          }
@@ -69,6 +72,18 @@
              if (selected_id) {
                  _jm.update_node(selected_id, topic);
              }
+         }
+
+         function zoom_in() {
+             _jm.view.zoomIn();
+         };
+
+         function zoom_out() {
+             _jm.view.zoomOut();
+         };
+
+         function zoom_reset() {
+             _jm.view.setZoom(1);
          }
         </script>
     </body>
