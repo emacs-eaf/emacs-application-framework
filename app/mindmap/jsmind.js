@@ -2481,15 +2481,15 @@
             this.jm.invoke_event_handle(jm.event_type.resize,{data:[]});
         },
 
-        zoomIn: function() {
-            return this.setZoom(this.actualZoom + this.zoomStep);
+        zoom_in: function() {
+            return this.set_zoom(this.actualZoom + this.zoomStep);
         },
 
-        zoomOut: function() {
-            return this.setZoom(this.actualZoom - this.zoomStep);
+        zoom_out: function() {
+            return this.set_zoom(this.actualZoom - this.zoomStep);
         },
 
-        setZoom: function(zoom) {
+        set_zoom: function(zoom) {
             if ((zoom < this.minZoom) || (zoom > this.maxZoom)) {
                 return false;
             }

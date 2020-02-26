@@ -32,8 +32,14 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.setUrl(QUrl(self.url))
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "add_sub_node", "remove_node",
-                            "select_up_node", "select_down_node", "select_left_node", "select_right_node"]:
+                            "select_up_node", "select_down_node", "select_left_node", "select_right_node",
+                            "toggle_node"]:
             self.build_js_method(method_name)
+
+        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node", "update_node_topic", "refresh_page",
+                            "select_up_node", "select_down_node", "select_left_node", "select_right_node",
+                            "toggle_node"]:
+            self.build_insert_or_do(method_name)
 
     def build_js_method(self, method_name):
         def _do ():
@@ -49,3 +55,14 @@ class AppBuffer(BrowserBuffer):
     def handle_input_message(self, result_type, result_content):
         if result_type == "update_node_topic":
             self.handle_update_node_topic(str(result_content))
+
+    def is_focus(self):
+        return self.buffer_widget.execute_js("node_is_focus();")
+
+    def build_insert_or_do(self, method_name):
+        def _do ():
+            if self.is_focus():
+                self.fake_key_event(self.current_event_string)
+            else:
+                getattr(self, method_name)()
+        setattr(self, "insert_or_{}".format(method_name), _do)

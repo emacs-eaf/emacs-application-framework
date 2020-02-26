@@ -48,6 +48,8 @@
 
              var nodeid = jsMind.util.uuid.newid();
              var node = _jm.add_node(selected_node, nodeid, 'Topic');
+             _jm.select_node(node);
+             _jm.view.edit_node_begin(node);
          }
 
          function get_selected_nodeid(){
@@ -75,15 +77,15 @@
          }
 
          function zoom_in() {
-             _jm.view.zoomIn();
+             _jm.view.zoom_in();
          };
 
          function zoom_out() {
-             _jm.view.zoomOut();
+             _jm.view.zoom_out();
          };
 
          function zoom_reset() {
-             _jm.view.setZoom(1);
+             _jm.view.set_zoom(1);
          }
 
          function select_up_node(){
@@ -152,6 +154,17 @@
                  if(!!node){
                      _jm.select_node(node);
                  }
+             }
+         }
+
+         function node_is_focus() {
+             return _jm.view.is_editing();
+         }
+
+         function toggle_node() {
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if (selected_node) {
+                 _jm.toggle_node(selected_node);
              }
          }
         </script>
