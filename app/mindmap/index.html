@@ -35,6 +35,11 @@
 
              _jm = jsMind.show(options);
              _jm.select_node("root");
+
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if (selected_node) {
+                 _jm.view.edit_node_begin(selected_node);
+             }
          }
 
          open_empty();

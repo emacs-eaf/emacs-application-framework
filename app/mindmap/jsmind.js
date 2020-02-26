@@ -2755,7 +2755,7 @@
             var selected_node = _jm.get_selected_node();
             if(!!selected_node){
                 var nodeid = jm.util.uuid.newid();
-                var node = _jm.add_node(selected_node, nodeid, 'New Node');
+                var node = _jm.add_node(selected_node, nodeid, 'Topic');
                 if(!!node){
                     _jm.select_node(nodeid);
                     _jm.begin_edit(nodeid);
@@ -2766,7 +2766,7 @@
             var selected_node = _jm.get_selected_node();
             if(!!selected_node && !selected_node.isroot){
                 var nodeid = jm.util.uuid.newid();
-                var node = _jm.insert_node_after(selected_node, nodeid, 'New Node');
+                var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
                 if(!!node){
                     _jm.select_node(nodeid);
                     _jm.begin_edit(nodeid);

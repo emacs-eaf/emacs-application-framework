@@ -29,6 +29,19 @@ canvas {
     z-index: 1;
 }
 
+input {
+    outline-style: none;
+    border: blue;
+    font-size: 24px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    min-width: 100px;
+}
+
 /* z-index: 2 */
 jmnodes {
     position: absolute;
@@ -68,7 +81,6 @@ jmnode {
     background-color:  #30A3C0;
     color:  #FFF;
     border-radius: 5px;
-    font: 16px/1.125 Verdana,Arial,Helvetica,sans-serif;
     padding-left:  30px;
     padding-right:  30px;
 }
