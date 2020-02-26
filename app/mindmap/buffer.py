@@ -31,7 +31,8 @@ class AppBuffer(BrowserBuffer):
         self.url = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
         self.buffer_widget.setUrl(QUrl(self.url))
 
-        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "add_sub_node", "remove_node"]:
+        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "add_sub_node", "remove_node",
+                            "select_up_node", "select_down_node", "select_left_node", "select_right_node"]:
             self.build_js_method(method_name)
 
     def build_js_method(self, method_name):

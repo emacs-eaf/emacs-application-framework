@@ -427,6 +427,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
+    ("M-k" . "select_up_node")
+    ("M-j" . "select_down_node")
+    ("M-h" . "select_left_node")
+    ("M-l" . "select_right_node")
     )
   "The keybinding of EAF Mindmap."
   :type 'cons)
