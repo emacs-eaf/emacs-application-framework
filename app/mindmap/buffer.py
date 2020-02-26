@@ -48,13 +48,15 @@ class AppBuffer(BrowserBuffer):
 
     def init_file(self):
         self.url = os.path.expanduser(self.url)
-        print(self.url)
+
         if os.path.exists(self.url):
             with open(self.url, "r") as f:
                 base64_string = str(base64.b64encode(f.read().encode("utf-8")), "utf-8")
                 self.buffer_widget.execute_js("open_file('{}');".format(base64_string))
         else:
             self.buffer_widget.eval_js("edit_root_node();")
+
+        self.change_title(self.get_root_node_topic())
 
     def build_js_method(self, method_name):
         def _do ():
@@ -82,9 +84,19 @@ class AppBuffer(BrowserBuffer):
                 getattr(self, method_name)()
         setattr(self, "insert_or_{}".format(method_name), _do)
 
+    def get_root_node_topic(self):
+        return self.buffer_widget.execute_js("get_root_node_topic();")
+
     def handle_download_request(self, download_item):
         download_data = download_item.url().toString()
-        image_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), os.path.splitext(os.path.basename(self.buffer_widget.url().toString()))[0] + ".png")
+
+        # Note:
+        # Set some delay to make get_root_node_topic works expect.
+        # get_root_node_topic will return None if execute immediately.
+        QTimer.singleShot(200, lambda : self.save_screenshot_data(download_data))
+
+    def save_screenshot_data(self, download_data):
+        image_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + ".png")
         touch(image_path)
         with open(image_path, "wb") as f:
             f.write(base64.decodestring(download_data.split("data:image/png;base64,")[1].encode("utf-8")))
@@ -92,7 +104,7 @@ class AppBuffer(BrowserBuffer):
         self.message_to_emacs.emit("Save image: " + image_path)
 
     def save_file(self):
-        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), os.path.splitext(os.path.basename(self.buffer_widget.url().toString()))[0] + ".emm")
+        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + ".emm")
         touch(file_path)
         with open(file_path, "w") as f:
             f.write(self.buffer_widget.execute_js("save_file();"))

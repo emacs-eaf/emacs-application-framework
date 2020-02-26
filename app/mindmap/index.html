@@ -35,6 +35,10 @@
              }
          }
 
+         function get_root_node_topic() {
+             return _jm.get_node("root").topic;
+         }
+
          function add_sub_node(){
              var selected_node = _jm.get_selected_node(); // as parent of new node
              if(!selected_node) {
