@@ -185,6 +185,13 @@
          function save_file() {
              return jsMind.util.json.json2string(_jm.get_data());
          }
+
+         function change_node_background(image) {
+             var selected_id = get_selected_nodeid();
+             if(selected_id) {
+                 _jm.set_node_background_image(selected_id, "file://" + image);
+             }
+         }
         </script>
     </body>
 </html>

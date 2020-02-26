@@ -452,6 +452,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("t" . "insert_or_toggle_node")
     ("1" . "insert_or_save_screenshot")
     ("2" . "insert_or_save_file")
+    ("i" . "insert_or_change_node_background")
     )
   "The keybinding of EAF Mindmap."
   :type 'cons)

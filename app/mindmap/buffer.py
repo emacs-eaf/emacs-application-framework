@@ -41,7 +41,7 @@ class AppBuffer(BrowserBuffer):
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node", "update_node_topic", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
-                            "toggle_node", "save_screenshot", "save_file"]:
+                            "toggle_node", "save_screenshot", "save_file", "change_node_background"]:
             self.build_insert_or_do(method_name)
 
         QTimer.singleShot(500, self.init_file)
@@ -63,6 +63,9 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js("{}();".format(method_name))
         setattr(self, method_name, _do)
 
+    def change_node_background(self):
+        self.send_input_message("Change node background: ", "change_node_background", "file")
+
     def update_node_topic(self):
         self.send_input_message("Update topic: ", "update_node_topic")
 
@@ -72,6 +75,9 @@ class AppBuffer(BrowserBuffer):
     def handle_input_message(self, result_type, result_content):
         if result_type == "update_node_topic":
             self.handle_update_node_topic(str(result_content))
+        elif result_type == "change_node_background":
+            print(str(result_content))
+            self.buffer_widget.eval_js("change_node_background('{}');".format(str(result_content)))
 
     def is_focus(self):
         return self.buffer_widget.execute_js("node_is_focus();")
