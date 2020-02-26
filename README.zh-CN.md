@@ -36,10 +36,10 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 | <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
 |                                                   |                                                     |
 
-| Aria2 下载管理器                               |
-| :--------:                                     |
-| <img src="./screenshot/aria2.gif" width="400"> |
-|                                                |
+| Aria2 下载管理器                               | 思维导图                                         |
+| :--------:                                     | :-------:                                        |
+| <img src="./screenshot/aria2.gif" width="400"> | <img src="./screenshot/mindmap.gif" width="400"> |
+|                                                |                                                  |
 
 ## 安装
 1. 如果是Arch用户，你可以直接安装[emacs-eaf](https://aur.archlinux.org/packages/emacs-eaf/)，并跳到第4步.

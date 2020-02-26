@@ -36,10 +36,10 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 | <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
 |                                                   |                                                     |
 
-| Aria2 Download Manager                         |
-| :--------:                                     |
-| <img src="./screenshot/aria2.gif" width="400"> |
-|                                                |
+| Aria2 Download Manager                         | Mind Map  |
+| :--------:                                     | :-------: |
+| <img src="./screenshot/aria2.gif" width="400"> | <img src="./screenshot/mindmap.gif" width="400"> |
+|                                                |           |
 
 
 
