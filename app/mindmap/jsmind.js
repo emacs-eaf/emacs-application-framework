@@ -51,10 +51,10 @@
             hmargin:100,
             vmargin:50,
             line_width:2,
-            line_color:'#555'
+            line_color:'#3598DB'
         },
         layout:{
-            hspace:30,
+            hspace:50,
             vspace:20,
             pspace:13
         },
