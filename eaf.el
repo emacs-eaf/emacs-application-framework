@@ -228,6 +228,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
+    (eaf-mindmap-save-path . "~/Documents")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -440,7 +441,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("d" . "insert_or_remove_node")
     ("f" . "insert_or_update_node_topic")
     ("t" . "insert_or_toggle_node")
-    ("a" . "insert_or_save_screenshot")
+    ("1" . "insert_or_save_screenshot")
+    ("2" . "insert_or_save_file")
     )
   "The keybinding of EAF Mindmap."
   :type 'cons)
@@ -1529,9 +1531,13 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
   (eaf--edit-set-header-line))
 
-(defun eaf-open-mindmap ()
+(defun eaf-create-mindmap ()
   (interactive)
-  (eaf-open "eaf-mindmap" "mindmap"))
+  (eaf-open " " "mindmap"))
+
+(defun eaf-open-mindmap (file)
+  (interactive "fOpen EAF Mind Map: ")
+  (eaf-open file "mindmap"))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"

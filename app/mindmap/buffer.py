@@ -19,17 +19,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
+from core.utils import touch
 import os
+import base64
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, False, QColor(255, 255, 255, 255))
 
-        self.url = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
-        self.buffer_widget.setUrl(QUrl(self.url))
+        self.url = url
+        index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
+        self.buffer_widget.setUrl(QUrl(index_file))
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "add_sub_node", "remove_node",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
@@ -38,8 +41,20 @@ class AppBuffer(BrowserBuffer):
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node", "update_node_topic", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
-                            "toggle_node", "save_screenshot"]:
+                            "toggle_node", "save_screenshot", "save_file"]:
             self.build_insert_or_do(method_name)
+
+        QTimer.singleShot(500, self.init_file)
+
+    def init_file(self):
+        self.url = os.path.expanduser(self.url)
+        print(self.url)
+        if os.path.exists(self.url):
+            with open(self.url, "r") as f:
+                base64_string = str(base64.b64encode(f.read().encode("utf-8")), "utf-8")
+                self.buffer_widget.execute_js("open_file('{}');".format(base64_string))
+        else:
+            self.buffer_widget.eval_js("select_root_node();")
 
     def build_js_method(self, method_name):
         def _do ():
@@ -66,3 +81,19 @@ class AppBuffer(BrowserBuffer):
             else:
                 getattr(self, method_name)()
         setattr(self, "insert_or_{}".format(method_name), _do)
+
+    def handle_download_request(self, download_item):
+        download_data = download_item.url().toString()
+        image_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), os.path.splitext(os.path.basename(self.buffer_widget.url().toString()))[0] + ".png")
+        touch(image_path)
+        with open(image_path, "wb") as f:
+            f.write(base64.decodestring(download_data.split("data:image/png;base64,")[1].encode("utf-8")))
+
+        self.message_to_emacs.emit("Save image: " + image_path)
+
+    def save_file(self):
+        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), os.path.splitext(os.path.basename(self.buffer_widget.url().toString()))[0] + ".emm")
+        touch(file_path)
+        with open(file_path, "w") as f:
+            f.write(self.buffer_widget.execute_js("save_file();"))
+        self.message_to_emacs.emit("Save file: " + file_path)

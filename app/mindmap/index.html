@@ -14,13 +14,15 @@
 
         <script type="text/javascript">
          var _jm = null;
-         function open_empty(){
-             var options = {
-                 container:'jsmind_container',
-                 editable:true
-             }
 
-             _jm = jsMind.show(options);
+         var options = {
+             container:'jsmind_container',
+             editable:true
+         }
+
+         _jm = jsMind.show(options);
+
+         function select_root_node() {
              _jm.select_node("root");
 
              var selected_node = _jm.get_selected_node(); // as parent of new node
@@ -28,8 +30,6 @@
                  _jm.view.edit_node_begin(selected_node);
              }
          }
-
-         open_empty();
 
          function add_sub_node(){
              var selected_node = _jm.get_selected_node(); // as parent of new node
@@ -160,8 +160,20 @@
          }
 
          function save_screenshot() {
-             "use strict";
              _jm.screenshot.shootDownload();
+         }
+
+         function open_file(file_base64_content) {
+             var file_data = decodeURIComponent(escape(window.atob(file_base64_content)));
+             var mind = jsMind.util.json.string2json(file_data);
+
+             if(!!mind){
+                 _jm.show(mind);
+             }
+         }
+
+         function save_file() {
+             return jsMind.util.json.json2string(_jm.get_data());
          }
         </script>
     </body>
