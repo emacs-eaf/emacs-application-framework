@@ -24,7 +24,9 @@
 
          function select_root_node() {
              _jm.select_node("root");
+         }
 
+         function edit_root_node() {
              var selected_node = _jm.get_selected_node(); // as parent of new node
              if (selected_node) {
                  _jm.view.edit_node_begin(selected_node);
@@ -169,6 +171,8 @@
 
              if(!!mind){
                  _jm.show(mind);
+
+                 select_root_node();
              }
          }
 
