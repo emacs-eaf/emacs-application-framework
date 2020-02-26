@@ -27,6 +27,8 @@
          }
 
          function edit_root_node() {
+             select_root_node();
+
              var selected_node = _jm.get_selected_node(); // as parent of new node
              if (selected_node) {
                  _jm.view.edit_node_begin(selected_node);
