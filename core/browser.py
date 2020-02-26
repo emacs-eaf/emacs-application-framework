@@ -31,6 +31,7 @@ import os
 import base64
 import subprocess
 import re
+import base64
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
@@ -424,10 +425,19 @@ class BrowserBuffer(Buffer):
     def handle_download_request(self, download_item):
         self.try_start_aria2_daemon()
 
-        with open(os.devnull, "w") as null_file:
-            subprocess.Popen(["aria2p", "add", download_item.url().toString()], stdout=null_file)
+        download_data = download_item.url().toString()
+        if download_data.startswith("data:image/png;base64,"):
+            image_path = os.path.join(os.path.expanduser(str(self.emacs_var_dict["eaf-browser-download-path"])),
+                                      os.path.splitext(os.path.basename(self.buffer_widget.url().toString()))[0] + ".png")
+            with open(image_path, "wb") as f:
+                f.write(base64.decodestring(download_data.split("data:image/png;base64,")[1].encode("utf-8")))
 
-        self.message_to_emacs.emit("Start download: " + download_item.url().toString())
+            self.message_to_emacs.emit("Save image: " + image_path)
+        else:
+            with open(os.devnull, "w") as null_file:
+                subprocess.Popen(["aria2p", "add", download_data], stdout=null_file)
+
+            self.message_to_emacs.emit("Start download: " + download_data)
 
     def handle_destroy(self):
         self.close_page.emit(self.buffer_widget.url().toString())
