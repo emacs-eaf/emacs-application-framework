@@ -422,13 +422,23 @@ class BrowserBuffer(Buffer):
             self.build_insert_or_do(method_name)
 
     def handle_download_request(self, download_item):
-        self.try_start_aria2_daemon()
-
         download_data = download_item.url().toString()
-        with open(os.devnull, "w") as null_file:
-            subprocess.Popen(["aria2p", "add", download_data], stdout=null_file)
 
-        self.message_to_emacs.emit("Start download: " + download_data)
+        if download_data.startswith("data:image/"):
+            image_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "image.png")
+            touch(image_path)
+            with open(image_path, "wb") as f:
+                f.write(base64.decodestring(download_data.split(",")[1].encode("utf-8")))
+
+            self.message_to_emacs.emit("Save image: " + image_path)
+        else:
+            self.try_start_aria2_daemon()
+
+            download_data = download_item.url().toString()
+            with open(os.devnull, "w") as null_file:
+                subprocess.Popen(["aria2p", "add", download_data], stdout=null_file)
+
+            self.message_to_emacs.emit("Start download: " + download_data)
 
     def handle_destroy(self):
         self.close_page.emit(self.buffer_widget.url().toString())
