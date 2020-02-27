@@ -84,9 +84,9 @@
 ;; Remove the relevant environment variables from the process-environment to disable QT scaling,
 ;; let EAF qt program follow the system scale.
 (setq process-environment (seq-filter
- (lambda(var)
-   (and (not (string-match-p "QT_SCALE_FACTOR" var))
-        (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var)))) process-environment))
+                           (lambda(var)
+                             (and (not (string-match-p "QT_SCALE_FACTOR" var))
+                                  (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var)))) process-environment))
 
 (defgroup eaf nil
   "Emacs Application Framework."
@@ -512,6 +512,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
   :type 'string)
 
+(defcustom eaf-enable-debug nil
+  "If you got segfault error, please turn this option.
+Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
+  :type 'boolean)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -661,13 +666,16 @@ For now only EAF browser app is supported."
    ((process-live-p eaf-process)
     (message "[EAF] Process is already running."))
    (t
-    (setq eaf-process
-          (apply #'start-process
-                 eaf-name
-                 eaf-name
-                 eaf-python-command (append (list eaf-python-file) (eaf-get-render-size)
-                                            (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
-                                            (list (eaf-serialization-var-list)))))
+    (let ((eaf-args (append
+                     (list eaf-python-file)
+                     (eaf-get-render-size)
+                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
+                     (list (eaf-serialization-var-list))))
+          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
+      (setq eaf-process
+            (if eaf-enable-debug
+                (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
+              (apply #'start-process eaf-name eaf-name eaf-python-command eaf-args))))
     (set-process-query-on-exit-flag eaf-process nil)
     (set-process-sentinel
      eaf-process

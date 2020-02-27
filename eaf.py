@@ -449,9 +449,6 @@ class EAF(dbus.service.Object):
             print("Session is not restored, as %s cannot be found." % (self.session_file))
 
 if __name__ == "__main__":
-    import faulthandler
-    faulthandler.enable()
-
     import sys
     import signal
 
