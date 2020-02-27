@@ -42,21 +42,19 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 |                                                |                                                  |
 
 ## 安装
-1. 如果是Arch用户，你可以直接安装[emacs-eaf](https://aur.archlinux.org/packages/emacs-eaf/)，并跳到第4步.
-
-2. 先确认系统中已经安装了 ```python3```，然后使用 ```pip3``` 安装EAF依赖库:
+1. 先确认系统中已经安装了 ```python3```，然后使用 ```pip3``` 安装EAF依赖库:
 
 ```Bash
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
 ```
 
-3. 使用 ```git clone``` 下载这个仓库.
+2. 使用 ```git clone``` 下载这个仓库.
 
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
-4. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
+3. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
 (require 'eaf)
@@ -75,7 +73,7 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-5. 如果你*需要*使用EAF终端模拟器，请按照下面的方法安装配置 ```wetty```:
+4. 如果你*需要*使用EAF终端模拟器，请按照下面的方法安装配置 ```wetty```:
 ```Bash
 # 安装wetty
 sudo yarn global add wetty
@@ -88,7 +86,7 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
-6. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
+5. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
 
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。

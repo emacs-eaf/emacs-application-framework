@@ -44,21 +44,19 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 
 
 ## Install
-1. For Arch Linux users, one can install [emacs-eaf](https://aur.archlinux.org/packages/emacs-eaf/) in AUR and jump to step 4.
-
-2. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
+1. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
 
 ```Bash
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
 ```
 
-3. Clone this repository.
+2. Clone this repository.
 
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
-4. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+3. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
 ```Elisp
 (require 'eaf)
@@ -77,7 +75,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-5. For EAF Terminal to work *only*: Install and configure ```wetty```:
+4. For EAF Terminal to work *only*: Install and configure ```wetty```:
 ```Bash
 # Install wetty
 sudo yarn global add wetty
@@ -90,7 +88,7 @@ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ```
 
-6. For EAF Browser download to work, please install ```aria2```.
+5. For EAF Browser download to work, please install ```aria2```.
 
 ### Dependency List
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
