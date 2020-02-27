@@ -24,7 +24,7 @@ from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch, is_port_in_use
+from core.utils import touch, is_port_in_use, string_to_base64
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
@@ -291,7 +291,7 @@ class BrowserView(QWebEngineView):
         return self.execute_js(self.get_focus_text_js)
 
     def set_focus_text(self, new_text):
-        self.set_focus_text_js = self.set_focus_text_raw.replace("%1", str(base64.b64encode(new_text.encode("utf-8")), "utf-8"));
+        self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
     def clear_focus(self):

@@ -23,6 +23,7 @@ from PyQt5 import QtCore
 import functools
 import os
 import socket
+import base64
 
 class PostGui(QtCore.QObject):
 
@@ -77,3 +78,6 @@ def is_port_in_use(port):
     import socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
+
+def string_to_base64(text):
+    return str(base64.b64encode(text.encode("utf-8")), "utf-8")

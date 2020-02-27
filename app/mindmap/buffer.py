@@ -22,7 +22,7 @@
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
-from core.utils import touch
+from core.utils import touch, string_to_base64
 import os
 import base64
 
@@ -51,8 +51,7 @@ class AppBuffer(BrowserBuffer):
 
         if os.path.exists(self.url):
             with open(self.url, "r") as f:
-                base64_string = str(base64.b64encode(f.read().encode("utf-8")), "utf-8")
-                self.buffer_widget.execute_js("open_file('{}');".format(base64_string))
+                self.buffer_widget.execute_js("open_file('{}');".format(string_to_base64(f.read())))
         else:
             self.buffer_widget.eval_js("edit_root_node();")
 
