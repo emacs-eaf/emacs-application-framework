@@ -20,13 +20,12 @@
              editable:true
          }
 
-         _jm = jsMind.show(options);
-
          function select_root_node() {
              _jm.select_node("root");
          }
 
-         function edit_root_node() {
+         function init_root_node() {
+             _jm = jsMind.show(options);
              select_root_node();
 
              var selected_node = _jm.get_selected_node(); // as parent of new node
@@ -172,6 +171,8 @@
          }
 
          function open_file(file_base64_content) {
+             _jm = jsMind.show(options);
+
              var file_data = decodeURIComponent(escape(window.atob(file_base64_content)));
              var mind = jsMind.util.json.string2json(file_data);
 

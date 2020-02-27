@@ -53,7 +53,7 @@ class AppBuffer(BrowserBuffer):
             with open(self.url, "r") as f:
                 self.buffer_widget.execute_js("open_file('{}');".format(string_to_base64(f.read())))
         else:
-            self.buffer_widget.eval_js("edit_root_node();")
+            self.buffer_widget.eval_js("init_root_node();")
 
         self.change_title(self.get_root_node_topic())
 
