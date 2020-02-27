@@ -174,17 +174,20 @@ class EAF(dbus.service.Object):
         # Handle eval form in emacs.
         app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
 
-        # Add create new window callback if module is browser
+        # Handle get_focus_text signal.
+        if getattr(app_buffer.buffer_widget, "get_focus_text", False):
+            app_buffer.get_focus_text.connect(self.edit_focus_text)
+
+        # Handle trigger_focus_event signal.
+        if getattr(app_buffer.buffer_widget, "trigger_focus_event", False):
+            app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
+
+        # Add create new window when create_new_browser_window_callback is call.
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
-            app_buffer.get_focus_text.connect(self.edit_focus_text)
-            app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
 
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
-
-        elif module_path == "app.pdf-viewer.buffer":
-            app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
         # Restore buffer session.
         self.restore_buffer_session(app_buffer)
