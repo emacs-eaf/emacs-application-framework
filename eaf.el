@@ -506,6 +506,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of mindmap application."
   :type 'cons)
 
+(defcustom eaf-doc-extension-list
+  '("docx" "doc")
+  "The extension list of doc application."
+  :type 'cons)
+
 (defcustom eaf-mua-get-html
   '(("^gnus-" . eaf-gnus-get-html)
     ("^mu4e-" . eaf-mu4e-get-html)
@@ -1416,12 +1421,15 @@ choose a search engine defined in `eaf-browser-search-engines'"
 Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
   (interactive)
   (dolist (file (dired-get-marked-files))
-    (cond ((eaf--get-app-for-extension
-            (eaf-get-file-name-extension file))
-           (eaf-open file))
-          (eaf-find-alternate-file-in-dired
-           (dired-find-alternate-file))
-          (t (dired-find-file)))))
+    (cond
+     ((member (eaf-get-file-name-extension file) eaf-doc-extension-list)
+      (eaf-open-doc file))
+     ((eaf--get-app-for-extension
+       (eaf-get-file-name-extension file))
+      (eaf-open file))
+     (eaf-find-alternate-file-in-dired
+      (dired-find-alternate-file))
+     (t (dired-find-file)))))
 
 ;;;###autoload
 (define-obsolete-function-alias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
@@ -1577,6 +1585,21 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf-open-mindmap (file)
   (interactive "fOpen EAF Mind Map: ")
   (eaf-open file "mindmap"))
+
+(defun eaf-open-doc (file)
+  (interactive "fOpen doc: ")
+  (if (executable-find "libreoffice")
+      (progn
+        (message "Converting %s to PDF format, EAF will start after convert finish." file)
+        (make-process
+         :name ""
+         :buffer " *eaf-open-doc*"
+         :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
+         :sentinel (lambda (process event)
+                     (when (string= (substring event 0 -1) "finished")
+                       (eaf-open (format "%s/%s.pdf" "/tmp" (file-name-base file)) "pdf-viewer" "temp_pdf_file")
+                       ))))
+    (message "Please install libreoffice to convert doc to pdf.")))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"

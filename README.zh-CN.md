@@ -88,6 +88,8 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 
 5. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
 
+6. EAF办公文档阅读器需要你额外安装 ```libreoffice``` 这个工具。
+
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
@@ -104,6 +106,7 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | aria2p        | pip3          | 浏览器                                                               | 发送下载请求给Aria2 Daemon                         |
 | aria2         | pacman (Arch) | 浏览器                                                               | 下载网络文件                                       |
 | wetty         | yarn          | 终端模拟器                                                           | 通过浏览器与本地TTY交互                            |
+| libreoffice   | pacman        | 办公文档阅读器                                                       | 转换doc文件为pdf格式           |
 
 ## EAF应用启动命令
 | 应用名称       | 启动命令                                                                    |
@@ -122,7 +125,8 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | 二维码上传文件 | `M-x eaf-file-receiver-qrcode`                                              |
 | 无线分享       | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
 | RSS新闻阅读器  | `M-x eaf-open-rss-reader`                                                   |
-| 思维导图 | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
+| 思维导图       | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
+| 办公文档阅读器 | `M-x eaf-open-doc`                                                          |
 | 演示程序       | `M-x eaf-open-demo`                                                         |
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。

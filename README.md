@@ -90,6 +90,8 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 
 5. For EAF Browser download to work, please install ```aria2```.
 
+5. For EAF Doc Viewer to work, please install ```libreoffice```.
+
 ### Dependency List
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
@@ -106,6 +108,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | aria2p        | pip3          | Browser                                                                            | Send download requests to Aria2 daemon    |
 | aria2         | pacman (Arch) | Browser                                                                            | Download files from the web               |
 | wetty         | yarn          | Terminal                                                                           | Communicate between browser and local TTY |
+| libreoffice   | pacman        | Doc Viewer                                                                         | Convert doc file to pdf |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -125,6 +128,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Airshare            | `M-x eaf-open-airshare`                                                |
 | RSS Reader          | `M-x eaf-open-rss-reader`                                              |
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
+| Doc Viewer          | `M-x eaf-open-doc`                                                     |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
 - To open the file under the cursor in `dired` using appropriate EAF Application, use `eaf-open-this-from-dired` instead.

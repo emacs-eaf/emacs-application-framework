@@ -37,6 +37,7 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, False, QColor(0, 0, 0, 255))
 
+        self.delete_temp_file = arguments == "temp_pdf_file"
         self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
@@ -44,6 +45,13 @@ class AppBuffer(Buffer):
                             "zoom_reset", "zoom_in", "zoom_out", "save_current_pos", "jump_to_saved_pos",
                             "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
             self.build_widget_method(method_name)
+
+    def handle_destroy(self):
+        if self.delete_temp_file:
+            if os.path.exists(self.url):
+                os.remove(self.url)
+
+        super.handle_destroy(self)
 
     def get_table_file(self):
         return self.buffer_widget.table_file_path
