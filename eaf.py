@@ -175,8 +175,11 @@ class EAF(dbus.service.Object):
         app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
 
         # Handle get_focus_text signal.
-        if getattr(app_buffer.buffer_widget, "get_focus_text", False):
+        if getattr(app_buffer, "get_focus_text", False):
             app_buffer.get_focus_text.connect(self.edit_focus_text)
+
+        if getattr(app_buffer.buffer_widget, "get_focus_text", False):
+            app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
         # Handle trigger_focus_event signal.
         if getattr(app_buffer.buffer_widget, "trigger_focus_event", False):
