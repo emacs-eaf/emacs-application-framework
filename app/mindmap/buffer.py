@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
@@ -27,6 +28,9 @@ import os
 import base64
 
 class AppBuffer(BrowserBuffer):
+
+    export_org_json = QtCore.pyqtSignal(str, str)
+
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, False, QColor(255, 255, 255, 255))
 
@@ -41,7 +45,8 @@ class AppBuffer(BrowserBuffer):
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node", "update_node_topic", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
-                            "toggle_node", "save_screenshot", "save_file", "change_node_background"]:
+                            "toggle_node", "save_screenshot", "save_file", "save_org_file",
+                            "change_node_background"]:
             self.build_insert_or_do(method_name)
 
         QTimer.singleShot(500, self.init_file)
@@ -114,3 +119,9 @@ class AppBuffer(BrowserBuffer):
         with open(file_path, "w") as f:
             f.write(self.buffer_widget.execute_js("save_file();"))
         self.message_to_emacs.emit("Save file: " + file_path)
+
+    def save_org_file(self):
+        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + ".org")
+        touch(file_path)
+        self.export_org_json.emit(self.buffer_widget.execute_js("save_file();"), file_path)
+        self.message_to_emacs.emit("Save org file: " + file_path)

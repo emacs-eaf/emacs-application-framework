@@ -182,6 +182,10 @@ class EAF(dbus.service.Object):
         if getattr(app_buffer.buffer_widget, "trigger_focus_event", False):
             app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
 
+        # Handle export_org_json signal.
+        if getattr(app_buffer, "export_org_json", False):
+            app_buffer.export_org_json.connect(self.export_org_json)
+
         # Add create new window when create_new_browser_window_callback is call.
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
@@ -391,6 +395,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def edit_focus_text(self, buffer_id, focus_text):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def export_org_json(self, org_json_content, org_file_path):
         pass
 
     def save_buffer_session(self, buf):
