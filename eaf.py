@@ -175,18 +175,18 @@ class EAF(dbus.service.Object):
         app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
 
         # Handle get_focus_text signal.
-        if getattr(app_buffer, "get_focus_text", False):
+        if getattr(app_buffer, "get_focus_text", False) and getattr(app_buffer.get_focus_text, "connect", False):
             app_buffer.get_focus_text.connect(self.edit_focus_text)
 
-        if getattr(app_buffer.buffer_widget, "get_focus_text", False):
+        if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(app_buffer.buffer_widget.get_focus_text, "connect", False):
             app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
         # Handle trigger_focus_event signal.
-        if getattr(app_buffer.buffer_widget, "trigger_focus_event", False):
+        if getattr(app_buffer.buffer_widget, "trigger_focus_event", False) and getattr(app_buffer.buffer_widget.trigger_focus_event, "connect", False):
             app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
 
         # Handle export_org_json signal.
-        if getattr(app_buffer, "export_org_json", False):
+        if getattr(app_buffer, "export_org_json", False) and getattr(app_buffer.export_org_json, "connect", False):
             app_buffer.export_org_json.connect(self.export_org_json)
 
         # Add create new window when create_new_browser_window_callback is call.
