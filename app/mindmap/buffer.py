@@ -51,6 +51,9 @@ class AppBuffer(BrowserBuffer):
 
         QTimer.singleShot(500, self.init_file)
 
+    def resize_view(self):
+        self.buffer_widget.eval_js("relayout();")
+
     def init_file(self):
         self.url = os.path.expanduser(self.url)
 

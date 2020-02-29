@@ -1,7 +1,7 @@
 /*
  * Released under BSD License
  * Copyright (c) 2014-2015 hizzgdev@163.com
- * 
+ *
  * Project Home:
  *   https://github.com/hizzgdev/jsmind/
  */
@@ -178,7 +178,7 @@
         },
 
         _draw_lines:function(){
-            this.jm.view.show_lines(this.canvas_ctx);
+            this.jm.view.show_lines(this.canvas_ctx, true);
         },
 
         _draw_nodes:function(callback){

@@ -257,6 +257,9 @@ class EAF(dbus.service.Object):
                 else:
                     buffer.buffer_widget.resize(emacs_width, emacs_height)
 
+                # Send resize signal to buffer.
+                buffer.resize_view()
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="")
     def kill_emacs(self):
         tmp_buffer_dict = {}

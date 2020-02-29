@@ -19,8 +19,8 @@
     // an noop function define
     var _noop = function(){};
     var logger = (typeof console === 'undefined')?{
-            log:_noop, debug:_noop, error:_noop, warn:_noop, info:_noop
-        }:console;
+        log:_noop, debug:_noop, error:_noop, warn:_noop, info:_noop
+    }:console;
 
     // check global variables
     if(typeof module === 'undefined' || !module.exports){
@@ -1041,8 +1041,8 @@
                 for(var o in a){
                     if(o in b){
                         if(typeof b[o] === 'object' &&
-                            Object.prototype.toString.call(b[o]).toLowerCase() == '[object object]' &&
-                            !b[o].length){
+                           Object.prototype.toString.call(b[o]).toLowerCase() == '[object object]' &&
+                           !b[o].length){
                             jm.util.json.merge(b[o], a[o]);
                         }else{
                             b[o] = a[o];
@@ -1668,7 +1668,7 @@
 
     };
 
-// ============= data provider =============================================
+    // ============= data provider =============================================
 
     jm.data_provider = function(jm){
         this.jm = jm;
@@ -1783,15 +1783,15 @@
                     }
                 }
                 /*
-                var boundary = Math.ceil(children_count/2);
-                var i = children_count;
-                while(i--){
-                    if(i>=boundary){
-                        this._layout_direction_side(children[i],jm.direction.left, children_count-i-1);
-                    }else{
-                        this._layout_direction_side(children[i],jm.direction.right, i);
-                    }
-                }*/
+                  var boundary = Math.ceil(children_count/2);
+                  var i = children_count;
+                  while(i--){
+                  if(i>=boundary){
+                  this._layout_direction_side(children[i],jm.direction.left, children_count-i-1);
+                  }else{
+                  this._layout_direction_side(children[i],jm.direction.right, i);
+                  }
+                  }*/
 
             }
         },
@@ -2388,7 +2388,7 @@
         select_node:function(node){
             if(!!this.selected_node){
                 this.selected_node._data.view.element.className =
-                this.selected_node._data.view.element.className.replace(/\s*selected\b/i,'');
+                    this.selected_node._data.view.element.className.replace(/\s*selected\b/i,'');
                 this.reset_node_custom_style(this.selected_node);
             }
             if(!!node){
@@ -2671,13 +2671,15 @@
             jm.util.canvas.clear(ctx,0,0,this.size.w,this.size.h);
         },
 
-        show_lines:function(canvas_ctx){
+        show_lines:function(canvas_ctx, fill_background){
             this.clear_lines(canvas_ctx);
 
-            // Draw background, use to save screenshot.
-            var ctx = canvas_ctx || this.canvas_ctx;
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, this.size.w, this.size.h);
+            if (fill_background) {
+                // Draw background, use to save screenshot.
+                var ctx = canvas_ctx || this.canvas_ctx;
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, this.size.w, this.size.h);
+            }
 
             var nodes = this.jm.mind.nodes;
             var node = null;

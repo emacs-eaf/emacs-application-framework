@@ -233,6 +233,9 @@ class Buffer(QGraphicsScene):
     def some_view_show(self):
         pass
 
+    def resize_view(self):
+        pass
+
     def get_key_event_widgets(self):
         return [self.buffer_widget]
 
