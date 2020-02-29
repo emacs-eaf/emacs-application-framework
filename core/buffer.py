@@ -152,7 +152,7 @@ class Buffer(QGraphicsScene):
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_text = QtCore.pyqtSignal(str)
     before_destroy_hook = QtCore.pyqtSignal()
-    input_message = QtCore.pyqtSignal(str, str, str, str)
+    input_message = QtCore.pyqtSignal(str, str, str, str, str)
     close_buffer = QtCore.pyqtSignal(str)
     message_to_emacs = QtCore.pyqtSignal(str)
     set_emacs_var = QtCore.pyqtSignal(str, str)
@@ -239,8 +239,8 @@ class Buffer(QGraphicsScene):
     def get_key_event_widgets(self):
         return [self.buffer_widget]
 
-    def send_input_message(self, message, callback_type, input_type="string"):
-        self.input_message.emit(self.buffer_id, message, callback_type, input_type)
+    def send_input_message(self, message, callback_type, input_type="string", input_content=""):
+        self.input_message.emit(self.buffer_id, message, callback_type, input_type, input_content)
 
     def handle_input_message(self, result_type, result_content):
         pass

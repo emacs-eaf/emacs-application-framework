@@ -33,6 +33,15 @@
              return _jm.get_node("root").topic;
          }
 
+         function get_node_topic() {
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if (selected_node) {
+                 return selected_node.topic;
+             } else {
+                 return ""
+             }
+         }
+
          function add_sub_node(){
              var selected_node = _jm.get_selected_node(); // as parent of new node
              if(!selected_node) {

@@ -74,7 +74,11 @@ class AppBuffer(BrowserBuffer):
         self.send_input_message("Change node background: ", "change_node_background", "file")
 
     def update_node_topic(self):
-        self.send_input_message("Update topic: ", "update_node_topic")
+        self.send_input_message(
+            "Update topic: ",
+            "update_node_topic",
+            "string",
+            self.buffer_widget.execute_js("get_node_topic();"))
 
     def handle_update_node_topic(self, topic):
         self.buffer_widget.eval_js("update_node_topic('{}');".format(topic))
