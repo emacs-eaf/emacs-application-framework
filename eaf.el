@@ -1347,7 +1347,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1586,19 +1586,27 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "fOpen EAF Mind Map: ")
   (eaf-open file "mindmap"))
 
+(defun eaf-get-file-md5 (file)
+  (car (split-string (shell-command-to-string (format "md5sum %s" (file-truename file))) " ")))
+
 (defun eaf-open-office (file)
   (interactive "fOpen office file: ")
   (if (executable-find "libreoffice")
-      (progn
-        (message "Converting %s to PDF format, EAF will start after convert finish." file)
-        (make-process
-         :name ""
-         :buffer " *eaf-open-office*"
-         :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
-         :sentinel (lambda (process event)
-                     (when (string= (substring event 0 -1) "finished")
-                       (eaf-open (format "%s/%s.pdf" "/tmp" (file-name-base file)) "pdf-viewer" "temp_pdf_file")
-                       ))))
+      (let* ((file-md5 (eaf-get-file-md5 file))
+             (convert-file (format "/tmp/%s.pdf" (file-name-base file)))
+             (pdf-file (format "/tmp/%s.pdf" file-md5)))
+        (if (file-exists-p pdf-file)
+            (eaf-open pdf-file "pdf-viewer")
+          (message "Converting %s to PDF format, EAF will start after convert finish." file)
+          (make-process
+           :name ""
+           :buffer " *eaf-open-office*"
+           :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
+           :sentinel (lambda (process event)
+                       (when (string= (substring event 0 -1) "finished")
+                         (rename-file convert-file pdf-file)
+                         (eaf-open pdf-file "pdf-viewer")
+                         )))))
     (message "Please install libreoffice to convert office file to pdf.")))
 
 (dbus-register-signal
