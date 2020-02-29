@@ -27,11 +27,6 @@
          function init_root_node() {
              _jm = jsMind.show(options);
              select_root_node();
-
-             var selected_node = _jm.get_selected_node(); // as parent of new node
-             if (selected_node) {
-                 _jm.view.edit_node_begin(selected_node);
-             }
          }
 
          function get_root_node_topic() {
@@ -47,7 +42,6 @@
              var nodeid = jsMind.util.uuid.newid();
              var node = _jm.add_node(selected_node, nodeid, 'Topic');
              _jm.select_node(node);
-             _jm.view.edit_node_begin(node);
          }
 
          function get_selected_nodeid(){
