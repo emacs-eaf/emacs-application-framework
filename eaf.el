@@ -669,7 +669,10 @@ For now only EAF browser app is supported."
          "com.lazycat.eaf"          ; service name
          "/com/lazycat/eaf"         ; path name
          "com.lazycat.eaf"          ; interface name
-         method args))
+         method
+         :timeout 1000000
+         args)
+  )
 
 (defun eaf-get-emacs-xid (frame)
   (frame-parameter frame 'window-id))
