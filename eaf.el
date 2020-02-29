@@ -506,9 +506,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of mindmap application."
   :type 'cons)
 
-(defcustom eaf-doc-extension-list
-  '("docx" "doc")
-  "The extension list of doc application."
+(defcustom eaf-office-extension-list
+  '("docx" "doc" "ppt" "pptx" "xlsx")
+  "The extension list of office application."
   :type 'cons)
 
 (defcustom eaf-mua-get-html
@@ -1422,8 +1422,8 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
   (interactive)
   (dolist (file (dired-get-marked-files))
     (cond
-     ((member (eaf-get-file-name-extension file) eaf-doc-extension-list)
-      (eaf-open-doc file))
+     ((member (eaf-get-file-name-extension file) eaf-office-extension-list)
+      (eaf-open-office file))
      ((eaf--get-app-for-extension
        (eaf-get-file-name-extension file))
       (eaf-open file))
@@ -1586,20 +1586,20 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive "fOpen EAF Mind Map: ")
   (eaf-open file "mindmap"))
 
-(defun eaf-open-doc (file)
-  (interactive "fOpen doc: ")
+(defun eaf-open-office (file)
+  (interactive "fOpen office file: ")
   (if (executable-find "libreoffice")
       (progn
         (message "Converting %s to PDF format, EAF will start after convert finish." file)
         (make-process
          :name ""
-         :buffer " *eaf-open-doc*"
+         :buffer " *eaf-open-office*"
          :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
          :sentinel (lambda (process event)
                      (when (string= (substring event 0 -1) "finished")
                        (eaf-open (format "%s/%s.pdf" "/tmp" (file-name-base file)) "pdf-viewer" "temp_pdf_file")
                        ))))
-    (message "Please install libreoffice to convert doc to pdf.")))
+    (message "Please install libreoffice to convert office file to pdf.")))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
