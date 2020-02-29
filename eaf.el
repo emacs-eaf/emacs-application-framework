@@ -387,7 +387,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-0" . "zoom_reset")
     ("C-S-c" . "copy_text")
     ("C-S-v" . "yank_text")
-    ("C-c C-c" . "eaf-send-cancel-key-sequence")
     ("C-a" . "eaf-send-key-sequence")
     ("C-e" . "eaf-send-key-sequence")
     ("C-d" . "eaf-send-key-sequence")
@@ -397,12 +396,14 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "eaf-send-key-sequence")
     ("C-k" . "eaf-send-key-sequence")
     ("C-o" . "eaf-send-key-sequence")
-    ("C-x" . "eaf-send-key-sequence")
     ("C-v" . "eaf-send-key-sequence")
     ("M-v" . "eaf-send-key-sequence")
     ("M-f" . "eaf-send-key-sequence")
     ("M-b" . "eaf-send-key-sequence")
-    ("M-d" . "eaf-send-key-sequence"))
+    ("M-d" . "eaf-send-key-sequence")
+    ("C-c C-c" . "eaf-send-second-key-sequence")
+    ("C-c C-x" . "eaf-send-second-key-sequence")
+    )
   "The keybinding of EAF Terminal."
   :type 'cons)
 
@@ -840,7 +841,7 @@ to edit EAF keybindings!" fun fun)))
                    do (define-key map (kbd key)
                         (cond ((symbolp fun)
                                fun)
-                              ((member fun (list "eaf-send-key-sequence" "eaf-send-cancel-key-sequence"))
+                              ((member fun (list "eaf-send-key-sequence" "eaf-send-second-key-sequence"))
                                (intern fun))
                               (t
                                (eaf--make-proxy-function fun))))
@@ -971,10 +972,12 @@ to edit EAF keybindings!" fun fun)))
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
 
-(defun eaf-send-cancel-key-sequence ()
-  "Send C-c to terminal."
+(defun eaf-send-second-key-sequence ()
+  "Send second part of key sequence to terminal."
   (interactive)
-  (eaf-call "send_key_sequence" eaf--buffer-id "C-c"))
+  (eaf-call "send_key_sequence"
+            eaf--buffer-id
+            (nth 1 (split-string (key-description (this-command-keys-vector))))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
