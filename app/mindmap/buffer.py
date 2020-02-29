@@ -38,7 +38,10 @@ class AppBuffer(BrowserBuffer):
         index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
         self.buffer_widget.setUrl(QUrl(index_file))
 
-        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "add_sub_node", "remove_node",
+        for method_name in ["add_sub_node", "remove_node"]:
+            self.build_js_method(method_name, True)
+
+        for method_name in ["zoom_in", "zoom_out", "zoom_reset", 
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
                             "toggle_node", "save_screenshot"]:
             self.build_js_method(method_name)
@@ -65,9 +68,12 @@ class AppBuffer(BrowserBuffer):
 
         self.change_title(self.get_root_node_topic())
 
-    def build_js_method(self, method_name):
+    def build_js_method(self, method_name, auto_save=False):
         def _do ():
             self.buffer_widget.eval_js("{}();".format(method_name))
+
+            if auto_save:
+                self.save_file(True)
         setattr(self, method_name, _do)
 
     def change_node_background(self):
@@ -82,6 +88,10 @@ class AppBuffer(BrowserBuffer):
 
     def handle_update_node_topic(self, topic):
         self.buffer_widget.eval_js("update_node_topic('{}');".format(topic))
+
+        self.change_title(self.get_root_node_topic())
+
+        self.save_file(False)
 
     def handle_input_message(self, result_type, result_content):
         if result_type == "update_node_topic":
@@ -112,23 +122,31 @@ class AppBuffer(BrowserBuffer):
         # get_root_node_topic will return None if execute immediately.
         QTimer.singleShot(200, lambda : self.save_screenshot_data(download_data))
 
+    def get_save_path(self, extension_name):
+        if self.url.strip() == "":
+            return os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + "." + extension_name)
+        else:
+            return os.path.splitext(self.url)[0] + "." + extension_name
+
     def save_screenshot_data(self, download_data):
-        image_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + ".png")
+        image_path = self.get_save_path("png")
         touch(image_path)
         with open(image_path, "wb") as f:
             f.write(base64.decodestring(download_data.split("data:image/png;base64,")[1].encode("utf-8")))
 
         self.message_to_emacs.emit("Save image: " + image_path)
 
-    def save_file(self):
-        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + ".emm")
+    def save_file(self, notify=True):
+        file_path = self.get_save_path("emm")
         touch(file_path)
         with open(file_path, "w") as f:
             f.write(self.buffer_widget.execute_js("save_file();"))
-        self.message_to_emacs.emit("Save file: " + file_path)
+
+        if notify:
+            self.message_to_emacs.emit("Save file: " + file_path)
 
     def save_org_file(self):
-        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + ".org")
+        file_path = self.get_save_path("org")
         touch(file_path)
         self.export_org_json.emit(self.buffer_widget.execute_js("save_file();"), file_path)
         self.message_to_emacs.emit("Save org file: " + file_path)
