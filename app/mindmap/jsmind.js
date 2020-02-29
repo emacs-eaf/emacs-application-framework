@@ -2673,6 +2673,12 @@
 
         show_lines:function(canvas_ctx){
             this.clear_lines(canvas_ctx);
+
+            // Draw background, use to save screenshot.
+            var ctx = canvas_ctx || this.canvas_ctx;
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, this.size.w, this.size.h);
+
             var nodes = this.jm.mind.nodes;
             var node = null;
             var pin = null;
