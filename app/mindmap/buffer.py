@@ -41,7 +41,7 @@ class AppBuffer(BrowserBuffer):
         for method_name in ["add_sub_node", "remove_node"]:
             self.build_js_method(method_name, True)
 
-        for method_name in ["zoom_in", "zoom_out", "zoom_reset", 
+        for method_name in ["zoom_in", "zoom_out", "zoom_reset",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
                             "toggle_node", "save_screenshot"]:
             self.build_js_method(method_name)
@@ -73,7 +73,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js("{}();".format(method_name))
 
             if auto_save:
-                self.save_file(True)
+                self.save_file(False)
         setattr(self, method_name, _do)
 
     def change_node_background(self):
