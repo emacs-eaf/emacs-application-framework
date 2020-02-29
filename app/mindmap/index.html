@@ -53,6 +53,17 @@
              _jm.select_node(node);
          }
 
+         function add_brother_node(){
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if(!selected_node) {
+                 _jm.move_node(selected_id,'_first_');
+             }
+
+             var nodeid = jsMind.util.uuid.newid();
+             var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
+             _jm.select_node(node);
+         }
+
          function get_selected_nodeid(){
              var selected_node = _jm.get_selected_node();
              if(!!selected_node){

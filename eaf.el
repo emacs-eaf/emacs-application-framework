@@ -443,6 +443,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-mindmap-keybinding
   '(("TAB" . "add_sub_node")
+    ("RET" . "add_brother_node")
     ("<deletechar>" . "remove_node")
     ("M-m" . "update_node_topic")
     ("M-r" . "refresh_page")
