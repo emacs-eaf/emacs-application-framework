@@ -440,13 +440,17 @@ class BrowserBuffer(Buffer):
 
             self.message_to_emacs.emit("Start download: " + download_data)
 
-    def handle_destroy(self):
+    def destroy_buffer(self):
+        # Record close page.
         self.close_page.emit(self.buffer_widget.url().toString())
 
         # Load blank page to stop video playing, such as youtube.com.
         self.buffer_widget.open_url("about:blank")
 
-        super.handle_destroy(self)
+        if self.buffer_widget is not None:
+            # NOTE: We need delete QWebEnginePage manual, otherwise QtWebEngineProcess won't quit.
+            self.buffer_widget.web_page.deleteLater()
+            self.buffer_widget.deleteLater()
 
     def get_key_event_widgets(self):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.

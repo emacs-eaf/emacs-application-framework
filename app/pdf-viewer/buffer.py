@@ -46,12 +46,10 @@ class AppBuffer(Buffer):
                             "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
             self.build_widget_method(method_name)
 
-    def handle_destroy(self):
+    def before_destroy_buffer(self):
         if self.delete_temp_file:
             if os.path.exists(self.url):
                 os.remove(self.url)
-
-        super.handle_destroy(self)
 
     def get_table_file(self):
         return self.buffer_widget.table_file_path

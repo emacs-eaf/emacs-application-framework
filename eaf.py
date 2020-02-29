@@ -220,7 +220,7 @@ class EAF(dbus.service.Object):
         # Remove old key from view dict and destroy old view.
         for key in list(self.view_dict):
             if key not in view_infos:
-                self.view_dict[key].handle_destroy()
+                self.view_dict[key].destroy_view()
                 self.view_dict.pop(key, None)
 
         # Create new view and udpate in view dict.
@@ -274,7 +274,7 @@ class EAF(dbus.service.Object):
         # Kill all view base on buffer_id.
         for key in list(self.view_dict):
             if buffer_id == self.view_dict[key].buffer_id:
-                self.view_dict[key].handle_destroy()
+                self.view_dict[key].destroy_view()
                 self.view_dict.pop(key, None)
 
         # Clean buffer from buffer dict.
@@ -282,7 +282,7 @@ class EAF(dbus.service.Object):
             # Save buffer session.
             self.save_buffer_session(self.buffer_dict[buffer_id])
 
-            self.buffer_dict[buffer_id].handle_destroy()
+            self.buffer_dict[buffer_id].destroy_buffer()
             self.buffer_dict.pop(buffer_id, None)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")

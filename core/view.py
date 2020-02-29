@@ -105,5 +105,5 @@ class View(QWidget):
 
         xlib_display.sync()
 
-    def handle_destroy(self):
+    def destroy_view(self):
         self.destroy()

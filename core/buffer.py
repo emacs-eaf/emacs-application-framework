@@ -151,7 +151,6 @@ class Buffer(QGraphicsScene):
     open_url_in_new_tab = QtCore.pyqtSignal(str)
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_text = QtCore.pyqtSignal(str)
-    before_destroy_hook = QtCore.pyqtSignal()
     input_message = QtCore.pyqtSignal(str, str, str, str, str)
     close_buffer = QtCore.pyqtSignal(str)
     message_to_emacs = QtCore.pyqtSignal(str)
@@ -214,12 +213,14 @@ class Buffer(QGraphicsScene):
 
         self.buffer_widget.buffer = self
 
-    def handle_destroy(self):
-        # Record close page before close action.
-        self.before_destroy_hook.emit()
+    def before_destroy_buffer(self):
+        pass
+
+    def destroy_buffer(self):
+        self.before_destroy_buffer()
 
         if self.buffer_widget is not None:
-            self.buffer_widget.destroy()
+            self.buffer_widget.deleteLater()
 
     def change_title(self, title):
         self.update_details.emit(self.buffer_id, title, self.url)
