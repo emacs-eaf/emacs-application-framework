@@ -1,7 +1,7 @@
 /*
  * Released under BSD License
  * Copyright (c) 2014-2015 hizzgdev@163.com
- * 
+ *
  * Project Home:
  *   https://github.com/hizzgdev/jsmind/
  */

@@ -211,6 +211,20 @@
          function relayout() {
              _jm.view.relayout();
          }
+
+         function paste_node_tree(src_node_id) {
+             /* var selected_node = _jm.get_selected_node();
+              * if(!!selected_node){
+              *     var src_node = _jm.get_node(src_node_id);
+              *     _jm.move_node(src_node, selected_node, selected_node.direction);
+              * } */
+
+             var selected_node = _jm.get_selected_node();
+             if(!!selected_node){
+                 var src_node = _jm.get_node(src_node_id);
+                 _jm.move_node(src_node, src_node_id, selected_node.id, selected_node.direction);
+             }
+         }
         </script>
     </body>
 </html>

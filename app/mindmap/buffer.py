@@ -39,6 +39,8 @@ class AppBuffer(BrowserBuffer):
         index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
         self.buffer_widget.setUrl(QUrl(index_file))
 
+        self.cut_node_id = None
+
         for method_name in ["add_sub_node", "add_brother_node", "remove_node"]:
             self.build_js_method(method_name, True)
 
@@ -51,7 +53,7 @@ class AppBuffer(BrowserBuffer):
                             "copy_node_topic", "paste_node_topic", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
                             "toggle_node", "save_screenshot", "save_file", "save_org_file",
-                            "change_node_background"]:
+                            "change_node_background", "cut_node_tree", "paste_node_tree"]:
             self.build_insert_or_do(method_name)
 
         QTimer.singleShot(500, self.init_file)
@@ -100,6 +102,20 @@ class AppBuffer(BrowserBuffer):
             self.save_file(False)
         else:
             self.message_to_emacs.emit("Nothing in clipboard, can't paste.")
+
+    def cut_node_tree(self):
+        self.cut_node_id = self.buffer_widget.execute_js("get_selected_nodeid();")
+        if self.cut_node_id:
+            if self.cut_node_id != "root":
+                self.message_to_emacs.emit("Root node not allowed cut.")
+            else:
+                self.message_to_emacs.emit("Cut node tree: {}".format(self.cut_node_id))
+
+    def paste_node_tree(self):
+        if self.cut_node_id:
+            self.buffer_widget.eval_js("paste_node_tree('{}');".format(self.cut_node_id))
+            self.save_file(False)
+            self.message_to_emacs.emit("Paste node tree: {}".format(self.cut_node_id))
 
     def change_node_background(self):
         self.send_input_message("Change node background: ", "change_node_background", "file")
