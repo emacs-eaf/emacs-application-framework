@@ -21,6 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QTimer
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
 from core.utils import touch, string_to_base64
@@ -46,7 +47,8 @@ class AppBuffer(BrowserBuffer):
                             "toggle_node", "save_screenshot"]:
             self.build_js_method(method_name)
 
-        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node", "update_node_topic", "refresh_page",
+        for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node", "update_node_topic",
+                            "copy_node_topic", "paste_node_topic", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
                             "toggle_node", "save_screenshot", "save_file", "save_org_file",
                             "change_node_background"]:
@@ -76,6 +78,29 @@ class AppBuffer(BrowserBuffer):
                 self.save_file(False)
         setattr(self, method_name, _do)
 
+    def build_insert_or_do(self, method_name):
+        def _do ():
+            if self.is_focus():
+                self.fake_key_event(self.current_event_string)
+            else:
+                getattr(self, method_name)()
+        setattr(self, "insert_or_{}".format(method_name), _do)
+
+    def copy_node_topic(self):
+        node_topic = self.buffer_widget.execute_js("get_node_topic();")
+        self.eval_in_emacs.emit('''(kill-new "{}")'''.format(node_topic))
+        self.message_to_emacs.emit("Copy: {}".format(node_topic))
+
+    def paste_node_topic(self):
+        text = QApplication.clipboard().text()
+        if text.strip() != "":
+            self.buffer_widget.eval_js("update_node_topic('{}');".format(text))
+            self.message_to_emacs.emit("Paste: {}".format(text))
+
+            self.save_file(False)
+        else:
+            self.message_to_emacs.emit("Nothing in clipboard, can't paste.")
+
     def change_node_background(self):
         self.send_input_message("Change node background: ", "change_node_background", "file")
 
@@ -102,14 +127,6 @@ class AppBuffer(BrowserBuffer):
 
     def is_focus(self):
         return self.buffer_widget.execute_js("node_is_focus();")
-
-    def build_insert_or_do(self, method_name):
-        def _do ():
-            if self.is_focus():
-                self.fake_key_event(self.current_event_string)
-            else:
-                getattr(self, method_name)()
-        setattr(self, "insert_or_{}".format(method_name), _do)
 
     def get_root_node_topic(self):
         return self.buffer_widget.execute_js("get_root_node_topic();")
