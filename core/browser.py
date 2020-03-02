@@ -353,6 +353,7 @@ class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
+    open_dev_tools_tab = QtCore.pyqtSignal(object)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
@@ -661,3 +662,6 @@ class BrowserBuffer(Buffer):
 
     def eval_js_file(self):
         self.send_input_message("Eval JS: ", "eval_js_file", "file")
+
+    def open_dev_tool_page(self):
+        self.open_dev_tools_tab.emit(self.buffer_widget.web_page)

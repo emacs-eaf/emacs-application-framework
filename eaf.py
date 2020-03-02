@@ -189,12 +189,21 @@ class EAF(dbus.service.Object):
         if getattr(app_buffer, "export_org_json", False) and getattr(app_buffer.export_org_json, "connect", False):
             app_buffer.export_org_json.connect(self.export_org_json)
 
+        # Handle dev tools signal.
+        if getattr(app_buffer, "open_dev_tools_tab", False) and getattr(app_buffer.open_dev_tools_tab, "connect", False):
+            app_buffer.open_dev_tools_tab.connect(self.open_dev_tools_tab)
+
         # Add create new window when create_new_browser_window_callback is call.
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
 
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
+
+        # If arguments is dev_tools, create dev tools page.
+        if module_path == "app.browser.buffer" and arguments == "dev_tools" and self.dev_tools_page:
+            self.dev_tools_page.setDevToolsPage(app_buffer.buffer_widget.web_page)
+            self.dev_tools_page = None
 
         # Restore buffer session.
         self.restore_buffer_session(app_buffer)
@@ -360,6 +369,10 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
+    def open_dev_tools_page(self):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
     def open_url_in_background_tab(self, url):
         pass
 
@@ -406,6 +419,10 @@ class EAF(dbus.service.Object):
     @dbus.service.signal(EAF_DBUS_NAME)
     def export_org_json(self, org_json_content, org_file_path):
         pass
+
+    def open_dev_tools_tab(self, web_page):
+        self.dev_tools_page = web_page
+        self.open_dev_tools_page()
 
     def save_buffer_session(self, buf):
         # Create config file it not exist.

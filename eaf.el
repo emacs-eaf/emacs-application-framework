@@ -311,7 +311,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")
     ("M-p" . "eval_js_file")
-    ("<f5>" . "refresh_page"))
+    ("<f5>" . "refresh_page")
+    ("<f12>" . "open_dev_tool_page")
+    )
   "The keybinding of EAF Browser."
   :type 'cons)
 
@@ -1271,6 +1273,17 @@ In that way the corresponding function will be called to retrieve the HTML
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "open_dev_tools_page"
+ #'eaf-open-dev-tool-page)
+
+(defun eaf-open-dev-tool-page ()
+  (delete-other-windows)
+  (split-window (selected-window) (/ (* (nth 3 (eaf-get-window-allocation (selected-window))) 2) 3) nil t)
+  (other-window 1)
+  (eaf-open "about:blank" "browser" "dev_tools"))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "open_url_in_new_tab"
  #'eaf-open-browser)
 
@@ -1358,7 +1371,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
