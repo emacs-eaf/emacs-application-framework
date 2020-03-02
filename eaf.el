@@ -747,6 +747,7 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
     (eaf--delete-org-preview-file org-file-name))
   (setq eaf-org-file-list nil)
   (setq eaf-org-killed-file-list nil)
+  (setq eaf-fullscreen-p nil)
 
   ;; Kill process after kill buffer, make application can save session data.
   (eaf--kill-python-process))
@@ -1381,7 +1382,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
