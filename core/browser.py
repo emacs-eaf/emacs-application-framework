@@ -248,6 +248,9 @@ class BrowserView(QWebEngineView):
     def redo_action(self):
         self.triggerPageAction(self.web_page.Redo)
 
+    def exit_fullscreen(self):
+        self.triggerPageAction(self.web_page.ExitFullScreen)
+
     def select_all(self):
         # We need window focus before select all text.
         self.eval_js("window.focus()")
@@ -354,6 +357,8 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
     open_dev_tools_tab = QtCore.pyqtSignal(object)
+    enter_fullscreen_request = QtCore.pyqtSignal()
+    exit_fullscreen_request = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
@@ -390,7 +395,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.loadProgress.connect(self.update_progress)
         self.buffer_widget.loadFinished.connect(self.stop_progress)
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
-        self.buffer_widget.web_page.fullScreenRequested.connect(lambda r: r.accept())
+        self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
 
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
 
@@ -405,7 +410,7 @@ class BrowserBuffer(Buffer):
         for method_name in ["search_text_forward", "search_text_backward", "zoom_out", "zoom_in", "zoom_reset",
                             "scroll_left", "scroll_right", "scroll_up", "scroll_down",
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
-                            "refresh_page", "undo_action", "redo_action", "get_url",
+                            "refresh_page", "undo_action", "redo_action", "get_url", "exit_fullscreen",
                             "set_focus_text", "clear_focus", "dark_mode"]:
             self.build_widget_method(method_name)
 
@@ -421,6 +426,14 @@ class BrowserBuffer(Buffer):
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark"]:
             self.build_insert_or_do(method_name)
+
+    def handle_fullscreen_request(self, request):
+        if request.toggleOn():
+            self.enter_fullscreen_request.emit()
+        else:
+            self.exit_fullscreen_request.emit()
+
+        request.accept()
 
     def handle_download_request(self, download_item):
         download_data = download_item.url().toString()

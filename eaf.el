@@ -311,6 +311,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")
     ("M-p" . "eval_js_file")
+    ("M-g" . "exit_fullscreen")
     ("<f5>" . "refresh_page")
     ("<f12>" . "open_dev_tool_page")
     )
@@ -603,6 +604,8 @@ EAF call python method `new_buffer' to create EAF application buffer.
 EAF call python method `update_views' to create EAF application view.
 
 Python process only create application view when Emacs window or buffer state change.")
+
+(defvar eaf-fullscreen-p nil)
 
 (defvar eaf-buffer-title-format "%s")
 
@@ -902,18 +905,25 @@ to edit EAF keybindings!" fun fun)))
             (let ((buffer (window-buffer window)))
               (with-current-buffer buffer
                 (if (derived-mode-p 'eaf-mode)
-                    (let* ((window-allocation (eaf-get-window-allocation window))
-                           (x (nth 0 window-allocation))
-                           (y (nth 1 window-allocation))
-                           (w (nth 2 window-allocation))
-                           (h (nth 3 window-allocation))
-                           )
-                      (push (format "%s:%s:%s:%s:%s:%s"
-                                    eaf--buffer-id
-                                    (eaf-get-emacs-xid frame)
-                                    x y w h)
-                            view-infos)
-                      ))))))
+                    ;; Use frame size if just have one window in current frame and `eaf-fullscreen-p' is non-nil.
+                    (if (and (equal (length (window-list)) 1)
+                             eaf-fullscreen-p)
+                        (push (format "%s:%s:%s:%s:%s:%s"
+                                      eaf--buffer-id
+                                      (eaf-get-emacs-xid frame)
+                                      0 0 (frame-pixel-width) (frame-pixel-height))
+                              view-infos)
+                      (let* ((window-allocation (eaf-get-window-allocation window))
+                             (x (nth 0 window-allocation))
+                             (y (nth 1 window-allocation))
+                             (w (nth 2 window-allocation))
+                             (h (nth 3 window-allocation)))
+                        (push (format "%s:%s:%s:%s:%s:%s"
+                                      eaf--buffer-id
+                                      (eaf-get-emacs-xid frame)
+                                      x y w h)
+                              view-infos)
+                        )))))))
         ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
         ;; So I package two-dimensional list in string, then unpack on server side. ;)
         (eaf-call "update_views" (mapconcat #'identity view-infos ","))
@@ -1661,6 +1671,24 @@ Make sure that your smartphone is connected to the same WiFi network as this com
           "Cancel with `\\[eaf-edit-buffer-cancel]'. "
           "Switch to org-mode with `\\[eaf-edit-buffer-switch-to-org-mode]'. "
           ))))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "enter_fullscreen_request"
+ #'eaf--enter_fullscreen_request)
+
+(defun eaf--enter_fullscreen_request ()
+  (setq eaf-fullscreen-p t)
+  (eaf-monitor-configuration-change))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "exit_fullscreen_request"
+ #'eaf--exit_fullscreen_request)
+
+(defun eaf--exit_fullscreen_request ()
+  (setq eaf-fullscreen-p nil)
+  (eaf-monitor-configuration-change))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()

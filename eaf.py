@@ -193,6 +193,13 @@ class EAF(dbus.service.Object):
         if getattr(app_buffer, "open_dev_tools_tab", False) and getattr(app_buffer.open_dev_tools_tab, "connect", False):
             app_buffer.open_dev_tools_tab.connect(self.open_dev_tools_tab)
 
+        # Handle fulllscreen signal.
+        if getattr(app_buffer, "enter_fullscreen_request", False) and getattr(app_buffer.enter_fullscreen_request, "connect", False):
+            app_buffer.enter_fullscreen_request.connect(self.enter_fullscreen_request)
+
+        if getattr(app_buffer, "exit_fullscreen_request", False) and getattr(app_buffer.exit_fullscreen_request, "connect", False):
+            app_buffer.exit_fullscreen_request.connect(self.exit_fullscreen_request)
+
         # Add create new window when create_new_browser_window_callback is call.
         if module_path == "app.browser.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
@@ -418,6 +425,14 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def export_org_json(self, org_json_content, org_file_path):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def enter_fullscreen_request(self):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def exit_fullscreen_request(self):
         pass
 
     def open_dev_tools_tab(self, web_page):
