@@ -605,7 +605,8 @@ EAF call python method `update_views' to create EAF application view.
 
 Python process only create application view when Emacs window or buffer state change.")
 
-(defvar eaf-fullscreen-p nil)
+(defvar eaf-fullscreen-p nil
+  "When non-nil, EAF will intelligently hide modeline as necessray.")
 
 (defvar eaf-buffer-title-format "%s")
 
@@ -747,7 +748,7 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
     (eaf--delete-org-preview-file org-file-name))
   (setq eaf-org-file-list nil)
   (setq eaf-org-killed-file-list nil)
-  (setq eaf-fullscreen-p nil)
+  (setq-local eaf-fullscreen-p nil)
 
   ;; Kill process after kill buffer, make application can save session data.
   (eaf--kill-python-process))
@@ -1681,7 +1682,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--enter_fullscreen_request)
 
 (defun eaf--enter_fullscreen_request ()
-  (setq eaf-fullscreen-p t)
+  (setq-local eaf-fullscreen-p t)
   (eaf-monitor-configuration-change))
 
 (dbus-register-signal
@@ -1690,7 +1691,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--exit_fullscreen_request)
 
 (defun eaf--exit_fullscreen_request ()
-  (setq eaf-fullscreen-p nil)
+  (setq-local eaf-fullscreen-p nil)
   (eaf-monitor-configuration-change))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
