@@ -310,6 +310,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")
+    ("M-o" . "eval_js")
     ("M-p" . "eval_js_file")
     ("M-g" . "exit_fullscreen")
     ("<f5>" . "refresh_page")

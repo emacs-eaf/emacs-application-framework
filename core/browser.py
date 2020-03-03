@@ -495,6 +495,8 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
         elif result_type == "eval_js_file":
             self.buffer_widget.eval_js_file(str(result_content))
+        elif result_type == "eval_js":
+            self.buffer_widget.eval_js(str(result_content))
 
     def cancel_input_message(self, result_type):
         if result_type == "jump_link" or result_type == "jump_link_new_buffer" or result_type == "jump_link_background_buffer":
@@ -674,7 +676,10 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.select_all()
 
     def eval_js_file(self):
-        self.send_input_message("Eval JS: ", "eval_js_file", "file")
+        self.send_input_message("Eval JS file: ", "eval_js_file", "file")
+
+    def eval_js(self):
+        self.send_input_message("Eval JS: ", "eval_js")
 
     def open_dev_tool_page(self):
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
