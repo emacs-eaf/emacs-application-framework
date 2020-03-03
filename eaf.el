@@ -477,6 +477,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("1" . "insert_or_save_screenshot")
     ("2" . "insert_or_save_file")
     ("3" . "insert_or_save_org_file")
+    ("M-o" . "eval_js")
+    ("M-p" . "eval_js_file")
+    ("<f12>" . "open_dev_tool_page")
     )
   "The keybinding of EAF Mindmap."
   :type 'cons)
@@ -1386,7 +1389,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
