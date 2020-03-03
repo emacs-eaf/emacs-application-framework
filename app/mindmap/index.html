@@ -225,6 +225,37 @@
                  _jm.move_node(src_node, src_node_id, selected_node.id, selected_node.direction);
              }
          }
+
+         function remove_middle_node() {
+             var selected_node = _jm.get_selected_node();
+             if(!!selected_node){
+                 var children = selected_node.children;
+                 for (var i = 0; i < children.length; i++) {
+                     var child = children[i];
+                     _jm.move_node(child, child.id, selected_node.parent.id, selected_node.parent.direction);
+                 }
+
+                 _jm.select_node(selected_node.parent);
+                 _jm.remove_node(selected_node.id);
+             }
+         }
+
+         function add_middle_node() {
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if(!!selected_node) {
+                 var topic = selected_node.topic;
+
+                 add_brother_node();
+
+                 var brother_node = _jm.get_selected_node();
+                 _jm.update_node(brother_node.id, topic);
+                 _jm.update_node(selected_node.id, "Topic");
+
+                 _jm.move_node(selected_node, selected_node.id, brother_node.id, brother_node.direction);
+
+                 _jm.select_node(selected_node);
+             }
+         }
         </script>
     </body>
 </html>
