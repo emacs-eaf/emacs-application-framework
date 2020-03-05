@@ -1631,7 +1631,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf-open file "mindmap"))
 
 (defun eaf-get-file-md5 (file)
-  (car (split-string (shell-command-to-string (format "md5sum %s" (file-truename file))) " ")))
+  (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
 
 (defun eaf-open-office (file)
   (interactive "fOpen office file: ")
