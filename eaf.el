@@ -367,17 +367,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Video Player."
   :type 'cons)
 
-(defcustom eaf-js-video-player-keybinding
-  '(
-    ("C--" . "zoom_out")
-    ("C-=" . "zoom_in")
-    ("C-0" . "zoom_reset")
-    ("M-g" . "exit_fullscreen")
-    ("<f12>" . "open_dev_tool_page")
-    )
-  "The keybinding of EAF JS Video Player."
-  :type 'cons)
-
 (defcustom eaf-image-viewer-keybinding
   '(("n" . "load_next_image")
     ("p" . "load_prev_image")
@@ -566,7 +555,6 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
     ("video-player" . eaf-video-player-keybinding)
-    ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
@@ -1469,7 +1457,7 @@ choose a search engine defined in `eaf-browser-search-engines'"
                   if (member extension-name (symbol-value ext))
                   return app)))
     (if (string-equal app-name "video-player")
-        ;; Use Browser play video if webneing
+        ;; Use Browser play video if QWebEngine include private codec.
         (if (eaf--webengine-include-private-codec) "js-video-player" "video-player")
       app-name)))
 

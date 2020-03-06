@@ -404,6 +404,7 @@ class BrowserBuffer(Buffer):
             settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
             settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
             settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
+            settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
         except Exception:
             pass
 
