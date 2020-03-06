@@ -19,5 +19,21 @@
          var video = document.getElementById('player');
          video.setAttribute('src', file);
      }
+
+     function toggle_play() {
+         player.togglePlay();
+     }
+
+     function toggle_fullscreen() {
+         player.fullscreen.toggle();
+     }
+
+     function get_current_time() {
+         return player.currentTime;
+     }
+
+     function set_current_time(time) {
+         player.currentTime = parseFloat(time);
+     }
     </script>
 </body>

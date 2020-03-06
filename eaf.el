@@ -367,6 +367,18 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Video Player."
   :type 'cons)
 
+(defcustom eaf-js-video-player-keybinding
+  '(("SPC" . "toggle_play")
+    ("f" . "toggle_fullscreen")
+    ("M-g" . "exit_fullscreen")
+    ("<f12>" . "open_dev_tool_page")
+    ("C--" . "zoom_out")
+    ("C-=" . "zoom_in")
+    ("C-0" . "zoom_reset")
+    )
+  "The keybinding of EAF JS Video Player."
+  :type 'cons)
+
 (defcustom eaf-image-viewer-keybinding
   '(("n" . "load_next_image")
     ("p" . "load_prev_image")
@@ -555,6 +567,7 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
     ("video-player" . eaf-video-player-keybinding)
+    ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
