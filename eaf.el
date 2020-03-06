@@ -369,10 +369,15 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-js-video-player-keybinding
   '(("SPC" . "toggle_play")
-    ("f" . "toggle_fullscreen")
     ("M-g" . "exit_fullscreen")
     ("<f12>" . "open_dev_tool_page")
-    ("C--" . "zoom_out")
+    ("f" . "toggle_fullscreen")
+    ("h" . "backward")
+    ("l" . "forward")
+    ("r" . "restart")
+    ("j" . "decrease_volume")
+    ("k" . "increase_volume")
+    ("c--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
     )

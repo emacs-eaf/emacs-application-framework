@@ -39,7 +39,7 @@ class AppBuffer(BrowserBuffer):
         index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
         self.buffer_widget.setUrl(QUrl(index_file))
 
-        for method_name in ["toggle_play", "toggle_fullscreen"]:
+        for method_name in ["toggle_play", "toggle_fullscreen", "forward", "backward", "restart", "increase_volume", "decrease_volume"]:
             self.build_js_method(method_name)
 
         QTimer.singleShot(500, self.play_video)
