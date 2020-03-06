@@ -50,6 +50,16 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
 ```
 
+    If you use Arch Linux, we recommend you install dependencies with below command:
+
+```Bash
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
+python-dbus
+yay -S python-pymupdf python-grip aria2p
+```
+
+    Because Arch's QtWebEngine build with proprietary codec library that can play video file with browser.
+
 2. Clone this repository.
 
 ```Bash

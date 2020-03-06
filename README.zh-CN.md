@@ -48,6 +48,16 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
 ```
 
+    如果你使用的是Arch系统，建议用下面的命令来安装依赖：
+
+```Bash
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
+python-dbus
+yay -S python-pymupdf python-grip aria2p
+```
+
+    因为Arch的QtWebEngine编译的时候内建私有编解码库，可以直接在浏览器中播放mp4等视频文件。
+
 2. 使用 ```git clone``` 下载这个仓库.
 
 ```Bash
