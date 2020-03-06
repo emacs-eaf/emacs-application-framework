@@ -1,0 +1,78 @@
+// ==========================================================================
+// Base layout
+// ==========================================================================
+
+// BORDER-BOX ALL THE THINGS!
+// http://paulirish.com/2012/box-sizing-border-box-ftw/
+*,
+*::after,
+*::before {
+    box-sizing: border-box;
+}
+
+// Hidden
+[hidden] {
+    display: none;
+}
+
+// Base
+html {
+    height: 100%;
+    font-size: 100%;
+}
+body {
+    padding: (@padding-base * 1.5) (@padding-base / 2) (@padding-base * 3);
+    background: @body-background;
+    font-family: @font-stack;
+    line-height: 1.5;
+    text-align: center;
+    color: @text-color;
+    .font-smoothing(on);
+    .font-size();
+    font-weight: @font-weight-medium;
+    text-shadow: 0 1px 1px fade(#000, 10%);
+
+    @media only screen and (min-width: @screen-sm) {
+        display: flex;
+        height: 100%;
+        align-items: center;
+        padding-top: (@padding-base * 3);
+    }
+}
+
+.section,
+.action {
+    margin-top: @padding-base;
+}
+.section + .section {
+    margin-top: (@padding-base / 2);
+}
+
+// Header
+header p {
+    .font-size(@font-size-large);
+}
+
+// Main container
+main {
+    max-width: 400px;
+    margin: 0 auto;
+    animation: fade-in 0.2s ease;
+}
+
+// Alert
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: (@padding-base / 2);
+    background: fade(#fff, 95%);
+    color: @gray;
+    text-shadow: none;
+    animation: fade-in-up 0.2s ease;
+
+    .icon {
+        margin-right: ceil(@padding-base / 3);
+    }
+}

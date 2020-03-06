@@ -1,0 +1,22 @@
+<head>
+    <link href="./node_modules/plyr/dist/plyr.css" rel="stylesheet" />
+    <link href="./style.css" rel="stylesheet" />
+    <script src="./node_modules/plyr/dist/plyr.min.js"></script>
+</head>
+
+<body>
+    <video
+        id="player"
+    />
+
+    <script type="text/javascript">
+     const player = new Plyr('#player', {
+         controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', "fullscreen"],
+     });
+
+     function play(file) {
+         var video = document.getElementById('player');
+         video.setAttribute('src', file);
+     }
+    </script>
+</body>

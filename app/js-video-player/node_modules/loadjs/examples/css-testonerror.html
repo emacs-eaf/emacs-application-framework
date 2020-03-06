@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <script>
+     function loadSheet(path) {
+       var e = document.createElement('link');
+       
+       e.rel = 'stylesheet';
+       e.href = path;
+
+       e.onload = function(ev) {
+         console.log('---- ONLOAD ----');
+         console.log(path + ': ' + ev.type);
+
+         try {
+           console.log('sheet.cssText.length: ' + e.sheet.cssText.length);
+         } catch (err) {
+           console.log('error code: ' + err.code);
+         }
+
+         console.log(ev);
+         
+         console.log('----------------');
+       };
+       
+       e.onerror = function(ev) {console.log('onerror: ' + ev.type);};
+
+       document.head.appendChild(e);
+
+     }
+
+     loadSheet('//cdn.muicss.com/mui-0.9.41/css/mui.min.css');
+     loadSheet('//cdn.muicss.com/mui-0.9.41/css/mui-doesntexist.min.css');
+     loadSheet('assets/fontcss-doesntexist.css');
+     loadSheet('assets/file.css');
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

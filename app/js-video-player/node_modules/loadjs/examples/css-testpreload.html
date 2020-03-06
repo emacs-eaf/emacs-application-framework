@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <script>
+     function loadSheet(path) {
+       var e = document.createElement('link');
+
+       //e.rel = 'stylesheet';
+       e.rel = 'preload';
+       e.as = 'style';
+       e.href = path;
+
+       e.onload = function(ev) {
+         //if (e.rel == 'preload') return e.rel = 'stylesheet';
+         
+         console.log('[ONLOAD] ' + path + ': ' + ev.type);
+       };
+       
+       e.onerror = function(ev) {
+         //if (e.rel == 'preload') return e.rel = 'stylesheet';
+         
+         console.log('[ONERROR] ' + path + ': ' + ev.type);
+       };
+
+       document.head.appendChild(e);
+
+     }
+
+     //loadSheet('//cdn.muicss.com/mui-0.9.41/css/mui.min.css');
+     loadSheet('//cdn.muicss.com/mui-0.9.41/css/mui-doesntexist.min.css');
+     //loadSheet('assets/fontcss-doesntexist.css');
+     //loadSheet('assets/file.css');
+    </script>
+  </head>
+  <body>
+    <div class="mui-container">
+      <div class="mui-panel">
+        <h1>My Title</h1>
+        <button class="mui-btn mui-btn--primary mui-btn--raised">My Button</button>
+      </div>
+    </div>
+  </body>
+</html>

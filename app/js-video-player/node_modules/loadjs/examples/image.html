@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="assets/log.js"></script>
+    <script src="assets/loadjs/loadjs.js"></script>
+    <script>
+      loadjs('assets/flash.svg', function() {
+        log('example1: flash.svg loaded');
+      });
+
+      loadjs('assets/flash.png', function() {
+        log('example2: flash.png loaded');
+      });
+
+     loadjs('assets/flash-doesntexist.svg', {
+       success: function() {
+         log('example3: flash-doesntexist.svg triggered success (FAIL)');
+       },
+       error: function() {
+         log('example3: flash-doesntexist.svg triggered error (OK)');
+       }
+     });
+
+      loadjs('img!assets/flash.svg?trick', function() {
+        log('example4: flash.svg loaded');
+      });
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

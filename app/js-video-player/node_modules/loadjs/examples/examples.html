@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="assets/log.js"></script>
+    <script src="assets/loadjs/loadjs.js"></script>
+    <script>
+      // load a single file
+      loadjs('assets/file1.js', function() {
+        log('example1: file1.js loaded');
+      });
+      
+
+      // load multiple files
+      loadjs(['assets/file1.js', 'assets/file2.js'], function() {
+        log('example2: file1.js & file2.js loaded');
+      });
+      
+
+      // add a bundle id
+      loadjs(['assets/file1.js', 'assets/file2.js'], 'example3', function() {
+        log('example3: file1.js & file2.js loaded');
+      });
+      
+
+      // add a failure callback
+      loadjs(['assets/file1.js', 'assets/file-doesntexist.js'],
+             'example4',
+             function() { 
+               throw "Load should fail";
+             },
+             function(pathsNotFound) { 
+               log('example4: ' + pathsNotFound + ' not found');
+             });
+      
+
+      // execute a callback after bundle finishes loading
+      loadjs(['assets/file1.js', 'assets/file2.js'], 'example5');
+      
+      loadjs.ready('example5', function() {
+        log('example5: file1.js & file2.js loaded');
+      });
+      
+
+      // .ready() can be chained together
+      loadjs('assets/file1.js', 'example6a');
+      loadjs('assets/file2.js', 'example6b');
+      
+      loadjs
+      .ready('example6a', function() {
+        log('example6a: file1.js loaded');
+      })
+      .ready('example6b', function() {
+        log('example6b: file2.js loaded');
+      });
+      
+
+      // compose more complex dependency lists
+      loadjs('assets/file1.js', 'example7a');
+      loadjs(['assets/file2.js', 'assets/file3.js'], 'example7b');
+      loadjs(['assets/file3.js', 'assets/file-doesntexist.js'], 'example7c');
+
+      // wait for multiple depdendencies
+      loadjs.ready(['example7a', 'example7b'],
+                   function() {
+                     log('example7ab: file1.js & file2.js & file3.js loaded');
+                   },
+                   function(depsNotFound) {
+                     throw "Load should succeed";
+                   });
+      
+      loadjs.ready(['example7a', 'example7b', 'example7c'],
+                   function() {
+                     throw "Load should fail";
+                   },
+                   function(depsNotFound) {
+                     log('example7abc: ' + depsNotFound + ' failed');
+                   });
+
+
+      // use .done() for more control
+      loadjs.ready('my-awesome-plugin', function() {
+        myAwesomePlugin();
+        log('example8: my-awesome-plugin was loaded');
+      });
+      
+      loadjs('https://code.jquery.com/jquery-1.11.3.min.js', function() {
+        // plugin requires jquery
+        window.myAwesomePlugin = function() {
+          if (!window.jQuery) throw "jQuery is missing!";
+        };
+        
+        // plugin is done loading
+        loadjs.done('my-awesome-plugin');
+      });
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
