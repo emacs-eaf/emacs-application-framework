@@ -1452,9 +1452,17 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (eaf-open "eaf-terminal" "terminal"))
 
 (defun eaf--get-app-for-extension (extension-name)
-  (cl-loop for (app . ext) in eaf-app-extensions-alist
-           if (member extension-name (symbol-value ext))
-           return app))
+  (let ((app-name
+         (cl-loop for (app . ext) in eaf-app-extensions-alist
+                  if (member extension-name (symbol-value ext))
+                  return app)))
+    (if (string-equal app-name "video-player")
+        ;; Use Browser play video if webneing 
+        (if (eaf--webengine-include-private-codec) "js-video-player" "video-player")
+      app-name)))
+
+(defun eaf--webengine-include-private-codec ()
+  (not (string-equal (shell-command-to-string "ldd /usr/lib/libQt5WebEngineCore.so | grep libavformat") "")))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
