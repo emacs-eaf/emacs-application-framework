@@ -47,7 +47,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 1. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
 ```
 
     If you use Arch Linux, we recommend you install dependencies with below command:
@@ -55,7 +55,7 @@ sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcod
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
 python-dbus
-yay -S python-pymupdf python-grip aria2p
+yay -S python-pymupdf python-grip
 ```
 
     Because Arch's QtWebEngine build with proprietary codec library that can play video file with browser.
@@ -115,7 +115,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | grip          | pip3          | Markdown Previewer                                                                 | Markdown rendering server                 |
 | qrcode        | pip3          | File Sender, File Receiver, Airshare                                               | Render QR code pointing to local files    |
 | feedparser    | pip3          | RSS Reader                                                                         | Parse RSS feeds                           |
-| aria2p        | pip3          | Browser                                                                            | Send download requests to Aria2 daemon    |
 | aria2         | pacman (Arch) | Browser                                                                            | Download files from the web               |
 | wetty         | yarn          | Terminal                                                                           | Communicate between browser and local TTY |
 | libreoffice   | pacman        | Doc Viewer                                                                         | Convert doc file to pdf |
@@ -195,7 +194,7 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p --force-reinstall
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser --force-reinstall
 ```
 
 ### What is Github Personal Access Tokens?

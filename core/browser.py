@@ -448,19 +448,15 @@ class BrowserBuffer(Buffer):
 
             self.message_to_emacs.emit("Save image: " + image_path)
         else:
-            from shutil import which
+            self.try_start_aria2_daemon()
 
-            if which("aria2p") is not None:
+            from core.pyaria2 import Jsonrpc
 
-                self.try_start_aria2_daemon()
+            download_url = download_item.url().toString()
+            jsonrpc = Jsonrpc('localhost', 6800)
+            resp = jsonrpc.addUris(download_url)
 
-                download_data = download_item.url().toString()
-                with open(os.devnull, "w") as null_file:
-                    subprocess.Popen(["aria2p", "add", download_data], stdout=null_file)
-
-                self.message_to_emacs.emit("Start download: " + download_data)
-            else:
-                self.message_to_emacs.emit("Please install aria2p first.")
+            self.message_to_emacs.emit("Start download: " + download_url)
 
     def destroy_buffer(self):
         # Record close page.
