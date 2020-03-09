@@ -24,7 +24,7 @@ from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch, is_port_in_use, string_to_base64
+from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
@@ -426,7 +426,7 @@ class BrowserBuffer(Buffer):
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "open_link", "open_link_new_buffer", "open_link_background_buffer",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
-                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark"]:
+                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "download_youtube_video"]:
             self.build_insert_or_do(method_name)
 
     def handle_fullscreen_request(self, request):
@@ -687,3 +687,27 @@ class BrowserBuffer(Buffer):
 
     def open_dev_tool_page(self):
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
+
+    def download_youtube_video(self):
+        url = self.buffer_widget.url().toString()
+        if url.startswith("https://www.youtube.com"):
+            import shutil
+
+            if shutil.which("youtube-dl"):
+                download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(str(self.emacs_var_dict["eaf-browser-download-path"])))
+
+                youtube_dl_args = ["youtube-dl"]
+                youtube_dl_args.append("--proxy")
+                youtube_dl_args.append(self.proxy_string)
+                youtube_dl_args.append(url)
+                youtube_dl_args.append("-o")
+                youtube_dl_args.append(download_path)
+
+                with open(os.devnull, "w") as null_file:
+                    popen_and_call(youtube_dl_args, lambda : self.message_to_emacs.emit("Finish download: {0}".format(url)), null_file)
+
+                self.message_to_emacs.emit("Start download: {0}".format(url))
+            else:
+                self.message_to_emacs.emit("Please install youtube-dl first.")
+        else:
+            self.message_to_emacs.emit("Only can download video from YouTube now.")

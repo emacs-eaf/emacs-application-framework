@@ -25,6 +25,8 @@ import os
 import socket
 import sys
 import base64
+import threading
+import subprocess
 
 class PostGui(QtCore.QObject):
 
@@ -91,3 +93,20 @@ def get_local_ip():
     except OSError:
         print("Network is unreachable")
         sys.exit()
+
+def popen_and_call(popen_args, on_exit, stdout_file=None):
+    """
+    Runs the given args in a subprocess.Popen, and then calls the function
+    on_exit when the subprocess completes.
+    on_exit is a callable object, and popen_args is a list/tuple of args that
+    would give to subprocess.Popen.
+    """
+    def run_in_thread(on_exit, popen_args):
+        proc = subprocess.Popen(popen_args, stdout=stdout_file)
+        proc.wait()
+        on_exit()
+        return
+    thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
+    thread.start()
+    # returns immediately after the thread starts
+    return thread

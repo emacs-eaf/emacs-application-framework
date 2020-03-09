@@ -39,7 +39,7 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_width, emacs_height, eaf_config_dir
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         dbus.service.Object.__init__(
             self,
@@ -63,6 +63,8 @@ class EAF(dbus.service.Object):
 
         # Set Network proxy.
         if proxy_host != "" and proxy_port != "":
+            proxy_string = "{0}://{1}:{2}".format(proxy_type, proxy_host, proxy_port)
+
             proxy = QNetworkProxy()
             if proxy_type == "socks5":
                 proxy.setType(QNetworkProxy.Socks5Proxy)
@@ -137,7 +139,7 @@ class EAF(dbus.service.Object):
             return "EAF: Something went wrong when trying to import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
-        global emacs_width, emacs_height, eaf_config_dir
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Create application buffer.
         module = importlib.import_module(module_path)
@@ -206,6 +208,9 @@ class EAF(dbus.service.Object):
 
         elif module_path == "app.rss-reader.buffer":
             app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
+
+        if module_path == "app.browser.buffer":
+            app_buffer.proxy_string = proxy_string
 
         # If arguments is dev_tools, create dev tools page.
         if module_path == "app.browser.buffer" and arguments == "dev_tools" and self.dev_tools_page:
@@ -500,6 +505,8 @@ class EAF(dbus.service.Object):
 if __name__ == "__main__":
     import sys
     import signal
+
+    proxy_string = ""
 
     DBusGMainLoop(set_as_default=True) # WARING: only use once in one process
 
