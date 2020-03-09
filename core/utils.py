@@ -23,6 +23,7 @@ from PyQt5 import QtCore
 import functools
 import os
 import socket
+import sys
 import base64
 
 class PostGui(QtCore.QObject):
@@ -81,3 +82,12 @@ def is_port_in_use(port):
 
 def string_to_base64(text):
     return str(base64.b64encode(text.encode("utf-8")), "utf-8")
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except OSError:
+        print("Network is unreachable")
+        sys.exit()

@@ -23,6 +23,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
+from core.utils import get_local_ip
 from io import BytesIO
 import html
 import http.server
@@ -204,7 +205,10 @@ class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         f = BytesIO()
         displaypath = html.escape(urllib.parse.unquote(self.path))
         f.write(b'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
-        f.write(("<html>\n<title>Directory listing for %s</title>\n" % displaypath).encode())
+        f.write(("<html>\n<head>{0} {1}<title>Directory listing for {2}</title>\n</head>\n".format(
+            '''<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />''',
+            '''<meta name="viewport" content="width=device-width, initial-scale=1">\n''',
+            displaypath)).encode())
         f.write(("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath).encode())
         f.write(b"<hr>\n")
         f.write(b"<form ENCTYPE=\"multipart/form-data\" method=\"post\">")
@@ -368,7 +372,7 @@ class FileUploaderWidget(QWidget):
         layout.addStretch()
 
         self.port = "8000"
-        self.local_ip = self.get_local_ip()
+        self.local_ip = get_local_ip()
         self.address = "http://{0}:{1}".format(self.local_ip, self.port)
 
         self.qrcode_label.setPixmap(qrcode.make(self.address, image_factory=Image).pixmap())
@@ -376,28 +380,12 @@ class FileUploaderWidget(QWidget):
         global upload_dir
         upload_dir = url
 
-        t = threading.Thread(target=self.run_http_server, name='LoopThread')
-        t.start()
+        self.sender_thread = threading.Thread(target=self.run_http_server, name='LoopThread')
+        self.sender_thread.start()
 
     def run_http_server(self):
         http.server.test(SimpleHTTPRequestHandler, http.server.HTTPServer)
 
-    def get_local_ip(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            return s.getsockname()[0]
-        except OSError:
-            print("Network is unreachable")
-            sys.exit()
-
-if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
-    import signal
-    app = QApplication(sys.argv)
-
-    test = FileUploaderWidget("/home/andy/", QColor(0, 0, 0, 255))
-    test.show()
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    sys.exit(app.exec_())
+    def before_destroy_buffer(self):
+        self.message_to_emacs.emit("Stop file receiver server: http://{0}:{1}".format(self.local_ip, self.port))
+        self.sender_thread.stop()

@@ -24,7 +24,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from core.buffer import Buffer
-from core.utils import get_free_port
+from core.utils import get_free_port, get_local_ip
 import http.server as BaseHTTPServer
 import os
 import qrcode
@@ -122,38 +122,24 @@ class FileTransferWidget(QWidget):
     def set_address(self, address):
         self.qrcode_label.setPixmap(qrcode.make(address, image_factory=Image).pixmap())
 
-    def get_local_ip(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            return s.getsockname()[0]
-        except OSError:
-            print("Network is unreachable")
-            sys.exit()
-
     def start_server(self, filename):
         global local_file_path
 
         local_file_path = filename
 
         self.port = get_free_port()
-        self.local_ip = self.get_local_ip()
+        self.local_ip = get_local_ip()
         self.set_address("http://{0}:{1}/{2}".format(self.local_ip, self.port, filename))
 
-        t = threading.Thread(target=self.run_http_server, name='LoopThread')
-        t.start()
+        self.sender_thread = threading.Thread(target=self.run_http_server, name='LoopThread')
+        self.sender_thread.start()
 
     def run_http_server(self):
         httpd = BaseHTTPServer.HTTPServer(('', self.port), SimpleHTTPRequestHandler)
         httpd.serve_forever()
 
-if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
-    import signal
-    app = QApplication(sys.argv)
+    def before_destroy_buffer(self):
+        global local_file_path
 
-    test = FileTransferWidget("/home/andy/rms/1.jpg", QColor(0, 0, 0, 255))
-    test.show()
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    sys.exit(app.exec_())
+        self.message_to_emacs.emit("Stop file sender server: http://{0}:{1}/{2}".format(self.local_ip, self.port, local_file_path))
+        self.sender_thread.stop()
