@@ -426,7 +426,8 @@ class BrowserBuffer(Buffer):
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "open_link", "open_link_new_buffer", "open_link_background_buffer",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
-                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "download_youtube_video"]:
+                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
+                            "download_youtube_video", "download_youtube_audio"]:
             self.build_insert_or_do(method_name)
 
     def handle_fullscreen_request(self, request):
@@ -689,6 +690,12 @@ class BrowserBuffer(Buffer):
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
 
     def download_youtube_video(self):
+        self.download_youtube_file()
+
+    def download_youtube_audio(self):
+        self.download_youtube_file(True)
+
+    def download_youtube_file(self, only_audio=False):
         url = self.buffer_widget.url().toString()
         if url.startswith("https://www.youtube.com"):
             import shutil
@@ -703,10 +710,15 @@ class BrowserBuffer(Buffer):
                 youtube_dl_args.append("-o")
                 youtube_dl_args.append(download_path)
 
+                file_type = "video"
+                if only_audio:
+                    youtube_dl_args.append("-x")
+                    file_type = "audio"
+
                 with open(os.devnull, "w") as null_file:
                     popen_and_call(youtube_dl_args, lambda : self.message_to_emacs.emit("Finish download: {0}".format(url)), null_file)
 
-                self.message_to_emacs.emit("Start download: {0}".format(url))
+                self.message_to_emacs.emit("Start download {0}: {1}".format(file_type, url))
             else:
                 self.message_to_emacs.emit("Please install youtube-dl first.")
         else:
