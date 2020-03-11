@@ -412,6 +412,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-S-v" . "yank_text")
     ("C-a" . "eaf-send-key-sequence")
     ("C-e" . "eaf-send-key-sequence")
+    ("C-f" . "eaf-send-key-sequence")
+    ("C-b" . "eaf-send-key-sequence")
     ("C-d" . "eaf-send-key-sequence")
     ("C-n" . "eaf-send-key-sequence")
     ("C-p" . "eaf-send-key-sequence")
