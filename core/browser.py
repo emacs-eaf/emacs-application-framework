@@ -457,7 +457,7 @@ class BrowserBuffer(Buffer):
             jsonrpc = Jsonrpc('localhost', 6800)
             resp = jsonrpc.addUris(download_url)
 
-            self.message_to_emacs.emit("Start download: " + download_url)
+            self.message_to_emacs.emit("Downloading: " + download_url)
 
     def destroy_buffer(self):
         # Record close page.
@@ -716,10 +716,10 @@ class BrowserBuffer(Buffer):
                     file_type = "audio"
 
                 with open(os.devnull, "w") as null_file:
-                    popen_and_call(youtube_dl_args, lambda : self.message_to_emacs.emit("Finish download: {0}".format(url)), null_file)
+                    popen_and_call(youtube_dl_args, lambda : self.message_to_emacs.emit("Downloaded: {0}".format(url)), null_file)
 
-                self.message_to_emacs.emit("Start download {0}: {1}".format(file_type, url))
+                self.message_to_emacs.emit("Downloading {0}: {1}".format(file_type, url))
             else:
-                self.message_to_emacs.emit("Please install youtube-dl first.")
+                self.message_to_emacs.emit("Please install youtube-dl to use this feature.")
         else:
-            self.message_to_emacs.emit("Only can download video from YouTube now.")
+            self.message_to_emacs.emit("Only videos from YouTube can be downloaded for now.")
