@@ -163,8 +163,8 @@ EAF implements three major functionalities:
 
 ### EAF vs EXWM?
 1. EAF and EXWM share a common goal: enhance collaboration between the standard GNU Emacs with other GUI tools.
-2. EXWM is an X11 Windows Manager, it manages and controls other software using a keyboard, but it cannot modify, customize and extend the behavior of other software. For example, it cannot modify the behavior when you press a key in Chrome or a PDF viewer.
-3. EAF is *not* a Windows Manager, it utilizes the windows managing capabilities of Emacs to display its applications.
+2. EXWM is an X11 Window Manager, it manages and controls other software using a keyboard, but it cannot modify, customize and extend the behavior of other software. For example, it cannot modify the behavior when you press a key in Chrome or a PDF viewer.
+3. EAF is *not* a Window Manager, it utilizes the windows managing capabilities of Emacs to display its applications.
 4. The intention of EAF is to provide a framework to write PyQt5 applications that extends the multimedia experience of Emacs. From the perspective of Emacs' buffer/mode design, EAF is not different from any other package, with the former uses Qt for drawing contents while the latter uses Emacs' built-in text libraries instead.
 5. Through EAF's design, one can use Elisp to control Python and vice versa, and even able to use Elisp to control JavaScript in EAF Browser. EAF enables Emacs to the world of **multi-language scripting**.
 
