@@ -1471,7 +1471,10 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-terminal ()
   "Open EAF terminal application."
   (interactive)
-  (eaf-open "eaf-terminal" "terminal"))
+  (eaf-open (eaf--generate-terminal-buffer-name) "terminal"))
+
+(defun eaf--generate-terminal-buffer-name ()
+  (format "%s-%04x" "eaf-terminal" (random (expt 16 4))))
 
 (defun eaf--get-app-for-extension (extension-name)
   (let ((app-name
