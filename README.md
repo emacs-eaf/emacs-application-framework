@@ -42,6 +42,11 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 |                                                |           |
 
 
+| Mermaid                                          |
+| :--------:                                       |
+| <img src="./screenshot/mermaid.gif" width="400"> |
+|                                                  |
+
 
 ## Install
 1. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
