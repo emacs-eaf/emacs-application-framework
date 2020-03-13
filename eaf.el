@@ -507,6 +507,51 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Mindmap."
   :type 'cons)
 
+(defcustom eaf-mermaid-keybinding
+  '(("C--" . "zoom_out")
+    ("C-=" . "zoom_in")
+    ("C-0" . "zoom_reset")
+    ("C-s" . "search_text_forward")
+    ("C-r" . "search_text_backward")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
+    ("C-f" . "scroll_right")
+    ("C-b" . "scroll_left")
+    ("C-v" . "scroll_up_page")
+    ("C-w" . "kill_text")
+    ("M-w" . "copy_text")
+    ("M-v" . "scroll_down_page")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom")
+    ("M-t" . "new_blank_page")
+    ("SPC" . "insert_or_scroll_up_page")
+    ("J" . "insert_or_goto_left_tab")
+    ("K" . "insert_or_goto_right_tab")
+    ("j" . "insert_or_scroll_up")
+    ("k" . "insert_or_scroll_down")
+    ("h" . "insert_or_scroll_left")
+    ("l" . "insert_or_scroll_right")
+    ("d" . "insert_or_scroll_up_page")
+    ("u" . "insert_or_scroll_down_page")
+    ("t" . "insert_or_new_blank_page")
+    ("T" . "insert_or_recover_prev_close_page")
+    ("r" . "insert_or_refresh_page")
+    ("g" . "insert_or_scroll_to_begin")
+    ("x" . "insert_or_close_buffer")
+    ("G" . "insert_or_scroll_to_bottom")
+    ("-" . "insert_or_zoom_out")
+    ("=" . "insert_or_zoom_in")
+    ("0" . "insert_or_zoom_reset")
+    ("m" . "insert_or_save_as_bookmark")
+    ("C-a" . "select_all_or_input_text")
+    ("M-o" . "eval_js")
+    ("M-p" . "eval_js_file")
+    ("<f5>" . "refresh_page")
+    ("<f12>" . "open_dev_tool_page")
+    )
+  "The keybinding of EAF Mermaid."
+  :type 'cons)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz" "djvu")
   "The extension list of pdf application."
@@ -515,6 +560,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
+  :type 'cons)
+
+(defcustom eaf-mermaid-extension-list
+  '("mmd")
+  "The extension list of mermaid application."
   :type 'cons)
 
 (defcustom eaf-image-extension-list
@@ -584,6 +634,7 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
     ("org-previewer" . eaf-browser-keybinding)
     ("rss-reader" . eaf-rss-reader-keybinding)
     ("mindmap" . eaf-mindmap-keybinding)
+    ("mermaid" . eaf-mermaid-keybinding)
     )
   "Mapping app names to keybinding variables.
 
@@ -591,7 +642,8 @@ Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
 (defvar eaf-app-display-function-alist
-  '(("markdown-previewer" . eaf--markdown-preview-display)
+  '(("mermaid" . eaf--mermaid-preview-display)
+    ("markdown-previewer" . eaf--markdown-preview-display)
     ("org-previewer" . eaf--org-preview-display))
   "Mapping app names to display functions.
 
@@ -613,6 +665,7 @@ A bookmark handler function is used as
 (defvar eaf-app-extensions-alist
   '(("pdf-viewer" . eaf-pdf-extension-list)
     ("markdown-previewer" . eaf-markdown-extension-list)
+    ("mermaid" . eaf-mermaid-extension-list)
     ("image-viewer" . eaf-image-extension-list)
     ("video-player" . eaf-video-extension-list)
     ("browser" . eaf-browser-extension-list)
@@ -1215,6 +1268,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
            (switch-to-buffer eaf-name)
            (message buffer-result)))))
 
+(defun eaf--mermaid-preview-display (buf)
+  "Given BUF, split window to show file and previewer."
+  (eaf-split-preview-windows
+   (buffer-local-value
+    'eaf--buffer-url buf))
+  (switch-to-buffer buf)
+  (other-window +1)
+  (markdown-mode))
+
 (defun eaf--markdown-preview-display (buf)
   "Given BUF, split window to show file and previewer."
   (eaf-split-preview-windows
@@ -1413,7 +1475,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))

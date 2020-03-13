@@ -45,15 +45,16 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 1. 先确认系统中已经安装了 ```python3```，然后使用 ```pip3``` 安装EAF依赖库:
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf
+grip qrcode feedparser pyinotify markdown
 ```
 
     如果你使用的是Arch系统，建议用下面的命令来安装依赖：
 
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
-python-dbus
-yay -S python-pymupdf python-grip aria2p
+python-dbus python-pyinotify python-markdown
+yay -S python-pymupdf python-grip
 ```
 
     因为Arch的QtWebEngine编译的时候内建私有编解码库，可以直接在浏览器中播放mp4等视频文件。
@@ -113,10 +114,11 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | grip          | pip3          | Markdown预览                                                         | 建立Markdown文件的HTML服务                         |
 | qrcode        | pip3          | 文件上传，文件下载，文字传输                                         | 根据文件信息生成二维码                             |
 | feedparser    | pip3          | RSS阅读器                                                            | 解析RSS/Atom信息                                   |
-| aria2p        | pip3          | 浏览器                                                               | 发送下载请求给Aria2 Daemon                         |
 | aria2         | pacman (Arch) | 浏览器                                                               | 下载网络文件                                       |
 | wetty         | yarn          | 终端模拟器                                                           | 通过浏览器与本地TTY交互                            |
-| libreoffice   | pacman        | 办公文档阅读器                                                       | 转换doc文件为pdf格式           |
+| libreoffice   | pacman        | 办公文档阅读器                                                       | 转换doc文件为pdf格式                               |
+| pyinotify     | pacman        | 流程图                                                               | 监听 mmd 格式文件的变动                            |
+| markdown      | pacman        | 流程图                                                               | 转换 mmd 格式为 mermaid 识别的 html 格式           |
 
 ## EAF应用启动命令
 | 应用名称       | 启动命令                                                                    |
@@ -136,7 +138,8 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | 无线分享       | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
 | RSS新闻阅读器  | `M-x eaf-open-rss-reader`                                                   |
 | 思维导图       | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
-| 办公文档阅读器 | `M-x eaf-open-office`                                                          |
+| 办公文档阅读器 | `M-x eaf-open-office`                                                       |
+| 流程图         | `M-x eaf-open` 输入 mmd 格式文件                                            |
 | 演示程序       | `M-x eaf-open-demo`                                                         |
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
@@ -189,7 +192,8 @@ EAF依赖X11的XReparent技术，Wayland并不支持跨进程窗口融合技术
 如果你启动的时候发现 "undefined symbol" 错误，并且你使用的是Arch系统，那肯定是因为Arch自身的bug，Arch系统每次升级以后，重新使用pip3安装一次Python依赖包就可以解决这个问题:
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser aria2p --force-reinstall
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf
+grip qrcode feedparser pyinotify markdown --force-reinstall
 ```
 
 ### Github 个人访问标记干什么用的？

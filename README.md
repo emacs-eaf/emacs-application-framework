@@ -47,14 +47,14 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 1. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser pyinotify markdown
 ```
 
     If you use Arch Linux, we recommend you install dependencies with below command:
 
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
-python-dbus
+python-dbus python-pyinotify python-markdown
 yay -S python-pymupdf python-grip
 ```
 
@@ -105,19 +105,21 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 ### Dependency List
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package       | Package Repo  | Dependent                                                                          | Description                               |
-| :--------     | :----         | :------                                                                            | :------                                   |
-| pyqt5         | pip3          | Core                                                                               | Essential GUI library                     |
-| dbus-python   | pip3          | Core                                                                               | DBus IPC to connect Python with Elisp     |
-| python-xlib   | pip3          | Core                                                                               | Stick application window into Emacs frame |
-| pyqtwebengine | pip3          | Browser, Image Viewer, RSS Reader, <br>Terminal, Org Previewer, Markdown Previewer | Chromium based web rendering engine       |
-| pymupdf       | pip3          | PDF Viewer                                                                         | PDF rendering engine                      |
-| grip          | pip3          | Markdown Previewer                                                                 | Markdown rendering server                 |
-| qrcode        | pip3          | File Sender, File Receiver, Airshare                                               | Render QR code pointing to local files    |
-| feedparser    | pip3          | RSS Reader                                                                         | Parse RSS feeds                           |
-| aria2         | pacman (Arch) | Browser                                                                            | Download files from the web               |
-| wetty         | yarn          | Terminal                                                                           | Communicate between browser and local TTY |
-| libreoffice   | pacman        | Doc Viewer                                                                         | Convert doc file to pdf |
+| Package       | Package Repo  | Dependent                                                                          | Description                                   |
+| :--------     | :----         | :------                                                                            | :------                                       |
+| pyqt5         | pip3          | Core                                                                               | Essential GUI library                         |
+| dbus-python   | pip3          | Core                                                                               | DBus IPC to connect Python with Elisp         |
+| python-xlib   | pip3          | Core                                                                               | Stick application window into Emacs frame     |
+| pyqtwebengine | pip3          | Browser, Image Viewer, RSS Reader, <br>Terminal, Org Previewer, Markdown Previewer | Chromium based web rendering engine           |
+| pymupdf       | pip3          | PDF Viewer                                                                         | PDF rendering engine                          |
+| grip          | pip3          | Markdown Previewer                                                                 | Markdown rendering server                     |
+| qrcode        | pip3          | File Sender, File Receiver, Airshare                                               | Render QR code pointing to local files        |
+| feedparser    | pip3          | RSS Reader                                                                         | Parse RSS feeds                               |
+| aria2         | pacman (Arch) | Browser                                                                            | Download files from the web                   |
+| wetty         | yarn          | Terminal                                                                           | Communicate between browser and local TTY     |
+| libreoffice   | pacman        | Doc Viewer                                                                         | Convert doc file to pdf                       |
+| pyinotify     | pacman        | Mermaid                                                                            | Monitor *.mmd file change status              |
+| markdown      | pacman        | Mermaid                                                                            | Covert markdown format to mermaid html format |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -137,7 +139,8 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Airshare            | `M-x eaf-open-airshare`                                                |
 | RSS Reader          | `M-x eaf-open-rss-reader`                                              |
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
-| Doc Viewer          | `M-x eaf-open-office`                                                     |
+| Doc Viewer          | `M-x eaf-open-office`                                                  |
+| Mermaid             | `M-x eaf-open` Mermaid file (*.mmd)                                    |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
 - To open the file under the cursor in `dired` using appropriate EAF Application, use `eaf-open-this-from-dired` instead.
@@ -194,7 +197,7 @@ If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes
 You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser --force-reinstall
+sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser pyinotify markdown --force-reinstall
 ```
 
 ### What is Github Personal Access Tokens?

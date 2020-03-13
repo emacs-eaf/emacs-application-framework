@@ -517,7 +517,7 @@ if __name__ == "__main__":
         emacs_width = emacs_height = 0
         eaf_config_dir = ""
 
-        app = QApplication(sys.argv)
+        app = QApplication(sys.argv + ["--disable-web-security"])
 
         eaf = EAF(sys.argv[1:])
 
