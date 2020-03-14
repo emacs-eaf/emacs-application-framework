@@ -37,9 +37,16 @@ class AppBuffer(BrowserBuffer):
         self.port = get_free_port()
         self.url = url
 
+        argument_list = arguments.split("ᛡ")
+        self.command = argument_list[0]
+        self.start_directory = argument_list[1]
+
         # Start wetty process.
         self.background_process = subprocess.Popen(
-            "wetty -p {0} --base / --sshuser {1} --sshauth publickey -c {2}".format(self.port, getpass.getuser(), os.environ["SHELL"]),
+            "wetty -p {0} --base / --sshuser {1} --sshauth publickey -c {2}".format(
+                self.port,
+                getpass.getuser(),
+                "'{}'".format(self.command)),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             shell=True)
@@ -53,9 +60,21 @@ class AppBuffer(BrowserBuffer):
     def load_wetty_server(self):
         self.buffer_widget.setUrl(QUrl("http://localhost:{0}".format(self.port)))
 
-        paths = os.path.split(self.url)
-        if len(paths) > 0:
-            self.change_title(paths[-1])
+        self.update_title()
+
+    def update_title(self):
+        self.change_title("{0}-{1}".format(
+            os.path.basename(os.path.normpath(os.path.expanduser(self.start_directory))),
+            self.random_string()
+        ))
 
     def before_destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGTERM)
+
+    def random_string(self):
+        import hashlib
+        import time
+
+        hash = hashlib.sha1()
+        hash.update(str(time.time()).encode("utf-8"))
+        return hash.hexdigest()[:4]

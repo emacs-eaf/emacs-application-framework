@@ -1475,7 +1475,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1533,7 +1533,12 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-terminal ()
   "Open EAF terminal application."
   (interactive)
-  (eaf-open (eaf--generate-terminal-buffer-name) "terminal"))
+  (eaf-open (eaf--generate-terminal-buffer-name)
+            "terminal"
+            (format "%sᛡ%s" (eaf--generate-terminal-command) default-directory)))
+
+(defun eaf--generate-terminal-command ()
+  (format "cd %s && exec %s --login" default-directory (getenv "SHELL")))
 
 (defun eaf--generate-terminal-buffer-name ()
   (format "%s-%04x" "eaf-terminal" (random (expt 16 4))))
