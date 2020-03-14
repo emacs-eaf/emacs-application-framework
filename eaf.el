@@ -1533,9 +1533,21 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-terminal ()
   "Open EAF terminal application."
   (interactive)
+  (eaf-run-command-in-terminal (eaf--generate-terminal-command)))
+
+(defun eaf-open-ipython ()
+  "Open ipython in terminal."
+  (interactive)
+  (if (executable-find "ipython")
+      (eaf-run-command-in-terminal "ipython")
+    (message "Please install ipython first.")))
+
+(defun eaf-run-command-in-terminal (command)
+  "Run any command in terminal."
+  (interactive "sCommand: ")
   (eaf-open (eaf--generate-terminal-buffer-name)
             "terminal"
-            (format "%sᛡ%s" (eaf--generate-terminal-command) default-directory)))
+            (format "%sᛡ%s" command default-directory)))
 
 (defun eaf--generate-terminal-command ()
   (format "cd %s && exec %s --login" default-directory (getenv "SHELL")))
