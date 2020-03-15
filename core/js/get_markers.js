@@ -1,25 +1,11 @@
 (function() {
     function cssSelector(el) {
-        let path = [];
-        while (el.nodeType === Node.ELEMENT_NODE) {
-            let selector = el.nodeName.toLowerCase();
-            if (el.id) {
-                selector += '#' + el.id;
-                path.unshift(selector);
-                break;
-            } else {
-                let sib = el, nth = 1;
-                while (sib = sib.previousElementSibling) {
-                    if (sib.nodeName.toLowerCase() == selector)
-                        nth++;
-                }
-                if (nth != 1)
-                    selector += ":nth-of-type("+nth+")";
-            }
-            path.unshift(selector);
-            el = el.parentNode;
+        let path = [], parent;
+        while (parent = el.parentNode) {
+            path.unshift(`${el.tagName}:nth-child(${[].indexOf.call(parent.children, el)+1})`);
+            el = parent;
         }
-        return path.join(" > ");
+        return `${path.join(' > ')}`.toLowerCase();
     }
 
     function getCoords(link){

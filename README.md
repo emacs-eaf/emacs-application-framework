@@ -55,11 +55,10 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser pyinotify markdown
 ```
 
-    If you use Arch Linux, we recommend you install dependencies with below command:
+If you use **Arch Linux**, it is recommended to install dependencies using `pacman` and `yay` instead.
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
-python-dbus python-pyinotify python-markdown
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown
 yay -S python-pymupdf python-grip
 ```
 
