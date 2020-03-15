@@ -63,7 +63,7 @@ python-dbus python-pyinotify python-markdown
 yay -S python-pymupdf python-grip
 ```
 
-    因为Arch的QtWebEngine编译的时候内建私有编解码库，可以直接在浏览器中播放mp4等视频文件。
+    因为Arch的QtWebEngine编译的时候内建私有编解码库，可以直接在浏览器中播放mp4等视频文件, 并且更加稳定。
 
 2. 使用 ```git clone``` 下载这个仓库.
 

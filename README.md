@@ -62,7 +62,7 @@ sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib py
 yay -S python-pymupdf python-grip
 ```
 
-    Because Arch's QtWebEngine build with proprietary codec library that can play video file with browser.
+    Because Arch's QtWebEngine build with proprietary codec library that can play video file with browser, and more stable.
 
 2. Clone this repository.
 
