@@ -51,8 +51,6 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url_in_new_tab)
         self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
 
-        self.buffer_widget.loadFinished.connect(self.adjust_dark_mode)
-
         # Reset to default zoom when page init or url changed.
         self.reset_default_zoom()
         self.buffer_widget.urlChanged.connect(self.update_url)

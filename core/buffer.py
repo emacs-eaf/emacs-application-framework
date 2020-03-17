@@ -173,11 +173,6 @@ class Buffer(QGraphicsScene):
 
         self.buffer_widget = None
 
-        self.draw_progressbar = False
-        self.progressbar_progress = 0
-        self.progressbar_color = QColor(233, 129, 35, 255)
-        self.progressbar_height = 2
-
         self.current_event_string = ""
 
         self.aspect_ratio = 0
@@ -186,32 +181,6 @@ class Buffer(QGraphicsScene):
     def set_aspect_ratio(self, aspect_ratio):
         self.aspect_ratio = aspect_ratio
         self.aspect_ratio_change.emit()
-
-    def drawForeground(self, painter, rect):
-        if self.draw_progressbar:
-            painter.setBrush(self.progressbar_color)
-            painter.setPen(self.progressbar_color)
-            painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
-
-    @QtCore.pyqtSlot()
-    def start_progress(self):
-        self.progressbar_progress = 0
-        self.draw_progressbar = True
-        self.update()
-
-    @QtCore.pyqtSlot()
-    def stop_progress(self):
-        self.draw_progressbar = False
-        self.update()
-
-    @QtCore.pyqtSlot(int)
-    def update_progress(self, progress):
-        self.progressbar_progress = progress
-        self.draw_progressbar = True
-        self.update()
-
-        if progress == 100:
-            QtCore.QTimer.singleShot(500, self.stop_progress)
 
     def add_widget(self, widget):
         self.buffer_widget = widget

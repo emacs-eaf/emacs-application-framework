@@ -20,7 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer
+from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF
+from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -403,11 +404,20 @@ class BrowserBuffer(Buffer):
 
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
-        self.buffer_widget.loadFinished.connect(self.stop_progress)
         self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
 
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
+
+        self.draw_progressbar = False
+        self.eval_dark_js = False
+        self.progressbar_progress = 0
+        self.progressbar_color = QColor(233, 129, 35, 255)
+        self.progressbar_height = 2
+        self.light_mode_mask_color = QColor("#FFFFFF")
+        self.dark_mode_mask_color = QColor("#242525")
+
+        QtCore.QTimer.singleShot(10, self.init_background_color)
 
         settings = QWebEngineSettings.globalSettings()
         try:
@@ -439,6 +449,63 @@ class BrowserBuffer(Buffer):
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
                             "download_youtube_video", "download_youtube_audio", "toggle_device"]:
             self.build_insert_or_do(method_name)
+
+    def dark_mode_is_enable(self):
+        module_name = self.module_path.split(".")[1]
+        return self.emacs_var_dict["eaf-browser-dark-mode"] == "true" and module_name in ["browser"]
+
+    def init_background_color(self):
+        if self.dark_mode_is_enable():
+            self.buffer_widget.web_page.setBackgroundColor(self.dark_mode_mask_color)
+        else:
+            self.buffer_widget.web_page.setBackgroundColor(self.light_mode_mask_color)
+
+    def drawForeground(self, painter, rect):
+        if self.draw_progressbar:
+            # Draw foreground over web page avoid white flash when eval dark_mode_js
+            if self.dark_mode_is_enable():
+                painter.setBrush(self.dark_mode_mask_color)
+                painter.drawRect(0, 0, rect.width(), rect.height())
+
+            # Init progress bar brush.
+            painter.setBrush(self.progressbar_color)
+
+            if self.eval_dark_js:
+                # Draw 100% when after eval dark_mode_js, avoid flash progressbar.
+                painter.drawRect(0, 0, rect.width(), self.progressbar_height)
+            else:
+                # Draw progress bar.
+                painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
+
+    @QtCore.pyqtSlot()
+    def start_progress(self):
+        self.progressbar_progress = 0
+        self.draw_progressbar = True
+        self.update()
+
+    @QtCore.pyqtSlot()
+    def hide_progress(self):
+        self.draw_progressbar = False
+        self.eval_dark_js = False
+        self.update()
+
+    @QtCore.pyqtSlot(int)
+    def update_progress(self, progress):
+        if progress < 100:
+            # Update progres.
+            self.progressbar_progress = progress
+            self.update()
+        elif progress == 100 and self.draw_progressbar:
+            if self.dark_mode_is_enable():
+                if not self.eval_dark_js:
+                    self.dark_mode()
+                    self.eval_dark_js = True
+
+                    # We need show page some delay, avoid white flash when eval dark_mode_js
+                    QtCore.QTimer.singleShot(1000, self.hide_progress)
+            else:
+                # Hide progress bar immediately if not dark mode.
+                self.hide_progress()
 
     def handle_fullscreen_request(self, request):
         if request.toggleOn():
@@ -610,13 +677,6 @@ class BrowserBuffer(Buffer):
             except Exception:
                 import traceback
                 self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
-
-    def adjust_dark_mode(self):
-        try:
-            if self.emacs_var_dict["eaf-browser-dark-mode"] == "true":
-                self.dark_mode()
-        except Exception:
-            pass
 
     def new_blank_page(self):
         self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
