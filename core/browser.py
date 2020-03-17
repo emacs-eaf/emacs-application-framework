@@ -452,7 +452,7 @@ class BrowserBuffer(Buffer):
 
     def dark_mode_is_enable(self):
         module_name = self.module_path.split(".")[1]
-        return self.emacs_var_dict["eaf-browser-dark-mode"] == "true" and module_name in ["browser"]
+        return self.emacs_var_dict["eaf-browser-dark-mode"] == "true" and module_name in ["browser"] and self.url != "devtools://devtools/bundled/devtools_app.html"
 
     def init_background_color(self):
         if self.dark_mode_is_enable():
@@ -640,7 +640,7 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("No active input element.")
 
     def is_focus(self):
-        return self.buffer_widget.get_focus_text() != None
+        return self.buffer_widget.get_focus_text() != None or self.url == "devtools://devtools/bundled/devtools_app.html"
 
     def record_history(self, new_title):
         new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
