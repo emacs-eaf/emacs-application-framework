@@ -545,7 +545,7 @@ class BrowserBuffer(Buffer):
 
     def copy_text(self):
         self.buffer_widget.copy_text()
-        self.message_to_emacs.emit("Copy '" + self.buffer_widget.get_selection_text() + "'")
+        self.message_to_emacs.emit("Copy selected text.")
 
     def open_link(self):
         self.buffer_widget.get_link_markers()
