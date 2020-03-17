@@ -396,8 +396,10 @@ class BrowserBuffer(Buffer):
                         self.history_list.append(HistoryPage(his_line.group(1), his_line.group(2), his_line.group(3)))
 
         # Set User Agent with Firefox's one to make EAF browser can login in Google account.
+        self.pc_user_agent = "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/72.0"
+        self.phone_user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1"
         self.profile = QWebEngineProfile(self.buffer_widget)
-        self.profile.defaultProfile().setHttpUserAgent("Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/72.0")
+        self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
@@ -435,7 +437,7 @@ class BrowserBuffer(Buffer):
                             "open_link", "open_link_new_buffer", "open_link_background_buffer",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
-                            "download_youtube_video", "download_youtube_audio"]:
+                            "download_youtube_video", "download_youtube_audio", "toggle_device"]:
             self.build_insert_or_do(method_name)
 
     def handle_fullscreen_request(self, request):
@@ -696,6 +698,17 @@ class BrowserBuffer(Buffer):
 
     def open_dev_tool_page(self):
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
+
+    def toggle_device(self):
+        user_agent = self.profile.defaultProfile().httpUserAgent()
+        if user_agent == self.pc_user_agent:
+            self.profile.defaultProfile().setHttpUserAgent(self.phone_user_agent)
+            self.set_aspect_ratio(2.0 / 3)
+        else:
+            self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+            self.set_aspect_ratio(0)
+
+        self.refresh_page()
 
     def download_youtube_video(self):
         self.download_youtube_file()

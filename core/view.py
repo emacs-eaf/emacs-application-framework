@@ -67,12 +67,34 @@ class View(QWidget):
         # Resize after show to trigger fit view operation.
         self.resize(self.width, self.height)
 
+        self.buffer.aspect_ratio_change.connect(self.adjust_aspect_ratio)
+
     def resizeEvent(self, event):
         # Fit content to view rect just when buffer fit_to_view option is enable.
         if self.buffer.fit_to_view:
             if event.oldSize().isValid():
                 self.graphics_view.fitInView(self.graphics_view.scene().sceneRect(), Qt.KeepAspectRatio)
         QWidget.resizeEvent(self, event)
+
+    def adjust_aspect_ratio(self):
+        widget_width = self.width
+        widget_height = self.height
+
+        if self.buffer.aspect_ratio == 0:
+            self.buffer.buffer_widget.resize(self.width, self.height)
+
+            self.layout.setContentsMargins(0, 0, 0, 0)
+        else:
+            view_height = widget_height * (1 - 2 * self.buffer.vertical_padding_ratio)
+            view_width = view_height * self.buffer.aspect_ratio
+            horizontal_padding = (widget_width - view_width) / 2
+            vertical_padding = self.buffer.vertical_padding_ratio * widget_height
+
+            self.buffer.buffer_widget.resize(view_width, view_height)
+
+            self.layout.setContentsMargins(
+                horizontal_padding, vertical_padding,
+                horizontal_padding, vertical_padding)
 
     def eventFilter(self, obj, event):
         # Focus emacs buffer when user click view.

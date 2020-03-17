@@ -158,6 +158,7 @@ class Buffer(QGraphicsScene):
     eval_in_emacs = QtCore.pyqtSignal(str)
     goto_left_tab = QtCore.pyqtSignal()
     goto_right_tab = QtCore.pyqtSignal()
+    aspect_ratio_change = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
@@ -178,6 +179,13 @@ class Buffer(QGraphicsScene):
         self.progressbar_height = 2
 
         self.current_event_string = ""
+
+        self.aspect_ratio = 0
+        self.vertical_padding_ratio = 1.0 / 8
+
+    def set_aspect_ratio(self, aspect_ratio):
+        self.aspect_ratio = aspect_ratio
+        self.aspect_ratio_change.emit()
 
     def drawForeground(self, painter, rect):
         if self.draw_progressbar:
