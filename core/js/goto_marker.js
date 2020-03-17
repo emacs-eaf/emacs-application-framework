@@ -41,6 +41,7 @@
                   (link.hasAttribute('aria-haspopup')) || // menu button
                   (link.getAttribute('role') === 'button') || // role="button" buttons
                   (link.classList.contains('btn')) || // class="btn" buttons
+                  (link.classList.contains('gap')) || // class="gap" links
                   (link.getAttribute('href') === '') || // special href button
                   (link.getAttribute('href') === '#')){  // special href # button
             link.click();
