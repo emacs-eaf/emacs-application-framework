@@ -419,6 +419,11 @@ class BrowserBuffer(Buffer):
 
         self.init_background_color()
 
+        self.current_url = ""
+        self.request_url = ""
+        self.no_need_draw_background = False
+        self.buffer_widget.urlChanged.connect(self.record_url)
+
         settings = QWebEngineSettings.globalSettings()
         try:
             settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
@@ -450,6 +455,16 @@ class BrowserBuffer(Buffer):
                             "download_youtube_video", "download_youtube_audio", "toggle_device"]:
             self.build_insert_or_do(method_name)
 
+    def record_url(self, url):
+        self.request_url = url.toString()
+
+        # Emacs-china forum thread don't need draw background that avoid flash.
+        if self.dark_mode_is_enable() and self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
+            current_urls = self.current_url.rsplit("/", 1)
+            request_urls = self.request_url.rsplit("/", 1)
+
+            self.no_need_draw_background = current_urls[0] == request_urls[0] or self.request_url == current_urls[0]
+
     def dark_mode_is_enable(self):
         module_name = self.module_path.split(".")[1]
         return self.emacs_var_dict["eaf-browser-dark-mode"] == "true" and module_name in ["browser"] and self.url != "devtools://devtools/bundled/devtools_app.html"
@@ -463,7 +478,7 @@ class BrowserBuffer(Buffer):
     def drawForeground(self, painter, rect):
         if self.draw_progressbar:
             # Draw foreground over web page avoid white flash when eval dark_mode_js
-            if self.dark_mode_is_enable():
+            if self.dark_mode_is_enable() and not self.no_need_draw_background:
                 painter.setBrush(self.dark_mode_mask_color)
                 painter.drawRect(0, 0, rect.width(), rect.height())
 
@@ -485,6 +500,9 @@ class BrowserBuffer(Buffer):
 
     @QtCore.pyqtSlot()
     def hide_progress(self):
+        self.current_url = self.url
+        self.no_need_draw_background = False
+
         self.draw_progressbar = False
         self.eval_dark_js = False
         self.update()
