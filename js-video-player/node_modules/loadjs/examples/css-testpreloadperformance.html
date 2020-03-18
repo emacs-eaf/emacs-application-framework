@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <script>
+     var results = {
+       0: [],
+       1: [],
+       2: []
+     };
+
+      function standardDeviation(values) {
+        var avg = average(values);
+      
+        var squareDiffs = values.map(function(value){
+          var diff = value - avg;
+          var sqrDiff = diff * diff;
+          return sqrDiff;
+        });
+  
+        var avgSquareDiff = average(squareDiffs);
+
+        var stdDev = Math.sqrt(avgSquareDiff);
+        return stdDev;
+      }
+
+      function average(data){
+        var sum = data.reduce(function(sum, value){
+          return sum + value;
+        }, 0);
+
+        var avg = sum / data.length;
+        return avg;
+     }
+     
+     function doLoad(path, callbackFn) {
+       var e = document.createElement('link'),
+           t0;
+       
+       e.rel = 'stylesheet';
+       e.href = path + '?' + Math.random();
+       e.onload = function(ev) {
+         var t1 = performance.now();
+         results[0].push(t1 - t0);
+         setTimeout(function(){callbackFn(e)}, 0);
+       };
+
+       t0 = performance.now();
+       document.head.appendChild(e);
+     }
+
+     function doPreload(path, callbackFn) {
+       var e = document.createElement('link'),
+           t0;
+
+       e.rel = 'preload';
+       e.as = 'style';
+       e.href = path + '?' + Math.random();
+       e.onload = function(ev) {
+         var t1 = performance.now();
+         results[1].push(t1 - t0);
+         setTimeout(function(){callbackFn(e)}, 0);
+       };
+
+       t0 = performance.now();
+       document.head.appendChild(e);
+     }
+
+     function doPreloadWithExecution(path, callbackFn) {
+       var e = document.createElement('link'),
+           t0;
+       
+       e.rel = 'preload';
+       e.as = 'style';
+       e.href = path + '?' + Math.random();
+       e.onload = function(ev) {
+         if (e.rel == 'preload') return e.rel = 'stylesheet';
+         var t1 = performance.now();
+         results[2].push(t1 - t0);
+         setTimeout(function(){callbackFn(e)}, 0);
+       };
+
+       t0 = performance.now();
+       document.head.appendChild(e);
+     }
+
+     function printResults(str, data) {
+       var sum = data.reduce(function(a, b) {return a + b;}, 0);
+       
+       console.log('-----------');
+       console.log(str + '(' + data.length + '):');
+       console.log('Min: ' + Math.min(...data));
+       console.log('Max: ' + Math.max(...data));
+       console.log('Avg: ' + sum / data.length);
+       console.log('Std: ' + standardDeviation(data));
+       console.log('-----------');
+     }
+     
+     function loadAll(n) {
+       console.log(n);
+       
+       if (n == 100) {
+         setTimeout(function() {
+           printResults('Load', results[0]);
+           printResults('Preload', results[1]);
+           printResults('PreloadWithExecution', results[2]);
+         }, 2000);
+         return;
+       }
+       
+       var path = '//cdn.muicss.com/mui-0.9.41/css/mui.min.css';
+       
+       doLoad(path, function(e1) {
+         doPreload(path, function(e2) {
+           doPreloadWithExecution(path, function(e3) {
+             loadAll(n + 1);
+           });
+         });
+       });
+
+     }
+
+     loadAll(0);
+    </script>
+  </head>
+  <body>
+    <div class="mui-container">
+      <div class="mui-panel">
+        <h1>My Title</h1>
+        <button class="mui-btn mui-btn--primary mui-btn--raised">My Button</button>
+      </div>
+    </div>
+  </body>
+</html>

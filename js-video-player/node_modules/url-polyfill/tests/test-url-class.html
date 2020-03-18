@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tests</title>
+  <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>-->
+
+  <script type="text/javascript">
+    var script = document.createElement('script');
+    exports = {};
+    script.src = 'url-class-test.js?timeout=' + Math.random().toString();
+    document.head.appendChild(script);
+  </script>
+
+</head>
+<body>
+  Test executing...
+</body>
+</html>

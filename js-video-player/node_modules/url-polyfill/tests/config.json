@@ -1,0 +1,4 @@
+{
+  "testServer": "http://192.168.0.128:4444/wd/hub",
+  "testHost": "http://192.168.0.130:9876/tests/"
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>RangeTouch - A super tiny library to make range sliders work better on touch devices</title>
+        <meta name="description" content="A super tiny library to make range sliders work better on touch devices" />
+        <meta name="author" content="Sam Potts" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="dist/docs.css" />
+        <script>
+            (function() {
+                try {
+                    document.documentElement.classList.add(
+                        'ontouchstart' in document.documentElement ? 'touch' : 'no-touch',
+                    );
+                } catch (e) {}
+            })();
+        </script>
+    </head>
+
+    <body>
+        <main>
+            <header>
+                <h1>RangeTouch</h1>
+                <p>
+                    A super tiny library to make <code>&lt;input type='range'&gt;</code> sliders work better on touch
+                    devices
+                </p>
+            </header>
+
+            <div class="alert hidden-touch" role="alert">
+                Open this page on a touch device to see the difference with and without RangeTouch.
+            </div>
+
+            <div class="section example hidden-no-touch">
+                <label for="example1" class="color-bad">Default <span class="sr-only">example slider</span></label>
+                <input type="range" id="example1" />
+            </div>
+
+            <div class="section example hidden-no-touch">
+                <label for="example0" class="color-good">RangeTouch <span class="sr-only">example slider</span></label>
+                <input type="range" id="example0" class="js-example" />
+            </div>
+
+            <div class="action">
+                <a
+                    href="https://github.com/sampotts/rangetouch"
+                    target="_blank"
+                    class="btn btn--primary"
+                    data-shr-network="github"
+                >
+                    <svg class="icon">
+                        <use xlink:href="#icon-github"></use>
+                    </svg>
+                    Download on GitHub
+                </a>
+            </div>
+        </main>
+        <footer>
+            <svg class="icon color--twitter">
+                <use xlink:href="#icon-twitter" />
+            </svg>
+            If you like RangeTouch,
+            <a
+                href="https://twitter.com/intent/tweet?text=RangeTouch+-+a+super+tiny+library+to+make+input+type=range+sliders+work+better+on+touch+devices&url=http%3A%2F%2Frangetouch.com&via=Sam_Potts"
+                target="_blank"
+                data-shr-network="twitter"
+                >tweet it</a
+            >
+        </footer>
+
+        <!-- Shr -->
+        <script src="https://cdn.shr.one/1.0.1/shr.js"></script>
+
+        <!-- Docs script -->
+        <script src="dist/docs.js"></script>
+    </body>
+</html>
