@@ -160,14 +160,13 @@ class Buffer(QGraphicsScene):
     goto_right_tab = QtCore.pyqtSignal()
     aspect_ratio_change = QtCore.pyqtSignal()
 
-    def __init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view, background_color):
+    def __init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
 
         self.buffer_id = buffer_id
         self.url = url
         self.arguments = arguments
         self.emacs_var_dict = emacs_var_dict
-        self.module_path = module_path
         self.fit_to_view = fit_to_view
         self.background_color = background_color
         self.setBackgroundBrush(QBrush(self.background_color))
