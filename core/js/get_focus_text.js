@@ -5,6 +5,10 @@
     if (activeElement && inputs.indexOf(activeElement.tagName.toLowerCase()) !== -1) {
         return activeElement.value;
     } else {
-        return undefined;
+        if (window.location.href.startsWith("https://web.telegram.org/") && activeElement.hasAttribute("placeholder")) {
+            return activeElement.textContent;
+        } else {
+            return undefined;
+        }
     }
 })();
