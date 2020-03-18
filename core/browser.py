@@ -369,8 +369,8 @@ class BrowserBuffer(Buffer):
     enter_fullscreen_request = QtCore.pyqtSignal()
     exit_fullscreen_request = QtCore.pyqtSignal()
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, fit_to_view, background_color):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, fit_to_view, background_color)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view, background_color):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view, background_color)
 
         self.add_widget(BrowserView(config_dir))
 
@@ -417,7 +417,7 @@ class BrowserBuffer(Buffer):
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
 
-        QtCore.QTimer.singleShot(10, self.init_background_color)
+        self.init_background_color()
 
         settings = QWebEngineSettings.globalSettings()
         try:
