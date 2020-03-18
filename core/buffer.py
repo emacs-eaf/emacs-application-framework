@@ -285,7 +285,11 @@ class Buffer(QGraphicsScene):
 
         if len(event_list) > 1:
             for widget in [self.buffer_widget.focusProxy()]:
-                last_key = event_list[-1].lower()
+                last_char = event_list[-1]
+                last_key = last_char
+                if len(last_char) == 1:
+                    last_key = last_char.lower()
+
                 modifiers = Qt.NoModifier
 
                 for modifier in event_list[0:-1]:

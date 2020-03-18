@@ -318,6 +318,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-g" . "exit_fullscreen")
     ("<f5>" . "refresh_page")
     ("<f12>" . "open_dev_tool_page")
+    ("<C-return>" . "eaf-send-ctrl-return-sequence")
     )
   "The keybinding of EAF Browser."
   :type 'cons)
@@ -939,7 +940,7 @@ to edit EAF keybindings!" fun fun)))
                    do (define-key map (kbd key)
                         (cond ((symbolp fun)
                                fun)
-                              ((member fun (list "eaf-send-key-sequence" "eaf-send-second-key-sequence"))
+                              ((member fun (list "eaf-send-key-sequence" "eaf-send-second-key-sequence" "eaf-send-ctrl-return-sequence"))
                                (intern fun))
                               (t
                                (eaf--make-proxy-function fun))))
@@ -1076,6 +1077,10 @@ to edit EAF keybindings!" fun fun)))
   "Directly send key sequence to EAF Python side."
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
+
+(defun eaf-send-ctrl-return-sequence ()
+  (interactive)
+  (eaf-call "send_key_sequence" eaf--buffer-id "C-RET"))
 
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."
@@ -1479,7 +1484,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
