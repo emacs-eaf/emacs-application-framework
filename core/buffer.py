@@ -159,6 +159,8 @@ class Buffer(QGraphicsScene):
     goto_left_tab = QtCore.pyqtSignal()
     goto_right_tab = QtCore.pyqtSignal()
     aspect_ratio_change = QtCore.pyqtSignal()
+    enter_fullscreen_request = QtCore.pyqtSignal()
+    exit_fullscreen_request = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, is_dark_mode, fit_to_view, background_color):
         super(QGraphicsScene, self).__init__()
@@ -175,10 +177,27 @@ class Buffer(QGraphicsScene):
 
         self.buffer_widget = None
 
+        self.is_fullscreen = False
+
         self.current_event_string = ""
 
         self.aspect_ratio = 0
         self.vertical_padding_ratio = 1.0 / 8
+
+        self.enter_fullscreen_request.connect(self.enable_fullscreen)
+        self.exit_fullscreen_request.connect(self.disable_fullscreen)
+
+    def toggle_fullscreen(self):
+        if self.is_fullscreen:
+            self.exit_fullscreen_request.emit()
+        else:
+            self.enter_fullscreen_request.emit()
+
+    def enable_fullscreen(self):
+        self.is_fullscreen = True
+
+    def disable_fullscreen(self):
+        self.is_fullscreen = False
 
     def set_aspect_ratio(self, aspect_ratio):
         self.aspect_ratio = aspect_ratio

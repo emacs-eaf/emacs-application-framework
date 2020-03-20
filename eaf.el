@@ -111,6 +111,7 @@
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
     (define-key map (kbd "C-c e") #'eaf-open-external)
+    (define-key map (kbd "M-'") #'eaf-toggle-fullscreen)
     (define-key map (kbd "M-/") #'eaf-get-path-or-url)
     (define-key map (kbd "M-[") #'eaf-share-path-or-url)
     (define-key map (vector 'remap #'keyboard-quit) #'eaf-keyboard-quit)
@@ -376,7 +377,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   '(("SPC" . "toggle_play")
     ("M-g" . "exit_fullscreen")
     ("<f12>" . "open_dev_tool_page")
-    ("f" . "toggle_fullscreen")
     ("h" . "backward")
     ("l" . "forward")
     ("r" . "restart")
@@ -908,6 +908,11 @@ When called interactively, copy to ‘kill-ring’."
           (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
         (eaf-call "call_function" eaf--buffer-id "get_url"))
     (message "This command can only be called in an EAF buffer!")))
+
+(defun eaf-toggle-fullscreen ()
+  "Toggle fullscreen."
+  (interactive)
+  (eaf-call "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
 (defun eaf-share-path-or-url ()
   "Share the current file path or web URL as QRCode."
@@ -1868,6 +1873,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   | C-c b | eaf-open-bookmark     |
   | C-c e | eaf-open-external     |
   | M-/   | eaf-get-path-or-url   |
+  | M-'   | eaf-toggle-fullscreen |
   | M-[   | eaf-share-path-or-url |
 
 * Browser Edit Mode

@@ -366,8 +366,6 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
     open_dev_tools_tab = QtCore.pyqtSignal(object)
-    enter_fullscreen_request = QtCore.pyqtSignal()
-    exit_fullscreen_request = QtCore.pyqtSignal()
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, is_dark_mode, fit_to_view, background_color):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, is_dark_mode, fit_to_view, background_color)
