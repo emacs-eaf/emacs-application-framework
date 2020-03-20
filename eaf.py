@@ -49,6 +49,7 @@ class EAF(dbus.service.Object):
         (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string, is_dark_mode) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
+        is_dark_mode = is_dark_mode == "true"
         eaf_config_dir = os.path.expanduser(config_dir)
 
         self.buffer_dict = {}
@@ -143,7 +144,7 @@ class EAF(dbus.service.Object):
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path, bool(is_dark_mode))
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path, is_dark_mode)
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer
@@ -506,6 +507,7 @@ if __name__ == "__main__":
     import signal
 
     proxy_string = ""
+    is_dark_mode = ""
 
     DBusGMainLoop(set_as_default=True) # WARING: only use once in one process
 
