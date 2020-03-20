@@ -72,7 +72,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js("init_root_node();")
 
         color = "#FFFFFF"
-        if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "" and self.is_dark_mode):
+        if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "" and self.is_dark_mode == "true"):
             color = "#242525"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 
