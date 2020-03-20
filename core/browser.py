@@ -461,6 +461,8 @@ class BrowserBuffer(Buffer):
             current_urls = self.current_url.rsplit("/", 1)
             request_urls = self.request_url.rsplit("/", 1)
 
+            if self.request_url == "https://emacs-china.org/":
+                self.no_need_draw_background = False
             if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
                 self.no_need_draw_background = current_urls[0] == request_urls[0] or self.request_url == current_urls[0]
             elif self.current_url.startswith("https://livebook.manning.com/book/") and self.request_url.startswith("https://livebook.manning.com/book/"):
