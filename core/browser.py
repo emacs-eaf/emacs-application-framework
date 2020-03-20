@@ -460,11 +460,13 @@ class BrowserBuffer(Buffer):
 
         # Emacs-china forum thread don't need draw background that avoid flash.
         if self.dark_mode_is_enable():
-            if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
-                current_urls = self.current_url.rsplit("/", 1)
-                request_urls = self.request_url.rsplit("/", 1)
+            current_urls = self.current_url.rsplit("/", 1)
+            request_urls = self.request_url.rsplit("/", 1)
 
+            if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
                 self.no_need_draw_background = current_urls[0] == request_urls[0] or self.request_url == current_urls[0]
+            elif self.current_url.startswith("https://livebook.manning.com/book/") and self.request_url.startswith("https://livebook.manning.com/book/"):
+                self.no_need_draw_background = current_urls[0] == request_urls[0]
             elif self.current_url.startswith("https://web.telegram.org") and self.request_url.startswith("https://web.telegram.org"):
                 self.no_need_draw_background = True
 
