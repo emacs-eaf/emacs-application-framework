@@ -71,6 +71,11 @@ class AppBuffer(BrowserBuffer):
         else:
             self.buffer_widget.eval_js("init_root_node();")
 
+        color = "#FFFFFF"
+        if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true":
+            color = "#242525"
+        self.buffer_widget.eval_js("init_background('{}');".format(color))
+
         self.change_title(self.get_root_node_topic())
 
     def build_js_method(self, method_name, auto_save=False):

@@ -29,6 +29,10 @@
              select_root_node();
          }
 
+         function init_background(color) {
+             document.getElementById("jsmind_container").style.backgroundColor = color;
+         }
+
          function get_root_node_topic() {
              return _jm.get_node("root").topic;
          }

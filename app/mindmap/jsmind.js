@@ -2677,7 +2677,7 @@
             if (fill_background) {
                 // Draw background, use to save screenshot.
                 var ctx = canvas_ctx || this.canvas_ctx;
-                ctx.fillStyle = "#FFFFFF";
+                ctx.fillStyle = window.getComputedStyle(document.getElementById("jsmind_container"), null).backgroundColor.toString();
                 ctx.fillRect(0, 0, this.size.w, this.size.h);
             }
 

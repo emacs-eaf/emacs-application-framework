@@ -246,6 +246,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
+    (eaf-mindmap-dark-mode . "false")
     (eaf-mindmap-save-path . "~/Documents")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
