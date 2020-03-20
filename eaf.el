@@ -240,14 +240,14 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
     (eaf-browser-blank-page-url . "https://www.google.com")
-    (eaf-browser-dark-mode . "false")
     (eaf-browser-scroll-behavior . "auto")
     (eaf-browser-download-path . "~/Downloads")
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
-    (eaf-marker-letters . "ASDFHJKLWEOPCNM")
-    (eaf-mindmap-dark-mode . "false")
+    (eaf-browser-dark-mode . "")
+    (eaf-mindmap-dark-mode . "")
     (eaf-mindmap-save-path . "~/Documents")
+    (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     )
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -791,7 +791,8 @@ For now only EAF browser app is supported."
                      (list eaf-python-file)
                      (eaf-get-render-size)
                      (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
-                     (list (eaf-serialization-var-list))))
+                     (list (eaf-serialization-var-list))
+                     (list (eaf-is-dark-theme))))
           (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
       (setq eaf-process
             (if eaf-enable-debug
@@ -1774,6 +1775,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                          (eaf-open pdf-file "pdf-viewer")
                          )))))
     (message "Please install libreoffice to convert office file to pdf.")))
+
+(defun eaf-is-dark-theme ()
+  (if (eq (frame-parameter nil 'background-mode) 'light)
+      "false"
+    "true"))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"

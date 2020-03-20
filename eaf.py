@@ -39,14 +39,14 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string, is_dark_mode
 
         dbus.service.Object.__init__(
             self,
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string, is_dark_mode) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.expanduser(config_dir)
@@ -139,11 +139,11 @@ class EAF(dbus.service.Object):
             return "EAF: Something went wrong when trying to import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string, is_dark_mode
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path)
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path, bool(is_dark_mode))
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer

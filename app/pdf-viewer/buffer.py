@@ -34,8 +34,8 @@ import os
 import hashlib
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, is_dark_mode):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, is_dark_mode, False, QColor(0, 0, 0, 255))
 
         self.delete_temp_file = arguments == "temp_pdf_file"
         self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
