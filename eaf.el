@@ -586,7 +586,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-browser-extension-list
-  '("html")
+  '("html" "htm")
   "The extension list of browser application."
   :type 'cons)
 
@@ -1256,20 +1256,22 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  "com.lazycat.eaf" "input_message"
  #'eaf--input-message)
 
-(defun eaf--input-message (input-buffer-id interactive-string callback-type interactive_type input_content)
+(defun eaf--input-message (input-buffer-id interactive-string callback-tag interactive-type initial-content)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
-  (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive_type input_content)))
+  (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive-type initial-content)))
     (if input-message
-        (eaf-call "handle_input_message" input-buffer-id callback-type input-message)
-      (eaf-call "cancel_input_message" input-buffer-id callback-type))))
+        (eaf-call "handle_input_message" input-buffer-id callback-tag input-message)
+      (eaf-call "cancel_input_message" input-buffer-id callback-tag))))
 
-(defun eaf-read-input (interactive-string interactive_type input_content)
-  "Like `read-string' which read an INTERACTIVE-STRING, but return nil if user execute `keyboard-quit' when input."
+(defun eaf-read-input (interactive-string interactive-type initial-content)
+  "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
   (condition-case nil
-      (cond ((string-equal interactive_type "string")
-             (read-string interactive-string input_content))
-            ((string-equal interactive_type "file")
-             (expand-file-name (read-file-name interactive-string))))
+      (cond ((string-equal interactive-type "string")
+             (read-string interactive-string initial-content))
+            ((string-equal interactive-type "file")
+             (expand-file-name (read-file-name interactive-string)))
+            ((string-equal interactive-type "yes-or-no")
+             (yes-or-no-p interactive-string)))
     (quit nil)))
 
 (defun eaf--open-internal (url app-name arguments)
