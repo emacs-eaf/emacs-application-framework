@@ -1890,7 +1890,9 @@ Make sure that your smartphone is connected to the same WiFi network as this com
       (insert (format "  *Keybinding Variable*: =%s=\n" (symbol-name var)))
       (insert "| Key | Event |\n")
       (insert "|-----+------|\n")
-      (dolist (element (eval var))
+      ;; NOTE: `standard-value' use for fetch origin value of keybinding variable.
+      ;; Otherwise, developer's personal config will dirty document.
+      (dolist (element (eval (car (get var 'standard-value))))
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
       (insert "\n"))
     (switch-to-buffer doc-buffer)
