@@ -318,8 +318,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")
     ("M-o" . "eval_js")
-    ("M-p" . "eval_js_file")
+    ("M-O" . "eval_js_file")
     ("M-g" . "exit_fullscreen")
+    ("M-," . "eaf-send-down-key")
+    ("M-." . "eaf-send-up-key")
+    ("M-m" . "eaf-send-return-key")
     ("<f5>" . "refresh_page")
     ("<f12>" . "open_dev_tool_page")
     ("<C-return>" . "eaf-send-ctrl-return-sequence")
@@ -949,7 +952,12 @@ to edit EAF keybindings!" fun fun)))
                    do (define-key map (kbd key)
                         (cond ((symbolp fun)
                                fun)
-                              ((member fun (list "eaf-send-key-sequence" "eaf-send-second-key-sequence" "eaf-send-ctrl-return-sequence"))
+                              ((member fun (list "eaf-send-key-sequence"
+                                                 "eaf-send-second-key-sequence"
+                                                 "eaf-send-ctrl-return-sequence"
+                                                 "eaf-send-down-key"
+                                                 "eaf-send-up-key"
+                                                 "eaf-send-return-key"))
                                (intern fun))
                               (t
                                (eaf--make-proxy-function fun))))
@@ -1081,6 +1089,21 @@ to edit EAF keybindings!" fun fun)))
   "Directly send key to EAF Python side."
   (interactive)
   (eaf-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector))))
+
+(defun eaf-send-down-key ()
+  "Directly send down key to EAF Python side."
+  (interactive)
+  (eaf-call "send_key" eaf--buffer-id "<down>"))
+
+(defun eaf-send-up-key ()
+  "Directly send up key to EAF Python side."
+  (interactive)
+  (eaf-call "send_key" eaf--buffer-id "<up>"))
+
+(defun eaf-send-return-key ()
+  "Directly send return key to EAF Python side."
+  (interactive)
+  (eaf-call "send_key" eaf--buffer-id "RET"))
 
 (defun eaf-send-key-sequence ()
   "Directly send key sequence to EAF Python side."
