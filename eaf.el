@@ -246,6 +246,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
     (eaf-browser-dark-mode . "")
+    (eaf-pdf-dark-mode . "")
     (eaf-mindmap-dark-mode . "")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
