@@ -572,11 +572,7 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("Downloading: " + download_url)
 
     def save_as_pdf(self):
-        parsed = urlparse(self.url)
-        qd = parse_qs(parsed.query, keep_blank_values=True)
-        pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
-        print(pdf_path)
-        self.buffer_widget.web_page.printToPdf(pdf_path)
+        self.send_input_message("Save current webpage as PDF?", "save_as_pdf", "yes-or-no")
 
     def destroy_buffer(self):
         # Record close page.
@@ -606,24 +602,29 @@ class BrowserBuffer(Buffer):
             else:
                 self.scroll_down()
 
-    def handle_input_message(self, result_type, result_content):
-        if result_type == "search_text_forward":
+    def handle_input_message(self, result_tag, result_content):
+        if result_tag == "search_text_forward":
             self.buffer_widget._search_text(str(result_content))
-        elif result_type == "search_text_backward":
+        elif result_tag == "search_text_backward":
             self.buffer_widget._search_text(str(result_content), True)
-        elif result_type == "jump_link":
+        elif result_tag == "jump_link":
             self.buffer_widget.jump_to_link(str(result_content).strip())
-        elif result_type == "jump_link_new_buffer":
+        elif result_tag == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
-        elif result_type == "jump_link_background_buffer":
+        elif result_tag == "jump_link_background_buffer":
             self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
-        elif result_type == "eval_js_file":
+        elif result_tag == "eval_js_file":
             self.buffer_widget.eval_js_file(str(result_content))
-        elif result_type == "eval_js":
+        elif result_tag == "eval_js":
             self.buffer_widget.eval_js(str(result_content))
+        elif result_tag == "save_as_pdf":
+            parsed = urlparse(self.url)
+            qd = parse_qs(parsed.query, keep_blank_values=True)
+            pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
+            self.buffer_widget.web_page.printToPdf(pdf_path)
 
-    def cancel_input_message(self, result_type):
-        if result_type == "jump_link" or result_type == "jump_link_new_buffer" or result_type == "jump_link_background_buffer":
+    def cancel_input_message(self, result_tag):
+        if result_tag == "jump_link" or result_tag == "jump_link_new_buffer" or result_tag == "jump_link_background_buffer":
             self.buffer_widget.cleanup_links()
 
     def clear_all_cookies(self):
