@@ -313,6 +313,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("Y" . "insert_or_download_youtube_audio")
     ("p" . "insert_or_toggle_device")
     ("s" . "insert_or_save_as_pdf")
+    ("v" . "insert_or_view_source")
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")

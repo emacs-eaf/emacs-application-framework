@@ -260,6 +260,9 @@ class BrowserView(QWebEngineView):
     def exit_fullscreen(self):
         self.triggerPageAction(self.web_page.ExitFullScreen)
 
+    def view_source(self):
+        self.triggerPageAction(self.web_page.ViewSource)
+
     def select_all(self):
         # We need window focus before select all text.
         self.eval_js("window.focus()")
@@ -436,7 +439,7 @@ class BrowserBuffer(Buffer):
                             "scroll_left", "scroll_right", "scroll_up", "scroll_down",
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "refresh_page", "undo_action", "redo_action", "get_url", "exit_fullscreen",
-                            "set_focus_text", "clear_focus", "dark_mode"]:
+                            "set_focus_text", "clear_focus", "dark_mode", "view_source"]:
             self.build_widget_method(method_name)
 
         self.build_widget_method("history_backward", "back")
@@ -450,7 +453,8 @@ class BrowserBuffer(Buffer):
                             "open_link", "open_link_new_buffer", "open_link_background_buffer",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
-                            "download_youtube_video", "download_youtube_audio", "toggle_device", "save_as_pdf"]:
+                            "download_youtube_video", "download_youtube_audio", "toggle_device",
+                            "save_as_pdf", "view_source"]:
             self.build_insert_or_do(method_name)
 
     def notify_print_message(self, file_path, success):
