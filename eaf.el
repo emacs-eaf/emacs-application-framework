@@ -586,7 +586,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-browser-extension-list
-  '("html")
+  '("html" "htm")
   "The extension list of browser application."
   :type 'cons)
 
