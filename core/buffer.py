@@ -238,8 +238,8 @@ class Buffer(QGraphicsScene):
     def get_key_event_widgets(self):
         return [self.buffer_widget]
 
-    def send_input_message(self, message, callback_type, input_type="string", input_content=""):
-        self.input_message.emit(self.buffer_id, message, callback_type, input_type, input_content)
+    def send_input_message(self, message, callback_tag, input_type="string", initial_content=""):
+        self.input_message.emit(self.buffer_id, message, callback_tag, input_type, initial_content)
 
     def handle_input_message(self, result_type, result_content):
         pass

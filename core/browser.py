@@ -459,9 +459,9 @@ class BrowserBuffer(Buffer):
 
     def notify_print_message(self, file_path, success):
         if success:
-            self.message_to_emacs.emit("Save as '{}' successfully.".format(file_path))
+            self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
         else:
-            self.message_to_emacs.emit("Save as '{}' failed.".format(file_path))
+            self.message_to_emacs.emit("Failed to save current webpage as '{}'.".format(file_path))
 
     def record_url(self, url):
         self.request_url = url.toString()
