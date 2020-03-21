@@ -400,13 +400,6 @@ class BrowserBuffer(Buffer):
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
-        self.buffer_widget.loadStarted.connect(self.start_progress)
-        self.buffer_widget.loadProgress.connect(self.update_progress)
-        self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
-        self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
-
-        self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
-
         self.draw_progressbar = False
         self.eval_dark_js = False
         self.progressbar_progress = 0
@@ -415,12 +408,19 @@ class BrowserBuffer(Buffer):
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
 
-        self.init_background_color()
-
         self.current_url = ""
         self.request_url = ""
         self.no_need_draw_background = False
+
+        self.init_background_color()
+
+        self.buffer_widget.loadStarted.connect(self.start_progress)
+        self.buffer_widget.loadProgress.connect(self.update_progress)
         self.buffer_widget.urlChanged.connect(self.record_url)
+        self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
+        self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
+        self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
+        self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
 
         settings = QWebEngineSettings.globalSettings()
         try:
@@ -450,8 +450,14 @@ class BrowserBuffer(Buffer):
                             "open_link", "open_link_new_buffer", "open_link_background_buffer",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
-                            "download_youtube_video", "download_youtube_audio", "toggle_device"]:
+                            "download_youtube_video", "download_youtube_audio", "toggle_device", "save_as_pdf"]:
             self.build_insert_or_do(method_name)
+
+    def notify_print_message(self, file_path, success):
+        if success:
+            self.message_to_emacs.emit("Save as '{}' successfully.".format(file_path))
+        else:
+            self.message_to_emacs.emit("Save as '{}' failed.".format(file_path))
 
     def record_url(self, url):
         self.request_url = url.toString()
@@ -560,6 +566,13 @@ class BrowserBuffer(Buffer):
             resp = jsonrpc.addUris(download_url)
 
             self.message_to_emacs.emit("Downloading: " + download_url)
+
+    def save_as_pdf(self):
+        parsed = urlparse(self.url)
+        qd = parse_qs(parsed.query, keep_blank_values=True)
+        pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
+        print(pdf_path)
+        self.buffer_widget.web_page.printToPdf(pdf_path)
 
     def destroy_buffer(self):
         # Record close page.
