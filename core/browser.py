@@ -618,9 +618,8 @@ class BrowserBuffer(Buffer):
         elif result_tag == "eval_js":
             self.buffer_widget.eval_js(str(result_content))
         elif result_tag == "save_as_pdf":
-            parsed = urlparse(self.url)
-            qd = parse_qs(parsed.query, keep_blank_values=True)
-            pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
+            title = self.buffer_widget.web_page.title()
+            pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(title))
             self.message_to_emacs.emit("Saving to " + pdf_path + "...")
             self.buffer_widget.web_page.printToPdf(pdf_path)
 
