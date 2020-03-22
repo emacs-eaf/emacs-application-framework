@@ -459,7 +459,14 @@ class BrowserBuffer(Buffer):
 
     def notify_print_message(self, file_path, success):
         if success:
-            self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
+            # Try to rename pdf file with title.
+            # Use host name if title include invalid file char.
+            title_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(self.title))
+            try:
+                os.rename(file_path, title_path)
+                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(title_path))
+            except Exception:
+                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
         else:
             self.message_to_emacs.emit("Failed to save current webpage as '{}'.".format(file_path))
 
@@ -618,9 +625,10 @@ class BrowserBuffer(Buffer):
         elif result_tag == "eval_js":
             self.buffer_widget.eval_js(str(result_content))
         elif result_tag == "save_as_pdf":
-            title = self.buffer_widget.web_page.title()
-            pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(title))
-            self.message_to_emacs.emit("Saving to " + pdf_path + "...")
+            parsed = urlparse(self.url)
+            qd = parse_qs(parsed.query, keep_blank_values=True)
+            pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
+            self.message_to_emacs.emit("Saving as pdf...")
             self.buffer_widget.web_page.printToPdf(pdf_path)
 
     def cancel_input_message(self, result_tag):

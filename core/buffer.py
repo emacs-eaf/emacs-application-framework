@@ -174,6 +174,7 @@ class Buffer(QGraphicsScene):
         self.background_color = background_color
         self.setBackgroundBrush(QBrush(self.background_color))
         self.is_dark_mode = is_dark_mode
+        self.title = ""
 
         self.buffer_widget = None
 
@@ -221,6 +222,7 @@ class Buffer(QGraphicsScene):
             self.buffer_widget.deleteLater()
 
     def change_title(self, title):
+        self.title = title
         self.update_details.emit(self.buffer_id, title, self.url)
 
     def request_close_buffer(self):
