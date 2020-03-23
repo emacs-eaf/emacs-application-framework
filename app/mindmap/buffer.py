@@ -41,7 +41,7 @@ class AppBuffer(BrowserBuffer):
 
         self.cut_node_id = None
 
-        for method_name in ["add_sub_node", "add_brother_node", "remove_node", "remove_middle_node", "add_middle_node"]:
+        for method_name in ["add_sub_node", "add_brother_node", "remove_node", "remove_middle_node", "add_middle_node", "update_node_topic_inline"]:
             self.build_js_method(method_name, True)
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset",
