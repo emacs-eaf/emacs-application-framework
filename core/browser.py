@@ -33,6 +33,7 @@ import subprocess
 import re
 import base64
 
+
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
 
@@ -454,7 +455,7 @@ class BrowserBuffer(Buffer):
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
                             "download_youtube_video", "download_youtube_audio", "toggle_device",
-                            "save_as_pdf", "view_source"]:
+                            "save_as_pdf", "view_source", "save_as_single_file"]:
             self.build_insert_or_do(method_name)
 
     def notify_print_message(self, file_path, success):
@@ -581,6 +582,13 @@ class BrowserBuffer(Buffer):
     def save_as_pdf(self):
         self.send_input_message("Save current webpage as PDF?", "save_as_pdf", "yes-or-no")
 
+    def save_as_single_file(self):
+        import shutil
+        if shutil.which("monolith") is None:
+            self.message_to_emacs.emit("Executable monolith not in PATH")
+        else:
+            self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
+
     def destroy_buffer(self):
         # Record close page.
         self.close_page.emit(self.buffer_widget.url().toString())
@@ -630,6 +638,21 @@ class BrowserBuffer(Buffer):
             pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
             self.message_to_emacs.emit("Saving as pdf...")
             self.buffer_widget.web_page.printToPdf(pdf_path)
+        elif result_tag == "save_as_single_file":
+            parsed = urlparse(self.url)
+            qd = parse_qs(parsed.query, keep_blank_values=True)
+            file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(parsed.netloc))
+            self.message_to_emacs.emit("Saving as single file...")
+            ret = subprocess.call("monolith " + self.url + " -o " +  file_path, shell=True)
+            if ret == 0:
+                title_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(self.title))
+                try:
+                    os.rename(file_path, title_path)
+                    self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(title_path))
+                except Exception:
+                    self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
+            else:
+                self.message_to_emacs.emit("Failed to save current page as single file.")
 
     def cancel_input_message(self, result_tag):
         if result_tag == "jump_link" or result_tag == "jump_link_new_buffer" or result_tag == "jump_link_background_buffer":
