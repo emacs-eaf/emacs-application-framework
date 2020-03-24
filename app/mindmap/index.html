@@ -62,10 +62,13 @@
              if(!selected_node) {
                  _jm.move_node(selected_id,'_first_');
              }
-
-             var nodeid = jsMind.util.uuid.newid();
-             var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
-             _jm.select_node(node);
+             if(_jm.view.is_editing()) {
+                 _jm.end_edit();
+             } else {
+                 var nodeid = jsMind.util.uuid.newid();
+                 var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
+                 _jm.select_node(node);
+             }
          }
 
          function get_selected_nodeid(){
@@ -89,6 +92,13 @@
              var selected_id = get_selected_nodeid();
              if (selected_id) {
                  _jm.update_node(selected_id, topic);
+             }
+         }
+
+         function update_node_topic_inline() {
+             var selected_id = get_selected_nodeid();
+             if (selected_id) {
+                 _jm.begin_edit(selected_id);
              }
          }
 

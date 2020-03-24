@@ -484,6 +484,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("RET" . "add_brother_node")
     ("<deletechar>" . "remove_node")
     ("M-m" . "update_node_topic")
+    ("M-e" . "update_node_topic_inline")
     ("M-r" . "refresh_page")
     ("C--" . "zoom_out")
     ("C-=" . "zoom_in")
