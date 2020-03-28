@@ -294,6 +294,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
     ("D" . "insert_or_open_link_background_buffer")
+    ("c" . "insert_or_copy_link")
     ("d" . "insert_or_scroll_up_page")
     ("u" . "insert_or_scroll_down_page")
     ("H" . "insert_or_history_backward")

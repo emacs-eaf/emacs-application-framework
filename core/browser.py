@@ -304,6 +304,13 @@ class BrowserView(QWebEngineView):
         if link != "":
             self.open_url_background_buffer(link)
 
+    def copy_link(self, marker):
+        link = self.get_marker_link(marker)
+        if link != "":
+            clipboard = QApplication.clipboard()
+            clipboard.setText(link)
+            self.buffer.message_to_emacs.emit("Copy link")
+
     def get_focus_text(self):
         return self.execute_js(self.get_focus_text_js)
 
@@ -452,7 +459,7 @@ class BrowserBuffer(Buffer):
 
         for method_name in ["recover_prev_close_page", "scroll_up", "scroll_down", "scroll_left", "scroll_right",
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
-                            "open_link", "open_link_new_buffer", "open_link_background_buffer",
+                            "open_link", "open_link_new_buffer", "open_link_background_buffer", "copy_link",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
                             "download_youtube_video", "download_youtube_audio", "toggle_device",
@@ -640,6 +647,8 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
         elif result_tag == "jump_link_background_buffer":
             self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
+        elif result_tag == "copy_link":
+            self.buffer_widget.copy_link(str(result_content).strip())
         elif result_tag == "eval_js_file":
             self.buffer_widget.eval_js_file(str(result_content))
         elif result_tag == "eval_js":
@@ -660,7 +669,7 @@ class BrowserBuffer(Buffer):
             call_and_check_code(args, handler)
 
     def cancel_input_message(self, result_tag):
-        if result_tag == "jump_link" or result_tag == "jump_link_new_buffer" or result_tag == "jump_link_background_buffer":
+        if result_tag == "jump_link" or result_tag == "jump_link_new_buffer" or result_tag == "jump_link_background_buffer" or result_tag == "copy_link":
             self.buffer_widget.cleanup_links()
 
     def clear_all_cookies(self):
@@ -706,6 +715,10 @@ class BrowserBuffer(Buffer):
     def open_link_background_buffer(self):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
+
+    def copy_link(self):
+        self.buffer_widget.get_link_markers()
+        self.send_input_message("Copy link: ", "copy_link");
 
     def reset_default_zoom(self):
         if hasattr(self, "buffer_widget"):
