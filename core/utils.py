@@ -110,3 +110,19 @@ def popen_and_call(popen_args, on_exit, stdout_file=None):
     thread.start()
     # returns immediately after the thread starts
     return thread
+
+def call_and_check_code(popen_args, on_exit, stdout_file=None):
+    """
+    Runs the given args in a subprocess.Popen, and then calls the function
+    on_exit when the subprocess completes.
+    on_exit is a callable object, and popen_args is a list/tuple of args that
+    would give to subprocess.Popen.
+    """
+    def run_in_thread(on_exit, popen_args):
+        retcode = subprocess.call(popen_args, stdout=stdout_file)
+        on_exit(retcode)
+        return
+    thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
+    thread.start()
+    # returns immediately after the thread starts
+    return thread

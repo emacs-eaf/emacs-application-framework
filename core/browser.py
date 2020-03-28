@@ -25,13 +25,14 @@ from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call
+from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call, call_and_check_code
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
 import subprocess
 import re
 import base64
+from functools import partial
 
 
 MOUSE_BACK_BUTTON = 8
@@ -471,6 +472,17 @@ class BrowserBuffer(Buffer):
         else:
             self.message_to_emacs.emit("Failed to save current webpage as '{}'.".format(file_path))
 
+    def notify_monolith_message(self, download_path, file_path, title, retcode):
+        if retcode == 0:
+            title_path = os.path.join(os.path.expanduser(download_path), "{}.html".format(title))
+            try:
+                os.rename(file_path, title_path)
+                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(title_path))
+            except Exception:
+                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
+        else:
+            self.message_to_emacs.emit("Failed to save current page as single file.")
+
     def record_url(self, url):
         self.request_url = url.toString()
 
@@ -643,16 +655,9 @@ class BrowserBuffer(Buffer):
             qd = parse_qs(parsed.query, keep_blank_values=True)
             file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(parsed.netloc))
             self.message_to_emacs.emit("Saving as single file...")
-            ret = subprocess.call("monolith " + self.url + " -o " +  file_path, shell=True)
-            if ret == 0:
-                title_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(self.title))
-                try:
-                    os.rename(file_path, title_path)
-                    self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(title_path))
-                except Exception:
-                    self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
-            else:
-                self.message_to_emacs.emit("Failed to save current page as single file.")
+            args = ["monolith", self.url, "-o", file_path]
+            handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
+            call_and_check_code(args, handler)
 
     def cancel_input_message(self, result_tag):
         if result_tag == "jump_link" or result_tag == "jump_link_new_buffer" or result_tag == "jump_link_background_buffer":
