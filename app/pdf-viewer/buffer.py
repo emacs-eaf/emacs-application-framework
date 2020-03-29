@@ -997,14 +997,3 @@ class PdfViewerWidget(QWidget):
 
         return False
 
-if __name__ == '__main__':
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-
-    w = PdfViewerWidget(sys.argv[1], QColor(0, 0, 0, 255))
-    w.resize(1920, 1080)
-    w.show()
-
-    sys.exit(app.exec_())
