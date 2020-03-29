@@ -1612,9 +1612,14 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (format "%s-%04x" "eaf-terminal" (random (expt 16 4))))
 
 (defun eaf--get-app-for-extension (extension-name)
-  (cl-loop for (app . ext) in eaf-app-extensions-alist
+  (let ((app-name
+         (cl-loop for (app . ext) in eaf-app-extensions-alist
                   if (member extension-name (symbol-value ext))
-                  return app))
+                  return app)))
+    (if (string-equal app-name "video-player")
+        ;; Use Browser play video if QWebEngine include private codec.
+        (if eaf--webengine-include-private-codec "js-video-player" "video-player")
+      app-name)))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)

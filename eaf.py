@@ -80,8 +80,8 @@ class EAF(dbus.service.Object):
 
     def webengine_include_private_codec(self):
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
-        result = subprocess.run("ldd {} | grep libavformat".format(path), shell=True, stdout=subprocess.PIPE)
-        return result != ""
+        result = subprocess.run("ldd {} | grep libavformat".format(path), shell=True, stdout=subprocess.PIPE, text=True)
+        return result.stdout != ""
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_emacs_var_dict(self, var_dict_string):
