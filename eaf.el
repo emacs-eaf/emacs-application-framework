@@ -188,6 +188,8 @@ been initialized."
 
 (defvar eaf--first-start-arguments nil)
 
+(defvar eaf--webengine-include-private-codec nil)
+
 (defvar eaf-org-file-list '())
 
 (defvar eaf-org-killed-file-list '())
@@ -1247,7 +1249,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf--first-start ()
   "Call `eaf--open-internal' after receive `start_finish' signal from server process."
-  (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments))
+  (let* ((webengine-process-path (eaf-call "webengine_process_path"))
+         (webengine-include-private-codec (eaf--webengine-include-private-codec webengine-process-path)))
+    (setq eaf--webengine-include-private-codec webengine-include-private-codec)
+    (setq eaf--first-start-app-name (if (and (string-equal eaf--first-start-app-name "video-player")
+                                             webengine-include-private-codec)
+                                        "js-video-player"
+                                      eaf--first-start-app-name))
+    (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments)))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1609,11 +1618,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
                   return app)))
     (if (string-equal app-name "video-player")
         ;; Use Browser play video if QWebEngine include private codec.
-        (if (eaf--webengine-include-private-codec) "js-video-player" "video-player")
+        (if eaf--webengine-include-private-codec "js-video-player" "video-player")
       app-name)))
 
-(defun eaf--webengine-include-private-codec ()
-  (not (string-equal (shell-command-to-string "ldd /usr/lib/libQt5WebEngineCore.so | grep libavformat") "")))
+(defun eaf--webengine-include-private-codec (path)
+  (not (string-equal (shell-command-to-string (concat "ldd " path " | grep libavformat")) "")))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
