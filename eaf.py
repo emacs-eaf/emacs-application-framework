@@ -24,6 +24,7 @@
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
 
+from PyQt5.QtCore import QLibraryInfo
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
 from core.view import View
@@ -75,6 +76,10 @@ class EAF(dbus.service.Object):
             proxy.setHostName(proxy_host)
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="s")
+    def webengine_process_path(self):
+        return os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_emacs_var_dict(self, var_dict_string):
