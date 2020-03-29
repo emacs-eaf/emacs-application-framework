@@ -26,72 +26,21 @@ from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QApplication
 import abc
+import string
 
-qt_key_dict = {
-    '''a''': Qt.Key_A,
-    '''b''': Qt.Key_B,
-    '''c''': Qt.Key_C,
-    '''d''': Qt.Key_D,
-    '''e''': Qt.Key_E,
-    '''f''': Qt.Key_F,
-    '''g''': Qt.Key_G,
-    '''h''': Qt.Key_H,
-    '''i''': Qt.Key_I,
-    '''j''': Qt.Key_J,
-    '''k''': Qt.Key_K,
-    '''l''': Qt.Key_L,
-    '''m''': Qt.Key_M,
-    '''n''': Qt.Key_N,
-    '''o''': Qt.Key_O,
-    '''p''': Qt.Key_P,
-    '''q''': Qt.Key_Q,
-    '''r''': Qt.Key_R,
-    '''s''': Qt.Key_S,
-    '''t''': Qt.Key_T,
-    '''u''': Qt.Key_U,
-    '''v''': Qt.Key_V,
-    '''w''': Qt.Key_W,
-    '''x''': Qt.Key_X,
-    '''y''': Qt.Key_Y,
-    '''z''': Qt.Key_Z,
+qt_key_dict = {}
 
-    '''A''': Qt.Key_A,
-    '''B''': Qt.Key_B,
-    '''C''': Qt.Key_C,
-    '''D''': Qt.Key_D,
-    '''E''': Qt.Key_E,
-    '''F''': Qt.Key_F,
-    '''G''': Qt.Key_G,
-    '''H''': Qt.Key_H,
-    '''I''': Qt.Key_I,
-    '''J''': Qt.Key_J,
-    '''K''': Qt.Key_K,
-    '''L''': Qt.Key_L,
-    '''M''': Qt.Key_M,
-    '''N''': Qt.Key_N,
-    '''O''': Qt.Key_O,
-    '''P''': Qt.Key_P,
-    '''Q''': Qt.Key_Q,
-    '''R''': Qt.Key_R,
-    '''S''': Qt.Key_S,
-    '''T''': Qt.Key_T,
-    '''U''': Qt.Key_U,
-    '''V''': Qt.Key_V,
-    '''W''': Qt.Key_W,
-    '''X''': Qt.Key_X,
-    '''Y''': Qt.Key_Y,
-    '''Z''': Qt.Key_Z,
+# Build char event.
+for char in string.ascii_lowercase:
+    upper_char = char.upper()
+    qt_key_dict[char] = eval("Qt.Key_{}".format(upper_char))
+    qt_key_dict[upper_char] = eval("Qt.Key_{}".format(upper_char))
 
-    '''0''': Qt.Key_0,
-    '''1''': Qt.Key_1,
-    '''2''': Qt.Key_2,
-    '''3''': Qt.Key_3,
-    '''4''': Qt.Key_4,
-    '''5''': Qt.Key_5,
-    '''6''': Qt.Key_6,
-    '''7''': Qt.Key_7,
-    '''8''': Qt.Key_8,
-    '''9''': Qt.Key_9,
+# Build number event.
+for number in range(0, 10):
+    qt_key_dict[str(number)] = eval("Qt.Key_{}".format(number))
+
+qt_key_dict.update({
     ''':''': Qt.Key_Colon,
     ''';''': Qt.Key_Semicolon,
     '''.''': Qt.Key_Period,
@@ -138,7 +87,7 @@ qt_key_dict = {
     '''<prior>''': Qt.Key_PageUp,
     '''<next>''': Qt.Key_PageDown,
     '''<delete>''': Qt.Key_Delete
-}
+})
 
 qt_text_dict = {
     "SPC": " "
