@@ -133,6 +133,9 @@ class AppBuffer(Buffer):
         else:
             self.message_to_emacs.emit("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
+    def current_page(self):
+        return str(self.buffer_widget.get_start_page_index() + 1)
+
     def add_annot_highlight(self):
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.annot_select_char_area("highlight")
