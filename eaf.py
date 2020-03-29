@@ -34,6 +34,7 @@ import dbus.service
 import importlib
 import json
 import os
+import subprocess
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"
@@ -59,7 +60,7 @@ class EAF(dbus.service.Object):
 
         self.update_emacs_var_dict(var_dict_string)
 
-        self.first_start()
+        self.first_start(self.webengine_include_private_codec())
 
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
@@ -77,9 +78,10 @@ class EAF(dbus.service.Object):
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="s")
-    def webengine_process_path(self):
-        return os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
+    def webengine_include_private_codec(self):
+        path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
+        result = subprocess.run("ldd {} | grep libavformat".format(path), shell=True, stdout=subprocess.PIPE)
+        return result != ""
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_emacs_var_dict(self, var_dict_string):
@@ -374,7 +376,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def first_start(self):
+    def first_start(self, webengine_include_private_codec):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

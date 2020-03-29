@@ -1247,16 +1247,16 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  "com.lazycat.eaf" "first_start"
  #'eaf--first-start)
 
-(defun eaf--first-start ()
+(defun eaf--first-start (webengine-include-private-codec)
   "Call `eaf--open-internal' after receive `start_finish' signal from server process."
-  (let* ((webengine-process-path (eaf-call "webengine_process_path"))
-         (webengine-include-private-codec (eaf--webengine-include-private-codec webengine-process-path)))
-    (setq eaf--webengine-include-private-codec webengine-include-private-codec)
-    (setq eaf--first-start-app-name (if (and (string-equal eaf--first-start-app-name "video-player")
-                                             webengine-include-private-codec)
-                                        "js-video-player"
-                                      eaf--first-start-app-name))
-    (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments)))
+  ;; If webengine include private codec and app name is "video-player", replace by "js-video-player".
+  (setq eaf--webengine-include-private-codec webengine-include-private-codec)
+  (when (and (string-equal eaf--first-start-app-name "video-player")
+             webengine-include-private-codec)
+    (setq eaf--first-start-app-name "js-video-player"))
+
+  ;; Start app.
+  (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1612,17 +1612,9 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (format "%s-%04x" "eaf-terminal" (random (expt 16 4))))
 
 (defun eaf--get-app-for-extension (extension-name)
-  (let ((app-name
-         (cl-loop for (app . ext) in eaf-app-extensions-alist
+  (cl-loop for (app . ext) in eaf-app-extensions-alist
                   if (member extension-name (symbol-value ext))
-                  return app)))
-    (if (string-equal app-name "video-player")
-        ;; Use Browser play video if QWebEngine include private codec.
-        (if eaf--webengine-include-private-codec "js-video-player" "video-player")
-      app-name)))
-
-(defun eaf--webengine-include-private-codec (path)
-  (not (string-equal (shell-command-to-string (concat "ldd " path " | grep libavformat")) "")))
+                  return app))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
