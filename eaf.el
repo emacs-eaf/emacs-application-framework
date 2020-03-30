@@ -958,17 +958,16 @@ to edit EAF keybindings!" fun fun)))
           (set-keymap-parent map eaf-mode-map*)
           (cl-loop for (key . fun) in keybinding
                    do (define-key map (kbd key)
-                        (cond ((symbolp fun)
-                               fun)
-                              ((member fun (list "eaf-send-key-sequence"
-                                                 "eaf-send-second-key-sequence"
-                                                 "eaf-send-ctrl-return-sequence"
-                                                 "eaf-send-down-key"
-                                                 "eaf-send-up-key"
-                                                 "eaf-send-return-key"))
-                               (intern fun))
-                              (t
-                               (eaf--make-proxy-function fun))))
+                        (cond
+                         ;; If command is normal symbol, just call it directly.
+                         ((symbolp fun)
+                          fun)
+                         ;; If command is string and include _ , it's command in python side, build elisp proxy function to call it.
+                         ((string-match "_" fun)
+                          (eaf--make-proxy-function fun))
+                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                         ((string-match "-" fun)
+                          (intern fun))))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
