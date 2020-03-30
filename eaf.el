@@ -1160,11 +1160,10 @@ KEY is a string representing a sequence of keystrokes and events.
 EAF-APP-KEYBINDING is one of the `eaf-<app-name>-keybinding'
 variables, where <app-name> can be obtained by checking the value
 of `eaf--buffer-app-name' inside the EAF buffer."
-  `(setf (map-elt ,eaf-app-keybinding ,key
-                ,(if (string-match "_" (symbol-name command))
-                     (symbol-name command)
-                   `(quote ,command)))
-         #'equal))
+  `(setf (map-elt ,eaf-app-keybinding ,key)
+         ,(if (string-match "_" (symbol-name command))
+              (symbol-name command)
+            `(quote ,command))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
