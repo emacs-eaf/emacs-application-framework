@@ -23,6 +23,7 @@
 # QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
+from sys import version_info
 
 from PyQt5.QtCore import QLibraryInfo
 from PyQt5.QtNetwork import QNetworkProxy
@@ -80,7 +81,10 @@ class EAF(dbus.service.Object):
 
     def webengine_include_private_codec(self):
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
-        result = subprocess.run("ldd {} | grep libavformat".format(path), shell=True, stdout=subprocess.PIPE, text=True)
+        if version_info >= (3,7):
+            result = subprocess.run("ldd {} | grep libavformat".format(path), check=False, shell=True, stdout=subprocess.PIPE, text=True)
+        else:
+            result = subprocess.run("ldd {} | grep libavformat".format(path), check=False, shell=True, stdout=subprocess.PIPE)
         return result.stdout != ""
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
