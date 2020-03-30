@@ -1133,9 +1133,7 @@ to edit EAF keybindings!" fun fun)))
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
 
 For convenience, use the Lisp macro `eaf-setq' instead."
-  (if (version< emacs-version "27")
-      (map-put eaf-var-list sym val)
-    (map-put! eaf-var-list sym val))
+  (setf (map-elt eaf-var-list sym) val)
   (when (process-live-p eaf-process)
     ;; Update python side variable dynamically.
     (eaf-call "update_emacs_var_dict" (eaf-serialization-var-list)))
@@ -1162,15 +1160,11 @@ KEY is a string representing a sequence of keystrokes and events.
 EAF-APP-KEYBINDING is one of the `eaf-<app-name>-keybinding'
 variables, where <app-name> can be obtained by checking the value
 of `eaf--buffer-app-name' inside the EAF buffer."
-  (if (version< emacs-version "27")
-      `(map-put ,eaf-app-keybinding ,key
-            ,(if (string-match "_" (symbol-name command))
-                 (symbol-name command)
-               `(quote ,command)) #'equal)
-    `(map-put! ,eaf-app-keybinding ,key
-            ,(if (string-match "_" (symbol-name command))
-                 (symbol-name command)
-               `(quote ,command)) #'equal)))
+  `(setf (map-elt ,eaf-app-keybinding ,key
+                ,(if (string-match "_" (symbol-name command))
+                     (symbol-name command)
+                   `(quote ,command)))
+         #'equal))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1539,7 +1533,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
