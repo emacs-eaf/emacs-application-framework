@@ -463,7 +463,7 @@ class BrowserBuffer(Buffer):
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
                             "download_youtube_video", "download_youtube_audio", "toggle_device",
-                            "save_as_pdf", "view_source", "save_as_single_file"]:
+                            "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab"]:
             self.build_insert_or_do(method_name)
 
     def notify_print_message(self, file_path, success):
@@ -823,14 +823,6 @@ class BrowserBuffer(Buffer):
     @insert_or_do
     def insert_or_close_buffer(self):
         self.request_close_buffer()
-
-    @insert_or_do
-    def insert_or_goto_left_tab(self):
-        self.select_left_tab()
-
-    @insert_or_do
-    def insert_or_goto_right_tab(self):
-        self.select_right_tab()
 
     @insert_or_do
     def insert_or_open_url(self):
