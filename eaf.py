@@ -37,7 +37,6 @@ import json
 import os
 import subprocess
 
-
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
@@ -82,7 +81,7 @@ class EAF(dbus.service.Object):
 
     def webengine_include_private_codec(self):
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
-        if version_info > (3,7):
+        if version_info >= (3,7):
             result = subprocess.run("ldd {} | grep libavformat".format(path), check=False, shell=True, stdout=subprocess.PIPE, text=True)
         else:
             result = subprocess.run("ldd {} | grep libavformat".format(path), check=False, shell=True, stdout=subprocess.PIPE)
