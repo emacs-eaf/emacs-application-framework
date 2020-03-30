@@ -289,3 +289,9 @@ class Buffer(QGraphicsScene):
 
     def save_as_bookmark(self):
         self.eval_in_emacs.emit('''(bookmark-set)''')
+
+    def select_left_tab(self):
+        self.goto_left_tab.emit()
+
+    def select_right_tab(self):
+        self.goto_right_tab.emit()

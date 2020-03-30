@@ -41,8 +41,10 @@ class AppBuffer(Buffer):
         self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict, is_dark_mode))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
-        for method_name in ["scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_home", "scroll_to_end",
-                            "zoom_reset", "zoom_in", "zoom_out", "save_current_pos", "jump_to_saved_pos",
+        for method_name in ["scroll_up", "scroll_down", "scroll_up_page",
+                            "scroll_down_page", "scroll_to_home", "scroll_to_end",
+                            "zoom_reset", "zoom_in", "zoom_out",
+                            "save_current_pos", "jump_to_saved_pos",
                             "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
             self.build_widget_method(method_name)
 
@@ -996,4 +998,3 @@ class PdfViewerWidget(QWidget):
                 self.is_select_mode = True
 
         return False
-

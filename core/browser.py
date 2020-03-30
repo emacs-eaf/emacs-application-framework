@@ -826,11 +826,11 @@ class BrowserBuffer(Buffer):
 
     @insert_or_do
     def insert_or_goto_left_tab(self):
-        self.goto_left_tab.emit()
+        self.select_left_tab()
 
     @insert_or_do
     def insert_or_goto_right_tab(self):
-        self.goto_right_tab.emit()
+        self.select_right_tab()
 
     @insert_or_do
     def insert_or_open_url(self):

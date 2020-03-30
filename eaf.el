@@ -372,7 +372,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("u" . "add_annot_underline")
     ("s" . "add_annot_squiggly")
     ("d" . "add_annot_strikeout_or_delete_annot")
-    ("e" . "add_annot_text_or_edit_annot"))
+    ("e" . "add_annot_text_or_edit_annot")
+    ("J" . "select_left_tab")
+    ("K" . "select_right_tab"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
