@@ -116,7 +116,7 @@
     (define-key map (kbd "M-[") #'eaf-share-path-or-url)
     (define-key map (vector 'remap #'keyboard-quit) #'eaf-keyboard-quit)
     (define-key map (vector 'remap #'self-insert-command) #'eaf-send-key)
-    (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>"))
+    (dolist (single-key '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>"))
       (define-key map (kbd single-key) #'eaf-send-key))
     map)
   "Keymap for default bindings available in all apps.")
