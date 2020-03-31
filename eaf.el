@@ -1931,9 +1931,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
       ;; Otherwise, developer's personal config will dirty document.
       (dolist (element (eval (car (get var 'standard-value))))
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
-      (insert "\n"))
-    (switch-to-buffer doc-buffer)
-    (message "Update EAF Keybindings wiki with buffer content.")))
+      (insert "\n"))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
