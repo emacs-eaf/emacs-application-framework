@@ -102,7 +102,7 @@ class Buffer(QGraphicsScene):
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_text = QtCore.pyqtSignal(str)
     input_message = QtCore.pyqtSignal(str, str, str, str, str)
-    close_buffer = QtCore.pyqtSignal(str)
+    request_close_buffer = QtCore.pyqtSignal(str)
     message_to_emacs = QtCore.pyqtSignal(str)
     set_emacs_var = QtCore.pyqtSignal(str, str)
     eval_in_emacs = QtCore.pyqtSignal(str)
@@ -175,8 +175,8 @@ class Buffer(QGraphicsScene):
         self.title = title
         self.update_details.emit(self.buffer_id, title, self.url)
 
-    def request_close_buffer(self):
-        self.close_buffer.emit(self.buffer_id)
+    def close_buffer(self):
+        self.request_close_buffer.emit(self.buffer_id)
 
     def all_views_hide(self):
         pass

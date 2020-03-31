@@ -176,7 +176,7 @@ class EAF(dbus.service.Object):
         app_buffer.input_message.connect(self.input_message)
 
         # Handle buffer close request.
-        app_buffer.close_buffer.connect(self.request_kill_buffer)
+        app_buffer.request_close_buffer.connect(self.request_kill_buffer)
 
         # Handle message to emacs.
         app_buffer.message_to_emacs.connect(self.message_to_emacs)

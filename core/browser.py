@@ -429,7 +429,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
         self.buffer_widget.urlChanged.connect(self.record_url)
-        self.buffer_widget.web_page.windowCloseRequested.connect(self.request_close_buffer)
+        self.buffer_widget.web_page.windowCloseRequested.connect(self.close_buffer)
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
@@ -462,7 +462,7 @@ class BrowserBuffer(Buffer):
                             "open_link", "open_link_new_buffer", "open_link_background_buffer", "copy_link",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
-                            "download_youtube_video", "download_youtube_audio", "toggle_device",
+                            "download_youtube_video", "download_youtube_audio", "toggle_device", "close_buffer",
                             "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab"]:
             self.build_insert_or_do(method_name)
 
@@ -821,10 +821,6 @@ class BrowserBuffer(Buffer):
             else:
                 getattr(self, method_name)()
         setattr(self, "insert_or_{}".format(method_name), _do)
-
-    @insert_or_do
-    def insert_or_close_buffer(self):
-        self.request_close_buffer()
 
     @insert_or_do
     def insert_or_open_url(self):
