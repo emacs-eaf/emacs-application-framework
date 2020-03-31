@@ -507,6 +507,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("y" . "insert_or_paste_node_topic")
     ("W" . "insert_or_cut_node_tree")
     ("Y" . "insert_or_paste_node_tree")
+    ("J" . "insert_or_select_left_tab")
+    ("K" . "insert_or_select_right_tab")
     ("-" . "insert_or_zoom_out")
     ("=" . "insert_or_zoom_in")
     ("0" . "insert_or_zoom_reset")
