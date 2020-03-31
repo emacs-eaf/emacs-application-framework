@@ -87,7 +87,8 @@ qt_key_dict.update({
     '''<prior>''': Qt.Key_PageUp,
     '''<next>''': Qt.Key_PageDown,
     '''<delete>''': Qt.Key_Delete,
-    '''<backspace>''': Qt.Key_Backspace
+    '''<backspace>''': Qt.Key_Backspace,
+    '''<return>''': Qt.Key_Return
 })
 
 qt_text_dict = {
