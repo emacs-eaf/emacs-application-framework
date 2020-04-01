@@ -86,6 +86,7 @@
 (require 'bookmark)
 (require 'seq)
 (require 'eaf-mindmap)
+(require 'eaf-interleave)
 
 ;;; Code:
 
