@@ -461,7 +461,7 @@ class BrowserBuffer(Buffer):
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "open_link", "open_link_new_buffer", "open_link_background_buffer", "copy_link",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
-                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark",
+                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "edit_link",
                             "download_youtube_video", "download_youtube_audio", "toggle_device", "close_buffer",
                             "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab"]:
             self.build_insert_or_do(method_name)
@@ -667,9 +667,15 @@ class BrowserBuffer(Buffer):
             args = ["monolith", self.url, "-o", file_path]
             handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
             call_and_check_code(args, handler)
+        elif result_tag == "edit_link":
+            self.buffer_widget.open_url(str(result_content))
 
     def cancel_input_message(self, result_tag):
-        if result_tag == "jump_link" or result_tag == "jump_link_new_buffer" or result_tag == "jump_link_background_buffer" or result_tag == "copy_link":
+        if result_tag == "jump_link" or \
+           result_tag == "jump_link_new_buffer" or \
+           result_tag == "jump_link_background_buffer" or \
+           result_tag == "copy_link" or \
+           result_tag == "edit_link":
             self.buffer_widget.cleanup_links()
 
     def clear_all_cookies(self):
@@ -721,6 +727,9 @@ class BrowserBuffer(Buffer):
     def copy_link(self):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Copy link: ", "copy_link");
+
+    def edit_link(self):
+        self.send_input_message("Edit link: ", "edit_link", "string", self.url)
 
     def reset_default_zoom(self):
         if hasattr(self, "buffer_widget"):
