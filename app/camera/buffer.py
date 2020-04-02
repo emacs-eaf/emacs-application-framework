@@ -50,6 +50,10 @@ class AppBuffer(Buffer):
         else:
             self.buffer_widget.take_photo("~/Downloads")
 
+    def destroy_buffer(self):
+        self.buffer_widget.stop_camera()
+        super().destroy_buffer()
+
 class CameraWidget(QWidget):
 
     def __init__(self, background_color):
@@ -91,6 +95,9 @@ class CameraWidget(QWidget):
         photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
         image_capture.capture(photo_path)
         self.message_to_emacs.emit("Captured Photo at " + photo_path)
+
+    def stop_camera(self):
+        self.camera.stop()
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
