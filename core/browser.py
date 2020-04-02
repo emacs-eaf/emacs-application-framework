@@ -461,7 +461,7 @@ class BrowserBuffer(Buffer):
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "open_link", "open_link_new_buffer", "open_link_background_buffer", "copy_link",
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
-                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "edit_link",
+                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "edit_url",
                             "download_youtube_video", "download_youtube_audio", "toggle_device", "close_buffer",
                             "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab"]:
             self.build_insert_or_do(method_name)
