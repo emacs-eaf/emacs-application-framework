@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Feb 25 09:57:21 2020 (-0500)
+;; Last-Updated: Thu Apr  2 00:04:45 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1564,12 +1564,12 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (let* ((real-search-engine (if current-prefix-arg
                                  (let ((all-search-engine (mapcar #'car eaf-browser-search-engines)))
                                    (completing-read
-                                    (format "Choose search engine (default %s): " eaf-browser-default-search-engine)
+                                    (format "[EAF/browser] Select search engine (default %s): " eaf-browser-default-search-engine)
                                     all-search-engine nil t nil nil eaf-browser-default-search-engine))
                                (or search-engine eaf-browser-default-search-engine)))
          (link (or (cdr (assoc real-search-engine
                                eaf-browser-search-engines))
-                   (error (format "[EAF/browser] search engine %s is unknown to EAF!" real-search-engine))))
+                   (error (format "[EAF/browser] Search engine %s is unknown to EAF!" real-search-engine))))
          (current-symbol (if mark-active
                              (buffer-substring (region-beginning) (region-end))
                            (symbol-at-point)))
@@ -1607,11 +1607,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (if (executable-find "ipython")
       (eaf-run-command-in-terminal "ipython")
-    (message "Please install ipython first.")))
+    (message "[EAF/terminal] Please install ipython first.")))
 
 (defun eaf-run-command-in-terminal (command)
   "Run any command in terminal."
-  (interactive "sCommand: ")
+  (interactive "s[EAF/terminal] Command: ")
   (eaf-open (eaf--generate-terminal-buffer-name)
             "terminal"
             (format "%sᛡ%s" command default-directory)))
@@ -1634,6 +1634,7 @@ choose a search engine defined in `eaf-browser-search-engines'"
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
+  "A wrapper around `file-name-extension' that downcases the extension of the FILE."
   (downcase (file-name-extension file)))
 
 (defun eaf-open-this-from-dired ()
@@ -1803,14 +1804,14 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf-open " " "mindmap"))
 
 (defun eaf-open-mindmap (file)
-  (interactive "fOpen EAF Mind Map: ")
+  (interactive "f[EAF/mindmap] Select Mindmap file: ")
   (eaf-open file "mindmap"))
 
 (defun eaf-get-file-md5 (file)
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
 
 (defun eaf-open-office (file)
-  (interactive "fOpen office file: ")
+  (interactive "f[EAF/office] Open Office file as PDF: ")
   (if (executable-find "libreoffice")
       (let* ((file-md5 (eaf-get-file-md5 file))
              (convert-file (format "/tmp/%s.pdf" (file-name-base file)))
@@ -1827,7 +1828,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                          (rename-file convert-file pdf-file)
                          (eaf-open pdf-file "pdf-viewer")
                          )))))
-    (message "Please install libreoffice to convert office file to pdf.")))
+    (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
 (defun eaf-is-dark-theme ()
   (if (eq (frame-parameter nil 'background-mode) 'light)
