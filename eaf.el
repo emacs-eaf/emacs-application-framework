@@ -816,7 +816,7 @@ For now only EAF browser app is supported."
                      (eaf-get-render-size)
                      (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
                      (list (eaf-serialization-var-list))
-                     (list (eaf-is-dark-theme))))
+                     ))
           (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
       (setq eaf-process
             (if eaf-enable-debug
@@ -1542,7 +1542,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1830,11 +1830,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                          )))))
     (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
-(defun eaf-is-dark-theme ()
-  (if (eq (frame-parameter nil 'background-mode) 'light)
-      "false"
-    "true"))
-
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "edit_focus_text"
@@ -1881,6 +1876,19 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf--exit_fullscreen_request ()
   (setq-local eaf-fullscreen-p nil)
   (eaf-monitor-configuration-change))
+
+(dbus-register-service :session "com.lazycat.emacs")
+
+(defun eaf-get-theme-mode ()
+  (format "%s"(frame-parameter nil 'background-mode)))
+
+(dbus-register-method
+ :session
+ "com.lazycat.emacs"
+ "/com/lazycat/emacs"
+ "com.lazycat.emacs"
+ "GetThemeMode"
+ 'eaf-get-theme-mode)
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()

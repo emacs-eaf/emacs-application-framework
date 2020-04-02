@@ -25,7 +25,7 @@
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
 from sys import version_info
 
-from PyQt5.QtCore import QLibraryInfo
+from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
 from core.view import View
@@ -42,17 +42,16 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string, is_dark_mode
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         dbus.service.Object.__init__(
             self,
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string, is_dark_mode) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
-        is_dark_mode = is_dark_mode == "true"
         eaf_config_dir = os.path.expanduser(config_dir)
 
         self.buffer_dict = {}
@@ -79,13 +78,23 @@ class EAF(dbus.service.Object):
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
 
+    def get_command_result(self, command):
+        if version_info >= (3,7):
+            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE, text=True).stdout
+        else:
+            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE).stdout
+
+    def call_emacs(self, method_name):
+        try:
+            # Current, only support STRING as return value.
+            result = self.get_command_result('''dbus-send --print-reply --dest="com.lazycat.emacs" "/com/lazycat/emacs" "com.lazycat.emacs.{}"'''.format(method_name))
+            return result.split("\n")[1].split(" ")[-1].split('"')[1]
+        except Exception:
+            return ""
+
     def webengine_include_private_codec(self):
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
-        if version_info >= (3,7):
-            result = subprocess.run("ldd {} | grep libavformat".format(path), check=False, shell=True, stdout=subprocess.PIPE, text=True)
-        else:
-            result = subprocess.run("ldd {} | grep libavformat".format(path), check=False, shell=True, stdout=subprocess.PIPE)
-        return result.stdout != ""
+        return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_emacs_var_dict(self, var_dict_string):
@@ -151,11 +160,11 @@ class EAF(dbus.service.Object):
             return "EAF: Something went wrong when trying to import {0}".format(module_path)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string, is_dark_mode
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path, is_dark_mode)
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path, self.call_emacs)
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer
@@ -518,7 +527,6 @@ if __name__ == "__main__":
     import signal
 
     proxy_string = ""
-    is_dark_mode = ""
 
     DBusGMainLoop(set_as_default=True) # WARING: only use once in one process
 

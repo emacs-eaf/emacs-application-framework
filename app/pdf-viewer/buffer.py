@@ -34,11 +34,11 @@ import os
 import hashlib
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, is_dark_mode):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, is_dark_mode, False, QColor(0, 0, 0, 255))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, call_emacs, False, QColor(0, 0, 0, 255))
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict, is_dark_mode))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict, call_emacs))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
         for method_name in ["scroll_up", "scroll_down", "scroll_up_page",
@@ -172,7 +172,7 @@ class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict, is_dark_mode):
+    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict, call_emacs):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
@@ -182,7 +182,7 @@ class PdfViewerWidget(QWidget):
         self.installEventFilter(self)
         self.setMouseTracking(True)
         self.emacs_var_dict = emacs_var_dict
-        self.is_dark_mode = is_dark_mode
+        self.call_emacs = call_emacs
 
         # Load document first.
         self.document = fitz.open(url)
@@ -199,7 +199,8 @@ class PdfViewerWidget(QWidget):
 
         # Inverted mode.
         self.inverted_mode = False
-        if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or (self.emacs_var_dict["eaf-pdf-dark-mode"] == "" and self.is_dark_mode)):
+        if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or \
+            (self.emacs_var_dict["eaf-pdf-dark-mode"] == "" and self.call_emacs("GetThemeMode") == "dark")):
             self.inverted_mode = True
 
         # mark link

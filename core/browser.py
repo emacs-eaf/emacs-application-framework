@@ -379,8 +379,8 @@ class BrowserBuffer(Buffer):
     get_focus_text = QtCore.pyqtSignal(str, str)
     open_dev_tools_tab = QtCore.pyqtSignal(object)
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, is_dark_mode, fit_to_view, background_color):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, is_dark_mode, fit_to_view, background_color)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs, fit_to_view, background_color):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, call_emacs, fit_to_view, background_color)
 
         self.add_widget(BrowserView(config_dir))
 
@@ -509,9 +509,10 @@ class BrowserBuffer(Buffer):
 
     def dark_mode_is_enable(self):
         module_name = self.module_path.split(".")[1]
-        return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or (self.emacs_var_dict["eaf-browser-dark-mode"] == "" and self.is_dark_mode)) \
-            and module_name in ["browser"] \
-            and self.url != "devtools://devtools/bundled/devtools_app.html"
+        return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or \
+                (self.emacs_var_dict["eaf-browser-dark-mode"] == "" and self.call_emacs("GetThemeMode") == "dark")) \
+                and module_name in ["browser"] \
+                and self.url != "devtools://devtools/bundled/devtools_app.html"
 
     def init_background_color(self):
         if self.dark_mode_is_enable():
