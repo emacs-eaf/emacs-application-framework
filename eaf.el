@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Apr  2 00:04:45 2020 (-0400)
+;; Last-Updated: Thu Apr  2 00:35:12 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -320,7 +320,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("s" . "insert_or_save_as_pdf")
     ("S" . "insert_or_save_as_single_file")
     ("v" . "insert_or_view_source")
-    ("e" . "insert_or_edit_link")
+    ("e" . "insert_or_edit_url")
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")

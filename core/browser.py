@@ -667,7 +667,7 @@ class BrowserBuffer(Buffer):
             args = ["monolith", self.url, "-o", file_path]
             handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
             call_and_check_code(args, handler)
-        elif result_tag == "edit_link":
+        elif result_tag == "edit_url":
             self.buffer_widget.open_url(str(result_content))
 
     def cancel_input_message(self, result_tag):
@@ -675,7 +675,7 @@ class BrowserBuffer(Buffer):
            result_tag == "jump_link_new_buffer" or \
            result_tag == "jump_link_background_buffer" or \
            result_tag == "copy_link" or \
-           result_tag == "edit_link":
+           result_tag == "edit_url":
             self.buffer_widget.cleanup_links()
 
     def clear_all_cookies(self):
@@ -728,8 +728,8 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Copy link: ", "copy_link");
 
-    def edit_link(self):
-        self.send_input_message("Edit link: ", "edit_link", "string", self.url)
+    def edit_url(self):
+        self.send_input_message("Edit link: ", "edit_url", "string", self.url)
 
     def reset_default_zoom(self):
         if hasattr(self, "buffer_widget"):
