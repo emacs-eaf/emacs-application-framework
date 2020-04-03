@@ -424,7 +424,7 @@ Return the position of the newly inserted heading."
       (funcall change-level)))
   (point))
 
-(defun eaf-interleave--create-new-note (page)
+(defun eaf-interleave--create-new-note (url page)
   "Create a new headline for the page PAGE."
   (let (new-note-position)
     (with-current-buffer eaf-interleave-org-buffer
@@ -433,6 +433,7 @@ Return the position of the newly inserted heading."
         (let ((position (eaf-interleave--goto-insert-position)))
           (setq new-note-position (eaf-interleave--insert-heading-respect-content position)))
         (insert (format "Notes for page %d" page))
+        (org-set-property eaf-interleave--pdf-prop url)
         (org-set-property eaf-interleave--page-note-prop (number-to-string page))
         (eaf-interleave--narrow-to-subtree)
         (org-cycle-hide-drawers t)))
@@ -448,7 +449,8 @@ buffer."
          (position (eaf-interleave--go-to-page-note page)))
     (if position
         (eaf-interleave--switch-to-org-buffer t position)
-      (eaf-interleave--create-new-note page))))
+      (eaf-interleave--create-new-note eaf--buffer-url page)))
+  )
 
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
