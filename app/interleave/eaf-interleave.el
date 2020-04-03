@@ -549,5 +549,11 @@ SORT-ORDER is either 'asc or 'desc."
             (throw 'find-buffer t)))))
     current-buffer))
 
+(defun eaf-interleave--kill-buffer (url)
+  "Kill the current converter process and buffer."
+  (interactive)
+  (let ((buffer (eaf-interleave--find-buffer url)))
+    (kill-buffer buffer)))
+
 (provide 'eaf-interleave)
 ;;; interleave.el ends here
