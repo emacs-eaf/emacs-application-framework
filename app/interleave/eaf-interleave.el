@@ -440,11 +440,17 @@ Return the position of the newly inserted heading."
     (eaf-interleave--switch-to-org-buffer t new-note-position)))
 
 (defun eaf-interleave-add-note ()
-  "Add note for the current page.
+  "Add note for the EAF buffer.
 
-If there are already notes for this page, jump to the notes
+If there are already notes for this url, jump to the notes
 buffer."
   (interactive)
+  (cond ((and (derived-mode-p 'eaf-mode)
+              (equal eaf--buffer-app-name "pdf-viewer"))
+         (eaf-interleave-pdf-add-note))))
+
+(defun eaf-interleave-pdf-add-note ()
+  "EAF pdf-viewer-mode add note"
   (let* ((page (eaf-interleave--pdf-viewer-current-page))
          (position (eaf-interleave--go-to-page-note page)))
     (if position
