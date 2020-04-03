@@ -141,10 +141,9 @@ split horizontally."
     (setq eaf-interleave--window-configuration nil)
     (setq eaf-interleave-org-buffer nil)
     (setq eaf-interleave--current-pdf-file nil)
-    (with-current-buffer eaf-interleave-pdf-buffer
+    (with-current-buffer (eaf-interleave--find-buffer eaf-interleave--current-pdf-file)
       (eaf-interleave-pdf-mode -1)
       (eaf-interleave-pdf-kill-buffer))
-    (setq eaf-interleave-pdf-buffer nil)
     ))
 
 ;;; Interleave PDF Mode
@@ -160,15 +159,11 @@ split horizontally."
   (when eaf-interleave-pdf-mode
     ;; if derived mode is eaf.
     (unless eaf-interleave--current-pdf-file
-      (setq eaf-interleave--current-pdf-file eaf--buffer-url))
-    (setq eaf-interleave-pdf-buffer (get-buffer (file-name-nondirectory eaf-interleave--current-pdf-file)))))
+      (setq eaf-interleave--current-pdf-file eaf--buffer-url))))
 
 ;; variables
 (defvar eaf-interleave-org-buffer nil
   "Org notes buffer name.")
-
-(defvar eaf-interleave-pdf-buffer nil
-  "Name of PDF buffer associated with `eaf-interleave-org-buffer'.")
 
 (defvar eaf-interleave--window-configuration nil
   "Variable to store the window configuration before interleave mode was enabled.")
@@ -301,17 +296,17 @@ It (possibly) narrows the subtree when found."
 (defun eaf-interleave-pdf-kill-buffer ()
   "Kill the current converter process and buffer."
   (interactive)
-  (when eaf-interleave-pdf-buffer
-    (kill-buffer eaf-interleave-pdf-buffer)))
+  (when (eaf-interleave--find-buffer eaf-interleave--current-pdf-file)
+    (kill-buffer (eaf-interleave--find-buffer eaf-interleave--current-pdf-file))))
 
 (defun eaf-interleave--pdf-viewer-current-page ()
   "get current page index."
-  (let ((id (buffer-local-value 'eaf--buffer-id eaf-interleave-pdf-buffer)))
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer eaf-interleave--current-pdf-file))))
     (string-to-number (eaf-call "call_function" id "current_page"))))
 
 (defun eaf-interleave--pdf-viewer-goto-page (page)
   "goto page"
-  (let ((id (buffer-local-value 'eaf--buffer-id eaf-interleave-pdf-buffer)))
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer eaf-interleave--current-pdf-file))))
     (eaf-call "handle_input_message" id "jump_page" page)))
 
 (defun eaf-interleave-sync-pdf-page-previous ()
@@ -461,7 +456,7 @@ buffer."
   (let ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop))))
     (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
       (eaf-interleave--narrow-to-subtree)
-      (with-current-buffer eaf-interleave-pdf-buffer
+      (with-current-buffer (eaf-interleave--find-buffer eaf-interleave--current-pdf-file)
         (eaf-interleave--pdf-viewer-goto-page pdf-page))
       )))
 
