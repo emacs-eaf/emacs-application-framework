@@ -172,9 +172,10 @@ split horizontally."
 SPLIT-WINDOW is a function that actually splits the window, so it must be either
 `split-window-right' or `split-window-below'."
   (let ((pdf-file-name
-          (or (eaf-interleave--headline-pdf-path eaf-interleave-org-buffer)
-              (eaf-interleave--find-pdf-path eaf-interleave-org-buffer)
-              (eaf-interleave--handle-parse-pdf-file-name))))
+         (or (org-entry-get-with-inheritance eaf-interleave--url-prop)
+             (eaf-interleave--headline-pdf-path eaf-interleave-org-buffer)
+             (eaf-interleave--find-pdf-path eaf-interleave-org-buffer)
+             (eaf-interleave--handle-parse-pdf-file-name))))
     (eaf-interleave--select-split-function)
     (eaf-interleave--eaf-open-pdf pdf-file-name)
     pdf-file-name))
@@ -419,12 +420,16 @@ buffer."
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
   (interactive)
-  (let ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
-        (pdf-url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
-    (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
-      (eaf-interleave--narrow-to-subtree)
-      (with-current-buffer (eaf-interleave--find-buffer pdf-url)
-        (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))
+  (let* ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
+         (pdf-url (org-entry-get-with-inheritance eaf-interleave--url-prop))
+         (buffer (eaf-interleave--find-buffer pdf-url)))
+    (if buffer
+        (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
+          (eaf-interleave--narrow-to-subtree)
+          (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-pdf-mode")))
+          (with-current-buffer buffer
+            (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page)))
+      (eaf-interleave--open-file)
       )))
 
 ;;;###autoload
