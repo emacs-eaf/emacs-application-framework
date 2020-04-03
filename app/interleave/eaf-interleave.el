@@ -140,11 +140,9 @@ split horizontally."
     (set-window-configuration eaf-interleave--window-configuration)
     (setq eaf-interleave--window-configuration nil)
     (setq eaf-interleave-org-buffer nil)
-    (setq eaf-interleave--current-pdf-file nil)
-    (with-current-buffer (eaf-interleave--find-buffer eaf-interleave--current-pdf-file)
-      (eaf-interleave-pdf-mode -1)
-      (eaf-interleave-pdf-kill-buffer))
     ))
+
+(defun eaf-interleave--close-all ())
 
 ;;; Interleave PDF Mode
 ;; Minor mode for the pdf file buffer associated with the notes
@@ -155,11 +153,7 @@ split horizontally."
 ;;;###autoload
 (define-minor-mode eaf-interleave-pdf-mode
   "Interleave view for the pdf."
-  :keymap eaf-interleave-pdf-mode-map
-  (when eaf-interleave-pdf-mode
-    ;; if derived mode is eaf.
-    (unless eaf-interleave--current-pdf-file
-      (setq eaf-interleave--current-pdf-file eaf--buffer-url))))
+  :keymap eaf-interleave-pdf-mode-map)
 
 ;; variables
 (defvar eaf-interleave-org-buffer nil
@@ -167,8 +161,6 @@ split horizontally."
 
 (defvar eaf-interleave--window-configuration nil
   "Variable to store the window configuration before interleave mode was enabled.")
-
-(defvar eaf-interleave--current-pdf-file nil)
 
 (defvar-local eaf-interleave-multi-pdf-notes-file nil
   "Indicates if the current Org notes file is a multi-pdf notes file.")
@@ -189,7 +181,6 @@ SPLIT-WINDOW is a function that actually splits the window, so it must be either
           (or (eaf-interleave--headline-pdf-path eaf-interleave-org-buffer)
               (eaf-interleave--find-pdf-path eaf-interleave-org-buffer)
               (eaf-interleave--handle-parse-pdf-file-name))))
-    (setq eaf-interleave--current-pdf-file pdf-file-name)
     (eaf-interleave--select-split-function)
     (eaf-interleave--eaf-open-pdf pdf-file-name)
     pdf-file-name))
@@ -293,20 +284,14 @@ It (possibly) narrows the subtree when found."
           (recenter)))
       point)))
 
-(defun eaf-interleave-pdf-kill-buffer ()
-  "Kill the current converter process and buffer."
-  (interactive)
-  (when (eaf-interleave--find-buffer eaf-interleave--current-pdf-file)
-    (kill-buffer (eaf-interleave--find-buffer eaf-interleave--current-pdf-file))))
-
-(defun eaf-interleave--pdf-viewer-current-page ()
+(defun eaf-interleave--pdf-viewer-current-page (url)
   "get current page index."
-  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer eaf-interleave--current-pdf-file))))
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
     (string-to-number (eaf-call "call_function" id "current_page"))))
 
-(defun eaf-interleave--pdf-viewer-goto-page (page)
+(defun eaf-interleave--pdf-viewer-goto-page (url page)
   "goto page"
-  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer eaf-interleave--current-pdf-file))))
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
     (eaf-call "handle_input_message" id "jump_page" page)))
 
 (defun eaf-interleave-sync-pdf-page-previous ()
@@ -451,7 +436,7 @@ buffer."
 
 (defun eaf-interleave-pdf-add-note ()
   "EAF pdf-viewer-mode add note"
-  (let* ((page (eaf-interleave--pdf-viewer-current-page))
+  (let* ((page (eaf-interleave--pdf-viewer-current-page eaf--buffer-url))
          (position (eaf-interleave--go-to-page-note page)))
     (if position
         (eaf-interleave--switch-to-org-buffer t position)
@@ -461,11 +446,12 @@ buffer."
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
   (interactive)
-  (let ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop))))
+  (let ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
+        (pdf-url (org-entry-get-with-inheritance eaf-interleave--pdf-prop)))
     (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
       (eaf-interleave--narrow-to-subtree)
-      (with-current-buffer (eaf-interleave--find-buffer eaf-interleave--current-pdf-file)
-        (eaf-interleave--pdf-viewer-goto-page pdf-page))
+      (with-current-buffer (eaf-interleave--find-buffer pdf-url)
+        (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))
       )))
 
 ;;;###autoload
@@ -528,8 +514,7 @@ of .pdf)."
     (when (eaf-interleave--headlines-available-p)
       (eaf-interleave--sort-notes eaf-interleave-sort-order)
       (org-overview))
-    (eaf-interleave-mode 0))
-  (eaf-interleave-pdf-kill-buffer))
+    (eaf-interleave-mode 0)))
 
 (defun eaf-interleave--headlines-available-p ()
   "True if there are headings in the notes buffer."
