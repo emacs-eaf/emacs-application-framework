@@ -547,5 +547,19 @@ SORT-ORDER is either 'asc or 'desc."
                           #'>))
     ('user-error nil)))
 
+;; utils
+(defun eaf-interleave--find-buffer (url)
+  "find EAF buffer base url"
+  (let (current-buffer)
+    (catch 'find-buffer
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+          (when (and
+                 (derived-mode-p 'eaf-mode)
+                 (equal eaf--buffer-url url))
+            (setq current-buffer buffer)
+            (throw 'find-buffer t)))))
+    current-buffer))
+
 (provide 'eaf-interleave)
 ;;; interleave.el ends here
