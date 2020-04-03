@@ -355,7 +355,7 @@ If POSITION is non-nil move point to it."
     (save-restriction
       (when eaf-interleave-disable-narrowing
         (eaf-interleave--narrow-to-subtree t))
-      (eaf-interleave--goto-insert-position))
+      (goto-char (point-max)))
     ;; Expand again. Sometimes the new content is outside the narrowed
     ;; region.
     (org-show-subtree)
@@ -363,13 +363,6 @@ If POSITION is non-nil move point to it."
     ;; Insert a new line if not already on a new line
     (when (not (looking-back "^ *" (line-beginning-position)))
       (org-return))))
-
-(defun eaf-interleave--goto-insert-position ()
-  "Move the point to the right insert postion.
-
-For multi-pdf notes this is the end of the subtree.  For everything else
-this is the end of the buffer"
-  (goto-char (point-max)))
 
 (defun eaf-interleave--insert-heading-respect-content (parent-headline)
   "Create a new heading in the notes buffer.
@@ -395,7 +388,7 @@ Return the position of the newly inserted heading."
     (with-current-buffer eaf-interleave-org-buffer
       (save-excursion
         (widen)
-        (let ((position (eaf-interleave--goto-insert-position)))
+        (let ((position (goto-char (point-max))))
           (setq new-note-position (eaf-interleave--insert-heading-respect-content position)))
         (insert (format "Notes for page %d" page))
         (org-set-property eaf-interleave--url-prop url)
