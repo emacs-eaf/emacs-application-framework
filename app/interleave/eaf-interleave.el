@@ -283,7 +283,7 @@ It (possibly) narrows the subtree when found."
   (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
     (eaf-call "handle_input_message" id "jump_page" page)))
 
-(defun eaf-interleave-sync-pdf-page-previous ()
+(defun eaf-interleave-sync-previous-note ()
   "Move to the previous set of notes.
 This show the previous notes and synchronizes the PDF to the right page number."
   (interactive)
@@ -294,9 +294,9 @@ This show the previous notes and synchronizes the PDF to the right page number."
   (eaf-interleave--narrow-to-subtree)
   (org-show-subtree)
   (org-cycle-hide-drawers t)
-  (eaf-interleave-sync-pdf-page-current))
+  (eaf-interleave-sync-current-note))
 
-(defun eaf-interleave-sync-pdf-page-next ()
+(defun eaf-interleave-sync-next-note ()
   "Move to the next set of notes.
 This shows the next notes and synchronizes the PDF to the right page number."
   (interactive)
@@ -312,7 +312,7 @@ This shows the next notes and synchronizes the PDF to the right page number."
   (eaf-interleave--narrow-to-subtree)
   (org-show-subtree)
   (org-cycle-hide-drawers t)
-  (eaf-interleave-sync-pdf-page-current))
+  (eaf-interleave-sync-current-note))
 
 (defun eaf-interleave--goto-parent-headline (property)
   "Traverse the tree until the parent headline.
@@ -415,6 +415,13 @@ buffer."
     (if position
         (eaf-interleave--switch-to-org-buffer t position)
       (eaf-interleave--create-new-note eaf--buffer-url page)))
+  )
+
+(defun eaf-interleave-sync-current-note ()
+  "Sync EAF buffer on current note"
+  (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
+    (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
+           (eaf-interleave-sync-pdf-page-current))))
   )
 
 (defun eaf-interleave-sync-pdf-page-current ()
