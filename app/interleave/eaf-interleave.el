@@ -130,9 +130,6 @@ split horizontally."
         (when eaf-interleave-disable-narrowing
           (with-current-buffer eaf-interleave-org-buffer
             (eaf-interleave--goto-search-position)
-            (if eaf-interleave-multi-pdf-notes-file
-                (org-show-subtree)
-              (show-all))
             (org-cycle-hide-drawers 'all)))
         (eaf-interleave--go-to-page-note 1)
         (message "EAF Interleave enabled"))
@@ -161,9 +158,6 @@ split horizontally."
 
 (defvar eaf-interleave--window-configuration nil
   "Variable to store the window configuration before interleave mode was enabled.")
-
-(defvar-local eaf-interleave-multi-pdf-notes-file nil
-  "Indicates if the current Org notes file is a multi-pdf notes file.")
 
 (defconst eaf-interleave--page-note-prop "interleave_page_note"
   "The page note property string.")
@@ -209,7 +203,6 @@ SPLIT-WINDOW is a function that actually splits the window, so it must be either
       (let ((headline (org-element-at-point)))
         (when (and (equal (org-element-type headline) 'headline)
                    (org-entry-get nil eaf-interleave--pdf-prop))
-          (setq eaf-interleave-multi-pdf-notes-file t)
           (org-entry-get nil eaf-interleave--pdf-prop))))))
 
 (defun eaf-interleave--find-pdf-path (buffer)
@@ -244,9 +237,7 @@ based on a combination of `current-prefix-arg' and
 
 For multi-pdf notes this is the outermost parent headline.  For everything else
 this is the beginning of the buffer."
-  (if eaf-interleave-multi-pdf-notes-file
-      (eaf-interleave--goto-parent-headline eaf-interleave--pdf-prop)
-    (goto-char (point-min))))
+  (goto-char (point-min)))
 
 (defun eaf-interleave--go-to-page-note (page)
   "Look up the notes for the current pdf PAGE.
@@ -263,9 +254,6 @@ It (possibly) narrows the subtree when found."
       (save-excursion
         (widen)
         (eaf-interleave--goto-search-position)
-        (when eaf-interleave-multi-pdf-notes-file
-          ;; only search the current subtree for notes. See. Issue #16
-          (eaf-interleave--narrow-to-subtree t))
         (when (re-search-forward (format "^\[ \t\r\]*\:interleave_page_note\: %d$" page) nil t)
           ;; widen the buffer again for the case it is narrowed from
           ;; multi-pdf notes search. Kinda ugly I know. Maybe a macro helps?
@@ -319,8 +307,6 @@ This shows the next notes and synchronizes the PDF to the right page number."
   ;; for page.
   (if (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
       (org-forward-heading-same-level 1)
-    (when eaf-interleave-multi-pdf-notes-file
-      (org-show-subtree))
     (outline-next-visible-heading 1))
   (eaf-interleave--narrow-to-subtree)
   (org-show-subtree)
@@ -383,11 +369,7 @@ If POSITION is non-nil move point to it."
 
 For multi-pdf notes this is the end of the subtree.  For everything else
 this is the end of the buffer"
-  (if (not eaf-interleave-multi-pdf-notes-file)
-      (goto-char (point-max))
-    (prog1
-        (eaf-interleave--goto-parent-headline eaf-interleave--pdf-prop)
-      (org-end-of-subtree))))
+  (goto-char (point-max)))
 
 (defun eaf-interleave--insert-heading-respect-content (parent-headline)
   "Create a new heading in the notes buffer.
@@ -397,9 +379,7 @@ PARENT-HEADLINE.
 
 Return the position of the newly inserted heading."
   (org-insert-heading-respect-content)
-  (let* ((parent-level (if eaf-interleave-multi-pdf-notes-file
-                           (org-element-property :level parent-headline)
-                         0))
+  (let* ((parent-level 0 )
          (change-level (if (> (org-element-property :level (org-element-at-point))
                               (1+ parent-level))
                            #'org-promote
