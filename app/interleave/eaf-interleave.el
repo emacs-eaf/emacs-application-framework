@@ -162,7 +162,7 @@ split horizontally."
 (defconst eaf-interleave--page-note-prop "interleave_page_note"
   "The page note property string.")
 
-(defconst eaf-interleave--pdf-prop "interleave_pdf"
+(defconst eaf-interleave--url-prop "interleave_url"
   "The pdf property string.")
 
 ;; functions
@@ -202,8 +202,8 @@ SPLIT-WINDOW is a function that actually splits the window, so it must be either
     (save-excursion
       (let ((headline (org-element-at-point)))
         (when (and (equal (org-element-type headline) 'headline)
-                   (org-entry-get nil eaf-interleave--pdf-prop))
-          (org-entry-get nil eaf-interleave--pdf-prop))))))
+                   (org-entry-get nil eaf-interleave--url-prop))
+          (org-entry-get nil eaf-interleave--url-prop))))))
 
 (defun eaf-interleave--find-pdf-path (buffer)
   "Search the `interleave_pdf' property in BUFFER and extracts it when found."
@@ -398,7 +398,7 @@ Return the position of the newly inserted heading."
         (let ((position (eaf-interleave--goto-insert-position)))
           (setq new-note-position (eaf-interleave--insert-heading-respect-content position)))
         (insert (format "Notes for page %d" page))
-        (org-set-property eaf-interleave--pdf-prop url)
+        (org-set-property eaf-interleave--url-prop url)
         (org-set-property eaf-interleave--page-note-prop (number-to-string page))
         (eaf-interleave--narrow-to-subtree)
         (org-cycle-hide-drawers t)))
@@ -427,7 +427,7 @@ buffer."
   "Open PDF page for currently visible notes."
   (interactive)
   (let ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
-        (pdf-url (org-entry-get-with-inheritance eaf-interleave--pdf-prop)))
+        (pdf-url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
     (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
       (eaf-interleave--narrow-to-subtree)
       (with-current-buffer (eaf-interleave--find-buffer pdf-url)
