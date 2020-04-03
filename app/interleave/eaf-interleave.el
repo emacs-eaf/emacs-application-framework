@@ -192,11 +192,6 @@ SPLIT-WINDOW is a function that actually splits the window, so it must be either
         (insert "#+INTERLEAVE_PDF: " pdf-file-name)))
     pdf-file-name))
 
-(defun eaf-interleave--eaf-open-pdf (pdf-file-name)
-  "Use EAF PdfViewer open this pdf-file-name document."
-  (eaf-open pdf-file-name)
-  (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-pdf-mode))
-
 (defun eaf-interleave--headline-pdf-path (buffer)
   "Return the INTERLEAVE_PDF property of the current headline in BUFFER."
   (with-current-buffer buffer
@@ -272,16 +267,6 @@ It (possibly) narrows the subtree when found."
           (goto-char point)
           (recenter)))
       point)))
-
-(defun eaf-interleave--pdf-viewer-current-page (url)
-  "get current page index."
-  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
-    (string-to-number (eaf-call "call_function" id "current_page"))))
-
-(defun eaf-interleave--pdf-viewer-goto-page (url page)
-  "goto page"
-  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
-    (eaf-call "handle_input_message" id "jump_page" page)))
 
 (defun eaf-interleave-sync-previous-note ()
   "Move to the previous set of notes.
@@ -521,6 +506,11 @@ SORT-ORDER is either 'asc or 'desc."
     ('user-error nil)))
 
 ;; utils
+(defun eaf-interleave--eaf-open-pdf (pdf-file-name)
+  "Use EAF PdfViewer open this pdf-file-name document."
+  (eaf-open pdf-file-name)
+  (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-pdf-mode))
+
 (defun eaf-interleave--find-buffer (url)
   "find EAF buffer base url"
   (let (current-buffer)
@@ -539,6 +529,16 @@ SORT-ORDER is either 'asc or 'desc."
   (interactive)
   (let ((buffer (eaf-interleave--find-buffer url)))
     (kill-buffer buffer)))
+
+(defun eaf-interleave--pdf-viewer-current-page (url)
+  "get current page index."
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
+    (string-to-number (eaf-call "call_function" id "current_page"))))
+
+(defun eaf-interleave--pdf-viewer-goto-page (url page)
+  "goto page"
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
+    (eaf-call "handle_input_message" id "jump_page" page)))
 
 (provide 'eaf-interleave)
 ;;; interleave.el ends here
