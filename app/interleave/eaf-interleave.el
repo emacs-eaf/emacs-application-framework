@@ -273,13 +273,7 @@ This shows the next notes and synchronizes the PDF to the right page number."
   (interactive)
   (eaf-interleave--switch-to-org-buffer)
   (widen)
-  ;; go to the first notes heading if we're not at an headline or if
-  ;; we're on multi-pdf heading. This is useful to quickly jump to the
-  ;; notes if they start at page 96 or so. Image you need to skip page
-  ;; for page.
-  (if (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
-      (org-forward-heading-same-level 1)
-    (outline-next-visible-heading 1))
+  (org-forward-heading-same-level 1)
   (eaf-interleave--narrow-to-subtree)
   (org-show-subtree)
   (org-cycle-hide-drawers t)
