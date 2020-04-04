@@ -204,8 +204,7 @@ It (possibly) narrows the subtree when found."
   "Add new url on note if property is none. else modify current url"
   (interactive)
   (let ((url (read-file-name "Please specify path: " nil nil t)))
-    (org-entry-put (point) eaf-interleave--url-prop url)
-    (org-entry-put (point) eaf-interleave--page-note-prop "1")))
+    (org-entry-put (point) eaf-interleave--url-prop url)))
 
 
 (defun eaf-interleave--narrow-to-subtree (&optional force)
@@ -289,15 +288,16 @@ Return the position of the newly inserted heading."
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
   (interactive)
-  (let* ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
+  (let* ((pdf-page (org-entry-get-with-inheritance eaf-interleave--page-note-prop))
          (pdf-url (org-entry-get-with-inheritance eaf-interleave--url-prop))
          (buffer (eaf-interleave--find-buffer pdf-url)))
     (if buffer
-        (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
+        (progn
           (eaf-interleave--narrow-to-subtree)
           (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-pdf-mode")))
-          (with-current-buffer buffer
-            (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page)))
+          (when pdf-page
+            (with-current-buffer buffer
+            (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))))
       (eaf-interleave--select-split-function)
       (eaf-interleave--open-pdf pdf-url)
       )))
