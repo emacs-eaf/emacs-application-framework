@@ -151,17 +151,11 @@ split horizontally."
   "The pdf property string.")
 
 ;; functions
-(defun eaf-interleave--handle-parse-pdf-file-name ()
-  "When don't parse responsive pdf file on current org file."
-  (let ((pdf-file-name (read-file-name "No INTERLEAVE_PDF property found. Please specify path: " nil nil t)))
-    ;; Check whether we have any entry at point with `org-entry-properties' before
-    ;; prompting if the user wants multi-pdf.
-    (if (and (org-entry-properties) (y-or-n-p "Is this multi-pdf? "))
-        (org-entry-put (point) "INTERLEAVE_PDF" pdf-file-name)
-      (save-excursion
-        (goto-char (point-min))
-        (insert "#+INTERLEAVE_PDF: " pdf-file-name)))
-    pdf-file-name))
+(defun eaf-interleave-add-file-url ()
+  "Add new url on note if property is none. else modify current url"
+  (interactive)
+  (let ((url (read-file-name "Please specify path: " nil nil t)))
+    (org-entry-put (point) eaf-interleave--url-prop url)))
 
 (defun eaf-interleave--select-split-function ()
   "Determine which split function to use.
