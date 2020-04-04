@@ -136,17 +136,14 @@ split horizontally."
     (setq eaf-interleave-org-buffer nil)
     ))
 
-;;; Interleave PDF Mode
-;; Minor mode for the pdf file buffer associated with the notes
-(defvar eaf-interleave-pdf-mode-map (make-sparse-keymap)
-  "Keymap while command `eaf-interleave-pdf-mode' is active in the pdf file buffer."
+(defvar eaf-interleave-app-mode-map (make-sparse-keymap)
+  "Keymap while command `eaf-interleave-app-mode' is active."
   )
 
 ;;;###autoload
-(define-minor-mode eaf-interleave-pdf-mode
-  "Interleave view for the pdf."
-  :keymap eaf-interleave-pdf-mode-map)
-
+(define-minor-mode eaf-interleave-app-mode
+  "Interleave view for the EAF app."
+  :keymap eaf-interleave-app-mode-map)
 
 ;;; functions
 ;; interleave mode
@@ -262,17 +259,19 @@ Return the position of the newly inserted heading."
       (funcall change-level)))
   (point))
 
-(defun eaf-interleave--create-new-note (url page)
-  "Create a new headline for the page PAGE."
+(defun eaf-interleave--create-new-note (url &optional title page)
+  "Create a new headline for current EAF url."
   (let (new-note-position)
     (with-current-buffer eaf-interleave-org-buffer
       (save-excursion
         (widen)
         (let ((position (goto-char (point-max))))
           (setq new-note-position (eaf-interleave--insert-heading-respect-content position)))
-        (insert (format "Notes for page %d" page))
         (org-set-property eaf-interleave--url-prop url)
-        (org-set-property eaf-interleave--page-note-prop (number-to-string page))
+        (when title
+          (insert (format "Notes for %s" title)))
+        (when page
+          (org-set-property eaf-interleave--page-note-prop (number-to-string page)))
         (eaf-interleave--narrow-to-subtree)
         (org-cycle-hide-drawers t)))
     (eaf-interleave--switch-to-org-buffer t new-note-position)))
@@ -361,8 +360,12 @@ buffer."
          (position (eaf-interleave--go-to-page-note page)))
     (if position
         (eaf-interleave--switch-to-org-buffer t position)
-      (eaf-interleave--create-new-note eaf--buffer-url page)))
+      (eaf-interleave--create-new-note eaf--buffer-url eaf--buffer-app-name page)))
   )
+
+(defun eaf-interleave--browser-add-note ()
+  "EAF browser add note"
+  (eaf-interleave--create-new-note eaf--buffer-url eaf--buffer-app-name))
 
 ;;;###autoload
 (defun eaf-interleave-open-notes-file-for-pdf ()
