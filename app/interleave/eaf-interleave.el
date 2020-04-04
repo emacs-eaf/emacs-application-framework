@@ -226,6 +226,16 @@ This show the previous notes and synchronizes the PDF to the right page number."
              (eaf-interleave--open-notes-file-for-browser))))
   )
 
+(defun eaf-interleave-quit ()
+  "Quit interleave mode."
+  (interactive)
+  (with-current-buffer eaf-interleave-org-buffer
+    (widen)
+    (goto-char (point-min))
+    (when (eaf-interleave--headlines-available-p)
+      (org-overview))
+    (eaf-interleave-mode 0)))
+
 ;;;###autoload
 (defun eaf-interleave--open-notes-file-for-pdf ()
   "Open the notes org file for the current pdf file if it exists.
@@ -260,17 +270,6 @@ Else create it."
     (switch-to-buffer buffer)
     ))
 
-(defun eaf-interleave-quit ()
-  "Quit interleave mode."
-  (interactive)
-  (with-current-buffer eaf-interleave-org-buffer
-    (widen)
-    (goto-char (point-min))
-    (when (eaf-interleave--headlines-available-p)
-      (org-overview))
-    (eaf-interleave-mode 0)))
-
-;;
 (defun eaf-interleave--select-split-function ()
   "Determine which split function to use.
 
