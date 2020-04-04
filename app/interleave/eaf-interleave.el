@@ -151,20 +151,6 @@ split horizontally."
   "The pdf property string.")
 
 ;; functions
-(defun eaf-interleave--open-file ()
-  "Opens the pdf file in besides the notes buffer.
-
-SPLIT-WINDOW is a function that actually splits the window, so it must be either
-`split-window-right' or `split-window-below'."
-  (let ((pdf-file-name
-         (or (org-entry-get-with-inheritance eaf-interleave--url-prop)
-             (eaf-interleave--headline-pdf-path eaf-interleave-org-buffer)
-             (eaf-interleave--find-pdf-path eaf-interleave-org-buffer)
-             (eaf-interleave--handle-parse-pdf-file-name))))
-    (eaf-interleave--select-split-function)
-    (eaf-interleave--open-pdf pdf-file-name)
-    pdf-file-name))
-
 (defun eaf-interleave--handle-parse-pdf-file-name ()
   "When don't parse responsive pdf file on current org file."
   (let ((pdf-file-name (read-file-name "No INTERLEAVE_PDF property found. Please specify path: " nil nil t)))
@@ -176,25 +162,6 @@ SPLIT-WINDOW is a function that actually splits the window, so it must be either
         (goto-char (point-min))
         (insert "#+INTERLEAVE_PDF: " pdf-file-name)))
     pdf-file-name))
-
-(defun eaf-interleave--headline-pdf-path (buffer)
-  "Return the INTERLEAVE_PDF property of the current headline in BUFFER."
-  (with-current-buffer buffer
-    (save-excursion
-      (let ((headline (org-element-at-point)))
-        (when (and (equal (org-element-type headline) 'headline)
-                   (org-entry-get nil eaf-interleave--url-prop))
-          (org-entry-get nil eaf-interleave--url-prop))))))
-
-(defun eaf-interleave--find-pdf-path (buffer)
-  "Search the `interleave_pdf' property in BUFFER and extracts it when found."
-  (with-current-buffer buffer
-    (save-restriction
-      (widen)
-      (save-excursion
-        (goto-char (point-min))
-        (when (re-search-forward "^#\\+interleave_pdf: \\(.*\\)" nil :noerror)
-          (match-string 1))))))
 
 (defun eaf-interleave--select-split-function ()
   "Determine which split function to use.
