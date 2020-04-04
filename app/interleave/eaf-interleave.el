@@ -127,14 +127,9 @@ e.g. if `eaf-interleave-split-direction' is 'vertical the buffer is
 split horizontally."
   :keymap eaf-interleave-mode-map
   (if eaf-interleave-mode
-      (progn
-        (setq eaf-interleave-org-buffer (current-buffer))
-        (setq eaf-interleave--window-configuration (current-window-configuration)))
+      (setq eaf-interleave-org-buffer (current-buffer))
     ;; Disable the corresponding minor mode in the PDF file too.
-    (set-window-configuration eaf-interleave--window-configuration)
-    (setq eaf-interleave--window-configuration nil)
-    (setq eaf-interleave-org-buffer nil)
-    ))
+    (setq eaf-interleave-org-buffer nil)))
 
 (defvar eaf-interleave-app-mode-map (make-sparse-keymap)
   "Keymap while command `eaf-interleave-app-mode' is active.")
