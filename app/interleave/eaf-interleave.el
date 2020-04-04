@@ -170,7 +170,7 @@ SPLIT-WINDOW is a function that actually splits the window, so it must be either
              (eaf-interleave--find-pdf-path eaf-interleave-org-buffer)
              (eaf-interleave--handle-parse-pdf-file-name))))
     (eaf-interleave--select-split-function)
-    (eaf-interleave--eaf-open-pdf pdf-file-name)
+    (eaf-interleave--open-pdf pdf-file-name)
     pdf-file-name))
 
 (defun eaf-interleave--handle-parse-pdf-file-name ()
@@ -477,7 +477,7 @@ of .pdf)."
     (re-search-forward "^\* .*" nil t)))
 
 ;; utils
-(defun eaf-interleave--eaf-open-pdf (pdf-file-name)
+(defun eaf-interleave--open-pdf (pdf-file-name)
   "Use EAF PdfViewer open this pdf-file-name document."
   (eaf-open pdf-file-name)
   (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-pdf-mode))
