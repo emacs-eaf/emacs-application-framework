@@ -217,56 +217,43 @@ This show the previous notes and synchronizes the PDF to the right page number."
   (org-cycle-hide-drawers t)
   (eaf-interleave-sync-current-note))
 
+(defun eaf-interleave-open-notes-file ()
+  "Find current EAF url corresponding note files if exists"
+  (interactive)
+  (if (derived-mode-p 'eaf-mode)
+      (cond ((equal eaf--buffer-app-name "pdf-viewer")
+             (eaf-interleave--open-notes-file-for-pdf))
+            ((equal eaf--buffer-app-name "browser")
+             (eaf-interleave--open-notes-file-for-browser))))
+  )
+
 ;;;###autoload
-(defun eaf-interleave-open-notes-file-for-pdf ()
+(defun eaf-interleave--open-notes-file-for-pdf ()
   "Open the notes org file for the current pdf file if it exists.
 Else create it.
 
 It is assumed that the notes org file will have the exact same base name
 as the pdf file (just that the notes file will have a .org extension instead
 of .pdf)."
-  (interactive)
-  (when (derived-mode-p 'eaf-mode)
-    (let* ((pdf-file-name (eaf-get-path-or-url))
-           (org-file-name-sans-directory (concat (file-name-base pdf-file-name) ".org"))
-           org-file-create-dir
-           (cnt 0)
-           try-org-file-name
-           (org-file-name (catch 'break
-                            (dolist (dir eaf-interleave-org-notes-dir-list)
-                              ;; If dir is "." or begins with "./", replace
-                              ;; the "." or "./" with the pdf dir name
-                              (setq dir (replace-regexp-in-string
-                                         "^\\(\\.$\\|\\./\\).*"
-                                         (file-name-directory pdf-file-name)
-                                         dir nil nil 1))
-                              (when (= cnt 0)
-                                ;; In the event the org file is needed to be
-                                ;; created, it will be created in the directory
-                                ;; listed as the first element in
-                                ;; `eaf-interleave-org-notes-dir-list'
-                                (setq org-file-create-dir dir))
-                              (setq cnt (1+ cnt))
-                              (setq try-org-file-name (locate-file
-                                                       org-file-name-sans-directory
-                                                       (list dir)))
-                              (when try-org-file-name
-                                ;; return the first match
-                                (throw 'break try-org-file-name))))))
-      ;; Create the notes org file if it does not exist
-      (when (null org-file-name)
-        (setq org-file-name (if (null eaf-interleave-org-notes-dir-list)
-                                (read-file-name "Path: " "~/")
-                              (progn
-                                (when (null (file-exists-p org-file-create-dir))
-                                  (make-directory org-file-create-dir))
-                                (expand-file-name org-file-name-sans-directory
-                                                  org-file-create-dir))))
-        (with-temp-file org-file-name
-          (insert "#+INTERLEAVE_PDF: " pdf-file-name)))
-      ;; Open the notes org file and enable `eaf-interleave-mode'
-      (find-file org-file-name)
-      (eaf-interleave-mode))))
+  (let ((org-file (concat (file-name-base eaf--buffer-url) ".org"))
+        (default-dir (nth 0 eaf-interleave-org-notes-dir-list))
+        (org-file-path (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url))
+        (buffer (eaf-interleave--find-buffer eaf--buffer-url)))
+    ;; Create the notes org file if it does not exist
+    (unless org-file-path
+      (setq org-file-path (eaf-interleave--ensure-org-file-exist eaf-interleave-org-notes-dir-list org-file)))
+    ;; Open the notes org file and enable `eaf-interleave-mode'
+    (find-file org-file-path)
+    (eaf-interleave-mode)
+    (eaf-interleave--select-split-function)
+    (switch-to-buffer buffer)
+    ))
+
+(defun eaf-interleave--open-notes-file-for-browser ()
+  "Find current open interleave-mode org file, if exists, else will create new org file with URL."
+  (if eaf-interleave-org-buffer
+      nil
+    nil))
 
 (defun eaf-interleave-quit ()
   "Quit interleave mode."
@@ -493,6 +480,36 @@ Consider a headline with property PROPERTY as parent headline."
       nil
     (eaf-interleave--select-split-function)
     (switch-to-buffer buffer)))
+
+(defun eaf-interleave--parse-current-dir (dir url)
+  "If dir is '.' or begins with './', replace the '.' or './' with the current url name"
+  (replace-regexp-in-string
+   "^\\(\\.$\\|\\./\\).*"
+   (file-name-directory url)
+   dir nil nil 1))
+
+(defun eaf-interleave--find-match-org (dir-list url)
+  "Find corresponding org file base url on dir list"
+  (let ((org-file (concat (file-name-base url) ".org"))
+        path)
+    (catch 'break
+      (dolist (dir dir-list)
+        (setq dir (eaf-interleave--parse-current-dir dir url))
+        (setq path (locate-file org-file (list dir)))
+        (when path
+          ;; return the first match
+          (throw 'break path))))
+    path))
+
+(defun eaf-interleave--ensure-org-file-exist (dir-list file-name)
+  "If the org file directory exist return this path, else created directory."
+  (let ((default-dir (nth 0 dir-list)))
+    (if dir-list
+        (progn
+          (unless (file-exists-p default-dir)
+            (make-directory default-dir))
+          (expand-file-name file-name default-dir))
+      (read-file-name "Path for org file: " "~/"))))
 
 (provide 'eaf-interleave)
 ;;; interleave.el ends here
