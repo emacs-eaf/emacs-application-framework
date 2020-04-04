@@ -287,7 +287,7 @@ based on a combination of `current-prefix-arg' and
         (enlarge-window-horizontally eaf-interleave-split-lines)))
     ))
 
-(defun eaf-interleave--go-to-page-note (page)
+(defun eaf-interleave--go-to-page-note (url page)
   "Look up the notes for the current pdf PAGE.
 
 Effectively resolves the headline with the interleave_page_note
@@ -298,26 +298,23 @@ re-centered to the page heading.
 
 It (possibly) narrows the subtree when found."
   (with-current-buffer eaf-interleave-org-buffer
-    (let (point (window (get-buffer-window (current-buffer) 'visible)))
-      (save-excursion
-        (widen)
-        (goto-char (point-min))
-        (when (re-search-forward (format "^\[ \t\r\]*\:interleave_page_note\: %d$" page) nil t)
-          ;; widen the buffer again for the case it is narrowed from
-          ;; multi-pdf notes search. Kinda ugly I know. Maybe a macro helps?
-          (widen)
-          (org-back-to-heading t)
-          (eaf-interleave--narrow-to-subtree)
-          (org-show-subtree)
-          (org-cycle-hide-drawers t)
-          (setq point (point))))
-      ;; When narrowing is disabled, and the notes/org buffer is
-      ;; visible recenter to the current headline. So even if not
-      ;; narrowed the notes buffer scrolls allong with the PDF.
-      (when (and eaf-interleave-disable-narrowing point window)
-        (with-selected-window window
-          (goto-char point)
-          (recenter)))
+    (let ((window (get-buffer-window (current-buffer) 'visible))
+          (property-list (org-map-entries (lambda ()
+                                        (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop))
+                                              (page (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
+                                          (cons url page)))))
+          point)
+      (catch 'find-property
+        (dolist (property property-list)
+          (when (and (string= (car property) url)
+                     (string= (cdr property) (number-to-string page)))
+            (widen)
+            (org-back-to-heading t)
+            (eaf-interleave--narrow-to-subtree)
+            (org-show-subtree)
+            (org-cycle-hide-drawers t)
+            (setq point (point))
+            (throw 'find-property nil))))
       point)))
 
 (defun eaf-interleave--narrow-to-subtree (&optional force)
@@ -424,7 +421,7 @@ Consider a headline with property PROPERTY as parent headline."
 (defun eaf-interleave--pdf-add-note ()
   "EAF pdf-viewer-mode add note"
   (let* ((page (eaf-interleave--pdf-viewer-current-page eaf--buffer-url))
-         (position (eaf-interleave--go-to-page-note page)))
+         (position (eaf-interleave--go-to-page-note eaf--buffer-url page)))
     (if position
         (eaf-interleave--switch-to-org-buffer t position)
       (eaf-interleave--create-new-note eaf--buffer-url eaf--buffer-app-name page)))
