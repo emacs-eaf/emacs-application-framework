@@ -122,7 +122,7 @@ split horizontally."
         ;; expand/show all headlines if narrowing is disabled
         (when eaf-interleave-disable-narrowing
           (with-current-buffer eaf-interleave-org-buffer
-            (eaf-interleave--goto-search-position)
+            (goto-char (point-min))
             (org-cycle-hide-drawers 'all)))
         (eaf-interleave--go-to-page-note 1)
         (message "EAF Interleave enabled"))
@@ -221,13 +221,6 @@ based on a combination of `current-prefix-arg' and
         (enlarge-window-horizontally eaf-interleave-split-lines)))
     ))
 
-(defun eaf-interleave--goto-search-position ()
-  "Move point to the search start position.
-
-For multi-pdf notes this is the outermost parent headline.  For everything else
-this is the beginning of the buffer."
-  (goto-char (point-min)))
-
 (defun eaf-interleave--go-to-page-note (page)
   "Look up the notes for the current pdf PAGE.
 
@@ -242,7 +235,7 @@ It (possibly) narrows the subtree when found."
     (let (point (window (get-buffer-window (current-buffer) 'visible)))
       (save-excursion
         (widen)
-        (eaf-interleave--goto-search-position)
+        (goto-char (point-min))
         (when (re-search-forward (format "^\[ \t\r\]*\:interleave_page_note\: %d$" page) nil t)
           ;; widen the buffer again for the case it is narrowed from
           ;; multi-pdf notes search. Kinda ugly I know. Maybe a macro helps?
@@ -473,7 +466,7 @@ of .pdf)."
   (interactive)
   (with-current-buffer eaf-interleave-org-buffer
     (widen)
-    (eaf-interleave--goto-search-position)
+    (goto-char (point-min))
     (when (eaf-interleave--headlines-available-p)
       (org-overview))
     (eaf-interleave-mode 0)))
