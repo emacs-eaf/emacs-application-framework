@@ -64,13 +64,6 @@ as \"/pdf/file/dir/\", \"./notes\" is interpreted as
 \"/pdf/file/dir/notes/\"."
   :type '(repeat directory))
 
-(defcustom eaf-interleave-sort-order 'asc
-  "Specifiy the notes' sort order in the notes buffer.
-
-The possible values are 'asc for ascending and 'desc for descending."
-  :type '(choice (const  asc)
-                 (const  desc)))
-
 (defcustom eaf-interleave-split-direction 'vertical
   "Specify how to split the notes buffer."
   :type '(choice (const vertical)
@@ -92,7 +85,19 @@ taken as columns."
   "Disable narrowing in notes/org buffer."
   :type 'boolean)
 
-;;; Interleave
+;; variables
+(defvar eaf-interleave-org-buffer nil
+  "Org notes buffer name.")
+
+(defvar eaf-interleave--window-configuration nil
+  "Variable to store the window configuration before interleave mode was enabled.")
+
+(defconst eaf-interleave--page-note-prop "interleave_page_note"
+  "The page note property string.")
+
+(defconst eaf-interleave--url-prop "interleave_url"
+  "The pdf property string.")
+
 ;; Minor mode for the org file buffer containing notes
 (defvar eaf-interleave-mode-map (make-sparse-keymap)
   "Keymap while command `eaf-interleave-mode' is active in the org file buffer.")
@@ -122,119 +127,143 @@ e.g. if `eaf-interleave-split-direction' is 'vertical the buffer is
 split horizontally."
   :keymap eaf-interleave-mode-map
   (if eaf-interleave-mode
-      (progn
-        (setq eaf-interleave-org-buffer (current-buffer))
-        (setq eaf-interleave--window-configuration (current-window-configuration))
-        (eaf-interleave--open-file)
-        ;; expand/show all headlines if narrowing is disabled
-        (when eaf-interleave-disable-narrowing
-          (with-current-buffer eaf-interleave-org-buffer
-            (eaf-interleave--goto-search-position)
-            (if eaf-interleave-multi-pdf-notes-file
-                (org-show-subtree)
-              (show-all))
-            (org-cycle-hide-drawers 'all)))
-        (eaf-interleave--go-to-page-note 1)
-        (message "EAF Interleave enabled"))
+      (setq eaf-interleave-org-buffer (current-buffer))
     ;; Disable the corresponding minor mode in the PDF file too.
-    (set-window-configuration eaf-interleave--window-configuration)
-    (setq eaf-interleave--window-configuration nil)
-    (setq eaf-interleave-org-buffer nil)
-    (setq eaf-interleave--current-pdf-file nil)
-    (with-current-buffer eaf-interleave-pdf-buffer
-      (eaf-interleave-pdf-mode -1)
-      (eaf-interleave-pdf-kill-buffer))
-    (setq eaf-interleave-pdf-buffer nil)
-    ))
+    (setq eaf-interleave-org-buffer nil)))
 
-;;; Interleave PDF Mode
-;; Minor mode for the pdf file buffer associated with the notes
-(defvar eaf-interleave-pdf-mode-map (make-sparse-keymap)
-  "Keymap while command `eaf-interleave-pdf-mode' is active in the pdf file buffer."
-  )
+(defvar eaf-interleave-app-mode-map (make-sparse-keymap)
+  "Keymap while command `eaf-interleave-app-mode' is active.")
 
 ;;;###autoload
-(define-minor-mode eaf-interleave-pdf-mode
-  "Interleave view for the pdf."
-  :keymap eaf-interleave-pdf-mode-map
-  (when eaf-interleave-pdf-mode
-    ;; if derived mode is eaf.
-    (unless eaf-interleave--current-pdf-file
-      (setq eaf-interleave--current-pdf-file eaf--buffer-url))
-    (setq eaf-interleave-pdf-buffer (get-buffer (file-name-nondirectory eaf-interleave--current-pdf-file)))))
+(define-minor-mode eaf-interleave-app-mode
+  "Interleave view for the EAF app."
+  :keymap eaf-interleave-app-mode-map)
 
-;; variables
-(defvar eaf-interleave-org-buffer nil
-  "Org notes buffer name.")
+;;; functions
+;; interactive
+(defun eaf-interleave-sync-current-note ()
+  "Sync EAF buffer on current note"
+  (interactive)
+  (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
+    (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
+           (eaf-interleave-sync-pdf-page-current))
+          ((string-prefix-p "http" url)
+           (eaf-interleave-sync-browser-url-current))))
+  )
 
-(defvar eaf-interleave-pdf-buffer nil
-  "Name of PDF buffer associated with `eaf-interleave-org-buffer'.")
+(defun eaf-interleave-sync-pdf-page-current ()
+  "Open PDF page for currently visible notes."
+  (interactive)
+  (let* ((pdf-page (org-entry-get-with-inheritance eaf-interleave--page-note-prop))
+         (pdf-url (org-entry-get-with-inheritance eaf-interleave--url-prop))
+         (buffer (eaf-interleave--find-buffer pdf-url)))
+    (if buffer
+        (progn
+          (eaf-interleave--display-buffer buffer)
+          (when pdf-page
+            (with-current-buffer buffer
+              (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))))
+      (eaf-interleave--select-split-function)
+      (eaf-interleave--open-pdf pdf-url)
+      )))
 
-(defvar eaf-interleave--window-configuration nil
-  "Variable to store the window configuration before interleave mode was enabled.")
+(defun eaf-interleave-sync-next-note ()
+  "Move to the next set of notes.
+This shows the next notes and synchronizes the PDF to the right page number."
+  (interactive)
+  (eaf-interleave--switch-to-org-buffer)
+  (widen)
+  (org-forward-heading-same-level 1)
+  (eaf-interleave--narrow-to-subtree)
+  (org-show-subtree)
+  (org-cycle-hide-drawers t)
+  (eaf-interleave-sync-current-note))
 
-(defvar eaf-interleave--current-pdf-file nil)
+(defun eaf-interleave-add-note ()
+  "Add note for the EAF buffer.
 
-(defvar-local eaf-interleave-multi-pdf-notes-file nil
-  "Indicates if the current Org notes file is a multi-pdf notes file.")
+If there are already notes for this url, jump to the notes
+buffer."
+  (interactive)
+  (if (derived-mode-p 'eaf-mode)
+      (cond ((equal eaf--buffer-app-name "pdf-viewer")
+             (eaf-interleave--pdf-add-note))
+            ((equal eaf--buffer-app-name "browser")
+             (eaf-interleave--browser-add-note)))
+    ))
 
-(defconst eaf-interleave--page-note-prop "interleave_page_note"
-  "The page note property string.")
+(defun eaf-interleave-add-file-url ()
+  "Add new url on note if property is none. else modify current url"
+  (interactive)
+  (let ((url (read-file-name "Please specify path: " nil nil t)))
+    (org-entry-put (point) eaf-interleave--url-prop url)))
 
-(defconst eaf-interleave--pdf-prop "interleave_pdf"
-  "The pdf property string.")
+(defun eaf-interleave-sync-previous-note ()
+  "Move to the previous set of notes.
+This show the previous notes and synchronizes the PDF to the right page number."
+  (interactive)
+  (eaf-interleave--switch-to-org-buffer)
+  (widen)
+  (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
+  (org-backward-heading-same-level 1)
+  (eaf-interleave--narrow-to-subtree)
+  (org-show-subtree)
+  (org-cycle-hide-drawers t)
+  (eaf-interleave-sync-current-note))
 
-;; functions
-(defun eaf-interleave--open-file ()
-  "Opens the pdf file in besides the notes buffer.
+(defun eaf-interleave-open-notes-file ()
+  "Find current EAF url corresponding note files if exists"
+  (interactive)
+  (if (derived-mode-p 'eaf-mode)
+      (cond ((equal eaf--buffer-app-name "pdf-viewer")
+             (eaf-interleave--open-notes-file-for-pdf))
+            ((equal eaf--buffer-app-name "browser")
+             (eaf-interleave--open-notes-file-for-browser))))
+  )
 
-SPLIT-WINDOW is a function that actually splits the window, so it must be either
-`split-window-right' or `split-window-below'."
-  (let ((pdf-file-name
-          (or (eaf-interleave--headline-pdf-path eaf-interleave-org-buffer)
-              (eaf-interleave--find-pdf-path eaf-interleave-org-buffer)
-              (eaf-interleave--handle-parse-pdf-file-name))))
-    (setq eaf-interleave--current-pdf-file pdf-file-name)
+(defun eaf-interleave-quit ()
+  "Quit interleave mode."
+  (interactive)
+  (with-current-buffer eaf-interleave-org-buffer
+    (widen)
+    (goto-char (point-min))
+    (when (eaf-interleave--headlines-available-p)
+      (org-overview))
+    (eaf-interleave-mode 0)))
+
+;;;###autoload
+(defun eaf-interleave--open-notes-file-for-pdf ()
+  "Open the notes org file for the current pdf file if it exists.
+Else create it. It is assumed that the notes org file will have
+the exact same base name as the pdf file (just that the notes
+file will have a .org extension instead of .pdf)."
+  (let ((org-file (concat (file-name-base eaf--buffer-url) ".org")))
+    (eaf-interleave--open-notes-file-for-app org-file)))
+
+(defun eaf-interleave--open-notes-file-for-browser ()
+  "Find current open interleave-mode org file, if exists, else
+will create new org file with URL. It is assumed that the notes
+org file will have the exact sam base name as the url domain."
+  (unless (buffer-live-p eaf-interleave-org-buffer)
+    (let* ((domain (url-domain (url-generic-parse-url eaf--buffer-url)))
+           (org-file (concat domain ".org")))
+      (eaf-interleave--open-notes-file-for-app org-file))))
+
+(defun eaf-interleave--open-notes-file-for-app (org-file)
+  "Open the notes org file for the current url if it exists.
+Else create it."
+  (let ((default-dir (nth 0 eaf-interleave-org-notes-dir-list))
+        (org-file-path (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url))
+        (buffer (eaf-interleave--find-buffer eaf--buffer-url)))
+    ;; Create the notes org file if it does not exist
+    (unless org-file-path
+      (setq org-file-path (eaf-interleave--ensure-org-file-exist eaf-interleave-org-notes-dir-list org-file)))
+    ;; Open the notes org file and enable `eaf-interleave-mode'
+    (find-file org-file-path)
+    (eaf-interleave-mode)
     (eaf-interleave--select-split-function)
-    (eaf-interleave--eaf-open-pdf pdf-file-name)
-    pdf-file-name))
-
-(defun eaf-interleave--handle-parse-pdf-file-name ()
-  "When don't parse responsive pdf file on current org file."
-  (let ((pdf-file-name (read-file-name "No INTERLEAVE_PDF property found. Please specify path: " nil nil t)))
-    ;; Check whether we have any entry at point with `org-entry-properties' before
-    ;; prompting if the user wants multi-pdf.
-    (if (and (org-entry-properties) (y-or-n-p "Is this multi-pdf? "))
-        (org-entry-put (point) "INTERLEAVE_PDF" pdf-file-name)
-      (save-excursion
-        (goto-char (point-min))
-        (insert "#+INTERLEAVE_PDF: " pdf-file-name)))
-    pdf-file-name))
-
-(defun eaf-interleave--eaf-open-pdf (pdf-file-name)
-  "Use EAF PdfViewer open this pdf-file-name document."
-  (eaf-open pdf-file-name)
-  (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-pdf-mode))
-
-(defun eaf-interleave--headline-pdf-path (buffer)
-  "Return the INTERLEAVE_PDF property of the current headline in BUFFER."
-  (with-current-buffer buffer
-    (save-excursion
-      (let ((headline (org-element-at-point)))
-        (when (and (equal (org-element-type headline) 'headline)
-                   (org-entry-get nil eaf-interleave--pdf-prop))
-          (setq eaf-interleave-multi-pdf-notes-file t)
-          (org-entry-get nil eaf-interleave--pdf-prop))))))
-
-(defun eaf-interleave--find-pdf-path (buffer)
-  "Search the `interleave_pdf' property in BUFFER and extracts it when found."
-  (with-current-buffer buffer
-    (save-restriction
-      (widen)
-      (save-excursion
-        (goto-char (point-min))
-        (when (re-search-forward "^#\\+interleave_pdf: \\(.*\\)" nil :noerror)
-          (match-string 1))))))
+    (switch-to-buffer buffer)
+    ))
 
 (defun eaf-interleave--select-split-function ()
   "Determine which split function to use.
@@ -253,16 +282,7 @@ based on a combination of `current-prefix-arg' and
         (enlarge-window-horizontally eaf-interleave-split-lines)))
     ))
 
-(defun eaf-interleave--goto-search-position ()
-  "Move point to the search start position.
-
-For multi-pdf notes this is the outermost parent headline.  For everything else
-this is the beginning of the buffer."
-  (if eaf-interleave-multi-pdf-notes-file
-      (eaf-interleave--goto-parent-headline eaf-interleave--pdf-prop)
-    (goto-char (point-min))))
-
-(defun eaf-interleave--go-to-page-note (page)
+(defun eaf-interleave--go-to-page-note (url page)
   "Look up the notes for the current pdf PAGE.
 
 Effectively resolves the headline with the interleave_page_note
@@ -273,93 +293,24 @@ re-centered to the page heading.
 
 It (possibly) narrows the subtree when found."
   (with-current-buffer eaf-interleave-org-buffer
-    (let (point (window (get-buffer-window (current-buffer) 'visible)))
-      (save-excursion
-        (widen)
-        (eaf-interleave--goto-search-position)
-        (when eaf-interleave-multi-pdf-notes-file
-          ;; only search the current subtree for notes. See. Issue #16
-          (eaf-interleave--narrow-to-subtree t))
-        (when (re-search-forward (format "^\[ \t\r\]*\:interleave_page_note\: %d$" page) nil t)
-          ;; widen the buffer again for the case it is narrowed from
-          ;; multi-pdf notes search. Kinda ugly I know. Maybe a macro helps?
-          (widen)
-          (org-back-to-heading t)
-          (eaf-interleave--narrow-to-subtree)
-          (org-show-subtree)
-          (org-cycle-hide-drawers t)
-          (setq point (point))))
-      ;; When narrowing is disabled, and the notes/org buffer is
-      ;; visible recenter to the current headline. So even if not
-      ;; narrowed the notes buffer scrolls allong with the PDF.
-      (when (and eaf-interleave-disable-narrowing point window)
-        (with-selected-window window
-          (goto-char point)
-          (recenter)))
+    (let ((window (get-buffer-window (current-buffer) 'visible))
+          (property-list (org-map-entries (lambda ()
+                                        (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop))
+                                              (page (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
+                                          (cons url page)))))
+          point)
+      (catch 'find-property
+        (dolist (property property-list)
+          (when (and (string= (car property) url)
+                     (string= (cdr property) (number-to-string page)))
+            (widen)
+            (org-back-to-heading t)
+            (eaf-interleave--narrow-to-subtree)
+            (org-show-subtree)
+            (org-cycle-hide-drawers t)
+            (setq point (point))
+            (throw 'find-property nil))))
       point)))
-
-(defun eaf-interleave-pdf-kill-buffer ()
-  "Kill the current converter process and buffer."
-  (interactive)
-  (when eaf-interleave-pdf-buffer
-    (kill-buffer eaf-interleave-pdf-buffer)))
-
-(defun eaf-interleave--pdf-viewer-current-page ()
-  "get current page index."
-  (let ((id (buffer-local-value 'eaf--buffer-id eaf-interleave-pdf-buffer)))
-    (string-to-number (eaf-call "call_function" id "current_page"))))
-
-(defun eaf-interleave--pdf-viewer-goto-page (page)
-  "goto page"
-  (let ((id (buffer-local-value 'eaf--buffer-id eaf-interleave-pdf-buffer)))
-    (eaf-call "handle_input_message" id "jump_page" page)))
-
-(defun eaf-interleave-sync-pdf-page-previous ()
-  "Move to the previous set of notes.
-This show the previous notes and synchronizes the PDF to the right page number."
-  (interactive)
-  (eaf-interleave--switch-to-org-buffer)
-  (widen)
-  (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
-  (org-backward-heading-same-level 1)
-  (eaf-interleave--narrow-to-subtree)
-  (org-show-subtree)
-  (org-cycle-hide-drawers t)
-  (eaf-interleave-sync-pdf-page-current))
-
-(defun eaf-interleave-sync-pdf-page-next ()
-  "Move to the next set of notes.
-This shows the next notes and synchronizes the PDF to the right page number."
-  (interactive)
-  (eaf-interleave--switch-to-org-buffer)
-  (widen)
-  ;; go to the first notes heading if we're not at an headline or if
-  ;; we're on multi-pdf heading. This is useful to quickly jump to the
-  ;; notes if they start at page 96 or so. Image you need to skip page
-  ;; for page.
-  (if (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
-      (org-forward-heading-same-level 1)
-    (when eaf-interleave-multi-pdf-notes-file
-      (org-show-subtree))
-    (outline-next-visible-heading 1))
-  (eaf-interleave--narrow-to-subtree)
-  (org-show-subtree)
-  (org-cycle-hide-drawers t)
-  (eaf-interleave-sync-pdf-page-current))
-
-(defun eaf-interleave--goto-parent-headline (property)
-  "Traverse the tree until the parent headline.
-
-Consider a headline with property PROPERTY as parent headline."
-  (catch 'done
-    (if (and (eql (org-element-type (org-element-at-point)) 'headline)
-             (org-entry-get (point) property))
-        (org-element-at-point)
-      (condition-case nil
-          (org-up-element)
-        ('error
-         (throw 'done nil)))
-      (eaf-interleave--goto-parent-headline property))))
 
 (defun eaf-interleave--narrow-to-subtree (&optional force)
   "Narrow buffer to the current subtree.
@@ -389,7 +340,7 @@ If POSITION is non-nil move point to it."
     (save-restriction
       (when eaf-interleave-disable-narrowing
         (eaf-interleave--narrow-to-subtree t))
-      (eaf-interleave--goto-insert-position))
+      (goto-char (point-max)))
     ;; Expand again. Sometimes the new content is outside the narrowed
     ;; region.
     (org-show-subtree)
@@ -397,17 +348,6 @@ If POSITION is non-nil move point to it."
     ;; Insert a new line if not already on a new line
     (when (not (looking-back "^ *" (line-beginning-position)))
       (org-return))))
-
-(defun eaf-interleave--goto-insert-position ()
-  "Move the point to the right insert postion.
-
-For multi-pdf notes this is the end of the subtree.  For everything else
-this is the end of the buffer"
-  (if (not eaf-interleave-multi-pdf-notes-file)
-      (goto-char (point-max))
-    (prog1
-        (eaf-interleave--goto-parent-headline eaf-interleave--pdf-prop)
-      (org-end-of-subtree))))
 
 (defun eaf-interleave--insert-heading-respect-content (parent-headline)
   "Create a new heading in the notes buffer.
@@ -417,9 +357,7 @@ PARENT-HEADLINE.
 
 Return the position of the newly inserted heading."
   (org-insert-heading-respect-content)
-  (let* ((parent-level (if eaf-interleave-multi-pdf-notes-file
-                           (org-element-property :level parent-headline)
-                         0))
+  (let* ((parent-level 0 )
          (change-level (if (> (org-element-property :level (org-element-at-point))
                               (1+ parent-level))
                            #'org-promote
@@ -429,123 +367,145 @@ Return the position of the newly inserted heading."
       (funcall change-level)))
   (point))
 
-(defun eaf-interleave--create-new-note (page)
-  "Create a new headline for the page PAGE."
+(defun eaf-interleave--create-new-note (url &optional title page)
+  "Create a new headline for current EAF url."
   (let (new-note-position)
     (with-current-buffer eaf-interleave-org-buffer
       (save-excursion
         (widen)
-        (let ((position (eaf-interleave--goto-insert-position)))
+        (let ((position (goto-char (point-max))))
           (setq new-note-position (eaf-interleave--insert-heading-respect-content position)))
-        (insert (format "Notes for page %d" page))
-        (org-set-property eaf-interleave--page-note-prop (number-to-string page))
+        (org-set-property eaf-interleave--url-prop url)
+        (when title
+          (insert (format "Notes for %s" title)))
+        (when page
+          (org-set-property eaf-interleave--page-note-prop (number-to-string page)))
         (eaf-interleave--narrow-to-subtree)
         (org-cycle-hide-drawers t)))
     (eaf-interleave--switch-to-org-buffer t new-note-position)))
 
-(defun eaf-interleave-add-note ()
-  "Add note for the current page.
+(defun eaf-interleave-sync-browser-url-current ()
+  "Sync current note url for browser"
+  (let* ((web-url (org-entry-get-with-inheritance eaf-interleave--url-prop))
+        (buffer (eaf-interleave--find-buffer web-url)))
+    (if buffer
+        (eaf-interleave--display-buffer buffer)
+      (eaf-interleave--select-split-function)
+      (eaf-interleave--open-web-url web-url))))
 
-If there are already notes for this page, jump to the notes
-buffer."
-  (interactive)
-  (let* ((page (eaf-interleave--pdf-viewer-current-page))
-         (position (eaf-interleave--go-to-page-note page)))
+(defun eaf-interleave--display-buffer (buffer)
+  "Use already used window display buffer"
+  (eaf-interleave--narrow-to-subtree)
+  (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-app-mode")))
+  (eaf-interleave--ensure-buffer-window buffer))
+
+(defun eaf-interleave--goto-parent-headline (property)
+  "Traverse the tree until the parent headline.
+
+Consider a headline with property PROPERTY as parent headline."
+  (catch 'done
+    (if (and (eql (org-element-type (org-element-at-point)) 'headline)
+             (org-entry-get (point) property))
+        (org-element-at-point)
+      (condition-case nil
+          (org-up-element)
+        ('error
+         (throw 'done nil)))
+      (eaf-interleave--goto-parent-headline property))))
+
+(defun eaf-interleave--pdf-add-note ()
+  "EAF pdf-viewer-mode add note"
+  (let* ((page (eaf-interleave--pdf-viewer-current-page eaf--buffer-url))
+         (position (eaf-interleave--go-to-page-note eaf--buffer-url page)))
     (if position
         (eaf-interleave--switch-to-org-buffer t position)
-      (eaf-interleave--create-new-note page))))
+      (eaf-interleave--create-new-note eaf--buffer-url eaf--buffer-app-name page)))
+  )
 
-(defun eaf-interleave-sync-pdf-page-current ()
-  "Open PDF page for currently visible notes."
-  (interactive)
-  (let ((pdf-page (string-to-number (org-entry-get-with-inheritance eaf-interleave--page-note-prop))))
-    (when (and (integerp pdf-page) (> pdf-page 0)) ; The page number needs to be a positive integer
-      (eaf-interleave--narrow-to-subtree)
-      (with-current-buffer eaf-interleave-pdf-buffer
-        (eaf-interleave--pdf-viewer-goto-page pdf-page))
-      )))
-
-;;;###autoload
-(defun eaf-interleave-open-notes-file-for-pdf ()
-  "Open the notes org file for the current pdf file if it exists.
-Else create it.
-
-It is assumed that the notes org file will have the exact same base name
-as the pdf file (just that the notes file will have a .org extension instead
-of .pdf)."
-  (interactive)
-  (when (derived-mode-p 'eaf-mode)
-    (let* ((pdf-file-name (eaf-get-path-or-url))
-           (org-file-name-sans-directory (concat (file-name-base pdf-file-name) ".org"))
-           org-file-create-dir
-           (cnt 0)
-           try-org-file-name
-           (org-file-name (catch 'break
-                            (dolist (dir eaf-interleave-org-notes-dir-list)
-                              ;; If dir is "." or begins with "./", replace
-                              ;; the "." or "./" with the pdf dir name
-                              (setq dir (replace-regexp-in-string
-                                         "^\\(\\.$\\|\\./\\).*"
-                                         (file-name-directory pdf-file-name)
-                                         dir nil nil 1))
-                              (when (= cnt 0)
-                                ;; In the event the org file is needed to be
-                                ;; created, it will be created in the directory
-                                ;; listed as the first element in
-                                ;; `eaf-interleave-org-notes-dir-list'
-                                (setq org-file-create-dir dir))
-                              (setq cnt (1+ cnt))
-                              (setq try-org-file-name (locate-file
-                                                       org-file-name-sans-directory
-                                                       (list dir)))
-                              (when try-org-file-name
-                                ;; return the first match
-                                (throw 'break try-org-file-name))))))
-      ;; Create the notes org file if it does not exist
-      (when (null org-file-name)
-        (setq org-file-name (if (null eaf-interleave-org-notes-dir-list)
-                                (read-file-name "Path: " "~/")
-                              (progn
-                                (when (null (file-exists-p org-file-create-dir))
-                                  (make-directory org-file-create-dir))
-                                (expand-file-name org-file-name-sans-directory
-                                                  org-file-create-dir))))
-        (with-temp-file org-file-name
-          (insert "#+INTERLEAVE_PDF: " pdf-file-name)))
-      ;; Open the notes org file and enable `eaf-interleave-mode'
-      (find-file org-file-name)
-      (eaf-interleave-mode))))
-
-(defun eaf-interleave-quit ()
-  "Quit interleave mode."
-  (interactive)
-  (with-current-buffer eaf-interleave-org-buffer
-    (widen)
-    (eaf-interleave--goto-search-position)
-    (when (eaf-interleave--headlines-available-p)
-      (eaf-interleave--sort-notes eaf-interleave-sort-order)
-      (org-overview))
-    (eaf-interleave-mode 0))
-  (eaf-interleave-pdf-kill-buffer))
+(defun eaf-interleave--browser-add-note ()
+  "EAF browser add note"
+  (eaf-interleave--create-new-note eaf--buffer-url eaf--buffer-app-name))
 
 (defun eaf-interleave--headlines-available-p ()
   "True if there are headings in the notes buffer."
   (save-excursion
     (re-search-forward "^\* .*" nil t)))
 
-(defun eaf-interleave--sort-notes (sort-order)
-  "Sort notes by interleave_page_property.
+;; utils
+(defun eaf-interleave--open-pdf (pdf-file-name)
+  "Use EAF PdfViewer open this pdf-file-name document."
+  (eaf-open pdf-file-name)
+  (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-app-mode))
 
-SORT-ORDER is either 'asc or 'desc."
-  (condition-case nil
-      (org-sort-entries nil ?f
-                        (lambda ()
-                          (let ((page-note (org-entry-get nil "interleave_page_note")))
-                            (if page-note (string-to-number page-note) -1)))
-                        (if (eq sort-order 'asc)
-                            #'<
-                          #'>))
-    ('user-error nil)))
+(defun eaf-interleave--open-web-url (url)
+  "Use EAF Browser open current note web address"
+  (eaf-open-browser url)
+  (add-hook 'eaf-browser-hook 'eaf-interleave-app-mode))
+
+(defun eaf-interleave--find-buffer (url)
+  "find EAF buffer base url"
+  (let (current-buffer)
+    (catch 'find-buffer
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+          (when (and
+                 (derived-mode-p 'eaf-mode)
+                 (equal eaf--buffer-url url))
+            (setq current-buffer buffer)
+            (throw 'find-buffer t)))))
+    current-buffer))
+
+(defun eaf-interleave--kill-buffer (url)
+  "Kill the current converter process and buffer."
+  (let ((buffer (eaf-interleave--find-buffer url)))
+    (kill-buffer buffer)))
+
+(defun eaf-interleave--pdf-viewer-current-page (url)
+  "get current page index."
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
+    (string-to-number (eaf-call "call_function" id "current_page"))))
+
+(defun eaf-interleave--pdf-viewer-goto-page (url page)
+  "goto page"
+  (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
+    (eaf-call "handle_input_message" id "jump_page" page)))
+
+(defun eaf-interleave--ensure-buffer-window (buffer)
+  "If BUFFER don't display, will use other window display"
+  (if (get-buffer-window buffer)
+      nil
+    (eaf-interleave--select-split-function)
+    (switch-to-buffer buffer)))
+
+(defun eaf-interleave--parse-current-dir (dir url)
+  "If dir is '.' or begins with './', replace the '.' or './' with the current url name"
+  (replace-regexp-in-string
+   "^\\(\\.$\\|\\./\\).*"
+   (file-name-directory url)
+   dir nil nil 1))
+
+(defun eaf-interleave--find-match-org (dir-list url)
+  "Find corresponding org file base url on dir list"
+  (let ((org-file (concat (file-name-base url) ".org"))
+        path)
+    (catch 'break
+      (dolist (dir dir-list)
+        (setq dir (eaf-interleave--parse-current-dir dir url))
+        (setq path (locate-file org-file (list dir)))
+        (when path
+          ;; return the first match
+          (throw 'break path))))
+    path))
+
+(defun eaf-interleave--ensure-org-file-exist (dir-list file-name)
+  "If the org file directory exist return this path, else created directory."
+  (let ((default-dir (nth 0 dir-list)))
+    (if dir-list
+        (progn
+          (unless (file-exists-p default-dir)
+            (make-directory default-dir))
+          (expand-file-name file-name default-dir))
+      (read-file-name "Path for org file: " "~/"))))
 
 (provide 'eaf-interleave)
 ;;; interleave.el ends here
