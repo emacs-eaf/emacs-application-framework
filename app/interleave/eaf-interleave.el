@@ -64,13 +64,6 @@ as \"/pdf/file/dir/\", \"./notes\" is interpreted as
 \"/pdf/file/dir/notes/\"."
   :type '(repeat directory))
 
-(defcustom eaf-interleave-sort-order 'asc
-  "Specifiy the notes' sort order in the notes buffer.
-
-The possible values are 'asc for ascending and 'desc for descending."
-  :type '(choice (const  asc)
-                 (const  desc)))
-
 (defcustom eaf-interleave-split-direction 'vertical
   "Specify how to split the notes buffer."
   :type '(choice (const vertical)
@@ -482,7 +475,6 @@ of .pdf)."
     (widen)
     (eaf-interleave--goto-search-position)
     (when (eaf-interleave--headlines-available-p)
-      (eaf-interleave--sort-notes eaf-interleave-sort-order)
       (org-overview))
     (eaf-interleave-mode 0)))
 
@@ -490,20 +482,6 @@ of .pdf)."
   "True if there are headings in the notes buffer."
   (save-excursion
     (re-search-forward "^\* .*" nil t)))
-
-(defun eaf-interleave--sort-notes (sort-order)
-  "Sort notes by interleave_page_property.
-
-SORT-ORDER is either 'asc or 'desc."
-  (condition-case nil
-      (org-sort-entries nil ?f
-                        (lambda ()
-                          (let ((page-note (org-entry-get nil "interleave_page_note")))
-                            (if page-note (string-to-number page-note) -1)))
-                        (if (eq sort-order 'asc)
-                            #'<
-                          #'>))
-    ('user-error nil)))
 
 ;; utils
 (defun eaf-interleave--eaf-open-pdf (pdf-file-name)
