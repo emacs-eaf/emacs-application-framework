@@ -204,7 +204,8 @@ It (possibly) narrows the subtree when found."
   "Add new url on note if property is none. else modify current url"
   (interactive)
   (let ((url (read-file-name "Please specify path: " nil nil t)))
-    (org-entry-put (point) eaf-interleave--url-prop url)))
+    (org-entry-put (point) eaf-interleave--url-prop url)
+    (org-entry-put (point) eaf-interleave--page-note-prop "1")))
 
 
 (defun eaf-interleave--narrow-to-subtree (&optional force)
