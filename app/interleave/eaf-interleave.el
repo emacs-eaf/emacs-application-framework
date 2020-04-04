@@ -281,8 +281,19 @@ Return the position of the newly inserted heading."
   (interactive)
   (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
     (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
-           (eaf-interleave-sync-pdf-page-current))))
+           (eaf-interleave-sync-pdf-page-current))
+          ((string-prefix-p "http" url)
+           (eaf-interleave-sync-browser-url-current))))
   )
+
+(defun eaf-interleave-sync-browser-url-current ()
+  "Sync current note url for browser"
+  (let* ((web-url (org-entry-get-with-inheritance eaf-interleave--url-prop))
+        (buffer (eaf-interleave--find-buffer web-url)))
+    (if buffer
+        (eaf-interleave--display-buffer buffer)
+      (eaf-interleave--select-split-function)
+      (eaf-interleave--open-web-url web-url))))
 
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
@@ -292,15 +303,19 @@ Return the position of the newly inserted heading."
          (buffer (eaf-interleave--find-buffer pdf-url)))
     (if buffer
         (progn
-          (eaf-interleave--narrow-to-subtree)
-          (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-pdf-mode")))
-          (eaf-interleave--ensure-buffer-window buffer)
+          (eaf-interleave--display-buffer buffer)
           (when pdf-page
             (with-current-buffer buffer
               (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))))
       (eaf-interleave--select-split-function)
       (eaf-interleave--open-pdf pdf-url)
       )))
+
+(defun eaf-interleave--display-buffer (buffer)
+  "Use already used window display buffer"
+  (eaf-interleave--narrow-to-subtree)
+  (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-app-mode")))
+  (eaf-interleave--ensure-buffer-window buffer))
 
 (defun eaf-interleave-sync-previous-note ()
   "Move to the previous set of notes.
@@ -437,7 +452,12 @@ of .pdf)."
 (defun eaf-interleave--open-pdf (pdf-file-name)
   "Use EAF PdfViewer open this pdf-file-name document."
   (eaf-open pdf-file-name)
-  (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-pdf-mode))
+  (add-hook 'eaf-pdf-viewer-hook 'eaf-interleave-app-mode))
+
+(defun eaf-interleave--open-web-url (url)
+  "Use EAF Browser open current note web address"
+  (eaf-open-browser url)
+  (add-hook 'eaf-browser-hook 'eaf-interleave-app-mode))
 
 (defun eaf-interleave--find-buffer (url)
   "find EAF buffer base url"
