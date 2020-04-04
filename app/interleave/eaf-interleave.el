@@ -137,8 +137,7 @@ split horizontally."
     ))
 
 (defvar eaf-interleave-app-mode-map (make-sparse-keymap)
-  "Keymap while command `eaf-interleave-app-mode' is active."
-  )
+  "Keymap while command `eaf-interleave-app-mode' is active.")
 
 ;;;###autoload
 (define-minor-mode eaf-interleave-app-mode
@@ -230,13 +229,25 @@ This show the previous notes and synchronizes the PDF to the right page number."
 ;;;###autoload
 (defun eaf-interleave--open-notes-file-for-pdf ()
   "Open the notes org file for the current pdf file if it exists.
-Else create it.
+Else create it. It is assumed that the notes org file will have
+the exact same base name as the pdf file (just that the notes
+file will have a .org extension instead of .pdf)."
+  (let ((org-file (concat (file-name-base eaf--buffer-url) ".org")))
+    (eaf-interleave--open-notes-file-for-app org-file)))
 
-It is assumed that the notes org file will have the exact same base name
-as the pdf file (just that the notes file will have a .org extension instead
-of .pdf)."
-  (let ((org-file (concat (file-name-base eaf--buffer-url) ".org"))
-        (default-dir (nth 0 eaf-interleave-org-notes-dir-list))
+(defun eaf-interleave--open-notes-file-for-browser ()
+  "Find current open interleave-mode org file, if exists, else
+will create new org file with URL. It is assumed that the notes
+org file will have the exact sam base name as the url domain."
+  (unless (buffer-live-p eaf-interleave-org-buffer)
+    (let* ((domain (url-domain (url-generic-parse-url eaf--buffer-url)))
+           (org-file (concat domain ".org")))
+      (eaf-interleave--open-notes-file-for-app org-file))))
+
+(defun eaf-interleave--open-notes-file-for-app (org-file)
+  "Open the notes org file for the current url if it exists.
+Else create it."
+  (let ((default-dir (nth 0 eaf-interleave-org-notes-dir-list))
         (org-file-path (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url))
         (buffer (eaf-interleave--find-buffer eaf--buffer-url)))
     ;; Create the notes org file if it does not exist
@@ -248,12 +259,6 @@ of .pdf)."
     (eaf-interleave--select-split-function)
     (switch-to-buffer buffer)
     ))
-
-(defun eaf-interleave--open-notes-file-for-browser ()
-  "Find current open interleave-mode org file, if exists, else will create new org file with URL."
-  (if eaf-interleave-org-buffer
-      nil
-    nil))
 
 (defun eaf-interleave-quit ()
   "Quit interleave mode."
