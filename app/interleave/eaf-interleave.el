@@ -348,11 +348,14 @@ This shows the next notes and synchronizes the PDF to the right page number."
 If there are already notes for this url, jump to the notes
 buffer."
   (interactive)
-  (cond ((and (derived-mode-p 'eaf-mode)
-              (equal eaf--buffer-app-name "pdf-viewer"))
-         (eaf-interleave-pdf-add-note))))
+  (if (derived-mode-p 'eaf-mode)
+      (cond ((equal eaf--buffer-app-name "pdf-viewer")
+             (eaf-interleave--pdf-add-note))
+            ((equal eaf--buffer-app-name "browser")
+             (eaf-interleave--browser-add-note)))
+    ))
 
-(defun eaf-interleave-pdf-add-note ()
+(defun eaf-interleave--pdf-add-note ()
   "EAF pdf-viewer-mode add note"
   (let* ((page (eaf-interleave--pdf-viewer-current-page eaf--buffer-url))
          (position (eaf-interleave--go-to-page-note page)))
