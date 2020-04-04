@@ -117,15 +117,7 @@ split horizontally."
   (if eaf-interleave-mode
       (progn
         (setq eaf-interleave-org-buffer (current-buffer))
-        (setq eaf-interleave--window-configuration (current-window-configuration))
-        (eaf-interleave--open-file)
-        ;; expand/show all headlines if narrowing is disabled
-        (when eaf-interleave-disable-narrowing
-          (with-current-buffer eaf-interleave-org-buffer
-            (goto-char (point-min))
-            (org-cycle-hide-drawers 'all)))
-        (eaf-interleave--go-to-page-note 1)
-        (message "EAF Interleave enabled"))
+        (setq eaf-interleave--window-configuration (current-window-configuration)))
     ;; Disable the corresponding minor mode in the PDF file too.
     (set-window-configuration eaf-interleave--window-configuration)
     (setq eaf-interleave--window-configuration nil)
@@ -384,6 +376,7 @@ buffer."
 
 (defun eaf-interleave-sync-current-note ()
   "Sync EAF buffer on current note"
+  (interactive)
   (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
     (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
            (eaf-interleave-sync-pdf-page-current))))
@@ -401,7 +394,8 @@ buffer."
           (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-pdf-mode")))
           (with-current-buffer buffer
             (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page)))
-      (eaf-interleave--open-file)
+      (eaf-interleave--select-split-function)
+      (eaf-interleave--open-pdf pdf-url)
       )))
 
 ;;;###autoload
