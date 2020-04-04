@@ -295,9 +295,10 @@ Return the position of the newly inserted heading."
         (progn
           (eaf-interleave--narrow-to-subtree)
           (display-buffer-reuse-mode-window buffer '(("mode" . "eaf-interleave-pdf-mode")))
+          (eaf-interleave--ensure-buffer-window buffer)
           (when pdf-page
             (with-current-buffer buffer
-            (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))))
+              (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))))
       (eaf-interleave--select-split-function)
       (eaf-interleave--open-pdf pdf-url)
       )))
@@ -460,6 +461,13 @@ of .pdf)."
   "goto page"
   (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
     (eaf-call "handle_input_message" id "jump_page" page)))
+
+(defun eaf-interleave--ensure-buffer-window (buffer)
+  "If BUFFER don't display, will use other window display"
+  (if (get-buffer-window buffer)
+      nil
+    (eaf-interleave--select-split-function)
+    (switch-to-buffer buffer)))
 
 (provide 'eaf-interleave)
 ;;; interleave.el ends here
