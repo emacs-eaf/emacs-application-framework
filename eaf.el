@@ -454,6 +454,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-c C-c" . "eaf-send-second-key-sequence")
     ("C-c C-x" . "eaf-send-second-key-sequence")
     ("<f12>" . "open_dev_tool_page")
+    ("M-w" . "copy_text")
+    ("C-y" . "yank_text")
+    ("C-S-a" . "select_all")
+    ("C-S-l" . "clear_selection")
     )
   "The keybinding of EAF Terminal."
   :type 'cons)

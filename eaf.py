@@ -223,7 +223,7 @@ class EAF(dbus.service.Object):
             app_buffer.exit_fullscreen_request.connect(self.exit_fullscreen_request)
 
         # Add create new window when create_new_browser_window_callback is call.
-        if module_path == "app.browser.buffer":
+        if module_path == "app.browser.buffer" or module_path == "app.terminal.buffer":
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
 
         elif module_path == "app.rss-reader.buffer":
@@ -545,3 +545,4 @@ if __name__ == "__main__":
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(app.exec_())
+

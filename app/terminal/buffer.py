@@ -21,6 +21,7 @@
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
 from core.utils import PostGui, get_free_port
 import os
@@ -88,3 +89,78 @@ class AppBuffer(BrowserBuffer):
         hash = hashlib.sha1()
         hash.update(str(time.time()).encode("utf-8"))
         return hash.hexdigest()[:4]
+
+    def copy_text(self):
+        text = self.buffer_widget.execute_js("get_selection();")
+        if text == "":
+            self.message_to_emacs.emit("Nothing selected")
+        else:
+            clipboard = QApplication.clipboard()
+            clipboard.setText(text)
+            self.message_to_emacs.emit("Copy text")
+
+    def yank_text(self):
+        text = QApplication.clipboard().text()
+        self.buffer_widget.eval_js("paste('{}');".format(text))
+
+    def scroll(self, scroll_direction, scroll_type):
+        if scroll_type == "page":
+            if scroll_direction == "up":
+                self.buffer_widget.eval_js("scroll_page(1);")
+            else:
+                self.buffer_widget.eval_js("scroll_page(-1);")
+        else:
+            if scroll_direction == "up":
+                self.buffer_widget.eval_js("scroll_line(1);")
+            else:
+                self.buffer_widget.eval_js("scroll_line(-1);")
+
+    def scroll_up_page(self):
+        self.buffer_widget.eval_js("scroll_page(1);")
+
+    def scroll_down_page(self):
+        self.buffer_widget.eval_js("scroll_page(-1);")
+
+    def scroll_to_begin(self):
+        self.buffer_widget.eval_js("scroll_to_begin();")
+
+    def scroll_to_bottom(self):
+        self.buffer_widget.eval_js("scroll_to_bottom();")
+
+    def select_all(self):
+        self.buffer_widget.eval_js("select_all();")
+
+    def clear_selection(self):
+        self.buffer_widget.eval_js("clear_selection();")
+
+    def _search_text(self, text, is_backward = False):
+        if self.search_term != text:
+            self.search_term = text
+        if is_backward:
+            # self.web_page.findText(self.search_term, self.web_page.FindBackward)
+            self.buffer_widget.eval_js("find_next('{}')".format(text))
+        else:
+            # self.web_page.findText(self.search_term)
+            self.buffer_widget.eval_js("find_prev('{}')".format(text))
+
+    def search_text_forward(self):
+        if self.search_term == "":
+            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
+        else:
+            self._search_text(self.search_term)
+
+    def search_text_backward(self):
+        if self.search_term == "":
+            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
+        else:
+            self._search_text(self.search_term, True)
+
+    def search_quit(self):
+        if self.search_term != "":
+            self._search_text("")
+
+    def handle_input_message(self, result_tag, result_content):
+        if result_tag == "search_text_forward":
+            self.buffer_widget._search_text(str(result_content))
+        elif result_tag == "search_text_backward":
+            self.buffer_widget._search_text(str(result_content), True)

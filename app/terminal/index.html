@@ -41,17 +41,60 @@
 
         <script>
          var socket = new WebSocket("ws://127.0.0.1:%1");
+         const term = new Terminal({
+             fontSize: 18,
+             cursorBlink: true,
+             theme: theme
+         });
+         const searchAddon = new SearchAddon.SearchAddon();
+
+         function get_selection() {
+             return term.getSelection();
+         }
+
+         function paste(text) {
+             term.paste(text);
+         }
+
+         function scroll_line(number) {
+             term.scrollLines(number);
+         }
+
+         function scroll_page(number) {
+             term.scrollPages(number);
+         }
+
+         function scroll_to_begin() {
+             term.scrollToTop();
+         }
+
+         function scroll_to_bottom() {
+             term.scrollToBottom();
+         }
+
+         function select_all() {
+             term.selectAll();
+         }
+
+         function clear_selection() {
+             term.clearSelection();
+         }
+
+         function find_next(text) {
+             searchAddon.findNext(text);
+         }
+
+         function find_prev(text) {
+             searchAddon.findPrevious(text);
+         }
 
          socket.onopen = () => {
-             const term = new Terminal({
-                 fontSize: 18,
-                 cursorBlink: true,
-                 theme: theme
-             });
              const attachAddon = new AttachAddon.AttachAddon(socket);
              const fitAddon = new FitAddon.FitAddon();
              term.loadAddon(attachAddon);
              term.loadAddon(fitAddon);
+             term.loadAddon(searchAddon);
+             term.loadAddon(new WebLinksAddon.WebLinksAddon());
              term.open(document.getElementById('xterm'));
              fitAddon.fit();
              term.focus();
