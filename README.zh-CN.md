@@ -41,10 +41,10 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 | <img src="./screenshot/aria2.gif" width="400"> | <img src="./screenshot/mindmap.gif" width="400"> |
 |                                                |                                                  |
 
-| 流程图                                            |
-| :--------:                                       |
-| <img src="./screenshot/mermaid.gif" width="400"> |
-|                                                  |
+| 流程图                                           | 笔记管理系统                                            |
+| :--------:                                       | :--------:                                              |
+| <img src="./screenshot/mermaid.gif" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
+|                                                  |                                                         |
 
 
 ## 安装

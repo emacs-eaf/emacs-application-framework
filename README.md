@@ -42,10 +42,10 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 |                                                |           |
 
 
-| Mermaid                                          |
-| :--------:                                       |
-| <img src="./screenshot/mermaid.gif" width="400"> |
-|                                                  |
+| Mermaid                                          | EAF Interleave                                          |
+| :--------:                                       | :----------:                                            |
+| <img src="./screenshot/mermaid.gif" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
+|                                                  |                                                         |
 
 
 ## Install
