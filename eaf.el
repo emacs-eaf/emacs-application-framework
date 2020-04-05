@@ -1768,14 +1768,14 @@ the file at current cursor position in dired."
   (interactive)
   (eaf-file-sender-qrcode (dired-get-filename)))
 
-(defun eaf-file-receiver-qrcode (dir)
-  "Open EAF File Receiver application.
+(defun eaf-file-browser-qrcode (dir)
+  "Open EAF File Browser application.
 
-Select directory DIR to receive the uploaded file.
+Select directory DIR to share file.
 
 Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "D[EAF/file-receiver] Specify Destination: ")
-  (eaf-open dir "file-receiver"))
+  (interactive "D[EAF/file-browser] Specify Destination: ")
+  (eaf-open dir "file-browser"))
 
 (defun eaf-edit-buffer-cancel ()
   "Cancel EAF Browser focus text input and closes the buffer."

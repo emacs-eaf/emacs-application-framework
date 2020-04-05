@@ -22,7 +22,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 
 | File Sender                                            | File Receiver                                          |
 | :--------:                                             | :----:                                                 |
-| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
+| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_browser.png" width="400"> |
 |                                                        |                                                        |
 
 
@@ -52,7 +52,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 1. Install EAF dependencies:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
 yay -S python-pymupdf python-grip
 ```
 
@@ -99,6 +99,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | nodejs                         | Terminal                             | Communicate between browser and local TTY     |
 | aria2                          | Browser                              | Download files from the web                   |
 | libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
+| filebrowser                    | File Browser                         | Share files between computer and smartphone   |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -114,7 +115,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Camera              | `M-x eaf-open-camera`                                                  |
 | Terminal            | `M-x eaf-open-terminal`                                                |
 | File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`      |
-| File Receiver       | `M-x eaf-file-receiver-qrcode`                                         |
+| File Browser        | `M-x eaf-file-browser-qrcode`                                          |
 | Airshare            | `M-x eaf-open-airshare`                                                |
 | RSS Reader          | `M-x eaf-open-rss-reader`                                              |
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |

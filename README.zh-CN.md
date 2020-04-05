@@ -22,7 +22,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 
 | 二维码下载文件 (PC到手机)                              | 二维码上传文件 (手机到PC)                                 |
 | :--------:                                             | :----:                                                 |
-| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_uploader.png" width="400"> |
+| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_browser.png" width="400"> |
 |                                                        |                                                        |
 
 
@@ -52,7 +52,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
-python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
+python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
 yay -S python-pymupdf python-grip
 ```
 
@@ -99,28 +99,29 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 | aria2                          | 浏览器                       | 下载网络文件                                       |
 | nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                            |
 | libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                               |
+| filebrowser                    | 文件浏览器                   | 在电脑和手机之间快速共享文件                       |
 
 ## EAF应用启动命令
-| 应用名称       | 启动命令                                                                    |
-| :--------      | :----                                                                       |
-| 浏览器         | `M-x eaf-open-browser` 在浏览器中打开或搜索                                 |
-|                | `M-x eaf-open-browser-with-history` 搜索历史或者打开URL                     |
-| HTML邮件渲染   | `M-x eaf-open-mail-as-html` 在 `gnus`，`mu4e`，`notmuch` 等邮件客户端中执行 |
-| PDF阅读器      | `M-x eaf-open` 输入PDF文件                                                  |
-| 视频播放器     | `M-x eaf-open` 输入视频文件                                                 |
-| 图片浏览器     | `M-x eaf-open` 输入图片文件                                                 |
-| Markdown预览   | `M-x eaf-open` 输入Markdown文件                                             |
-| Org预览        | `M-x eaf-open` 输入Org文件                                                  |
-| 摄像头程序     | `M-x eaf-open-camera`                                                       |
-| 终端模拟器     | `M-x eaf-open-terminal`                                                     |
-| 二维码下载文件 | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`           |
-| 二维码上传文件 | `M-x eaf-file-receiver-qrcode`                                              |
-| 无线分享       | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
-| RSS新闻阅读器  | `M-x eaf-open-rss-reader`                                                   |
-| 思维导图       | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
-| 办公文档阅读器 | `M-x eaf-open-office`                                                       |
-| 流程图         | `M-x eaf-open` 输入 mmd 格式文件                                            |
-| 演示程序       | `M-x eaf-open-demo`                                                         |
+| 应用名称         | 启动命令                                                                    |
+| :--------        | :----                                                                       |
+| 浏览器           | `M-x eaf-open-browser` 在浏览器中打开或搜索                                 |
+|                  | `M-x eaf-open-browser-with-history` 搜索历史或者打开URL                     |
+| HTML邮件渲染     | `M-x eaf-open-mail-as-html` 在 `gnus`，`mu4e`，`notmuch` 等邮件客户端中执行 |
+| PDF阅读器        | `M-x eaf-open` 输入PDF文件                                                  |
+| 视频播放器       | `M-x eaf-open` 输入视频文件                                                 |
+| 图片浏览器       | `M-x eaf-open` 输入图片文件                                                 |
+| Markdown预览     | `M-x eaf-open` 输入Markdown文件                                             |
+| Org预览          | `M-x eaf-open` 输入Org文件                                                  |
+| 摄像头程序       | `M-x eaf-open-camera`                                                       |
+| 终端模拟器       | `M-x eaf-open-terminal`                                                     |
+| 二维码下载文件   | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`           |
+| 二维码在线浏览器 | `M-x eaf-file-browser-qrcode`                                               |
+| 无线分享         | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
+| RSS新闻阅读器    | `M-x eaf-open-rss-reader`                                                   |
+| 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
+| 办公文档阅读器   | `M-x eaf-open-office`                                                       |
+| 流程图           | `M-x eaf-open` 输入 mmd 格式文件                                            |
+| 演示程序         | `M-x eaf-open-demo`                                                         |
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
 
