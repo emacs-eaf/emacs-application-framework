@@ -48,22 +48,13 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 
 
 ## 安装
-1. 先确认系统中已经安装了 ```python3```，然后使用 ```pip3``` 安装EAF依赖库:
-
-```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf
-grip qrcode feedparser pyinotify markdown
-```
-
-    如果你使用的是Arch系统，建议用下面的命令来安装依赖：
+1. 安装EAF依赖库:
 
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
-python-dbus python-pyinotify python-markdown nodejs
+python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
 yay -S python-pymupdf python-grip
 ```
-
-    因为Arch的QtWebEngine编译的时候内建私有编解码库，可以直接在浏览器中播放mp4等视频文件, 并且更加稳定。
 
 2. 使用 ```git clone``` 下载这个仓库.
 
@@ -90,28 +81,24 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-4. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
-
-5. EAF办公文档阅读器需要你额外安装 ```libreoffice``` 这个工具。
-
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
-| 包名          | 安装方式      | 依赖                                                                 | 解释                                               |
-| :--------     | :----         | :------                                                              | :------                                            |
-| pyqt5         | pip3          | 核心                                                                 | GUI图形库                                          |
-| dbus-python   | pip3          | 核心                                                                 | DBus库，用于在Emacs和Python进程间通讯              |
-| python-xlib   | pip3          | 核心                                                                 | X11的Python绑定，用于粘贴Qt5程序到Emacs Buffer区域 |
-| pyqtwebengine | pip3          | 浏览器，图片浏览器，RSS阅读器，<br>终端模拟器，Org预览，Markdown预览 | 基于Chromium的浏览器引擎                           |
-| pymupdf       | pip3          | PDF阅读器                                                            | 解析PDF文件                                        |
-| grip          | pip3          | Markdown预览                                                         | 建立Markdown文件的HTML服务                         |
-| qrcode        | pip3          | 文件上传，文件下载，文字传输                                         | 根据文件信息生成二维码                             |
-| feedparser    | pip3          | RSS阅读器                                                            | 解析RSS/Atom信息                                   |
-| aria2         | pacman (Arch) | 浏览器                                                               | 下载网络文件                                       |
-| nodejs         | pacman          | 终端模拟器                                                           | 通过浏览器与本地TTY交互                            |
-| libreoffice   | pacman        | 办公文档阅读器                                                       | 转换doc文件为pdf格式                               |
-| pyinotify     | pacman        | 流程图                                                               | 监听 mmd 格式文件的变动                            |
-| markdown      | pacman        | 流程图                                                               | 转换 mmd 格式为 mermaid 识别的 html 格式           |
+| 包名                           | 依赖                         | 解释                                               |
+| :--------                      | :------                      | :------                                            |
+| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                          |
+| python-dbus                    | 核心                         | DBus库，用于在Emacs和Python进程间通讯              |
+| python-xlib                    | 核心                         | X11的Python绑定，用于粘贴Qt5程序到Emacs Buffer区域 |
+| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                           |
+| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                                        |
+| python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务                         |
+| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                             |
+| python-feedparser              | RSS阅读器                    | 解析RSS/Atom信息                                   |
+| python-pyinotify               | 流程图                       | 监听 mmd 格式文件的变动                            |
+| python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式           |
+| aria2                          | 浏览器                       | 下载网络文件                                       |
+| nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                            |
+| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                               |
 
 ## EAF应用启动命令
 | 应用名称       | 启动命令                                                                    |
@@ -180,14 +167,6 @@ EAF依赖X11的XReparent技术，Wayland并不支持跨进程窗口融合技术
 
 ### `[EAF] *eaf* aborted (core dumped)` 奔溃了怎么办？
 请检查 `*eaf*` 这个窗口的内容。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。
-
-### `undefined symbol` 错误
-如果你启动的时候发现 "undefined symbol" 错误，并且你使用的是Arch系统，那肯定是因为Arch自身的bug，Arch系统每次升级以后，重新使用pip3安装一次Python依赖包就可以解决这个问题:
-
-```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf
-grip qrcode feedparser pyinotify markdown --force-reinstall
-```
 
 ### Github 个人访问标记干什么用的？
 Markdown预览程序依赖grip，你需要访问[Github Personal access token](https://github.com/settings/tokens/new?scopes=)去获取你个人的标记，然后通过下面的命令设置标记后，grip才能正常的工作：

@@ -49,20 +49,12 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 
 
 ## Install
-1. Make sure to have ```python3``` installed, and use ```pip3``` to install all EAF dependencies (see below list for details)
+1. Install EAF dependencies:
 
 ```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser pyinotify markdown
-```
-
-If you use **Arch Linux**, it is recommended to install dependencies using `pacman` and `yay` instead.
-
-```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
 yay -S python-pymupdf python-grip
 ```
-
-    Because Arch's QtWebEngine build with proprietary codec library that can play video file with browser, and more stable.
 
 2. Clone this repository.
 
@@ -89,28 +81,24 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-4. For EAF Browser download to work, please install ```aria2```.
-
-5. For EAF Doc Viewer to work, please install ```libreoffice```.
-
 ### Dependency List
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package       | Package Repo  | Dependent                                                                          | Description                                   |
-| :--------     | :----         | :------                                                                            | :------                                       |
-| pyqt5         | pip3          | Core                                                                               | Essential GUI library                         |
-| dbus-python   | pip3          | Core                                                                               | DBus IPC to connect Python with Elisp         |
-| python-xlib   | pip3          | Core                                                                               | Stick application window into Emacs frame     |
-| pyqtwebengine | pip3          | Browser, Image Viewer, RSS Reader, <br>Terminal, Org Previewer, Markdown Previewer | Chromium based web rendering engine           |
-| pymupdf       | pip3          | PDF Viewer                                                                         | PDF rendering engine                          |
-| grip          | pip3          | Markdown Previewer                                                                 | Markdown rendering server                     |
-| qrcode        | pip3          | File Sender, File Receiver, Airshare                                               | Render QR code pointing to local files        |
-| feedparser    | pip3          | RSS Reader                                                                         | Parse RSS feeds                               |
-| aria2         | pacman (Arch) | Browser                                                                            | Download files from the web                   |
-| nodejs         | pacman          | Terminal                                                                           | Communicate between browser and local TTY     |
-| libreoffice   | pacman        | Doc Viewer                                                                         | Convert doc file to pdf                       |
-| pyinotify     | pacman        | Mermaid                                                                            | Monitor *.mmd file change status              |
-| markdown      | pacman        | Mermaid                                                                            | Covert markdown format to mermaid html format |
+| Package                        | Dependent                            | Description                                   |
+| :--------                      | :------                              | :------                                       |
+| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
+| python-dbus                    | Core                                 | DBus IPC to connect Python with Elisp         |
+| python-xlib                    | Core                                 | Stick application window into Emacs frame     |
+| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
+| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
+| python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
+| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |
+| python-feedparser              | RSS Reader                           | Parse RSS feeds                               |
+| python-pyinotify               | Mermaid                              | Monitor *.mmd file change status              |
+| python-markdown                | Mermaid                              | Covert markdown format to mermaid html format |
+| nodejs                         | Terminal                             | Communicate between browser and local TTY     |
+| aria2                          | Browser                              | Download files from the web                   |
+| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -181,15 +169,6 @@ We recommend to use KDE or Xfce, they supports X11 XReparent and handling of key
 Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
 
 If you're sure Python dependences are installed correctly, please create an issue with the `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
-
-### `undefined symbol` error
-If you got "undefined symbol" error after start EAF, and you use Arch Linux, yes, it's a bug of Arch.
-
-You need use pip install all dependences after you upgrade your Arch system, then undefine symbol error will fix.
-
-```Bash
-sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcode feedparser pyinotify markdown --force-reinstall
-```
 
 ### What is Github Personal Access Tokens?
 If you use EAF Markdown Previewer, to get consistent previewing, you need to access [Github Personal access token site](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token. Then set the token:
