@@ -31,9 +31,9 @@ import getpass
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs, False, QColor(255, 255, 255, 255))
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs, False, QColor(233, 129, 35, 255))
 
-        # Get free port to render markdown.
+        # Get free port.
         self.port = get_free_port()
         self.url = url
 
@@ -41,24 +41,29 @@ class AppBuffer(BrowserBuffer):
         self.command = argument_list[0]
         self.start_directory = argument_list[1]
 
-        # Start wetty process.
+        self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
+        self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
+
+        # Start server process.
         self.background_process = subprocess.Popen(
-            "wetty -p {0} --base / --sshuser {1} --sshauth publickey -c {2}".format(
-                self.port,
-                getpass.getuser(),
-                "'{}'".format(self.command)),
+            "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             shell=True)
 
-        # Add timer make load markdown preview link after grip process start finish.
-        threading.Timer(1, self.load_wetty_server).start()
+        self.open_terminal_page()
 
         self.reset_default_zoom()
 
     @PostGui()
-    def load_wetty_server(self):
-        self.buffer_widget.setUrl(QUrl("http://localhost:{0}".format(self.port)))
+    def open_terminal_page(self):
+        theme = "light"
+        if self.emacs_var_dict["eaf-terminal-dark-mode"] == "true" or \
+           (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.call_emacs("GetThemeMode") == "dark"):
+            theme = "dark"
+        with open(self.index_file, "r") as f:
+            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme)
+            self.buffer_widget.setHtml(html)
 
         self.update_title()
 
@@ -68,8 +73,13 @@ class AppBuffer(BrowserBuffer):
             self.random_string()
         ))
 
-    def before_destroy_buffer(self):
-        os.kill(self.background_process.pid, signal.SIGTERM)
+    def destroy_buffer(self):
+        os.kill(self.background_process.pid, signal.SIGKILL)
+
+        if self.buffer_widget is not None:
+            # NOTE: We need delete QWebEnginePage manual, otherwise QtWebEngineProcess won't quit.
+            self.buffer_widget.web_page.deleteLater()
+            self.buffer_widget.deleteLater()
 
     def random_string(self):
         import hashlib

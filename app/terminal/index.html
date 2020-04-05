@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script type="text/javascript" src="%2/node_modules/xterm/lib/xterm.js"></script>
+        <script type="text/javascript" src="%2/node_modules/xterm-addon-attach/lib/xterm-addon-attach.js"></script>
+        <script type="text/javascript" src="%2/node_modules/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+        <script type="text/javascript" src="%2/node_modules/xterm-addon-search/lib/xterm-addon-search.js"></script>
+        <script type="text/javascript" src="%2/node_modules/xterm-addon-web-links/lib/xterm-addon-web-links.js"></script>
+        <script type="text/javascript" src="%2/%3_theme.js"></script>
+        <link rel="stylesheet" href="%2/node_modules/xterm/css/xterm.css" />
+
+        <style>
+         html, body {
+             width: 100%;
+             height: 100%;
+             padding: 0;
+             margin: 0;
+         }
+         div#xterm {
+             width: 100%;
+             height: 100%;
+             padding: 0;
+             margin: 0;
+         }
+
+         /* Hide scrollbar */
+         .xterm-viewport {
+             overflow: hidden !important;
+         }
+
+         /* Make terminal fit full area of window */
+         div.terminal.xterm {
+             height: 100%;
+             width: 100%;
+         }
+        </style>
+    </head>
+    <body>
+        <div id="xterm" class="xterm"/>
+
+        <script>
+         var socket = new WebSocket("ws://127.0.0.1:%1");
+
+         socket.onopen = () => {
+             const term = new Terminal({
+                 fontSize: 18,
+                 cursorBlink: true,
+                 theme: theme
+             });
+             const attachAddon = new AttachAddon.AttachAddon(socket);
+             const fitAddon = new FitAddon.FitAddon();
+             term.loadAddon(attachAddon);
+             term.loadAddon(fitAddon);
+             term.open(document.getElementById('xterm'));
+             fitAddon.fit();
+             term.focus();
+
+             setTimeout(() => {
+                 sendSizeToServer();
+             }, 50);
+
+             function sendSizeToServer() {
+                 /* After window resize, make terminal fit before get term size */
+                 fitAddon.fit()
+
+                 let cols = term.cols.toString();
+                 let rows = term.rows.toString();
+                 while (cols.length < 3) {
+                     cols = "0"+cols;
+                 }
+                 while (rows.length < 3) {
+                     rows = "0"+rows;
+                 }
+
+                 console.log("ESCAPED|-- RESIZE:"+cols+";"+rows);
+
+                 socket.send("ESCAPED|-- RESIZE:"+cols+";"+rows);
+             }
+
+             window.addEventListener("resize", sendSizeToServer);
+         }
+         socket.onclose = () => {}
+         socket.onerror = () => {}
+        </script>
+    </body>
+</html>

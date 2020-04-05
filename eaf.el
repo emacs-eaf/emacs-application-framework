@@ -250,6 +250,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-aria2-proxy-port . "")
     (eaf-browser-dark-mode . "")
     (eaf-pdf-dark-mode . "")
+    (eaf-terminal-dark-mode . "")
     (eaf-mindmap-dark-mode . "")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
@@ -452,6 +453,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-d" . "eaf-send-key-sequence")
     ("C-c C-c" . "eaf-send-second-key-sequence")
     ("C-c C-x" . "eaf-send-second-key-sequence")
+    ("<f12>" . "open_dev_tool_page")
     )
   "The keybinding of EAF Terminal."
   :type 'cons)
@@ -1600,24 +1602,24 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-terminal ()
   "Open EAF terminal application."
   (interactive)
-  (eaf-run-command-in-terminal (eaf--generate-terminal-command)))
+  (eaf-run-command-in-terminal (eaf--generate-terminal-command) default-directory))
 
 (defun eaf-open-ipython ()
   "Open ipython in terminal."
   (interactive)
   (if (executable-find "ipython")
-      (eaf-run-command-in-terminal "ipython")
+      (eaf-run-command-in-terminal "ipython" default-directory)
     (message "[EAF/terminal] Please install ipython first.")))
 
-(defun eaf-run-command-in-terminal (command)
+(defun eaf-run-command-in-terminal (command dir)
   "Run any command in terminal."
   (interactive "s[EAF/terminal] Command: ")
   (eaf-open (eaf--generate-terminal-buffer-name)
             "terminal"
-            (format "%sᛡ%s" command default-directory)))
+            (format "%sᛡ%s" command (expand-file-name dir))))
 
 (defun eaf--generate-terminal-command ()
-  (format "cd %s && exec %s --login" default-directory (getenv "SHELL")))
+  (getenv "SHELL"))
 
 (defun eaf--generate-terminal-buffer-name ()
   (format "%s-%04x" "eaf-terminal" (random (expt 16 4))))

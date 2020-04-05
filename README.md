@@ -58,7 +58,7 @@ sudo pip3 install dbus-python python-xlib pyqt5 pyqtwebengine pymupdf grip qrcod
 If you use **Arch Linux**, it is recommended to install dependencies using `pacman` and `yay` instead.
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs
 yay -S python-pymupdf python-grip
 ```
 
@@ -89,20 +89,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-4. For EAF Terminal to work *only*: Install and configure ```wetty```:
-```Bash
-# Install wetty
-sudo yarn global add wetty
-
-# Make wetty login with public key
-ssh-keygen
-cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
-
-# You need add below in .bashrc if you are Chinese
-echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
-```
-
-5. For EAF Browser download to work, please install ```aria2```.
+4. For EAF Browser download to work, please install ```aria2```.
 
 5. For EAF Doc Viewer to work, please install ```libreoffice```.
 
@@ -120,7 +107,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | qrcode        | pip3          | File Sender, File Receiver, Airshare                                               | Render QR code pointing to local files        |
 | feedparser    | pip3          | RSS Reader                                                                         | Parse RSS feeds                               |
 | aria2         | pacman (Arch) | Browser                                                                            | Download files from the web                   |
-| wetty         | yarn          | Terminal                                                                           | Communicate between browser and local TTY     |
+| nodejs         | pacman          | Terminal                                                                           | Communicate between browser and local TTY     |
 | libreoffice   | pacman        | Doc Viewer                                                                         | Convert doc file to pdf                       |
 | pyinotify     | pacman        | Mermaid                                                                            | Monitor *.mmd file change status              |
 | markdown      | pacman        | Mermaid                                                                            | Covert markdown format to mermaid html format |

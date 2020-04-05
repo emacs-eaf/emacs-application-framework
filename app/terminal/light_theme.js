@@ -1,0 +1,23 @@
+theme = {
+    foreground: "#333333",
+    background: "#EEEEEE",
+    cursor: "#28A4B5",
+    cursorAccent: "#28A4B5",
+    black: "#333333",
+    red: "#DA3E39",
+    green: "#41933E",
+    yellow: "#855504",
+    blue: "#315EEE",
+    magenta: "#930092",
+    cyan: "#0E6FAD",
+    white: "#FDF6E3",
+
+    brightBlack: "#666666",
+    brightRed: "#DC322F",
+    brightGreen: "#2AA198",
+    brightYellow: "#859900",
+    brightBlue: "#268BD2",
+    brightMagenta: "#D33682",
+    brightCyan: "#2AA198",
+    brightWhite: "#EEE8D5",
+}

@@ -59,7 +59,7 @@ grip qrcode feedparser pyinotify markdown
 
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
-python-dbus python-pyinotify python-markdown
+python-dbus python-pyinotify python-markdown nodejs
 yay -S python-pymupdf python-grip
 ```
 
@@ -90,22 +90,9 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
-4. 如果你*需要*使用EAF终端模拟器，请按照下面的方法安装配置 ```wetty```:
-```Bash
-# 安装wetty
-sudo yarn global add wetty
+4. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
 
-# 确保wetty自动登录
-ssh-keygen
-cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
-
-# 确保终端正常显示中文文件名
-echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
-```
-
-5. EAF浏览器的下载功能依赖aria2，还需要你额外安装 ```aria2``` 这个工具。
-
-6. EAF办公文档阅读器需要你额外安装 ```libreoffice``` 这个工具。
+5. EAF办公文档阅读器需要你额外安装 ```libreoffice``` 这个工具。
 
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
@@ -121,7 +108,7 @@ echo 'export LANG=zh_CN.UTF-8' >> ~/.bashrc
 | qrcode        | pip3          | 文件上传，文件下载，文字传输                                         | 根据文件信息生成二维码                             |
 | feedparser    | pip3          | RSS阅读器                                                            | 解析RSS/Atom信息                                   |
 | aria2         | pacman (Arch) | 浏览器                                                               | 下载网络文件                                       |
-| wetty         | yarn          | 终端模拟器                                                           | 通过浏览器与本地TTY交互                            |
+| nodejs         | pacman          | 终端模拟器                                                           | 通过浏览器与本地TTY交互                            |
 | libreoffice   | pacman        | 办公文档阅读器                                                       | 转换doc文件为pdf格式                               |
 | pyinotify     | pacman        | 流程图                                                               | 监听 mmd 格式文件的变动                            |
 | markdown      | pacman        | 流程图                                                               | 转换 mmd 格式为 mermaid 识别的 html 格式           |
