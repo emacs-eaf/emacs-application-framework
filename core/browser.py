@@ -68,6 +68,8 @@ class BrowserView(QWebEngineView):
 
         self.get_markers_raw = self.read_js_content("get_markers.js")
         self.goto_marker_raw = self.read_js_content("goto_marker.js")
+        self.get_codes_raw = self.read_js_content("get_codes.js")
+        self.goto_code_raw = self.read_js_content("goto_code.js")
         self.get_focus_text_js = self.read_js_content("get_focus_text.js")
         self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
         self.clear_focus_js = self.read_js_content("clear_focus.js")
@@ -311,6 +313,22 @@ class BrowserView(QWebEngineView):
             clipboard.setText(link)
             self.buffer.message_to_emacs.emit("Copy link")
 
+    def get_code_markers(self):
+        self.eval_js(self.get_codes_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+
+    def get_code_content(self, marker):
+        self.goto_code_js = self.goto_code_raw.replace("%1", str(marker));
+        content = self.execute_js(self.goto_code_js)
+        self.cleanup_links()
+        return content
+
+    def copy_code_content(self, marker):
+        content = self.get_code_content(marker)
+        if content != "":
+            clipboard = QApplication.clipboard()
+            clipboard.setText(content)
+            self.buffer.message_to_emacs.emit("Copy code")
+
     def get_focus_text(self):
         return self.execute_js(self.get_focus_text_js)
 
@@ -463,7 +481,8 @@ class BrowserBuffer(Buffer):
                             "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "edit_url",
                             "download_youtube_video", "download_youtube_audio", "toggle_device", "close_buffer",
-                            "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab"]:
+                            "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab",
+                            "copy_code"]:
             self.build_insert_or_do(method_name)
 
     def notify_print_message(self, file_path, success):
@@ -670,6 +689,8 @@ class BrowserBuffer(Buffer):
             call_and_check_code(args, handler)
         elif result_tag == "edit_url":
             self.buffer_widget.open_url(str(result_content))
+        elif result_tag == "copy_code":
+            self.buffer_widget.copy_code_content(str(result_content).strip())
 
     def cancel_input_message(self, result_tag):
         if result_tag == "jump_link" or \
@@ -712,6 +733,10 @@ class BrowserBuffer(Buffer):
     def copy_text(self):
         self.buffer_widget.copy_text()
         self.message_to_emacs.emit("Copy selected text.")
+
+    def copy_code(self):
+        self.buffer_widget.get_code_markers()
+        self.send_input_message("Copy code: ", "copy_code");
 
     def open_link(self):
         self.buffer_widget.get_link_markers()
