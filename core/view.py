@@ -20,10 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QPainter
+from PyQt5.QtCore import Qt, QEvent, QPoint
+from PyQt5.QtGui import QPainter, QWindow
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView
-from core.xutils import get_xlib_display
 
 class View(QWidget):
 
@@ -117,15 +116,9 @@ class View(QWidget):
         self.graphics_view.horizontalScrollBar().setValue(0)
 
     def reparent(self):
-        xlib_display = get_xlib_display()
-
-        view_xid = self.winId().__int__()
-        view_xwindow = xlib_display.create_resource_object("window", view_xid)
-        emacs_xwindow = xlib_display.create_resource_object("window", self.emacs_xid)
-
-        view_xwindow.reparent(emacs_xwindow, self.x, self.y)
-
-        xlib_display.sync()
+        qwindow = self.windowHandle()
+        qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
+        qwindow.setPosition(QPoint(self.x, self.y))
 
     def destroy_view(self):
         self.destroy()

@@ -52,7 +52,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 1. Install EAF dependencies:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
 yay -S python-pymupdf python-grip
 ```
 
@@ -88,7 +88,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | :--------                      | :------                              | :------                                       |
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
 | python-dbus                    | Core                                 | DBus IPC to connect Python with Elisp         |
-| python-xlib                    | Core                                 | Stick application window into Emacs frame     |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
 | python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
@@ -140,7 +139,7 @@ Wiki consists of documentations on Keybinding, Customization, Design and TODOLIS
 
 ### How does EAF work?
 EAF implements three major functionalities:
-1. Integrate PyQt program window into Emacs frame using Xlib Reparent technology.
+1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
 2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via DBus IPC.
 3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
@@ -154,17 +153,10 @@ EAF implements three major functionalities:
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
 ### EAF is (currently) Linux only. Why?
-1. As of now, none of EAF's core developers use MacOS or Windows or BSD family OS.
-2. EAF uses X11 Reparent to stick Qt5 window to Emacs frame. Other operating systems may implement similar features, but the core developers don't know how to work with them.
-3. DBus is Linux-specific technology, it's difficult to support DBus in other operating systems.
-4. Qt5's QGraphicsScene technology does not work on MacOS.
+1. DBus is Linux-specific technology, it's difficult to support DBus in other operating systems.
+2. Qt5's QGraphicsScene technology does not work on MacOS.
 
 If you've figure them out, PRs are always welcome!
-
-### How about Wayland?
-EAF use X11 XReparent technology, Wayland doesn't support it (right now).
-
-We recommend to use KDE or Xfce, they supports X11 XReparent and handling of keyboard focus events correctly. Other Lighter DEs or Tiling WMs do not support EAF very well, such as ```i3wm``` or ```awesome```.
 
 ### `[EAF] *eaf* aborted (core dumped)` error
 Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.

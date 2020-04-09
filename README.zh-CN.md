@@ -51,7 +51,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 1. 安装EAF依赖库:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-xlib python-qrcode python-feedparser
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser
 python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
 yay -S python-pymupdf python-grip
 ```
@@ -88,7 +88,6 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 | :--------                      | :------                      | :------                                            |
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                          |
 | python-dbus                    | 核心                         | DBus库，用于在Emacs和Python进程间通讯              |
-| python-xlib                    | 核心                         | X11的Python绑定，用于粘贴Qt5程序到Emacs Buffer区域 |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                           |
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                                        |
 | python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务                         |
@@ -139,7 +138,7 @@ Wiki包括架构设计，按键绑定，自定义选项和任务列表等文档�
 
 ### EAF是怎么工作的？
 EAF主要实现这几个功能：
-1. 利用X11的XReparent技术来实现PyQt应用进程的窗口粘贴到Emacs对应的Buffer区域
+1. 利用QWindow的Reparent技术来实现PyQt应用进程的窗口粘贴到Emacs对应的Buffer区域
 2. 通过DBus IPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
 3. 通过Qt5的QGraphicsScene来实现镜像窗口，以对应Emacs的Buffer/Window模型
 
@@ -154,17 +153,10 @@ EAF主要实现这几个功能：
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
 ### 为什么EAF只能在Linux下工作？
-1. 核心开发者主要使用Manjaro Linux，目前为止，核心开发者并不使用其他操作系统，比如MacOS，Windows，BSD
-2. EAF跨进程窗口混合技术依赖Linux下的X11 XReparent技术，其他操作系统可能有类似的技术，但是核心开发者不熟悉其他操作系统的底层技术
-3. DBus是Linux下专用的进程间通讯技术，其他操作系统可能无法支持DBus
-4. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
+1. DBus是Linux下专用的进程间通讯技术，其他操作系统可能无法支持DBus
+2. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
 
-欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有三个：XReparent，DBus，QGraphicsScene
-
-### 为什么不支持Wayland?
-EAF依赖X11的XReparent技术，Wayland并不支持跨进程窗口融合技术
-
-我们推荐你使用KDE或者Xfce这两个桌面环境，他们对XReparent技术有很好的支持，其他的轻量级窗口管理器和平铺窗口管理器对XReparent技术的支持和键盘焦点处理不完备，没法很好的支持EAF，比如i3wm，awesome都无法使EAF正常工作。
+欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：DBus，QGraphicsScene
 
 ### `[EAF] *eaf* aborted (core dumped)` 奔溃了怎么办？
 请检查 `*eaf*` 这个窗口的内容。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。
