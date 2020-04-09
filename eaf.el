@@ -459,6 +459,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-S-a" . "select_all")
     ("C-S-l" . "clear_selection")
+    ("M-DEL" . "eaf-send-alt-backspace-sequence")
     )
   "The keybinding of EAF Terminal."
   :type 'cons)
@@ -1138,6 +1139,10 @@ to edit EAF keybindings!" fun fun)))
 (defun eaf-send-ctrl-return-sequence ()
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id "C-RET"))
+
+(defun eaf-send-alt-backspace-sequence ()
+  (interactive)
+  (eaf-call "send_key_sequence" eaf--buffer-id "M-<backspace>"))
 
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."
