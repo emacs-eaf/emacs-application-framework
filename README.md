@@ -22,7 +22,7 @@ Using this framework, you can use PyQt develop powerful graphics programs to ext
 ### PDF Player
 ![img](./screenshot/pdf_viewer.gif)
 
-## Installation
+## Installation on Arch
 
 1. Install python libraries:
 ```Bash
@@ -31,6 +31,35 @@ sudo pip install git+https://github.com/wbsoft/python-poppler-qt5.git
 ```
 
 2. Clone this repository and add below code in your ~/.emacs
+```Elisp
+(require 'eaf)
+```
+## Installation on Debian 10
+
+1. Install required packages.
+```Bash
+sudo apt-get install git-lfs python3-pyqt5 python3-xlib python3-dev python-dev virtualenv git libdbus-glib-1-dev libgirepository1.0-dev
+```
+
+2. Create a clean python3 environment and Install python libraries:
+```Bash
+mkdir ~/.emacs.d/python3
+virtualenv -p /usr/bin/python3 ~/.emacs.d/python3
+souce ~/.emacs.d/python3/bin/activate
+pip install PyQt5 xlib PyQtWebEngine dbus-python fitz PyMuPDF
+```
+
+3. Install and setup [pyvenv](https://github.com/jorgenschaefer/pyvenv) to set python environment in emacs:
+```
+M-x package-install RET pyvenv RET
+```
+add this to your ~/.emacs
+```Elisp
+(require 'pyvenv)
+(pyvenv-activate (concat (getenv "HOME") "/.emacs.d/python3"))
+```
+
+4. Clone this repository and add below code in your ~/.emacs
 ```Elisp
 (require 'eaf)
 ```
