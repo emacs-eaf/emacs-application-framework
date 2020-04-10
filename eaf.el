@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Apr  2 00:35:12 2020 (-0400)
+;; Last-Updated: Fri Apr 10 02:04:33 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -73,7 +73,7 @@
 
 ;;; Require
 (defun add-subdirs-to-load-path (dir)
-  "Recursive add directories to `load-path'."
+  "Recursive add directory DIR to `load-path'."
   (let ((default-directory (file-name-as-directory dir)))
     (add-to-list 'load-path dir)
     (normal-top-level-add-subdirs-to-load-path)))
@@ -237,8 +237,7 @@ It must defined at `eaf-browser-search-engines'."
   :type 'directory)
 
 (defcustom eaf-var-list
-  '(
-    (eaf-camera-save-path . "~/Downloads")
+  '((eaf-camera-save-path . "~/Downloads")
     (eaf-browser-enable-plugin . "true")
     (eaf-browser-enable-javascript . "true")
     (eaf-browser-remember-history . "true")
@@ -251,10 +250,10 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-dark-mode . "")
     (eaf-pdf-dark-mode . "")
     (eaf-terminal-dark-mode . "")
+    (eaf-terminal-font-size . "13")
     (eaf-mindmap-dark-mode . "")
     (eaf-mindmap-save-path . "~/Documents")
-    (eaf-marker-letters . "ASDFHJKLWEOPCNM")
-    )
+    (eaf-marker-letters . "ASDFHJKLWEOPCNM"))
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
@@ -459,8 +458,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-S-a" . "select_all")
     ("C-S-l" . "clear_selection")
-    ("M-DEL" . "eaf-send-alt-backspace-sequence")
-    )
+    ("M-DEL" . "eaf-send-alt-backspace-sequence"))
   "The keybinding of EAF Terminal."
   :type 'cons)
 
@@ -1442,7 +1440,7 @@ In that way the corresponding function will be called to retrieve the HTML
  part of the current mail."
   (interactive)
   (when-let* ((html (funcall (eaf--get-html-func)))
-              (default-directory user-emacs-directory) ; force (temporary-file-directory) to ignore remote directory
+              (default-directory (eaf--non-remote-default-directory))
               (file (concat (temporary-file-directory) (make-temp-name "eaf-mail-") ".html")))
     (with-temp-file file
       (insert html))

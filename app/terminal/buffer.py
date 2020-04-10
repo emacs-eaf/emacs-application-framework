@@ -63,7 +63,7 @@ class AppBuffer(BrowserBuffer):
            (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.call_emacs("GetThemeMode") == "dark"):
             theme = "dark"
         with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme)
+            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
             self.buffer_widget.setHtml(html)
 
         self.update_title()
