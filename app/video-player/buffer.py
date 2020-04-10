@@ -28,7 +28,7 @@ from core.buffer import Buffer
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, call_emacs, True, QColor(0, 0, 0, 255))
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, call_emacs, True)
 
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)

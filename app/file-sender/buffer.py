@@ -35,7 +35,7 @@ import socket
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, call_emacs, False, QColor(0, 0, 0, 255))
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, call_emacs, False)
 
         self.add_widget(FileTransferWidget(url, QColor(0, 0, 0, 255)))
 
