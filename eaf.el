@@ -87,6 +87,7 @@
 (require 'seq)
 (require 'eaf-mindmap)
 (require 'eaf-interleave)
+(require 'json)
 
 ;;; Code:
 
@@ -806,8 +807,7 @@ For now only EAF browser app is supported."
   (frame-parameter frame 'window-id))
 
 (defun eaf-serialization-var-list ()
-  (string-join (cl-loop for (key . value) in eaf-var-list
-                        collect (format "%sᛝ%s" key value)) "ᛡ"))
+  (json-encode eaf-var-list))
 
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
@@ -1629,7 +1629,10 @@ To override and open a new terminal regardless, call interactively with prefix a
   "Run COMMAND in terminal in directory DIR.
 
 If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
-  (eaf-open dir "terminal" (format "%sᛡ%s" command (expand-file-name dir)) always-new))
+  (let ((arguments (make-hash-table :test 'equal)))
+    (puthash "command" command arguments)
+    (puthash "directory" (expand-file-name dir) arguments)
+    (eaf-open dir "terminal" (json-encode-hash-table arguments) always-new)))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."

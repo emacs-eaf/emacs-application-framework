@@ -29,6 +29,7 @@ import subprocess
 import signal
 import threading
 import getpass
+import json
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
@@ -38,9 +39,9 @@ class AppBuffer(BrowserBuffer):
         self.port = get_free_port()
         self.url = url
 
-        argument_list = arguments.split("ᛡ")
-        self.command = argument_list[0]
-        self.start_directory = argument_list[1]
+        arguments_dict = json.loads(arguments)
+        self.command = arguments_dict["command"]
+        self.start_directory = arguments_dict["directory"]
 
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.server_js = os.path.join(os.path.dirname(__file__), "server.js")

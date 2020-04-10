@@ -98,9 +98,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_emacs_var_dict(self, var_dict_string):
-        for var_pair in var_dict_string.split("ᛡ"):
-            (var_name, var_value) = var_pair.split("ᛝ")
-            self.emacs_var_dict[var_name] = var_value
+        self.emacs_var_dict = json.loads(var_dict_string)
 
         for buffer in list(self.buffer_dict.values()):
             buffer.emacs_var_dict = self.emacs_var_dict
@@ -545,4 +543,3 @@ if __name__ == "__main__":
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         sys.exit(app.exec_())
-
