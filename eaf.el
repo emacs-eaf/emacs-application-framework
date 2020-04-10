@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Apr 10 02:04:33 2020 (-0400)
+;; Last-Updated: Fri Apr 10 03:19:03 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1616,7 +1616,7 @@ The initial directory is `default-directory'.  However, it opens `$HOME'
 If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
 To override and open a new terminal regardless, call interactively with prefix arg."
   (interactive)
-  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory)))
+  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
 
 (defun eaf-open-ipython ()
   "Open ipython in terminal."
@@ -1625,9 +1625,11 @@ To override and open a new terminal regardless, call interactively with prefix a
       (eaf-terminal-run-command-in-dir "ipython" (eaf--non-remote-default-directory))
     (message "[EAF/terminal] Please install ipython first.")))
 
-(defun eaf-terminal-run-command-in-dir (command dir)
-  "Run COMMAND in terminal in directory DIR."
-  (eaf-open dir "terminal" (format "%sᛡ%s" command (expand-file-name dir))))
+(defun eaf-terminal-run-command-in-dir (command dir &optional always-new)
+  "Run COMMAND in terminal in directory DIR.
+
+If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
+  (eaf-open dir "terminal" (format "%sᛡ%s" command (expand-file-name dir)) always-new))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
