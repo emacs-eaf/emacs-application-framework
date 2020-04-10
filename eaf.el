@@ -1610,29 +1610,35 @@ choose a search engine defined in `eaf-browser-search-engines'"
 
 ;;;###autoload
 (defun eaf-open-terminal ()
-  "Open EAF terminal application."
+  "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
+
+The initial directory is `default-directory'.  However, it opens `$HOME'
+ when `default-directory' is part of a remote process.
+
+If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
+To override and open a new terminal regardless, call interactively with prefix arg."
   (interactive)
-  (eaf-run-command-in-terminal (eaf--generate-terminal-command) default-directory))
+  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory)))
 
 (defun eaf-open-ipython ()
   "Open ipython in terminal."
   (interactive)
   (if (executable-find "ipython")
-      (eaf-run-command-in-terminal "ipython" default-directory)
+      (eaf-terminal-run-command-in-dir "ipython" (eaf--non-remote-default-directory))
     (message "[EAF/terminal] Please install ipython first.")))
 
-(defun eaf-run-command-in-terminal (command dir)
-  "Run any command in terminal."
-  (interactive "s[EAF/terminal] Command: ")
-  (eaf-open (eaf--generate-terminal-buffer-name)
-            "terminal"
-            (format "%sᛡ%s" command (expand-file-name dir))))
+(defun eaf-terminal-run-command-in-dir (command dir)
+  "Run COMMAND in terminal in directory DIR."
+  (eaf-open dir "terminal" (format "%sᛡ%s" command (expand-file-name dir))))
+
+(defun eaf--non-remote-default-directory ()
+  "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
+  (if (file-remote-p default-directory)
+      (getenv "HOME")
+    default-directory))
 
 (defun eaf--generate-terminal-command ()
   (getenv "SHELL"))
-
-(defun eaf--generate-terminal-buffer-name ()
-  (format "%s-%04x" "eaf-terminal" (random (expt 16 4))))
 
 (defun eaf--get-app-for-extension (extension-name)
   (let ((app-name
@@ -1668,8 +1674,11 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (define-obsolete-function-alias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;###autoload
-(defun eaf-open (url &optional app-name arguments open-always)
+(defun eaf-open (url &optional app-name arguments always-new)
   "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
+
+Interactively, a prefix arg replaces ALWAYS-NEW, which means to open a new
+ buffer regardless of whether a buffer with existing URL and APP-NAME exists.
 
 By default, `eaf-open' will switch to buffer if corresponding url exists.
 `eaf-open' always open new buffer if option OPEN-ALWAYS is non-nil.
@@ -1703,6 +1712,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
               (t "File %s does not exist.")))
      url))
   (unless arguments (setq arguments ""))
+  (setq always-new (or always-new current-prefix-arg))
   ;; Hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
@@ -1718,10 +1728,10 @@ When called interactively, URL accepts a file that can be opened by EAF."
                          (string= eaf--buffer-app-name app-name))
                 (setq exists-eaf-buffer buffer)
                 (throw 'found-match-buffer t)))))
-        ;; Switch to exists buffer,
+        ;; Switch to existing buffer,
         ;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
-                 (not open-always))
+                 (not always-new))
             (progn
               (eaf--display-app-buffer app-name exists-eaf-buffer)
               (message (concat "[EAF/" app-name "] " "Switch to %s") url))
