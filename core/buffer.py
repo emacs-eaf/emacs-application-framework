@@ -166,12 +166,7 @@ class Buffer(QGraphicsScene):
 
         self.buffer_widget.buffer = self
 
-    def before_destroy_buffer(self):
-        pass
-
     def destroy_buffer(self):
-        self.before_destroy_buffer()
-
         if self.buffer_widget is not None:
             self.buffer_widget.deleteLater()
 

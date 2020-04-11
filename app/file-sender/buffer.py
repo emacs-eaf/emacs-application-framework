@@ -138,8 +138,10 @@ class FileTransferWidget(QWidget):
         httpd = BaseHTTPServer.HTTPServer(('', self.port), SimpleHTTPRequestHandler)
         httpd.serve_forever()
 
-    def before_destroy_buffer(self):
+    def destroy_buffer(self):
         global local_file_path
 
         self.message_to_emacs.emit("Stop file sender server: http://{0}:{1}/{2}".format(self.local_ip, self.port, local_file_path))
         self.sender_thread.stop()
+
+        super().destroy_buffer()

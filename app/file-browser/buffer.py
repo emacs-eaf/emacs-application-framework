@@ -40,6 +40,8 @@ class AppBuffer(Buffer):
     def destroy_buffer(self):
         os.kill(self.buffer_widget.background_process.pid, signal.SIGKILL)
 
+        super().destroy_buffer()
+
 class Image(qrcode.image.base.BaseImage):
     def __init__(self, border, width, box_size):
         self.border = border

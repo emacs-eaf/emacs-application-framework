@@ -52,6 +52,7 @@ class AppBuffer(Buffer):
 
     def destroy_buffer(self):
         self.buffer_widget.stop_camera()
+        
         super().destroy_buffer()
 
 class CameraWidget(QWidget):

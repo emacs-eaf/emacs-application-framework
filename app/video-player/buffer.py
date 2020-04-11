@@ -61,8 +61,10 @@ class AppBuffer(Buffer):
             self.buffer_widget.media_player.play()
             self.buffer_widget.video_need_replay = True
 
-    def before_destroy_buffer(self):
+    def destroy_buffer(self):
         self.buffer_widget.media_player.pause()
+
+        super().destroy_buffer()
 
 class VideoPlayerWidget(QWidget):
 
