@@ -387,8 +387,9 @@ class PdfViewerWidget(QWidget):
                     painter.translate(0, self.page_padding)
 
                 # Draw page image.
-                visible_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
-                painter.drawPixmap(QRect(visible_x, render_y, render_width, render_height), qpixmap)
+                if self.read_mode == "fit_to_customize":
+                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
+                painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
         # Clean unused pixmap cache that avoid use too much memory.
         self.clean_unused_page_cache_pixmap()
