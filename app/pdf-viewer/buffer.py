@@ -937,6 +937,8 @@ class PdfViewerWidget(QWidget):
             if index < self.page_total_number:
                 render_width = self.page_width * self.scale
                 render_x = int((self.rect().width() - render_width) / 2)
+                if self.read_mode == "fit_to_customize":
+                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
 
                 # computer absolute coordinate of page
                 x = (ex - render_x) * 1.0 / self.scale
