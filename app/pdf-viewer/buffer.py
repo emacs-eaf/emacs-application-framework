@@ -45,6 +45,7 @@ class AppBuffer(Buffer):
                             "scroll_down_page", "scroll_to_home", "scroll_to_end",
                             "zoom_reset", "zoom_in", "zoom_out",
                             "save_current_pos", "jump_to_saved_pos",
+                            "scroll_left", "scroll_right",
                             "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
             self.build_widget_method(method_name)
 
@@ -196,6 +197,7 @@ class PdfViewerWidget(QWidget):
         # Init scale and scale mode.
         self.scale = 1.0
         self.read_mode = "fit_to_width"
+        self.horizontal_offset = 0
 
         # Inverted mode.
         self.inverted_mode = False
@@ -385,6 +387,8 @@ class PdfViewerWidget(QWidget):
                     painter.translate(0, self.page_padding)
 
                 # Draw page image.
+                if self.read_mode == "fit_to_customize":
+                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
         # Clean unused pixmap cache that avoid use too much memory.
@@ -487,6 +491,12 @@ class PdfViewerWidget(QWidget):
 
     def scroll_down(self):
         self.update_scroll_offset(max(self.scroll_offset - self.scale * self.scroll_step, 0))
+
+    def scroll_left(self):
+        self.update_horizontal_offset(max(self.horizontal_offset - self.scale * 30, (self.rect().width() - self.page_width * self.scale) / 2))
+
+    def scroll_right(self):
+        self.update_horizontal_offset(min(self.horizontal_offset + (self.scale * 30), (self.page_width * self.scale - self.rect().width()) / 2))
 
     def scroll_up_page(self):
         # Adjust scroll step to make users continue reading fluently.
@@ -912,6 +922,11 @@ class PdfViewerWidget(QWidget):
             self.scroll_offset = new_offset
             self.update()
 
+    def update_horizontal_offset(self, new_offset):
+        if self.horizontal_offset != new_offset:
+            self.horizontal_offset = new_offset
+            self.update()
+
     def get_cursor_absolute_position(self):
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
@@ -922,6 +937,8 @@ class PdfViewerWidget(QWidget):
             if index < self.page_total_number:
                 render_width = self.page_width * self.scale
                 render_x = int((self.rect().width() - render_width) / 2)
+                if self.read_mode == "fit_to_customize":
+                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
 
                 # computer absolute coordinate of page
                 x = (ex - render_x) * 1.0 / self.scale
