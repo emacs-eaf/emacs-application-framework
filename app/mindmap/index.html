@@ -62,13 +62,10 @@
              if(!selected_node) {
                  _jm.move_node(selected_id,'_first_');
              }
-             if(_jm.view.is_editing()) {
-                 _jm.end_edit();
-             } else {
-                 var nodeid = jsMind.util.uuid.newid();
-                 var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
-                 _jm.select_node(node);
-             }
+
+             var nodeid = jsMind.util.uuid.newid();
+             var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
+             _jm.select_node(node);
          }
 
          function get_selected_nodeid(){
@@ -227,12 +224,6 @@
          }
 
          function paste_node_tree(src_node_id) {
-             /* var selected_node = _jm.get_selected_node();
-              * if(!!selected_node){
-              *     var src_node = _jm.get_node(src_node_id);
-              *     _jm.move_node(src_node, selected_node, selected_node.direction);
-              * } */
-
              var selected_node = _jm.get_selected_node();
              if(!!selected_node){
                  var src_node = _jm.get_node(src_node_id);
