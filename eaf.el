@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Apr 11 20:17:28 2020 (-0400)
+;; Last-Updated: Sat Apr 11 23:01:05 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -347,13 +347,17 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-pdf-viewer-keybinding
   '(("j" . "scroll_up")
-    ("k" . "scroll_down")
     ("<down>" . "scroll_up")
-    ("<up>" . "scroll_down")
     ("C-n" . "scroll_up")
+    ("k" . "scroll_down")
+    ("<up>" . "scroll_down")
     ("C-p" . "scroll_down")
-    ("C-b" . "scroll_right")
-    ("C-f" . "scroll_left")
+    ("h" . "scroll_left")
+    ("<left>" . "scroll_left")
+    ("C-b" . "scroll_left")
+    ("l" . "scroll_right")
+    ("<right>" . "scroll_right")
+    ("C-f" . "scroll_right")
     ("SPC" . "scroll_up_page")
     ("b" . "scroll_down_page")
     ("C-v" . "scroll_up_page")
@@ -375,11 +379,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-s" . "search_text_forward")
     ("C-r" . "search_text_backward")
     ("x" . "close_buffer")
-    ("h" . "add_annot_highlight")
-    ("u" . "add_annot_underline")
-    ("s" . "add_annot_squiggly")
-    ("d" . "add_annot_strikeout_or_delete_annot")
-    ("e" . "add_annot_text_or_edit_annot")
+    ("M-h" . "add_annot_highlight")
+    ("M-u" . "add_annot_underline")
+    ("M-s" . "add_annot_squiggly")
+    ("M-d" . "add_annot_strikeout_or_delete_annot")
+    ("M-e" . "add_annot_text_or_edit_annot")
     ("J" . "select_left_tab")
     ("K" . "select_right_tab"))
   "The keybinding of EAF PDF Viewer."

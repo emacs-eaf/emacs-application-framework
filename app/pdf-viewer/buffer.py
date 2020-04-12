@@ -45,7 +45,7 @@ class AppBuffer(Buffer):
                             "scroll_down_page", "scroll_to_home", "scroll_to_end",
                             "zoom_reset", "zoom_in", "zoom_out",
                             "save_current_pos", "jump_to_saved_pos",
-                            "scroll_left", "scroll_right",
+                            "scroll_right", "scroll_left",
                             "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
             self.build_widget_method(method_name)
 
@@ -442,9 +442,9 @@ class PdfViewerWidget(QWidget):
             if event.angleDelta().y():
                 self.update_scroll_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
             elif event.angleDelta().x() >= 0:
-                self.scroll_right()
-            elif event.angleDelta().x() < 0:
                 self.scroll_left()
+            elif event.angleDelta().x() < 0:
+                self.scroll_right()
 
     def get_start_page_index(self):
         return int(self.scroll_offset * 1.0 / self.scale / self.page_height)
@@ -499,10 +499,10 @@ class PdfViewerWidget(QWidget):
     def scroll_down(self):
         self.update_scroll_offset(max(self.scroll_offset - self.scale * self.scroll_step, 0))
 
-    def scroll_left(self):
+    def scroll_right(self):
         self.update_horizontal_offset(max(self.horizontal_offset - self.scale * 30, (self.rect().width() - self.page_width * self.scale) / 2))
 
-    def scroll_right(self):
+    def scroll_left(self):
         self.update_horizontal_offset(min(self.horizontal_offset + (self.scale * 30), (self.page_width * self.scale - self.rect().width()) / 2))
 
     def scroll_up_page(self):
