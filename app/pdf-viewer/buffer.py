@@ -439,7 +439,12 @@ class PdfViewerWidget(QWidget):
     @build_context_wrap
     def wheelEvent(self, event):
         if not event.accept():
-            self.update_scroll_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
+            if event.angleDelta().y():
+                self.update_scroll_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
+            elif event.angleDelta().x() >= 0:
+                self.scroll_right()
+            elif event.angleDelta().x() < 0:
+                self.scroll_left()
 
     def get_start_page_index(self):
         return int(self.scroll_offset * 1.0 / self.scale / self.page_height)
