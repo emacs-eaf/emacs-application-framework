@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Apr 10 03:19:03 2020 (-0400)
+;; Last-Updated: Sat Apr 11 20:17:28 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -461,7 +461,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-S-a" . "select_all")
     ("C-S-l" . "clear_selection")
-    ("M-DEL" . "eaf-send-alt-backspace-sequence"))
+    ("M-DEL" . "eaf-send-alt-backspace-sequence")
+    ("M-<backspace>" . "eaf-send-alt-backspace-sequence"))
   "The keybinding of EAF Terminal."
   :type 'cons)
 
