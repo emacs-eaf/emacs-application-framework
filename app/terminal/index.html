@@ -11,28 +11,21 @@
         <link rel="stylesheet" href="%2/node_modules/xterm/css/xterm.css" />
 
         <style>
-         html, body {
+         /* Make terminal fit full area of window */
+         html, body, #xterm, .xterm-screen, canvas {
              width: 100%;
              height: 100%;
              padding: 0;
              margin: 0;
          }
-         div#xterm {
-             width: 100%;
-             height: 100%;
-             padding: 0;
-             margin: 0;
+
+         .xterm-viewport {
+             display: none;
          }
 
          /* Hide scrollbar */
          .xterm-viewport {
              overflow: hidden !important;
-         }
-
-         /* Make terminal fit full area of window */
-         div.terminal.xterm {
-             height: 100%;
-             width: 100%;
          }
         </style>
     </head>
