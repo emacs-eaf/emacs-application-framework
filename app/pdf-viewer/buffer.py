@@ -1007,10 +1007,14 @@ class PdfViewerWidget(QWidget):
                 self.hover_annot()
 
         elif event.type() == QEvent.MouseButtonPress:
+            self.grabMouse() # add this detect release mouse event
             if event.button() == Qt.LeftButton:
                 event_link = self.get_event_link()
                 if event_link:
                     self.jump_to_page(event_link["page"] + 1)
+
+        elif event.type() == QEvent.MouseButtonRelease:
+            pass
 
         elif event.type() == QEvent.MouseButtonDblClick:
             if self.is_mark_search:
