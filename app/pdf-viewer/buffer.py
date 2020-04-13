@@ -440,15 +440,11 @@ class PdfViewerWidget(QWidget):
     def wheelEvent(self, event):
         if not event.accept():
             if event.angleDelta().y():
-                self.update_scroll_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
+                self.update_vertical_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
             if event.angleDelta().x():
-                new_pos = (self.horizontal_offset
-                           + self.scale * event.angleDelta().x() / 120
-                           * self.mouse_scroll_offset)
-                max_pos = (self.page_width * self.scale
-                           - self.rect().width())
-                self.update_horizontal_offset(
-                    max(min(new_pos , max_pos), -max_pos))
+                new_pos = (self.horizontal_offset + self.scale * event.angleDelta().x() / 120 * self.mouse_scroll_offset)
+                max_pos = (self.page_width * self.scale - self.rect().width())
+                self.update_horizontal_offset(max(min(new_pos , max_pos), -max_pos))
 
     def get_start_page_index(self):
         return int(self.scroll_offset * 1.0 / self.scale / self.page_height)
@@ -498,10 +494,10 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def scroll_up(self):
-        self.update_scroll_offset(min(self.scroll_offset + self.scale * self.scroll_step, self.max_scroll_offset()))
+        self.update_vertical_offset(min(self.scroll_offset + self.scale * self.scroll_step, self.max_scroll_offset()))
 
     def scroll_down(self):
-        self.update_scroll_offset(max(self.scroll_offset - self.scale * self.scroll_step, 0))
+        self.update_vertical_offset(max(self.scroll_offset - self.scale * self.scroll_step, 0))
 
     def scroll_right(self):
         self.update_horizontal_offset(max(self.horizontal_offset - self.scale * 30, (self.rect().width() - self.page_width * self.scale) / 2))
@@ -511,17 +507,17 @@ class PdfViewerWidget(QWidget):
 
     def scroll_up_page(self):
         # Adjust scroll step to make users continue reading fluently.
-        self.update_scroll_offset(min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset()))
+        self.update_vertical_offset(min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset()))
 
     def scroll_down_page(self):
         # Adjust scroll step to make users continue reading fluently.
-        self.update_scroll_offset(max(self.scroll_offset - self.rect().height() + self.scroll_step, 0))
+        self.update_vertical_offset(max(self.scroll_offset - self.rect().height() + self.scroll_step, 0))
 
     def scroll_to_home(self):
-        self.update_scroll_offset(0)
+        self.update_vertical_offset(0)
 
     def scroll_to_end(self):
-        self.update_scroll_offset(self.max_scroll_offset())
+        self.update_vertical_offset(self.max_scroll_offset())
 
     def zoom_in(self):
         if self.is_mark_search:
@@ -690,19 +686,19 @@ class PdfViewerWidget(QWidget):
             self.buffer.message_to_emacs.emit("No results found with \"" + text + "\".")
             self.is_mark_search = False
         else:
-            self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
+            self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
             self.buffer.message_to_emacs.emit("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
 
     def jump_next_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index + 1) % len(self.search_text_offset_list)
-            self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
+            self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
             self.buffer.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def jump_last_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index - 1) % len(self.search_text_offset_list)
-            self.update_scroll_offset(self.search_text_offset_list[self.search_text_index])
+            self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
             self.buffer.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def cleanup_search(self):
@@ -923,12 +919,12 @@ class PdfViewerWidget(QWidget):
         self.save_annot()
 
     def jump_to_page(self, page_num):
-        self.update_scroll_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
+        self.update_vertical_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
 
     def jump_to_percent(self, percent):
-        self.update_scroll_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
+        self.update_vertical_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
 
-    def update_scroll_offset(self, new_offset):
+    def update_vertical_offset(self, new_offset):
         if self.scroll_offset != new_offset:
             self.scroll_offset = new_offset
             self.update()
