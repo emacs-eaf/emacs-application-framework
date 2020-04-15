@@ -65,6 +65,7 @@ class JsonrpcWebsocketServer(QObject):
         if self.client_connection:
             print("Only one client")
             conn.close()
+            return
         print("client connected")
         self.client_connection = conn
         self.client_connection.textMessageReceived.connect(
