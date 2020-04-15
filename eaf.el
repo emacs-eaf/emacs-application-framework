@@ -637,7 +637,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-office-extension-list
-  '("docx" "doc" "ppt" "pptx" "xlsx")
+  '("docx" "doc" "ppt" "pptx" "xlsx" "xls")
   "The extension list of office application."
   :type 'cons)
 
