@@ -347,6 +347,17 @@ class EAF(dbus.service.Object):
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="s")
+    def call_function_with_args(self, buffer_id, function_name, args_string):
+        if buffer_id in self.buffer_dict:
+            try:
+                return self.buffer_dict[buffer_id].call_function_with_args(function_name, args_string)
+            except AttributeError:
+                import traceback
+                traceback.print_exc()
+                self.message_to_emacs("Cannot call function: " + function_name)
+                return ""
+
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def action_quit(self, buffer_id):
         if buffer_id in self.buffer_dict:
