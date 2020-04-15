@@ -102,6 +102,10 @@ class AppBuffer(Buffer):
     def jump_to_page(self):
         self.send_input_message("Jump to Page: ", "jump_page")
 
+    def jump_to_page_with_num(self, page_num):
+        self.buffer_widget.jump_to_page(int(page_num))
+        return ""
+
     def jump_to_percent(self):
         self.send_input_message("Jump to Percent: ", "jump_percent")
 
@@ -170,6 +174,13 @@ class AppBuffer(Buffer):
             self.buffer_widget.annot_select_char_area("text", new_text)
         elif self.buffer_widget.is_hover_annot:
             self.buffer_widget.update_annot_text(new_text)
+
+    def get_toc(self):
+        result = ""
+        toc = self.buffer_widget.document.getToC()
+        for line in toc:
+            result += str(line[0]) + chr(1) + line[1] + chr(1) + str(line[2]) + "\n"
+        return result
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)

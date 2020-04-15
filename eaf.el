@@ -385,7 +385,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-d" . "add_annot_strikeout_or_delete_annot")
     ("M-e" . "add_annot_text_or_edit_annot")
     ("J" . "select_left_tab")
-    ("K" . "select_right_tab"))
+    ("K" . "select_right_tab")
+    ("o" . "eaf-pdf-outline"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
@@ -734,6 +735,15 @@ Python process only create application view when Emacs window or buffer state ch
   "When non-nil, EAF will intelligently hide modeline as necessray.")
 
 (defvar eaf-buffer-title-format "%s")
+
+(defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
+  "The name of pdf-outline-buffer")
+
+(defvar eaf-pdf-outline-original-buffer-name ""
+  "The original eaf pdf buffer.")
+
+(defvar eaf-pdf-outline-window-configuration nil
+  "Save window configure before popup outline buffer.")
 
 (defvar-local eaf--bookmark-title nil)
 
@@ -1559,7 +1569,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1921,6 +1931,46 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  "com.lazycat.emacs"
  "GetThemeMode"
  'eaf-get-theme-mode)
+
+(define-minor-mode eaf-pdf-outline-mode
+  "eaf pdf outline mode."
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
+            map))
+
+(defun eaf-pdf-outline ()
+  (interactive)
+  (setq eaf-pdf-outline-window-configuration (current-window-configuration))
+
+  (let ((buffer-name (buffer-name (current-buffer)))
+        (toc (eaf-call "call_function" eaf--buffer-id "get_toc")))
+    (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
+      (erase-buffer)
+      (insert toc)
+      (setq eaf-pdf-outline-original-buffer-name buffer-name)
+      (make-local-variable 'eaf-pdf-outline-original-buffer-name)
+
+      (goto-char (point-min))
+      (save-excursion (replace-regexp "^1" ""))
+      (save-excursion (replace-regexp "^2" "  "))
+      (save-excursion (replace-regexp "^3" "    "))
+      (save-excursion (replace-regexp "^4" "      "))
+      (save-excursion (replace-regexp "^5" "        "))
+      (save-excursion (replace-regexp "" " "))
+      (eaf-pdf-outline-mode 1))
+    (pop-to-buffer eaf-pdf-outline-buffer-name)))
+
+(defun eaf-pdf-outline-jump ()
+  "jump into specific page."
+  (interactive)
+  (let* ((line (thing-at-point 'line))
+         (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
+    (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
+    (eaf-call "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
+
+    (when eaf-pdf-outline-window-configuration
+      (set-window-configuration eaf-pdf-outline-window-configuration)
+      (setq eaf-pdf-outline-window-configuration nil))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
