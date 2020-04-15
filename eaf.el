@@ -739,9 +739,6 @@ Python process only create application view when Emacs window or buffer state ch
 (defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
   "The name of pdf-outline-buffer")
 
-(defvar eaf-pdf-outline-original-buffer-name ""
-  "The original eaf pdf buffer.")
-
 (defvar eaf-pdf-outline-window-configuration nil
   "Save window configure before popup outline buffer.")
 
@@ -1569,7 +1566,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1940,24 +1937,20 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (defun eaf-pdf-outline ()
   (interactive)
-  (setq eaf-pdf-outline-window-configuration (current-window-configuration))
-
   (let ((buffer-name (buffer-name (current-buffer)))
         (toc (eaf-call "call_function" eaf--buffer-id "get_toc")))
+    ;; Save window configuration before outline.
+    (setq eaf-pdf-outline-window-configuration (current-window-configuration))
+
+    ;; Insert outline content.
     (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
       (erase-buffer)
       (insert toc)
-      (setq eaf-pdf-outline-original-buffer-name buffer-name)
-      (make-local-variable 'eaf-pdf-outline-original-buffer-name)
-
       (goto-char (point-min))
-      (save-excursion (replace-regexp "^1" ""))
-      (save-excursion (replace-regexp "^2" "  "))
-      (save-excursion (replace-regexp "^3" "    "))
-      (save-excursion (replace-regexp "^4" "      "))
-      (save-excursion (replace-regexp "^5" "        "))
-      (save-excursion (replace-regexp "" " "))
+      (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
       (eaf-pdf-outline-mode 1))
+
+    ;; Popup ouline buffer.
     (pop-to-buffer eaf-pdf-outline-buffer-name)))
 
 (defun eaf-pdf-outline-jump ()
@@ -1965,9 +1958,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive)
   (let* ((line (thing-at-point 'line))
          (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
+    ;; Jump to page.
     (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
     (eaf-call "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
 
+    ;; Restore window configuration before outline operation.
     (when eaf-pdf-outline-window-configuration
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))

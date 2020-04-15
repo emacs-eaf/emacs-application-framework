@@ -179,7 +179,7 @@ class AppBuffer(Buffer):
         result = ""
         toc = self.buffer_widget.document.getToC()
         for line in toc:
-            result += str(line[0]) + chr(1) + line[1] + chr(1) + str(line[2]) + "\n"
+            result += "{0}{1} {2}\n".format("".join("    " * (line[0] - 1)), line[1], line[2])
         return result
 
 class PdfViewerWidget(QWidget):
