@@ -22,34 +22,37 @@
 # NOTE
 # QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
-from app.browser.buffer import AppBuffer as NeverUsed # noqa
+from app.browser.buffer import AppBuffer as NeverUsed  # noqa
 from sys import version_info
 
-from PyQt5.QtCore import QLibraryInfo, QTimer
-from PyQt5.QtNetwork import QNetworkProxy
+from PyQt5.QtCore import QLibraryInfo, QTimer, QObject, QEventLoop, Qt
+from PyQt5.QtNetwork import QNetworkProxy, QHostAddress
 from PyQt5.QtWidgets import QApplication
 from core.view import View
-from dbus.mainloop.glib import DBusGMainLoop
-import dbus
-import dbus.service
 import importlib
 import json
 import os
 import subprocess
+import platform
 
-EAF_DBUS_NAME = "com.lazycat.eaf"
-EAF_OBJECT_NAME = "/com/lazycat/eaf"
+from eaf_websocket import JsonrpcWebsocketServer
 
-class EAF(dbus.service.Object):
-    def __init__(self, args):
+
+class EAF:
+    def __init__(self, server, args):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
-        dbus.service.Object.__init__(
-            self,
-            dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
-            EAF_OBJECT_NAME)
-
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
+        self.server = server
+        self.server.register_dispatcher_object(self)
+        (
+            emacs_width,
+            emacs_height,
+            proxy_host,
+            proxy_port,
+            proxy_type,
+            config_dir,
+            var_dict_string,
+        ) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.expanduser(config_dir)
@@ -79,36 +82,44 @@ class EAF(dbus.service.Object):
             QNetworkProxy.setApplicationProxy(proxy)
 
     def get_command_result(self, command):
-        if version_info >= (3,7):
-            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE, text=True).stdout
+        if version_info >= (3, 7):
+            return subprocess.run(
+                command, check=False, shell=True, stdout=subprocess.PIPE, text=True
+            ).stdout
         else:
-            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE).stdout
+            return subprocess.run(
+                command, check=False, shell=True, stdout=subprocess.PIPE
+            ).stdout
 
     def webengine_include_private_codec(self):
-        path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
-        return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
+        path = os.path.join(
+            QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath),
+            "QtWebEngineProcess",
+        )
+        if platform.system() =="Windows":
+            return False
+        else:
+            return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_emacs_var_dict(self, var_dict_string):
         self.emacs_var_dict = json.loads(var_dict_string)
 
         for buffer in list(self.buffer_dict.values()):
             buffer.emacs_var_dict = self.emacs_var_dict
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ssss", out_signature="s")
     def new_buffer(self, buffer_id, url, app_name, arguments):
         # NOTE: We need use function str convert dbus.String to String,
         # otherwise some library will throw error, such as fitz library.
-        return self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), str(arguments))
+        return self.create_app(
+            buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), str(arguments)
+        )
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
         for buffer in list(self.buffer_dict.values()):
             if buffer.module_path == module_path and buffer.url == buffer_url:
                 buffer.update_with_data(update_data)
                 break
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def scroll_buffer(self, view_info, scroll_direction, scroll_type):
         (buffer_id, _, _, _, _) = view_info.split(":")
         if buffer_id in self.buffer_dict:
@@ -124,14 +135,17 @@ class EAF(dbus.service.Object):
             secrets.token_hex(2),
             secrets.token_hex(2),
             secrets.token_hex(2),
-            secrets.token_hex(2))
+            secrets.token_hex(2),
+        )
 
     def create_new_browser_window(self):
         # Generate buffer id same as eaf.el does.
         buffer_id = self.get_new_browser_window_buffer_id()
 
         # Create buffer for create new browser window.
-        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer", "")
+        app_buffer = self.create_buffer(
+            buffer_id, "http://0.0.0.0", "app.browser.buffer", ""
+        )
 
         # Create emacs buffer with buffer id.
         self.create_new_browser_buffer(buffer_id)
@@ -146,15 +160,26 @@ class EAF(dbus.service.Object):
             return ""
         except ImportError:
             import traceback
+
             traceback.print_exc()
-            return "EAF: Something went wrong when trying to import {0}".format(module_path)
+            return "EAF: Something went wrong when trying to import {0}".format(
+                module_path
+            )
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
-
+        print("create application buffer ", buffer_id)
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path)
+        app_buffer = module.AppBuffer(
+            buffer_id,
+            url,
+            eaf_config_dir,
+            arguments,
+            self.emacs_var_dict,
+            module_path,
+            self.async_call_emacs,
+        )
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer
@@ -187,43 +212,67 @@ class EAF(dbus.service.Object):
         app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
 
         # Handle get_focus_text signal.
-        if getattr(app_buffer, "get_focus_text", False) and getattr(app_buffer.get_focus_text, "connect", False):
+        if getattr(app_buffer, "get_focus_text", False) and getattr(
+            app_buffer.get_focus_text, "connect", False
+        ):
             app_buffer.get_focus_text.connect(self.edit_focus_text)
 
-        if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(app_buffer.buffer_widget.get_focus_text, "connect", False):
+        if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(
+            app_buffer.buffer_widget.get_focus_text, "connect", False
+        ):
             app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
         # Handle trigger_focus_event signal.
-        if getattr(app_buffer.buffer_widget, "trigger_focus_event", False) and getattr(app_buffer.buffer_widget.trigger_focus_event, "connect", False):
-            app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
+        if getattr(app_buffer.buffer_widget, "trigger_focus_event", False) and getattr(
+            app_buffer.buffer_widget.trigger_focus_event, "connect", False
+        ):
+            app_buffer.buffer_widget.trigger_focus_event.connect(
+                self.focus_emacs_buffer
+            )
 
         # Handle export_org_json signal.
-        if getattr(app_buffer, "export_org_json", False) and getattr(app_buffer.export_org_json, "connect", False):
+        if getattr(app_buffer, "export_org_json", False) and getattr(
+            app_buffer.export_org_json, "connect", False
+        ):
             app_buffer.export_org_json.connect(self.export_org_json)
 
         # Handle dev tools signal.
-        if getattr(app_buffer, "open_dev_tools_tab", False) and getattr(app_buffer.open_dev_tools_tab, "connect", False):
+        if getattr(app_buffer, "open_dev_tools_tab", False) and getattr(
+            app_buffer.open_dev_tools_tab, "connect", False
+        ):
             app_buffer.open_dev_tools_tab.connect(self.open_dev_tools_tab)
 
         # Handle fulllscreen signal.
-        if getattr(app_buffer, "enter_fullscreen_request", False) and getattr(app_buffer.enter_fullscreen_request, "connect", False):
+        if getattr(app_buffer, "enter_fullscreen_request", False) and getattr(
+            app_buffer.enter_fullscreen_request, "connect", False
+        ):
             app_buffer.enter_fullscreen_request.connect(self.enter_fullscreen_request)
 
-        if getattr(app_buffer, "exit_fullscreen_request", False) and getattr(app_buffer.exit_fullscreen_request, "connect", False):
+        if getattr(app_buffer, "exit_fullscreen_request", False) and getattr(
+            app_buffer.exit_fullscreen_request, "connect", False
+        ):
             app_buffer.exit_fullscreen_request.connect(self.exit_fullscreen_request)
 
         # Add create new window when create_new_browser_window_callback is call.
         if module_path == "app.browser.buffer" or module_path == "app.terminal.buffer":
-            app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
+            app_buffer.buffer_widget.create_new_browser_window_callback = (
+                self.create_new_browser_window
+            )
 
         elif module_path == "app.rss-reader.buffer":
-            app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
+            app_buffer.buffer_widget.browser.create_new_browser_window_callback = (
+                self.create_new_browser_window
+            )
 
         if module_path == "app.browser.buffer":
             app_buffer.proxy_string = proxy_string
 
         # If arguments is dev_tools, create dev tools page.
-        if module_path == "app.browser.buffer" and arguments == "dev_tools" and self.dev_tools_page:
+        if (
+            module_path == "app.browser.buffer"
+            and arguments == "dev_tools"
+            and self.dev_tools_page
+        ):
             self.dev_tools_page.setDevToolsPage(app_buffer.buffer_widget.web_page)
             self.dev_tools_page = None
 
@@ -232,12 +281,15 @@ class EAF(dbus.service.Object):
 
         return app_buffer
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def update_views(self, args):
+        if len(args) == 0:
+            return
         view_infos = args.split(",")
 
         # Do something if buffer's all view hide after update_views operation.
-        old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
+        old_view_buffer_ids = list(
+            set(map(lambda v: v.buffer_id, self.view_dict.values()))
+        )
         new_view_buffer_ids = list(set(map(lambda v: v.split(":")[0], view_infos)))
 
         # Call all_views_hide interface when buffer's all views will hide.
@@ -255,7 +307,7 @@ class EAF(dbus.service.Object):
                 self.view_dict.pop(key, None)
 
         # Create new view and udpate in view dict.
-        if view_infos != ['']:
+        if view_infos != [""]:
             for view_info in view_infos:
                 if view_info not in self.view_dict:
                     (buffer_id, _, _, _, _, _) = view_info.split(":")
@@ -267,7 +319,7 @@ class EAF(dbus.service.Object):
         # Call some_view_show interface when buffer's view switch back.
         # Note, this must call after new view create, otherwise some buffer,
         # such as QGraphicsVideoItem will report "Internal data stream error" error.
-        if view_infos != ['']:
+        if view_infos != [""]:
             for new_view_buffer_id in new_view_buffer_ids:
                 if new_view_buffer_id not in old_view_buffer_ids:
                     self.buffer_dict[new_view_buffer_id].some_view_show()
@@ -277,7 +329,12 @@ class EAF(dbus.service.Object):
         # if buffer option fit_to_view is True, buffer render adjust by view.resizeEvent()
         for buffer in list(self.buffer_dict.values()):
             if not buffer.fit_to_view:
-                buffer_views = list(filter(lambda v: v.buffer_id == buffer.buffer_id, list(self.view_dict.values())))
+                buffer_views = list(
+                    filter(
+                        lambda v: v.buffer_id == buffer.buffer_id,
+                        list(self.view_dict.values()),
+                    )
+                )
 
                 # Adjust buffer size to max view's size.
                 if len(buffer_views) > 0:
@@ -291,7 +348,6 @@ class EAF(dbus.service.Object):
                 # Send resize signal to buffer.
                 buffer.resize_view()
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="")
     def kill_emacs(self):
         tmp_buffer_dict = {}
         for buffer_id in self.buffer_dict:
@@ -300,7 +356,6 @@ class EAF(dbus.service.Object):
         for buffer_id in tmp_buffer_dict:
             self.kill_buffer(buffer_id)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
         # Kill all view base on buffer_id.
         for key in list(self.view_dict):
@@ -316,7 +371,6 @@ class EAF(dbus.service.Object):
             self.buffer_dict[buffer_id].destroy_buffer()
             self.buffer_dict.pop(buffer_id, None)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def execute_function(self, buffer_id, function_name, event_string):
         if buffer_id in self.buffer_dict:
             try:
@@ -325,21 +379,23 @@ class EAF(dbus.service.Object):
                 buffer.execute_function(function_name)
             except AttributeError:
                 import traceback
-                traceback.print_exc()
-                self.message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
+                traceback.print_exc()
+                self.message_to_emacs(
+                    "Cannot execute function: " + function_name + " (" + buffer_id + ")"
+                )
+
     def call_function(self, buffer_id, function_name):
         if buffer_id in self.buffer_dict:
             try:
                 return self.buffer_dict[buffer_id].call_function(function_name)
             except AttributeError:
                 import traceback
+
                 traceback.print_exc()
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="s")
     def call_function_with_args(self, buffer_id, function_name, args_string):
         if buffer_id in self.buffer_dict:
             try:
@@ -350,116 +406,100 @@ class EAF(dbus.service.Object):
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def action_quit(self, buffer_id):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].action_quit()
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def send_key(self, buffer_id, event_string):
         # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].fake_key_event(event_string)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def send_key_sequence(self, buffer_id, event_string):
         # Send event to buffer when found match buffer.
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].fake_key_sequence(event_string)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def handle_input_message(self, buffer_id, callback_type, callback_result):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.handle_input_message(callback_type, callback_result)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def cancel_input_message(self, buffer_id, callback_type):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.cancel_input_message(callback_type)
 
-    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def update_focus_text(self, buffer_id, new_text):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.set_focus_text(new_text)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):
-        pass
+        self.server.notify("eaf-focus-buffer", message)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def first_start(self, webengine_include_private_codec):
-        pass
+        self.server.notify("eaf--first-start", webengine_include_private_codec)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def update_buffer_details(self, buffer_id, title, url):
-        pass
+        self.server.notify("eaf--update-buffer-details", buffer_id, title, url)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def open_url_in_new_tab(self, url):
-        pass
+        self.server.notify("open-url-in-new-tab", url)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def open_dev_tools_page(self):
-        pass
+        self.server.notify("eaf-open-dev-tools-page")
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def open_url_in_background_tab(self, url):
-        pass
+        self.server.notify("eaf-open-browser-in-background", url)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def goto_left_tab(self):
-        pass
+        self.server.notify("eaf-goto-left-tab")
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def goto_right_tab(self):
-        pass
+        self.server.notify("eaf-goto-right-tab")
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def translate_text(self, text):
-        pass
+        self.server.notify("eaf-translate-text", text)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
-    def input_message(self, buffer_id, message, callback_type, input_type, input_content):
-        pass
+    def input_message(
+        self, buffer_id, message, callback_type, input_type, input_content
+    ):
+        self.server.notify(
+            "eaf--input-message",
+            buffer_id,
+            message,
+            callback_type,
+            input_type,
+            input_content,
+        )
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def create_new_browser_buffer(self, buffer_id):
-        pass
+        self.server.notify("eaf--create-new-browser-buffer", buffer_id)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def request_kill_buffer(self, buffer_id):
-        pass
+        self.server.notify("eaf-request-kill-buffer", buffer_id)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def message_to_emacs(self, message):
-        pass
+        self.server.notify("eaf--message-to-emacs", message)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def set_emacs_var(self, var_name, var_value):
-        pass
+        self.server.notify("eaf--set-emacs-var", var_name, var_value)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def eval_in_emacs(self, elisp_code_string):
-        pass
+        self.server.notify("eaf--eval-in-emacs", elisp_code_string)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def edit_focus_text(self, buffer_id, focus_text):
-        pass
+        self.server.notify("eaf--edit-focus-text", buffer_id, focus_text)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def export_org_json(self, org_json_content, org_file_path):
-        pass
+        self.server.notify("eaf--export-org-json", org_json_content, org_file_path)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def enter_fullscreen_request(self):
-        pass
+        self.server.notify("eaf--enter_fullscreen_request")
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def exit_fullscreen_request(self):
-        pass
+        self.server.notify("eaf--exit_fullscreen_request")
 
     def open_dev_tools_tab(self, web_page):
         self.dev_tools_page = web_page
@@ -472,7 +512,7 @@ class EAF(dbus.service.Object):
             if not os.path.exists(basedir):
                 os.makedirs(basedir)
 
-            with open(self.session_file, 'a'):
+            with open(self.session_file, "a"):
                 os.utime(self.session_file, None)
 
             print("Create session file %s" % (self.session_file))
@@ -515,13 +555,25 @@ class EAF(dbus.service.Object):
                     if buf.url in session_dict[buf.module_path]:
                         buf.restore_session_data(session_dict[buf.module_path][buf.url])
 
-                        print("Session restored: ", buf.buffer_id, buf.module_path, self.session_file)
+                        print(
+                            "Session restored: ",
+                            buf.buffer_id,
+                            buf.module_path,
+                            self.session_file,
+                        )
                     else:
-                        print("Session is not restored, as no data about %s." % (buf.url))
+                        print(
+                            "Session is not restored, as no data about %s." % (buf.url)
+                        )
                 else:
-                    print("Session is not restored, as no data present in session file.")
+                    print(
+                        "Session is not restored, as no data present in session file."
+                    )
         else:
-            print("Session is not restored, as %s cannot be found." % (self.session_file))
+            print(
+                "Session is not restored, as %s cannot be found." % (self.session_file)
+            )
+
 
 if __name__ == "__main__":
     import sys
@@ -529,20 +581,13 @@ if __name__ == "__main__":
 
     proxy_string = ""
 
-    DBusGMainLoop(set_as_default=True) # WARING: only use once in one process
+    emacs_width = emacs_height = 0
+    eaf_config_dir = ""
+    QApplication.setAttribute(Qt.AA_DisableHighDpiScaling)
+    app = QApplication(sys.argv + ["--disable-web-security"])
 
-    bus = dbus.SessionBus()
-    if bus.request_name(EAF_DBUS_NAME) != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
-        print("EAF process is already running.")
-    else:
-        emacs_width = emacs_height = 0
-        eaf_config_dir = ""
-
-        app = QApplication(sys.argv + ["--disable-web-security"])
-
-        eaf = EAF(sys.argv[1:])
-
-        print("EAF process starting...")
-
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        sys.exit(app.exec_())
+    server = JsonrpcWebsocketServer("EAF Server", 12980)
+    server.close.connect(app.quit)
+    eaf = EAF(server, sys.argv[1:])
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    sys.exit(app.exec_())

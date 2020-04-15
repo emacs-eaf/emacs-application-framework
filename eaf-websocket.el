@@ -101,19 +101,18 @@ The following initargs are accepted:
 
 (defvar eaf-websocket--jsonrpc-connection nil)
 
-(defun eaf-websocket-start-connection()
-  "Start connect websocket server."
-  (setq      eaf-websocket--jsonrpc-connection
-             (jsonrpc-websocket-connection
-              :name "eaf"
-              :url "ws://127.0.0.1:12980"
-              :notification-dispatcher (lambda (conn method params)
-                                         (when (and (symbolp method) (fboundp method))
-                                           (apply method (append params nil))))
-              :request-dispatcher (lambda (conn method params)
-
+(defun eaf-websocket-start-connection(name url)
+  "Start connect NAME websocket server with URL."
+  (setq eaf-websocket--jsonrpc-connection
+        (jsonrpc-websocket-connection
+         :name name
+         :url url
+         :notification-dispatcher (lambda (conn method params)
                                     (when (and (symbolp method) (fboundp method))
-                                      (apply method (append params nil)))))))
+                                      (apply method (append params nil))))
+         :request-dispatcher (lambda (conn method params)
+                               (when (and (symbolp method) (fboundp method))
+                                 (apply method (append params nil)))))))
 
 (defun eaf-websocket-stop-connection()
   "Stop webcosket connect."
@@ -123,6 +122,10 @@ The following initargs are accepted:
 (defun eaf-websocket-call (method &rest params)
   "Call remote METHOD with PARAMS."
   (jsonrpc-request eaf-websocket--jsonrpc-connection method params))
+
+(cl-defun eaf-websocket-async-call (method params &rest args &key _success-fn _error-fn _timeout-fn)
+  "Async call remote METHOD with PARAMS. PARAMS is  a sequence."
+  (apply #'jsonrpc-async-request eaf-websocket--jsonrpc-connection method params args))
 
 (defun eaf-websocket-notify (method &rest params)
   "Notify METHOD with PARAMS."

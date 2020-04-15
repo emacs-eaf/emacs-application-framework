@@ -80,7 +80,6 @@
 
 (add-subdirs-to-load-path (file-name-directory (locate-library "eaf")))
 
-(require 'dbus)
 (require 'subr-x)
 (require 'map)
 (require 'bookmark)
@@ -88,12 +87,13 @@
 (require 'eaf-mindmap)
 (require 'eaf-interleave)
 (require 'json)
-
+(require 'eaf-websocket)
 ;;; Code:
 
 
 ;; Remove the relevant environment variables from the process-environment to disable QT scaling,
 ;; let EAF qt program follow the system scale.
+
 (setq process-environment (seq-filter
                            (lambda(var)
                              (and (not (string-match-p "QT_SCALE_FACTOR" var))
@@ -808,15 +808,9 @@ For now only EAF browser app is supported."
 
 (defun eaf-call (method &rest args)
   "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
-  (apply #'dbus-call-method
-         :session                   ; use the session (not system) bus
-         "com.lazycat.eaf"          ; service name
-         "/com/lazycat/eaf"         ; path name
-         "com.lazycat.eaf"          ; interface name
+  (apply #'eaf-websocket-call
          method
-         :timeout 1000000
-         args)
-  )
+         args))
 
 (defun eaf-get-emacs-xid (frame)
   (frame-parameter frame 'window-id))
@@ -850,7 +844,9 @@ For now only EAF browser app is supported."
          (when (string-prefix-p "exited abnormally with code" event)
            (switch-to-buffer eaf-name))
          (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
-    (message "[EAF] Process starting..."))))
+    (eaf-websocket-start-connection "EAF" "ws://127.0.0.1:12980")
+    (message "[EAF] Process starting...")
+    )))
 
 (defun eaf-stop-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
@@ -1023,12 +1019,7 @@ to edit EAF keybindings!" fun fun)))
     eaf-buffer))
 
 (defun eaf-is-support (url)
-  (dbus-call-method
-   :session "com.lazycat.eaf"
-   "/com/lazycat/eaf"
-   "com.lazycat.eaf"
-   "is_support"
-   url))
+  t)
 
 (defun eaf-monitor-window-size-change (frame)
   (when (process-live-p eaf-process)
@@ -1200,11 +1191,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
               (symbol-name command)
             `(quote ,command))))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "focus_emacs_buffer"
- #'eaf-focus-buffer)
-
 (defun eaf-focus-buffer (msg)
   (let* ((coordinate-list (split-string msg ","))
          (mouse-press-x (string-to-number (nth 0 coordinate-list)))
@@ -1226,33 +1212,16 @@ of `eaf--buffer-app-name' inside the EAF buffer."
                     (select-window window)
                     (throw 'find-window t))))))))))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "message_to_emacs"
- (lambda (format-string) (message (concat "[EAF/" eaf--buffer-app-name "] " format-string))))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "set_emacs_var"
- #'eaf--set-emacs-var)
+(defun eaf--message-to-emacs(format-string)
+  (message (concat "[EAF/" eaf--buffer-app-name "] " format-string)))
 
 (defun eaf--set-emacs-var (var-name var-value)
   "Used by Python applications to set Lisp variable VAR-NAME with value VAR-VALUE on the Emacs side."
   (set (intern var-name) var-value))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "eval_in_emacs"
- #'eaf--eval-in-emacs)
-
 (defun eaf--eval-in-emacs (elisp-code-string)
   "Used by Python applications to evaluate ELISP-CODE-STRING as Emacs Lisp code on the Emacs side."
   (eval (read elisp-code-string) 'lexical))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "create_new_browser_buffer"
- #'eaf--create-new-browser-buffer)
 
 (defun eaf--create-new-browser-buffer (new-window-buffer-id)
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
@@ -1262,11 +1231,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
       (set (make-local-variable 'eaf--buffer-url) "")
       (set (make-local-variable 'eaf--buffer-app-name) "browser"))
     (switch-to-buffer eaf-buffer)))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "request_kill_buffer"
- #'eaf-request-kill-buffer)
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
   (catch 'found-match-buffer
@@ -1278,11 +1242,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
           (message "[EAF] Request to kill buffer %s." kill-buffer-id)
           (throw 'found-match-buffer t))))))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "first_start"
- #'eaf--first-start)
-
 (defun eaf--first-start (webengine-include-private-codec)
   "Call `eaf--open-internal' after receive `start_finish' signal from server process."
   ;; If webengine include private codec and app name is "video-player", replace by "js-video-player".
@@ -1290,14 +1249,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (when (and (string-equal eaf--first-start-app-name "video-player")
              webengine-include-private-codec)
     (setq eaf--first-start-app-name "js-video-player"))
-
   ;; Start app.
   (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "update_buffer_details"
- #'eaf--update-buffer-details)
 
 (defun eaf--update-buffer-details (buffer-id title url)
   (when (> (length title) 0)
@@ -1314,19 +1267,9 @@ of `eaf--buffer-app-name' inside the EAF buffer."
               (rename-buffer (format eaf-buffer-title-format title))
               (throw 'find-buffer t))))))))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "translate_text"
- #'eaf-translate-text)
-
 (defun eaf-translate-text (text)
   (when (featurep 'sdcv)
     (sdcv-search-input+ text)))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "input_message"
- #'eaf--input-message)
 
 (defun eaf--input-message (input-buffer-id interactive-string callback-tag interactive-type initial-content)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
@@ -1467,21 +1410,11 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive)
   (eaf-open "RSS Reader" "rss-reader"))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "open_dev_tools_page"
- #'eaf-open-dev-tool-page)
-
 (defun eaf-open-dev-tool-page ()
   (delete-other-windows)
   (split-window (selected-window) (/ (* (nth 3 (eaf-get-window-allocation (selected-window))) 2) 3) nil t)
   (other-window 1)
   (eaf-open "about:blank" "browser" "dev_tools"))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "open_url_in_new_tab"
- #'eaf-open-browser)
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional arguments)
@@ -1514,25 +1447,10 @@ In that way the corresponding function will be called to retrieve the HTML
       url
     (concat "http://" url)))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "open_url_in_background_tab"
- #'eaf-open-browser-in-background)
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "goto_left_tab"
- #'eaf-goto-left-tab)
-
 (defun eaf-goto-left-tab ()
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-backward-tab)))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "goto_right_tab"
- #'eaf-goto-right-tab)
 
 (defun eaf-goto-right-tab ()
   (interactive)
@@ -1567,7 +1485,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1870,11 +1788,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                          )))))
     (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "edit_focus_text"
- #'eaf--edit-focus-text)
-
 (defun eaf--edit-focus-text (buffer-id focus-text)
   (split-window-below -10)
   (other-window 1)
@@ -1899,25 +1812,14 @@ Make sure that your smartphone is connected to the same WiFi network as this com
           "Switch to org-mode with `\\[eaf-edit-buffer-switch-to-org-mode]'. "
           ))))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "enter_fullscreen_request"
- #'eaf--enter_fullscreen_request)
-
 (defun eaf--enter_fullscreen_request ()
   (setq-local eaf-fullscreen-p t)
   (eaf-monitor-configuration-change))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "exit_fullscreen_request"
- #'eaf--exit_fullscreen_request)
 
 (defun eaf--exit_fullscreen_request ()
   (setq-local eaf-fullscreen-p nil)
   (eaf-monitor-configuration-change))
 
-(dbus-register-service :session "com.lazycat.emacs")
 
 (defun eaf-get-theme-mode ()
   (format "%s"(frame-parameter nil 'background-mode)))
