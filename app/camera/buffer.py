@@ -23,13 +23,15 @@ from PyQt5.QtCore import Qt, QSizeF
 from PyQt5.QtGui import QBrush
 from PyQt5.QtGui import QColor
 from PyQt5.QtMultimedia import QCameraInfo, QCamera, QCameraImageCapture
-from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
+from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
 from pathlib import Path
 import time
 import os
+import platform
+import shutil
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -46,9 +48,9 @@ class AppBuffer(Buffer):
 
     def take_photo(self):
         if os.path.exists(os.path.expanduser(self.emacs_var_dict["eaf-camera-save-path"])):
-            self.buffer_widget.take_photo(self.emacs_var_dict["eaf-camera-save-path"])
+           self.message_to_emacs.emit(self.buffer_widget.take_photo(self.emacs_var_dict["eaf-camera-save-path"]))
         else:
-            self.buffer_widget.take_photo("~/Downloads")
+            self.message_to_emacs.emit(self.buffer_widget.take_photo("~/Downloads"))
 
     def destroy_buffer(self):
         self.buffer_widget.stop_camera()
@@ -95,7 +97,38 @@ class CameraWidget(QWidget):
         save_path = str(Path(os.path.expanduser(camera_save_path)))
         photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
         image_capture.capture(photo_path)
-        self.message_to_emacs.emit("Captured Photo at " + photo_path)
+        return "Captured Photo at " + photo_path
+
+    def stop_camera(self):
+        self.camera.stop()
+
+
+class WindowsCameraWidget(QWidget):
+    def __init__(self, background_color):
+        QWidget.__init__(self)
+
+        self.video_widget = QVideoWidget()
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(self.video_widget)
+        self.available_cameras = QCameraInfo.availableCameras()
+        # Set the default camera.
+        self.select_camera(0)
+
+    def select_camera(self, i):
+        self.camera = QCamera(self.available_cameras[i])
+        self.camera.setViewfinder(self.video_widget)
+        self.camera.setCaptureMode(QCamera.CaptureStillImage)
+        self.camera.start()
+
+    def take_photo(self, camera_save_path):
+        save_path = str(Path(os.path.expanduser(camera_save_path)))
+        photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(int(time.time()))) + ".jpg")
+
+        self.image_capture = QCameraImageCapture(self.camera)
+        self.image_capture.imageSaved.connect(lambda id, file_path : os.rename(file_path, photo_path))
+        self.image_capture.capture()
+        return "Captured Photo at " + photo_path
 
     def stop_camera(self):
         self.camera.stop()

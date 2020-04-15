@@ -30,6 +30,7 @@ import signal
 import threading
 import getpass
 import json
+import os
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -44,11 +45,10 @@ class AppBuffer(BrowserBuffer):
         self.start_directory = arguments_dict["directory"]
 
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
-        self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
+        self.server_js = os.path.abspath(os.path.join(os.path.dirname(__file__), "server.js"))
 
         # Start server process.
-        self.background_process = subprocess.Popen(
-            "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
+        self.background_process = subprocess.Popen(["node", self.server_js, str(self.port), self.start_directory, self.command],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             shell=True)
@@ -70,7 +70,7 @@ class AppBuffer(BrowserBuffer):
            (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
         with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
+            html = f.read().replace("%1", str(self.port)).replace("%2", QUrl.fromLocalFile( os.path.abspath(os.path.join(os.path.dirname(__file__))) ).toString()).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
             self.buffer_widget.setHtml(html)
 
         self.update_title()

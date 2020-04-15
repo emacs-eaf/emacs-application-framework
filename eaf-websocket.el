@@ -101,6 +101,17 @@ The following initargs are accepted:
 
 (defvar eaf-websocket--jsonrpc-connection nil)
 
+(defun eaf-websocket--call-emacs (method params)
+  (when (and (symbolp method) (fboundp method))
+    (let ((args (mapcar (lambda(param)
+                          (if (or
+                               (eq param :json-false)
+                               (eq param :json-null))
+                              nil
+                            param)
+                          ) params) ))
+      (apply method args))))
+
 (defun eaf-websocket-start-connection(name url)
   "Start connect NAME websocket server with URL."
   (setq eaf-websocket--jsonrpc-connection
@@ -108,11 +119,11 @@ The following initargs are accepted:
          :name name
          :url url
          :notification-dispatcher (lambda (conn method params)
-                                    (when (and (symbolp method) (fboundp method))
-                                      (apply method (append params nil))))
+                                    (eaf-websocket--call-emacs method params)
+                                    )
          :request-dispatcher (lambda (conn method params)
-                               (when (and (symbolp method) (fboundp method))
-                                 (apply method (append params nil)))))))
+                               (eaf-websocket--call-emacs method params)
+                               ))))
 
 (defun eaf-websocket-stop-connection()
   "Stop webcosket connect."

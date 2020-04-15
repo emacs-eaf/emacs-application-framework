@@ -70,7 +70,9 @@ class JsonrpcWebsocketServer(QObject):
         self.client_connection.textMessageReceived.connect(
             self.__handle_text_message_received
         )
-        self.client_connection.binaryMessageReceived.connect(self.__handle_binary_message_received)
+        self.client_connection.binaryMessageReceived.connect(
+            self.__handle_binary_message_received
+        )
         self.client_connection.disconnected.connect(self.__handle_disconnected)
         # send deferred_notify_message
         while self.deferred_notify_messages:
@@ -98,9 +100,7 @@ class JsonrpcWebsocketServer(QObject):
                     params = []
                 else:
                     params = message["params"]
-                reply["result"] = self.__request_dispatcher(
-                    message["method"], params
-                )
+                reply["result"] = self.__request_dispatcher(message["method"], params)
             except Exception as error:
                 reply["error"] = {"code": -32603, "message": "Internal error"}
             self.__send_text_message(json.dumps(reply))
@@ -148,7 +148,7 @@ class JsonrpcWebsocketServer(QObject):
         self.dispatcher = instance
 
     def async_request(
-        self, method_name, *params, success_callback=None, error_callback=None,
+        self, method_name, *params, success_callback=None, error_callback=None
     ):
         if not self.client_connection:
             raise Exception("Client not connected")
@@ -202,7 +202,6 @@ class JsonrpcWebsocketServer(QObject):
         # else:
         #     print("request timeout:!")
         # return ""
-
 
     def notify(self, method_name, *params):
         message = {"jsonrpc": "2.0", "method": method_name, "params": params}

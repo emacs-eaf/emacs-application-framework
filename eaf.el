@@ -72,13 +72,12 @@
 ;;
 
 ;;; Require
-(defun add-subdirs-to-load-path (dir)
-  "Recursive add directory DIR to `load-path'."
-  (let ((default-directory (file-name-as-directory dir)))
-    (add-to-list 'load-path dir)
-    (normal-top-level-add-subdirs-to-load-path)))
-
-(add-subdirs-to-load-path (file-name-directory (locate-library "eaf")))
+(dolist (file '(
+                "."
+                "app/mindmap"
+                "app/interleave"
+                ))
+  (add-to-list 'load-path (expand-file-name file (file-name-directory (locate-library "eaf")))))
 
 (require 'subr-x)
 (require 'map)
@@ -1574,7 +1573,9 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
     default-directory))
 
 (defun eaf--generate-terminal-command ()
-  (getenv "SHELL"))
+  (if (fboundp 'w32-short-file-name)
+      (w32-short-file-name (getenv "SHELL"))
+    (getenv "SHELL")))
 
 (defun eaf--get-app-for-extension (extension-name)
   (let ((app-name
