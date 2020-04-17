@@ -113,7 +113,7 @@ class Buffer(QGraphicsScene):
     enter_fullscreen_request = QtCore.pyqtSignal()
     exit_fullscreen_request = QtCore.pyqtSignal()
 
-    def __init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view):
+    def __init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, fit_to_view):
         super(QGraphicsScene, self).__init__()
 
         self.buffer_id = buffer_id
@@ -127,6 +127,7 @@ class Buffer(QGraphicsScene):
         else:
             self.background_color = QColor(255, 255, 255, 255)
         self.setBackgroundBrush(QBrush(self.background_color))
+        self.async_call_emacs = async_call_emacs
         self.title = ""
 
         self.buffer_widget = None

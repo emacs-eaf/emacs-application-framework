@@ -32,8 +32,8 @@ class AppBuffer(BrowserBuffer):
 
     export_org_json = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs, False)
 
         self.url = url
         index_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "index.html"))

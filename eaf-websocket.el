@@ -77,7 +77,7 @@ The following initargs are accepted:
                       (jsonrpc-connection-receive connection json-message)))
       :on-close (lambda (_websocket)
                   ;;TODO: handle close
-                  (message "EAF WebSocket closed"))))))
+                  (message "eaf client closed"))))))
 
 (cl-defmethod jsonrpc-connection-send ((connection jsonrpc-websocket-client-connection)
                                        &key
@@ -129,14 +129,13 @@ The following initargs are accepted:
       port
       :host 'local
       :on-message (lambda (socket frame)
-                    (message "received: %s" (websocket-frame-text frame))
                     (jsonrpc-websocket-server-set-socket connection socket)
                     (let* ((json-object-type 'plist)
                            (json-message (json-read-from-string (websocket-frame-text frame))))
                       (jsonrpc-connection-receive connection json-message)))
       :on-close (lambda (_websocket)
                   ;;TODO: handle close
-                  (message "client websocket closed"))))))
+                  (message "server's client websocket closed"))))))
 
 (cl-defmethod jsonrpc-connection-send ((connection jsonrpc-websocket-server-connection)
                                        &key
@@ -155,7 +154,6 @@ The following initargs are accepted:
                   (plist-put message :params params))
           (result (plist-put message :result result))
           (error (plist-put message :error error)))
-    (message "send result: %s" (json-encode-plist message))
     (websocket-send-text (jsonrpc-websocket-server--socket connection) (json-encode-plist message))))
 
 
@@ -185,14 +183,14 @@ The following initargs are accepted:
                                     (eaf-websocket--call-emacs method params)
                                     )
          :request-dispatcher (lambda (conn method params)
-                               (message "method: %s. params: %s" method params)
                                (eaf-websocket--call-emacs method params)
                                ))))
 
 (defun eaf-websocket-stop-server ()
   "Stop websocket server."
-  (websocket-server-close (jsonrpc-websocket-server--server eaf-websocket--jsonrpc-server-connection))
-  (setq eaf-websocket--jsonrpc-server-connection nil))
+  (when eaf-websocket--jsonrpc-server-connection
+    (websocket-server-close (jsonrpc-websocket-server--server eaf-websocket--jsonrpc-server-connection))
+    (setq eaf-websocket--jsonrpc-server-connection nil)))
 
 (defun eaf-websocket-start-client(name url)
   "Start connect NAME websocket server with URL."
@@ -208,13 +206,19 @@ The following initargs are accepted:
                                ))))
 
 (defun eaf-websocket-stop-client()
-  (websocket-close (jsonrpc-websocket-client--socket eaf-websocket--jsonrpc-client-connection))
-  (setq eaf-websocket--jsonrpc-client-connection nil))
+  "Stop client."
+  (when eaf-websocket--jsonrpc-client-connection
+    (websocket-close (jsonrpc-websocket-client--socket eaf-websocket--jsonrpc-client-connection))
+    (setq eaf-websocket--jsonrpc-client-connection nil)))
 
 
 (defun eaf-websocket-call (method &rest params)
   "Call remote METHOD with PARAMS."
-  (jsonrpc-request eaf-websocket--jsonrpc-client-connection method params))
+  (jsonrpc-request eaf-websocket--jsonrpc-client-connection method params :timeout 300000))
+
+(cl-defun eaf-websocket-async-call (method params &rest args &key _success-fn _error-fn _timeout-fn)
+  "Async call remote METHOD with PARAMS. PARAMS is  a sequence."
+  (apply #'jsonrpc-async-request eaf-websocket--jsonrpc-client-connection method params args))
 
 (defun eaf-websocket-notify (method &rest params)
   "Notify METHOD with PARAMS."

@@ -36,7 +36,7 @@ import os
 import subprocess
 import platform
 
-from eaf_websocket import WebsocketClient, WebsocketServer
+from eaf_websocket import WebsocketClient, WebsocketServerThread
 
 
 class EAF:
@@ -67,7 +67,8 @@ class EAF:
         self.websocket_client = WebsocketClient("ws://127.0.0.1:" + str(eamcs_server_port))
         # start python websocket server
         port = get_free_port()
-        self.websocket_server = WebsocketServer("EAF Python Server", port, self)
+        self.websocket_server = WebsocketServerThread("EAF Python Server", port, self)
+        self.websocket_server.start()
 
         self.first_start(self.webengine_include_private_codec(), port)
 
@@ -288,8 +289,6 @@ class EAF:
         return app_buffer
 
     def update_views(self, args):
-        if len(args) == 0:
-            return
         view_infos = args.split(",")
 
         # Do something if buffer's all view hide after update_views operation.

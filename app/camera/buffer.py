@@ -34,9 +34,12 @@ import platform
 import shutil
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
-        self.add_widget(CameraWidget(QColor(0, 0, 0, 255)))
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, True)
+        if platform.system() == "Windows":
+            self.add_widget(WindowsCameraWidget(QColor(0, 0, 0, 255)))
+        else:
+            self.add_widget(CameraWidget(QColor(0, 0, 0, 255)))
 
     def all_views_hide(self):
         # Need stop camera if all view will hide, otherwise camera will crash.

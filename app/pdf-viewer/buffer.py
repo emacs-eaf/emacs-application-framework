@@ -34,11 +34,11 @@ import os
 import hashlib
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict, async_call_emacs))
         self.buffer_widget.translate_double_click_word.connect(self.translate_text)
 
         for method_name in ["scroll_up", "scroll_down", "scroll_up_page",
@@ -186,7 +186,7 @@ class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict):
+    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict, async_call_emacs):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
@@ -196,6 +196,7 @@ class PdfViewerWidget(QWidget):
         self.installEventFilter(self)
         self.setMouseTracking(True)
         self.emacs_var_dict = emacs_var_dict
+        self.async_call_emacs = async_call_emacs
 
         # Load document first.
         self.document = fitz.open(url)
