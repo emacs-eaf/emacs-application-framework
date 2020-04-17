@@ -274,21 +274,6 @@ class PdfViewerWidget(QWidget):
 
         self.remember_offset = None
 
-        # Save table in file for search framework, such as snails, search table to navigate.
-        table_info = ""
-        for info in self.document.getToC():
-            indentation_num = info[0]
-            title = info[1]
-            page = info[2]
-
-            table_info += str(page) + self.repeat_to_length(" ", indentation_num * 4) + title + "\n"
-
-        table_file_hash = hashlib.md5(self.url.encode()).hexdigest()
-        self.table_file_path = os.path.join(config_dir, "pdf-viewer", "table", table_file_hash)
-        touch(self.table_file_path)
-        with open(self.table_file_path, "w") as f:
-            f.write(table_info)
-
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
 
