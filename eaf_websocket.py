@@ -102,7 +102,9 @@ class WebsocketServer(QObject):
         message = {"jsonrpc": "2.0", "result": result, "id": request_id}
         self.__send_text_message(json.dumps(message))
 
-
+    def send_error(self, request_id, code, message):
+        message = {"jsonrpc": "2.0", "error": { "code": code, "message": message }, "id": request_id}
+        self.__send_text_message(json.dumps(message))
 
 #TODO: error handle
 class WebsocketServerThread(QThread):
