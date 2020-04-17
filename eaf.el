@@ -817,6 +817,10 @@ For now only EAF browser app is supported."
 (defun eaf-serialization-var-list ()
   (json-encode eaf-var-list))
 
+(defun eaf--get-free-port()
+  ;; TODO
+  "12981")
+
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -825,13 +829,17 @@ For now only EAF browser app is supported."
    ((process-live-p eaf-process)
     (message "[EAF] Process is already running."))
    (t
-    (let ((eaf-args (append
+    (let* ((port (eaf--get-free-port))
+           (eaf-args (append
                      (list eaf-python-file)
                      (eaf-get-render-size)
                      (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
                      (list (eaf-serialization-var-list))
+                     (list port)
                      ))
           (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
+      ;; start websocket server
+      (eaf-websocket-start-server "EAFServer" port)
       (setq eaf-process
             (if eaf-enable-debug
                 (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
@@ -843,7 +851,6 @@ For now only EAF browser app is supported."
          (when (string-prefix-p "exited abnormally with code" event)
            (switch-to-buffer eaf-name))
          (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
-    (eaf-websocket-start-connection "EAF" "ws://127.0.0.1:12980")
     (message "[EAF] Process starting...")
     )))
 
@@ -879,7 +886,9 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
   (setq-local eaf-fullscreen-p nil)
 
   ;; Kill process after kill buffer, make application can save session data.
-  (eaf--kill-python-process))
+  (eaf--kill-python-process)
+  ;; stop websocket server
+  (eaf-websocket-stop-server))
 
 (defalias 'eaf-kill-process #'eaf-stop-process)
 
@@ -1241,13 +1250,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
           (message "[EAF] Request to kill buffer %s." kill-buffer-id)
           (throw 'found-match-buffer t))))))
 
-(defun eaf--first-start (webengine-include-private-codec)
+(defun eaf--first-start (webengine-include-private-codec port)
   "Call `eaf--open-internal' after receive `start_finish' signal from server process."
   ;; If webengine include private codec and app name is "video-player", replace by "js-video-player".
   (setq eaf--webengine-include-private-codec webengine-include-private-codec)
   (when (and (string-equal eaf--first-start-app-name "video-player")
              webengine-include-private-codec)
     (setq eaf--first-start-app-name "js-video-player"))
+  ;; connect server
+  (eaf-websocket-start-client "EAF Client" (format "ws://127.0.0.1:%s" port))
   ;; Start app.
   (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments))
 

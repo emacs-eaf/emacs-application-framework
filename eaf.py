@@ -29,21 +29,20 @@ from PyQt5.QtCore import QLibraryInfo, QTimer, QObject, QEventLoop, Qt
 from PyQt5.QtNetwork import QNetworkProxy, QHostAddress
 from PyQt5.QtWidgets import QApplication
 from core.view import View
+from core.utils import get_free_port
 import importlib
 import json
 import os
 import subprocess
 import platform
 
-from eaf_websocket import JsonrpcWebsocketServer
+from eaf_websocket import WebsocketClient, WebsocketServer
 
 
 class EAF:
-    def __init__(self, server, args):
+    def __init__(self, args):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
-        self.server = server
-        self.server.register_dispatcher_object(self)
         (
             emacs_width,
             emacs_height,
@@ -52,6 +51,7 @@ class EAF:
             proxy_type,
             config_dir,
             var_dict_string,
+            eamcs_server_port
         ) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
@@ -63,7 +63,13 @@ class EAF:
 
         self.update_emacs_var_dict(var_dict_string)
 
-        self.first_start(self.webengine_include_private_codec())
+        # connect to emacs server
+        self.websocket_client = WebsocketClient("ws://127.0.0.1:" + str(eamcs_server_port))
+        # start python websocket server
+        port = get_free_port()
+        self.websocket_server = WebsocketServer("EAF Python Server", port, self)
+
+        self.first_start(self.webengine_include_private_codec(), port)
 
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
@@ -436,36 +442,36 @@ class EAF:
                 buffer.set_focus_text(new_text)
 
     def focus_emacs_buffer(self, message):
-        self.server.notify("eaf-focus-buffer", message)
+        self.websocket_client.notify("eaf-focus-buffer", message)
 
-    def first_start(self, webengine_include_private_codec):
-        self.server.notify("eaf--first-start", webengine_include_private_codec)
+    def first_start(self, webengine_include_private_codec, port):
+        self.websocket_client.notify("eaf--first-start", webengine_include_private_codec, port)
 
     def update_buffer_details(self, buffer_id, title, url):
-        self.server.notify("eaf--update-buffer-details", buffer_id, title, url)
+        self.websocket_client.notify("eaf--update-buffer-details", buffer_id, title, url)
 
     def open_url_in_new_tab(self, url):
-        self.server.notify("open-url-in-new-tab", url)
+        self.websocket_client.notify("open-url-in-new-tab", url)
 
     def open_dev_tools_page(self):
-        self.server.notify("eaf-open-dev-tools-page")
+        self.websocket_client.notify("eaf-open-dev-tools-page")
 
     def open_url_in_background_tab(self, url):
-        self.server.notify("eaf-open-browser-in-background", url)
+        self.websocket_client.notify("eaf-open-browser-in-background", url)
 
     def goto_left_tab(self):
-        self.server.notify("eaf-goto-left-tab")
+        self.websocket_client.notify("eaf-goto-left-tab")
 
     def goto_right_tab(self):
-        self.server.notify("eaf-goto-right-tab")
+        self.websocket_client.notify("eaf-goto-right-tab")
 
     def translate_text(self, text):
-        self.server.notify("eaf-translate-text", text)
+        self.websocket_client.notify("eaf-translate-text", text)
 
     def input_message(
         self, buffer_id, message, callback_type, input_type, input_content
     ):
-        self.server.notify(
+        self.websocket_client.notify(
             "eaf--input-message",
             buffer_id,
             message,
@@ -475,31 +481,31 @@ class EAF:
         )
 
     def create_new_browser_buffer(self, buffer_id):
-        self.server.notify("eaf--create-new-browser-buffer", buffer_id)
+        self.websocket_client.notify("eaf--create-new-browser-buffer", buffer_id)
 
     def request_kill_buffer(self, buffer_id):
-        self.server.notify("eaf-request-kill-buffer", buffer_id)
+        self.websocket_client.notify("eaf-request-kill-buffer", buffer_id)
 
     def message_to_emacs(self, message):
-        self.server.notify("eaf--message-to-emacs", message)
+        self.websocket_client.notify("eaf--message-to-emacs", message)
 
     def set_emacs_var(self, var_name, var_value):
-        self.server.notify("eaf--set-emacs-var", var_name, var_value)
+        self.websocket_client.notify("eaf--set-emacs-var", var_name, var_value)
 
     def eval_in_emacs(self, elisp_code_string):
-        self.server.notify("eaf--eval-in-emacs", elisp_code_string)
+        self.websocket_client.notify("eaf--eval-in-emacs", elisp_code_string)
 
     def edit_focus_text(self, buffer_id, focus_text):
-        self.server.notify("eaf--edit-focus-text", buffer_id, focus_text)
+        self.websocket_client.notify("eaf--edit-focus-text", buffer_id, focus_text)
 
     def export_org_json(self, org_json_content, org_file_path):
-        self.server.notify("eaf--export-org-json", org_json_content, org_file_path)
+        self.websocket_client.notify("eaf--export-org-json", org_json_content, org_file_path)
 
     def enter_fullscreen_request(self):
-        self.server.notify("eaf--enter_fullscreen_request")
+        self.websocket_client.notify("eaf--enter_fullscreen_request")
 
     def exit_fullscreen_request(self):
-        self.server.notify("eaf--exit_fullscreen_request")
+        self.websocket_client.notify("eaf--exit_fullscreen_request")
 
     def open_dev_tools_tab(self, web_page):
         self.dev_tools_page = web_page
@@ -586,8 +592,6 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling)
     app = QApplication(sys.argv + ["--disable-web-security"])
 
-    server = JsonrpcWebsocketServer("EAF Server", 12980)
-    server.close.connect(app.quit)
-    eaf = EAF(server, sys.argv[1:])
+    eaf = EAF(sys.argv[1:])
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())

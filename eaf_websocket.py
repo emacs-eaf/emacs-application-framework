@@ -19,72 +19,62 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
-import os
-
-from PyQt5.QtCore import QObject, QTimer, QEventLoop, pyqtSignal
+from PyQt5.QtCore import QObject, QTimer, QEventLoop, pyqtSignal, QUrl
 from PyQt5.QtNetwork import QHostAddress
 from PyQt5.QtWebSockets import QWebSocketServer, QWebSocket
 
+import json
+import os
 
-class JsonrpcWebsocketServer(QObject):
-    close = pyqtSignal()
-
-    def __init__(self, server_name, port, parent=None):
+class WebsocketServer(QObject):
+    def __init__(self, name, port, dispatcher, parent = None):
         super().__init__(parent=parent)
-        self.server_name = server_name
+        self.name = name
         self.port = port
 
-        self.next_request_id = 0
-        self.request_continuations = {}
-        self.dispatcher = None
-        self.deferred_notify_messages = []
+        self.dispatcher = dispatcher
 
-        self.server = QWebSocketServer(
-            self.server_name, QWebSocketServer.NonSecureMode, self
-        )
-        self.client_connection = None
-        if self.server.listen(QHostAddress.LocalHost, port):
+        self.__server = QWebSocketServer(self.name, QWebSocketServer.NonSecureMode)
+        if self.__server.listen(QHostAddress.LocalHost, self.port):
             print(
                 "Listened: "
-                + self.server.serverAddress().toString()
-                + " : "
-                + str(self.server.serverPort())
+                + self.__server.serverAddress().toString()
+                + ": "
+                + str(self.__server.serverPort())
             )
         else:
-            print("Listened error")
-
-        self.server.newConnection.connect(self.__on_new_connection)
-
-    def __send_text_message(self, message):
-        self.client_connection.sendTextMessage(message)
+            raise Exception(
+                "JsonrpcWebsocketServer Listen "
+                + str(self.__server.serverPort())
+                + " failed!"
+            )
+        self.__server.newConnection.connect(self.__on_new_connection)
 
     def __on_new_connection(self):
-        conn = self.server.nextPendingConnection()
-        self.server.close()
-        if self.client_connection:
-            print("Only one client")
-            conn.close()
+        self.__client_connection = self.__server.nextPendingConnection()
+        if not self.__client_connection:
             return
+        else:
+            # no more connection
+            self.__server.close()
         print("client connected")
-        self.client_connection = conn
-        self.client_connection.textMessageReceived.connect(
-            self.__handle_text_message_received
+        self.__client_connection.textMessageReceived.connect(
+            self.__on_text_message_received
         )
-        self.client_connection.binaryMessageReceived.connect(
-            self.__handle_binary_message_received
-        )
-        self.client_connection.disconnected.connect(self.__handle_disconnected)
-        # send deferred_notify_message
-        while self.deferred_notify_messages:
-            print(self.deferred_notify_messages)
-            self.__send_text_message(self.deferred_notify_messages.pop())
+        self.__client_connection.disconnected.connect(self.__on_disconnected)
 
-    def __handle_binary_message_received(self, message_binary):
-        pass
+    def __send_text_message(self, message):
+        try:
+            self.__client_connection.sendTextMessage(message)
+        except RuntimeError:
+            print("Client socket closed, send message failed. restart server and client!")
 
-    def __handle_text_message_received(self, message_str):
-        # for Debug
+    def __on_disconnected(self):
+        self.__client_connection.deleteLater()
+
+    def __on_text_message_received(self, message_str):
+        # for debug
+        print("server received: ", message_str)
         reply = {}
         reply["jsonrpc"] = "2.0"
         message = None
@@ -94,119 +84,115 @@ class JsonrpcWebsocketServer(QObject):
             reply["error"] = {"code": -32700, "message": "Parse error"}
             self.__send_text_message(json.dumps(reply))
             return
-        if "method" in message and "id" in message and message["id"] != None:
-            reply["id"] = message["id"]
-            try:
-                if "params" not in message or not message["params"]:
-                    params = []
-                else:
-                    params = message["params"]
-                reply["result"] = self.__request_dispatcher(message["method"], params)
-            except Exception as error:
-                reply["error"] = {"code": -32603, "message": "Internal error"}
-            self.__send_text_message(json.dumps(reply))
-        elif "method" in message:
+        if "method" in message:
+            if not isinstance(message["method"], str):
+                reply["error"] = {"code": -32600, "message": "method must be string"}
+                self.__send_text_message(json.dumps(reply))
+                return
             if "params" not in message or not message["params"]:
                 params = []
             else:
                 params = message["params"]
-
-            self.__notification_dispatcher(
-                message["method"], params,
-            )
-        elif "result" in message and "id" in message:
-            continuation = self.request_continuations.pop(message["id"])
-            if continuation["success_callback"]:
-                continuation["success_callback"](message["result"])
+            if "id" in message and message["id"] != None:
+                self.__request_dispatcher(message["id"], message["method"], params)
             else:
-                print(message["result"])
-        elif "error" in message and "id" in message:
-            continuation = self.request_continuations.pop(message["id"])
-            if continuation["error_callback"]:
-                continuation["error_callback"](message["error"])
-            else:
-                print(message["error"])
+                self.__notify_dispatcher(message["method"], params)
+            return
 
-    def __handle_disconnected(self):
-        if self.client_connection:
-            self.client_connection.deleteLater()
-
-    def __request_dispatcher(self, method_name, params):
+    def __request_dispatcher(self, request_id, method, params):
         if self.dispatcher:
-            method = getattr(self.dispatcher, method_name)
-            return method(*params)
-        else:
-            raise Exception("Internal error")
+            method = getattr(self.dispatcher, method)
+            result =  method(*params)
+            message = {"jsonrpc": "2.0", "result": result, "id": request_id}
+            self.__send_text_message(json.dumps(message))
 
-    def __notification_dispatcher(self, method_name, params):
+    def __notify_dispatcher(self, method, params):
         if self.dispatcher:
-            method = getattr(self.dispatcher, method_name)
+            method = getattr(self.dispatcher, method)
             method(*params)
         else:
             print("please register a dispatcher")
 
-    def register_dispatcher_object(self, instance):
-        self.dispatcher = instance
 
-    def async_request(
-        self, method_name, *params, success_callback=None, error_callback=None
-    ):
-        if not self.client_connection:
-            raise Exception("Client not connected")
-        self.next_request_id += 1
-        self.request_continuations[self.next_request_id] = {
-            "success_callback": success_callback,
-            "error_callback": error_callback,
-        }
+class WebsocketClient(QObject):
+    def __init__(self, url, parent=None):
+        super().__init__(parent)
+        self.url = url
+
+        self.__request_id = 0
+        self.__loop = QEventLoop()
+        self.__result = None
+        self.__error = None
+        self.__deferred_message = []
+        self.__socket = QWebSocket()
+        self.__socket.connected.connect(self.__on_connected)
+        self.__socket.open(QUrl(self.url))
+
+    def __on_connected(self):
+        print("connected to ", self.url)
+        self.__socket.textMessageReceived.connect(self.__on_text_message_received)
+        while self.__deferred_message:
+            self.__send_text_message(self.__deferred_message.pop())
+
+    def __send_text_message(self, message):
+        if self.__socket.isValid():
+            self.__socket.sendTextMessage(message)
+        else:
+            self.__deferred_message.append(message)
+
+    def __on_text_message_received(self, message_str):
+        # for debug
+        print("server received: ", message_str)
+        reply = {}
+        reply["jsonrpc"] = "2.0"
+        message = None
+        try:
+            message = json.loads(message_str)
+        except json.JSONDecodeError:
+            reply["error"] = {"code": -32700, "message": "Parse error"}
+            self.__send_text_message(json.dumps(reply))
+            return
+        if "result" in message and "id" in message:
+            self.__result = message["result"]
+            self.__loop.quit()
+            return
+        elif "error" in message and "id" in message:
+            self.__error = message["error"]["message"]
+            self.__loop.quit()
+            return
+
+
+    def notify(self, method, *params):
         message = {
             "jsonrpc": "2.0",
-            "id": self.next_request_id,
-            "method": method_name,
+            "method": method,
             "params": params,
         }
         self.__send_text_message(json.dumps(message))
-        return self.next_request_id
 
-    def request(self, method_name, *params, timeout=30000):
-        pass
-        ##TODO: not work
-        # print("request: ", method_name)
-        # if not self.client_connection:
-        #     raise Exception("Client not connected")
-        # q = QEventLoop()
-        # success_retval = None
-        # error_message = None
-        # def request_success_callback(retval):
-        #     print("success_callback: retval", retval)
-        #     nonlocal success_retval
-        #     nonlocal q
-        #     success_retval = retval
-        #     q.quit()
-
-        # def request_error_callback(error):
-        #     nonlocal error_message
-        #     nonlocal q
-        #     error_message = error
-        #     q.quit()
-
-        # id = self.async_request(
-        #     method_name,
-        #     *params,
-        #     success_callback=lambda retval: request_success_callback(retval),
-        #     error_callback=lambda error: request_error_callback(error),
-        # )
-        # q.exec()
-        # if success_retval:
-        #     return success_retval
-        # elif error_message:
-        #     print("request error: ", error_message)
-        # else:
-        #     print("request timeout:!")
-        # return ""
-
-    def notify(self, method_name, *params):
-        message = {"jsonrpc": "2.0", "method": method_name, "params": params}
-        if self.client_connection:
-            self.__send_text_message(json.dumps(message))
+    def request(self, method, *params, timeout=3000):
+        t = QTimer()
+        t.setSingleShot(True)
+        t.setInterval(timeout)
+        t.timeout.connect(self.__loop.quit)
+        self.__request_id += 1
+        message = {
+            "jsonrpc": "2.0",
+            "id": self.__request_id,
+            "method": method,
+            "params": params,
+        }
+        self.__send_text_message(json.dumps(message))
+        t.start()
+        self.__loop.exec()
+        if self.__result:
+            result = self.__result
+            self.__result = None
+            return result
+        elif self.__error:
+            print("error:", self.__error )
+            self.__error = None
+            return ""
         else:
-            self.deferred_notify_messages.append(json.dumps(message))
+            print("timeout")
+            return ""
