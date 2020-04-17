@@ -32,8 +32,8 @@ class AppBuffer(BrowserBuffer):
 
     export_org_json = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
         self.url = url
         index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
@@ -73,7 +73,7 @@ class AppBuffer(BrowserBuffer):
 
         color = "#FFFFFF"
         if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
-           (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "" and self.call_emacs("GetThemeMode") == "dark"):
+           (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             color = "#242525"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 

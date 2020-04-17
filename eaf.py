@@ -84,14 +84,6 @@ class EAF(dbus.service.Object):
         else:
             return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE).stdout
 
-    def call_emacs(self, method_name):
-        try:
-            # Current, only support STRING as return value.
-            result = self.get_command_result('''dbus-send --print-reply --dest="com.lazycat.emacs" "/com/lazycat/emacs" "com.lazycat.emacs.{}"'''.format(method_name))
-            return result.split("\n")[1].split(" ")[-1].split('"')[1]
-        except Exception:
-            return ""
-
     def webengine_include_private_codec(self):
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
@@ -162,7 +154,7 @@ class EAF(dbus.service.Object):
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path, self.call_emacs)
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path)
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer

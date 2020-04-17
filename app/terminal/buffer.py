@@ -32,8 +32,8 @@ import getpass
 import json
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, call_emacs, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
         # Get free port.
         self.port = get_free_port()
@@ -67,7 +67,7 @@ class AppBuffer(BrowserBuffer):
     def open_terminal_page(self):
         theme = "light"
         if self.emacs_var_dict["eaf-terminal-dark-mode"] == "true" or \
-           (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.call_emacs("GetThemeMode") == "dark"):
+           (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
         with open(self.index_file, "r") as f:
             html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])

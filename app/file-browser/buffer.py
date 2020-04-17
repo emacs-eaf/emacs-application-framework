@@ -32,8 +32,8 @@ import signal
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, argument, emacs_var_dict, module_path, call_emacs):
-        Buffer.__init__(self, buffer_id, url, argument, emacs_var_dict, module_path, call_emacs, False)
+    def __init__(self, buffer_id, url, config_dir, argument, emacs_var_dict, module_path):
+        Buffer.__init__(self, buffer_id, url, argument, emacs_var_dict, module_path, False)
 
         self.add_widget(FileUploaderWidget(url, QColor(0, 0, 0, 255)))
 
