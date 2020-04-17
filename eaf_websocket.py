@@ -74,7 +74,6 @@ class WebsocketServer(QObject):
 
     def __on_text_message_received(self, message_str):
         # for debug
-        print("server received: ", message_str)
         reply = {}
         reply["jsonrpc"] = "2.0"
         message = None
