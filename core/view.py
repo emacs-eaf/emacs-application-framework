@@ -111,6 +111,9 @@ class View(QWidget):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
 
+        # Places the window at the top of the Z order.  only Windows platform
+        self.emacs_window_to_top()
+
         # Make graphics view at left-top corner after show.
         self.graphics_view.verticalScrollBar().setValue(0)
         self.graphics_view.horizontalScrollBar().setValue(0)
@@ -119,6 +122,16 @@ class View(QWidget):
         qwindow = self.windowHandle()
         qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
         qwindow.setPosition(QPoint(self.x, self.y))
+
+    def emacs_window_to_top(self):
+        try:
+            from win32.win32gui import SetWindowPos
+            HWND_TOP = 0
+            SWP_NOSIZE = 0x0001
+            SWP_NOMOVE = 0x0002
+            SetWindowPos(int(self.emacs_xid), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE)
+        except ImportError:
+            pass
 
     def destroy_view(self):
         self.destroy()
