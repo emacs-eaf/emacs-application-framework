@@ -46,28 +46,28 @@
 (require 'jsonrpc)
 (require 'websocket)
 
-(defclass jsonrpc-websocket-connection (jsonrpc-connection)
+(defclass jsonrpc-websocket-client-connection (jsonrpc-connection)
   ((-url
     :initarg :url
     :initform ""
     :type string
-    :accessor jsonrpc-websocket--url
+    :accessor jsonrpc-websocket-client--url
     :documentation "Websocket server url.")
-   (-websocket-client
-    :accessor jsonrpc-websocket--websocket-client
-    :writer jsonrpc-websocket--set-websocket-client
+   (-socket
+    :accessor jsonrpc-websocket-client--socket
+    :writer jsonrpc-websocket-client--set-socket
     :initform nil
-    :documentation "Websocket client"
+    :documentation "client socket"
     :))
   :documentation "A JSONRPC connection over websocket.
 The following initargs are accepted:
 :URL (mandatory) , websocket server url.")
 
-(cl-defmethod initialize-instance ((connection jsonrpc-websocket-connection) slots)
+(cl-defmethod initialize-instance ((connection jsonrpc-websocket-client-connection) slots)
   "Construct CONNECTION with SLOTS."
   (cl-call-next-method)
   (let ((url (plist-get slots :url)))
-    (jsonrpc-websocket--set-websocket-client
+    (jsonrpc-websocket-client--set-socket
      connection
      (websocket-open
       url
@@ -79,7 +79,7 @@ The following initargs are accepted:
                   ;;TODO: handle close
                   (message "EAF WebSocket closed"))))))
 
-(cl-defmethod jsonrpc-connection-send ((connection jsonrpc-websocket-connection)
+(cl-defmethod jsonrpc-connection-send ((connection jsonrpc-websocket-client-connection)
                                        &key
                                        id
                                        method
@@ -96,10 +96,73 @@ The following initargs are accepted:
                   (plist-put message :params params))
           (result (plist-put message :result result))
           (error (plist-put message :error error)))
-    (websocket-send-text (jsonrpc-websocket--websocket-client connection) (json-encode-plist message))))
+    (websocket-send-text (jsonrpc-websocket-client--socket connection) (json-encode-plist message))))
+
+(defclass jsonrpc-websocket-server-connection (jsonrpc-connection)
+  ((-port
+    :initarg :port
+    :initform 12981
+    :accessor jsonrpc-websocket--port
+    :documentation "Websocket server port.")
+   (-server
+    :accessor jsonrpc-websocket-server--server
+    :writer jsonrpc-websocket-server--set-server
+    :initform nil
+    :documentation "Websocket server"
+    :)
+   (-socket
+    :accessor jsonrpc-websocket-server--socket
+    :writer jsonrpc-websocket-server-set-socket
+    :iniform nil
+    :documentation "socket"))
+  :documentation "A JSONRPC connection over websocket.
+The following initargs are accepted:
+:URL (mandatory) , websocket server url.")
+
+(cl-defmethod initialize-instance ((connection jsonrpc-websocket-server-connection) slots)
+  "Construct CONNECTION with SLOTS."
+  (cl-call-next-method)
+  (let ((port (plist-get slots :port)))
+    (jsonrpc-websocket-server--set-server
+     connection
+     (websocket-server
+      port
+      :host 'local
+      :on-message (lambda (socket frame)
+                    (message "received: %s" (websocket-frame-text frame))
+                    (jsonrpc-websocket-server-set-socket connection socket)
+                    (let* ((json-object-type 'plist)
+                           (json-message (json-read-from-string (websocket-frame-text frame))))
+                      (jsonrpc-connection-receive connection json-message)))
+      :on-close (lambda (_websocket)
+                  ;;TODO: handle close
+                  (message "client websocket closed"))))))
+
+(cl-defmethod jsonrpc-connection-send ((connection jsonrpc-websocket-server-connection)
+                                       &key
+                                       id
+                                       method
+                                       params
+                                       result
+                                       error
+                                       )
+  "Send message with websocket CONNECTION."
+  (let ((message `(:jsonrpc "2.0" :id ,(if id id json-null))))
+    (cond (method (plist-put message :method
+                             (cond ((keywordp method) (substring (symbol-name method) 1))
+                                   ((and method (symbolp method)) (symbol-name method))
+                                   (t method)))
+                  (plist-put message :params params))
+          (result (plist-put message :result result))
+          (error (plist-put message :error error)))
+    (message "send result: %s" (json-encode-plist message))
+    (websocket-send-text (jsonrpc-websocket-server--socket connection) (json-encode-plist message))))
 
 
-(defvar eaf-websocket--jsonrpc-connection nil)
+
+(defvar eaf-websocket--jsonrpc-client-connection nil)
+
+(defvar eaf-websocket--jsonrpc-server-connection nil)
 
 (defun eaf-websocket--call-emacs (method params)
   (when (and (symbolp method) (fboundp method))
@@ -112,35 +175,50 @@ The following initargs are accepted:
                           ) params) ))
       (apply method args))))
 
-(defun eaf-websocket-start-connection(name url)
-  "Start connect NAME websocket server with URL."
-  (setq eaf-websocket--jsonrpc-connection
-        (jsonrpc-websocket-connection
+(defun eaf-websocket-start-server(name port)
+  "Start NAME websocket server with PORT."
+  (setq eaf-websocket--jsonrpc-server-connection
+        (jsonrpc-websocket-server-connection
          :name name
-         :url url
+         :port port
          :notification-dispatcher (lambda (conn method params)
                                     (eaf-websocket--call-emacs method params)
                                     )
          :request-dispatcher (lambda (conn method params)
+                               (message "method: %s. params: %s" method params)
                                (eaf-websocket--call-emacs method params)
                                ))))
 
-(defun eaf-websocket-stop-connection()
-  "Stop webcosket connect."
-  (websocket-close eaf-websocket--jsonrpc-connection)
-  (setq eaf-websocket--jsonrpc-connection nil))
+(defun eaf-websocket-stop-server ()
+  "Stop websocket server."
+  (websocket-server-close (jsonrpc-websocket-server--server eaf-websocket--jsonrpc-server-connection))
+  (setq eaf-websocket--jsonrpc-server-connection nil))
+
+(defun eaf-websocket-start-client(name url)
+  "Start connect NAME websocket server with URL."
+  (setq eaf-websocket--jsonrpc-client-connection
+        (jsonrpc-websocket-client-connection
+         :name name
+         :url url
+         :notification-dispatcher (lambda (conn method params)
+                                    (message "client don't handle notify!")
+                                    )
+         :request-dispatcher (lambda (conn method params)
+                               (message "client don't handle request!")
+                               ))))
+
+(defun eaf-websocket-stop-client()
+  (websocket-close (jsonrpc-websocket-client--socket eaf-websocket--jsonrpc-client-connection))
+  (setq eaf-websocket--jsonrpc-client-connection nil))
+
 
 (defun eaf-websocket-call (method &rest params)
   "Call remote METHOD with PARAMS."
-  (jsonrpc-request eaf-websocket--jsonrpc-connection method params))
-
-(cl-defun eaf-websocket-async-call (method params &rest args &key _success-fn _error-fn _timeout-fn)
-  "Async call remote METHOD with PARAMS. PARAMS is  a sequence."
-  (apply #'jsonrpc-async-request eaf-websocket--jsonrpc-connection method params args))
+  (jsonrpc-request eaf-websocket--jsonrpc-client-connection method params))
 
 (defun eaf-websocket-notify (method &rest params)
   "Notify METHOD with PARAMS."
-  (jsonrpc-notify eaf-websocket--jsonrpc-connection method params))
+  (jsonrpc-notify eaf-websocket--jsonrpc-client-connection method params))
 
 (provide 'eaf-websocket)
 
