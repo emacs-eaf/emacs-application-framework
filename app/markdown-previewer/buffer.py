@@ -51,4 +51,4 @@ class AppBuffer(BrowserBuffer):
 
         paths = os.path.split(self.url)
         if len(paths) > 0:
-            self.change_title(paths[-1])
+            self.change_title(paths[-1] + " preview")

@@ -106,9 +106,9 @@ class WebsocketServer(QObject):
         message = {"jsonrpc": "2.0", "error": { "code": code, "message": message }, "id": request_id}
         self.__send_text_message(json.dumps(message))
 
-#TODO: error handle
 class WebsocketServerThread(QThread):
     send_result = pyqtSignal(int, str)
+    send_error = pyqtSignal(int, int, str)
     def __init__(self, name, port, dispatcher, parent=None):
         super().__init__(parent=parent)
         self.name = name
@@ -120,6 +120,7 @@ class WebsocketServerThread(QThread):
         self.__server.request_received.connect(self.__request_dispatcher)
         self.__server.notify_received.connect(self.__notify_dispatcher)
         self.send_result.connect(self.__server.send_result)
+        self.send_error.connect(self.__server.send_error)
         self.exec()
 
     def __request_dispatcher(self, request_id, method_name, params):
@@ -147,12 +148,12 @@ class WebsocketServerThread(QThread):
 
 
 class WebsocketClient(QObject):
+    request_success = pyqtSignal(int, str)
+    request_error = pyqtSignal(int, str)
     def __init__(self, url, parent=None):
         super().__init__(parent)
         self.url = url
 
-        self.__request_id = 0
-        self.__request_cbs = {}
         self.__deferred_message = []
         self.__socket = QWebSocket()
         self.__socket.connected.connect(self.__on_connected)
@@ -171,7 +172,6 @@ class WebsocketClient(QObject):
             self.__deferred_message.append(message)
 
     def __on_text_message_received(self, message_str):
-        # for debug
         reply = {}
         reply["jsonrpc"] = "2.0"
         message = None
@@ -182,18 +182,13 @@ class WebsocketClient(QObject):
             self.__send_text_message(json.dumps(reply))
             return
         if "result" in message and "id" in message:
-            cb = self.__request_cbs.pop(message["id"])["success_cb"]
-            if cb:
-                cb(message["result"])
+            self.request_success.emit(message["id"], message["result"])
             return
         elif "error" in message and "id" in message:
-            cb = self.__request_cbs.pop([message["id"]])["error_cb"]
-            if cb:
-                cb(message["error"]["message"])
+            self.request_error.emit(message["id"], message["error"]["message"])
             return
 
-
-    def notify(self, method, *params):
+    def notify(self, method, params):
         message = {
             "jsonrpc": "2.0",
             "method": method,
@@ -201,14 +196,74 @@ class WebsocketClient(QObject):
         }
         self.__send_text_message(json.dumps(message))
 
+
+    def request(self, request_id, method, params):
+        message = {
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "method": method,
+            "params": params,
+        }
+        self.__send_text_message(json.dumps(message))
+
+
+class WebsocketClientThread(QThread):
+    __send_notify = pyqtSignal(str, object)
+    __send_request = pyqtSignal(int, str, object)
+    def __init__(self, url, parent=None):
+        super().__init__(parent=parent)
+        self.url = url
+        self.__request_id = 0
+        self.__client = None
+        self.__request_cbs = {}
+        self.__deferred_notify = []
+        self.__deferred_request = []
+
+
+    def run(self):
+        self.__client = WebsocketClient(self.url)
+        self.__client.request_success.connect(self.__request_success)
+        self.__client.request_error.connect(self.__request_error)
+        self.__send_notify.connect(self.__client.notify)
+        self.__send_request.connect(self.__client.request)
+        while self.__deferred_notify:
+            notify = self.__deferred_notify.pop()
+            self.__client.notify(notify[0], notify[1])
+        while self.__deferred_request:
+            request = self.__deferred_request.pop()
+            self.__client.request(request[0], request[1], request[2])
+        self.exec()
+
+    def notify(self, method, *params):
+        if self.__client:
+            self.__send_notify.emit(method, params)
+        else:
+            self.__deferred_notify.append([method, params])
 
     def async_request(self, method, *params, success_cb=None, error_cb=None):
         self.__request_id += 1
-        message = {
-            "jsonrpc": "2.0",
-            "id": self.__request_id,
-            "method": method,
-            "params": params,
+        self.__request_cbs[self.__request_id] = {
+            "success_cb": success_cb,
+            "error_cb": error_cb
         }
-        self.__request_cbs[self.__request_id] = { "success_cb": success_cb , "error_cb": error_cb}
-        self.__send_text_message(json.dumps(message))
+        if not self.__client:
+            self.__deferred_request.append([self.__request_id, method, params])
+            return
+
+        self.__send_request.emit(self.__request_id, method, params)
+
+    def __request_success(self, request_id, result):
+        cb = self.__request_cbs.pop(request_id)["success_cb"]
+        if cb:
+            try:
+                cb(result)
+            except Exception:
+                print("execute request success callback exception")
+
+    def __request_error(self, request_id, error):
+        cb = self.__request_cbs.pop(request_id)["error_cb"]
+        if cb:
+            try:
+                cb(error)
+            except Exception:
+                print("execute request error callback exception")

@@ -214,7 +214,7 @@ The following initargs are accepted:
 
 (defun eaf-websocket-call (method &rest params)
   "Call remote METHOD with PARAMS."
-  (jsonrpc-request eaf-websocket--jsonrpc-client-connection method params :timeout 300000))
+  (jsonrpc-request eaf-websocket--jsonrpc-client-connection method params))
 
 (cl-defun eaf-websocket-async-call (method params &rest args &key _success-fn _error-fn _timeout-fn)
   "Async call remote METHOD with PARAMS. PARAMS is  a sequence."

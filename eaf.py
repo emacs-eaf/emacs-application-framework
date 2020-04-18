@@ -36,7 +36,7 @@ import os
 import subprocess
 import platform
 
-from eaf_websocket import WebsocketClient, WebsocketServerThread
+from eaf_websocket import WebsocketClientThread, WebsocketServerThread
 
 
 class EAF:
@@ -64,7 +64,9 @@ class EAF:
         self.update_emacs_var_dict(var_dict_string)
 
         # connect to emacs server
-        self.websocket_client = WebsocketClient("ws://127.0.0.1:" + str(eamcs_server_port))
+        self.websocket_client = WebsocketClientThread("ws://127.0.0.1:" + str(eamcs_server_port))
+        self.websocket_client.start()
+
         # start python websocket server
         port = get_free_port()
         self.websocket_server = WebsocketServerThread("EAF Python Server", port, self)
