@@ -626,19 +626,21 @@ class PdfViewerWidget(QWidget):
         self.is_jump_link = True
         key = key.upper()
         if key in self.jump_link_key_cache_dict:
-            link = self.jump_link_key_cache_dict[key]
-            if "page" in link:
-                self.cleanup_links()
+            self.handle_jump_to_link(self.jump_link_key_cache_dict[key])
 
-                self.save_current_pos()
-                self.jump_to_page(link["page"] + 1)
+    def handle_jump_to_link(self, link):
+        if "page" in link:
+            self.cleanup_links()
 
-                self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
-            elif "uri" in link:
-                self.cleanup_links()
+            self.save_current_pos()
+            self.jump_to_page(link["page"] + 1)
 
-                self.buffer.open_url_in_new_tab.emit(link["uri"])
-                self.buffer.message_to_emacs.emit("Open " + link["uri"])
+            self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
+        elif "uri" in link:
+            self.cleanup_links()
+
+            self.buffer.open_url_in_new_tab.emit(link["uri"])
+            self.buffer.message_to_emacs.emit("Open " + link["uri"])
 
     def cleanup_links(self):
         self.is_jump_link = False
@@ -965,8 +967,7 @@ class PdfViewerWidget(QWidget):
         for link in page.getLinks():
             rect = link["from"]
             if ex >= rect.x0 and ex <= rect.x1 and ey >= rect.y0 and ey <= rect.y1:
-                if link["page"]:
-                    return link
+                return link
 
         return None
 
@@ -1034,7 +1035,7 @@ class PdfViewerWidget(QWidget):
     def handle_click_link(self):
         event_link = self.get_event_link()
         if event_link:
-            self.jump_to_page(event_link["page"] + 1)
+            self.handle_jump_to_link(event_link)
 
     def handle_translate_word(self):
         double_click_word = self.get_double_click_word()
