@@ -626,19 +626,21 @@ class PdfViewerWidget(QWidget):
         self.is_jump_link = True
         key = key.upper()
         if key in self.jump_link_key_cache_dict:
-            link = self.jump_link_key_cache_dict[key]
-            if "page" in link:
-                self.cleanup_links()
+            self.handle_jump_to_link(self.jump_link_key_cache_dict[key])
 
-                self.save_current_pos()
-                self.jump_to_page(link["page"] + 1)
+    def handle_jump_to_link(self, link):
+        if "page" in link:
+            self.cleanup_links()
 
-                self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
-            elif "uri" in link:
-                self.cleanup_links()
+            self.save_current_pos()
+            self.jump_to_page(link["page"] + 1)
 
-                self.buffer.open_url_in_new_tab.emit(link["uri"])
-                self.buffer.message_to_emacs.emit("Open " + link["uri"])
+            self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
+        elif "uri" in link:
+            self.cleanup_links()
+
+            self.buffer.open_url_in_new_tab.emit(link["uri"])
+            self.buffer.message_to_emacs.emit("Open " + link["uri"])
 
     def cleanup_links(self):
         self.is_jump_link = False
@@ -868,7 +870,7 @@ class PdfViewerWidget(QWidget):
         page = self.document[page_index]
         annot = page.firstAnnot
         if not annot:
-            return None
+            return None, None
 
         annots = []
         while annot:
@@ -965,8 +967,7 @@ class PdfViewerWidget(QWidget):
         for link in page.getLinks():
             rect = link["from"]
             if ex >= rect.x0 and ex <= rect.x1 and ey >= rect.y0 and ey <= rect.y1:
-                if link["page"]:
-                    return link
+                return link
 
         return None
 
@@ -990,35 +991,53 @@ class PdfViewerWidget(QWidget):
                 return False
 
         if event.type() == QEvent.MouseMove:
-            if self.is_select_mode:
-                rect_index, page_index = self.get_char_rect_index()
-                if rect_index and page_index:
-                    if self.start_char_rect_index is None or self.start_char_page_index is None:
-                        self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
-                    else:
-                        self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
-                        self.mark_select_char_area()
-            else:
+            if self.hasMouseTracking():
                 self.hover_annot()
+            else:
+                self.handle_select_mode()
 
         elif event.type() == QEvent.MouseButtonPress:
-            self.grabMouse() # add this detect release mouse event
+            # add this detect release mouse event
+            self.grabMouse()
+
+            # cleanup select mode on another click
+            if self.is_select_mode:
+                self.cleanup_select()
+
             if event.button() == Qt.LeftButton:
-                event_link = self.get_event_link()
-                if event_link:
-                    self.jump_to_page(event_link["page"] + 1)
+                # In order to catch mouse move event when drap mouse.
+                self.setMouseTracking(False)
+            elif event.button() == Qt.RightButton:
+                self.handle_click_link()
 
         elif event.type() == QEvent.MouseButtonRelease:
-            pass
+            # Capture move event, event without holding down the mouse.
+            self.setMouseTracking(True)
 
         elif event.type() == QEvent.MouseButtonDblClick:
             if self.is_mark_search:
                 self.cleanup_search()
             if event.button() == Qt.RightButton:
-                double_click_word = self.get_double_click_word()
-                if double_click_word:
-                    self.translate_double_click_word.emit(double_click_word)
-            elif event.button() == Qt.LeftButton:
-                self.is_select_mode = True
+                self.handle_translate_word()
 
         return False
+
+    def handle_select_mode(self):
+        self.is_select_mode = True
+        rect_index, page_index = self.get_char_rect_index()
+        if rect_index and page_index:
+            if self.start_char_rect_index is None or self.start_char_page_index is None:
+                self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
+            else:
+                self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
+                self.mark_select_char_area()
+
+    def handle_click_link(self):
+        event_link = self.get_event_link()
+        if event_link:
+            self.handle_jump_to_link(event_link)
+
+    def handle_translate_word(self):
+        double_click_word = self.get_double_click_word()
+        if double_click_word:
+            self.translate_double_click_word.emit(double_click_word)
