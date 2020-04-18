@@ -1013,6 +1013,7 @@ class PdfViewerWidget(QWidget):
         elif event.type() == QEvent.MouseButtonRelease:
             # Capture move event, event without holding down the mouse.
             self.setMouseTracking(True)
+            self.releaseMouse()
 
         elif event.type() == QEvent.MouseButtonDblClick:
             if self.is_mark_search:
