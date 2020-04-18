@@ -885,6 +885,7 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
   (setq eaf-org-killed-file-list nil)
   (setq-local eaf-fullscreen-p nil)
 
+  (eaf-websocket-stop-client)
   ;; Kill process after kill buffer, make application can save session data.
   (eaf--kill-python-process)
   ;; stop websocket server

@@ -100,6 +100,9 @@ class EAF:
                 command, check=False, shell=True, stdout=subprocess.PIPE
             ).stdout
 
+    def async_call_emacs(self, method, *params, success_cb, error_cb=None):
+        self.websocket_client.async_request(method, *params, success_cb=success_cb, error_cb=None)
+
     def webengine_include_private_codec(self):
         path = os.path.join(
             QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath),

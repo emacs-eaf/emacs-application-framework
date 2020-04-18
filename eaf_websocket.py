@@ -23,8 +23,9 @@ from PyQt5.QtCore import QObject, QTimer, QEventLoop, pyqtSignal, QUrl, QThread,
 from PyQt5.QtNetwork import QHostAddress
 from PyQt5.QtWebSockets import QWebSocketServer, QWebSocket
 
-import json
 import os
+import traceback
+import json
 
 class WebsocketServer(QObject):
     request_received = pyqtSignal(int, str, object)
@@ -132,9 +133,9 @@ class WebsocketServerThread(QThread):
             else:
                 self.send_error.emit(request_id, -32601, "No Dispatcher")
         except AttributeError:
-            self.send_error.emit(request_id, -32601, "No Method")
+            self.send_error.emit(request_id, -32601, traceback.format_exc())
         except Exception as e:
-            self.send_error.emit(request_id, -32603, "method raise exception")
+            self.send_error.emit(request_id, -32603, "method raise exception: " + traceback.format_exc())
 
     def __notify_dispatcher(self, method_name, params):
         try:
