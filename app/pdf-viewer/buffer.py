@@ -735,7 +735,7 @@ class PdfViewerWidget(QWidget):
     def get_char_rect_index(self):
         offset = 15
         ex, ey, page_index = self.get_cursor_absolute_position()
-        if ex and ey and page_index:
+        if ex and ey and page_index is not None:
             rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
             for char_index, char in enumerate(self.char_dict[page_index]):
                 if fitz.Rect(char["bbox"]).intersect(rect):
@@ -1026,7 +1026,7 @@ class PdfViewerWidget(QWidget):
     def handle_select_mode(self):
         self.is_select_mode = True
         rect_index, page_index = self.get_char_rect_index()
-        if rect_index and page_index:
+        if rect_index and page_index is not None:
             if self.start_char_rect_index is None or self.start_char_page_index is None:
                 self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
             else:
