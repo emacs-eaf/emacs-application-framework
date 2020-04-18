@@ -990,35 +990,53 @@ class PdfViewerWidget(QWidget):
                 return False
 
         if event.type() == QEvent.MouseMove:
-            if self.is_select_mode:
-                rect_index, page_index = self.get_char_rect_index()
-                if rect_index and page_index:
-                    if self.start_char_rect_index is None or self.start_char_page_index is None:
-                        self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
-                    else:
-                        self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
-                        self.mark_select_char_area()
-            else:
+            if self.hasMouseTracking():
                 self.hover_annot()
+            else:
+                self.handle_select_mode()
 
         elif event.type() == QEvent.MouseButtonPress:
-            self.grabMouse() # add this detect release mouse event
+            # add this detect release mouse event
+            self.grabMouse()
+
+            # cleanup select mode on another click
+            if self.is_select_mode:
+                self.cleanup_select()
+
             if event.button() == Qt.LeftButton:
-                event_link = self.get_event_link()
-                if event_link:
-                    self.jump_to_page(event_link["page"] + 1)
+                # In order to catch mouse move event when drap mouse.
+                self.setMouseTracking(False)
+            elif event.button() == Qt.RightButton:
+                self.handle_click_link()
 
         elif event.type() == QEvent.MouseButtonRelease:
-            pass
+            # Capture move event, event without holding down the mouse.
+            self.setMouseTracking(True)
 
         elif event.type() == QEvent.MouseButtonDblClick:
             if self.is_mark_search:
                 self.cleanup_search()
             if event.button() == Qt.RightButton:
-                double_click_word = self.get_double_click_word()
-                if double_click_word:
-                    self.translate_double_click_word.emit(double_click_word)
-            elif event.button() == Qt.LeftButton:
-                self.is_select_mode = True
+                self.handle_translate_word()
 
         return False
+
+    def handle_select_mode(self):
+        self.is_select_mode = True
+        rect_index, page_index = self.get_char_rect_index()
+        if rect_index and page_index:
+            if self.start_char_rect_index is None or self.start_char_page_index is None:
+                self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
+            else:
+                self.last_char_rect_index, self.last_char_page_index = rect_index, page_index
+                self.mark_select_char_area()
+
+    def handle_click_link(self):
+        event_link = self.get_event_link()
+        if event_link:
+            self.jump_to_page(event_link["page"] + 1)
+
+    def handle_translate_word(self):
+        double_click_word = self.get_double_click_word()
+        if double_click_word:
+            self.translate_double_click_word.emit(double_click_word)
