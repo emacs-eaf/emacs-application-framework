@@ -868,7 +868,7 @@ class PdfViewerWidget(QWidget):
         page = self.document[page_index]
         annot = page.firstAnnot
         if not annot:
-            return None
+            return None, None
 
         annots = []
         while annot:
