@@ -806,9 +806,14 @@ For now only EAF browser app is supported."
              (start-process "" nil "xdg-open" path-or-url))))))
 
 (defun eaf-call (method &rest args)
-  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
+  "Call EAF Python process using `eaf-websocket-call' with METHOD and ARGS."
   (apply #'eaf-websocket-call
          method
+         args))
+
+(defun eaf-notify (method &rest args)
+  (apply #'eaf-websocket-notify
+         mehtod
          args))
 
 (defun eaf-get-emacs-xid (frame)
