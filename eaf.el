@@ -813,7 +813,7 @@ For now only EAF browser app is supported."
 
 (defun eaf-notify (method &rest args)
   (apply #'eaf-websocket-notify
-         mehtod
+         method
          args))
 
 (defun eaf-get-emacs-xid (frame)
