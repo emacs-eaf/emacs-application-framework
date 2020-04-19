@@ -19,7 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QObject, QTimer, QEventLoop, pyqtSignal, QUrl, QThread, QCoreApplication
+from PyQt5.QtCore import (
+    QObject,
+    QTimer,
+    QEventLoop,
+    pyqtSignal,
+    QUrl,
+    QThread,
+)
 from PyQt5.QtNetwork import QHostAddress
 from PyQt5.QtWebSockets import QWebSocketServer, QWebSocket
 
@@ -27,10 +34,12 @@ import os
 import traceback
 import json
 
+
 class WebsocketServer(QObject):
     request_received = pyqtSignal(int, str, object)
     notify_received = pyqtSignal(str, object)
-    def __init__(self, name, port, parent = None):
+
+    def __init__(self, name, port, parent=None):
         super().__init__(parent=parent)
         self.name = name
         self.port = port
@@ -68,13 +77,14 @@ class WebsocketServer(QObject):
         try:
             self.__client_connection.sendTextMessage(message)
         except RuntimeError:
-            print("Client socket closed, send message failed. restart server and client!")
+            print(
+                "Client socket closed, send message failed. restart server and client!"
+            )
 
     def __on_disconnected(self):
         self.__client_connection.deleteLater()
 
     def __on_text_message_received(self, message_str):
-        # for debug
         reply = {}
         reply["jsonrpc"] = "2.0"
         message = None
@@ -104,12 +114,18 @@ class WebsocketServer(QObject):
         self.__send_text_message(json.dumps(message))
 
     def send_error(self, request_id, code, message):
-        message = {"jsonrpc": "2.0", "error": { "code": code, "message": message }, "id": request_id}
+        message = {
+            "jsonrpc": "2.0",
+            "error": {"code": code, "message": message},
+            "id": request_id,
+        }
         self.__send_text_message(json.dumps(message))
+
 
 class WebsocketServerThread(QThread):
     send_result = pyqtSignal(int, str)
     send_error = pyqtSignal(int, int, str)
+
     def __init__(self, name, port, dispatcher, parent=None):
         super().__init__(parent=parent)
         self.name = name
@@ -128,14 +144,16 @@ class WebsocketServerThread(QThread):
         try:
             if self.dispatcher:
                 method = getattr(self.dispatcher, method_name)
-                result =  method(*params)
+                result = method(*params)
                 self.send_result.emit(request_id, result)
             else:
                 self.send_error.emit(request_id, -32601, "No Dispatcher")
         except AttributeError:
             self.send_error.emit(request_id, -32601, traceback.format_exc())
         except Exception as e:
-            self.send_error.emit(request_id, -32603, "method raise exception: " + traceback.format_exc())
+            self.send_error.emit(
+                request_id, -32603, "method raise exception: " + traceback.format_exc()
+            )
 
     def __notify_dispatcher(self, method_name, params):
         try:
@@ -145,12 +163,13 @@ class WebsocketServerThread(QThread):
             else:
                 print("no dispatcher")
         except Exception:
-            print("methid raise exception")
+            print("notify execute exception: ", traceback.format_exc())
 
 
 class WebsocketClient(QObject):
     request_success = pyqtSignal(int, str)
     request_error = pyqtSignal(int, str)
+
     def __init__(self, url, parent=None):
         super().__init__(parent)
         self.url = url
@@ -197,7 +216,6 @@ class WebsocketClient(QObject):
         }
         self.__send_text_message(json.dumps(message))
 
-
     def request(self, request_id, method, params):
         message = {
             "jsonrpc": "2.0",
@@ -211,6 +229,7 @@ class WebsocketClient(QObject):
 class WebsocketClientThread(QThread):
     __send_notify = pyqtSignal(str, object)
     __send_request = pyqtSignal(int, str, object)
+
     def __init__(self, url, parent=None):
         super().__init__(parent=parent)
         self.url = url
@@ -219,7 +238,6 @@ class WebsocketClientThread(QThread):
         self.__request_cbs = {}
         self.__deferred_notify = []
         self.__deferred_request = []
-
 
     def run(self):
         self.__client = WebsocketClient(self.url)
@@ -245,7 +263,7 @@ class WebsocketClientThread(QThread):
         self.__request_id += 1
         self.__request_cbs[self.__request_id] = {
             "success_cb": success_cb,
-            "error_cb": error_cb
+            "error_cb": error_cb,
         }
         if not self.__client:
             self.__deferred_request.append([self.__request_id, method, params])
