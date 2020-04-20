@@ -56,17 +56,13 @@ sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode 
 yay -S python-pymupdf python-grip
 ```
 
-2. 安装 [eamcs-websocket](https://github.com/ahyatt/emacs-websocket.git)
-
-用 ```git clone``` 下载 [eamcs-websocket](https://github.com/ahyatt/emacs-websocket.git)，然后将它加到  ```load-path``` 中
-
-3. 使用 ```git clone``` 下载这个仓库.
+2. 使用 ```git clone``` 下载这个仓库.
 
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
-4. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
+3. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
 (require 'eaf)
@@ -75,7 +71,6 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
 ```Elisp
-(use-package websocket)
 
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
@@ -153,7 +148,8 @@ EAF主要实现这几个功能：
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
 ### 为什么EAF只能在Linux/Windows下工作？
-2. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
+1. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
+2. 跨进程 reparent 技术在 MacOS 下不能正常工作。
 
 欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：QGraphicsScene
 
