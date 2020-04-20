@@ -52,7 +52,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 1. Install EAF dependencies:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-markdown nodejs aria2 libreoffice filebrowser
 yay -S python-pymupdf python-grip
 ```
 
@@ -87,13 +87,11 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Package                        | Dependent                            | Description                                   |
 | :--------                      | :------                              | :------                                       |
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
-| python-dbus                    | Core                                 | DBus IPC to connect Python with Elisp         |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
 | python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
 | python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |
 | python-feedparser              | RSS Reader                           | Parse RSS feeds                               |
-| python-pyinotify               | Mermaid                              | Monitor *.mmd file change status              |
 | python-markdown                | Mermaid                              | Covert markdown format to mermaid html format |
 | nodejs                         | Terminal                             | Communicate between browser and local TTY     |
 | aria2                          | Browser                              | Download files from the web                   |
@@ -124,11 +122,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 
 - To open the file under the cursor in `dired` using appropriate EAF Application, use `eaf-open-this-from-dired` instead.
 
-```
-NOTE:
-EAF use DBus' session bus, it must run by a general user.
-Please don't use EAF when Emacs is started with sudo or root user, a root user can only access DBus's system bus.
-```
 
 ## Wiki
 It is **highly** suggested to read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first before using EAF.
@@ -140,7 +133,7 @@ Wiki consists of documentations on Keybinding, Customization, Design and TODOLIS
 ### How does EAF work?
 EAF implements three major functionalities:
 1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
-2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via DBus IPC.
+2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via websocket + jsonrpc.
 3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
 ### EAF vs EXWM?
@@ -152,9 +145,9 @@ EAF implements three major functionalities:
 
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
-### EAF is (currently) Linux only. Why?
-1. DBus is Linux-specific technology, it's difficult to support DBus in other operating systems.
-2. Qt5's QGraphicsScene technology does not work on MacOS.
+### EAF is (currently) Linux/Windows only. Why?
+1. Qt5's QGraphicsScene technology does not work on MacOS.
+2. Cross-process reparent does not work on MacOS.
 
 If you've figure them out, PRs are always welcome!
 

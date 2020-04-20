@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
+from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt, QProcess
 from PyQt5.QtGui import QColor, QMouseEvent
 from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
@@ -30,10 +30,12 @@ import signal
 import threading
 import getpass
 import json
+import os
+import platform
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs, False)
 
         # Get free port.
         self.port = get_free_port()
@@ -44,15 +46,13 @@ class AppBuffer(BrowserBuffer):
         self.start_directory = arguments_dict["directory"]
 
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
-        self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
+        self.server_js = os.path.abspath(os.path.join(os.path.dirname(__file__), "server.js"))
 
         # Start server process.
-        self.background_process = subprocess.Popen(
-            "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=True)
-
+        self.background_process = QProcess(self)
+        self.background_process.setProcessChannelMode(QProcess.MergedChannels)
+        self.background_process.readyReadStandardOutput.connect(lambda : print(self.background_process.readAllStandardOutput()))
+        self.background_process.start("node", [self.server_js, str(self.port), self.start_directory, self.command])
         self.open_terminal_page()
 
         self.reset_default_zoom()
@@ -70,7 +70,7 @@ class AppBuffer(BrowserBuffer):
            (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
         with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
+            html = f.read().replace("%1", str(self.port)).replace("%2", QUrl.fromLocalFile( os.path.abspath(os.path.join(os.path.dirname(__file__))) ).toString()).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
             self.buffer_widget.setHtml(html)
 
         self.update_title()
@@ -82,7 +82,7 @@ class AppBuffer(BrowserBuffer):
         ))
 
     def destroy_buffer(self):
-        os.kill(self.background_process.pid, signal.SIGKILL)
+        self.background_process.kill()
 
         if self.buffer_widget is not None:
             # NOTE: We need delete QWebEnginePage manual, otherwise QtWebEngineProcess won't quit.

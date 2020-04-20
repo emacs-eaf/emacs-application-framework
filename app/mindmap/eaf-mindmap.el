@@ -84,11 +84,6 @@
 
 ;;; Code:
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "export_org_json"
- #'eaf--export-org-json)
-
 (defun eaf--export-org-json (org-json-content org-file-path)
   (let (org-parse-data)
     (with-temp-buffer

@@ -52,7 +52,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 
 ```Bash
 sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser
-python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
+ python-markdown nodejs aria2 libreoffice filebrowser
 yay -S python-pymupdf python-grip
 ```
 
@@ -71,6 +71,7 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
 ```Elisp
+
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :custom
@@ -87,13 +88,11 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 | 包名                           | 依赖                         | 解释                                               |
 | :--------                      | :------                      | :------                                            |
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                          |
-| python-dbus                    | 核心                         | DBus库，用于在Emacs和Python进程间通讯              |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                           |
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                                        |
 | python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务                         |
 | python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                             |
 | python-feedparser              | RSS阅读器                    | 解析RSS/Atom信息                                   |
-| python-pyinotify               | 流程图                       | 监听 mmd 格式文件的变动                            |
 | python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式           |
 | aria2                          | 浏览器                       | 下载网络文件                                       |
 | nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                            |
@@ -124,10 +123,6 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
 
-```
-注意：
-EAF使用DBus的普通权限总线 (session bus)，请不要用 sudo 来启动EAF，root用户只能访问系统权限总线 (system bus)
-```
 
 ## Wiki
 强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)。
@@ -139,7 +134,7 @@ Wiki包括架构设计，按键绑定，自定义选项和任务列表等文档�
 ### EAF是怎么工作的？
 EAF主要实现这几个功能：
 1. 利用QWindow的Reparent技术来实现PyQt应用进程的窗口粘贴到Emacs对应的Buffer区域
-2. 通过DBus IPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
+2. 通过websocket jsonrpc来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
 3. 通过Qt5的QGraphicsScene来实现镜像窗口，以对应Emacs的Buffer/Window模型
 
 ### EAF vs EXWM?
@@ -152,11 +147,11 @@ EAF主要实现这几个功能：
 
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
-### 为什么EAF只能在Linux下工作？
-1. DBus是Linux下专用的进程间通讯技术，其他操作系统可能无法支持DBus
-2. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
+### 为什么EAF只能在Linux/Windows下工作？
+1. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
+2. 跨进程 reparent 技术在 MacOS 下不能正常工作。
 
-欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：DBus，QGraphicsScene
+欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：QGraphicsScene
 
 ### `[EAF] *eaf* aborted (core dumped)` 奔溃了怎么办？
 请检查 `*eaf*` 这个窗口的内容。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。
