@@ -1032,9 +1032,6 @@ to edit EAF keybindings!" fun fun)))
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
 
-(defun eaf-is-support (url)
-  t)
-
 (defun eaf-monitor-window-size-change (frame)
   (when (process-live-p eaf-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))

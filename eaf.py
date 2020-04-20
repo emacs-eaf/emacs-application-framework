@@ -51,7 +51,7 @@ class EAF:
             proxy_type,
             config_dir,
             var_dict_string,
-            emacs_server_port
+            emacs_server_port,
         ) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
@@ -64,7 +64,8 @@ class EAF:
         self.update_emacs_var_dict(var_dict_string)
 
         # connect to emacs server
-        self.websocket_client = WebsocketClientThread("ws://127.0.0.1:" + str(emacs_server_port))
+        self.websocket_client = WebsocketClientThread("{0}://{1}:{2}".format("ws", "127.0.0.1", str(emacs_server_port)))
+
         self.websocket_client.start()
 
         # start python websocket server
@@ -101,17 +102,19 @@ class EAF:
             ).stdout
 
     def async_call_emacs(self, method, *params, success_cb, error_cb=None):
-        self.websocket_client.async_request(method, *params, success_cb=success_cb, error_cb=None)
+        self.websocket_client.async_request(
+            method, *params, success_cb=success_cb, error_cb=None
+        )
 
     def webengine_include_private_codec(self):
-        path = os.path.join(
-            QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath),
-            "QtWebEngineProcess",
-        )
-        if platform.system() =="Windows":
+        if platform.system() == "Windows":
             return False
         else:
-            return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
+            path = os.path.join(
+                QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath),
+                "QtWebEngineProcess",
+            )
+            return (self.get_command_result("ldd {} | grep libavformat".format(path)) != "")
 
     def update_emacs_var_dict(self, var_dict_string):
         self.emacs_var_dict = json.loads(var_dict_string)
@@ -409,9 +412,12 @@ class EAF:
     def call_function_with_args(self, buffer_id, function_name, args_string):
         if buffer_id in self.buffer_dict:
             try:
-                return self.buffer_dict[buffer_id].call_function_with_args(function_name, args_string)
+                return self.buffer_dict[buffer_id].call_function_with_args(
+                    function_name, args_string
+                )
             except AttributeError:
                 import traceback
+
                 traceback.print_exc()
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
@@ -449,10 +455,14 @@ class EAF:
         self.websocket_client.notify("eaf-focus-buffer", message)
 
     def first_start(self, webengine_include_private_codec, port):
-        self.websocket_client.notify("eaf--first-start", webengine_include_private_codec, port)
+        self.websocket_client.notify(
+            "eaf--first-start", webengine_include_private_codec, port
+        )
 
     def update_buffer_details(self, buffer_id, title, url):
-        self.websocket_client.notify("eaf--update-buffer-details", buffer_id, title, url)
+        self.websocket_client.notify(
+            "eaf--update-buffer-details", buffer_id, title, url
+        )
 
     def open_url_in_new_tab(self, url):
         self.websocket_client.notify("open-url-in-new-tab", url)
@@ -503,7 +513,9 @@ class EAF:
         self.websocket_client.notify("eaf--edit-focus-text", buffer_id, focus_text)
 
     def export_org_json(self, org_json_content, org_file_path):
-        self.websocket_client.notify("eaf--export-org-json", org_json_content, org_file_path)
+        self.websocket_client.notify(
+            "eaf--export-org-json", org_json_content, org_file_path
+        )
 
     def enter_fullscreen_request(self):
         self.websocket_client.notify("eaf--enter_fullscreen_request")
@@ -553,36 +565,27 @@ class EAF:
                 print("Saved session: ", buf.module_path, buf.url, buf_session_data)
 
     def restore_buffer_session(self, buf):
-        if os.path.exists(self.session_file):
-            with open(self.session_file, "r+") as session_file:
-                session_dict = {}
-                try:
-                    session_dict = json.load(session_file)
-                except ValueError:
-                    pass
+        if not os.path.exists(self.session_file):
+            print("Session is not restored, as %s cannot be found." % (self.session_file))
+            return
 
-                if buf.module_path in session_dict:
-                    if buf.url in session_dict[buf.module_path]:
-                        buf.restore_session_data(session_dict[buf.module_path][buf.url])
+        with open(self.session_file, "r+") as session_file:
+            session_dict = {}
+            try:
+                session_dict = json.load(session_file)
+            except ValueError:
+                pass
 
-                        print(
-                            "Session restored: ",
-                            buf.buffer_id,
-                            buf.module_path,
-                            self.session_file,
-                        )
-                    else:
-                        print(
-                            "Session is not restored, as no data about %s." % (buf.url)
-                        )
-                else:
-                    print(
-                        "Session is not restored, as no data present in session file."
-                    )
-        else:
-            print(
-                "Session is not restored, as %s cannot be found." % (self.session_file)
-            )
+            if buf.module_path not in session_dict:
+                print("Session is not restored, as no data present in session file.")
+                return
+
+            if buf.url not in session_dict[buf.module_path]:
+                print("Session is not restored, as no data about %s." % (buf.url))
+                return
+
+            buf.restore_session_data(session_dict[buf.module_path][buf.url])
+            print("Session restored: ", buf.buffer_id, buf.module_path, self.session_file)
 
 
 if __name__ == "__main__":

@@ -164,13 +164,13 @@ The following initargs are accepted:
 
 (defun eaf-websocket--call-emacs (method params)
   (when (and (symbolp method) (fboundp method))
-    (let ((args (mapcar (lambda(param)
-                          (if (or
-                               (eq param :json-false)
-                               (eq param :json-null))
-                              nil
-                            param)
-                          ) params) ))
+    (let ((args (mapcar
+                 (lambda(param)
+                   (unless (or
+                          (eq param :json-false)
+                          (eq param :json-null))
+                     param)
+                   ) params)))
       (apply method args))))
 
 (defun eaf-websocket-start-server(name port)
