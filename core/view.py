@@ -24,6 +24,8 @@ from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView
 
+import platform
+
 class View(QWidget):
 
     trigger_focus_event = QtCore.pyqtSignal(str)
@@ -111,8 +113,9 @@ class View(QWidget):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
 
-        # Places the window at the top of the Z order.  only Windows platform
-        self.emacs_window_to_top()
+        if platform.system() == "Windows":
+            # Places the window at the top of the Z order.  only Windows platform
+            self.emacs_window_to_top()
 
         # Make graphics view at left-top corner after show.
         self.graphics_view.verticalScrollBar().setValue(0)
