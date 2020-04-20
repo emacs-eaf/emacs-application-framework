@@ -31,6 +31,7 @@ import threading
 import getpass
 import json
 import os
+import platform
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
@@ -48,10 +49,18 @@ class AppBuffer(BrowserBuffer):
         self.server_js = os.path.abspath(os.path.join(os.path.dirname(__file__), "server.js"))
 
         # Start server process.
-        self.background_process = subprocess.Popen(["node", self.server_js, str(self.port), self.start_directory, self.command],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=True)
+        if platform.system() == "Windows":
+            self.background_process = subprocess.Popen(
+                ["node", self.server_js, str(self.port), self.start_directory, self.command],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                shell=True)
+        else:
+             self.background_process = subprocess.Popen(
+                 "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
+                 stdout=subprocess.PIPE,
+                 stderr=subprocess.STDOUT,
+                 shell=True)
 
         self.open_terminal_page()
 
