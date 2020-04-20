@@ -101,7 +101,6 @@ The following initargs are accepted:
 (defclass jsonrpc-websocket-server-connection (jsonrpc-connection)
   ((-port
     :initarg :port
-    :initform 12981
     :accessor jsonrpc-websocket--port
     :documentation "Websocket server port.")
    (-server

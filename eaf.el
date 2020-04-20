@@ -823,8 +823,15 @@ For now only EAF browser app is supported."
   (json-encode eaf-var-list))
 
 (defun eaf--get-free-port()
-  ;; TODO
-  "12981")
+  (let* ((temp-process
+          (make-network-process
+           :name "get-free-port"
+           :server t
+           :service 0
+           ))
+         (port (nth 1(process-contact temp-process))))
+    (delete-process temp-process)
+    (number-to-string port)))
 
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
