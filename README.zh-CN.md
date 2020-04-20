@@ -56,13 +56,17 @@ sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode 
 yay -S python-pymupdf python-grip
 ```
 
-2. 使用 ```git clone``` 下载这个仓库.
+2. 安装 [eamcs-websocket](https://github.com/ahyatt/emacs-websocket.git)
+
+用 ```git clone``` 下载 [eamcs-websocket](https://github.com/ahyatt/emacs-websocket.git)，然后将它加到  ```load-path``` 中
+
+3. 使用 ```git clone``` 下载这个仓库.
 
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
-3. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
+4. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
 (require 'eaf)
@@ -71,6 +75,8 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
 ```Elisp
+(use-package websocket)
+
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :custom

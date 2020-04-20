@@ -56,13 +56,17 @@ sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode 
 yay -S python-pymupdf python-grip
 ```
 
-2. Clone this repository.
+2. Install ```emacs-websocket```
+
+Clone [emacs-websocket](https://github.com/ahyatt/emacs-websocket) and add it to your Emacs ```load-path``
+
+3. Clone this repository.
 
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
 ```
 
-3. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+4. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
 ```Elisp
 (require 'eaf)
@@ -71,6 +75,8 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 If you use [use-package](https://github.com/jwiegley/use-package), a sample configuration has been provided.
 
 ```Elisp
+(use-package websocket)
+
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :custom
