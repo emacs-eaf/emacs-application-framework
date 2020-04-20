@@ -21,27 +21,42 @@
 
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, QTimer, QFileSystemWatcher
+from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
 from core.utils import string_to_base64
 from core.utils import PostGui
 import threading
+import pyinotify
 import markdown
 import os
-from pathlib import Path
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs, False)
+
+    update_content = QtCore.pyqtSignal()
+
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
         self.url = url
         self.render()
-        self.watcher = QFileSystemWatcher()
-        self.watcher.addPath(self.url)
-        self.watcher.fileChanged.connect(lambda : self.render())
 
+        self.update_content.connect(self.render)
+        threading.Timer(1, self.monitor_file_change).start()
+
+    def monitor_file_change(self):
+        parent = self
+
+        class ModHandler(pyinotify.ProcessEvent):
+            def process_IN_CLOSE_WRITE(self, evt):
+                parent.update_content.emit()
+
+        handler = ModHandler()
+        wm = pyinotify.WatchManager()
+        notifier = pyinotify.Notifier(wm, handler)
+        wdd = wm.add_watch(self.url, pyinotify.IN_CLOSE_WRITE)
+        notifier.loop()
 
     def render(self):
         with open(self.url, "r") as f:

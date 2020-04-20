@@ -24,18 +24,8 @@ from PyQt5.QtWidgets import QPushButton
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, True)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
 
         self.add_widget(QPushButton("Hello, EAF hacker, it's working!!!"))
         self.buffer_widget.setStyleSheet("font-size: 100px")
-        self.async_call_emacs("eaf-get-theme-mode", success_cb=self.update_background)
-
-    def update_background(self, theme):
-        if theme == "dark":
-            self.background_color = QColor(233, 129, 35, 255)
-        else:
-            self.background_color = QColor(255, 255, 255, 255)
-
-        self.setBackgroundBrush(self.background_color)
-        self.update()

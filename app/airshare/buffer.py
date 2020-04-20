@@ -27,8 +27,8 @@ from core.buffer import Buffer
 import qrcode
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
 
         self.add_widget(AirShareWidget(url, QColor(0, 0, 0, 255)))
 

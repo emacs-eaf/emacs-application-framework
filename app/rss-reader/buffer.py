@@ -31,8 +31,8 @@ import json
 import os
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, True)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
 
         self.add_widget(RSSReaderWidget(config_dir))
 

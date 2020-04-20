@@ -397,8 +397,8 @@ class BrowserBuffer(Buffer):
     get_focus_text = QtCore.pyqtSignal(str, str)
     open_dev_tools_tab = QtCore.pyqtSignal(object)
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs, fit_to_view):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, async_call_emacs, fit_to_view)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view)
 
         self.add_widget(BrowserView(config_dir))
 

@@ -27,8 +27,8 @@ from pathlib import Path
 import os
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, async_call_emacs, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
         self.load_image(url)
 
@@ -36,10 +36,10 @@ class AppBuffer(BrowserBuffer):
         self.url = url
         self.parent_dir = os.path.abspath(os.path.join(url, os.pardir))
         self.image_name = os.path.basename(url)
-        self.buffer_widget.setUrl(QUrl.fromLocalFile(self.url))
+        self.buffer_widget.setUrl(QUrl("file://" + self.url))
 
     def is_image_file(self, f):
-        return Path(f).suffix.lower() in [".jpg", ".jpeg", ".png", ".bmp", ".gif", ".svg", ".webp"]
+        return Path(f).suffix.lower() in ["jpg", "jpeg", "png", "bmp", "gif", "svg", "webp"]
 
     def get_same_dir_images(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
