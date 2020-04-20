@@ -51,7 +51,7 @@ class EAF:
             proxy_type,
             config_dir,
             var_dict_string,
-            eamcs_server_port
+            emacs_server_port
         ) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
@@ -64,7 +64,7 @@ class EAF:
         self.update_emacs_var_dict(var_dict_string)
 
         # connect to emacs server
-        self.websocket_client = WebsocketClientThread("ws://127.0.0.1:" + str(eamcs_server_port))
+        self.websocket_client = WebsocketClientThread("ws://127.0.0.1:" + str(emacs_server_port))
         self.websocket_client.start()
 
         # start python websocket server
