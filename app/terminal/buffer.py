@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
+from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt, QProcess
 from PyQt5.QtGui import QColor, QMouseEvent
 from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
@@ -49,19 +49,10 @@ class AppBuffer(BrowserBuffer):
         self.server_js = os.path.abspath(os.path.join(os.path.dirname(__file__), "server.js"))
 
         # Start server process.
-        if platform.system() == "Windows":
-            self.background_process = subprocess.Popen(
-                ["node", self.server_js, str(self.port), self.start_directory, self.command],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                shell=True)
-        else:
-             self.background_process = subprocess.Popen(
-                 "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
-                 stdout=subprocess.PIPE,
-                 stderr=subprocess.STDOUT,
-                 shell=True)
-
+        self.background_process = QProcess(self)
+        self.background_process.setProcessChannelMode(QProcess.MergedChannels)
+        self.background_process.readyReadStandardOutput.connect(lambda : print(self.background_process.readAllStandardOutput()))
+        self.background_process.start("node", [self.server_js, str(self.port), self.start_directory, self.command])
         self.open_terminal_page()
 
         self.reset_default_zoom()
@@ -91,7 +82,7 @@ class AppBuffer(BrowserBuffer):
         ))
 
     def destroy_buffer(self):
-        os.kill(self.background_process.pid, signal.SIGKILL)
+        self.background_process.kill()
 
         if self.buffer_widget is not None:
             # NOTE: We need delete QWebEnginePage manual, otherwise QtWebEngineProcess won't quit.
