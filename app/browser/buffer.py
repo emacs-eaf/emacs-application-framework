@@ -55,6 +55,6 @@ class AppBuffer(BrowserBuffer):
         self.reset_default_zoom()
         self.buffer_widget.urlChanged.connect(self.update_url)
 
-    def update_url(self, url):
+    def update_url(self, _url):
         self.reset_default_zoom()
         self.url = self.buffer_widget.url().toString()

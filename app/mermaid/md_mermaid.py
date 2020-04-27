@@ -22,7 +22,8 @@ MermaidRegex = re.compile(r"^(?P<mermaid_sign>[\~\`]){3}[\ \t]*[Mm]ermaid[\ \t]*
 # ------------------ The Markdown Extension -------------------------------
 
 class MermaidPreprocessor(Preprocessor):
-    def run(self, lines):
+    @staticmethod
+    def run(lines):
         new_lines = []
         mermaid_sign = ""
         m_start = None
@@ -72,7 +73,7 @@ class MermaidPreprocessor(Preprocessor):
 class MermaidExtension(Extension):
     """ Add source code hilighting to markdown codeblocks. """
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md, _md_globals):
         """ Add HilitePostprocessor to Markdown instance. """
         # Insert a preprocessor before ReferencePreprocessor
         md.preprocessors.register(MermaidPreprocessor(md), 'mermaid', 35)

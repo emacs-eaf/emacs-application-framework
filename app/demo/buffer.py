@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import QPushButton
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
+    def __init__(self, buffer_id, url, _config_dir, arguments, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
 
         self.add_widget(QPushButton("Hello, EAF hacker, it's working!!!"))

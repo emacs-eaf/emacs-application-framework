@@ -78,7 +78,8 @@ class EAF(dbus.service.Object):
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
 
-    def get_command_result(self, command):
+    @staticmethod
+    def get_command_result(command):
         if version_info >= (3,7):
             return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE, text=True).stdout
         else:
@@ -114,7 +115,8 @@ class EAF(dbus.service.Object):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].scroll(scroll_direction, scroll_type)
 
-    def get_new_browser_window_buffer_id(self):
+    @staticmethod
+    def get_new_browser_window_buffer_id():
         import secrets
 
         return "{0}-{1}-{2}-{3}-{4}-{5}-{6}".format(

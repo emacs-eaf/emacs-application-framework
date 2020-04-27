@@ -49,7 +49,8 @@ class AppBuffer(BrowserBuffer):
         parent = self
 
         class ModHandler(pyinotify.ProcessEvent):
-            def process_IN_CLOSE_WRITE(self, evt):
+            @staticmethod
+            def process_IN_CLOSE_WRITE(evt):
                 parent.update_content.emit()
 
         handler = ModHandler()
