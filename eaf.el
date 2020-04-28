@@ -1311,7 +1311,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
               (setq mode-name (concat "EAF/" eaf--buffer-app-name))
               (setq-local eaf--bookmark-title title)
               (setq-local eaf--buffer-url url)
-              (rename-buffer (format eaf-buffer-title-format title))
+              (rename-buffer (format eaf-buffer-title-format title) t)
               (throw 'find-buffer t))))))))
 
 (dbus-register-signal
