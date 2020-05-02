@@ -11,6 +11,8 @@
     } else {
         if (window.location.href.startsWith("https://web.telegram.org/") && activeElement.hasAttribute("placeholder")) {
             return activeElement.textContent;
+        } else if ((window.location.href.startsWith("https://console.cloud.google.com/") || window.location.href.startsWith("https://ssh.cloud.google.com/")) && activeElement.tagName.toLowerCase() == "iframe") {
+            return "";
         } else {
             return undefined;
         }
