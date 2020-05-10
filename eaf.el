@@ -950,7 +950,7 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
       (if (called-interactively-p 'any)
-          (message (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
+          (message "%s" (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
         (eaf-call "call_function" eaf--buffer-id "get_url"))
     (message "This command can only be called in an EAF buffer!")))
 
