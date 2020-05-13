@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Apr 11 23:01:05 2020 (-0400)
+;; Last-Updated: Wed May 13 10:59:10 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -808,15 +808,17 @@ For now only EAF browser app is supported."
 
 (defun eaf-call (method &rest args)
   "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
-  (apply #'dbus-call-method
-         :session                   ; use the session (not system) bus
-         "com.lazycat.eaf"          ; service name
-         "/com/lazycat/eaf"         ; path name
-         "com.lazycat.eaf"          ; interface name
-         method
-         :timeout 1000000
-         args)
-  )
+  (let ((result (apply #'dbus-call-method
+                       :session                   ; use the session (not system) bus
+                       "com.lazycat.eaf"          ; service name
+                       "/com/lazycat/eaf"         ; path name
+                       "com.lazycat.eaf"          ; interface name
+                       method
+                       :timeout 1000000
+                       args)))
+    (cond ((equal result "True") t)
+          ((equal result "False") nil)
+          (t result))))
 
 (defun eaf-get-emacs-xid (frame)
   (frame-parameter frame 'window-id))
