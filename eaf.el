@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Apr 11 23:01:05 2020 (-0400)
+;; Last-Updated: Wed May 13 10:59:10 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -307,7 +307,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
     ("T" . "insert_or_recover_prev_close_page")
-    ("i" . "insert_or_open_download_manage_page")
+    ("i" . "insert_or_focus_input")
+    ("I" . "insert_or_open_download_manage_page")
     ("r" . "insert_or_refresh_page")
     ("g" . "insert_or_scroll_to_begin")
     ("x" . "insert_or_close_buffer")
@@ -808,15 +809,17 @@ For now only EAF browser app is supported."
 
 (defun eaf-call (method &rest args)
   "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
-  (apply #'dbus-call-method
-         :session                   ; use the session (not system) bus
-         "com.lazycat.eaf"          ; service name
-         "/com/lazycat/eaf"         ; path name
-         "com.lazycat.eaf"          ; interface name
-         method
-         :timeout 1000000
-         args)
-  )
+  (let ((result (apply #'dbus-call-method
+                       :session                   ; use the session (not system) bus
+                       "com.lazycat.eaf"          ; service name
+                       "/com/lazycat/eaf"         ; path name
+                       "com.lazycat.eaf"          ; interface name
+                       method
+                       :timeout 1000000
+                       args)))
+    (cond ((equal result "True") t)
+          ((equal result "False") nil)
+          (t result))))
 
 (defun eaf-get-emacs-xid (frame)
   (frame-parameter frame 'window-id))

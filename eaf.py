@@ -318,6 +318,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
     def execute_function(self, buffer_id, function_name, event_string):
+        ''' Execute function and do not return anything. '''
         if buffer_id in self.buffer_dict:
             try:
                 buffer = self.buffer_dict[buffer_id]
@@ -330,9 +331,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="s")
     def call_function(self, buffer_id, function_name):
+        ''' Call function and return the result. '''
         if buffer_id in self.buffer_dict:
             try:
-                return self.buffer_dict[buffer_id].call_function(function_name)
+                return str(self.buffer_dict[buffer_id].call_function(function_name))
             except AttributeError:
                 import traceback
                 traceback.print_exc()
@@ -341,9 +343,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="s")
     def call_function_with_args(self, buffer_id, function_name, args_string):
+        ''' Call function with arguments and return the result. '''
         if buffer_id in self.buffer_dict:
             try:
-                return self.buffer_dict[buffer_id].call_function_with_args(function_name, args_string)
+                return str(self.buffer_dict[buffer_id].call_function_with_args(function_name, args_string))
             except AttributeError:
                 import traceback
                 traceback.print_exc()

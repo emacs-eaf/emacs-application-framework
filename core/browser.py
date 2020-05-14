@@ -76,6 +76,7 @@ class BrowserView(QWebEngineView):
         self.select_input_text_js = self.read_js_content("select_input_text.js")
         self.dark_mode_js = self.read_js_content("dark_mode.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
+        self.focus_input_js = self.read_js_content("focus_input.js")
 
     def open_download_manage_page(self):
         self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-webui", "index.html")))
@@ -336,6 +337,9 @@ class BrowserView(QWebEngineView):
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
+    def focus_input(self):
+        self.execute_js(self.focus_input_js)
+   
     def clear_focus(self):
         self.eval_js(self.clear_focus_js)
 
@@ -466,7 +470,7 @@ class BrowserBuffer(Buffer):
                             "scroll_left", "scroll_right", "scroll_up", "scroll_down",
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "refresh_page", "undo_action", "redo_action", "get_url", "exit_fullscreen",
-                            "set_focus_text", "clear_focus", "dark_mode", "view_source"]:
+                            "set_focus_text", "clear_focus", "dark_mode", "view_source", "focus_input"]:
             self.build_widget_method(method_name)
 
         self.build_widget_method("history_backward", "back")
@@ -482,7 +486,7 @@ class BrowserBuffer(Buffer):
                             "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "edit_url",
                             "download_youtube_video", "download_youtube_audio", "toggle_device", "close_buffer",
                             "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab",
-                            "copy_code"]:
+                            "copy_code", "focus_input"]:
             self.build_insert_or_do(method_name)
 
     def notify_print_message(self, file_path, success):
