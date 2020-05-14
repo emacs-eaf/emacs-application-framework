@@ -2076,6 +2076,42 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (other-window -1)
     (apply orig-fun direction line args)))
 
+
+;;;;;;;;;;;;;;;;;;;; evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+(defvar eaf-printable-character
+  (mapcar #'char-to-string (delq ?i (number-sequence ?: ?~)))
+  "")
+
+(defvar eaf-last-focus-buffer nil "")
+
+(defun eaf-generate-normal-state-key-func (key)
+  (lambda () (interactive)
+    (funcall (or (lookup-key (current-local-map) key)
+                 (lookup-key eaf-mode-map* key)
+                 'eaf-send-key))))
+
+(defun eaf-buffer-focus-handler ()
+  (when (not (buffer-live-p eaf-last-focus-buffer))
+    (setq eaf-last-focus-buffer nil))
+  (when (and (not (memq major-mode '(minibuffer-inactive-mode)))
+            (eq (window-buffer (selected-window))
+                (current-buffer))
+            (not (eq eaf-last-focus-buffer (current-buffer))))
+    (setq eaf-last-focus-buffer (current-buffer))
+    (when (derived-mode-p 'eaf-mode) (evil-emacs-state))))
+
+(defun eaf-enable-evil-intergration ()
+  (interactive)
+  (when (featurep 'evil)
+    ;; make sure you can use h,j,k,l and other often used key  in normal sate
+    (dolist (key (append  eaf-printable-character
+                         '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>" "<return>")))
+      (evil-define-key* 'normal eaf-mode-map* (kbd key) (eaf-generate-normal-state-key-func (kbd key))))
+    (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
+    (evil-define-key* 'normal eaf-mode-map* (kbd "i") #'evil-emacs-state)
+    (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") #'evil-escape)
+    (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)))
+
 (provide 'eaf)
 
 ;;; eaf.el ends here
