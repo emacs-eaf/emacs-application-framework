@@ -339,7 +339,6 @@ class BrowserView(QWebEngineView):
 
     def focus_input(self):
         self.execute_js(self.focus_input_js)
-        # self.eval_js(self.read_js_content("focus_input.js"))
    
     def clear_focus(self):
         self.eval_js(self.clear_focus_js)
