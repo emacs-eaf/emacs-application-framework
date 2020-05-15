@@ -2094,7 +2094,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf-buffer-focus-handler ()
   (when (not (buffer-live-p eaf-last-focus-buffer))
     (setq eaf-last-focus-buffer nil))
-  (when (and (not (memq major-mode '(minibuffer-inactive-mode)))
+  (when (and (not (minibufferp))
             (eq (window-buffer (selected-window))
                 (current-buffer))
             (not (eq eaf-last-focus-buffer (current-buffer))))
@@ -2110,7 +2110,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
       (evil-define-key* 'normal eaf-mode-map* (kbd key) (eaf-generate-normal-state-key-func (kbd key))))
     (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
     (evil-define-key* 'normal eaf-mode-map* (kbd "i") #'evil-emacs-state)
-    (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") #'evil-escape)
+    (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") #'evil-normal-state)
     (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)))
 
 (provide 'eaf)
