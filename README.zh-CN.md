@@ -185,6 +185,17 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 (setq eaf-proxy-type "socks5")
 ```
 
+### evil 集成
+
+开启办法：
+```elisp
+（require 'evil-eaf）
+```
+
+evil-eaf 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模式下也能够很好的支持 eaf 应用。
+
+
+
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。
