@@ -2085,31 +2085,24 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (defvar eaf-last-focus-buffer nil "")
 
-(defvar eaf-evil-init-state 'evil-emacs-state
+(defvar eaf-evil-init-state 'evil-normal-state
   "when you forst enter or go back to the old buffer, eaf set this evil mode state")
+
+(defun eaf-evil-lookup-key (key)
+  (or (lookup-key (current-local-map) (kbd key))
+      (lookup-key eaf-mode-map* (kbd key))
+      ;; sequence key
+      (when (or (string-prefix-p "C-" key)
+                (string-prefix-p "M-" key))
+        (lookup-key (current-global-map) (kbd key)))
+      'eaf-send-key))
 
 (defun eaf-generate-normal-state-key-func (key)
   (lambda () (interactive)
     (when (not (or (evil-insert-state-p)
                    (evil-emacs-state-p)))
-      (funcall eaf-evil-init-state))
-    (funcall  (or (lookup-key (current-local-map) (kbd key))
-                  (lookup-key eaf-mode-map* (kbd key))
-                  ;; sequence key
-                  (when (or (string-prefix-p "C-")
-                            (string-prefix-p "M-"))
-                    (lookup-key (current-global-map) (kbd key)))
-                  'eaf-send-key))))
-
-(defun eaf-buffer-focus-handler ()
-  (when (not (buffer-live-p eaf-last-focus-buffer))
-    (setq eaf-last-focus-buffer nil))
-  (when (and (not (minibufferp))
-            (eq (window-buffer (selected-window))
-                (current-buffer))
-            (not (eq eaf-last-focus-buffer (current-buffer))))
-    (setq eaf-last-focus-buffer (current-buffer))
-    (when (derived-mode-p 'eaf-mode) (funcall eaf-evil-init-state))))
+      (evil-emacs-state))
+    (call-interactively (eaf-evil-lookup-key key))))
 
 (defun eaf-evil-define-single-keys ()
   (dolist (key (append  eaf-printable-character
@@ -2119,7 +2112,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (defun eaf-evil-define-ctrl-keys ()
   (dolist (key (seq-difference  eaf-printable-character
-                                (mapcar #'char-to-string "xXcChH[1234567890")))
+                                (mapcar #'char-to-string "wWxXcChH[1234567890")))
     (evil-define-key* 'normal eaf-mode-map* (kbd (format "C-%s" key))
       (eaf-generate-normal-state-key-func (format "C-%s" key)))))
 
@@ -2139,7 +2132,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (eaf-evil-define-meta-keys)
     (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
     (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") 'evil-normal-state)
-    (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)))
+    ;; (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)
+    ))
 
 (with-eval-after-load "evil"
   (eaf-enable-evil-intergration))
