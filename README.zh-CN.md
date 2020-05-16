@@ -185,6 +185,15 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 (setq eaf-proxy-type "socks5")
 ```
 
+### evil 集成
+
+eaf 默认开启了对 evil 的支持.
+当你需绑定按键，可以直接使用
+```
+(eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+```
+
+
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。

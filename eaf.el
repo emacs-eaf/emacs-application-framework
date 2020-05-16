@@ -2080,16 +2080,22 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 ;;;;;;;;;;;;;;;;;;;; evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 (defvar eaf-printable-character
-  (mapcar #'char-to-string (delq ?i (number-sequence ?: ?~)))
-  "")
+  (mapcar #'char-to-string (number-sequence ?: ?~))
+  "printable character")
 
 (defvar eaf-last-focus-buffer nil "")
 
+(defvar eaf-evil-init-state 'evil-emacs-state
+  "when you forst enter or go back to the old buffer, eaf set this evil mode state")
+
 (defun eaf-generate-normal-state-key-func (key)
   (lambda () (interactive)
-    (funcall (or (lookup-key (current-local-map) key)
-                 (lookup-key eaf-mode-map* key)
-                 'eaf-send-key))))
+    (when (and (not (or (evil-insert-state-p)
+                        (evil-emacs-state-p))))
+      (funcall eaf-evil-init-state))
+    (funcall   (or (lookup-key (current-local-map) key)
+                   (lookup-key eaf-mode-map* key)
+                   'eaf-send-key))))
 
 (defun eaf-buffer-focus-handler ()
   (when (not (buffer-live-p eaf-last-focus-buffer))
@@ -2099,7 +2105,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                 (current-buffer))
             (not (eq eaf-last-focus-buffer (current-buffer))))
     (setq eaf-last-focus-buffer (current-buffer))
-    (when (derived-mode-p 'eaf-mode) (evil-emacs-state))))
+    (when (derived-mode-p 'eaf-mode) (funcall eaf-evil-init-state))))
 
 (defun eaf-enable-evil-intergration ()
   (interactive)
@@ -2109,9 +2115,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                          '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>" "<return>")))
       (evil-define-key* 'normal eaf-mode-map* (kbd key) (eaf-generate-normal-state-key-func (kbd key))))
     (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
-    (evil-define-key* 'normal eaf-mode-map* (kbd "i") #'evil-emacs-state)
-    (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") #'evil-normal-state)
+    (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") 'evil-normal-state)
     (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)))
+
+(with-eval-after-load "evil"
+  (eaf-enable-evil-intergration))
 
 (provide 'eaf)
 
