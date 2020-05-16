@@ -2080,7 +2080,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 ;;;;;;;;;;;;;;;;;;;; evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
 (defvar eaf-printable-character
-  (mapcar #'char-to-string (number-sequence ?: ?~))
+  (mapcar #'char-to-string (number-sequence ?! ?~))
   "printable character")
 
 (defvar eaf-last-focus-buffer nil "")
@@ -2090,12 +2090,16 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (defun eaf-generate-normal-state-key-func (key)
   (lambda () (interactive)
-    (when (and (not (or (evil-insert-state-p)
-                        (evil-emacs-state-p))))
+    (when (not (or (evil-insert-state-p)
+                   (evil-emacs-state-p)))
       (funcall eaf-evil-init-state))
-    (funcall   (or (lookup-key (current-local-map) key)
-                   (lookup-key eaf-mode-map* key)
-                   'eaf-send-key))))
+    (funcall  (or (lookup-key (current-local-map) (kbd key))
+                  (lookup-key eaf-mode-map* (kbd key))
+                  ;; sequence key
+                  (when (or (string-prefix-p "C-")
+                            (string-prefix-p "M-"))
+                    (lookup-key (current-global-map) (kbd key)))
+                  'eaf-send-key))))
 
 (defun eaf-buffer-focus-handler ()
   (when (not (buffer-live-p eaf-last-focus-buffer))
@@ -2107,13 +2111,32 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (setq eaf-last-focus-buffer (current-buffer))
     (when (derived-mode-p 'eaf-mode) (funcall eaf-evil-init-state))))
 
+(defun eaf-evil-define-single-keys ()
+  (dolist (key (append  eaf-printable-character
+                        '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>" "<return>")))
+    (evil-define-key* 'normal eaf-mode-map* (kbd key)
+      (eaf-generate-normal-state-key-func key))))
+
+(defun eaf-evil-define-ctrl-keys ()
+  (dolist (key (seq-difference  eaf-printable-character
+                                (mapcar #'char-to-string "xXcChH[1234567890")))
+    (evil-define-key* 'normal eaf-mode-map* (kbd (format "C-%s" key))
+      (eaf-generate-normal-state-key-func (format "C-%s" key)))))
+
+
+(defun eaf-evil-define-meta-keys ()
+  (dolist (key (seq-difference  eaf-printable-character
+                                (mapcar #'char-to-string "xX::1234567890")))
+    (evil-define-key* 'normal eaf-mode-map* (kbd (format "M-%s" key))
+      (eaf-generate-normal-state-key-func (format "M-%s" key)))))
+
 (defun eaf-enable-evil-intergration ()
   (interactive)
   (when (featurep 'evil)
     ;; make sure you can use h,j,k,l and other often used key  in normal sate
-    (dolist (key (append  eaf-printable-character
-                         '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>" "<return>")))
-      (evil-define-key* 'normal eaf-mode-map* (kbd key) (eaf-generate-normal-state-key-func (kbd key))))
+    (eaf-evil-define-single-keys)
+    (eaf-evil-define-ctrl-keys)
+    (eaf-evil-define-meta-keys)
     (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
     (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") 'evil-normal-state)
     (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)))

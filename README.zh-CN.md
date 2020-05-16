@@ -188,10 +188,8 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 ### evil 集成
 
 eaf 默认开启了对 evil 的支持.
-当你需绑定按键，可以直接使用
-```
-(eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-```
+当你打开`eaf`窗口，会切换到`evil-emacs-state`, 此时按键完全由`eaf`接管。
+doom-emacs和spacemacs用户可以通过 `Esc` 回到 normal state, 使用 `Leader` 键。
 
 
 ## EAF社区
