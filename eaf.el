@@ -2077,67 +2077,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (other-window -1)
     (apply orig-fun direction line args)))
 
-
-;;;;;;;;;;;;;;;;;;;; evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-(defvar eaf-printable-character
-  (mapcar #'char-to-string (number-sequence ?! ?~))
-  "printable character")
-
-(defvar eaf-last-focus-buffer nil "")
-
-(defvar eaf-evil-init-state 'evil-normal-state
-  "when you forst enter or go back to the old buffer, eaf set this evil mode state")
-
-(defun eaf-evil-lookup-key (key)
-  (or (lookup-key (current-local-map) (kbd key))
-      (lookup-key eaf-mode-map* (kbd key))
-      ;; sequence key
-      (when (or (string-prefix-p "C-" key)
-                (string-prefix-p "M-" key))
-        (lookup-key (current-global-map) (kbd key)))
-      'eaf-send-key))
-
-(defun eaf-generate-normal-state-key-func (key)
-  (lambda () (interactive)
-    (when (not (or (evil-insert-state-p)
-                   (evil-emacs-state-p)))
-      (evil-emacs-state))
-    (call-interactively (eaf-evil-lookup-key key))))
-
-(defun eaf-evil-define-single-keys ()
-  (dolist (key (append  eaf-printable-character
-                        '("RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>" "<return>")))
-    (evil-define-key* 'normal eaf-mode-map* (kbd key)
-      (eaf-generate-normal-state-key-func key))))
-
-(defun eaf-evil-define-ctrl-keys ()
-  (dolist (key (seq-difference  eaf-printable-character
-                                (mapcar #'char-to-string "wWxXcChH[1234567890")))
-    (evil-define-key* 'normal eaf-mode-map* (kbd (format "C-%s" key))
-      (eaf-generate-normal-state-key-func (format "C-%s" key)))))
-
-
-(defun eaf-evil-define-meta-keys ()
-  (dolist (key (seq-difference  eaf-printable-character
-                                (mapcar #'char-to-string "xX::1234567890")))
-    (evil-define-key* 'normal eaf-mode-map* (kbd (format "M-%s" key))
-      (eaf-generate-normal-state-key-func (format "M-%s" key)))))
-
-(defun eaf-enable-evil-intergration ()
-  (interactive)
-  (when (featurep 'evil)
-    ;; make sure you can use h,j,k,l and other often used key  in normal sate
-    (eaf-evil-define-single-keys)
-    (eaf-evil-define-ctrl-keys)
-    (eaf-evil-define-meta-keys)
-    (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
-    (evil-define-key* 'emacs eaf-mode-map* (kbd "<escape>") 'evil-normal-state)
-    ;; (add-hook 'buffer-list-update-hook #'eaf-buffer-focus-handler)
-    ))
-
-(with-eval-after-load "evil"
-  (eaf-enable-evil-intergration))
-
 (provide 'eaf)
 
 ;;; eaf.el ends here
