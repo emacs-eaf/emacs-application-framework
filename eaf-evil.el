@@ -1,14 +1,14 @@
-;; evil-eaf.el --- Emacs application framework  -*- lexical-binding: t; -*-
+;; eaf-evil.el --- Emacs application framework  -*- lexical-binding: t; -*-
 
-;; Filename: evil-eaf.el
+;; Filename: eaf-evil.el
 ;; Description: Emacs application framework
 ;; Author:  lee <loyalpartner@163.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2020-05-17 12:31:12
 ;; Version: 0.5
-;; Last-Updated: Wed May 13 10:59:10 2020 (-0400)
-;;           By: Lee
+;; Last-Updated: Wed May 20 11:48:43 2020 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 27.0.50
@@ -100,4 +100,4 @@
 (with-eval-after-load "evil"
   (eaf-enable-evil-intergration))
 
-(provide 'evil-eaf)
+(provide 'eaf-evil)

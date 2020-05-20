@@ -185,14 +185,14 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 (setq eaf-proxy-type "socks5")
 ```
 
-### evil 集成
+### evil-mode 集成
 
 开启办法：
 ```elisp
-（require 'evil-eaf）
+(require 'eaf-evil)
 ```
 
-evil-eaf 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模式下也能够很好的支持 eaf 应用。
+eaf-evil 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模式下也能够很好的支持 eaf 应用。
 
 
 
