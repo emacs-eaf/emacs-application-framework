@@ -187,6 +187,17 @@ If you use Socks5 as local proxy, one can set proxy type with:
 (setq eaf-proxy-type "socks5")
 ```
 
+
+### Integration with evil-mode
+
+Enable with
+```elisp
+(require 'eaf-evil)
+```
+
+eaf-evil will dynamically rebind eaf keybindings so that evil-mode works nicely in normal state.
+
+
 ## EAF in the community
 
 A list of other community packages that use EAF to enhance their graphical experiences!
