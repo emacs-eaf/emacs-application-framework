@@ -201,6 +201,11 @@ eaf-evil 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模�
 (require 'eaf-org)
 ```
 
+当前支持如下应用：
+
+- pdf-viewer 跳转到记录的标记页面
+- 理论上支持所有EAF应用（只要应用有 `eaf--buffer-url` 参数值）
+
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。

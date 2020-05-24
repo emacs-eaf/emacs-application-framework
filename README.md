@@ -204,8 +204,12 @@ Enable with
 (require 'eaf-org)
 ```
 
-- Support `org-store-link` and `org-link-open`
-  - Currently only support pdf-viewer app.
+Support `org-store-link` and `org-link-open` mechanism.
+
+Currently support following applications:
+
+- pdf-viewer support jump to page number
+- on theory supports all EAF applications without extra argument which has `eaf--buffer-url`
 
 ## EAF in the community
 

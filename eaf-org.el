@@ -65,7 +65,9 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
       ('pdf-viewer
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id
-                 "jump_to_page_with_num" (format "%s" extra-args))))))
+                 "jump_to_page_with_num" (format "%s" extra-args)))
+      (t
+       (eaf-open url)))))
 
 (org-link-set-parameters "eaf"
 			                   :follow #'eaf-org-open
