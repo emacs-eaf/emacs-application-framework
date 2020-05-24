@@ -44,7 +44,10 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
   (interactive)
   (when (eq major-mode 'eaf-mode)
     (let* ((app eaf--buffer-app-name)
-           (url eaf--buffer-url)
+           ;; filter temp files which is converted to PDF
+           (url (if (string-prefix-p "/tmp/" eaf--buffer-url)
+                    (warn "[EAF] don't support this application link which is converted to temporary PDF file.")
+                  eaf--buffer-url))
            (extra-args (cl-case (intern app)
                          ('pdf-viewer
                           (eaf-call "call_function" eaf--buffer-id "current_page"))
@@ -66,10 +69,14 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
          (url (cadr list))
          (extra-args (caddr list)))
     (cl-case app
+      ('browser
+       (eaf-open url "browser"))
       ('pdf-viewer
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id
                  "jump_to_page_with_num" (format "%s" extra-args)))
+      ('mindmap
+       (eaf-open url "mindmap"))
       ('js-video-player
        (eaf-open url "js-video-player")
        (eaf-call "call_function_with_args" eaf--buffer-id
