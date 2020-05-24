@@ -194,7 +194,12 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 
 eaf-evil 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模式下也能够很好的支持 eaf 应用。
 
+### Org Mode 集成
 
+加载 `eaf-org` 来启用：
+```elisp
+(require 'eaf-org)
+```
 
 ## EAF社区
 

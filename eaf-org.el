@@ -37,7 +37,40 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
+(defun eaf-org-store-link ()
+  "Store the page of PDF as link support for `org-store-link'.
 
+The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
+  (interactive)
+  (when (eq major-mode 'eaf-mode)
+    (let* ((app eaf--buffer-app-name)
+           (url eaf--buffer-url)
+           (extra-args (cl-case (intern app)
+                         ('pdf-viewer
+                          (eaf-call "call_function" eaf--buffer-id "current_page"))))
+           ;; (eaf-call "call_function_with_args" eaf--buffer-id "store_session_data" (format "%s" page-num))
+           (link (concat "eaf:" app "::" url "::" extra-args))
+           (description (buffer-name)))
+      (org-link-store-props
+       :type "eaf"
+       :link link
+       :description description))))
 
+(defun eaf-org-open (link _)
+  "Open EAF link with EAF correspoinding application."
+  (let* ((list (split-string link "::"))
+         (app (intern (car list)))
+         (url (cadr list))
+         (extra-args (caddr list)))
+    (cl-case app
+      ('pdf-viewer
+       ;; TODO open the PDF file
+       (eaf-open url "pdf-viewer")
+       (eaf-call "call_function_with_args" eaf--buffer-id
+                 "jump_to_page_with_num" (format "%s" extra-args))))))
+
+(org-link-set-parameters "eaf"
+			                   :follow #'eaf-org-open
+			                   :store #'eaf-org-store-link)
 
 (provide 'eaf-org)
