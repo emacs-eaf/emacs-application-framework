@@ -1937,6 +1937,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "eaf pdf outline mode."
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
+            (define-key map (kbd "q") 'quit-window)
             map))
 
 (defun eaf-pdf-outline ()
@@ -1948,10 +1949,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
     ;; Insert outline content.
     (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
+      (setq buffer-read-only nil)
       (erase-buffer)
       (insert toc)
       (goto-char (point-min))
       (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
+      (read-only-mode 1)
       (eaf-pdf-outline-mode 1))
 
     ;; Popup ouline buffer.
