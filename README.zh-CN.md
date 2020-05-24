@@ -203,6 +203,7 @@ eaf-evil 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模�
 
 当前支持如下应用：
 
+- web browser 链接支持
 - pdf-viewer 跳转到记录的标记页面
 - js-video-player 跳转到记录的视频时间戳
 - 理论上支持所有EAF应用（只要应用有 `eaf--buffer-url` 参数值）

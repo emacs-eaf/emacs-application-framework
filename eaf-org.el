@@ -66,6 +66,8 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
          (url (cadr list))
          (extra-args (caddr list)))
     (cl-case app
+      ('browser
+       (eaf-open-browser url))
       ('pdf-viewer
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id

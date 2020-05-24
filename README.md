@@ -208,6 +208,7 @@ Support `org-store-link` and `org-link-open` mechanism.
 
 Currently support following applications:
 
+- web browser support
 - pdf-viewer support jump to page number
 - js-video-player support jump to video timestamp
 - on theory supports all EAF applications without extra argument which has `eaf--buffer-url`
