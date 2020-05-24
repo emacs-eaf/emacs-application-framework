@@ -47,7 +47,9 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
            (url eaf--buffer-url)
            (extra-args (cl-case (intern app)
                          ('pdf-viewer
-                          (eaf-call "call_function" eaf--buffer-id "current_page"))))
+                          (eaf-call "call_function" eaf--buffer-id "current_page"))
+                         ('js-video-player
+                          (eaf-call "call_function" eaf--buffer-id "save_session_data"))))
            (link (if extra-args
                      (concat "eaf:" app "::" url "::" extra-args)
                    (concat "eaf:" app "::" url)))
@@ -68,6 +70,10 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id
                  "jump_to_page_with_num" (format "%s" extra-args)))
+      ('js-video-player
+       (eaf-open url "js-video-player")
+       (eaf-call "call_function_with_args" eaf--buffer-id
+                 "restore_session_data" (format "%s" extra-args)))
       (t
        (eaf-open url)))))
 
