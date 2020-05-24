@@ -48,7 +48,6 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
            (extra-args (cl-case (intern app)
                          ('pdf-viewer
                           (eaf-call "call_function" eaf--buffer-id "current_page"))))
-           ;; (eaf-call "call_function_with_args" eaf--buffer-id "store_session_data" (format "%s" page-num))
            (link (concat "eaf:" app "::" url "::" extra-args))
            (description (buffer-name)))
       (org-link-store-props
@@ -64,7 +63,6 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
          (extra-args (caddr list)))
     (cl-case app
       ('pdf-viewer
-       ;; TODO open the PDF file
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id
                  "jump_to_page_with_num" (format "%s" extra-args))))))
