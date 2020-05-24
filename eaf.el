@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed May 13 10:59:10 2020 (-0400)
+;; Last-Updated: Sun May 24 14:04:52 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -74,11 +74,11 @@
 ;;; Require
 (defun add-subdirs-to-load-path (dir)
   "Recursive add directory DIR to `load-path'."
-  (let ((default-directory (file-name-as-directory dir)))
-    (add-to-list 'load-path dir)
-    (normal-top-level-add-subdirs-to-load-path)))
+  (mapcar
+   (lambda (path) (add-to-list 'load-path path))
+   (delete-dups (mapcar 'file-name-directory (directory-files-recursively dir "\.el$")))))
 
-(add-subdirs-to-load-path (file-name-directory (locate-library "eaf")))
+(add-subdirs-to-load-path (expand-file-name "app" (file-name-directory (locate-library "eaf"))))
 
 (require 'dbus)
 (require 'subr-x)
@@ -1937,6 +1937,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "eaf pdf outline mode."
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
+            (define-key map (kbd "q") 'quit-window)
             map))
 
 (defun eaf-pdf-outline ()
@@ -1948,10 +1949,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
     ;; Insert outline content.
     (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
+      (setq buffer-read-only nil)
       (erase-buffer)
       (insert toc)
       (goto-char (point-min))
       (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
+      (read-only-mode 1)
       (eaf-pdf-outline-mode 1))
 
     ;; Popup ouline buffer.
