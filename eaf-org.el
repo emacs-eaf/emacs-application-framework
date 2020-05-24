@@ -44,7 +44,10 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
   (interactive)
   (when (eq major-mode 'eaf-mode)
     (let* ((app eaf--buffer-app-name)
-           (url eaf--buffer-url)
+           ;; filter temp files which is converted to PDF
+           (url (if (string-prefix-p "/tmp/" eaf--buffer-url)
+                    (warn "[EAF] don't support this application link which is converted to temporary PDF file.")
+                  eaf--buffer-url))
            (extra-args (cl-case (intern app)
                          ('pdf-viewer
                           (eaf-call "call_function" eaf--buffer-id "current_page"))
