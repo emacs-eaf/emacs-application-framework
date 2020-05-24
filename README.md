@@ -197,6 +197,15 @@ Enable with
 
 eaf-evil will dynamically rebind eaf keybindings so that evil-mode works nicely in normal state.
 
+### Integration with Org Mode
+
+Enable with
+```elisp
+(require 'eaf-org)
+```
+
+- Support `org-store-link` and `org-link-open`
+  - Currently only support pdf-viewer app.
 
 ## EAF in the community
 
