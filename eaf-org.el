@@ -47,9 +47,12 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
            (url eaf--buffer-url)
            (extra-args (cl-case (intern app)
                          ('pdf-viewer
-                          (eaf-call "call_function" eaf--buffer-id "current_page"))))
-           ;; (eaf-call "call_function_with_args" eaf--buffer-id "store_session_data" (format "%s" page-num))
-           (link (concat "eaf:" app "::" url "::" extra-args))
+                          (eaf-call "call_function" eaf--buffer-id "current_page"))
+                         ('js-video-player
+                          (eaf-call "call_function" eaf--buffer-id "save_session_data"))))
+           (link (if extra-args
+                     (concat "eaf:" app "::" url "::" extra-args)
+                   (concat "eaf:" app "::" url)))
            (description (buffer-name)))
       (org-link-store-props
        :type "eaf"
@@ -64,10 +67,15 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
          (extra-args (caddr list)))
     (cl-case app
       ('pdf-viewer
-       ;; TODO open the PDF file
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id
-                 "jump_to_page_with_num" (format "%s" extra-args))))))
+                 "jump_to_page_with_num" (format "%s" extra-args)))
+      ('js-video-player
+       (eaf-open url "js-video-player")
+       (eaf-call "call_function_with_args" eaf--buffer-id
+                 "restore_session_data" (format "%s" extra-args)))
+      (t
+       (eaf-open url)))))
 
 (org-link-set-parameters "eaf"
 			                   :follow #'eaf-org-open
