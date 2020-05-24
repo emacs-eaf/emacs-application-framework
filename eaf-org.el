@@ -67,11 +67,13 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
          (extra-args (caddr list)))
     (cl-case app
       ('browser
-       (eaf-open-browser url))
+       (eaf-open url "browser"))
       ('pdf-viewer
        (eaf-open url "pdf-viewer")
        (eaf-call "call_function_with_args" eaf--buffer-id
                  "jump_to_page_with_num" (format "%s" extra-args)))
+      ('mindmap
+       (eaf-open url "mindmap"))
       ('js-video-player
        (eaf-open url "js-video-player")
        (eaf-call "call_function_with_args" eaf--buffer-id
