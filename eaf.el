@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun May 24 14:04:52 2020 (-0400)
+;; Last-Updated: Tue May 26 13:46:15 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -718,7 +718,7 @@ A bookmark handler function is used as
     ("browser" . eaf-browser-extension-list)
     ("org-previewer" . eaf-org-extension-list)
     ("mindmap" . eaf-mindmap-extension-list)
-    )
+    ("office" . eaf-office-extension-list))
   "Mapping app names to extension list variables.
 
 A new app can use this to configure extensions which should
@@ -1662,6 +1662,7 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
   (getenv "SHELL"))
 
 (defun eaf--get-app-for-extension (extension-name)
+  "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
   (let ((app-name
          (cl-loop for (app . ext) in eaf-app-extensions-alist
                   if (member extension-name (symbol-value ext))
@@ -1714,13 +1715,16 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (let* ((extension-name (eaf-get-file-name-extension url)))
       ;; Initialize app name, url and arguments
       (setq app-name (eaf--get-app-for-extension extension-name))
-      (when (equal app-name "markdown-previewer")
+      (cond
+       ((equal app-name "markdown-previewer")
         ;; Try get user's github token if `eaf-grip-token' is nil.
         (setq arguments
               (or eaf-grip-token
                   (read-string (concat "[EAF/" app-name "] Fill your own Github token (or set `eaf-grip-token' with token string): ")))))
-      (when (equal app-name "browser")
-        (setq url (concat "file://" url)))))
+       ((equal app-name "browser")
+        (setq url (concat "file://" url)))
+       ((equal app-name "office")
+        (user-error "Please use `eaf-open-office' instead!")))))
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
