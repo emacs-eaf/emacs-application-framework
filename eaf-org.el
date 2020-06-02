@@ -37,6 +37,17 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
+(defcustom eaf-org-override-pdf-links nil
+  "This options will override existing PDF file links's open function.
+ Check out variable `eaf-org-override-pdf-links-list' about link types."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link)
+
+(defvar eaf-org-override-pdf-links-list
+  '("pdfview" "pdftools")
+  "A list of all PDF file link types which will be override by EAF open function.")
+
 (defun eaf-org-store-link ()
   "Store the page of PDF as link support for `org-store-link'.
 
@@ -64,28 +75,51 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
 
 (defun eaf-org-open (link _)
   "Open EAF link with EAF correspoinding application."
-  (let* ((list (split-string link "::"))
-         (app (intern (car list)))
-         (url (cadr list))
-         (extra-args (caddr list)))
-    (cl-case app
-      ('browser
-       (eaf-open url "browser"))
-      ('pdf-viewer
-       (eaf-open url "pdf-viewer")
-       (eaf-call "call_function_with_args" eaf--buffer-id
-                 "jump_to_page_with_num" (format "%s" extra-args)))
-      ('mindmap
-       (eaf-open url "mindmap"))
-      ('js-video-player
-       (eaf-open url "js-video-player")
-       (eaf-call "call_function_with_args" eaf--buffer-id
-                 "restore_session_data" (format "%s" extra-args)))
-      (t
-       (eaf-open url)))))
+  (if (member (car (split-string link "::")) (mapcar 'car eaf-app-extensions-alist))
+      ;; for eaf-org link type spec: "eaf:<app>:URL:(parameters)"
+      (let* ((list (split-string link "::"))
+             (app (car list))
+             (url (cadr list))
+             (extra-args (caddr list)))
+        (cl-case (intern app)
+          ('browser
+           (eaf-open url "browser"))
+          ('pdf-viewer
+           (eaf-open url "pdf-viewer")
+           (eaf-call "call_function_with_args" eaf--buffer-id
+                     "jump_to_page_with_num" (format "%s" extra-args)))
+          ('mindmap
+           (eaf-open url "mindmap"))
+          ('js-video-player
+           (eaf-open url "js-video-player")
+           (eaf-call "call_function_with_args" eaf--buffer-id
+                     "restore_session_data" (format "%s" extra-args)))
+          (t (eaf-open url))))
+    ;; for other link types spec: "<link-type>:URL:(parameters)"
+    ;; NOTE: currently only support override PDF link types.
+    (let* ((list (split-string link "::"))
+           (url (car list))
+           (extra-args (cadr list)))
+      (if eaf-org-override-pdf-links
+          (cl-case (intern (file-name-extension url))
+            ('pdf
+             (eaf-open (expand-file-name url) "pdf-viewer")
+             (eaf-call "call_function_with_args" eaf--buffer-id
+                       "jump_to_page_with_num" (format "%s" extra-args))))
+        ;; restore to original :follow function
+        (org-link-set-parameters
+         type :follow (org-link-get-parameter type :orig-follow))
+        ;; re-open link with original :follow function
+        (apply (org-link-get-parameter type :follow) link)))))
 
 (org-link-set-parameters "eaf"
 			                   :follow #'eaf-org-open
 			                   :store #'eaf-org-store-link)
+
+(if eaf-org-override-pdf-links
+    (dolist (type eaf-org-override-pdf-links-list)
+      (org-link-set-parameters ; store original :follow function
+       type :orig-follow (org-link-get-parameter type :follow))
+      (org-link-set-parameters type :follow #'eaf-org-open)))
 
 (provide 'eaf-org)
