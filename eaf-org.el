@@ -45,7 +45,7 @@
   :group 'org-link)
 
 (defvar eaf-org-override-pdf-links-list
-  '("pdfview" "pdftools")
+  '("docview" "pdfview" "pdftools")
   "A list of all PDF file link types which will be override by EAF open function.")
 
 (defun eaf-org-store-link ()
@@ -68,10 +68,20 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
                      (concat "eaf:" app "::" url "::" extra-args)
                    (concat "eaf:" app "::" url)))
            (description (buffer-name)))
-      (org-link-store-props
-       :type "eaf"
-       :link link
-       :description description))))
+      (if (and (string-equal app "pdf-viewer")
+               eaf-org-override-pdf-links
+               (or (equal (org-link-get-parameter "docview" :follow) 'eaf-org-open)
+                   (equal (org-link-get-parameter "pdfview" :follow) 'eaf-org-open)
+                   (equal (org-link-get-parameter "pdftools" :follow) 'eaf-org-open)))
+          (org-link-store-props
+           :type "eaf"
+           :link link
+           :description description)
+        (require 'ol-docview) ; use `docview' for most wide compatible support.
+        (org-link-store-props
+         :type "docview"
+         :link url
+         :description description)))))
 
 (defun eaf-org-open (link _)
   "Open EAF link with EAF correspoinding application."
@@ -118,8 +128,9 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>]]"
 
 (if eaf-org-override-pdf-links
     (dolist (type eaf-org-override-pdf-links-list)
-      (org-link-set-parameters ; store original :follow function
-       type :orig-follow (org-link-get-parameter type :follow))
-      (org-link-set-parameters type :follow #'eaf-org-open)))
+      (when (org-link-get-parameter type :follow) ; if `nil' means `ol-<link>' not loaded.
+        (org-link-set-parameters         ; store original `:follow' function
+         type :orig-follow (org-link-get-parameter type :follow))
+        (org-link-set-parameters type :follow #'eaf-org-open))))
 
 (provide 'eaf-org)
