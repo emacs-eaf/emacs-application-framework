@@ -320,6 +320,18 @@ class PdfViewerWidget(QWidget):
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
 
+            # exclude images
+            imagelist = page.getImageList()
+            for image in imagelist:
+                try:
+                    # image[7] is the name of the picture
+                    imagerect = page.getImageBbox(image[7])
+                    if imagerect.isInfinite or imagerect.isEmpty:
+                        continue
+                    pixmap.invertIRect(imagerect * self.scale)
+                except Exception:
+                    pass
+
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
 
