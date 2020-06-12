@@ -83,7 +83,7 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 
 ---
 
-如果你使用[Chemacs](https://github.com/plexus/chemacs)， 下面是一份 [`init.el`]的配置示例：
+如果你使用[Chemacs](https://github.com/plexus/chemacs)， 下面是一份 `init.el`的配置示例：
 
 ```Elisp
 ;; An example of init.el
@@ -100,7 +100,7 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 
 在安装EAF时，你仅需要修改此文件中调用函数`add-subdirs-to-load-path`的参数值，将其更改为你的EAF安装位置的绝对路径。 配置示例中的EAF是安装在`~/.emacs.d/`.
 
-在EAF安装完成后，假设你将它安装到了`~/eaf`,你电脑中只有存放在`~/.emacs.d`的Emacs配置文件和安装的EAF，并且你电脑中安装了Chemacs，此时`~/.emacs-profiles.el`应该这样配置:
+在EAF安装完成后，假设你将它安装到了`~/eaf`,你电脑中只有存放在`~/.emacs.d`的Emacs配置文件和安装的EAF，并且你电脑中安装了Chemacs，此时`.emacs-profiles.el`应该这样配置:
 
 ```Elisp
 (("default" . ((user-emacs-directory . "~/.emacs.d")))

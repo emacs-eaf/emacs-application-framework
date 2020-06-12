@@ -83,7 +83,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
 
 ---
 
-If you use [Chemacs](https://github.com/plexus/chemacs), a sample [`init.el`](./init.el) is provided as follows:
+If you use [Chemacs](https://github.com/plexus/chemacs), a sample `init.el` is provided as follows:
 
 ```Elisp
 ;; An example of init.el
@@ -98,9 +98,9 @@ If you use [Chemacs](https://github.com/plexus/chemacs), a sample [`init.el`](./
 (require 'eaf)
 ```
 
- during EAF installation, you only need to modify the parameter value when calling function `add-subdirs-to-load-path`, change it into your full path to the EAF installation directory. The sample gives a situation when you install EAF at `~/.emacs.d/`.
+During EAF installation, you only need to modify the parameter value when calling function `add-subdirs-to-load-path`, change it into your full path to the EAF installation directory. The sample gives a situation when you install EAF at `~/.emacs.d/`.
 
-After EAF installation, let's assume your EAF installation directory is `~/eaf`, you only have Emacs configurations at `~/.emacs.d` and EAF installed on your computer, and you have installed Chemacs, then the `~/.emacs-profiles.el` should look like this:
+After EAF installation, let's assume your EAF installation directory is `~/eaf`, you only have Emacs configurations at `~/.emacs.d` and EAF installed on your computer, and you have installed Chemacs, then the `.emacs-profiles.el` should look like this:
 
 ```Elisp
 (("default" . ((user-emacs-directory . "~/.emacs.d")))
