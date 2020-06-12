@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jun 12 19:47:30 2020 (-0400)
+;; Last-Updated: Fri Jun 12 19:49:06 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1644,6 +1644,13 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-camera" "camera"))
 
+(defun eaf-open-ipython ()
+  "Open ipython in terminal."
+  (interactive)
+  (if (executable-find "ipython")
+      (eaf-terminal-run-command-in-dir "ipython" (eaf--non-remote-default-directory))
+    (message "[EAF/terminal] Please install ipython first.")))
+
 ;;;###autoload
 (defun eaf-open-terminal ()
   "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
@@ -1655,13 +1662,6 @@ If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
 To override and open a new terminal regardless, call interactively with prefix arg."
   (interactive)
   (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
-
-(defun eaf-open-ipython ()
-  "Open ipython in terminal."
-  (interactive)
-  (if (executable-find "ipython")
-      (eaf-terminal-run-command-in-dir "ipython" (eaf--non-remote-default-directory))
-    (message "[EAF/terminal] Please install ipython first.")))
 
 (defun eaf-terminal-run-command-in-dir (command dir &optional always-new)
   "Run COMMAND in terminal in directory DIR.
@@ -1876,13 +1876,15 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
 
 (defun eaf-open-office (file)
+  "View Microsoft Office FILE as READ-ONLY PDF."
   (interactive "f[EAF/office] Open Office file as PDF: ")
   (if (executable-find "libreoffice")
       (let* ((file-md5 (eaf-get-file-md5 file))
-             (convert-file (format "/tmp/%s.pdf" (file-name-base file)))
+             (file-name-base (file-name-base file))
+             (convert-file (format "/tmp/%s.pdf" file-name-base))
              (pdf-file (format "/tmp/%s.pdf" file-md5)))
         (if (file-exists-p pdf-file)
-            (eaf-open pdf-file "pdf-viewer")
+            (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf"))
           (message "Converting %s to PDF format, EAF will start after convert finish." file)
           (make-process
            :name ""
@@ -1891,8 +1893,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
            :sentinel (lambda (process event)
                        (when (string= (substring event 0 -1) "finished")
                          (rename-file convert-file pdf-file)
-                         (eaf-open pdf-file "pdf-viewer")
-                         )))))
+                         (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf")))))))
     (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
 (dbus-register-signal
