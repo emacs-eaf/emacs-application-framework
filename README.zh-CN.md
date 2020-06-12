@@ -81,6 +81,34 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
+---
+
+如果你使用[Chemacs](https://github.com/plexus/chemacs)， 下面是一份 [`init.el`]的配置示例：
+
+```Elisp
+;; An example of init.el
+
+(defun add-subdirs-to-load-path (dir)
+  "Recursive add directories to `load-path'."
+  (let ((default-directory (file-name-as-directory dir)))
+    (add-to-list 'load-path dir)
+    (normal-top-level-add-subdirs-to-load-path)))
+(add-subdirs-to-load-path "~/.emacs.d/")
+
+(require 'eaf)
+```
+
+在安装EAF时，你仅需要修改此文件中调用函数`add-subdirs-to-load-path`的参数值，将其更改为你的EAF安装位置的绝对路径。 配置示例中的EAF是安装在`~/.emacs.d/`.
+
+在EAF安装完成后，假设你将它安装到了`~/eaf`,你电脑中只有存放在`~/.emacs.d`的Emacs配置文件和安装的EAF，并且你电脑中安装了Chemacs，此时`~/.emacs-profiles.el`应该这样配置:
+
+```Elisp
+(("default" . ((user-emacs-directory . "~/.emacs.d")))
+ ("EAF" . ((user-emacs-directory . "~/eaf"))))
+```
+
+当你想使用Chemacs打开EAF，只需在终端中执行`emacs --with-profile EAF`。
+
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
