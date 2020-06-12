@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue May 26 13:46:15 2020 (-0400)
+;; Last-Updated: Fri Jun 12 19:47:30 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -151,10 +151,13 @@ Don't modify this map directly.  To bind keys for all apps use
   "Internal id used by EAF app.")
 
 (defvar-local eaf--buffer-url nil
-  "The EAF buffer url.")
+  "EAF buffer-local URL.")
 
 (defvar-local eaf--buffer-app-name nil
-  "The EAF buffer app-name.")
+  "EAF buffer-local app-name.")
+
+(defvar-local eaf--buffer-args nil
+  "EAF buffer-local args.")
 
 (define-derived-mode eaf-mode fundamental-mode "EAF"
   "Major mode for Emacs Application Framework buffers.
@@ -184,11 +187,8 @@ been initialized."
 
 (defvar eaf-process nil)
 
-(defvar eaf--first-start-url nil)
-
-(defvar eaf--first-start-app-name nil)
-
-(defvar eaf--first-start-arguments nil)
+(defvar eaf--active-buffers nil
+  "Contains a list of '(buffer-url buffer-app-name buffer-args).")
 
 (defvar eaf--webengine-include-private-codec nil)
 
@@ -830,30 +830,29 @@ For now only EAF browser app is supported."
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
-   ((or (eq eaf--first-start-url nil) (eq eaf--first-start-app-name nil) (eq eaf--first-start-arguments nil))
-    (message "[EAF] Please initiate EAF with eaf-open-... functions only"))
+   ((eq eaf--active-buffers nil)
+    (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((process-live-p eaf-process)
-    (message "[EAF] Process is already running."))
-   (t
-    (let ((eaf-args (append
-                     (list eaf-python-file)
-                     (eaf-get-render-size)
-                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
-                     (list (eaf-serialization-var-list))
-                     ))
-          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
-      (setq eaf-process
-            (if eaf-enable-debug
-                (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
-              (apply #'start-process eaf-name eaf-name eaf-python-command eaf-args))))
-    (set-process-query-on-exit-flag eaf-process nil)
-    (set-process-sentinel
-     eaf-process
-     #'(lambda (process event)
-         (when (string-prefix-p "exited abnormally with code" event)
-           (switch-to-buffer eaf-name))
-         (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
-    (message "[EAF] Process starting..."))))
+    (user-error "[EAF] Process is already running")))
+  (let ((eaf-args (append
+                   (list eaf-python-file)
+                   (eaf-get-render-size)
+                   (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
+                   (list (eaf-serialization-var-list))
+                   ))
+        (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
+    (setq eaf-process
+          (if eaf-enable-debug
+              (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
+            (apply #'start-process eaf-name eaf-name eaf-python-command eaf-args))))
+  (set-process-query-on-exit-flag eaf-process nil)
+  (set-process-sentinel
+   eaf-process
+   #'(lambda (process event)
+       (when (string-prefix-p "exited abnormally with code" event)
+         (switch-to-buffer eaf-name))
+       (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
+  (message "[EAF] Process starting..."))
 
 (defun eaf-stop-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
@@ -873,11 +872,9 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
   (when (get-buffer eaf-name)
     (kill-buffer eaf-name))
 
-  ;; Clear cached URL and app-name, avoid next start process to open buffer.
+  ;; Clear active buffers
   (unless restart
-    (setq eaf--first-start-url nil)
-    (setq eaf--first-start-app-name nil)
-    (setq eaf--first-start-arguments nil))
+    (setq eaf--active-buffers nil))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
@@ -904,6 +901,11 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
   (interactive)
+  (setq eaf--active-buffers nil)
+  (dolist (buffer (buffer-list))
+    (set-buffer buffer)
+    (when (derived-mode-p 'eaf-mode)
+      (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers)))
   (eaf-stop-process t)
   (eaf-start-process))
 
@@ -1009,8 +1011,8 @@ to edit EAF keybindings!" fun fun)))
   (symbol-value
    (cdr (assoc app-name eaf-app-binding-alist))))
 
-(defun eaf--create-buffer (url app-name)
-  "Create an EAF buffer given URL and APP-NAME."
+(defun eaf--create-buffer (url app-name args)
+  "Create an EAF buffer given URL, APP-NAME, and ARGS."
   (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
   (let* ((eaf-buffer-name (if (equal (file-name-nondirectory url) "")
                               url
@@ -1021,6 +1023,7 @@ to edit EAF keybindings!" fun fun)))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
+      (set (make-local-variable 'eaf--buffer-args) args)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
@@ -1287,15 +1290,23 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf--first-start)
 
 (defun eaf--first-start (webengine-include-private-codec)
-  "Call `eaf--open-internal' after receive `start_finish' signal from server process."
-  ;; If webengine include private codec and app name is "video-player", replace by "js-video-player".
-  (setq eaf--webengine-include-private-codec webengine-include-private-codec)
-  (when (and (string-equal eaf--first-start-app-name "video-player")
-             webengine-include-private-codec)
-    (setq eaf--first-start-app-name "js-video-player"))
+  "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
 
-  ;; Start app.
-  (eaf--open-internal eaf--first-start-url eaf--first-start-app-name eaf--first-start-arguments))
+WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
+  ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
+  (setq eaf--webengine-include-private-codec webengine-include-private-codec)
+  (let* ((first-buffer-info (pop eaf--active-buffers))
+         (first-start-url (nth 0 first-buffer-info))
+         (first-start-app-name (nth 1 first-buffer-info))
+         (first-start-args (nth 2 first-buffer-info)))
+    (when (and (string-equal first-start-app-name "video-player")
+               webengine-include-private-codec)
+      (setq first-start-app-name "js-video-player"))
+    ;; Start first app.
+    (eaf--open-internal first-start-url first-start-app-name first-start-args))
+
+  (dolist (buffer-info eaf--active-buffers)
+    (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1349,19 +1360,28 @@ of `eaf--buffer-app-name' inside the EAF buffer."
              (yes-or-no-p interactive-string)))
     (quit nil)))
 
-(defun eaf--open-internal (url app-name arguments)
-  (let* ((buffer (eaf--create-buffer url app-name))
+(defun eaf--open-internal (url app-name args)
+  (let* ((buffer (eaf--create-buffer url app-name args))
          (buffer-result
           (with-current-buffer buffer
             (eaf-call "new_buffer"
-                      eaf--buffer-id url app-name arguments))))
+                      eaf--buffer-id url app-name args))))
     (cond ((equal buffer-result "")
            (eaf--display-app-buffer app-name buffer))
           (t
            ;; Kill buffer and show error message from python server.
            (kill-buffer buffer)
            (switch-to-buffer eaf-name)
-           (message buffer-result)))))
+           (message buffer-result))))
+  (eaf--post-open-actions url app-name args))
+
+(defun eaf--post-open-actions (url app-name args)
+  "The function to run after `eaf--open-internal', taking the same URL, APP-NAME and ARGS."
+  (cond ((and args (equal app-name "pdf-viewer"))
+         (let ((office-pdf (string-match "office-pdf" args)))
+           (when office-pdf
+             (with-current-buffer (file-name-nondirectory url)
+               (rename-buffer (concat "[Converted] " (substring args 0 (- office-pdf 1))) t)))))))
 
 (defun eaf--mermaid-preview-display (buf)
   "Given BUF, split window to show file and previewer."
@@ -1487,10 +1507,10 @@ In that way the corresponding function will be called to retrieve the HTML
  #'eaf-open-browser)
 
 ;;;###autoload
-(defun eaf-open-browser (url &optional arguments)
-  "Open EAF browser application given a URL and ARGUMENTS."
+(defun eaf-open-browser (url &optional args)
+  "Open EAF browser application given a URL and ARGS."
   (interactive "M[EAF/browser] URL: ")
-  (eaf-open (eaf-wrap-url url) "browser" arguments))
+  (eaf-open (eaf-wrap-url url) "browser" args))
 
 (defun eaf-is-valid-url (url)
   "Return the same URL if it is valid."
@@ -1543,10 +1563,10 @@ In that way the corresponding function will be called to retrieve the HTML
     (awesome-tab-forward-tab)))
 
 ;;;###autoload
-(defun eaf-open-browser-in-background (url &optional arguments)
+(defun eaf-open-browser-in-background (url &optional args)
   (setq eaf--monitor-configuration-p nil)
   (let ((save-buffer (current-buffer)))
-    (eaf-open-browser url arguments)
+    (eaf-open-browser url args)
     (switch-to-buffer save-buffer))
   (setq eaf--monitor-configuration-p t))
 
@@ -1647,10 +1667,10 @@ To override and open a new terminal regardless, call interactively with prefix a
   "Run COMMAND in terminal in directory DIR.
 
 If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
-  (let ((arguments (make-hash-table :test 'equal)))
-    (puthash "command" command arguments)
-    (puthash "directory" (expand-file-name dir) arguments)
-    (eaf-open dir "terminal" (json-encode-hash-table arguments) always-new)))
+  (let ((args (make-hash-table :test 'equal)))
+    (puthash "command" command args)
+    (puthash "directory" (expand-file-name dir) args)
+    (eaf-open dir "terminal" (json-encode-hash-table args) always-new)))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
@@ -1696,8 +1716,8 @@ Other files will open normally with `dired-find-file' or `dired-find-alternate-f
 (define-obsolete-function-alias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;###autoload
-(defun eaf-open (url &optional app-name arguments always-new)
-  "Open an EAF application with URL, optional APP-NAME and ARGUMENTS.
+(defun eaf-open (url &optional app-name args always-new)
+  "Open an EAF application with URL, optional APP-NAME and ARGS.
 
 Interactively, a prefix arg replaces ALWAYS-NEW, which means to open a new
  buffer regardless of whether a buffer with existing URL and APP-NAME exists.
@@ -1707,18 +1727,18 @@ By default, `eaf-open' will switch to buffer if corresponding url exists.
 
 When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "F[EAF] EAF Open: ")
-  ;; Try to set app-name along with url if app-name is unset.
+  ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
     (let* ((extension-name (eaf-get-file-name-extension url)))
-      ;; Initialize app name, url and arguments
+      ;; Initialize url, app-name and args
       (setq app-name (eaf--get-app-for-extension extension-name))
       (cond
        ((equal app-name "markdown-previewer")
         ;; Try get user's github token if `eaf-grip-token' is nil.
-        (setq arguments
+        (setq args
               (or eaf-grip-token
                   (read-string (concat "[EAF/" app-name "] Fill your own Github token (or set `eaf-grip-token' with token string): ")))))
        ((equal app-name "browser")
@@ -1728,15 +1748,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
-    (message
-     (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
-             (cond
-              ((not (or (string-prefix-p "/" url)
-                        (string-prefix-p "~" url))) "File %s cannot be opened.")
-              ((file-exists-p url) "File %s cannot be opened.")
-              (t "File %s does not exist.")))
-     url))
-  (unless arguments (setq arguments ""))
+    (user-error (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
+                     (cond
+                      ((not (or (string-prefix-p "/" url)
+                                (string-prefix-p "~" url))) "File %s cannot be opened.")
+                      ((file-exists-p url) "File %s cannot be opened.")
+                      (t "File %s does not exist.")))
+                url))
+  (unless args (setq args ""))
   (setq always-new (or always-new current-prefix-arg))
   ;; Hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
@@ -1760,12 +1779,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
             (progn
               (eaf--display-app-buffer app-name exists-eaf-buffer)
               (message (concat "[EAF/" app-name "] " "Switch to %s") url))
-          (eaf--open-internal url app-name arguments)
+          (eaf--open-internal url app-name args)
           (message (concat "[EAF/" app-name "] " "Opening %s") url)))
     ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
-    (setq eaf--first-start-url url)
-    (setq eaf--first-start-app-name app-name)
-    (setq eaf--first-start-arguments arguments)
+    (unless eaf--active-buffers
+      (push `(,url ,app-name ,args) eaf--active-buffers))
     (eaf-start-process)
     (message (concat "[EAF/" app-name "] " "Opening %s") url)))
 
