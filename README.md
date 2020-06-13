@@ -215,32 +215,6 @@ If you use Socks5 as local proxy, one can set proxy type with:
 (setq eaf-proxy-type "socks5")
 ```
 
-
-### Integration with evil-mode
-
-Enable with
-```elisp
-(require 'eaf-evil)
-```
-
-eaf-evil will dynamically rebind eaf keybindings so that evil-mode works nicely in normal state.
-
-### Integration with Org Mode
-
-Enable with
-```elisp
-(require 'eaf-org)
-```
-
-Support `org-store-link` and `org-link-open` mechanism.
-
-Currently support following applications:
-
-- web browser support
-- pdf-viewer support jump to page number
-- js-video-player support jump to video timestamp
-- on theory supports all EAF applications without extra argument which has `eaf--buffer-url`
-
 ## EAF in the community
 
 A list of other community packages that use EAF to enhance their graphical experiences!

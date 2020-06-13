@@ -213,29 +213,6 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 (setq eaf-proxy-type "socks5")
 ```
 
-### evil-mode 集成
-
-开启办法：
-```elisp
-(require 'eaf-evil)
-```
-
-eaf-evil 会动态查询 eaf 应用的按键绑定, 使得 evil 在 normal 模式下也能够很好的支持 eaf 应用。
-
-### Org Mode 集成
-
-加载 `eaf-org` 来启用：
-```elisp
-(require 'eaf-org)
-```
-
-当前支持如下应用：
-
-- web browser 链接支持
-- pdf-viewer 跳转到记录的标记页面
-- js-video-player 跳转到记录的视频时间戳
-- 理论上支持所有EAF应用（只要应用有 `eaf--buffer-url` 参数值）
-
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。
