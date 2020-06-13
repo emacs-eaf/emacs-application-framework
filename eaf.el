@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jun 12 23:26:00 2020 (-0400)
+;; Last-Updated: Sat Jun 13 00:11:43 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -771,7 +771,7 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
               (eaf-open-browser url))
           (dolist (url browser-url-list)
             (push `(,url "browser" "") eaf--active-buffers))
-          (eaf-open-browser (nth 0 (car eaf--active-buffers)))))
+          (when eaf--active-buffers (eaf-open-browser (nth 0 (car eaf--active-buffers))))))
     (user-error "Please set `eaf-browser-continue-where-left-off' to t first!")))
 
 
