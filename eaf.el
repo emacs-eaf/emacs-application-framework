@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jun 12 19:49:06 2020 (-0400)
+;; Last-Updated: Fri Jun 12 23:26:00 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -651,6 +651,12 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "An alist regex mapping a MUA `major-mode' to a function to retrieve HTML part of a mail."
   :type 'alist)
 
+(defcustom eaf-browser-continue-where-left-off nil
+  "Similar to Chromium's Setting -> On start-up -> Continue where you left off.
+
+If non-nil, all active EAF Browser buffers will be saved before Emacs is killed,
+and will re-open them when calling `eaf-browser-restore-buffers' in the future session."
+  :type 'boolean)
 
 (defcustom eaf-proxy-host ""
   "Proxy Host used by EAF Browser."
@@ -739,12 +745,35 @@ Python process only create application view when Emacs window or buffer state ch
 (defvar eaf-buffer-title-format "%s")
 
 (defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
-  "The name of pdf-outline-buffer")
+  "The name of pdf-outline-buffer.")
 
 (defvar eaf-pdf-outline-window-configuration nil
   "Save window configure before popup outline buffer.")
 
 (defvar-local eaf--bookmark-title nil)
+
+(defun eaf-browser-restore-buffers ()
+  "EAF restore all opened EAF Browser buffers in the previous Emacs session.
+
+This should be used after setting `eaf-browser-continue-where-left-off' to t."
+  (interactive)
+  (if eaf-browser-continue-where-left-off
+      (let* ((browser-restore-file-path
+              (concat eaf-config-location
+                      (file-name-as-directory "browser")
+                      (file-name-as-directory "history")
+                      "restore.txt"))
+             (browser-url-list
+              (with-temp-buffer (insert-file-contents browser-restore-file-path)
+                                (split-string (buffer-string) "\n" t))))
+        (if (process-live-p eaf-process)
+            (dolist (url browser-url-list)
+              (eaf-open-browser url))
+          (dolist (url browser-url-list)
+            (push `(,url "browser" "") eaf--active-buffers))
+          (eaf-open-browser (nth 0 (car eaf--active-buffers)))))
+    (user-error "Please set `eaf-browser-continue-where-left-off' to t first!")))
+
 
 (defun eaf--bookmark-make-record ()
   "Create a EAF bookmark.
@@ -1103,6 +1132,19 @@ to edit EAF keybindings!" fun fun)))
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed, kill all EAF buffers."
   (ignore-errors
+    (when eaf-browser-continue-where-left-off
+      (let* ((browser-restore-file-path
+              (concat eaf-config-location
+                      (file-name-as-directory "browser")
+                      (file-name-as-directory "history")
+                      "restore.txt"))
+             (browser-urls ""))
+        (write-region
+         (dolist (buffer (buffer-list) browser-urls)
+           (set-buffer buffer)
+           (when (and (derived-mode-p 'eaf-mode) (equal eaf--buffer-app-name "browser"))
+             (setq browser-urls (concat eaf--buffer-url "\n" browser-urls))))
+         nil browser-restore-file-path)))
     (eaf-call "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
