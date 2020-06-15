@@ -339,7 +339,7 @@ class BrowserView(QWebEngineView):
 
     def focus_input(self):
         self.execute_js(self.focus_input_js)
-   
+
     def clear_focus(self):
         self.eval_js(self.clear_focus_js)
 
@@ -704,7 +704,7 @@ class BrowserBuffer(Buffer):
            result_tag == "edit_url":
             self.buffer_widget.cleanup_links()
 
-    def clear_all_cookies(self):
+    def clear_cookies(self):
         self.buffer_widget.clear_cookies()
         self.message_to_emacs.emit("Cleared all cookies.")
 

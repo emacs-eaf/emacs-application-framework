@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jun 13 00:11:43 2020 (-0400)
+;; Last-Updated: Mon Jun 15 00:33:16 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -283,7 +283,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-w" . "copy_text")
     ("M-f" . "history_forward")
     ("M-b" . "history_backward")
-    ("M-q" . "clear_all_cookies")
+    ("M-q" . "clear_cookies")
     ("C-M-q" . "clear_history")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
