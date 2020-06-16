@@ -52,8 +52,8 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 1. Install EAF dependencies:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
-yay -S python-pymupdf python-grip
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
+yay -S python-pymupdf python-grip filebrowser-bin
 ```
 
 2. Clone this repository.
@@ -126,7 +126,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | nodejs                         | Terminal                             | Communicate between browser and local TTY     |
 | aria2                          | Browser                              | Download files from the web                   |
 | libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
-| filebrowser                    | File Browser                         | Share files between computer and smartphone   |
+| filebrowser-bin                | File Browser                         | Share files between computer and smartphone   |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |

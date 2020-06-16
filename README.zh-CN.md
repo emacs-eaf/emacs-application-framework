@@ -51,9 +51,8 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 1. 安装EAF依赖库:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser
-python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice filebrowser
-yay -S python-pymupdf python-grip
+sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
+yay -S python-pymupdf python-grip filebrowser-bin
 ```
 
 2. 使用 ```git clone``` 下载这个仓库.
@@ -112,21 +111,21 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
-| 包名                           | 依赖                         | 解释                                               |
-| :--------                      | :------                      | :------                                            |
-| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                          |
-| python-dbus                    | 核心                         | DBus库，用于在Emacs和Python进程间通讯              |
-| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                           |
-| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                                        |
-| python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务                         |
-| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                             |
-| python-feedparser              | RSS阅读器                    | 解析RSS/Atom信息                                   |
-| python-pyinotify               | 流程图                       | 监听 mmd 格式文件的变动                            |
-| python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式           |
-| aria2                          | 浏览器                       | 下载网络文件                                       |
-| nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                            |
-| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                               |
-| filebrowser                    | 文件浏览器                   | 在电脑和手机之间快速共享文件                       |
+| 包名                           | 依赖                         | 解释                                     |
+| :--------                      | :------                      | :------                                  |
+| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                |
+| python-dbus                    | 核心                         | DBus库，用于在Emacs和Python进程间通讯    |
+| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
+| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
+| python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务               |
+| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
+| python-feedparser              | RSS阅读器                    | 解析RSS/Atom信息                         |
+| python-pyinotify               | 流程图                       | 监听 mmd 格式文件的变动                  |
+| python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式 |
+| aria2                          | 浏览器                       | 下载网络文件                             |
+| nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                  |
+| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
+| filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
