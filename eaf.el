@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Jun 15 00:33:16 2020 (-0400)
+;; Last-Updated: Tue Jun 16 19:06:47 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -986,7 +986,7 @@ When called interactively, copy to ‘kill-ring’."
       (if (called-interactively-p 'any)
           (message "%s" (kill-new (eaf-call "call_function" eaf--buffer-id "get_url")))
         (eaf-call "call_function" eaf--buffer-id "get_url"))
-    (message "This command can only be called in an EAF buffer!")))
+    (user-error "This command can only be called in an EAF buffer!")))
 
 (defun eaf-toggle-fullscreen ()
   "Toggle fullscreen."
