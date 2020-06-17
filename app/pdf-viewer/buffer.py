@@ -47,7 +47,7 @@ class AppBuffer(Buffer):
                             "save_current_pos", "jump_to_saved_pos",
                             "scroll_right", "scroll_left",
                             "toggle_read_mode", "toggle_inverted_mode", "toggle_mark_link"]:
-            self.build_widget_method(method_name)
+            self.build_interactive_method(method_name, self.buffer_widget)
 
     def destroy_buffer(self):
         if self.delete_temp_file:

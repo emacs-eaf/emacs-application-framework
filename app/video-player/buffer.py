@@ -33,8 +33,8 @@ class AppBuffer(Buffer):
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
 
-        self.build_widget_method("play_backward", "seek_backward")
-        self.build_widget_method("play_forward", "seek_forward")
+        self.build_interactive_method("play_backward", self.buffer_widget, "seek_backward")
+        self.build_interactive_method("play_forward", self.buffer_widget, "seek_forward")
 
     def all_views_hide(self):
         # Pause video before all views hdie, otherwise will got error "Internal data stream error".

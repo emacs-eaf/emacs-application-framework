@@ -38,22 +38,13 @@ class AppBuffer(Buffer):
 
         for method_name in ["next_subscription", "prev_subscription", "next_article", "prev_article",
                             "first_subscription", "last_subscription", "first_article", "last_article"]:
-            self.build_widget_method(method_name)
+            self.build_interactive_method(method_name, self.buffer_widget)
 
         for method_name in ["scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                          "search_text_forward", "search_text_backward"]:
-            self.build_browser_method(method_name)
+            self.build_interactive_method(method_name, self.buffer_widget.browser)
 
-        self.build_browser_method("action_quit", "search_quit")
-
-    def build_browser_method(self, method_name, widget_method_name=None, message=None):
-        if widget_method_name:
-            setattr(self, method_name, getattr(self.buffer_widget.browser, widget_method_name))
-        else:
-            setattr(self, method_name, getattr(self.buffer_widget.browser, method_name))
-
-        if message != None:
-            self.message_to_emacs.emit(message)
+        self.build_interactive_method("action_quit", self.buffer_widget.browser, "search_quit")
 
     def add_subscription(self):
         self.send_input_message("Subscribe to RSS feed: ", "add_subscription")

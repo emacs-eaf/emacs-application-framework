@@ -471,13 +471,13 @@ class BrowserBuffer(Buffer):
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
                             "refresh_page", "undo_action", "redo_action", "get_url", "exit_fullscreen",
                             "set_focus_text", "clear_focus", "dark_mode", "view_source", "focus_input"]:
-            self.build_widget_method(method_name)
+            self.build_interactive_method(method_name, self.buffer_widget)
 
-        self.build_widget_method("history_backward", "back")
-        self.build_widget_method("history_forward", "forward")
-        self.build_widget_method("action_quit", "search_quit")
-        self.build_widget_method("yank_text", "yank_text", "Yank text.")
-        self.build_widget_method("kill_text", "kill_text", "Kill text.")
+        self.build_interactive_method("history_backward", self.buffer_widget, "back")
+        self.build_interactive_method("history_forward", self.buffer_widget, "forward")
+        self.build_interactive_method("action_quit", self.buffer_widget, "search_quit")
+        self.build_interactive_method("yank_text", self.buffer_widget, "yank_text", "Yank text.")
+        self.build_interactive_method("kill_text", self.buffer_widget, "kill_text", "Kill text.")
 
         for method_name in ["recover_prev_close_page", "scroll_up", "scroll_down", "scroll_left", "scroll_right",
                             "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",

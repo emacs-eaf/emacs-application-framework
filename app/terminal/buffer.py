@@ -59,6 +59,9 @@ class AppBuffer(BrowserBuffer):
 
         QTimer.singleShot(250, self.focus_terminal)
 
+        for method_name in ["search_text_forward", "search_text_backward", "scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom"]:
+            self.build_interactive_method(method_name, self)
+
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
         QApplication.sendEvent(self.buffer_widget.focusProxy(), event)

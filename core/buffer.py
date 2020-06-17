@@ -280,14 +280,19 @@ class Buffer(QGraphicsScene):
     def get_url(self):
         return self.url
 
-    def build_widget_method(self, method_name, widget_method_name=None, message=None):
-        if widget_method_name:
-            setattr(self, method_name, getattr(self.buffer_widget, widget_method_name))
-        else:
-            setattr(self, method_name, getattr(self.buffer_widget, method_name))
+    def build_interactive_method(self, method_name, origin_method_class, origin_method_name=None, message_emacs=None):
+        try:
+            del self.__dict__[method_name]
+        except KeyError:
+            pass
+        finally:
+            if origin_method_name:
+                setattr(self, method_name, getattr(origin_method_class, origin_method_name))
+            else:
+                setattr(self, method_name, getattr(origin_method_class, method_name))
 
-        if message != None:
-            self.message_to_emacs.emit(message)
+            if message_emacs != None:
+                self.message_to_emacs.emit(message_emacs)
 
     def save_as_bookmark(self):
         self.eval_in_emacs.emit('''(bookmark-set)''')
