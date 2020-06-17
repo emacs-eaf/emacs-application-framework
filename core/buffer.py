@@ -98,7 +98,7 @@ qt_text_dict = {
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
 
-    update_details = QtCore.pyqtSignal(str, str, str)
+    update_buffer_details = QtCore.pyqtSignal(str, str, str)
     open_url_in_new_tab = QtCore.pyqtSignal(str)
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_text = QtCore.pyqtSignal(str)
@@ -171,7 +171,7 @@ class Buffer(QGraphicsScene):
 
     def change_title(self, title):
         self.title = title
-        self.update_details.emit(self.buffer_id, title, self.url)
+        self.update_buffer_details.emit(self.buffer_id, title, self.url)
 
     def close_buffer(self):
         self.request_close_buffer.emit(self.buffer_id)
@@ -200,7 +200,7 @@ class Buffer(QGraphicsScene):
     def cancel_input_message(self, result_type):
         pass
 
-    def scroll(self, scroll_direction, scroll_type):
+    def scroll_other_buffer(self, scroll_direction, scroll_type):
         pass
 
     def save_session_data(self):

@@ -109,10 +109,10 @@ class EAF(dbus.service.Object):
                 break
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
-    def scroll_buffer(self, view_info, scroll_direction, scroll_type):
+    def scroll_other_buffer(self, view_info, scroll_direction, scroll_type):
         (buffer_id, _, _, _, _) = view_info.split(":")
         if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].scroll(scroll_direction, scroll_type)
+            self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
 
     def get_new_browser_window_buffer_id(self):
         import secrets
@@ -164,7 +164,7 @@ class EAF(dbus.service.Object):
         app_buffer.buffer_widget.resize(emacs_width, emacs_height)
 
         # Monitor buffer signals.
-        app_buffer.update_details.connect(self.update_buffer_details)
+        app_buffer.update_buffer_details.connect(self.update_buffer_details)
         app_buffer.translate_text.connect(self.translate_text)
         app_buffer.open_url_in_new_tab.connect(self.open_url_in_new_tab)
         app_buffer.open_url_in_background_tab.connect(self.open_url_in_background_tab)

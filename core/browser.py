@@ -648,7 +648,7 @@ class BrowserBuffer(Buffer):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
         return [self.buffer_widget.focusProxy()]
 
-    def scroll(self, scroll_direction, scroll_type):
+    def scroll_other_buffer(self, scroll_direction, scroll_type):
         if scroll_type == "page":
             if scroll_direction == "up":
                 self.scroll_up_page()

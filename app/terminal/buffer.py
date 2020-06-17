@@ -110,17 +110,24 @@ class AppBuffer(BrowserBuffer):
         text = QApplication.clipboard().text()
         self.buffer_widget.eval_js("paste('{}');".format(text))
 
-    def scroll(self, scroll_direction, scroll_type):
+    def scroll_other_buffer(self, scroll_direction, scroll_type):
         if scroll_type == "page":
             if scroll_direction == "up":
-                self.buffer_widget.eval_js("scroll_page(1);")
+                self.scroll_up_page()
             else:
-                self.buffer_widget.eval_js("scroll_page(-1);")
+                self.scroll_down_page()
         else:
             if scroll_direction == "up":
-                self.buffer_widget.eval_js("scroll_line(1);")
+                self.scroll_up()
             else:
-                self.buffer_widget.eval_js("scroll_line(-1);")
+                self.scroll_down()
+
+    def scroll_up(self):
+        print("python scroll_up")
+        self.buffer_widget.eval_js("scroll_line(1);")
+
+    def scroll_down(self):
+        self.buffer_widget.eval_js("scroll_line(-1);")
 
     def scroll_up_page(self):
         self.buffer_widget.eval_js("scroll_page(1);")

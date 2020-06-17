@@ -73,17 +73,17 @@ class AppBuffer(Buffer):
         if result_type == "jump_link":
             self.buffer_widget.cleanup_links()
 
-    def scroll(self, scroll_direction, scroll_type):
+    def scroll_other_buffer(self, scroll_direction, scroll_type):
         if scroll_type == "page":
             if scroll_direction == "up":
-                self.buffer_widget.scroll_up_page()
+                self.scroll_up_page()
             else:
-                self.buffer_widget.scroll_down_page()
+                self.scroll_down_page()
         else:
             if scroll_direction == "up":
-                self.buffer_widget.scroll_up()
+                self.scroll_up()
             else:
-                self.buffer_widget.scroll_down()
+                self.scroll_down()
 
     def save_session_data(self):
         return "{0}:{1}:{2}:{3}".format(self.buffer_widget.scroll_offset,

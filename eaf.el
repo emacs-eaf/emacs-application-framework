@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jun 16 19:06:47 2020 (-0400)
+;; Last-Updated: Wed Jun 17 03:14:16 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -437,7 +437,13 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-terminal-keybinding
-  '(("C--" . "zoom_out")
+  '(("M-n" . "scroll_up")
+    ("M-p" . "scroll_down")
+    ("C-v" . "scroll_up_page")
+    ("M-v" . "scroll_down_page")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom")
+    ("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
     ("C-S-c" . "copy_text")
@@ -456,8 +462,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-u" . "eaf-send-key-sequence")
     ("C-l" . "eaf-send-key-sequence")
     ("C-w" . "eaf-send-key-sequence")
-    ("C-v" . "eaf-send-key-sequence")
-    ("M-v" . "eaf-send-key-sequence")
     ("M-f" . "eaf-send-key-sequence")
     ("M-b" . "eaf-send-key-sequence")
     ("M-d" . "eaf-send-key-sequence")
@@ -2112,7 +2116,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-call "scroll_buffer" (eaf-get-view-info) "up"
+        (eaf-call "scroll_other_buffer" (eaf-get-view-info) "up"
                   (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
@@ -2124,7 +2128,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-call "scroll_buffer" (eaf-get-view-info) "down"
+        (eaf-call "scroll_other_buffer" (eaf-get-view-info) "down"
                   (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
@@ -2138,7 +2142,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-call "scroll_buffer" (eaf-get-view-info)
+        (eaf-call "scroll_other_buffer" (eaf-get-view-info)
                   (if (string-equal direction "up") "up" "down")
                   (if line "line" "page"))
         (other-window -1))
