@@ -126,7 +126,6 @@ class AppBuffer(BrowserBuffer):
                 self.scroll_down()
 
     def scroll_up(self):
-        print("python scroll_up")
         self.buffer_widget.eval_js("scroll_line(1);")
 
     def scroll_down(self):
