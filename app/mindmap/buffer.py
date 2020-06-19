@@ -24,7 +24,7 @@ from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
-from core.utils import touch, string_to_base64
+from core.utils import touch, string_to_base64, interactive
 import os
 import base64
 
@@ -50,12 +50,12 @@ class AppBuffer(BrowserBuffer):
             self.build_js_method(method_name)
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node",
-                            "remove_middle_node", "add_middle_node", "update_node_topic",
-                            "copy_node_topic", "paste_node_topic", "refresh_page",
+                            "remove_middle_node", "add_middle_node", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
-                            "toggle_node", "save_screenshot", "save_file", "save_org_file",
-                            "change_node_background", "cut_node_tree", "paste_node_tree"]:
+                            "toggle_node", "save_screenshot"]:
             self.build_insert_or_do(method_name)
+
+        self.build_all_methods(self)
 
         QTimer.singleShot(500, self.init_file)
 
@@ -87,19 +87,13 @@ class AppBuffer(BrowserBuffer):
                 self.save_file(False)
         setattr(self, method_name, _do)
 
-    def build_insert_or_do(self, method_name):
-        def _do ():
-            if self.is_focus():
-                self.fake_key_event(self.current_event_string)
-            else:
-                getattr(self, method_name)()
-        setattr(self, "insert_or_{}".format(method_name), _do)
-
+    @interactive(insert_or_do=True)
     def copy_node_topic(self):
         node_topic = self.buffer_widget.execute_js("get_node_topic();")
         self.eval_in_emacs.emit('''(kill-new "{}")'''.format(node_topic))
         self.message_to_emacs.emit("Copy: {}".format(node_topic))
 
+    @interactive(insert_or_do=True)
     def paste_node_topic(self):
         text = QApplication.clipboard().text()
         if text.strip() != "":
@@ -110,6 +104,7 @@ class AppBuffer(BrowserBuffer):
         else:
             self.message_to_emacs.emit("Nothing in clipboard, can't paste.")
 
+    @interactive(insert_or_do=True)
     def cut_node_tree(self):
         self.cut_node_id = self.buffer_widget.execute_js("get_selected_nodeid();")
         if self.cut_node_id:
@@ -118,15 +113,18 @@ class AppBuffer(BrowserBuffer):
             else:
                 self.message_to_emacs.emit("Cut node tree: {}".format(self.cut_node_id))
 
+    @interactive(insert_or_do=True)
     def paste_node_tree(self):
         if self.cut_node_id:
             self.buffer_widget.eval_js("paste_node_tree('{}');".format(self.cut_node_id))
             self.save_file(False)
             self.message_to_emacs.emit("Paste node tree: {}".format(self.cut_node_id))
 
+    @interactive(insert_or_do=True)
     def change_node_background(self):
         self.send_input_message("Change node background: ", "change_node_background", "file")
 
+    @interactive(insert_or_do=True)
     def update_node_topic(self):
         self.send_input_message(
             "Update topic: ",
@@ -176,6 +174,7 @@ class AppBuffer(BrowserBuffer):
 
         self.message_to_emacs.emit("Save image: " + image_path)
 
+    @interactive(insert_or_do=True)
     def save_file(self, notify=True):
         file_path = self.get_save_path("emm")
         touch(file_path)
@@ -185,6 +184,7 @@ class AppBuffer(BrowserBuffer):
         if notify:
             self.message_to_emacs.emit("Save file: " + file_path)
 
+    @interactive(insert_or_do=True)
     def save_org_file(self):
         file_path = self.get_save_path("org")
         touch(file_path)

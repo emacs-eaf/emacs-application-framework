@@ -25,6 +25,7 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QVBoxLayout
 from core.buffer import Buffer
+from core.utils import interactive
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -33,8 +34,7 @@ class AppBuffer(Buffer):
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
 
-        self.build_interactive_method("play_backward", self.buffer_widget, "seek_backward")
-        self.build_interactive_method("play_forward", self.buffer_widget, "seek_forward")
+        self.build_all_methods(self.buffer_widget)
 
     def all_views_hide(self):
         # Pause video before all views hdie, otherwise will got error "Internal data stream error".
@@ -99,10 +99,12 @@ class VideoPlayerWidget(QWidget):
         self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(url)))
         self.media_player.play()
 
-    def seek_forward(self):
+    @interactive()
+    def play_forward(self):
         video_position = self.media_player.position()
         self.media_player.setPosition(video_position + self.video_seek_durcation)
 
-    def seek_backward(self):
+    @interactive()
+    def play_backward(self):
         video_position = self.media_player.position()
         self.media_player.setPosition(max(video_position - self.video_seek_durcation, 0))

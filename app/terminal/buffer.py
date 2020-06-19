@@ -23,7 +23,7 @@ from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
 from PyQt5.QtGui import QColor, QMouseEvent
 from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
-from core.utils import PostGui, get_free_port
+from core.utils import PostGui, get_free_port, interactive
 import os
 import subprocess
 import signal
@@ -59,8 +59,7 @@ class AppBuffer(BrowserBuffer):
 
         QTimer.singleShot(250, self.focus_terminal)
 
-        for method_name in ["search_text_forward", "search_text_backward", "scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom"]:
-            self.build_interactive_method(method_name, self)
+        self.build_all_methods(self)
 
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -125,21 +124,27 @@ class AppBuffer(BrowserBuffer):
             else:
                 self.scroll_down()
 
+    @interactive()
     def scroll_up(self):
         self.buffer_widget.eval_js("scroll_line(1);")
 
+    @interactive()
     def scroll_down(self):
         self.buffer_widget.eval_js("scroll_line(-1);")
 
+    @interactive()
     def scroll_up_page(self):
         self.buffer_widget.eval_js("scroll_page(1);")
 
+    @interactive()
     def scroll_down_page(self):
         self.buffer_widget.eval_js("scroll_page(-1);")
 
+    @interactive()
     def scroll_to_begin(self):
         self.buffer_widget.eval_js("scroll_to_begin();")
 
+    @interactive()
     def scroll_to_bottom(self):
         self.buffer_widget.eval_js("scroll_to_bottom();")
 
@@ -159,18 +164,21 @@ class AppBuffer(BrowserBuffer):
             # self.web_page.findText(self.search_term)
             self.buffer_widget.eval_js("find_prev('{}')".format(text))
 
+    @interactive()
     def search_text_forward(self):
         if self.search_term == "":
             self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
             self._search_text(self.search_term)
 
+    @interactive()
     def search_text_backward(self):
         if self.search_term == "":
             self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
+    @interactive()
     def search_quit(self):
         if self.search_term != "":
             self._search_text("")

@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import QPushButton, QHBoxLayout, QWidget, QWidget, QListWid
 from core.buffer import Buffer
 from PyQt5 import QtCore
 from core.browser import BrowserView
-from core.utils import touch
+from core.utils import touch, interactive
 import feedparser
 import json
 import os
@@ -35,16 +35,10 @@ class AppBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
 
         self.add_widget(RSSReaderWidget(config_dir))
+        self.buffer_widget.browser.buffer = self
 
-        for method_name in ["next_subscription", "prev_subscription", "next_article", "prev_article",
-                            "first_subscription", "last_subscription", "first_article", "last_article"]:
-            self.build_interactive_method(method_name, self.buffer_widget)
-
-        for method_name in ["scroll_up", "scroll_down", "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
-                         "search_text_forward", "search_text_backward"]:
-            self.build_interactive_method(method_name, self.buffer_widget.browser)
-
-        self.build_interactive_method("action_quit", self.buffer_widget.browser, "search_quit")
+        self.build_all_methods(self.buffer_widget)
+        self.build_all_methods(self.buffer_widget.browser)
 
     def add_subscription(self):
         self.send_input_message("Subscribe to RSS feed: ", "add_subscription")
@@ -372,6 +366,7 @@ class RSSReaderWidget(QWidget):
             except Exception:
                 pass
 
+    @interactive()
     def next_subscription(self):
         feed_count = self.feed_list.count()
         current_row = self.feed_list.currentRow()
@@ -383,6 +378,7 @@ class RSSReaderWidget(QWidget):
         else:
             self.buffer.message_to_emacs.emit("End of subscribed feeds")
 
+    @interactive()
     def prev_subscription(self):
         current_row = self.feed_list.currentRow()
 
@@ -393,11 +389,13 @@ class RSSReaderWidget(QWidget):
         else:
             self.buffer.message_to_emacs.emit("Beginning of subscribed feeds")
 
+    @interactive()
     def first_subscription(self):
         self.feed_list.setCurrentRow(0)
         self.feed_list.scrollToItem(self.feed_list.currentItem())
         self.handle_feed(self.feed_list.currentItem())
 
+    @interactive()
     def last_subscription(self):
         feed_count = self.feed_list.count()
 
@@ -405,6 +403,7 @@ class RSSReaderWidget(QWidget):
         self.feed_list.scrollToItem(self.feed_list.currentItem())
         self.handle_feed(self.feed_list.currentItem())
 
+    @interactive()
     def next_article(self):
         article_count = self.article_list.count()
         current_row = self.article_list.currentRow()
@@ -416,6 +415,7 @@ class RSSReaderWidget(QWidget):
         else:
             self.buffer.message_to_emacs.emit("End of articles")
 
+    @interactive()
     def prev_article(self):
         current_row = self.article_list.currentRow()
 
@@ -426,11 +426,13 @@ class RSSReaderWidget(QWidget):
         else:
             self.buffer.message_to_emacs.emit("Beginning of articles")
 
+    @interactive()
     def first_article(self):
         self.article_list.setCurrentRow(0)
         self.article_list.scrollToItem(self.article_list.currentItem())
         self.handle_article(self.article_list.currentItem())
 
+    @interactive()
     def last_article(self):
         article_count = self.article_list.count()
 

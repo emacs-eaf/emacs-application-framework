@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Jun 17 03:14:16 2020 (-0400)
+;; Last-Updated: Fri Jun 19 03:25:46 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -317,7 +317,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("=" . "insert_or_zoom_in")
     ("0" . "insert_or_zoom_reset")
     ("m" . "insert_or_save_as_bookmark")
-    ("o" . "insert_or_open_url")
+    ("o" . "insert_or_open_browser")
     ("y" . "insert_or_download_youtube_video")
     ("Y" . "insert_or_download_youtube_audio")
     ("p" . "insert_or_toggle_device")
@@ -368,7 +368,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("0" . "zoom_reset")
     ("=" . "zoom_in")
     ("-" . "zoom_out")
-    ("g" . "scroll_to_home")
+    ("g" . "scroll_to_begin")
     ("G" . "scroll_to_end")
     ("p" . "jump_to_page")
     ("P" . "jump_to_percent")

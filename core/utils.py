@@ -27,6 +27,7 @@ import sys
 import base64
 import threading
 import subprocess
+from functools import wraps
 
 class PostGui(QtCore.QObject):
 
@@ -126,3 +127,15 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
     thread.start()
     # returns immediately after the thread starts
     return thread
+
+def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
+    def wrap(f):
+        f.interactive = True
+        f.insert_or_do = insert_or_do
+        f.msg_emacs = msg_emacs
+        f.new_name = new_name
+        @wraps(f)
+        def wrapped_f(*args, **kwargs):
+            return f(*args, **kwargs)
+        return wrapped_f
+    return wrap

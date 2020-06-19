@@ -25,7 +25,7 @@ from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call, call_and_check_code
+from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call, call_and_check_code, interactive
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
@@ -122,18 +122,21 @@ class BrowserView(QWebEngineView):
         else:
             self.web_page.findText(self.search_term)
 
+    @interactive()
     def search_text_forward(self):
         if self.search_term == "":
             self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
             self._search_text(self.search_term)
 
+    @interactive()
     def search_text_backward(self):
         if self.search_term == "":
             self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
+    @interactive(new_name = "action_quit")
     def search_quit(self):
         if self.search_term != "":
             self._search_text("")
@@ -199,12 +202,15 @@ class BrowserView(QWebEngineView):
     def open_url_background_buffer(self, url):
         self.open_url_in_background_tab.emit(url)
 
+    @interactive(insert_or_do=True)
     def zoom_in(self):
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
 
+    @interactive(insert_or_do=True)
     def zoom_out(self):
         self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
 
+    @interactive(insert_or_do=True)
     def zoom_reset(self):
         self.setZoomFactor(float(self.buffer.emacs_var_dict["eaf-browser-default-zoom"]))
 
@@ -217,54 +223,69 @@ class BrowserView(QWebEngineView):
     def execute_js(self, js):
         return self.web_page.execute_javascript(js)
 
+    @interactive(insert_or_do=True)
     def scroll_left(self):
         self.eval_js("document.scrollingElement.scrollBy(-35, 0)")
 
+    @interactive(insert_or_do=True)
     def scroll_right(self):
         self.eval_js("document.scrollingElement.scrollBy(35, 0)")
 
+    @interactive(insert_or_do=True)
     def scroll_up(self):
         self.eval_js("document.scrollingElement.scrollBy(0, 50)")
 
+    @interactive(insert_or_do=True)
     def scroll_down(self):
         self.eval_js("document.scrollingElement.scrollBy(0, -50)")
 
+    @interactive(insert_or_do=True)
     def scroll_up_page(self):
         self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
+    @interactive(insert_or_do=True)
     def scroll_down_page(self):
         self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
+    @interactive(insert_or_do=True)
     def scroll_to_begin(self):
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
+    @interactive(insert_or_do=True)
     def scroll_to_bottom(self):
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     def get_selection_text(self):
         return self.execute_js(self.get_selection_text_js)
 
+    @interactive(insert_or_do=True)
     def refresh_page(self):
         self.reload()
 
     def copy_text(self):
         self.triggerPageAction(self.web_page.Copy)
 
+    @interactive(msg_emacs="Yank selected text.")
     def yank_text(self):
         self.triggerPageAction(self.web_page.Paste)
 
+    @interactive(msg_emacs="Kill selected text.")
     def kill_text(self):
         self.triggerPageAction(self.web_page.Cut)
 
+    @interactive()
     def undo_action(self):
         self.triggerPageAction(self.web_page.Undo)
 
+    @interactive()
     def redo_action(self):
         self.triggerPageAction(self.web_page.Redo)
 
+    @interactive()
     def exit_fullscreen(self):
         self.triggerPageAction(self.web_page.ExitFullScreen)
 
+    @interactive(insert_or_do=True)
     def view_source(self):
         self.triggerPageAction(self.web_page.ViewSource)
 
@@ -276,6 +297,7 @@ class BrowserView(QWebEngineView):
     def select_input_text(self):
         self.eval_js(self.select_input_text_js)
 
+    @interactive()
     def get_url(self):
         return self.execute_js("window.location.href;")
 
@@ -333,16 +355,20 @@ class BrowserView(QWebEngineView):
     def get_focus_text(self):
         return self.execute_js(self.get_focus_text_js)
 
+    @interactive()
     def set_focus_text(self, new_text):
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
+    @interactive()
     def focus_input(self):
         self.execute_js(self.focus_input_js)
 
+    @interactive()
     def clear_focus(self):
         self.eval_js(self.clear_focus_js)
 
+    @interactive()
     def dark_mode(self):
         self.eval_js(self.dark_mode_js)
 
@@ -466,28 +492,10 @@ class BrowserBuffer(Buffer):
         except Exception:
             pass
 
-        for method_name in ["search_text_forward", "search_text_backward", "zoom_out", "zoom_in", "zoom_reset",
-                            "scroll_left", "scroll_right", "scroll_up", "scroll_down",
-                            "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
-                            "refresh_page", "undo_action", "redo_action", "get_url", "exit_fullscreen",
-                            "set_focus_text", "clear_focus", "dark_mode", "view_source", "focus_input"]:
-            self.build_interactive_method(method_name, self.buffer_widget)
-
-        self.build_interactive_method("history_backward", self.buffer_widget, "back")
-        self.build_interactive_method("history_forward", self.buffer_widget, "forward")
-        self.build_interactive_method("action_quit", self.buffer_widget, "search_quit")
-        self.build_interactive_method("yank_text", self.buffer_widget, "yank_text", "Yank text.")
-        self.build_interactive_method("kill_text", self.buffer_widget, "kill_text", "Kill text.")
-
-        for method_name in ["recover_prev_close_page", "scroll_up", "scroll_down", "scroll_left", "scroll_right",
-                            "scroll_up_page", "scroll_down_page", "scroll_to_begin", "scroll_to_bottom",
-                            "open_link", "open_link_new_buffer", "open_link_background_buffer", "copy_link",
-                            "history_backward", "history_forward", "new_blank_page", "open_download_manage_page",
-                            "refresh_page", "zoom_in", "zoom_out", "zoom_reset", "save_as_bookmark", "edit_url",
-                            "download_youtube_video", "download_youtube_audio", "toggle_device", "close_buffer",
-                            "save_as_pdf", "view_source", "save_as_single_file", "select_left_tab", "select_right_tab",
-                            "copy_code", "focus_input"]:
-            self.build_insert_or_do(method_name)
+        self.build_all_methods(self.buffer_widget)
+        self.build_all_methods(self)
+        self.build_interactive_method(self.buffer_widget, "back", "history_backward", insert_or_do=True)
+        self.build_interactive_method(self.buffer_widget, "forward", "history_forward", insert_or_do=True)
 
     def notify_print_message(self, file_path, success):
         if success:
@@ -622,9 +630,11 @@ class BrowserBuffer(Buffer):
 
             self.message_to_emacs.emit("Downloading: " + download_url)
 
+    @interactive(insert_or_do=True)
     def save_as_pdf(self):
         self.send_input_message("Save current webpage as PDF?", "save_as_pdf", "yes-or-no")
 
+    @interactive(insert_or_do=True)
     def save_as_single_file(self):
         import shutil
         if shutil.which("monolith") is None:
@@ -730,6 +740,7 @@ class BrowserBuffer(Buffer):
 
                 subprocess.Popen(aria2_args, stdout=null_file)
 
+    @interactive(insert_or_do=True)
     def open_download_manage_page(self):
         self.try_start_aria2_daemon()
         self.buffer_widget.open_download_manage_page()
@@ -738,22 +749,27 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.copy_text()
         self.message_to_emacs.emit("Copy selected text.")
 
+    @interactive(insert_or_do=True)
     def copy_code(self):
         self.buffer_widget.get_code_markers()
         self.send_input_message("Copy code: ", "copy_code");
 
+    @interactive(insert_or_do=True)
     def open_link(self):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link: ", "jump_link");
 
+    @interactive(insert_or_do=True)
     def open_link_new_buffer(self):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
 
+    @interactive(insert_or_do=True)
     def open_link_background_buffer(self):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
 
+    @interactive(insert_or_do=True)
     def copy_link(self):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Copy link: ", "copy_link");
@@ -811,6 +827,7 @@ class BrowserBuffer(Buffer):
                 import traceback
                 self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
 
+    @interactive(insert_or_do=True)
     def new_blank_page(self):
         self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
 
@@ -827,6 +844,7 @@ class BrowserBuffer(Buffer):
             with open(self.history_close_file_path, "a") as f:
                 f.write("{0}\n".format(url))
 
+    @interactive(insert_or_do=True)
     def recover_prev_close_page(self):
         if os.path.exists(self.history_close_file_path):
             with open(self.history_close_file_path, "r") as f:
@@ -845,24 +863,8 @@ class BrowserBuffer(Buffer):
         else:
             self.message_to_emacs.emit("No page need recovery.")
 
-    def insert_or_do(func):
-        def _do(self, *args, **kwargs):
-            if self.is_focus():
-                self.fake_key_event(self.current_event_string)
-            else:
-                func(self, *args, **kwargs)
-        return _do
-
-    def build_insert_or_do(self, method_name):
-        def _do ():
-            if self.is_focus():
-                self.fake_key_event(self.current_event_string)
-            else:
-                getattr(self, method_name)()
-        setattr(self, "insert_or_{}".format(method_name), _do)
-
-    @insert_or_do
-    def insert_or_open_url(self):
+    @interactive(insert_or_do=True)
+    def open_browser(self):
         self.eval_in_emacs.emit('''(call-interactively 'eaf-open-browser-with-history)''')
 
     def select_all_or_input_text(self):
@@ -880,6 +882,7 @@ class BrowserBuffer(Buffer):
     def open_dev_tool_page(self):
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
 
+    @interactive(insert_or_do=True)
     def toggle_device(self):
         user_agent = self.profile.defaultProfile().httpUserAgent()
         if user_agent == self.pc_user_agent:
@@ -891,9 +894,11 @@ class BrowserBuffer(Buffer):
 
         self.refresh_page()
 
+    @interactive(insert_or_do=True)
     def download_youtube_video(self):
         self.download_youtube_file()
 
+    @interactive(insert_or_do=True)
     def download_youtube_audio(self):
         self.download_youtube_file(True)
 

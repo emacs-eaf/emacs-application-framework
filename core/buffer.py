@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QApplication
+from core.utils import interactive
 import abc
 import string
 
@@ -141,6 +142,29 @@ class Buffer(QGraphicsScene):
         self.enter_fullscreen_request.connect(self.enable_fullscreen)
         self.exit_fullscreen_request.connect(self.disable_fullscreen)
 
+    def build_all_methods(self, origin_class):
+        method_list = [func for func in dir(origin_class) if callable(getattr(origin_class, func)) and not func.startswith("__")]
+        for func_name in method_list:
+            func_attr = getattr(origin_class, func_name)
+            if hasattr(func_attr, "interactive"):
+                self.build_interactive_method(origin_class, func_name, getattr(func_attr, "new_name"), getattr(func_attr, "msg_emacs"), getattr(func_attr, "insert_or_do"))
+
+    def build_interactive_method(self, origin_class, class_method_name, new_method_name=None, msg_emacs=None, insert_or_do=False):
+        new_name = class_method_name if new_method_name is None else new_method_name
+        self.__dict__.update({new_name: getattr(origin_class, class_method_name)})
+        if msg_emacs is not None:
+            self.message_to_emacs.emit(msg_emacs)
+        if insert_or_do:
+            self.build_insert_or_do(new_name)
+
+    def build_insert_or_do(self, method_name):
+        def _do ():
+            if self.is_focus():
+                self.fake_key_event(self.current_event_string)
+            else:
+                getattr(self, method_name)()
+        setattr(self, "insert_or_{}".format(method_name), _do)
+
     def toggle_fullscreen(self):
         if self.is_fullscreen:
             self.exit_fullscreen_request.emit()
@@ -173,6 +197,7 @@ class Buffer(QGraphicsScene):
         self.title = title
         self.update_buffer_details.emit(self.buffer_id, title, self.url)
 
+    @interactive(insert_or_do=True)
     def close_buffer(self):
         self.request_close_buffer.emit(self.buffer_id)
 
@@ -280,25 +305,14 @@ class Buffer(QGraphicsScene):
     def get_url(self):
         return self.url
 
-    def build_interactive_method(self, method_name, origin_method_class, origin_method_name=None, message_emacs=None):
-        try:
-            del self.__dict__[method_name]
-        except KeyError:
-            pass
-        finally:
-            if origin_method_name:
-                setattr(self, method_name, getattr(origin_method_class, origin_method_name))
-            else:
-                setattr(self, method_name, getattr(origin_method_class, method_name))
-
-            if message_emacs != None:
-                self.message_to_emacs.emit(message_emacs)
-
+    @interactive(insert_or_do=True)
     def save_as_bookmark(self):
         self.eval_in_emacs.emit('''(bookmark-set)''')
 
+    @interactive(insert_or_do=True)
     def select_left_tab(self):
         self.goto_left_tab.emit()
 
+    @interactive(insert_or_do=True)
     def select_right_tab(self):
         self.goto_right_tab.emit()
