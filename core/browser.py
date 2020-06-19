@@ -360,7 +360,7 @@ class BrowserView(QWebEngineView):
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
-    @interactive()
+    @interactive(insert_or_do=True)
     def focus_input(self):
         self.execute_js(self.focus_input_js)
 
@@ -774,6 +774,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.get_link_markers()
         self.send_input_message("Copy link: ", "copy_link");
 
+    @interactive(insert_or_do=True)
     def edit_url(self):
         self.send_input_message("Edit link: ", "edit_url", "string", self.url)
 
