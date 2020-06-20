@@ -524,11 +524,10 @@ class BrowserBuffer(Buffer):
     def record_url(self, url):
         self.request_url = url.toString()
 
-        # Emacs-china forum thread don't need draw background that avoid flash.
         if self.dark_mode_is_enable():
             current_urls = self.current_url.rsplit("/", 1)
             request_urls = self.request_url.rsplit("/", 1)
-
+            # Emacs-china forum thread don't need draw background that avoid flash.
             if self.request_url == "https://emacs-china.org/":
                 self.no_need_draw_background = False
             if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
@@ -842,19 +841,21 @@ class BrowserBuffer(Buffer):
     def record_close_page(self, url):
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
             touch(self.history_close_file_path)
-            with open(self.history_close_file_path, "a") as f:
-                f.write("{0}\n".format(url))
+            with open(self.history_close_file_path, "r") as f:
+                close_urls = f.readlines()
+                close_urls.append("{0}\n".format(url))
+                if len(close_urls) > 30:
+                    del close_urls[:len(close_urls)-30]
+                open(self.history_close_file_path, "w").writelines(close_urls)
 
     @interactive(insert_or_do=True)
     def recover_prev_close_page(self):
         if os.path.exists(self.history_close_file_path):
             with open(self.history_close_file_path, "r") as f:
                 close_urls = f.readlines()
-
                 if len(close_urls) > 0:
                     # We need use rstrip remove \n char from url record.
                     prev_close_url = close_urls.pop().rstrip()
-
                     self.open_url_in_new_tab.emit(prev_close_url)
                     open(self.history_close_file_path, "w").writelines(close_urls)
 
