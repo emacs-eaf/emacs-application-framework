@@ -193,9 +193,10 @@ class Buffer(QGraphicsScene):
         if self.buffer_widget is not None:
             self.buffer_widget.deleteLater()
 
-    def change_title(self, title):
-        self.title = title
-        self.update_buffer_details.emit(self.buffer_id, title, self.url)
+    def change_title(self, new_title):
+        if new_title != "about:blank":
+            self.title = new_title
+            self.update_buffer_details.emit(self.buffer_id, new_title, self.url)
 
     @interactive(insert_or_do=True)
     def close_buffer(self):

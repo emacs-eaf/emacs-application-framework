@@ -42,9 +42,10 @@ class AppBuffer(BrowserBuffer):
         arguments_dict = json.loads(arguments)
         self.command = arguments_dict["command"]
         self.start_directory = arguments_dict["directory"]
-
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
+
+        self.buffer_widget.titleChanged.connect(self.change_title)
 
         # Start server process.
         self.background_process = subprocess.Popen(
@@ -75,13 +76,10 @@ class AppBuffer(BrowserBuffer):
             html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
             self.buffer_widget.setHtml(html)
 
-        self.update_title()
-
     def update_title(self):
-        self.change_title("{0}-{1}".format(
-            os.path.basename(os.path.normpath(os.path.expanduser(self.start_directory))),
-            self.random_string()
-        ))
+        # FIXME: rename title based on pwd
+        # self.change_title("")
+        pass
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)
@@ -91,14 +89,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.web_page.deleteLater()
             self.buffer_widget.deleteLater()
 
-    def random_string(self):
-        import hashlib
-        import time
-
-        hash = hashlib.sha1()
-        hash.update(str(time.time()).encode("utf-8"))
-        return hash.hexdigest()[:4]
-
+    @interactive()
     def copy_text(self):
         text = self.buffer_widget.execute_js("get_selection();")
         if text == "":
@@ -108,10 +99,12 @@ class AppBuffer(BrowserBuffer):
             clipboard.setText(text)
             self.message_to_emacs.emit("Copy text")
 
+    @interactive()
     def yank_text(self):
         text = QApplication.clipboard().text()
         self.buffer_widget.eval_js("paste('{}');".format(text))
 
+    @interactive()
     def scroll_other_buffer(self, scroll_direction, scroll_type):
         if scroll_type == "page":
             if scroll_direction == "up":
