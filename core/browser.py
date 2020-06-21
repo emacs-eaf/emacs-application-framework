@@ -839,7 +839,7 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("There is no browsing history.")
 
     def record_close_page(self, url):
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+        if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.arguments != "temp_html_file" and url != "about:blank":
             touch(self.history_close_file_path)
             with open(self.history_close_file_path, "r") as f:
                 close_urls = f.readlines()
