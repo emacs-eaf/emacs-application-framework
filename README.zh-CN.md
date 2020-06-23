@@ -146,11 +146,12 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 | 无线分享         | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
 | RSS新闻阅读器    | `M-x eaf-open-rss-reader`                                                   |
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
-| 办公文档阅读器   | `M-x eaf-open-office`                                                       |
+| 微软Office阅读器 | `M-x eaf-open-office`                                                       |
 | 流程图           | `M-x eaf-open` 输入 mmd 格式文件                                            |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
+- EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
 ```
 注意：
