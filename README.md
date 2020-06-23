@@ -49,11 +49,12 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 
 
 ## Install
-1. Install EAF dependencies:
+1. Install EAF dependencies, an explaination of each dependency can be found in [Dependency List](#dependency-list).
+
+The following line is for *Archlinux*, same packages should be available to install on your particular distribution:
 
 ```Bash
-sudo pacman -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice
-yay -S python-pymupdf python-grip filebrowser-bin
+yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-pymupdf python-grip filebrowser-bin
 ```
 
 2. Clone this repository.
