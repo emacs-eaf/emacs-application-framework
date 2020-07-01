@@ -41,6 +41,7 @@
   (mapcar #'char-to-string (number-sequence ?! ?~))
   "printable character")
 
+;; EAF evil Key Configuration
 (defun eaf-evil-lookup-key (key)
   (or (lookup-key (current-local-map) (kbd key))
       (lookup-key eaf-mode-map* (kbd key))
@@ -83,6 +84,7 @@
     (when (evil-insert-state-p) (evil-normal-state))))
 
 (defun eaf-enable-evil-intergration ()
+  "EAF evil intergration."
   (interactive)
   (when (featurep 'evil)
     (eaf-evil-define-single-keys)

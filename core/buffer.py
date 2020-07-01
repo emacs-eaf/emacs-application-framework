@@ -143,6 +143,7 @@ class Buffer(QGraphicsScene):
         self.exit_fullscreen_request.connect(self.disable_fullscreen)
 
     def build_all_methods(self, origin_class):
+        ''' Build all methods.'''
         method_list = [func for func in dir(origin_class) if callable(getattr(origin_class, func)) and not func.startswith("__")]
         for func_name in method_list:
             func_attr = getattr(origin_class, func_name)
@@ -150,6 +151,7 @@ class Buffer(QGraphicsScene):
                 self.build_interactive_method(origin_class, func_name, getattr(func_attr, "new_name"), getattr(func_attr, "msg_emacs"), getattr(func_attr, "insert_or_do"))
 
     def build_interactive_method(self, origin_class, class_method_name, new_method_name=None, msg_emacs=None, insert_or_do=False):
+        ''' Build interactive methods.'''
         new_name = class_method_name if new_method_name is None else new_method_name
         self.__dict__.update({new_name: getattr(origin_class, class_method_name)})
         if msg_emacs is not None:
@@ -158,6 +160,7 @@ class Buffer(QGraphicsScene):
             self.build_insert_or_do(new_name)
 
     def build_insert_or_do(self, method_name):
+        ''' Build insert or do.'''
         def _do ():
             if self.is_focus():
                 self.fake_key_event(self.current_event_string)
@@ -166,22 +169,27 @@ class Buffer(QGraphicsScene):
         setattr(self, "insert_or_{}".format(method_name), _do)
 
     def toggle_fullscreen(self):
+        ''' Toggle full screen.'''
         if self.is_fullscreen:
             self.exit_fullscreen_request.emit()
         else:
             self.enter_fullscreen_request.emit()
 
     def enable_fullscreen(self):
+        ''' Enable full screen.'''
         self.is_fullscreen = True
 
     def disable_fullscreen(self):
+        ''' Disable full screen.'''
         self.is_fullscreen = False
 
     def set_aspect_ratio(self, aspect_ratio):
+        ''' Set aspect ratio.'''
         self.aspect_ratio = aspect_ratio
         self.aspect_ratio_change.emit()
 
     def add_widget(self, widget):
+        ''' Add widget.'''
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
 
@@ -190,16 +198,19 @@ class Buffer(QGraphicsScene):
         self.buffer_widget.buffer = self
 
     def destroy_buffer(self):
+        ''' Destroy buffer.'''
         if self.buffer_widget is not None:
             self.buffer_widget.deleteLater()
 
     def change_title(self, new_title):
+        ''' Change title.'''
         if new_title != "about:blank":
             self.title = new_title
             self.update_buffer_details.emit(self.buffer_id, new_title, self.url)
 
     @interactive(insert_or_do=True)
     def close_buffer(self):
+        ''' Close buffer.'''
         self.request_close_buffer.emit(self.buffer_id)
 
     def all_views_hide(self):
@@ -212,9 +223,11 @@ class Buffer(QGraphicsScene):
         pass
 
     def get_key_event_widgets(self):
+        ''' Get key event widgets.'''
         return [self.buffer_widget]
 
     def send_input_message(self, message, callback_tag, input_type="string", initial_content=""):
+        ''' Send input message.'''
         self.input_message.emit(self.buffer_id, message, callback_tag, input_type, initial_content)
 
     def handle_input_message(self, result_type, result_content):
@@ -239,18 +252,22 @@ class Buffer(QGraphicsScene):
         pass
 
     def execute_function(self, function_name):
+        ''' Execute function.''' 
         getattr(self, function_name)()
 
     def call_function(self, function_name):
+        ''' Call function.'''
         return getattr(self, function_name)()
 
     def call_function_with_args(self, function_name, args_string):
+        ''' Call function with arguments.'''
         return getattr(self, function_name)(args_string)
 
     def fake_key_event_filter(self, event_string):
         pass
 
     def fake_key_event(self, event_string):
+        ''' Fake key event.'''
         # Init.
         text = event_string
         modifier = Qt.NoModifier
@@ -280,6 +297,7 @@ class Buffer(QGraphicsScene):
         self.fake_key_event_filter(event_string)
 
     def fake_key_sequence(self, event_string):
+        ''' Fake key sequence.'''
         event_list = event_string.split("-")
 
         if len(event_list) > 1:
@@ -304,16 +322,20 @@ class Buffer(QGraphicsScene):
                 QApplication.sendEvent(widget, QKeyEvent(QEvent.KeyPress, qt_key_dict[last_key], modifiers, last_key))
 
     def get_url(self):
+        ''' Get url.'''
         return self.url
 
     @interactive(insert_or_do=True)
     def save_as_bookmark(self):
+        ''' Save as bookmark.'''
         self.eval_in_emacs.emit('''(bookmark-set)''')
 
     @interactive(insert_or_do=True)
     def select_left_tab(self):
+        ''' Select left tab.'''
         self.goto_left_tab.emit()
 
     @interactive(insert_or_do=True)
     def select_right_tab(self):
+        ''' Select right tab.'''
         self.goto_right_tab.emit()
