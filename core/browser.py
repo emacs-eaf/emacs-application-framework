@@ -79,12 +79,15 @@ class BrowserView(QWebEngineView):
         self.focus_input_js = self.read_js_content("focus_input.js")
 
     def open_download_manage_page(self):
+        ''' Open aria2-webui download manage page. '''
         self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-webui", "index.html")))
 
     def read_js_content(self, js_file):
+        ''' Read content of JavaScript(js) files.'''
         return open(os.path.join(os.path.dirname(__file__), "js", js_file), "r").read()
 
     def filter_url(self, url):
+        ''' Filter url, avoid duplicate url for the same keyword.'''
         parsed = urlparse(url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
         if parsed.netloc.startswith("www.google.com"):
@@ -124,6 +127,7 @@ class BrowserView(QWebEngineView):
 
     @interactive()
     def search_text_forward(self):
+        ''' Forward Search Text.'''
         if self.search_term == "":
             self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
@@ -131,6 +135,7 @@ class BrowserView(QWebEngineView):
 
     @interactive()
     def search_text_backward(self):
+        ''' Backward Search Text.'''
         if self.search_term == "":
             self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
@@ -138,25 +143,31 @@ class BrowserView(QWebEngineView):
 
     @interactive(new_name = "action_quit")
     def search_quit(self):
+        ''' Quit search.'''
         if self.search_term != "":
             self._search_text("")
 
     def select_text_change(self):
+        ''' Change selected text.'''
         modifiers = QApplication.keyboardModifiers()
         if modifiers == Qt.ControlModifier:
             self.translate_selected_text.emit(self.selectedText())
 
     def load_cookie(self):
+        ''' Load cookies.'''
         for cookie in self.cookie_storage.load_cookie():
             self.cookie_store.setCookie(cookie)
 
     def clear_cookies(self):
+        ''' Clear cookies.'''
         self.cookie_storage.clear_cookies(self.cookie_store)
 
     def createWindow(self, window_type):
+        ''' Create new browser window.'''
         return self.create_new_browser_window_callback()
 
     def event(self, event):
+        ''' Catch event.'''
         if event.type() == QEvent.ChildAdded:
             obj = event.child()
             if isinstance(obj, QWidget):
@@ -165,6 +176,7 @@ class BrowserView(QWebEngineView):
         return QWebEngineView.event(self, event)
 
     def eventFilter(self, obj, event):
+        ''' Handle event.'''
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel]:
@@ -194,142 +206,178 @@ class BrowserView(QWebEngineView):
         return super(QWebEngineView, self).eventFilter(obj, event)
 
     def open_url(self, url):
+        ''' Configure current url.'''
         self.setUrl(QUrl(url))
 
     def open_url_new_buffer(self, url):
+        ''' Open url in a new tab.'''
         self.open_url_in_new_tab.emit(url)
 
     def open_url_background_buffer(self, url):
+        ''' Open url in background tab.'''
         self.open_url_in_background_tab.emit(url)
 
     @interactive(insert_or_do=True)
     def zoom_in(self):
+        ''' Zoom in.'''
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
 
     @interactive(insert_or_do=True)
     def zoom_out(self):
+        ''' Zoom out.'''
         self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
 
     @interactive(insert_or_do=True)
     def zoom_reset(self):
+        ''' Reset the magnification.'''
         self.setZoomFactor(float(self.buffer.emacs_var_dict["eaf-browser-default-zoom"]))
 
     def eval_js(self, js):
+        ''' Run JavaScript.'''
         self.web_page.runJavaScript(js)
 
     def eval_js_file(self, js_file):
+        ''' Run JavaScript from JS file.'''
         self.eval_js(self.read_js_content(js_file))
 
     def execute_js(self, js):
+        ''' Execute JavaScript.'''
         return self.web_page.execute_javascript(js)
 
     @interactive(insert_or_do=True)
     def scroll_left(self):
+        ''' Scroll to left side.'''
         self.eval_js("document.scrollingElement.scrollBy(-35, 0)")
 
     @interactive(insert_or_do=True)
     def scroll_right(self):
+        ''' Scroll to right side.'''
         self.eval_js("document.scrollingElement.scrollBy(35, 0)")
 
     @interactive(insert_or_do=True)
     def scroll_up(self):
+        ''' Scroll up.'''
         self.eval_js("document.scrollingElement.scrollBy(0, 50)")
 
     @interactive(insert_or_do=True)
     def scroll_down(self):
+        ''' Scroll down.'''
         self.eval_js("document.scrollingElement.scrollBy(0, -50)")
 
     @interactive(insert_or_do=True)
     def scroll_up_page(self):
+        ''' Scroll up a page.'''
         self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
+        ''' Scroll down a page.'''
         self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_begin(self):
+        ''' Scroll to the beginning.'''
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_bottom(self):
+        ''' Scroll to the bottom.'''
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     def get_selection_text(self):
+        ''' Get the selected text.'''
         return self.execute_js(self.get_selection_text_js)
 
     @interactive(insert_or_do=True)
     def refresh_page(self):
+        ''' Refresh the page.'''
         self.reload()
 
     def copy_text(self):
+        ''' Copy selected text.'''
         self.triggerPageAction(self.web_page.Copy)
 
     @interactive(msg_emacs="Yank selected text.")
     def yank_text(self):
+        ''' Paste selected text.'''
         self.triggerPageAction(self.web_page.Paste)
 
     @interactive(msg_emacs="Kill selected text.")
     def kill_text(self):
+        ''' Cut selected text.'''
         self.triggerPageAction(self.web_page.Cut)
 
     @interactive()
     def undo_action(self):
+        ''' Undo action.'''
         self.triggerPageAction(self.web_page.Undo)
 
     @interactive()
     def redo_action(self):
+        ''' Redo action.'''
         self.triggerPageAction(self.web_page.Redo)
 
     @interactive()
     def exit_fullscreen(self):
+        ''' Exit full screen.'''
         self.triggerPageAction(self.web_page.ExitFullScreen)
 
     @interactive(insert_or_do=True)
     def view_source(self):
+        ''' View source.'''
         self.triggerPageAction(self.web_page.ViewSource)
 
     def select_all(self):
+        ''' Select all text.'''
         # We need window focus before select all text.
         self.eval_js("window.focus()")
         self.triggerPageAction(self.web_page.SelectAll)
 
     def select_input_text(self):
+        ''' Select input text.'''
         self.eval_js(self.select_input_text_js)
 
     @interactive()
     def get_url(self):
+        ''' Get current url.'''
         return self.execute_js("window.location.href;")
 
     def cleanup_links(self):
+        ''' Clean up links.'''
         self.eval_js("document.querySelector('.eaf-marker-container').remove();")
         self.eval_js("document.querySelector('.eaf-style').remove();")
 
     def get_link_markers(self):
+        ''' Get link markers.'''
         self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
 
     def get_marker_link(self, marker):
+        ''' Get marker's link.'''
         self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
         link = self.execute_js(self.goto_marker_js)
         self.cleanup_links()
         return link
 
     def jump_to_link(self, marker):
+        ''' Jump to link according to marker.'''
         link = self.get_marker_link(marker)
         if link != "":
             self.open_url(link)
 
     def jump_to_link_new_buffer(self, marker):
+        ''' Jump to a new buffer of the link.'''
         link = self.get_marker_link(marker)
         if link != "":
             self.open_url_new_buffer(link)
 
     def jump_to_link_background_buffer(self, marker):
+        ''' Jump to the bacground buffer of the link.'''
         link = self.get_marker_link(marker)
         if link != "":
             self.open_url_background_buffer(link)
 
     def copy_link(self, marker):
+        ''' Copy the link.'''
         link = self.get_marker_link(marker)
         if link != "":
             clipboard = QApplication.clipboard()
@@ -337,15 +385,18 @@ class BrowserView(QWebEngineView):
             self.buffer.message_to_emacs.emit("Copy link")
 
     def get_code_markers(self):
+        ''' Get the code markers.'''
         self.eval_js(self.get_codes_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
 
     def get_code_content(self, marker):
+        ''' Get the code content according to marker.'''
         self.goto_code_js = self.goto_code_raw.replace("%1", str(marker));
         content = self.execute_js(self.goto_code_js)
         self.cleanup_links()
         return content
 
     def copy_code_content(self, marker):
+        ''' Copy the code content according to marker.'''
         content = self.get_code_content(marker)
         if content != "":
             clipboard = QApplication.clipboard()
@@ -353,23 +404,28 @@ class BrowserView(QWebEngineView):
             self.buffer.message_to_emacs.emit("Copy code")
 
     def get_focus_text(self):
+        ''' Get the focus text.'''
         return self.execute_js(self.get_focus_text_js)
 
     @interactive()
     def set_focus_text(self, new_text):
+        ''' Set the focus text.'''
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
     @interactive(insert_or_do=True)
     def focus_input(self):
+        ''' input in focus.'''
         self.execute_js(self.focus_input_js)
 
     @interactive()
     def clear_focus(self):
+        ''' Clear the focus.'''
         self.eval_js(self.clear_focus_js)
 
     @interactive()
     def dark_mode(self):
+        ''' Dark mode support.'''
         self.eval_js(self.dark_mode_js)
 
 class BrowserPage(QWebEnginePage):
@@ -377,6 +433,7 @@ class BrowserPage(QWebEnginePage):
         QWebEnginePage.__init__(self)
 
     def execute_javascript(self, script_src):
+        ''' Execute JavaScript.'''
         self.loop = QEventLoop()
         self.result = QVariant()
         QTimer.singleShot(250, self.loop.quit)
@@ -387,6 +444,7 @@ class BrowserPage(QWebEnginePage):
         return self.result
 
     def callback_js(self, res):
+        ''' Callback JS loop.'''
         if self.loop is not None and self.loop.isRunning():
             self.result = res
             self.loop.quit()
@@ -398,19 +456,23 @@ class BrowserCookieStorage:
         touch(self.cookie_file)
 
     def load_cookie(self):
+        ''' Load cookies.'''
         with open(self.cookie_file, 'rb+') as store:
             cookies = store.read()
             return QNetworkCookie.parseCookies(cookies)
 
     def save_cookie(self, cookie):
+        ''' Save cookies.'''
         with open(self.cookie_file, 'wb+') as store:
             store.write(cookie + b'\n' if cookie is not None else b'')
 
     def add_cookie(self, cookie):
+        ''' Add cookies.'''
         raw = cookie.toRawForm()
         self.save_cookie(raw)
 
     def clear_cookies(self, cookie_store):
+        ''' Clear cookies.'''
         cookie_store.deleteAllCookies()
 
         open(self.cookie_file, 'w').close()
@@ -498,6 +560,7 @@ class BrowserBuffer(Buffer):
         self.build_interactive_method(self.buffer_widget, "forward", "history_forward", insert_or_do=True)
 
     def notify_print_message(self, file_path, success):
+        ''' Notify the print as pdf message.'''
         if success:
             # Try to rename pdf file with title.
             # Use host name if title include invalid file char.
@@ -511,6 +574,7 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("Failed to save current webpage as '{}'.".format(file_path))
 
     def notify_monolith_message(self, download_path, file_path, title, retcode):
+        ''' Notify the save as html message.'''
         if retcode == 0:
             title_path = os.path.join(os.path.expanduser(download_path), "{}.html".format(title))
             try:
@@ -522,6 +586,7 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("Failed to save current page as single file.")
 
     def record_url(self, url):
+        ''' Record the url.'''
         self.request_url = url.toString()
 
         if self.dark_mode_is_enable():
@@ -538,6 +603,7 @@ class BrowserBuffer(Buffer):
                 self.no_need_draw_background = True
 
     def dark_mode_is_enable(self):
+        ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
         return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or \
                 (self.emacs_var_dict["eaf-browser-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
@@ -545,12 +611,14 @@ class BrowserBuffer(Buffer):
                 and self.url != "devtools://devtools/bundled/devtools_app.html"
 
     def init_background_color(self):
+        ''' Initialize the background colour.'''
         if self.dark_mode_is_enable():
             self.buffer_widget.web_page.setBackgroundColor(self.dark_mode_mask_color)
         else:
             self.buffer_widget.web_page.setBackgroundColor(self.light_mode_mask_color)
 
     def drawForeground(self, painter, rect):
+        ''' Draw Foreground.'''
         if self.draw_progressbar:
             # Draw foreground over web page avoid white flash when eval dark_mode_js
             if self.dark_mode_is_enable() and not self.no_need_draw_background:
@@ -569,12 +637,14 @@ class BrowserBuffer(Buffer):
 
     @QtCore.pyqtSlot()
     def start_progress(self):
+        ''' Initialize the Progress Bar.'''
         self.progressbar_progress = 0
         self.draw_progressbar = True
         self.update()
 
     @QtCore.pyqtSlot()
     def hide_progress(self):
+        ''' Hide the Progress Bar.'''
         self.current_url = self.url
         self.no_need_draw_background = False
 
@@ -584,6 +654,7 @@ class BrowserBuffer(Buffer):
 
     @QtCore.pyqtSlot(int)
     def update_progress(self, progress):
+        ''' Update the Progress Bar.'''
         if progress < 100:
             # Update progres.
             self.progressbar_progress = progress
@@ -601,6 +672,7 @@ class BrowserBuffer(Buffer):
                 self.hide_progress()
 
     def handle_fullscreen_request(self, request):
+        ''' Handle fullscreen request.'''
         if request.toggleOn():
             self.enter_fullscreen_request.emit()
         else:
@@ -609,6 +681,7 @@ class BrowserBuffer(Buffer):
         request.accept()
 
     def handle_download_request(self, download_item):
+        ''' Handle download request.'''
         download_data = download_item.url().toString()
 
         if download_data.startswith("data:image/"):
@@ -631,10 +704,12 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def save_as_pdf(self):
+        ''' Request to save as pdf.'''
         self.send_input_message("Save current webpage as PDF?", "save_as_pdf", "yes-or-no")
 
     @interactive(insert_or_do=True)
     def save_as_single_file(self):
+        ''' Request to save current webpage as single html file.'''
         import shutil
         if shutil.which("monolith") is None:
             self.message_to_emacs.emit("Executable monolith not in PATH")
@@ -642,6 +717,7 @@ class BrowserBuffer(Buffer):
             self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
 
     def destroy_buffer(self):
+        ''' Destroy the buffer.'''
         # Record close page.
         self.close_page.emit(self.buffer_widget.url().toString())
 
@@ -654,10 +730,12 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.deleteLater()
 
     def get_key_event_widgets(self):
+        ''' Send key event to QWebEngineView's focusProxy widget.'''
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
         return [self.buffer_widget.focusProxy()]
 
     def scroll_other_buffer(self, scroll_direction, scroll_type):
+        ''' Scroll.''''
         if scroll_type == "page":
             if scroll_direction == "up":
                 self.scroll_up_page()
@@ -670,6 +748,7 @@ class BrowserBuffer(Buffer):
                 self.scroll_down()
 
     def handle_input_message(self, result_tag, result_content):
+        ''' Handle input message.'''
         if result_tag == "search_text_forward":
             self.buffer_widget._search_text(str(result_content))
         elif result_tag == "search_text_backward":
@@ -706,6 +785,7 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.copy_code_content(str(result_content).strip())
 
     def cancel_input_message(self, result_tag):
+        ''' Cancel input message.'''
         if result_tag == "jump_link" or \
            result_tag == "jump_link_new_buffer" or \
            result_tag == "jump_link_background_buffer" or \
@@ -714,10 +794,12 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.cleanup_links()
 
     def clear_cookies(self):
+        ''' Clear all cookies.'''
         self.buffer_widget.clear_cookies()
         self.message_to_emacs.emit("Cleared all cookies.")
 
     def try_start_aria2_daemon(self):
+        ''' Try to start aria2 daemon.'''
         if not is_port_in_use(6800):
             with open(os.devnull, "w") as null_file:
                 aria2_args = ["aria2c"]
@@ -741,47 +823,57 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def open_download_manage_page(self):
+        ''' Open download manage page.'''
         self.try_start_aria2_daemon()
         self.buffer_widget.open_download_manage_page()
 
     def copy_text(self):
+        ''' Copy selected text.'''
         self.buffer_widget.copy_text()
         self.message_to_emacs.emit("Copy selected text.")
 
     @interactive(insert_or_do=True)
     def copy_code(self):
+        ''' Copy code.'''
         self.buffer_widget.get_code_markers()
         self.send_input_message("Copy code: ", "copy_code");
 
     @interactive(insert_or_do=True)
     def open_link(self):
+        ''' Open Link.'''
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link: ", "jump_link");
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer(self):
+        ''' Open Link in New Buffer.'''
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
 
     @interactive(insert_or_do=True)
     def open_link_background_buffer(self):
+        ''' Open Link in Background Buffer.'''
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
 
     @interactive(insert_or_do=True)
     def copy_link(self):
+        ''' Copy link.'''
         self.buffer_widget.get_link_markers()
         self.send_input_message("Copy link: ", "copy_link");
 
     @interactive(insert_or_do=True)
     def edit_url(self):
+        ''' Edit link.'''
         self.send_input_message("Edit link: ", "edit_url", "string", self.url)
 
     def reset_default_zoom(self):
+        ''' Reset default magnification.'''
         if hasattr(self, "buffer_widget"):
             self.buffer_widget.setZoomFactor(float(self.emacs_var_dict["eaf-browser-default-zoom"]))
 
     def edit_focus_text(self):
+        ''' Edit the focus text.'''
         text = self.buffer_widget.get_focus_text()
         if text != None:
             self.get_focus_text.emit(self.buffer_id, text)
@@ -789,9 +881,11 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("No active input element.")
 
     def is_focus(self):
+        ''' Return bool of whether the buffer is focused.'''
         return self.buffer_widget.get_focus_text() != None or self.url == "devtools://devtools/bundled/devtools_app.html"
 
     def record_history(self, new_title):
+        ''' Record browser history.'''
         new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.buffer_widget.filter_title(new_title) != "" and \
            self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
@@ -829,9 +923,11 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def new_blank_page(self):
+        ''' Open new blank page.'''
         self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
 
     def clear_history(self):
+        ''' Clear browsing history.'''
         if os.path.exists(self.history_log_file_path):
             os.remove(self.history_log_file_path)
             self.message_to_emacs.emit("Cleared browsing history.")
@@ -839,6 +935,7 @@ class BrowserBuffer(Buffer):
             self.message_to_emacs.emit("There is no browsing history.")
 
     def record_close_page(self, url):
+        ''' Record closing pages.'''
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.arguments != "temp_html_file" and url != "about:blank":
             touch(self.history_close_file_path)
             with open(self.history_close_file_path, "r") as f:
@@ -850,6 +947,7 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def recover_prev_close_page(self):
+        ''' Recover previous closed pages.'''
         if os.path.exists(self.history_close_file_path):
             with open(self.history_close_file_path, "r") as f:
                 close_urls = f.readlines()
@@ -867,25 +965,31 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def open_browser(self):
+        ''' Open browser.'''
         self.eval_in_emacs.emit('''(call-interactively 'eaf-open-browser-with-history)''')
 
     def select_all_or_input_text(self):
+        ''' Select all or input text.'''
         if self.is_focus():
             self.buffer_widget.select_input_text()
         else:
             self.buffer_widget.select_all()
 
     def eval_js_file(self):
+        ''' Eval JS file.'''
         self.send_input_message("Eval JS file: ", "eval_js_file", "file")
 
     def eval_js(self):
+        ''' Eval JS.'''
         self.send_input_message("Eval JS: ", "eval_js")
 
     def open_dev_tool_page(self):
+        ''' Open dev-tool page.'''
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
 
     @interactive(insert_or_do=True)
     def toggle_device(self):
+        ''' Toggle device.'''
         user_agent = self.profile.defaultProfile().httpUserAgent()
         if user_agent == self.pc_user_agent:
             self.profile.defaultProfile().setHttpUserAgent(self.phone_user_agent)
@@ -898,13 +1002,16 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def download_youtube_video(self):
+        ''' Download Youtube Video.'''
         self.download_youtube_file()
 
     @interactive(insert_or_do=True)
     def download_youtube_audio(self):
+        ''' Download Youtube Audio.'''
         self.download_youtube_file(True)
 
     def download_youtube_file(self, only_audio=False):
+        ''' Download Youtube File.'''
         url = self.buffer_widget.url().toString()
         if url.startswith("https://www.youtube.com"):
             import shutil
