@@ -304,7 +304,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="", out_signature="")
     def kill_emacs(self):
-        '''kill all buffurs from buffer dict.'''
+        ''' Kill all buffurs from buffer dict.'''
         tmp_buffer_dict = {}
         for buffer_id in self.buffer_dict:
             tmp_buffer_dict[buffer_id] = self.buffer_dict[buffer_id]
@@ -314,7 +314,7 @@ class EAF(dbus.service.Object):
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="s", out_signature="")
     def kill_buffer(self, buffer_id):
-        ''' Kill all view base on buffer_id and clean buffer from buffer dict.'''
+        ''' Kill all view based on buffer_id and clean buffer from buffer dict.'''
         # Kill all view base on buffer_id.
         for key in list(self.view_dict):
             if buffer_id == self.view_dict[key].buffer_id:

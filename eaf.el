@@ -955,8 +955,8 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-get-window-allocation (&optional window)
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
-         ;; support emacs 27 tab-line-mode.
-         ;; tab-line-mode news: https://github.com/emacs-mirror/emacs/blob/master/etc/NEWS.27#L2755
+         ;; Support emacs 27 tab-line-mode.
+         ;; Tab-line-mode news: https://github.com/emacs-mirror/emacs/blob/master/etc/NEWS.27#L2755
          (y (+ (nth 1 window-edges)
                (window-header-line-height window)
                (if (require 'tab-line nil t)
@@ -1396,7 +1396,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
  #'eaf-translate-text)
 
 (defun eaf-translate-text (text)
-  "Ctrl + Double Click: use sdcv translate selected text."
+  "Ctrl + Double Click: use sdcv to translate selected text."
   (when (featurep 'sdcv)
     (sdcv-search-input+ text)))
 
@@ -2038,7 +2038,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
             map))
 
 (defun eaf-pdf-outline ()
-  "create PDF outline."
+  "Create PDF outline."
   (interactive)
   (let ((buffer-name (buffer-name (current-buffer)))
         (toc (eaf-call "call_function" eaf--buffer-id "get_toc")))
