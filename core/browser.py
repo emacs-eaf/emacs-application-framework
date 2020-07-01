@@ -735,7 +735,7 @@ class BrowserBuffer(Buffer):
         return [self.buffer_widget.focusProxy()]
 
     def scroll_other_buffer(self, scroll_direction, scroll_type):
-        ''' Scroll.''''
+        ''' Scroll.'''
         if scroll_type == "page":
             if scroll_direction == "up":
                 self.scroll_up_page()
