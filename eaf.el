@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jun 30 09:16:54 2020 (-0400)
+;; Last-Updated: Tue Jun 30 21:32:00 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -957,8 +957,8 @@ We need calcuate render allocation to make sure no black border around render co
          (x (nth 0 window-edges))
          (y (+ (nth 1 window-edges)
                (window-header-line-height window)
-               (if (> emacs-major-version 26)
-                   (if global-tab-line-mode (window-tab-line-height window) 0)
+               (if (require 'tab-line nil t)
+                   (if tab-line-mode (window-tab-line-height window) 0)
                  0)))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
