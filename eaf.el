@@ -955,6 +955,8 @@ We need calcuate render allocation to make sure no black border around render co
 (defun eaf-get-window-allocation (&optional window)
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
+         ;; support emacs 27 tab-line-mode.
+         ;; tab-line-mode news: https://github.com/emacs-mirror/emacs/blob/master/etc/NEWS.27#L2755
          (y (+ (nth 1 window-edges)
                (window-header-line-height window)
                (if (require 'tab-line nil t)
@@ -1073,6 +1075,7 @@ to edit EAF keybindings!" fun fun)))
    "is_support"
    url))
 
+;; Update eaf view once emacs window size changed.
 (defun eaf-monitor-window-size-change (frame)
   (when (process-live-p eaf-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
@@ -1119,12 +1122,14 @@ to edit EAF keybindings!" fun fun)))
         ))))
 
 (defun eaf--delete-org-preview-file (org-file)
+  "Delete the given org-preview file."
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
     (when (file-exists-p org-html-file)
       (delete-file org-html-file)
       (message "[EAF] Cleaned org-preview file %s (%s)." org-html-file org-file))))
 
 (defun eaf--org-killed-buffer-clean ()
+  "Function cleaning the killed org buffer."
   (dolist (org-killed-buffer eaf-org-killed-file-list)
     (unless (get-file-buffer org-killed-buffer)
       (setq eaf-org-file-list (remove org-killed-buffer eaf-org-file-list))
@@ -1167,6 +1172,7 @@ to edit EAF keybindings!" fun fun)))
 
 
 (defun eaf--org-preview-monitor-buffer-save ()
+  "Save org-preview buffer."
   (when (process-live-p eaf-process)
     (ignore-errors
       ;; eaf-org-file-list?
@@ -1206,10 +1212,12 @@ to edit EAF keybindings!" fun fun)))
   (eaf-call "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
 
 (defun eaf-send-ctrl-return-sequence ()
+  "Directly send Ctrl-Return key sequence to EAF Python side."
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id "C-RET"))
 
 (defun eaf-send-alt-backspace-sequence ()
+  "Directly send Alt-Backspace key sequence to EAF Python side."
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id "M-<backspace>"))
 
@@ -1262,6 +1270,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf-focus-buffer)
 
 (defun eaf-focus-buffer (msg)
+  "Focus the buffer."
   (let* ((coordinate-list (split-string msg ","))
          (mouse-press-x (string-to-number (nth 0 coordinate-list)))
          (mouse-press-y (string-to-number (nth 1 coordinate-list))))
@@ -1311,6 +1320,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf--create-new-browser-buffer)
 
 (defun eaf--create-new-browser-buffer (new-window-buffer-id)
+  "Function for creating a new browser buffer with the specified window buffer id."
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
@@ -1325,6 +1335,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf-request-kill-buffer)
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
+  "Function for requesting to kill the given buffer with its id."
   (catch 'found-match-buffer
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
@@ -1364,6 +1375,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
  #'eaf--update-buffer-details)
 
 (defun eaf--update-buffer-details (buffer-id title url)
+  "Function for updating buffer details."
   (when (> (length title) 0)
     (catch 'find-buffer
       (dolist (window (window-list))
@@ -1384,6 +1396,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
  #'eaf-translate-text)
 
 (defun eaf-translate-text (text)
+  "Ctrl + Double Click: use sdcv translate selected text."
   (when (featurep 'sdcv)
     (sdcv-search-input+ text)))
 
@@ -1411,6 +1424,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (quit nil)))
 
 (defun eaf--open-internal (url app-name args)
+  "Open EAF apps"
   (let* ((buffer (eaf--create-buffer url app-name args))
          (buffer-result
           (with-current-buffer buffer
@@ -1451,6 +1465,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   (other-window +1))
 
 (defun eaf--org-preview-display (buf)
+  "Given BUF, split window to show file and previewer."
   (let ((url (buffer-local-value
               'eaf--buffer-url buf)))
     ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
@@ -1844,6 +1859,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (funcall display-fun buffer)))
 
 (defun eaf-split-preview-windows (url)
+  "Function for split preview windows."
   (delete-other-windows)
   (find-file url)
   (split-window-horizontally)
@@ -1915,14 +1931,17 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf--edit-set-header-line))
 
 (defun eaf-create-mindmap ()
+  "Create a new Mindmap file."
   (interactive)
   (eaf-open " " "mindmap"))
 
 (defun eaf-open-mindmap (file)
+  "Open a given Mindmap file."
   (interactive "f[EAF/mindmap] Select Mindmap file: ")
   (eaf-open file "mindmap"))
 
 (defun eaf-get-file-md5 (file)
+  "Get the MD5 value of a specified file."
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
 
 (defun eaf-open-office (file)
@@ -1952,6 +1971,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--edit-focus-text)
 
 (defun eaf--edit-focus-text (buffer-id focus-text)
+  "EAF Browser: press Alt + e to edit focus text with Emacs."
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
@@ -1965,6 +1985,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     ))
 
 (defun eaf--edit-set-header-line ()
+  "Set header line."
   (setq header-line-format
         (substitute-command-keys
          (concat
@@ -1981,6 +2002,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--enter_fullscreen_request)
 
 (defun eaf--enter_fullscreen_request ()
+  "Entering EAF browser fullscreen use emacs frame's size."
   (setq-local eaf-fullscreen-p t)
   (eaf-monitor-configuration-change))
 
@@ -1990,11 +2012,13 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--exit_fullscreen_request)
 
 (defun eaf--exit_fullscreen_request ()
+  "Exit EAF browser fullscreen."
   (setq-local eaf-fullscreen-p nil)
   (eaf-monitor-configuration-change))
 
 (dbus-register-service :session "com.lazycat.emacs")
 
+;; Update and load the theme
 (defun eaf-get-theme-mode ()
   (format "%s"(frame-parameter nil 'background-mode)))
 
@@ -2014,6 +2038,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
             map))
 
 (defun eaf-pdf-outline ()
+  "create PDF outline."
   (interactive)
   (let ((buffer-name (buffer-name (current-buffer)))
         (toc (eaf-call "call_function" eaf--buffer-id "get_toc")))
