@@ -33,7 +33,12 @@
         <div id="xterm" class="xterm"/>
 
         <script>
-         var socket = new WebSocket("ws://127.0.0.1:%1");
+        try {
+             var socket = new WebSocket("ws://127.0.0.1:%1");
+        }
+        catch(err) {
+            setTimeout('location.reload();',1000);
+        }
          const term = new Terminal({
              fontSize: "%4",
              cursorBlink: true,
