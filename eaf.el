@@ -791,14 +791,14 @@ For now only EAF browser app is supported."
       (funcall handler))))
 
 (defun eaf--browser-bookmark ()
-  "Bookmark browser."
+  "Restore EAF buffer according to browser bookmark from the current file path or web URL."
   `((handler . eaf--bookmark-restore)
     (eaf-app . "browser")
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
 
 (defun eaf--pdf-viewer-bookmark ()
-  "Bookmark pdf."
+  "Restore EAF buffer according to pdf bookmark from the current file path or web URL."
   `((handler . eaf--bookmark-restore)
     (eaf-app . "pdf-viewer")
     (defaults . ,(list eaf--bookmark-title))
@@ -1052,7 +1052,10 @@ to edit EAF keybindings!" fun fun)))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
-  "Get the specified APP-NAME bindings"
+  "Get the specified APP-NAME keybinding.
+
+Every app has its name and the corresponding
+keybinding variable to eaf-app-binding-alist."
   (symbol-value
    (cdr (assoc app-name eaf-app-binding-alist))))
 
@@ -1083,7 +1086,7 @@ to edit EAF keybindings!" fun fun)))
 
 
 (defun eaf-monitor-window-size-change (frame)
-  "Monitor window FRAME size change."
+  "Update eaf view once emacs FRAME size changed."
   (when (process-live-p eaf-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
@@ -1130,7 +1133,7 @@ to edit EAF keybindings!" fun fun)))
         ))))
 
 (defun eaf--delete-org-preview-file (org-file)
-  "Delete the given ORG-FILE."
+  "Delete the org-preview file when given ORG-FILE name."
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
     (when (file-exists-p org-html-file)
       (delete-file org-html-file)
@@ -1404,7 +1407,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
  #'eaf-translate-text)
 
 (defun eaf-translate-text (text)
-  "Ctrl + Double Click: use sdcv to translate selected TEXT."
+  "Use sdcv to translate selected TEXT."
   (when (featurep 'sdcv)
     (sdcv-search-input+ text)))
 
@@ -1432,7 +1435,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (quit nil)))
 
 (defun eaf--open-internal (url app-name args)
-  "Open EAF apps with its URL, APP-NAME and ARGS"
+  "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args))
          (buffer-result
           (with-current-buffer buffer
@@ -1621,7 +1624,7 @@ In that way the corresponding function will be called to retrieve the HTML
  #'eaf-goto-left-tab)
 
 (defun eaf-goto-left-tab ()
-  "Go to left tab."
+  "Go to left tab when awesome-tab exists."
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-backward-tab)))
@@ -1632,7 +1635,7 @@ In that way the corresponding function will be called to retrieve the HTML
  #'eaf-goto-right-tab)
 
 (defun eaf-goto-right-tab ()
-  "Go to right tab."
+  "Go to right tab when awesome-tab exists."
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-forward-tab)))
@@ -1871,7 +1874,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (funcall display-fun buffer)))
 
 (defun eaf-split-preview-windows (url)
-  "Function for split preview windows with specified URL."
+  "Function for spliting preview windows with specified URL."
   (delete-other-windows)
   (find-file url)
   (split-window-horizontally)
@@ -1983,7 +1986,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--edit-focus-text)
 
 (defun eaf--edit-focus-text (buffer-id focus-text)
-  "EAF Browser: press Alt + e to edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
