@@ -791,12 +791,14 @@ For now only EAF browser app is supported."
       (funcall handler))))
 
 (defun eaf--browser-bookmark ()
+  "Restore EAF buffer according to browser bookmark from the current file path or web URL."
   `((handler . eaf--bookmark-restore)
     (eaf-app . "browser")
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
 
 (defun eaf--pdf-viewer-bookmark ()
+  "Restore EAF buffer according to pdf bookmark from the current file path or web URL."
   `((handler . eaf--bookmark-restore)
     (eaf-app . "pdf-viewer")
     (defaults . ,(list eaf--bookmark-title))
@@ -855,9 +857,11 @@ For now only EAF browser app is supported."
           (t result))))
 
 (defun eaf-get-emacs-xid (frame)
+  "Get emacs FRAME xid."
   (frame-parameter frame 'window-id))
 
 (defun eaf-serialization-var-list ()
+  "Serialize variable list."
   (json-encode eaf-var-list))
 
 (defun eaf-start-process ()
@@ -953,6 +957,7 @@ We need calcuate render allocation to make sure no black border around render co
     (mapcar (lambda (x) (format "%s" x)) (list width height))))
 
 (defun eaf-get-window-allocation (&optional window)
+  "Get WINDOW allocation."
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
          ;; Support emacs 27 tab-line-mode.
@@ -1047,6 +1052,10 @@ to edit EAF keybindings!" fun fun)))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
+  "Get the specified APP-NAME keybinding.
+
+Every app has its name and the corresponding
+keybinding variable to eaf-app-binding-alist."
   (symbol-value
    (cdr (assoc app-name eaf-app-binding-alist))))
 
@@ -1075,14 +1084,16 @@ to edit EAF keybindings!" fun fun)))
    "is_support"
    url))
 
-;; Update eaf view once emacs window size changed.
+
 (defun eaf-monitor-window-size-change (frame)
+  "Update eaf view once emacs FRAME size changed."
   (when (process-live-p eaf-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
     (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size)))))
 
 (defun eaf-try-adjust-view-with-frame-size ()
+  "Update eaf view once emacs window size changed."
   (when (and (equal (frame-pixel-width) eaf-last-frame-width)
              (equal (frame-pixel-height) eaf-last-frame-height))
     (eaf-monitor-configuration-change)))
@@ -1122,7 +1133,7 @@ to edit EAF keybindings!" fun fun)))
         ))))
 
 (defun eaf--delete-org-preview-file (org-file)
-  "Delete the given org-preview file."
+  "Delete the org-preview file when given ORG-FILE name."
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
     (when (file-exists-p org-html-file)
       (delete-file org-html-file)
@@ -1270,7 +1281,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf-focus-buffer)
 
 (defun eaf-focus-buffer (msg)
-  "Focus the buffer."
+  "Focus the buffer MSG."
   (let* ((coordinate-list (split-string msg ","))
          (mouse-press-x (string-to-number (nth 0 coordinate-list)))
          (mouse-press-y (string-to-number (nth 1 coordinate-list))))
@@ -1320,7 +1331,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf--create-new-browser-buffer)
 
 (defun eaf--create-new-browser-buffer (new-window-buffer-id)
-  "Function for creating a new browser buffer with the specified window buffer id."
+  "Function for creating a new browser buffer with the specified NEW-WINDOW-BUFFER-ID."
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
     (with-current-buffer eaf-buffer
       (eaf-mode)
@@ -1335,7 +1346,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  #'eaf-request-kill-buffer)
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
-  "Function for requesting to kill the given buffer with its id."
+  "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
   (catch 'found-match-buffer
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
@@ -1375,7 +1386,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
  #'eaf--update-buffer-details)
 
 (defun eaf--update-buffer-details (buffer-id title url)
-  "Function for updating buffer details."
+  "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
   (when (> (length title) 0)
     (catch 'find-buffer
       (dolist (window (window-list))
@@ -1396,7 +1407,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
  #'eaf-translate-text)
 
 (defun eaf-translate-text (text)
-  "Ctrl + Double Click: use sdcv to translate selected text."
+  "Use sdcv to translate selected TEXT."
   (when (featurep 'sdcv)
     (sdcv-search-input+ text)))
 
@@ -1424,7 +1435,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (quit nil)))
 
 (defun eaf--open-internal (url app-name args)
-  "Open EAF apps"
+  "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args))
          (buffer-result
           (with-current-buffer buffer
@@ -1613,6 +1624,7 @@ In that way the corresponding function will be called to retrieve the HTML
  #'eaf-goto-left-tab)
 
 (defun eaf-goto-left-tab ()
+  "Go to left tab when awesome-tab exists."
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-backward-tab)))
@@ -1623,12 +1635,14 @@ In that way the corresponding function will be called to retrieve the HTML
  #'eaf-goto-right-tab)
 
 (defun eaf-goto-right-tab ()
+  "Go to right tab when awesome-tab exists."
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-forward-tab)))
 
 ;;;###autoload
 (defun eaf-open-browser-in-background (url &optional args)
+  "Open browser with the specified URL and optional ARGS in background."
   (setq eaf--monitor-configuration-p nil)
   (let ((save-buffer (current-buffer)))
     (eaf-open-browser url args)
@@ -1853,13 +1867,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (message (concat "[EAF/" app-name "] " "Opening %s") url)))
 
 (defun eaf--display-app-buffer (app-name buffer)
+  "Display specified APP-NAME's app buffer in BUFFER."
   (let ((display-fun (or (cdr (assoc app-name
                                      eaf-app-display-function-alist))
                          #'switch-to-buffer)))
     (funcall display-fun buffer)))
 
 (defun eaf-split-preview-windows (url)
-  "Function for split preview windows."
+  "Function for spliting preview windows with specified URL."
   (delete-other-windows)
   (find-file url)
   (split-window-horizontally)
@@ -1936,12 +1951,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf-open " " "mindmap"))
 
 (defun eaf-open-mindmap (file)
-  "Open a given Mindmap file."
+  "Open a given Mindmap FILE."
   (interactive "f[EAF/mindmap] Select Mindmap file: ")
   (eaf-open file "mindmap"))
 
 (defun eaf-get-file-md5 (file)
-  "Get the MD5 value of a specified file."
+  "Get the MD5 value of a specified FILE."
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
 
 (defun eaf-open-office (file)
@@ -1971,7 +1986,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
  #'eaf--edit-focus-text)
 
 (defun eaf--edit-focus-text (buffer-id focus-text)
-  "EAF Browser: press Alt + e to edit focus text with Emacs."
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
@@ -2031,7 +2046,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode)))
 
 (define-minor-mode eaf-pdf-outline-mode
-  "eaf pdf outline mode."
+  "EAF pdf outline mode."
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
             (define-key map (kbd "q") 'quit-window)
@@ -2059,7 +2074,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (pop-to-buffer eaf-pdf-outline-buffer-name)))
 
 (defun eaf-pdf-outline-jump ()
-  "jump into specific page."
+  "Jump into specific page."
   (interactive)
   (let* ((line (thing-at-point 'line))
          (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
