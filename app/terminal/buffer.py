@@ -82,7 +82,7 @@ class AppBuffer(BrowserBuffer):
 
     def on_change_directory(self):
         self.update_title()
-        self.eval_in_emacs.emit('''(setq command-line-default-directory "'''+self.buffer_widget.execute_js("title")+'''")''')
+        self.eval_in_emacs.emit('''(setq default-directory "'''+self.buffer_widget.execute_js("title")+'''")''')
 
     def update_title(self):
         self.change_title(self.buffer_widget.execute_js("title"))
