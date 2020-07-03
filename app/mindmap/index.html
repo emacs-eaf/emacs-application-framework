@@ -20,6 +20,20 @@
              editable:true
          }
 
+         function change_background_color(color) {
+             var selected_id = get_selected_nodeid();
+             if(selected_id) {
+                 _jm.set_node_color(selected_id, color, null);
+            }
+          }
+
+         function change_text_color(color) {
+             var selected_id = get_selected_nodeid();
+             if(selected_id) {
+                _jm.set_node_color(selected_id, null, color);
+            }
+         }
+
          function select_root_node() {
              _jm.select_node("root");
          }
