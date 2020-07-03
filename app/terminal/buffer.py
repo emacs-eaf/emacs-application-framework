@@ -42,6 +42,7 @@ class AppBuffer(BrowserBuffer):
         arguments_dict = json.loads(arguments)
         self.command = arguments_dict["command"]
         self.start_directory = arguments_dict["directory"]
+        self.current_directory = self.start_directory
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
 
@@ -61,6 +62,10 @@ class AppBuffer(BrowserBuffer):
         QTimer.singleShot(250, self.focus_terminal)
 
         self.build_all_methods(self)
+        
+        self.timer=QTimer()
+        self.timer.start(250)
+        self.timer.timeout.connect(self.on_change_directory)
 
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -73,13 +78,18 @@ class AppBuffer(BrowserBuffer):
            (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
         with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
+            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory)
             self.buffer_widget.setHtml(html)
 
+    def on_change_directory(self):
+        changed_directory = self.buffer_widget.execute_js("title")
+        if not str(changed_directory) == self.current_directory:
+            self.update_title()
+            self.eval_in_emacs.emit('''(setq default-directory "'''+ str(changed_directory) +'''")''')
+            self.current_directory = str(changed_directory)
+
     def update_title(self):
-        # FIXME: rename title based on pwd
-        # self.change_title("")
-        pass
+        self.change_title(self.buffer_widget.execute_js("title"))
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)
