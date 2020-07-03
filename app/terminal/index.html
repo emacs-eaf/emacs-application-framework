@@ -44,6 +44,9 @@
              cursorBlink: true,
              theme: theme
          });
+         
+         var title = "~/"
+         
          const searchAddon = new SearchAddon.SearchAddon();
 
          function get_selection() {
@@ -123,7 +126,13 @@
          }
 
          socket.onmessage = (msg) => {
-             if(msg==="Closing"){
+         var re = /:([^\x07]*?)\x07/g;
+             arr = re.exec(msg.data)
+             if(arr) {
+                 title = arr[1]+"/";
+             }
+            
+             if(msg==="Closing") {
                  socket.close();
              }
          }

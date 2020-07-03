@@ -61,6 +61,10 @@ class AppBuffer(BrowserBuffer):
         QTimer.singleShot(250, self.focus_terminal)
 
         self.build_all_methods(self)
+        
+        self.timer=QTimer()
+        self.timer.start(250)
+        self.timer.timeout.connect(self.on_change_directory)
 
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -76,10 +80,12 @@ class AppBuffer(BrowserBuffer):
             html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"])
             self.buffer_widget.setHtml(html)
 
+    def on_change_directory(self):
+        self.update_title()
+        self.eval_in_emacs.emit('''(setq command-line-default-directory "'''+self.buffer_widget.execute_js("title")+'''")''')
+
     def update_title(self):
-        # FIXME: rename title based on pwd
-        # self.change_title("")
-        pass
+        self.change_title(self.buffer_widget.execute_js("title"))
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)
