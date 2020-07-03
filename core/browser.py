@@ -45,10 +45,11 @@ class BrowserView(QWebEngineView):
     translate_selected_text = QtCore.pyqtSignal(str)
     trigger_focus_event = QtCore.pyqtSignal(str)
 
-    def __init__(self, config_dir):
+    def __init__(self, buffer_id, config_dir):
         super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
+        self.buffer_id = buffer_id
         self.config_dir = config_dir
 
         self.web_page = BrowserPage()
@@ -179,9 +180,8 @@ class BrowserView(QWebEngineView):
         ''' Handle event.'''
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                            QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.Wheel]:
-            # Send mouse event to applicatin view.
-            self.trigger_focus_event.emit("{0},{1}".format(event.globalX(), event.globalY()))
+                            QEvent.MouseButtonDblClick, QEvent.Wheel]:
+            self.trigger_focus_event.emit(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
             if event.button() == MOUSE_FORWARD_BUTTON:
@@ -492,7 +492,7 @@ class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view)
 
-        self.add_widget(BrowserView(config_dir))
+        self.add_widget(BrowserView(buffer_id, config_dir))
 
         self.config_dir = config_dir
 

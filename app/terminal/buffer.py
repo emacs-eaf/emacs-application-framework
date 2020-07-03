@@ -83,11 +83,7 @@ class AppBuffer(BrowserBuffer):
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)
-
-        if self.buffer_widget is not None:
-            # NOTE: We need delete QWebEnginePage manual, otherwise QtWebEngineProcess won't quit.
-            self.buffer_widget.web_page.deleteLater()
-            self.buffer_widget.deleteLater()
+        super().destroy_buffer()
 
     @interactive()
     def copy_text(self):

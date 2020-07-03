@@ -34,7 +34,7 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
 
-        self.add_widget(RSSReaderWidget(config_dir))
+        self.add_widget(RSSReaderWidget(buffer_id, config_dir))
         self.buffer_widget.browser.buffer = self
 
         self.build_all_methods(self.buffer_widget)
@@ -75,7 +75,7 @@ class AppBuffer(Buffer):
 
 class RSSReaderWidget(QWidget):
 
-    def __init__(self, config_dir):
+    def __init__(self, buffer_id, config_dir):
         super(RSSReaderWidget, self).__init__()
 
         self.feed_file_path = os.path.join(config_dir, "rss-reader", "feeds.json")
@@ -97,7 +97,7 @@ class RSSReaderWidget(QWidget):
         article_layout.setSpacing(0)
         article_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.browser = BrowserView(config_dir)
+        self.browser = BrowserView(buffer_id, config_dir)
 
         article_layout.addWidget(self.article_list)
         article_layout.addWidget(self.browser)

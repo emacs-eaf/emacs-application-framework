@@ -33,12 +33,12 @@
         <div id="xterm" class="xterm"/>
 
         <script>
-        try {
+         try {
              var socket = new WebSocket("ws://127.0.0.1:%1");
-        }
-        catch(err) {
-            setTimeout('location.reload();',1000);
-        }
+         }
+         catch(err) {
+             setTimeout('location.reload();',1000);
+         }
          const term = new Terminal({
              fontSize: "%4",
              cursorBlink: true,
@@ -123,13 +123,13 @@
          }
 
          socket.onmessage = (msg) => {
-            if(msg==="Closing"){
-                socket.close();
-            }
+             if(msg==="Closing"){
+                 socket.close();
+             }
          }
-         
+
          socket.onclose = () => {
-            window.close();
+             window.close();
          }
          socket.onerror = () => {}
         </script>

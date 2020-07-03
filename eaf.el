@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jun 30 21:32:00 2020 (-0400)
+;; Last-Updated: Fri Jul  3 02:11:53 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1280,27 +1280,17 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  "com.lazycat.eaf" "focus_emacs_buffer"
  #'eaf-focus-buffer)
 
-(defun eaf-focus-buffer (msg)
-  "Focus the buffer MSG."
-  (let* ((coordinate-list (split-string msg ","))
-         (mouse-press-x (string-to-number (nth 0 coordinate-list)))
-         (mouse-press-y (string-to-number (nth 1 coordinate-list))))
-    (catch 'find-window
-      (dolist (window (window-list))
+(defun eaf-focus-buffer (focus-buffer-id)
+  "Focus the buffer given the FOCUS-BUFFER-ID."
+  (catch 'find-window
+    (dolist (frame (frame-list))
+      (dolist (window (window-list frame))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
-            (if (derived-mode-p 'eaf-mode)
-                (let* ((window-allocation (eaf-get-window-allocation window))
-                       (x (nth 0 window-allocation))
-                       (y (nth 1 window-allocation))
-                       (w (nth 2 window-allocation))
-                       (h (nth 3 window-allocation))
-                       )
-                  (when (and
-                         (< x mouse-press-x (+ x w))
-                         (< y mouse-press-y (+ y h)))
-                    (select-window window)
-                    (throw 'find-window t))))))))))
+            (when (and (derived-mode-p 'eaf-mode)
+                       (string= eaf--buffer-id focus-buffer-id)
+              (select-window window)
+              (throw 'find-window t)))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1350,11 +1340,11 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (catch 'found-match-buffer
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
-      (when (derived-mode-p 'eaf-mode)
-        (when (string= eaf--buffer-id kill-buffer-id)
-          (kill-buffer buffer)
-          (message "[EAF] Request to kill buffer %s." kill-buffer-id)
-          (throw 'found-match-buffer t))))))
+      (when (and (derived-mode-p 'eaf-mode)
+                 (string= eaf--buffer-id kill-buffer-id))
+        (kill-buffer buffer)
+        (message "[EAF] Request to kill buffer %s." kill-buffer-id)
+        (throw 'found-match-buffer t)))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
