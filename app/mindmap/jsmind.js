@@ -2396,10 +2396,14 @@
                 node._data.view.element.className += ' selected';
                 this.clear_node_custom_style(node);
             }
+            document.getElementById("change_background_color").style.display="";
+            document.getElementById("change_text_color").style.display="";
         },
 
         select_clear:function(){
             this.select_node(null);
+            document.getElementById("change_background_color").style.display="none";
+            document.getElementById("change_text_color").style.display="none";
         },
 
         get_editing_node:function(){

@@ -10,6 +10,44 @@
         <script type="text/javascript" src="jsmind.screenshot.js"></script>
     </head>
     <body>
+    <div id="change_background_color">
+        <h3>Change Selected Node Background Color</h3>
+            <ol>
+                <li><button onclick="change_background_color('Red');">Red</button></li>
+                <li><button onclick="change_background_color('Green');">Green</button></li>
+                <li><button onclick="change_background_color('Blue');">Blue</button></li>
+                <li><button onclick="change_background_color('Yellow');">Yellow</button></li>
+                <li><button onclick="change_background_color('Orange');">Orange</button></li>
+                <li><button onclick="change_background_color('Purple');">Purple</button></li>
+                <li><button onclick="change_background_color('Gray');">Gray</button></li>
+                <li><button onclick="change_background_color('Black');">Black</button></li>
+                <li><button onclick="change_background_color('White');">White</button></li>
+                <li><small id="small_background_R">R: 0</small><input id="background_R" type="range" value="0" min="0" max="255" step="1" onchange="change_value(id)"></li>
+                <li><small id="small_background_G">G: 0</small><input id="background_G" type="range" value="0" min="0" max="255" step="1" onchange="change_value(id)"></li>
+                <li><small id="small_background_B">B: 0</small><input id="background_B" type="range" value="0" min="0" max="255" step="1" onchange="change_value(id)"></li>
+                <li><button onclick="custom_change_background_color();">Cumstomized Color</button></li>
+            </ol>
+    </div>
+        
+    <div id="change_text_color">
+        <h3>Change Selected Node Text Color <h3>
+            <ol>
+                <li><button onclick="change_text_color('Red');">Red</button></li>
+                <li><button onclick="change_text_color('Green');">Green</button></li>
+                <li><button onclick="change_text_color('Blue');">Blue</button></li>
+                <li><button onclick="change_text_color('Yellow');">Yellow</button></li>
+                <li><button onclick="change_text_color('Orange');">Orange</button></li>
+                <li><button onclick="change_text_color('Purple');">Purple</button></li>
+                <li><button onclick="change_text_color('Gray');">Gray</button></li>
+                <li><button onclick="change_text_color('Black');">Black</button></li>
+                <li><button onclick="change_text_color('White');">White</button></li>
+                <li><small id="small_text_R">R: 0</small><input id="text_R" type="range" value="0" min="0" max="255" step="1" onchange="change_value(id)"></li>
+                <li><small id="small_text_G">G: 0</small><input id="text_G" type="range" value="0" min="0" max="255" step="1" onchange="change_value(id)"></li>
+                <li><small id="small_text_B">B: 0</small><input id="text_B" type="range" value="0" min="0" max="255" step="1" onchange="change_value(id)"></li>
+                <li><button onclick="custom_change_text_color();">Cumstomized Color</button></li>
+            </ol>
+        </div>    
+
         <div id="jsmind_container"></div>
 
         <script type="text/javascript">
@@ -18,6 +56,44 @@
          var options = {
              container:'jsmind_container',
              editable:true
+         }
+
+         function change_background_color(color) {
+             var selected_id = get_selected_nodeid();
+             if(!selected_id){prompt_info('please select a node first.');return;}
+
+             _jm.set_node_color(selected_id, color, null);
+          }
+
+         function change_text_color(color) {
+             var selected_id = get_selected_nodeid();
+             if(!selected_id){prompt_info('please select a node first.');return;}
+
+             _jm.set_node_color(selected_id, null, color);
+         }
+
+          function custom_change_background_color() {
+             red = document.getElementById('background_R').value
+             green = document.getElementById('background_G').value
+             blue = document.getElementById('background_B').value
+             var selected_id = get_selected_nodeid();
+             if(!selected_id){prompt_info('please select a node first.');return;}
+
+             _jm.set_node_color(selected_id, 'rgb('+red+','+green+','+blue+')', null);
+          }
+         
+          function custom_change_text_color() {
+             red = document.getElementById('text_R').value
+             green = document.getElementById('text_G').value
+             blue = document.getElementById('text_B').value
+             var selected_id = get_selected_nodeid();
+             if(!selected_id){prompt_info('please select a node first.');return;}
+
+             _jm.set_node_color(selected_id, 'rgb('+red+','+green+','+blue+')', null);
+          }
+          
+         function change_value(id) {
+             document.getElementById("small_"+id).innerText = id.charAt(id.length-1)+": "+document.getElementById(id).value;
          }
 
          function select_root_node() {

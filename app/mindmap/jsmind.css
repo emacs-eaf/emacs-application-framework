@@ -14,6 +14,17 @@ html, body {
     padding: 0;
 }
 
+#change_background_color, #change_text_color {
+    overflow: auto;
+}
+
+ol li {
+    overflow: auto;
+    float: left;
+    padding-right: 5%;
+    list-style:none;
+}
+
 #jsmind_container{
     width: 100%;
     height: 100%;
