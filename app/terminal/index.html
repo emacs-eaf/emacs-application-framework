@@ -45,7 +45,7 @@
              theme: theme
          });
          
-         var title = "~/"
+         var title = "%5"
          
          const searchAddon = new SearchAddon.SearchAddon();
 
@@ -126,13 +126,18 @@
          }
 
          socket.onmessage = (msg) => {
-         var re = /:([^\x07]*?)\x07/g;
+             var re = /:([^\x07].*?)\x07/g;
              arr = re.exec(msg.data)
              if(arr) {
-                 title = arr[1]+"/";
+                 if (arr[1] === "/") {
+                     title = arr[1];
+                 }
+                 else {
+                     title = arr[1]+"/"
+                 }
              }
             
-             if(msg==="Closing") {
+             if(msg === "Closing") {
                  socket.close();
              }
          }
