@@ -121,7 +121,16 @@
 
              window.addEventListener("resize", sendSizeToServer);
          }
-         socket.onclose = () => {}
+
+         socket.onmessage = (msg) => {
+            if(msg==="Closing"){
+                socket.close();
+            }
+         }
+         
+         socket.onclose = () => {
+            window.close();
+         }
          socket.onerror = () => {}
         </script>
     </body>
