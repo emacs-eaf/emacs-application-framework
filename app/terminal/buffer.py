@@ -94,6 +94,7 @@ class AppBuffer(BrowserBuffer):
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)
         super().destroy_buffer()
+        self.timer.stop()
 
     @interactive()
     def copy_text(self):
