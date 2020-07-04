@@ -203,6 +203,18 @@ class EAF(dbus.service.Object):
         if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(app_buffer.buffer_widget.get_focus_text, "connect", False):
             app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
+        # Handle get_sub_node_id signal.
+        if getattr(app_buffer, "get_sub_node_id", False) and getattr(app_buffer.get_sub_node_id, "connect", False):
+            app_buffer.get_sub_node_id.connect(self.add_multiple_sub_node)
+
+        # Handle get_brother_node_id signal.
+        if getattr(app_buffer, "get_brother_node_id", False) and getattr(app_buffer.get_brother_node_id, "connect", False):
+            app_buffer.get_brother_node_id.connect(self.add_multiple_brother_node)
+
+        # Handle get_middle_node_id signal.
+        if getattr(app_buffer, "get_middle_node_id", False) and getattr(app_buffer.get_middle_node_id, "connect", False):
+            app_buffer.get_middle_node_id.connect(self.add_multiple_middle_node)
+
         # Handle trigger_focus_event signal.
         if getattr(app_buffer.buffer_widget, "trigger_focus_event", False) and getattr(app_buffer.buffer_widget.trigger_focus_event, "connect", False):
             app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
@@ -405,6 +417,42 @@ class EAF(dbus.service.Object):
             if buffer.buffer_id == buffer_id:
                 buffer.set_focus_text(new_text)
 
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def update_multiple_sub_node(self, buffer_id, new_text):
+        ''' Update multiplt sub node.'''
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                for line in str(new_text).split("\n"):
+                    buffer.add_texted_sub_node(line)
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def update_multiple_brother_node(self, buffer_id, new_text):
+        ''' Update multiplt brother node.'''
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                for line in str(new_text).split("\n"):
+                    buffer.add_texted_brother_node(line)
+
+    @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
+    def update_multiple_middle_node(self, buffer_id, new_text):
+        ''' Update multiplt middle node.'''
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                for line in str(new_text).split("\n"):
+                    buffer.add_texted_middle_node(line)
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def add_multiple_sub_node(self, buffer_id):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def add_multiple_brother_node(self, buffer_id):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def add_multiple_middle_node(self, buffer_id):
+        pass
+    
     @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):
         pass

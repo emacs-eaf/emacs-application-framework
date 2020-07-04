@@ -523,6 +523,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
+    ("M-q" . "add_multiple_sub_node")
+    ("M-RET" . "add_multiple_brother_node")
+    ("M-i" . "add_multiple_middle_node")
     ("M-j" . "select_down_node")
     ("M-k" . "select_up_node")
     ("M-h" . "select_left_node")
@@ -1921,9 +1924,22 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive)
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
+  (if (equal current-add-mode "sub")
+  (eaf-call "update_multiple_sub_node"
+            (replace-regexp-in-string "eaf-\\(.*?\\)-add-multiple-sub-node-" "" (buffer-name))
+            (buffer-string))
+  (if (equal current-add-mode "brother")       
+  (eaf-call "update_multiple_brother_node"
+            (replace-regexp-in-string "eaf-\\(.*?\\)-add-multiple-brother-node-" "" (buffer-name))
+            (buffer-string))
+  (if (equal current-add-mode "middle") 
+  (eaf-call "update_multiple_middle_node"
+            (replace-regexp-in-string "eaf-\\(.*?\\)-add-multiple-middle-node-" "" (buffer-name))
+            (buffer-string))
   (eaf-call "update_focus_text"
             (replace-regexp-in-string "eaf-\\(.*?\\)-edit-focus-text-" "" (buffer-name))
-            (buffer-string))
+            (buffer-string)))))
+  (setq current-add-mode "")
   (kill-buffer)
   (delete-window))
 
@@ -1983,6 +1999,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
     (switch-to-buffer edit-text-buffer)
+    (setq current-add-mode "")
     (eaf-edit-mode)
     (eaf--edit-set-header-line)
     (insert focus-text)

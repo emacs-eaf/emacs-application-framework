@@ -71,6 +71,16 @@
              _jm.select_node(node);
          }
 
+         function add_texted_sub_node(text){
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if(!selected_node) {
+                 _jm.move_node(selected_id,'_first_');
+             }
+
+             var nodeid = jsMind.util.uuid.newid();
+             _jm.add_node(selected_node, nodeid, text);
+         }
+
          function add_brother_node(){
              var selected_node = _jm.get_selected_node(); // as parent of new node
              if(!selected_node) {
@@ -82,6 +92,19 @@
                  var nodeid = jsMind.util.uuid.newid();
                  var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
                  _jm.select_node(node);
+             }
+         }
+
+         function add_texted_brother_node(text){
+             var selected_node = _jm.get_selected_node(); // as parent of new node
+             if(!selected_node) {
+                 _jm.move_node(selected_id,'_first_');
+             }
+             if(_jm.view.is_editing()) {
+                 _jm.end_edit();
+             } else {
+                 var nodeid = jsMind.util.uuid.newid();
+                 _jm.insert_node_after(selected_node, nodeid, text);
              }
          }
 
@@ -283,6 +306,30 @@
 
                  _jm.select_node(selected_node);
              }
+         }
+
+         function add_texted_middle_node(text){
+            var selected_node = _jm.get_selected_node(); // as parent of new node
+             if(!!selected_node) {
+                 var topic = selected_node.topic;
+
+                 if(_jm.view.is_editing()) {
+                     _jm.end_edit();
+                 } else {
+                     var nodeid = jsMind.util.uuid.newid();
+                     var node = _jm.insert_node_after(selected_node, nodeid, text);
+                     _jm.select_node(node);
+                 }
+
+                 var brother_node = _jm.get_selected_node();
+                 _jm.update_node(brother_node.id, topic);
+                 _jm.update_node(selected_node.id, text);
+
+                 _jm.move_node(selected_node, selected_node.id, brother_node.id, brother_node.direction);
+
+                 _jm.select_node(selected_node);
+             }
+
          }
         </script>
     </body>

@@ -302,6 +302,84 @@ actural call `org-json-gen-alist1' to work."
       (concat h " " vs))
     ))
 
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "add_multiple_sub_node"
+ #'eaf--add-multiple-sub-node)
+
+(defun eaf--add-multiple-sub-node (buffer-id)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-sub-node-%s" eaf--buffer-app-name buffer-id))))
+    (switch-to-buffer edit-text-buffer)
+    (setq current-add-mode "sub")
+    (eaf-edit-mode)
+    (setq header-line-format
+        (substitute-command-keys
+         (concat
+          "\\<eaf-edit-mode-map>"
+          " EAF/" eaf--buffer-app-name " EDIT: "
+          "Confirm with `\\[eaf-edit-buffer-confirm]', "
+          "Cancel with `\\[eaf-edit-buffer-cancel]'. "
+          )))
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (beginning-of-buffer))
+    ))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "add_multiple_brother_node"
+ #'eaf--add-multiple-brother-node)
+
+(defun eaf--add-multiple-brother-node (buffer-id)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-brother-node-%s" eaf--buffer-app-name buffer-id))))
+    (switch-to-buffer edit-text-buffer)
+    (setq current-add-mode "brother")
+    (eaf-edit-mode)
+    (setq header-line-format
+        (substitute-command-keys
+         (concat
+          "\\<eaf-edit-mode-map>"
+          " EAF/" eaf--buffer-app-name " EDIT: "
+          "Confirm with `\\[eaf-edit-buffer-confirm]', "
+          "Cancel with `\\[eaf-edit-buffer-cancel]'. "
+          )))
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (beginning-of-buffer))
+    ))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "add_multiple_middle_node"
+ #'eaf--add-multiple-middle-node)
+
+(defun eaf--add-multiple-middle-node (buffer-id)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-middle-node-%s" eaf--buffer-app-name buffer-id))))
+    (switch-to-buffer edit-text-buffer)
+    (setq current-add-mode "middle")
+    (eaf-edit-mode)
+    (setq header-line-format
+        (substitute-command-keys
+         (concat
+          "\\<eaf-edit-mode-map>"
+          " EAF/" eaf--buffer-app-name " EDIT: "
+          "Confirm with `\\[eaf-edit-buffer-confirm]', "
+          "Cancel with `\\[eaf-edit-buffer-cancel]'. "
+          )))
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (beginning-of-buffer))
+    ))
+
 (provide 'eaf-mindmap)
 
 ;;; eaf-mindmap.el ends here
