@@ -88,6 +88,14 @@ class AppBuffer(BrowserBuffer):
         setattr(self, method_name, _do)
 
     @interactive(insert_or_do=True)
+    def change_background_color(self):
+        self.send_input_message("Change node background color(Input color): ", "change_background_color")
+
+    @interactive(insert_or_do=True)
+    def change_text_color(self):
+        self.send_input_message("Change node text color(Input color): ", "change_text_color")
+
+    @interactive(insert_or_do=True)
     def copy_node_topic(self):
         node_topic = self.buffer_widget.execute_js("get_node_topic();")
         self.eval_in_emacs.emit('''(kill-new "{}")'''.format(node_topic))
@@ -145,6 +153,10 @@ class AppBuffer(BrowserBuffer):
         elif result_type == "change_node_background":
             print(str(result_content))
             self.buffer_widget.eval_js("change_node_background('{}');".format(str(result_content)))
+        elif result_type == "change_background_color":
+            self.buffer_widget.eval_js("change_background_color('{}');".format(str(result_content)))
+        elif result_type == "change_text_color":
+            self.buffer_widget.eval_js("change_text_color('{}');".format(str(result_content)))
 
     def is_focus(self):
         return self.buffer_widget.execute_js("node_is_focus();")

@@ -547,6 +547,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("f" . "insert_or_update_node_topic")
     ("t" . "insert_or_toggle_node")
     ("b" . "insert_or_change_node_background")
+    ("c" . "insert_or_change_background_color")
+    ("C" . "insert_or_change_text_color")
     ("1" . "insert_or_save_screenshot")
     ("2" . "insert_or_save_file")
     ("3" . "insert_or_save_org_file")
