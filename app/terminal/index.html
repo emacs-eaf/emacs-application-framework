@@ -46,6 +46,7 @@
          });
          
          var title = "%5"
+         var current_destination = "%6"
          
          const searchAddon = new SearchAddon.SearchAddon();
 
@@ -126,8 +127,14 @@
          }
 
          socket.onmessage = (msg) => {
+             
+             var ssh_re = /]0;(.*?):/g;
              var re = /:([^\x07].*?)\x07/g;
+             ssh_arr = ssh_re.exec(msg.data)
              arr = re.exec(msg.data)
+             if(ssh_arr) {
+                 current_destination =ssh_arr[1]
+             }
              if(arr) {
                  if (arr[1] === "/") {
                      title = arr[1];
