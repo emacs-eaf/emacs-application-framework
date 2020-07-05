@@ -114,7 +114,9 @@
                                                     (end-of-line)
                                                     (backward-char 1)
                                                     (point)))))
-            (when (> (length header-string) 2)
+            (setq loop-times (/ (- (length header-string) 1) 2))
+            (while (> loop-times 0)
+              (setq loop-times (- loop-times 1))
               (setq header-string (string-remove-prefix "*" header-string)))
             (setq org-parse-data (concat org-parse-data (format "%s%s\n" header-string content-string)))))
 
