@@ -114,10 +114,10 @@
                                                     (end-of-line)
                                                     (backward-char 1)
                                                     (point)))))
-            (setq loop-times (/ (- (length header-string) 1) 2))
+            (let ((loop-times (/ (- (length header-string) 1) 2)))
             (while (> loop-times 0)
               (setq loop-times (- loop-times 1))
-              (setq header-string (string-remove-prefix "*" header-string)))
+              (setq header-string (string-remove-prefix "*" header-string))))
             (setq org-parse-data (concat org-parse-data (format "%s%s\n" header-string content-string)))))
 
         (with-temp-file org-file-path
