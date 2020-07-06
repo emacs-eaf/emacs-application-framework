@@ -1924,22 +1924,22 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (interactive)
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
-  (if (equal current-add-mode "sub")
-  (eaf-call "update_multiple_sub_nodes"
-            current-buffer-id-value
-            (buffer-string))
-  (if (equal current-add-mode "brother")       
-  (eaf-call "update_multiple_brother_nodes"
-            current-buffer-id-value
-            (buffer-string))
-  (if (equal current-add-mode "middle") 
-  (eaf-call "update_multiple_middle_nodes"
-            current-buffer-id-value
-            (buffer-string))
-  (eaf-call "update_focus_text"
-            current-buffer-id-value
-            (buffer-string)))))
-  (setq current-add-mode "")
+  (cond ((equal eaf-mindmap--current-add-mode "sub")
+    (eaf-call "update_multiple_sub_nodes"
+      eaf--buffer-id
+      (buffer-string)))
+  ((equal eaf-mindmap--current-add-mode "brother")       
+    (eaf-call "update_multiple_brother_nodes"
+      eaf--buffer-id
+      (buffer-string)))
+  ((equal eaf-mindmap--current-add-mode "middle") 
+    (eaf-call "update_multiple_middle_nodes"
+      eaf--buffer-id
+      (buffer-string)))
+  (t 
+    (eaf-call "update_focus_text"
+      eaf--buffer-id
+      (buffer-string))))
   (kill-buffer)
   (delete-window))
 
@@ -1998,10 +1998,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq current-add-mode "")
-    (setq current-buffer-id-value buffer-id)
-    (eaf-edit-mode)
+    (setq eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
     (insert focus-text)
     ;; When text line number above

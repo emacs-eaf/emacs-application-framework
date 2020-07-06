@@ -312,10 +312,11 @@ actural call `org-json-gen-alist1' to work."
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-sub-nodes" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq current-add-mode "sub")
-    (setq current-buffer-id-value buffer-id)
-    (eaf-edit-mode)
+    (setq eaf-mindmap--current-add-mode "sub")
     (setq header-line-format
         (substitute-command-keys
          (concat
@@ -340,10 +341,11 @@ actural call `org-json-gen-alist1' to work."
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-brother-nodes" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq current-add-mode "brother")
-    (setq current-buffer-id-value buffer-id)
-    (eaf-edit-mode)
+    (setq eaf-mindmap--current-add-mode "brother")
     (setq header-line-format
         (substitute-command-keys
          (concat
@@ -368,10 +370,11 @@ actural call `org-json-gen-alist1' to work."
   (split-window-below -10)
   (other-window 1)
   (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-middle-nodes" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq current-add-mode "middle")
-    (setq current-buffer-id-value buffer-id)
-    (eaf-edit-mode)
+    (setq eaf-mindmap--current-add-mode "middle")
     (setq header-line-format
         (substitute-command-keys
          (concat
