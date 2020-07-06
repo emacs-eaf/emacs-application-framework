@@ -30,6 +30,9 @@ import base64
 
 class AppBuffer(BrowserBuffer):
 
+    get_middle_node_id = QtCore.pyqtSignal(str)
+    get_brother_node_id = QtCore.pyqtSignal(str)
+    get_sub_node_id = QtCore.pyqtSignal(str)
     export_org_json = QtCore.pyqtSignal(str, str)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -157,6 +160,43 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.eval_js("change_background_color('{}');".format(str(result_content)))
         elif result_type == "change_text_color":
             self.buffer_widget.eval_js("change_text_color('{}');".format(str(result_content)))
+
+    def add_multiple_sub_nodes(self):
+        node_id = self.buffer_widget.execute_js("_jm.get_selected_node();")
+        if node_id != None:
+            self.get_sub_node_id.emit(self.buffer_id)
+        else:
+            self.message_to_emacs.emit("No selected node.")
+
+    def add_multiple_brother_nodes(self):
+        node_id = self.buffer_widget.execute_js("_jm.get_selected_node();")
+        if node_id == None:
+            self.message_to_emacs.emit("No selected node.")
+        elif not self.buffer_widget.execute_js("_jm.get_selected_node().parent;"):
+            self.message_to_emacs.emit("No parent node for selected node.")
+        else:
+            self.get_brother_node_id.emit(self.buffer_id)
+
+    def add_multiple_middle_nodes(self):
+        node_id = self.buffer_widget.execute_js("_jm.get_selected_node();")
+        if node_id == None:
+            self.message_to_emacs.emit("No selected node.")
+        elif not self.buffer_widget.execute_js("_jm.get_selected_node().parent;"):
+            self.message_to_emacs.emit("No parent node for selected node.")
+        else:
+            self.get_middle_node_id.emit(self.buffer_id)
+
+    @interactive()
+    def add_texted_sub_node(self,text):
+        self.buffer_widget.eval_js("add_texted_sub_node('{}');".format(str(text)))
+
+    @interactive()
+    def add_texted_brother_node(self,text):
+        self.buffer_widget.eval_js("add_texted_brother_node('{}');".format(str(text)))
+
+    @interactive()
+    def add_texted_middle_node(self,text):
+        self.buffer_widget.eval_js("add_texted_middle_node('{}');".format(str(text)))
 
     def is_focus(self):
         return self.buffer_widget.execute_js("node_is_focus();")

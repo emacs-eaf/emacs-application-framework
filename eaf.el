@@ -523,6 +523,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C--" . "zoom_out")
     ("C-=" . "zoom_in")
     ("C-0" . "zoom_reset")
+    ("M-q" . "add_multiple_sub_nodes")
+    ("M-RET" . "add_multiple_brother_nodes")
+    ("M-i" . "add_multiple_middle_nodes")
     ("M-j" . "select_down_node")
     ("M-k" . "select_up_node")
     ("M-h" . "select_left_node")
@@ -757,6 +760,8 @@ Python process only create application view when Emacs window or buffer state ch
   "Save window configure before popup outline buffer.")
 
 (defvar-local eaf--bookmark-title nil)
+
+(defvar-local eaf-mindmap--current-add-mode nil)
 
 (defun eaf-browser-restore-buffers ()
   "EAF restore all opened EAF Browser buffers in the previous Emacs session.
@@ -1291,8 +1296,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
           (with-current-buffer buffer
             (when (and (derived-mode-p 'eaf-mode)
                        (string= eaf--buffer-id focus-buffer-id)
-              (select-window window)
-              (throw 'find-window t)))))))))
+		       (select-window window)
+		       (throw 'find-window t)))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1661,7 +1666,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+				      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1820,11 +1825,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (unless app-name
     ;; Output error to user if app-name is empty string.
     (user-error (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
-                     (cond
-                      ((not (or (string-prefix-p "/" url)
-                                (string-prefix-p "~" url))) "File %s cannot be opened.")
-                      ((file-exists-p url) "File %s cannot be opened.")
-                      (t "File %s does not exist.")))
+			(cond
+			 ((not (or (string-prefix-p "/" url)
+				   (string-prefix-p "~" url))) "File %s cannot be opened.")
+			 ((file-exists-p url) "File %s cannot be opened.")
+			 (t "File %s does not exist.")))
                 url))
   (unless args (setq args ""))
   (setq always-new (or always-new current-prefix-arg))
@@ -1917,13 +1922,26 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (message "[EAF/%s] Edit cancelled!" eaf--buffer-app-name))
 
 (defun eaf-edit-buffer-confirm ()
-  "Confirm EAF Browser focus text input and send the text to EAF Browser."
+  "Confirm input text and send the text to corresponding EAF app."
   (interactive)
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
-  (eaf-call "update_focus_text"
-            (replace-regexp-in-string "eaf-\\(.*?\\)-edit-focus-text-" "" (buffer-name))
-            (buffer-string))
+  (cond ((equal eaf-mindmap--current-add-mode "sub")
+	 (eaf-call "update_multiple_sub_nodes"
+		   eaf--buffer-id
+		   (buffer-string)))
+	((equal eaf-mindmap--current-add-mode "brother")       
+	 (eaf-call "update_multiple_brother_nodes"
+		   eaf--buffer-id
+		   (buffer-string)))
+	((equal eaf-mindmap--current-add-mode "middle") 
+	 (eaf-call "update_multiple_middle_nodes"
+		   eaf--buffer-id
+		   (buffer-string)))
+	(t 
+	 (eaf-call "update_focus_text"
+		   eaf--buffer-id
+		   (buffer-string))))
   (kill-buffer)
   (delete-window))
 
@@ -1981,9 +1999,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
   (other-window 1)
-  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text-%s" eaf--buffer-app-name buffer-id))))
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (eaf-edit-mode)
+    (setq-local eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
     (insert focus-text)
     ;; When text line number above

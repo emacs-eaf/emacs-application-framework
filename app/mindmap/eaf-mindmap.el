@@ -304,6 +304,93 @@ actural call `org-json-gen-alist1' to work."
       (concat h " " vs))
     ))
 
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "add_multiple_sub_nodes"
+ #'eaf--add-multiple-sub-nodes)
+
+(defun eaf--add-multiple-sub-nodes (buffer-id)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-sub-nodes" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
+    (switch-to-buffer edit-text-buffer)
+    (setq-local eaf-mindmap--current-add-mode "sub")
+    (setq header-line-format
+	  (substitute-command-keys
+	   (concat
+	    "\\<eaf-edit-mode-map>"
+	    " EAF/" eaf--buffer-app-name " EDIT: "
+	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
+	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
+	    "Separate diffrent nodes with 'RET'. "
+	    )))
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (beginning-of-buffer))
+    ))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "add_multiple_brother_nodes"
+ #'eaf--add-multiple-brother-nodes)
+
+(defun eaf--add-multiple-brother-nodes (buffer-id)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-brother-nodes" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
+    (switch-to-buffer edit-text-buffer)
+    (setq-local eaf-mindmap--current-add-mode "brother")
+    (setq header-line-format
+	  (substitute-command-keys
+	   (concat
+	    "\\<eaf-edit-mode-map>"
+	    " EAF/" eaf--buffer-app-name " EDIT: "
+	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
+	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
+	    "Separate diffrent nodes with 'RET'. "
+	    )))
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (beginning-of-buffer))
+    ))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "add_multiple_middle_nodes"
+ #'eaf--add-multiple-middle-nodes)
+
+(defun eaf--add-multiple-middle-nodes (buffer-id)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-add-multiple-middle-nodes" eaf--buffer-app-name))))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
+    (switch-to-buffer edit-text-buffer)
+    (setq-local eaf-mindmap--current-add-mode "middle")
+    (setq header-line-format
+	  (substitute-command-keys
+	   (concat
+	    "\\<eaf-edit-mode-map>"
+	    " EAF/" eaf--buffer-app-name " EDIT: "
+	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
+	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
+	    "Separate diffrent nodes with 'RET'. "
+	    )))
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (beginning-of-buffer))
+    ))
+
 (provide 'eaf-mindmap)
 
 ;;; eaf-mindmap.el ends here
