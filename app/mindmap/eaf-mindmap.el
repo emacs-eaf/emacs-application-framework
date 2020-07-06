@@ -316,7 +316,7 @@ actural call `org-json-gen-alist1' to work."
       (eaf-edit-mode)
       (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq eaf-mindmap--current-add-mode "sub")
+    (setq-local eaf-mindmap--current-add-mode "sub")
     (setq header-line-format
         (substitute-command-keys
          (concat
@@ -345,7 +345,7 @@ actural call `org-json-gen-alist1' to work."
       (eaf-edit-mode)
       (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq eaf-mindmap--current-add-mode "brother")
+    (setq-local eaf-mindmap--current-add-mode "brother")
     (setq header-line-format
         (substitute-command-keys
          (concat
@@ -374,7 +374,7 @@ actural call `org-json-gen-alist1' to work."
       (eaf-edit-mode)
       (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq eaf-mindmap--current-add-mode "middle")
+    (setq-local eaf-mindmap--current-add-mode "middle")
     (setq header-line-format
         (substitute-command-keys
          (concat

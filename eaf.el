@@ -761,6 +761,8 @@ Python process only create application view when Emacs window or buffer state ch
 
 (defvar-local eaf--bookmark-title nil)
 
+(defvar-local eaf-mindmap--current-add-mode nil)
+
 (defun eaf-browser-restore-buffers ()
   "EAF restore all opened EAF Browser buffers in the previous Emacs session.
 
@@ -2002,7 +2004,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
       (eaf-edit-mode)
       (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
-    (setq eaf-mindmap--current-add-mode "")
+    (setq-local eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
     (insert focus-text)
     ;; When text line number above
