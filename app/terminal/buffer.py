@@ -48,6 +48,7 @@ class AppBuffer(BrowserBuffer):
         self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
         self.host_destination = str(getpass.getuser())+"@"+str(socket.gethostname())
         self.current_destination = self.host_destination
+        self.executing_command = ""
         self.buffer_widget.titleChanged.connect(self.change_title)
 
         # Start server process.
@@ -67,7 +68,7 @@ class AppBuffer(BrowserBuffer):
         
         self.timer=QTimer()
         self.timer.start(250)
-        self.timer.timeout.connect(self.on_change_address)
+        self.timer.timeout.connect(self.update_title)
 
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -83,26 +84,57 @@ class AppBuffer(BrowserBuffer):
             html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory).replace("%6", self.host_destination)
             self.buffer_widget.setHtml(html)
 
-    def on_change_address(self):
-        changed_directory = self.buffer_widget.execute_js("title")
-        changed_destination = self.buffer_widget.execute_js("current_destination")
-        if not str(changed_directory) == self.current_directory: 
-            if str(changed_destination) == self.host_destination:
-                self.update_title()
-                self.eval_in_emacs.emit('''(setq default-directory "'''+ str(changed_directory) +'''")''')
-                self.current_directory = str(changed_directory)
-            else:
-                self.change_title("ssh- " + str(changed_destination)+ ":" +str(changed_directory))
-                self.current_directory = str(changed_directory)
-                self.current_destination = str(changed_destination)
-        else:
-            if not str(changed_destination) == self.host_destination:
-                if not str(changed_destination) == self.current_destination: 
-                    self.change_title("ssh- " + str(changed_destination)+ ":" +str(changed_directory))
-                    self.current_destination = str(changed_destination)
-
     def update_title(self):
-        self.change_title(self.buffer_widget.execute_js("title"))
+        changed_directory = str(self.buffer_widget.execute_js("title"))
+        changed_destination = str(self.buffer_widget.execute_js("current_destination"))
+        changed_executing_command = ""
+        raw_message = str(self.buffer_widget.execute_js("executing_command")).split(" ",2)
+        if raw_message[0] == "sudo":
+            changed_executing_command = "sudo " + raw_message[1]
+        else:
+            changed_executing_command = raw_message[0]
+        if changed_executing_command != self.executing_command:
+            if changed_destination == self.host_destination:
+                if changed_executing_command:
+                    self.change_title(changed_executing_command + "- " + changed_directory)
+                else:
+                    self.change_title(changed_directory)
+                self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+            else:
+                if changed_executing_command:
+                    self.change_title(changed_executing_command + "- " + changed_destination+ ":" +changed_directory)
+                else:
+                    self.change_title(changed_destination+ ":" +changed_directory)  
+        else:
+            if not changed_directory == self.current_directory: 
+                if changed_destination == self.host_destination:
+                    if changed_executing_command:
+                        self.change_title(changed_executing_command + "- " +changed_directory)
+                    else:
+                        self.change_title(changed_directory)
+                    self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+                else:
+                    if changed_executing_command:
+                        self.change_title(changed_executing_command + "- "+ changed_destination+ ":" +changed_directory)
+                    else:
+                        self.change_title(changed_destination+ ":" +changed_directory)
+            else:
+                if not changed_destination == self.host_destination:
+                    if not changed_destination == self.current_destination: 
+                        if changed_executing_command:
+                            self.change_title(changed_executing_command + "- "+ changed_destination+ ":" +changed_directory)
+                        else:
+                            self.change_title(changed_destination+ ":" +changed_directory)
+                else:
+                    if not changed_destination == self.current_destination: 
+                        if changed_executing_command:
+                            self.change_title(changed_executing_command + "- "+ changed_directory)
+                        else:
+                            self.change_title(changed_directory)
+                        self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+        self.current_destination = changed_destination
+        self.current_directory = changed_directory
+        self.executing_command = changed_executing_command   
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)

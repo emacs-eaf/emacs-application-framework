@@ -46,7 +46,9 @@
          });
          
          var title = "%5"
+         var host_destination = "%6"
          var current_destination = "%6"
+         var executing_command = ""
          
          const searchAddon = new SearchAddon.SearchAddon();
 
@@ -124,18 +126,50 @@
              }
 
              window.addEventListener("resize", sendSizeToServer);
+             term.onLineFeed(() => {
+                 const buffer = term.buffer;
+                 const new_line = buffer.getLine(buffer.baseY + buffer.cursorY);
+                 if (new_line && !new_line.isWrapped) {
+                     var input_data = get_line_data(buffer, buffer.baseY + buffer.cursorY - 1);
+                     if (input_data.indexOf('$')!=-1){
+                        executing_command = input_data.slice(input_data.indexOf('$')+2)
+                        if(executing_command === "exit" && host_destination === current_destination){
+                            window.close();
+                        }
+                        if(executing_command.startsWith("cd ")){
+                            executing_command = ""
+                        }
+                     }
+                 }
+             })
+             function get_line_data(buffer, line_index) {
+                 let line = buffer.getLine(line_index);
+                 if (!line) {
+                     return;
+                 }
+                 let line_data = line.translateToString(true);
+                 while (line_index > 0 && line.isWrapped) {
+                     line = buffer.getLine(--line_index);
+                     if (!line) {
+                         break;
+                     }
+                     line_data = line.translateToString(false) + line_data;
+                 }
+                 return line_data;
+             }
          }
 
          socket.onmessage = (msg) => {
-             
              var ssh_re = /]0;(.*?):/g;
              var re = /:([^\x07].*?)\x07/g;
              ssh_arr = ssh_re.exec(msg.data)
              arr = re.exec(msg.data)
              if(ssh_arr) {
+                 executing_command = ""
                  current_destination =ssh_arr[1]
              }
              if(arr) {
+                executing_command = ""
                  if (arr[1] === "/") {
                      title = arr[1];
                  }
@@ -143,15 +177,9 @@
                      title = arr[1]+"/"
                  }
              }
-            
-             if(msg === "Closing") {
-                 socket.close();
-             }
          }
 
-         socket.onclose = () => {
-             window.close();
-         }
+         socket.onclose = () => {}
          socket.onerror = () => {}
         </script>
     </body>
