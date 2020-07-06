@@ -1296,8 +1296,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
           (with-current-buffer buffer
             (when (and (derived-mode-p 'eaf-mode)
                        (string= eaf--buffer-id focus-buffer-id)
-              (select-window window)
-              (throw 'find-window t)))))))))
+		       (select-window window)
+		       (throw 'find-window t)))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1666,7 +1666,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+				      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1825,11 +1825,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (unless app-name
     ;; Output error to user if app-name is empty string.
     (user-error (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
-                     (cond
-                      ((not (or (string-prefix-p "/" url)
-                                (string-prefix-p "~" url))) "File %s cannot be opened.")
-                      ((file-exists-p url) "File %s cannot be opened.")
-                      (t "File %s does not exist.")))
+			(cond
+			 ((not (or (string-prefix-p "/" url)
+				   (string-prefix-p "~" url))) "File %s cannot be opened.")
+			 ((file-exists-p url) "File %s cannot be opened.")
+			 (t "File %s does not exist.")))
                 url))
   (unless args (setq args ""))
   (setq always-new (or always-new current-prefix-arg))
@@ -1927,21 +1927,21 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
   (cond ((equal eaf-mindmap--current-add-mode "sub")
-    (eaf-call "update_multiple_sub_nodes"
-      eaf--buffer-id
-      (buffer-string)))
-  ((equal eaf-mindmap--current-add-mode "brother")       
-    (eaf-call "update_multiple_brother_nodes"
-      eaf--buffer-id
-      (buffer-string)))
-  ((equal eaf-mindmap--current-add-mode "middle") 
-    (eaf-call "update_multiple_middle_nodes"
-      eaf--buffer-id
-      (buffer-string)))
-  (t 
-    (eaf-call "update_focus_text"
-      eaf--buffer-id
-      (buffer-string))))
+	 (eaf-call "update_multiple_sub_nodes"
+		   eaf--buffer-id
+		   (buffer-string)))
+	((equal eaf-mindmap--current-add-mode "brother")       
+	 (eaf-call "update_multiple_brother_nodes"
+		   eaf--buffer-id
+		   (buffer-string)))
+	((equal eaf-mindmap--current-add-mode "middle") 
+	 (eaf-call "update_multiple_middle_nodes"
+		   eaf--buffer-id
+		   (buffer-string)))
+	(t 
+	 (eaf-call "update_focus_text"
+		   eaf--buffer-id
+		   (buffer-string))))
   (kill-buffer)
   (delete-window))
 

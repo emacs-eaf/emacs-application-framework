@@ -318,14 +318,14 @@ actural call `org-json-gen-alist1' to work."
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "sub")
     (setq header-line-format
-        (substitute-command-keys
-         (concat
-          "\\<eaf-edit-mode-map>"
-          " EAF/" eaf--buffer-app-name " EDIT: "
-          "Confirm with `\\[eaf-edit-buffer-confirm]', "
-          "Cancel with `\\[eaf-edit-buffer-cancel]', "
-          "Separate diffrent nodes with 'RET'. "
-          )))
+	  (substitute-command-keys
+	   (concat
+	    "\\<eaf-edit-mode-map>"
+	    " EAF/" eaf--buffer-app-name " EDIT: "
+	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
+	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
+	    "Separate diffrent nodes with 'RET'. "
+	    )))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (beginning-of-buffer))
@@ -347,14 +347,14 @@ actural call `org-json-gen-alist1' to work."
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "brother")
     (setq header-line-format
-        (substitute-command-keys
-         (concat
-          "\\<eaf-edit-mode-map>"
-          " EAF/" eaf--buffer-app-name " EDIT: "
-          "Confirm with `\\[eaf-edit-buffer-confirm]', "
-          "Cancel with `\\[eaf-edit-buffer-cancel]', "
-          "Separate diffrent nodes with 'RET'. "
-          )))
+	  (substitute-command-keys
+	   (concat
+	    "\\<eaf-edit-mode-map>"
+	    " EAF/" eaf--buffer-app-name " EDIT: "
+	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
+	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
+	    "Separate diffrent nodes with 'RET'. "
+	    )))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (beginning-of-buffer))
@@ -376,14 +376,14 @@ actural call `org-json-gen-alist1' to work."
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "middle")
     (setq header-line-format
-        (substitute-command-keys
-         (concat
-          "\\<eaf-edit-mode-map>"
-          " EAF/" eaf--buffer-app-name " EDIT: "
-          "Confirm with `\\[eaf-edit-buffer-confirm]', "
-          "Cancel with `\\[eaf-edit-buffer-cancel]', "
-          "Separate diffrent nodes with 'RET'. "
-          )))
+	  (substitute-command-keys
+	   (concat
+	    "\\<eaf-edit-mode-map>"
+	    " EAF/" eaf--buffer-app-name " EDIT: "
+	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
+	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
+	    "Separate diffrent nodes with 'RET'. "
+	    )))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (beginning-of-buffer))
