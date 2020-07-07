@@ -2069,7 +2069,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "Create PDF outline."
   (interactive)
   (let ((buffer-name (buffer-name (current-buffer)))
-        (toc (eaf-call "call_function" eaf--buffer-id "get_toc")))
+        (toc (eaf-call "call_function" eaf--buffer-id "get_toc"))
+        (page-number (string-to-number (eaf-call "call_function" eaf--buffer-id "current_page"))))
     ;; Save window configuration before outline.
     (setq eaf-pdf-outline-window-configuration (current-window-configuration))
 
@@ -2078,7 +2079,10 @@ Make sure that your smartphone is connected to the same WiFi network as this com
       (setq buffer-read-only nil)
       (erase-buffer)
       (insert toc)
-      (goto-char (point-min))
+      (setq toc (mapcar (lambda (line)
+                          (string-to-number (car (last (split-string line " ")))))
+                        (butlast (split-string (buffer-string) "\n"))))
+      (goto-line (seq-count (apply-partially #'>= page-number) toc))
       (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
       (read-only-mode 1)
       (eaf-pdf-outline-mode 1))
