@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul  3 02:11:53 2020 (-0400)
+;; Last-Updated: Tue Jul  7 09:59:13 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1908,7 +1908,7 @@ the file at current cursor position in dired."
 (defun eaf-file-browser-qrcode (dir)
   "Open EAF File Browser application.
 
-Select directory DIR to share file.
+Select directory DIR to share file from the smartphone.
 
 Make sure that your smartphone is connected to the same WiFi network as this computer."
   (interactive "D[EAF/file-browser] Specify Destination: ")
@@ -1930,15 +1930,15 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 	 (eaf-call "update_multiple_sub_nodes"
 		   eaf--buffer-id
 		   (buffer-string)))
-	((equal eaf-mindmap--current-add-mode "brother")       
+	((equal eaf-mindmap--current-add-mode "brother")
 	 (eaf-call "update_multiple_brother_nodes"
 		   eaf--buffer-id
 		   (buffer-string)))
-	((equal eaf-mindmap--current-add-mode "middle") 
+	((equal eaf-mindmap--current-add-mode "middle")
 	 (eaf-call "update_multiple_middle_nodes"
 		   eaf--buffer-id
 		   (buffer-string)))
-	(t 
+	(t
 	 (eaf-call "update_focus_text"
 		   eaf--buffer-id
 		   (buffer-string))))

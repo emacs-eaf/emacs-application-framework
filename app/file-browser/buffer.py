@@ -76,7 +76,7 @@ class FileUploaderWidget(QWidget):
         self.file_name_font.setPointSize(24)
 
         self.file_name_label = QLabel(self)
-        self.file_name_label.setText("Your file will be share at\n{0}".format(url))
+        self.file_name_label.setText("Your smartphone file will be shared at\n{0}".format(url))
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
         self.file_name_label.setStyleSheet("color: #eee")
@@ -86,7 +86,7 @@ class FileUploaderWidget(QWidget):
         self.notify_font = QFont()
         self.notify_font.setPointSize(12)
         self.notify_label = QLabel(self)
-        self.notify_label.setText("Scan QR code above to upload a file from your smartphone.\nMake sure the smartphone is connected to the same WiFi network as this computer.")
+        self.notify_label.setText("Scan the QR code above to upload a file from your smartphone.\nMake sure the smartphone is connected to the same WiFi network as this computer.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
         self.notify_label.setStyleSheet("color: #eee")
