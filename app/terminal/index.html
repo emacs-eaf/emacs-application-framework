@@ -33,14 +33,12 @@
     <div id="xterm" class="xterm"/>
 
     <script>
-      var first_time = true;
       try {
           var socket = new WebSocket("ws://127.0.0.1:%1");
       }
       catch(err) {
           setTimeout('location.reload();',1000);
       }
-      first_time = false;
       const term = new Terminal({
           fontSize: "%4",
           cursorBlink: true,
@@ -125,30 +123,18 @@
           }
 
           window.addEventListener("resize", sendSizeToServer);
+
       }
 
       socket.onmessage = (msg) => {
           var re = /:([^\x07].*?)\x07/g;
           arr = re.exec(msg.data)
           if(arr) {
-              if (arr[1] === "/") {
-                  title = arr[1];
-              }
-              else {
-                  title = arr[1]+"/"
-              }
-          }
-          
-          if(msg === "ESCAPED|-- CLOSED") {
-              socket.close();
+              title = arr[1];
           }
       }
 
-      socket.onclose = () => {
-          if(!first_time){
-              window.close();
-          }
-      }
+      socket.onclose = () => {}
       socket.onerror = () => {}
     </script>
   </body>

@@ -65,7 +65,7 @@ class AppBuffer(BrowserBuffer):
         
         self.timer=QTimer()
         self.timer.start(250)
-        self.timer.timeout.connect(self.on_change_directory)
+        self.timer.timeout.connect(self.checking_status)
 
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -81,19 +81,18 @@ class AppBuffer(BrowserBuffer):
             html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory)
             self.buffer_widget.setHtml(html)
 
-    def on_change_directory(self):
+    def checking_status(self):
         changed_directory = str(self.buffer_widget.execute_js("title"))
         if not changed_directory == self.current_directory:
-            self.update_title()
+            self.change_title(changed_directory)
             self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
             self.current_directory = changed_directory
-
-    def update_title(self):
-        self.change_title(str(self.buffer_widget.execute_js("title")))
+        if subprocess.Popen.poll(self.background_process) is not None:
+            self.destroy_buffer()
 
     def destroy_buffer(self):
-        os.kill(self.background_process.pid, signal.SIGKILL)
         super().destroy_buffer()
+        self.close_buffer()
         self.timer.stop()
 
     @interactive()
