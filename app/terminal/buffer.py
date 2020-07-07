@@ -85,56 +85,31 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setHtml(html)
 
     def update_title(self):
-        changed_directory = str(self.buffer_widget.execute_js("title"))
+        changed_directory = str(self.buffer_widget.execute_js("current_directory"))
         changed_destination = str(self.buffer_widget.execute_js("current_destination"))
-        changed_executing_command = ""
-        raw_message = str(self.buffer_widget.execute_js("executing_command")).split(" ",2)
-        if raw_message[0] == "sudo":
-            changed_executing_command = "sudo " + raw_message[1]
+        changed_executing_command = str(self.buffer_widget.execute_js("executing_command"))
+        if len(changed_executing_command) > 30:
+            changed_executing_command = changed_executing_command[:30]
+        if changed_executing_command != self.executing_command and self.executing_command == "":
+            self.change_title(changed_executing_command)
         else:
-            changed_executing_command = raw_message[0]
-        if changed_executing_command != self.executing_command:
-            if changed_destination == self.host_destination:
-                if changed_executing_command:
-                    self.change_title(changed_executing_command + "- " + changed_directory)
-                else:
-                    self.change_title(changed_directory)
-                self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
-            else:
-                if changed_executing_command:
-                    self.change_title(changed_executing_command + "- " + changed_destination+ ":" +changed_directory)
-                else:
-                    self.change_title(changed_destination+ ":" +changed_directory)  
-        else:
-            if not changed_directory == self.current_directory: 
+            if not changed_directory == self.current_directory or changed_executing_command != self.executing_command: 
                 if changed_destination == self.host_destination:
-                    if changed_executing_command:
-                        self.change_title(changed_executing_command + "- " +changed_directory)
-                    else:
-                        self.change_title(changed_directory)
+                    self.change_title(changed_directory)
                     self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
                 else:
-                    if changed_executing_command:
-                        self.change_title(changed_executing_command + "- "+ changed_destination+ ":" +changed_directory)
-                    else:
-                        self.change_title(changed_destination+ ":" +changed_directory)
+                    self.change_title(changed_destination+ ":" +changed_directory)
             else:
                 if not changed_destination == self.host_destination:
                     if not changed_destination == self.current_destination: 
-                        if changed_executing_command:
-                            self.change_title(changed_executing_command + "- "+ changed_destination+ ":" +changed_directory)
-                        else:
-                            self.change_title(changed_destination+ ":" +changed_directory)
+                        self.change_title(changed_destination+ ":" +changed_directory)
                 else:
                     if not changed_destination == self.current_destination: 
-                        if changed_executing_command:
-                            self.change_title(changed_executing_command + "- "+ changed_directory)
-                        else:
-                            self.change_title(changed_directory)
+                        self.change_title(changed_directory)
                         self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+        self.executing_command = changed_executing_command
         self.current_destination = changed_destination
-        self.current_directory = changed_directory
-        self.executing_command = changed_executing_command   
+        self.current_directory = changed_directory 
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)

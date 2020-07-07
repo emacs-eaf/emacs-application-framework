@@ -1,186 +1,182 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <script type="text/javascript" src="%2/node_modules/xterm/lib/xterm.js"></script>
-        <script type="text/javascript" src="%2/node_modules/xterm-addon-attach/lib/xterm-addon-attach.js"></script>
-        <script type="text/javascript" src="%2/node_modules/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
-        <script type="text/javascript" src="%2/node_modules/xterm-addon-search/lib/xterm-addon-search.js"></script>
-        <script type="text/javascript" src="%2/node_modules/xterm-addon-web-links/lib/xterm-addon-web-links.js"></script>
-        <script type="text/javascript" src="%2/%3_theme.js"></script>
-        <link rel="stylesheet" href="%2/node_modules/xterm/css/xterm.css" />
+  <head>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="%2/node_modules/xterm/lib/xterm.js"></script>
+    <script type="text/javascript" src="%2/node_modules/xterm-addon-attach/lib/xterm-addon-attach.js"></script>
+    <script type="text/javascript" src="%2/node_modules/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+    <script type="text/javascript" src="%2/node_modules/xterm-addon-search/lib/xterm-addon-search.js"></script>
+    <script type="text/javascript" src="%2/node_modules/xterm-addon-web-links/lib/xterm-addon-web-links.js"></script>
+    <script type="text/javascript" src="%2/%3_theme.js"></script>
+    <link rel="stylesheet" href="%2/node_modules/xterm/css/xterm.css" />
 
-        <style>
-         /* Make terminal fit full area of window */
-         html, body, #xterm, .xterm-screen, canvas {
-             width: 100%;
-             height: 100%;
-             padding: 0;
-             margin: 0;
-         }
+    <style>
+      /* Make terminal fit full area of window */
+      html, body, #xterm, .xterm-screen, canvas {
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          margin: 0;
+      }
 
-         .xterm-viewport {
-             display: none;
-         }
+      .xterm-viewport {
+          display: none;
+      }
 
-         /* Hide scrollbar */
-         .xterm-viewport {
-             overflow: hidden !important;
-         }
-        </style>
-    </head>
-    <body>
-        <div id="xterm" class="xterm"/>
+      /* Hide scrollbar */
+      .xterm-viewport {
+          overflow: hidden !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="xterm" class="xterm"/>
 
-        <script>
-         try {
-             var socket = new WebSocket("ws://127.0.0.1:%1");
-         }
-         catch(err) {
-             setTimeout('location.reload();',1000);
-         }
-         const term = new Terminal({
-             fontSize: "%4",
-             cursorBlink: true,
-             theme: theme
-         });
-         
-         var title = "%5"
-         var host_destination = "%6"
-         var current_destination = "%6"
-         var executing_command = ""
-         
-         const searchAddon = new SearchAddon.SearchAddon();
+    <script>
+      try {
+          var socket = new WebSocket("ws://127.0.0.1:%1");
+      }
+      catch(err) {
+          setTimeout('location.reload();',1000);
+      }
+      const term = new Terminal({
+          fontSize: "%4",
+          cursorBlink: true,
+          theme: theme
+      });
+      
+      var current_directory = "%5"
+      var host_destination = "%6"
+      var current_destination = "%6"
+      var executing_command = ""
+      
+      const searchAddon = new SearchAddon.SearchAddon();
 
-         function get_selection() {
-             return term.getSelection();
-         }
+      function get_selection() {
+          return term.getSelection();
+      }
 
-         function paste(text) {
-             term.paste(text);
-         }
+      function paste(text) {
+          term.paste(text);
+      }
 
-         function scroll_line(number) {
-             term.scrollLines(number);
-         }
+      function scroll_line(number) {
+          term.scrollLines(number);
+      }
 
-         function scroll_page(number) {
-             term.scrollPages(number);
-         }
+      function scroll_page(number) {
+          term.scrollPages(number);
+      }
 
-         function scroll_to_begin() {
-             term.scrollToTop();
-         }
+      function scroll_to_begin() {
+          term.scrollToTop();
+      }
 
-         function scroll_to_bottom() {
-             term.scrollToBottom();
-         }
+      function scroll_to_bottom() {
+          term.scrollToBottom();
+      }
 
-         function select_all() {
-             term.selectAll();
-         }
+      function select_all() {
+          term.selectAll();
+      }
 
-         function clear_selection() {
-             term.clearSelection();
-         }
+      function clear_selection() {
+          term.clearSelection();
+      }
 
-         function find_next(text) {
-             searchAddon.findNext(text);
-         }
+      function find_next(text) {
+          searchAddon.findNext(text);
+      }
 
-         function find_prev(text) {
-             searchAddon.findPrevious(text);
-         }
+      function find_prev(text) {
+          searchAddon.findPrevious(text);
+      }
 
-         socket.onopen = () => {
-             const attachAddon = new AttachAddon.AttachAddon(socket);
-             const fitAddon = new FitAddon.FitAddon();
-             term.loadAddon(attachAddon);
-             term.loadAddon(fitAddon);
-             term.loadAddon(searchAddon);
-             term.loadAddon(new WebLinksAddon.WebLinksAddon());
-             term.open(document.getElementById('xterm'));
-             fitAddon.fit();
-             term.focus();
+      socket.onopen = () => {
+          const attachAddon = new AttachAddon.AttachAddon(socket);
+          const fitAddon = new FitAddon.FitAddon();
+          term.loadAddon(attachAddon);
+          term.loadAddon(fitAddon);
+          term.loadAddon(searchAddon);
+          term.loadAddon(new WebLinksAddon.WebLinksAddon());
+          term.open(document.getElementById('xterm'));
+          fitAddon.fit();
+          term.focus();
 
-             setTimeout(() => {
-                 sendSizeToServer();
-             }, 50);
+          setTimeout(() => {
+              sendSizeToServer();
+          }, 50);
 
-             function sendSizeToServer() {
-                 /* After window resize, make terminal fit before get term size */
-                 fitAddon.fit()
+          function sendSizeToServer() {
+              /* After window resize, make terminal fit before get term size */
+              fitAddon.fit()
 
-                 let cols = term.cols.toString();
-                 let rows = term.rows.toString();
-                 while (cols.length < 3) {
-                     cols = "0"+cols;
-                 }
-                 while (rows.length < 3) {
-                     rows = "0"+rows;
-                 }
+              let cols = term.cols.toString();
+              let rows = term.rows.toString();
+              while (cols.length < 3) {
+                  cols = "0"+cols;
+              }
+              while (rows.length < 3) {
+                  rows = "0"+rows;
+              }
 
-                 console.log("ESCAPED|-- RESIZE:"+cols+";"+rows);
+              console.log("ESCAPED|-- RESIZE:"+cols+";"+rows);
 
-                 socket.send("ESCAPED|-- RESIZE:"+cols+";"+rows);
-             }
+              socket.send("ESCAPED|-- RESIZE:"+cols+";"+rows);
+          }
 
-             window.addEventListener("resize", sendSizeToServer);
-             term.onLineFeed(() => {
-                 const buffer = term.buffer;
-                 const new_line = buffer.getLine(buffer.baseY + buffer.cursorY);
-                 if (new_line && !new_line.isWrapped) {
-                     var input_data = get_line_data(buffer, buffer.baseY + buffer.cursorY - 1);
-                     if (input_data.indexOf('$')!=-1){
-                        executing_command = input_data.slice(input_data.indexOf('$')+2)
-                        if(executing_command === "exit" && host_destination === current_destination){
-                            window.close();
-                        }
-                        if(executing_command.startsWith("cd ")){
-                            executing_command = ""
-                        }
-                     }
-                 }
-             })
-             function get_line_data(buffer, line_index) {
-                 let line = buffer.getLine(line_index);
-                 if (!line) {
-                     return;
-                 }
-                 let line_data = line.translateToString(true);
-                 while (line_index > 0 && line.isWrapped) {
-                     line = buffer.getLine(--line_index);
-                     if (!line) {
-                         break;
-                     }
-                     line_data = line.translateToString(false) + line_data;
-                 }
-                 return line_data;
-             }
-         }
+          window.addEventListener("resize", sendSizeToServer);
+          term.onLineFeed(() => {
+              const buffer = term.buffer;
+              const new_line = buffer.getLine(buffer.baseY + buffer.cursorY);
+              if (new_line && !new_line.isWrapped) {
+                  var input_data = get_line_data(buffer, buffer.baseY + buffer.cursorY - 1);
+                  if (input_data.indexOf('$')!=-1){
+                      executing_command = input_data.slice(input_data.indexOf('$')+1).trim()
+                      if(executing_command === "exit" && host_destination === current_destination){
+                          window.close();
+                      }
+                      if(executing_command.startsWith("cd ")){
+                          executing_command = ""
+                      }
+                  }
+              }
+          })
+          function get_line_data(buffer, line_index) {
+              let line = buffer.getLine(line_index);
+              if (!line) {
+                  return;
+              }
+              let line_data = line.translateToString(true);
+              while (line_index > 0 && line.isWrapped) {
+                  line = buffer.getLine(--line_index);
+                  if (!line) {
+                      break;
+                  }
+                  line_data = line.translateToString(false) + line_data;
+              }
+              return line_data;
+          }
+      }
 
-         socket.onmessage = (msg) => {
-             var ssh_re = /]0;(.*?):/g;
-             var re = /:([^\x07].*?)\x07/g;
-             ssh_arr = ssh_re.exec(msg.data)
-             arr = re.exec(msg.data)
-             if(ssh_arr) {
-                 executing_command = ""
-                 current_destination =ssh_arr[1]
-             }
-             if(arr) {
-                executing_command = ""
-                 if (arr[1] === "/") {
-                     title = arr[1];
-                 }
-                 else {
-                     title = arr[1]+"/"
-                 }
-             }
-         }
+      socket.onmessage = (msg) => {
+          console.log(msg.data)
+          var ssh_re = /;(.*?):/g;
+          var re = /:([^\x07].*?)\x07/g;
+          ssh_arr = ssh_re.exec(msg.data)
+          arr = re.exec(msg.data)
+          if(ssh_arr) {
+              executing_command = ""
+              current_destination =ssh_arr[1]
+          }
+          if(arr) {
+              executing_command = ""
+              current_directory = arr[1];
+          }
+      }
 
-         socket.onclose = () => {}
-         socket.onerror = () => {}
-        </script>
-    </body>
+      socket.onclose = () => {}
+      socket.onerror = () => {}
+    </script>
+  </body>
 </html>
