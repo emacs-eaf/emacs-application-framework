@@ -90,7 +90,8 @@ class AppBuffer(Buffer):
         self.buffer_widget.scroll_offset = float(scroll_offset)
         self.buffer_widget.scale = float(scale)
         self.buffer_widget.read_mode = read_mode
-        self.buffer_widget.inverted_mode = inverted_mode == "True"
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore":
+            self.buffer_widget.inverted_mode = inverted_mode == "True"
         self.buffer_widget.update()
 
     def jump_to_page(self):
@@ -208,7 +209,8 @@ class PdfViewerWidget(QWidget):
         # Inverted mode.
         self.inverted_mode = False
         if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or \
-            (self.emacs_var_dict["eaf-pdf-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
+            ((self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" or self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore") and \
+             self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
             self.inverted_mode = True
 
         # mark link

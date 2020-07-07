@@ -76,7 +76,7 @@ class AppBuffer(BrowserBuffer):
 
         color = "#FFFFFF"
         if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
-           (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+           (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             color = "#242525"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 
