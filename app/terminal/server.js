@@ -2,11 +2,12 @@ this.Pty = require("node-pty");
 this.Websocket = require("ws").Server;
 
 this.onclosed = () => {
-    ws.send("Closing");
+    process.exit()
 };
 this.onopened = () => {};
 this.onresize = () => {};
 this.ondisconnected = () => {};
+
 
 var port = process.argv.slice(2)[0]
 var dir = process.argv.slice(3)[0]
