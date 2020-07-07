@@ -62,7 +62,7 @@ class AppBuffer(BrowserBuffer):
         QTimer.singleShot(250, self.focus_terminal)
 
         self.build_all_methods(self)
-        
+
         self.timer=QTimer()
         self.timer.start(250)
         self.timer.timeout.connect(self.checking_status)
@@ -75,7 +75,7 @@ class AppBuffer(BrowserBuffer):
     def open_terminal_page(self):
         theme = "light"
         if self.emacs_var_dict["eaf-terminal-dark-mode"] == "true" or \
-           (self.emacs_var_dict["eaf-terminal-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+           (self.emacs_var_dict["eaf-terminal-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
         with open(self.index_file, "r") as f:
             html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory)

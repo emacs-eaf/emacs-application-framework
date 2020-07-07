@@ -606,7 +606,7 @@ class BrowserBuffer(Buffer):
         ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
         return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or \
-                (self.emacs_var_dict["eaf-browser-dark-mode"] == "" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
+                (self.emacs_var_dict["eaf-browser-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
                 and module_name in ["browser", "terminal", "mindmap", "js-video-player"] \
                 and self.url != "devtools://devtools/bundled/devtools_app.html"
 

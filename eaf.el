@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jul  7 09:59:13 2020 (-0400)
+;; Last-Updated: Tue Jul  7 16:32:12 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -248,11 +248,11 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-download-path . "~/Downloads")
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
-    (eaf-browser-dark-mode . "")
-    (eaf-pdf-dark-mode . "")
-    (eaf-terminal-dark-mode . "")
+    (eaf-browser-dark-mode . "follow")
+    (eaf-pdf-dark-mode . "follow")
+    (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
-    (eaf-mindmap-dark-mode . "")
+    (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     (eaf-emacs-theme-mode . ""))
