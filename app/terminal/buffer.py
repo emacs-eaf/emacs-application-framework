@@ -82,14 +82,14 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setHtml(html)
 
     def on_change_directory(self):
-        changed_directory = self.buffer_widget.execute_js("title")
-        if not str(changed_directory) == self.current_directory:
+        changed_directory = str(self.buffer_widget.execute_js("title"))
+        if not changed_directory == self.current_directory:
             self.update_title()
-            self.eval_in_emacs.emit('''(setq default-directory "'''+ str(changed_directory) +'''")''')
-            self.current_directory = str(changed_directory)
+            self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+            self.current_directory = changed_directory
 
     def update_title(self):
-        self.change_title(self.buffer_widget.execute_js("title"))
+        self.change_title(str(self.buffer_widget.execute_js("title")))
 
     def destroy_buffer(self):
         os.kill(self.background_process.pid, signal.SIGKILL)

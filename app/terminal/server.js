@@ -2,7 +2,7 @@ this.Pty = require("node-pty");
 this.Websocket = require("ws").Server;
 
 this.onclosed = () => {
-    ws.send("Closing");
+    ws.send("ESCAPED|-- CLOSED");
 };
 this.onopened = () => {};
 this.onresize = () => {};
