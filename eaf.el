@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jul  7 16:32:12 2020 (-0400)
+;; Last-Updated: Tue Jul  7 21:13:03 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -200,13 +200,15 @@ been initialized."
 
 (defvar eaf-last-frame-height 0)
 
-(defvar eaf-grip-token nil)
-
 (defvar eaf-find-alternate-file-in-dired nil
   "If non-nil, calling `eaf-open-this-from-dired' determines file types to open.
 
 EAF unrecognizable files will be opened by `dired-find-alternate-file' normally.
 Otherwise they will be opened normally with `dired-find-file'.")
+
+(defcustom eaf-grip-token ""
+  "Github personal acess token, used by grip."
+  :type 'string)
 
 (defcustom eaf-browser-search-engines `(("google" . "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
                                         ("duckduckgo" . "https://duckduckgo.com/?q=%s"))
