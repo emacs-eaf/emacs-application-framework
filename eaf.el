@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jul  9 19:22:31 2020 (-0400)
+;; Last-Updated: Thu Jul  9 19:22:50 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1289,15 +1289,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf-focus-buffer (focus-buffer-id)
   "Focus the buffer given the FOCUS-BUFFER-ID."
-  (catch 'find-window
+  (catch 'found-eaf
     (dolist (frame (frame-list))
       (dolist (window (window-list frame))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
             (when (and (derived-mode-p 'eaf-mode)
                        (string= eaf--buffer-id focus-buffer-id)
-		       (select-window window)
-		       (throw 'find-window t)))))))))
+                       (select-window window)
+                       (throw 'found-eaf t)))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1344,14 +1344,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
   "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
-  (catch 'found-match-buffer
+  (catch 'found-eaf
     (dolist (buffer (buffer-list))
       (set-buffer buffer)
       (when (and (derived-mode-p 'eaf-mode)
                  (string= eaf--buffer-id kill-buffer-id))
         (kill-buffer buffer)
         (message "[EAF] Request to kill buffer %s." kill-buffer-id)
-        (throw 'found-match-buffer t)))))
+        (throw 'found-eaf t)))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1385,7 +1385,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
   (when (> (length title) 0)
-    (catch 'find-buffer
+    (catch 'found-eaf
       (dolist (window (window-list))
         (let ((buffer (window-buffer window)))
           (with-current-buffer buffer
@@ -1396,7 +1396,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
               (setq-local eaf--bookmark-title title)
               (setq-local eaf--buffer-url url)
               (rename-buffer (format eaf-buffer-title-format title) t)
-              (throw 'find-buffer t))))))))
+              (throw 'found-eaf t))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1666,7 +1666,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-				      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                 (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1825,11 +1825,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (unless app-name
     ;; Output error to user if app-name is empty string.
     (user-error (concat (if app-name (concat "[EAF/" app-name "] ") "[EAF] ")
-			(cond
-			 ((not (or (string-prefix-p "/" url)
-				   (string-prefix-p "~" url))) "File %s cannot be opened.")
-			 ((file-exists-p url) "File %s cannot be opened.")
-			 (t "File %s does not exist.")))
+                        (cond
+                         ((not (or (string-prefix-p "/" url)
+                                   (string-prefix-p "~" url))) "File %s cannot be opened.")
+                         ((file-exists-p url) "File %s cannot be opened.")
+                         (t "File %s does not exist.")))
                 url))
   (unless args (setq args ""))
   (setq always-new (or always-new current-prefix-arg))
@@ -1840,14 +1840,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (if (process-live-p eaf-process)
       (let (exists-eaf-buffer)
         ;; Try to open buffer
-        (catch 'found-match-buffer
+        (catch 'found-eaf
           (dolist (buffer (buffer-list))
             (set-buffer buffer)
             (when (derived-mode-p 'eaf-mode)
               (when (and (string= eaf--buffer-url url)
                          (string= eaf--buffer-app-name app-name))
                 (setq exists-eaf-buffer buffer)
-                (throw 'found-match-buffer t)))))
+                (throw 'found-eaf t)))))
         ;; Switch to existing buffer,
         ;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
@@ -1927,21 +1927,21 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
   (cond ((equal eaf-mindmap--current-add-mode "sub")
-	 (eaf-call "update_multiple_sub_nodes"
-		   eaf--buffer-id
-		   (buffer-string)))
-	((equal eaf-mindmap--current-add-mode "brother")
-	 (eaf-call "update_multiple_brother_nodes"
-		   eaf--buffer-id
-		   (buffer-string)))
-	((equal eaf-mindmap--current-add-mode "middle")
-	 (eaf-call "update_multiple_middle_nodes"
-		   eaf--buffer-id
-		   (buffer-string)))
-	(t
-	 (eaf-call "update_focus_text"
-		   eaf--buffer-id
-		   (buffer-string))))
+         (eaf-call "update_multiple_sub_nodes"
+                   eaf--buffer-id
+                   (buffer-string)))
+        ((equal eaf-mindmap--current-add-mode "brother")
+         (eaf-call "update_multiple_brother_nodes"
+                   eaf--buffer-id
+                   (buffer-string)))
+        ((equal eaf-mindmap--current-add-mode "middle")
+         (eaf-call "update_multiple_middle_nodes"
+                   eaf--buffer-id
+                   (buffer-string)))
+        (t
+         (eaf-call "update_focus_text"
+                   eaf--buffer-id
+                   (buffer-string))))
   (kill-buffer)
   (delete-window))
 
