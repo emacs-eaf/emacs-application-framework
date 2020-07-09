@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jul  7 21:13:03 2020 (-0400)
+;; Last-Updated: Thu Jul  9 19:22:31 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1118,12 +1118,12 @@ keybinding variable to eaf-app-binding-alist."
               (with-current-buffer buffer
                 (if (derived-mode-p 'eaf-mode)
                     ;; Use frame size if just have one window in current frame and `eaf-fullscreen-p' is non-nil.
-                    (if (and (equal (length (window-list)) 1)
+                    (if (and (equal (length (window-list frame)) 1)
                              eaf-fullscreen-p)
                         (push (format "%s:%s:%s:%s:%s:%s"
                                       eaf--buffer-id
                                       (eaf-get-emacs-xid frame)
-                                      0 0 (frame-pixel-width) (frame-pixel-height))
+                                      0 0 (frame-pixel-width frame) (frame-pixel-height frame))
                               view-infos)
                       (let* ((window-allocation (eaf-get-window-allocation window))
                              (x (nth 0 window-allocation))
@@ -1134,12 +1134,10 @@ keybinding variable to eaf-app-binding-alist."
                                       eaf--buffer-id
                                       (eaf-get-emacs-xid frame)
                                       x y w h)
-                              view-infos)
-                        )))))))
+                              view-infos))))))))
         ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
         ;; So I package two-dimensional list in string, then unpack on server side. ;)
-        (eaf-call "update_views" (mapconcat #'identity view-infos ","))
-        ))))
+        (eaf-call "update_views" (mapconcat #'identity view-infos ","))))))
 
 (defun eaf--delete-org-preview-file (org-file)
   "Delete the org-preview file when given ORG-FILE name."
