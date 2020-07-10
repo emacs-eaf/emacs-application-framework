@@ -149,6 +149,7 @@ z-index: 100000;\
     addElementToRects(validRects, document.querySelectorAll('select')); // collect <select>
     addElementToRects(validRects, document.querySelectorAll('summary')); // collect <summary>
     addElementToRects(validRects, document.querySelectorAll('[class="gap"]')); // collect class="gap"
+    addElementToRects(validRects, document.querySelectorAll('[ng-click]')); // collect ng-click
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');
