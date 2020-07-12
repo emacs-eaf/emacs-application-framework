@@ -51,7 +51,6 @@ class BrowserView(QWebEngineView):
         self.installEventFilter(self)
         self.buffer_id = buffer_id
         self.config_dir = config_dir
-        self.enable_adblock = True
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
@@ -65,9 +64,6 @@ class BrowserView(QWebEngineView):
         self.urlChanged.connect(lambda url: self.search_quit())
 
         self.load_cookie()
-
-        if self.enable_adblock:
-            self.load_css(os.path.join(os.path.dirname(__file__), "adblock.css"),'adblock')
 
         self.search_term = ""
 
@@ -106,6 +102,9 @@ class BrowserView(QWebEngineView):
         script.setRunsOnSubFrames(True)
         script.setWorldId(QWebEngineScript.ApplicationWorld)
         self.web_page.scripts().insert(script)
+
+    def load_adblock(self):
+        self.load_css(os.path.join(os.path.dirname(__file__), "adblock.css"),'adblock')
 
     def remove_css(self, name, immediately):
         SCRIPT =  """
@@ -166,17 +165,19 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term, self.web_page.FindBackward)
         else:
             self.web_page.findText(self.search_term)
-            
+
     @interactive()
     def change_adblock_status(self):
         ''' Change adblock status.'''
-        if self.enable_adblock == True:
-            self.enable_adblock = False
+        if self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] == "true":
+            self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] = "false"
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblock", "false")
             self.remove_css('adblock',True)
             self.buffer.message_to_emacs.emit("Successfully disabled adblock!")
-        elif self.enable_adblock == False:
-            self.enable_adblock = True
-            self.load_css(os.path.join(os.path.dirname(__file__), "adblock.css"),'adblock')
+        elif self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] == "false":
+            self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] = "true"
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblock", "true")
+            self.load_adblock()
             self.buffer.message_to_emacs.emit("Successfully enabled adblock!")
 
     @interactive()
