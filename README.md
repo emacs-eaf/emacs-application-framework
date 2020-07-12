@@ -82,34 +82,6 @@ If you use [use-package](https://github.com/jwiegley/use-package), a sample conf
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 
----
-
-If you use [Chemacs](https://github.com/plexus/chemacs), a sample `init.el` is provided as follows:
-
-```Elisp
-;; An example of init.el
-
-(defun add-subdirs-to-load-path (dir)
-  "Recursive add directories to `load-path'."
-  (let ((default-directory (file-name-as-directory dir)))
-    (add-to-list 'load-path dir)
-    (normal-top-level-add-subdirs-to-load-path)))
-(add-subdirs-to-load-path "~/.emacs.d/")
-
-(require 'eaf)
-```
-
-During EAF installation, you only need to modify the parameter value when calling function `add-subdirs-to-load-path`, change it into your full path to the EAF installation directory. The sample gives a situation when you install EAF at `~/.emacs.d/`.
-
-After EAF installation, let's assume your EAF installation directory is `~/eaf`, you only have Emacs configurations at `~/.emacs.d` and EAF installed on your computer, and you have installed Chemacs, then the `.emacs-profiles.el` should look like this:
-
-```Elisp
-(("default" . ((user-emacs-directory . "~/.emacs.d")))
- ("EAF" . ((user-emacs-directory . "~/eaf"))))
-```
-
-When you want to use EAF by chemacs, you can excute `emacs --with-profile EAF` in the terminal.
-
 ### Dependency List
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
