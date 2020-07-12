@@ -20,10 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF
+from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF, QFile
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtNetwork import QNetworkCookie
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call, call_and_check_code, interactive
 from core.buffer import Buffer
@@ -51,6 +51,7 @@ class BrowserView(QWebEngineView):
         self.installEventFilter(self)
         self.buffer_id = buffer_id
         self.config_dir = config_dir
+        self.enable_adblock = True
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
@@ -65,6 +66,9 @@ class BrowserView(QWebEngineView):
 
         self.load_cookie()
 
+        if self.enable_adblock:
+            self.load_css(os.path.join(os.path.dirname(__file__), "adblock.css"),'adblock')
+
         self.search_term = ""
 
         self.get_markers_raw = self.read_js_content("get_markers.js")
@@ -78,6 +82,43 @@ class BrowserView(QWebEngineView):
         self.dark_mode_js = self.read_js_content("dark_mode.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
+
+    def load_css(self, path, name):
+        path = QFile(path)
+        if not path.open(QFile.ReadOnly | QtCore.QFile.Text):
+            return
+        css = path.readAll().data().decode("utf-8")
+        SCRIPT = """
+        (function() {
+        css = document.createElement('style');
+        css.type = 'text/css';
+        css.id = "%s";
+        document.head.appendChild(css);
+        css.innerText = `%s`;
+        })()
+        """ % (name, css)
+
+        script = QWebEngineScript()
+        self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+        script.setName(name)
+        script.setSourceCode(SCRIPT)
+        script.setInjectionPoint(QWebEngineScript.DocumentReady)
+        script.setRunsOnSubFrames(True)
+        script.setWorldId(QWebEngineScript.ApplicationWorld)
+        self.web_page.scripts().insert(script)
+
+    def remove_css(self, name, immediately):
+        SCRIPT =  """
+        (function() {
+        var element = document.getElementById('%s');
+        element.outerHTML = '';
+        delete element;
+        })()
+         """ % (name)
+        if immediately:
+            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+        script = self.web_page.scripts().findScript(name)
+        self.web_page.scripts().remove(script)
 
     def open_download_manage_page(self):
         ''' Open aria2-webui download manage page. '''
@@ -125,6 +166,18 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term, self.web_page.FindBackward)
         else:
             self.web_page.findText(self.search_term)
+            
+    @interactive()
+    def change_adblock_status(self):
+        ''' Change adblock status.'''
+        if self.enable_adblock == True:
+            self.enable_adblock = False
+            self.remove_css('adblock',True)
+            self.buffer.message_to_emacs.emit("Successfully disabled adblock!")
+        elif self.enable_adblock == False:
+            self.enable_adblock = True
+            self.load_css(os.path.join(os.path.dirname(__file__), "adblock.css"),'adblock')
+            self.buffer.message_to_emacs.emit("Successfully enabled adblock!")
 
     @interactive()
     def search_text_forward(self):
