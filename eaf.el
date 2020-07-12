@@ -242,6 +242,7 @@ It must defined at `eaf-browser-search-engines'."
 (defcustom eaf-var-list
   '((eaf-camera-save-path . "~/Downloads")
     (eaf-browser-enable-plugin . "true")
+    (eaf-browser-enable-adblock . "true")
     (eaf-browser-enable-javascript . "true")
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
