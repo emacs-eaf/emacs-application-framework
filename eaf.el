@@ -269,6 +269,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-0" . "zoom_reset")
     ("C-s" . "search_text_forward")
     ("C-r" . "search_text_backward")
+    ("C-d" . "change_adblock_status")
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
     ("C-f" . "scroll_right")
