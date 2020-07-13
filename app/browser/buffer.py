@@ -62,5 +62,5 @@ class AppBuffer(BrowserBuffer):
         self.url = self.buffer_widget.url().toString()
 
     def set_adblocker(self, url):
-        if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
+        if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true" and not self.page_closed:
             self.buffer_widget.load_adblocker()

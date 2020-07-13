@@ -170,12 +170,10 @@ class BrowserView(QWebEngineView):
     def toggle_adblocker(self):
         ''' Change adblocker status.'''
         if self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
-            self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] = "false"
             self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "false", "true")
             self.remove_css('adblocker',True)
             self.buffer.message_to_emacs.emit("Successfully disabled adblocker!")
         elif self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
-            self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] = "true"
             self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true", "true")
             self.load_adblocker()
             self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
@@ -549,6 +547,7 @@ class BrowserBuffer(Buffer):
         self.add_widget(BrowserView(buffer_id, config_dir))
 
         self.config_dir = config_dir
+        self.page_closed = False
 
         self.history_list = []
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
@@ -990,6 +989,7 @@ class BrowserBuffer(Buffer):
 
     def record_close_page(self, url):
         ''' Record closing pages.'''
+        self.page_closed = True
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.arguments != "temp_html_file" and url != "about:blank":
             touch(self.history_close_file_path)
             with open(self.history_close_file_path, "r") as f:
