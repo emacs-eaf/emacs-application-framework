@@ -51,6 +51,8 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url_in_new_tab)
         self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
 
+        self.buffer_widget.urlChanged.connect(self.set_adblocker)
+
         # Reset to default zoom when page init or url changed.
         self.reset_default_zoom()
         self.buffer_widget.urlChanged.connect(self.update_url)
@@ -58,3 +60,7 @@ class AppBuffer(BrowserBuffer):
     def update_url(self, url):
         self.reset_default_zoom()
         self.url = self.buffer_widget.url().toString()
+
+    def set_adblocker(self, url):
+        if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true" and not self.page_closed:
+            self.buffer_widget.load_adblocker()

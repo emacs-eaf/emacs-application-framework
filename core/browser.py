@@ -20,10 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF
+from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF, QFile
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtNetwork import QNetworkCookie
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call, call_and_check_code, interactive
 from core.buffer import Buffer
@@ -79,6 +79,46 @@ class BrowserView(QWebEngineView):
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
 
+    def load_css(self, path, name):
+        path = QFile(path)
+        if not path.open(QFile.ReadOnly | QtCore.QFile.Text):
+            return
+        css = path.readAll().data().decode("utf-8")
+        SCRIPT = """
+        (function() {
+        css = document.createElement('style');
+        css.type = 'text/css';
+        css.id = "%s";
+        document.head.appendChild(css);
+        css.innerText = `%s`;
+        })()
+        """ % (name, css)
+
+        script = QWebEngineScript()
+        self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+        script.setName(name)
+        script.setSourceCode(SCRIPT)
+        script.setInjectionPoint(QWebEngineScript.DocumentReady)
+        script.setRunsOnSubFrames(True)
+        script.setWorldId(QWebEngineScript.ApplicationWorld)
+        self.web_page.scripts().insert(script)
+
+    def load_adblocker(self):
+        self.load_css(os.path.join(os.path.dirname(__file__), "adblocker.css"),'adblocker')
+
+    def remove_css(self, name, immediately):
+        SCRIPT =  """
+        (function() {
+        var element = document.getElementById('%s');
+        element.outerHTML = '';
+        delete element;
+        })()
+         """ % (name)
+        if immediately:
+            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+        script = self.web_page.scripts().findScript(name)
+        self.web_page.scripts().remove(script)
+
     def open_download_manage_page(self):
         ''' Open aria2-webui download manage page. '''
         self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-webui", "index.html")))
@@ -125,6 +165,18 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term, self.web_page.FindBackward)
         else:
             self.web_page.findText(self.search_term)
+
+    @interactive()
+    def toggle_adblocker(self):
+        ''' Change adblocker status.'''
+        if self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "false", "true")
+            self.remove_css('adblocker',True)
+            self.buffer.message_to_emacs.emit("Successfully disabled adblocker!")
+        elif self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true", "true")
+            self.load_adblocker()
+            self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
 
     @interactive()
     def search_text_forward(self):
@@ -495,6 +547,7 @@ class BrowserBuffer(Buffer):
         self.add_widget(BrowserView(buffer_id, config_dir))
 
         self.config_dir = config_dir
+        self.page_closed = False
 
         self.history_list = []
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
@@ -936,6 +989,7 @@ class BrowserBuffer(Buffer):
 
     def record_close_page(self, url):
         ''' Record closing pages.'''
+        self.page_closed = True
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.arguments != "temp_html_file" and url != "about:blank":
             touch(self.history_close_file_path)
             with open(self.history_close_file_path, "r") as f:
