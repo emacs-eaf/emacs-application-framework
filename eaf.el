@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jul  9 19:22:50 2020 (-0400)
+;; Last-Updated: Sun Jul 12 21:48:49 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -242,7 +242,7 @@ It must defined at `eaf-browser-search-engines'."
 (defcustom eaf-var-list
   '((eaf-camera-save-path . "~/Downloads")
     (eaf-browser-enable-plugin . "true")
-    (eaf-browser-enable-adblock . "false")
+    (eaf-browser-enable-adblocker . "false")
     (eaf-browser-enable-javascript . "true")
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
@@ -270,7 +270,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-0" . "zoom_reset")
     ("C-s" . "search_text_forward")
     ("C-r" . "search_text_backward")
-    ("C-d" . "change_adblock_status")
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
     ("C-f" . "scroll_right")
@@ -288,6 +287,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-f" . "history_forward")
     ("M-b" . "history_backward")
     ("M-q" . "clear_cookies")
+    ("M-a" . "toggle_adblocker")
     ("C-M-q" . "clear_history")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")

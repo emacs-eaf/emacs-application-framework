@@ -103,8 +103,8 @@ class BrowserView(QWebEngineView):
         script.setWorldId(QWebEngineScript.ApplicationWorld)
         self.web_page.scripts().insert(script)
 
-    def load_adblock(self):
-        self.load_css(os.path.join(os.path.dirname(__file__), "adblock.css"),'adblock')
+    def load_adblocker(self):
+        self.load_css(os.path.join(os.path.dirname(__file__), "adblocker.css"),'adblocker')
 
     def remove_css(self, name, immediately):
         SCRIPT =  """
@@ -167,18 +167,18 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term)
 
     @interactive()
-    def change_adblock_status(self):
-        ''' Change adblock status.'''
-        if self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] == "true":
-            self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] = "false"
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblock", "false")
-            self.remove_css('adblock',True)
-            self.buffer.message_to_emacs.emit("Successfully disabled adblock!")
-        elif self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] == "false":
-            self.buffer.emacs_var_dict["eaf-browser-enable-adblock"] = "true"
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblock", "true")
-            self.load_adblock()
-            self.buffer.message_to_emacs.emit("Successfully enabled adblock!")
+    def toggle_adblocker(self):
+        ''' Change adblocker status.'''
+        if self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
+            self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] = "false"
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "false")
+            self.remove_css('adblocker',True)
+            self.buffer.message_to_emacs.emit("Successfully disabled adblocker!")
+        elif self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
+            self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] = "true"
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true")
+            self.load_adblocker()
+            self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
 
     @interactive()
     def search_text_forward(self):
