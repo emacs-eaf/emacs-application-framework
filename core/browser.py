@@ -171,12 +171,12 @@ class BrowserView(QWebEngineView):
         ''' Change adblocker status.'''
         if self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
             self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] = "false"
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "false")
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "false", "true")
             self.remove_css('adblocker',True)
             self.buffer.message_to_emacs.emit("Successfully disabled adblocker!")
         elif self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
             self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] = "true"
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true")
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true", "true")
             self.load_adblocker()
             self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
 
