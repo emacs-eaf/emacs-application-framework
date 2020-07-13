@@ -1309,9 +1309,13 @@ of `eaf--buffer-app-name' inside the EAF buffer."
  "com.lazycat.eaf" "set_emacs_var"
  #'eaf--set-emacs-var)
 
-(defun eaf--set-emacs-var (var-name var-value)
-  "Used by Python applications to set Lisp variable VAR-NAME with value VAR-VALUE on the Emacs side."
-  (set (intern var-name) var-value))
+(defun eaf--set-emacs-var (name value eaf-specific)
+  "Set Lisp variable NAME with VALUE on the Emacs side.
+
+If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
+  (if (string= eaf-specific "true")
+      (eaf-set (intern name) value)
+    (set (intern name) value)))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"

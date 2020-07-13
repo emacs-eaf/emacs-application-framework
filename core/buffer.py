@@ -106,7 +106,7 @@ class Buffer(QGraphicsScene):
     input_message = QtCore.pyqtSignal(str, str, str, str, str)
     request_close_buffer = QtCore.pyqtSignal(str)
     message_to_emacs = QtCore.pyqtSignal(str)
-    set_emacs_var = QtCore.pyqtSignal(str, str)
+    set_emacs_var = QtCore.pyqtSignal(str, str, str)
     eval_in_emacs = QtCore.pyqtSignal(str)
     goto_left_tab = QtCore.pyqtSignal()
     goto_right_tab = QtCore.pyqtSignal()
@@ -252,7 +252,7 @@ class Buffer(QGraphicsScene):
         pass
 
     def execute_function(self, function_name):
-        ''' Execute function.''' 
+        ''' Execute function.'''
         getattr(self, function_name)()
 
     def call_function(self, function_name):

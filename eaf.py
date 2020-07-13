@@ -452,7 +452,7 @@ class EAF(dbus.service.Object):
     @dbus.service.signal(EAF_DBUS_NAME)
     def add_multiple_middle_nodes(self, buffer_id):
         pass
-    
+
     @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):
         pass
@@ -506,7 +506,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def set_emacs_var(self, var_name, var_value):
+    def set_emacs_var(self, var_name, var_value, eaf_specific):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
