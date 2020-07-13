@@ -159,6 +159,9 @@ Don't modify this map directly.  To bind keys for all apps use
 (defvar-local eaf--buffer-args nil
   "EAF buffer-local args.")
 
+(defvar-local eaf--buffer-map-alist nil
+  "EAF buffer-local map alist.")
+
 (define-derived-mode eaf-mode fundamental-mode "EAF"
   "Major mode for Emacs Application Framework buffers.
 
@@ -172,14 +175,19 @@ name of the current app. Each app can setup app hooks by using
 been initialized."
   ;; Split window combinations proportionally.
   (setq-local window-combination-resize t)
-  (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
-  (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
-  ;; Copy default value in case user already has bindings there
-  (setq-local emulation-mode-map-alists (default-value 'emulation-mode-map-alists))
   ;; Disable cursor in eaf buffer.
   (setq-local cursor-type nil)
-  (push (list (cons t eaf-mode-map))
-        emulation-mode-map-alists)
+
+  (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
+  (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
+
+  ;; Copy default value in case user already has bindings there
+  (setq-local emulation-mode-map-alists (default-value 'emulation-mode-map-alists))
+  ;; Construct map alist
+  (setq-local eaf--buffer-map-alist (list (cons t eaf-mode-map)))
+  ;; Eanble mode map and make it the first priority
+  (add-to-ordered-list 'emulation-mode-map-alists 'eaf--buffer-map-alist 1)
+
   (add-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill nil t)
   (add-hook 'kill-emacs-hook #'eaf--monitor-emacs-kill))
 
