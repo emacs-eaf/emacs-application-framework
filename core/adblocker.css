@@ -10,37 +10,37 @@
  * links when the link HREF contans certain substrings.
  */
 
-A:link[HREF*="addata"]  IMG, 
-A:link[HREF*="ad."]  IMG, 
-A:link[HREF*="ads."]  IMG, 
-A:link[HREF*="/ad"]  IMG, 
-A:link[HREF*="/A="]  IMG, 
-A:link[HREF*="/click"]  IMG, 
-A:link[HREF*="?click"]  IMG, 
-A:link[HREF*="?banner"]  IMG, 
-A:link[HREF*="=click"]  IMG, 
-A:link[HREF*="clickurl="]  IMG, 
-A:link[HREF*=".atwola."]  IMG, 
-A:link[HREF*="spinbox."]  IMG, 
-A:link[HREF*="transfer.go"]  IMG, 
-A:link[HREF*="adfarm"]  IMG, 
-A:link[HREF*="adSpace"]  IMG, 
-A:link[HREF*="adserve"]  IMG, 
-A:link[HREF*=".banner"]  IMG, 
-A:link[HREF*="bluestreak"]  IMG, 
-A:link[HREF*="doubleclick"]  IMG, 
-A:link[HREF*="/rd."]  IMG, 
-A:link[HREF*="/0AD"]  IMG, 
-A:link[HREF*=".falkag."]  IMG, 
-A:link[HREF*="trackoffer."]  IMG, 
-A:link[HREF*="casalemedia."]  IMG, 
-A:link[HREF*="valueclick."]  IMG, 
-A:link[HREF*="betterbasketball."]  IMG, 
-A:link[HREF*="sponsors.phtml"]  IMG, 
-A:link[HREF*="realgmtix.phtml"]  IMG, 
+A:link[HREF*="addata"]  IMG,
+A:link[HREF*="ad."]  IMG,
+A:link[HREF*="ads."]  IMG,
+A:link[HREF*="/ad"]  IMG,
+A:link[HREF*="/A="]  IMG,
+A:link[HREF*="/click"]  IMG,
+A:link[HREF*="?click"]  IMG,
+A:link[HREF*="?banner"]  IMG,
+A:link[HREF*="=click"]  IMG,
+A:link[HREF*="clickurl="]  IMG,
+A:link[HREF*=".atwola."]  IMG,
+A:link[HREF*="spinbox."]  IMG,
+A:link[HREF*="transfer.go"]  IMG,
+A:link[HREF*="adfarm"]  IMG,
+A:link[HREF*="adSpace"]  IMG,
+A:link[HREF*="adserve"]  IMG,
+A:link[HREF*=".banner"]  IMG,
+A:link[HREF*="bluestreak"]  IMG,
+A:link[HREF*="doubleclick"]  IMG,
+A:link[HREF*="/rd."]  IMG,
+A:link[HREF*="/0AD"]  IMG,
+A:link[HREF*=".falkag."]  IMG,
+A:link[HREF*="trackoffer."]  IMG,
+A:link[HREF*="casalemedia."]  IMG,
+A:link[HREF*="valueclick."]  IMG,
+A:link[HREF*="betterbasketball."]  IMG,
+A:link[HREF*="sponsors.phtml"]  IMG,
+A:link[HREF*="realgmtix.phtml"]  IMG,
 A:link[HREF*="BurstingPipe"]  IMG,
 A:link[HREF*="ebayobjects"]  IMG,
-A:link[HREF*="tracksponsor."]  IMG { display: none ! important } 
+A:link[HREF*="tracksponsor."]  IMG { display: none ! important }
 
 /* disable ad iframes */
 IFRAME[SRC*="addata"],
@@ -65,11 +65,11 @@ IFRAME[SRC*="bluestreak"],
 IFRAME[SRC*="doubleclick"],
 IFRAME[SRC*="/rd."],
 IFRAME[SRC*="/0AD"],
-IFRAME[SRC*=".falkag."], 
+IFRAME[SRC*=".falkag."],
 IFRAME[SRC*="trackoffer."],
 IFRAME[SRC*="connextra."],
 IFRAME[ID*="merchandisingMERC"],
-IFRAME[SRC*="tracksponsor."]  { display: none ! important } 
+IFRAME[SRC*="tracksponsor."]  { display: none ! important }
 
 
 /* miscellaneous different blocking rules to block some stuff that gets through */
@@ -83,20 +83,20 @@ A:link[onmouseover*="AdSolution"] IMG,
 *[ID=inlinead],
 *[ID=ad_creative],
 *[ID=contextualLinks],
-IMG[SRC*=".msads."] { display: none ! important } 
+IMG[SRC*=".msads."] { display: none ! important }
 
 
 /* turning some false positives back off */
 
-A:link[HREF*="/add"]  IMG, 
+A:link[HREF*="/add"]  IMG,
 A:link[HREF*="/adsl"] IMG,
 A:link[HREF*="thread."] IMG,
 A:link[HREF*="download."] IMG,
 A:link[HREF*="downloads."] IMG,
 A:link[HREF*="netflix.com/AddToQueue"] IMG,
-A:link[HREF*="load."], 
-A:link[HREF*="loads."], 
-IFRAME[SRC*="load."], 
+A:link[HREF*="load."],
+A:link[HREF*="loads."],
+IFRAME[SRC*="load."],
 IFRAME[SRC*="loads."],
 A:link[HREF*="click.mp3"] IMG { display: inline ! important }
 
@@ -108,8 +108,6 @@ embed[type="application/x-shockwave-flash"],
 embed[src$=".swf"]
 { -moz-binding: url("http://www.floppymoose.com/clickToView.xml#ctv"); }
 
-/* 
+/*
  * For more examples see http://www.mozilla.org/unix/customizing.html
  */
-
-
