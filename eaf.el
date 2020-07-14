@@ -186,7 +186,7 @@ been initialized."
 
   ;; Copy default value in case user already has bindings there
   (setq-local emulation-mode-map-alists
-              (default-value 'emulation-mode-map-alists))
+              (copy-alist (default-value 'emulation-mode-map-alists)))
   ;; Construct map alist
   (setq-local eaf--buffer-map-alist (list (cons t eaf-mode-map)))
   ;; Eanble mode map and make it the first priority
