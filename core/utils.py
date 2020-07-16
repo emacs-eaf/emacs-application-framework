@@ -129,6 +129,9 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
     return thread
 
 def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
+    """
+    Defines an interactive command invoked from Emacs.
+    """
     def wrap(f):
         f.interactive = True
         f.insert_or_do = insert_or_do

@@ -713,6 +713,8 @@ class BrowserBuffer(Buffer):
             self.progressbar_progress = progress
             self.update()
         elif progress == 100 and self.draw_progressbar:
+            if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
+                self.buffer_widget.load_adblocker()
             if self.dark_mode_is_enable():
                 if not self.eval_dark_js:
                     self.dark_mode()

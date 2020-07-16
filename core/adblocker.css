@@ -111,3 +111,11 @@ embed[src$=".swf"]
 /*
  * For more examples see http://www.mozilla.org/unix/customizing.html
  */
+
+/* EAF additional */
+
+[id*='google_ads'],
+[class*='-ad'],
+[class*='ad-'],
+[class*='_ad'],
+[class*='ad_'] { display: none ! important }
