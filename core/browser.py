@@ -33,6 +33,7 @@ import subprocess
 import re
 import base64
 from functools import partial
+import sqlite3
 
 
 MOUSE_BACK_BUTTON = 8
@@ -177,6 +178,27 @@ class BrowserView(QWebEngineView):
             self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true", "true")
             self.load_adblocker()
             self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
+
+    @interactive()
+    def record_form_data(self):
+        ''' Record form data.'''
+        self.buffer.add_password_entry()
+        self.buffer.message_to_emacs.emit("Successfully recorded form data!")
+
+    @interactive()
+    def toggle_autofill(self):
+        ''' Toggle Autofill status and data'''
+        if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "false":
+            self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "true", "true")
+            self.buffer.autofill_id = self.buffer.auto_fill(0)
+            self.buffer.message_to_emacs.emit("Successfully enabled autofill!")
+        else:
+            self.buffer.autofill_id = self.buffer.auto_fill(self.buffer.autofill_id)
+            if self.buffer.autofill_id == 0:
+                self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "false", "true")
+                self.buffer.message_to_emacs.emit("Successfully disabled autofill!")
+            else:
+                self.buffer.message_to_emacs.emit("Successfully changed autofill data!")
 
     @interactive()
     def search_text_forward(self):
@@ -549,6 +571,9 @@ class BrowserBuffer(Buffer):
         self.config_dir = config_dir
         self.page_closed = False
 
+        self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
+        self.autofill_id = 0
+
         self.history_list = []
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
             self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
@@ -611,6 +636,51 @@ class BrowserBuffer(Buffer):
         self.build_all_methods(self)
         self.build_interactive_method(self.buffer_widget, "back", "history_backward", insert_or_do=True)
         self.build_interactive_method(self.buffer_widget, "forward", "history_forward", insert_or_do=True)
+
+    def add_password_entry(self):
+        password, form_data = self.buffer_widget.execute_js("""
+        var password = "";
+        var form_data = {};
+        var input_list=document.getElementsByTagName("input");
+        for(var i=0;i<input_list.length && input_list[i];i++){
+            if(input_list[i].type === "password" && input_list[i].value != ""){
+                password = input_list[i].value;
+            }
+            else if(input_list[i].type != "hidden" && input_list[i].value != "" && input_list[i].id != ""){
+                form_data[input_list[i].id] = input_list[i].value;
+            }
+        }
+        [password, form_data]
+        """)
+        self.autofill.add_entry(urlparse(self.current_url).hostname, password, form_data)
+
+    def auto_fill(self, id):
+        result = self.autofill.get_entries(urlparse(self.url).hostname, id)
+        new_id = 0
+        for row in result:
+            new_id = row[0]
+            password = row[2]
+            form_data = row[3]
+            self.buffer_widget.execute_js(
+            """
+            var form_data = %s;
+            var input_list=document.getElementsByTagName("input");
+            for(var i=0;i<input_list.length && input_list[i];i++){
+                if(input_list[i].type === "password"){
+                    input_list[i].value = "%s";
+                }
+                else if(input_list[i].type != "hidden" && input_list[i].id != ""){
+                    input_list[i].value = form_data[input_list[i].id];
+                }
+            }
+            """ % (form_data,password))
+            break
+        return new_id
+        
+    
+    def init_auto_fill(self):
+        if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
+            self.autofill_id = self.auto_fill(0)
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
@@ -713,6 +783,7 @@ class BrowserBuffer(Buffer):
             self.progressbar_progress = progress
             self.update()
         elif progress == 100 and self.draw_progressbar:
+            self.init_auto_fill()
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
                 self.buffer_widget.load_adblocker()
             if self.dark_mode_is_enable():
@@ -1095,3 +1166,35 @@ class BrowserBuffer(Buffer):
                 self.message_to_emacs.emit("Please install youtube-dl to use this feature.")
         else:
             self.message_to_emacs.emit("Only videos from YouTube can be downloaded for now.")
+
+class PasswordDb(object):
+    def __init__(self, dbpath):
+        self._conn = sqlite3.connect(dbpath)
+        self._conn.execute("""
+        CREATE TABLE IF NOT EXISTS autofill
+        (id INTEGER PRIMARY KEY AUTOINCREMENT, host TEXT,
+         password TEXT, form_data TEXT)
+        """)
+
+    def add_entry(self, host, password, form_data):
+        result = self._conn.execute("""
+        SELECT id, host, password, form_data FROM autofill
+        WHERE host=? AND form_data=? ORDER BY id
+        """, (host, str(form_data)))
+        if len(list(result))>0:
+            self._conn.execute("""
+            UPDATE autofill SET password=? 
+            WHERE host=? and form_data=?
+            """, (password, host, str(form_data)))
+        else:
+            self._conn.execute("""
+            INSERT INTO autofill (host, password, form_data)
+            VALUES (?, ?, ?)
+            """, (host, password, str(form_data)))
+        self._conn.commit()
+
+    def get_entries(self, host, id):
+        return self._conn.execute("""
+        SELECT id, host, password, form_data FROM autofill
+        WHERE host=? and id>? ORDER BY id
+        """, (host, id))
