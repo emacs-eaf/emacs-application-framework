@@ -77,6 +77,7 @@ class BrowserView(QWebEngineView):
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
         self.dark_mode_js = self.read_js_content("dark_mode.js")
+        self.caret_browsing_js = self.read_js_content("caret_browsing.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
 
@@ -602,6 +603,10 @@ class BrowserBuffer(Buffer):
 
         self.draw_progressbar = False
         self.eval_dark_js = False
+        self.eval_caret_js = False
+        self.caret_browsing_activated = False
+        self.caret_browsing_mark_activated = False
+        self.caret_browsing_search_text = ""
         self.progressbar_progress = 0
         self.progressbar_color = QColor(233, 129, 35, 255)
         self.progressbar_height = 2
@@ -780,10 +785,13 @@ class BrowserBuffer(Buffer):
         ''' Update the Progress Bar.'''
         if progress < 100:
             # Update progres.
+            self.eval_caret_js = False
             self.progressbar_progress = progress
             self.update()
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
+            self.buffer_widget.eval_js(self.buffer_widget.caret_browsing_js)
+            self.eval_caret_js = True
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
                 self.buffer_widget.load_adblocker()
             if self.dark_mode_is_enable():
@@ -879,6 +887,10 @@ class BrowserBuffer(Buffer):
             self.buffer_widget._search_text(str(result_content))
         elif result_tag == "search_text_backward":
             self.buffer_widget._search_text(str(result_content), True)
+        elif result_tag == "caret_search_text_forward":
+            self._caret_search_text(str(result_content))
+        elif result_tag == "caret_search_text_backward":
+            self._caret_search_text(str(result_content), True)
         elif result_tag == "jump_link":
             self.buffer_widget.jump_to_link(str(result_content).strip())
         elif result_tag == "jump_link_new_buffer":
@@ -946,6 +958,117 @@ class BrowserBuffer(Buffer):
                 aria2_args.append("--rpc-listen-all")
 
                 subprocess.Popen(aria2_args, stdout=null_file)
+
+    def caret_browsing(self):
+        ''' Init caret browsing.'''
+        if self.eval_caret_js:
+            self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
+            self.message_to_emacs.emit("Caret browsing activated.")
+            self.caret_browsing_activated = True
+            self.caret_browsing_search_text = ""
+
+    def caret_exit(self):
+        ''' Exit caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
+            self.message_to_emacs.emit("Caret browsing deactivated.")
+            self.caret_browsing_activated = False
+
+    @interactive(insert_or_do=True)
+    def caret_next_line(self):
+        ''' Switch to next line in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'line');")
+
+    @interactive(insert_or_do=True)
+    def caret_previous_line(self):
+        ''' Switch to previous line in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'line');")
+
+    @interactive(insert_or_do=True)
+    def caret_next_character(self):
+        ''' Switch to next character in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'character');")
+
+    @interactive(insert_or_do=True)
+    def caret_previous_character(self):
+        ''' Switch to previous character in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'character');")
+
+    @interactive(insert_or_do=True)
+    def caret_next_word(self):
+        ''' Switch to next word in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'word');")
+            
+    @interactive(insert_or_do=True)
+    def caret_previous_word(self):
+        ''' Switch to previous word in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'word');")
+
+    @interactive(insert_or_do=True)
+    def caret_to_bottom(self):
+        ''' Switch to next word in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'documentboundary');")
+            
+    @interactive(insert_or_do=True)
+    def caret_to_top(self):
+        ''' Switch to previous word in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'documentboundary');")
+            
+    def caret_toggle_mark(self):
+        ''' Toggle mark in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.toggleMark();")
+            if self.buffer_widget.execute_js("CaretBrowsing.markEnabled"):
+                self.caret_browsing_mark_activated = True
+                self.message_to_emacs.emit("Mark is on.")
+            else:
+                self.caret_browsing_mark_activated = False
+                self.message_to_emacs.emit("Mark is off.")
+
+    def caret_clear_search(self):
+        ''' Clear search text in caret browsing.'''
+        if self.caret_browsing_activated:
+            if self.caret_browsing_mark_activated:
+                self.caret_browsing_search_text = ""
+                self.message_to_emacs.emit("Cleared caret search text.")
+
+    @interactive(insert_or_do=True)
+    def caret_search_forward(self):
+        ''' Search Text forward in caret browsing.'''
+        if self.caret_browsing_activated:
+            if self.caret_browsing_mark_activated:
+                if self.caret_browsing_search_text == "":
+                    self.send_input_message("Forward Search Text and Select: ", "caret_search_text_forward")
+                else:
+                    self._caret_search_text(self.caret_browsing_search_text)
+
+    @interactive(insert_or_do=True)
+    def caret_search_backward(self):
+        ''' Search Text backward in caret browsing.'''
+        if self.caret_browsing_activated:
+            if self.caret_browsing_mark_activated:
+                if self.caret_browsing_search_text == "":
+                    self.send_input_message("Backward Search Text and Select: ", "caret_search_text_backward")
+                else:
+                    self._caret_search_text(self.caret_browsing_search_text,True)
+
+    def _caret_search_text(self, text, is_backward = False):
+        if self.caret_browsing_search_text != text:
+            self.caret_browsing_search_text = text
+        if is_backward:
+            if not self.buffer_widget.execute_js("window.find('"+text+"',false,true)"):
+                self.message_to_emacs.emit("Unable to find more, please try forward search.")
+        else:
+            if not self.buffer_widget.execute_js("window.find('"+text+"')"):
+                self.message_to_emacs.emit("Unable to find more, please try backward search.")
 
     @interactive(insert_or_do=True)
     def open_download_manage_page(self):
