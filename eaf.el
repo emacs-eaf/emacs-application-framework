@@ -162,7 +162,7 @@ Don't modify this map directly.  To bind keys for all apps use
 (defvar-local eaf--buffer-map-alist nil
   "EAF buffer-local map alist.")
 
-(defvar-local eaf--buffer-map-alist-order 1 
+(defvar-local eaf--buffer-map-alist-order 1
   "Order of EAF buffer-local map alist in `emulation-mode-map-alists'.")
 
 (define-derived-mode eaf-mode fundamental-mode "EAF"
@@ -314,14 +314,14 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
     ("C-q" . "caret_exit")
-    ("z" . "insert_or_caret_next_line")
-    ("Z" . "insert_or_caret_previous_line")
-    ("a" . "insert_or_caret_next_character")
-    ("A" . "insert_or_caret_previous_character")
-    ("w" . "insert_or_caret_next_word")
-    ("W" . "insert_or_caret_previous_word")
-    ("b" . "insert_or_caret_to_bottom")
-    ("B" . "insert_or_caret_to_top")
+    ("s" . "insert_or_caret_next_line")
+    ("w" . "insert_or_caret_previous_line")
+    ("d" . "insert_or_caret_next_character")
+    ("a" . "insert_or_caret_previous_character")
+    ("D" . "insert_or_caret_next_word")
+    ("A" . "insert_or_caret_previous_word")
+    ("S" . "insert_or_caret_to_bottom")
+    ("W" . "insert_or_caret_to_top")
     ("/" . "insert_or_caret_search_forward")
     ("?" . "insert_or_caret_search_backward")
     ("C-i" . "caret_toggle_mark")
@@ -334,10 +334,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("l" . "insert_or_scroll_right")
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
-    ("D" . "insert_or_open_link_background_buffer")
+    ("B" . "insert_or_open_link_background_buffer")
     ("c" . "insert_or_copy_link")
     ("C" . "insert_or_copy_code")
-    ("d" . "insert_or_scroll_up_page")
     ("u" . "insert_or_scroll_down_page")
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
