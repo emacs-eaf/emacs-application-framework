@@ -114,8 +114,4 @@ embed[src$=".swf"]
 
 /* EAF additional */
 
-[id*='google_ads'],
-[class*='-ad'],
-[class*='ad-'],
-[class*='_ad'],
-[class*='ad_'] { display: none ! important }
+[id*='google_ads'] { display: none ! important }
