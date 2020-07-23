@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
 from core.utils import touch, string_to_base64, interactive
+from html import escape, unescape
 import os
 import base64
 
@@ -141,10 +142,10 @@ class AppBuffer(BrowserBuffer):
             "Update topic: ",
             "update_node_topic",
             "string",
-            self.buffer_widget.execute_js("get_node_topic();"))
+            unescape(self.buffer_widget.execute_js("get_node_topic();")))
 
     def handle_update_node_topic(self, topic):
-        self.buffer_widget.eval_js("update_node_topic('{}');".format(topic))
+        self.buffer_widget.eval_js("update_node_topic('{}');".format(escape(topic)))
 
         self.change_title(self.get_root_node_topic())
 
