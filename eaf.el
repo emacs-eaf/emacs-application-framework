@@ -269,6 +269,8 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-aria2-proxy-port . "")
     (eaf-browser-dark-mode . "follow")
     (eaf-pdf-dark-mode . "follow")
+    (eaf-pdf-read-mode . "fit_to_customize")
+    (eaf-pdf-default-zoom . "1.5")
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
     (eaf-mindmap-dark-mode . "follow")
