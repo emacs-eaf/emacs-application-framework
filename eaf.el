@@ -294,7 +294,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-w" . "kill_text")
     ("M-e" . "edit_focus_text")
-    ("M-c" . "caret_browsing")
+    ("M-c" . "toggle_caret_browsing")
     ("M-s" . "open_link")
     ("M-S" . "open_link_new_buffer")
     ("M-d" . "open_link_background_buffer")
@@ -313,19 +313,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
-    ("C-q" . "caret_exit")
-    ("s" . "insert_or_caret_next_line")
-    ("w" . "insert_or_caret_previous_line")
-    ("d" . "insert_or_caret_next_character")
-    ("a" . "insert_or_caret_previous_character")
-    ("D" . "insert_or_caret_next_word")
-    ("A" . "insert_or_caret_previous_word")
-    ("S" . "insert_or_caret_to_bottom")
-    ("W" . "insert_or_caret_to_top")
-    ("/" . "insert_or_caret_search_forward")
-    ("?" . "insert_or_caret_search_backward")
-    ("C-i" . "caret_toggle_mark")
-    ("C-." . "caret_clear_search")
     ("J" . "insert_or_select_left_tab")
     ("K" . "insert_or_select_right_tab")
     ("j" . "insert_or_scroll_up")
@@ -797,6 +784,81 @@ Python process only create application view when Emacs window or buffer state ch
 (defvar-local eaf--bookmark-title nil)
 
 (defvar-local eaf-mindmap--current-add-mode nil)
+
+(define-minor-mode eaf-browser-caret-mode
+  "EAF browser caret mode."
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "w") 'eaf-caret-previous-line)
+            (define-key map (kbd "s") 'eaf-caret-next-line)
+            (define-key map (kbd "d") 'eaf-caret-next-character)
+            (define-key map (kbd "a") 'eaf-caret-previous-character)
+            (define-key map (kbd "W") 'eaf-caret-to-top)
+            (define-key map (kbd "S") 'eaf-caret-to-bottom)
+            (define-key map (kbd "A") 'eaf-caret-previous-word)
+            (define-key map (kbd "D") 'eaf-caret-next-word)
+            (define-key map (kbd "/") 'eaf-caret-search-forward)
+            (define-key map (kbd "?") 'eaf-caret-search-backward)
+            (define-key map (kbd "C-o") 'eaf-caret-toggle-mark)
+            (define-key map (kbd "C-.") 'eaf-caret-clear-search)
+            map))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "toggle_caret_browsing"
+ #'eaf--toggle-caret-browsing)
+
+(defun eaf--toggle-caret-browsing (caret-status)
+  (if caret-status
+      (eaf-browser-caret-mode 1)
+      (eaf-browser-caret-mode 0)))
+
+(defun eaf-caret-previous-line ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_previous_line"))
+
+(defun eaf-caret-next-line ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_next_line"))
+  
+(defun eaf-caret-next-character ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_next_character"))
+
+(defun eaf-caret-previous-character ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_previous_character"))
+
+(defun eaf-caret-to-top ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_to_top"))
+
+(defun eaf-caret-to-bottom ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_to_bottom"))
+
+(defun eaf-caret-previous-word ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_previous_word"))
+
+(defun eaf-caret-next-word ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_next_word"))
+
+(defun eaf-caret-search-forward ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_search_forward"))
+
+(defun eaf-caret-search-backward ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_search_backward"))
+
+(defun eaf-caret-toggle-mark ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_toggle_mark"))
+
+(defun eaf-caret-clear-search ()
+  (interactive)
+  (eaf-call "call_function" eaf--buffer-id "caret_clear_search"))
 
 (defun eaf-browser-restore-buffers ()
   "EAF restore all opened EAF Browser buffers in the previous Emacs session.
@@ -2189,6 +2251,22 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   | C-c C-c | eaf-edit-buffer-confirm            |
   | C-c C-k | eaf-edit-buffer-cancel             |
   | C-c C-t | eaf-edit-buffer-switch-to-org-mode |
+
+* Browser Caret Browsing Mode
+  | Key     | Event                              |
+  |---------+------------------------------------|
+  | w       | eaf-caret-previous-line            |
+  | s       | eaf-caret-next-line                |
+  | d       | eaf-caret-next-character           |
+  | a       | eaf-caret-previous-character       |
+  | W       | eaf-caret-to-top                   |
+  | S       | eaf-caret-to-bottom                |
+  | A       | eaf-caret-previous-word            |
+  | D       | eaf-caret-next-word                |
+  | /       | eaf-caret-search-forward           |
+  | ?       | eaf-caret-search-backward          |
+  | C-o     | eaf-caret-toggle-mark              |
+  | C-.     | eaf-caret-clear-search             |
 
 ")
     (dolist (var vars)

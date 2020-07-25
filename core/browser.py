@@ -563,6 +563,7 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
     open_dev_tools_tab = QtCore.pyqtSignal(object)
+    caret_browsing_status = QtCore.pyqtSignal(bool)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view)
@@ -959,64 +960,61 @@ class BrowserBuffer(Buffer):
 
                 subprocess.Popen(aria2_args, stdout=null_file)
 
-    def caret_browsing(self):
-        ''' Init caret browsing.'''
+    def toggle_caret_browsing(self):
+        ''' toggle caret browsing.'''
         if self.eval_caret_js:
-            self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
-            self.message_to_emacs.emit("Caret browsing activated.")
-            self.caret_browsing_activated = True
-            self.caret_browsing_search_text = ""
+            if self.caret_browsing_activated:
+                self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
+                self.message_to_emacs.emit("Caret browsing deactivated.")
+                self.caret_browsing_activated = False
+                self.caret_browsing_status.emit(self.caret_browsing_activated)
+            else:
+                self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
+                self.message_to_emacs.emit("Caret browsing activated.")
+                self.caret_browsing_activated = True
+                self.caret_browsing_search_text = ""
+                self.caret_browsing_status.emit(self.caret_browsing_activated)
 
-    def caret_exit(self):
-        ''' Exit caret browsing.'''
+    def exit_caret_browsing(self):
         if self.caret_browsing_activated:
-            self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
-            self.message_to_emacs.emit("Caret browsing deactivated.")
             self.caret_browsing_activated = False
+            self.caret_browsing_status.emit(self.caret_browsing_activated)
 
-    @interactive(insert_or_do=True)
     def caret_next_line(self):
         ''' Switch to next line in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'line');")
 
-    @interactive(insert_or_do=True)
     def caret_previous_line(self):
         ''' Switch to previous line in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'line');")
 
-    @interactive(insert_or_do=True)
     def caret_next_character(self):
         ''' Switch to next character in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'character');")
 
-    @interactive(insert_or_do=True)
     def caret_previous_character(self):
         ''' Switch to previous character in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'character');")
 
-    @interactive(insert_or_do=True)
     def caret_next_word(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'word');")
             
-    @interactive(insert_or_do=True)
     def caret_previous_word(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'word');")
 
-    @interactive(insert_or_do=True)
     def caret_to_bottom(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'documentboundary');")
             
-    @interactive(insert_or_do=True)
     def caret_to_top(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1040,7 +1038,6 @@ class BrowserBuffer(Buffer):
                 self.caret_browsing_search_text = ""
                 self.message_to_emacs.emit("Cleared caret search text.")
 
-    @interactive(insert_or_do=True)
     def caret_search_forward(self):
         ''' Search Text forward in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1050,7 +1047,6 @@ class BrowserBuffer(Buffer):
                 else:
                     self._caret_search_text(self.caret_browsing_search_text)
 
-    @interactive(insert_or_do=True)
     def caret_search_backward(self):
         ''' Search Text backward in caret browsing.'''
         if self.caret_browsing_activated:

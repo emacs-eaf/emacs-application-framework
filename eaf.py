@@ -203,6 +203,10 @@ class EAF(dbus.service.Object):
         if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(app_buffer.buffer_widget.get_focus_text, "connect", False):
             app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
 
+        # Handle caret_browsing_status signal.
+        if getattr(app_buffer, "caret_browsing_status", False) and getattr(app_buffer.caret_browsing_status, "connect", False):
+            app_buffer.caret_browsing_status.connect(self.toggle_caret_browsing)
+
         # Handle get_sub_node_id signal.
         if getattr(app_buffer, "get_sub_node_id", False) and getattr(app_buffer.get_sub_node_id, "connect", False):
             app_buffer.get_sub_node_id.connect(self.add_multiple_sub_nodes)
@@ -515,6 +519,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def edit_focus_text(self, buffer_id, focus_text):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def toggle_caret_browsing(self, caret_status):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

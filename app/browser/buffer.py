@@ -52,6 +52,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
 
         self.buffer_widget.urlChanged.connect(self.set_adblocker)
+        self.buffer_widget.urlChanged.connect(self.exit_caret_browsing)
 
         # Reset to default zoom when page init or url changed.
         self.reset_default_zoom()
