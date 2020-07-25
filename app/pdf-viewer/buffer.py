@@ -204,7 +204,8 @@ class PdfViewerWidget(QWidget):
         # Init scale and scale mode.
         self.scale = 1.0
         self.read_mode = "fit_to_width"
-        if (self.emacs_var_dict["eaf-pdf-read-mode"] == "fit_to_customize"):
+        # Simple string comparation. 
+        if (self.emacs_var_dict["eaf-pdf-default-zoom"] != "1.0"):
             self.read_mode = "fit_to_customize"
             self.scale = float(self.emacs_var_dict["eaf-pdf-default-zoom"])
         self.horizontal_offset = 0
