@@ -275,7 +275,9 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
-    (eaf-emacs-theme-mode . ""))
+    (eaf-emacs-theme-mode . "")
+    (eaf-emacs-theme-background-color . "")
+    (eaf-emacs-theme-foreground-color . ""))
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
@@ -2088,13 +2090,25 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf-get-theme-mode ()
   (format "%s"(frame-parameter nil 'background-mode)))
 
+(defun eaf-get-theme-background-color ()
+  (format "%s"(frame-parameter nil 'background-color)))
+
+(defun eaf-get-theme-foreground-color ()
+  (format "%s"(frame-parameter nil 'foreground-color)))
+
 (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+
+(eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+
+(eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
 
 (advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
   "Update `eaf-emacs-theme-mode' after execute `load-theme'."
   (apply orig-fun arg args)
-  (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode)))
+  (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+  (eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+  (eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
 
 (define-minor-mode eaf-pdf-outline-mode
   "EAF pdf outline mode."

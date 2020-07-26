@@ -256,8 +256,10 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_height = 22
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_light_color = QColor("#333333")
-        self.page_annotate_dark_color = QColor("#999999")
+        self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.page_annotate_dark_color = QColor(1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).redF(),\
+                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).greenF(),\
+                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).blueF())
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -272,6 +274,16 @@ class PdfViewerWidget(QWidget):
         self.is_page_just_changed = False
 
         self.remember_offset = None
+
+    def handle_color(self,color,inverted=False):
+        r = float(color.redF())
+        g = float(color.greenF())
+        b = float(color.blueF())
+        if inverted:
+            r = 1.0-r
+            g = 1.0-g
+            b = 1.0-b
+        return (r,g,b)
 
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
@@ -315,6 +327,10 @@ class PdfViewerWidget(QWidget):
         if self.char_dict[index] is None:
             self.char_dict[index] = self.get_page_char_rect_list(index)
             self.select_area_annot_cache_dict[index] = None
+
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow":
+            col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
+            page.drawRect(page.rect, color=col, fill=col, overlay=False)
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
