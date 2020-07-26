@@ -572,6 +572,7 @@ class BrowserBuffer(Buffer):
         self.config_dir = config_dir
         self.page_closed = False
 
+        touch(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
         self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
         self.autofill_id = 0
 
