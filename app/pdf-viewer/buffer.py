@@ -256,7 +256,10 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_height = 22
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.page_annotate_dark_color = QColor(1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).redF(),\
+                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).greenF(),\
+                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).blueF())
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -326,10 +329,7 @@ class PdfViewerWidget(QWidget):
             self.select_area_annot_cache_dict[index] = None
 
         if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow":
-            if self.inverted_mode:
-                col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), True)
-            else:
-                col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]))
+            col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
             page.drawRect(page.rect, color=col, fill=col, overlay=False)
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
@@ -426,7 +426,10 @@ class PdfViewerWidget(QWidget):
         # Render current page.
         painter.setFont(self.font)
 
-        painter.setPen(self.page_annotate_color)
+        if self.inverted_mode:
+            painter.setPen(self.page_annotate_dark_color)
+        else:
+            painter.setPen(self.page_annotate_light_color)
 
         painter.drawText(QRect(self.rect().x(),
                                self.rect().y() + self.rect().height() - self.page_annotate_height - self.page_annotate_padding_bottom,
