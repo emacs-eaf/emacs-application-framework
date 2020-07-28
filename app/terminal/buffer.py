@@ -43,6 +43,7 @@ class AppBuffer(BrowserBuffer):
         self.command = arguments_dict["command"]
         self.start_directory = arguments_dict["directory"]
         self.current_directory = self.start_directory
+        self.executing_command = ""
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
 
@@ -83,10 +84,21 @@ class AppBuffer(BrowserBuffer):
 
     def checking_status(self):
         changed_directory = str(self.buffer_widget.execute_js("title"))
-        if not changed_directory == self.current_directory:
+        changed_executing_command = str(self.buffer_widget.execute_js("executing_command"))
+        if len(changed_executing_command) > 30:
+            changed_executing_command = changed_executing_command[:30]
+
+        if changed_executing_command != self.executing_command and changed_executing_command != "":
+            self.change_title(changed_executing_command)
+            self.executing_command = changed_executing_command
+        elif changed_executing_command == "" and self.executing_command != "" or not changed_directory == self.current_directory:
             self.change_title(changed_directory)
-            self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
-            self.current_directory = changed_directory
+            if not changed_directory == self.current_directory:
+                self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+                self.current_directory = changed_directory
+            if self.executing_command != "":
+                self.executing_command = ""
+
         if subprocess.Popen.poll(self.background_process) is not None:
             self.destroy_buffer()
 

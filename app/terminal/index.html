@@ -37,7 +37,7 @@
           var socket = new WebSocket("ws://127.0.0.1:%1");
       }
       catch(err) {
-          setTimeout('location.reload();',1000);
+          location.reload();
       }
       const term = new Terminal({
           fontSize: "%4",
@@ -46,6 +46,7 @@
       });
       
       var title = "%5"
+      var executing_command = ""
       
       const searchAddon = new SearchAddon.SearchAddon();
 
@@ -124,6 +125,34 @@
 
           window.addEventListener("resize", sendSizeToServer);
 
+          term.onLineFeed(() => {
+              const buffer = term.buffer;
+              const new_line = buffer.getLine(buffer.baseY + buffer.cursorY);
+              if (new_line && !new_line.isWrapped) {
+                  var input_data = get_line_data(buffer, buffer.baseY + buffer.cursorY - 1);
+                  if (input_data.indexOf('$')!=-1){
+                      executing_command = input_data.slice(input_data.indexOf('$')+1).trim()
+                      if(executing_command.startsWith("cd ")) {
+                          executing_command = ""
+                      }
+                  }
+              }
+          })
+          function get_line_data(buffer, line_index) {
+              let line = buffer.getLine(line_index);
+              if (!line) {
+                  return;
+              }
+              let line_data = line.translateToString(true);
+              while (line_index > 0 && line.isWrapped) {
+                  line = buffer.getLine(--line_index);
+                  if (!line) {
+                      break;
+                  }
+                  line_data = line.translateToString(false) + line_data;
+              }
+              return line_data;
+          }
       }
 
       socket.onmessage = (msg) => {
@@ -131,6 +160,7 @@
           arr = re.exec(msg.data)
           if(arr) {
               title = arr[1];
+              executing_command = ""
           }
       }
 
