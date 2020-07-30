@@ -359,6 +359,7 @@ class BrowserView(QWebEngineView):
         ''' Scroll to the bottom.'''
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
+    @interactive()
     def get_selection_text(self):
         ''' Get the selected text.'''
         return self.execute_js(self.get_selection_text_js)
