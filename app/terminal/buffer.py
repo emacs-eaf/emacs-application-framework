@@ -78,7 +78,13 @@ class AppBuffer(BrowserBuffer):
     def run_http_server(self):
         class Handler(SimpleHTTPRequestHandler):
             def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=os.path.dirname(__file__), **kwargs)
+                # directory=os.path.dirname(__file__), This argument add in python3.7 after
+                super().__init__(*args, **kwargs)
+            def translate_path(self, path):
+                # On python3.7 before version, http server don't support setting directory
+                # default use the project path.
+                path = super().translate_path(path)
+                return os.path.dirname(__file__) + path[len(os.getcwd()):]
         with TCPServer(("127.0.0.1", int(self.http_url.split(":")[-1])), Handler) as h:
             h.serve_forever()
 
