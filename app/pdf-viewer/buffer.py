@@ -328,7 +328,7 @@ class PdfViewerWidget(QWidget):
             self.char_dict[index] = self.get_page_char_rect_list(index)
             self.select_area_annot_cache_dict[index] = None
 
-        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow":
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.url.split(".")[-1] == "pdf":
             col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
             page.drawRect(page.rect, color=col, fill=col, overlay=False)
 
