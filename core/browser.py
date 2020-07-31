@@ -892,7 +892,7 @@ class BrowserBuffer(Buffer):
             self._caret_search_text(str(result_content))
         elif result_tag == "caret_search_text_backward":
             self._caret_search_text(str(result_content), True)
-        elif result_tag == "jump_link":
+        elif result_tag == "jump_link_or_select_text":
             self.buffer_widget.jump_to_link(str(result_content).strip())
         elif result_tag == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
@@ -925,7 +925,7 @@ class BrowserBuffer(Buffer):
 
     def cancel_input_message(self, result_tag):
         ''' Cancel input message.'''
-        if result_tag == "jump_link" or \
+        if result_tag == "jump_link_or_select_text" or \
            result_tag == "jump_link_new_buffer" or \
            result_tag == "jump_link_background_buffer" or \
            result_tag == "copy_link" or \
@@ -1089,10 +1089,10 @@ class BrowserBuffer(Buffer):
         self.send_input_message("Copy code: ", "copy_code");
 
     @interactive(insert_or_do=True)
-    def open_link(self):
+    def open_link_or_select_text(self):
         ''' Open Link.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link: ", "jump_link");
+        self.send_input_message("Open Link or Select Text: ", "jump_link_or_select_text");
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer(self):

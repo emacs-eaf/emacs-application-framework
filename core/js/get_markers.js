@@ -8,9 +8,9 @@
         return `${path.join(' > ')}`.toLowerCase();
     }
 
-    function getCoords(link){
-        let rect = link.getBoundingClientRect();
-        return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(link) ];
+    function getCoords(node){
+        let rect = node.getBoundingClientRect();
+        return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(node) ];
     }
 
     function isElementOnScreen(rect){
@@ -60,11 +60,11 @@
     function generateKeys(markerContainer) {
         let lettersString = "%1";
         let letters = lettersString.split("");
-        let linkNum = markerContainer.children.length;
-        let keyLen = linkNum == 1 ? 1 : Math.ceil(Math.log(linkNum)/Math.log(letters.length));
+        let nodeNum = markerContainer.children.length;
+        let keyLen = nodeNum == 1 ? 1 : Math.ceil(Math.log(nodeNum)/Math.log(letters.length));
         let keyCounter = [];
         for(let i = 0; i < keyLen; i++) keyCounter[i] = 0;
-        for(let l = 0; l < linkNum; l++) {
+        for(let l = 0; l < nodeNum; l++) {
             let keyStr = '';
             for(let k = 0; k < keyLen; k++) {
                 let mark = document.createElement('span');
@@ -150,6 +150,8 @@ z-index: 100000;\
     addElementToRects(validRects, document.querySelectorAll('summary')); // collect <summary>
     addElementToRects(validRects, document.querySelectorAll('[class="gap"]')); // collect class="gap"
     addElementToRects(validRects, document.querySelectorAll('[ng-click]')); // collect ng-click
+    addElementToRects(validRects, document.querySelectorAll('p')); // collect <p>
+    addElementToRects(validRects, document.querySelectorAll('span')); // collect <span>
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');

@@ -298,7 +298,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-w" . "kill_text")
     ("M-e" . "edit_focus_text")
     ("M-c" . "caret_browsing")
-    ("M-s" . "open_link")
+    ("M-s" . "open_link_or_select_text")
     ("M-S" . "open_link_new_buffer")
     ("M-d" . "open_link_background_buffer")
     ("C-/" . "undo_action")
