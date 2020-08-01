@@ -359,6 +359,7 @@ class BrowserView(QWebEngineView):
         ''' Scroll to the bottom.'''
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
+    @interactive()
     def get_selection_text(self):
         ''' Get the selected text.'''
         return self.execute_js(self.get_selection_text_js)
@@ -425,6 +426,10 @@ class BrowserView(QWebEngineView):
     def get_link_markers(self):
         ''' Get link markers.'''
         self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+
+    def get_text_markers(self):
+        ''' Get link markers.'''
+        self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]).replace("%2", "select_text"));
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
@@ -892,7 +897,7 @@ class BrowserBuffer(Buffer):
             self._caret_search_text(str(result_content))
         elif result_tag == "caret_search_text_backward":
             self._caret_search_text(str(result_content), True)
-        elif result_tag == "jump_link":
+        elif result_tag == "jump_link" or result_tag == "select_marker_text":
             self.buffer_widget.jump_to_link(str(result_content).strip())
         elif result_tag == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
@@ -928,6 +933,7 @@ class BrowserBuffer(Buffer):
         if result_tag == "jump_link" or \
            result_tag == "jump_link_new_buffer" or \
            result_tag == "jump_link_background_buffer" or \
+           result_tag == "select_marker_text" or \
            result_tag == "copy_link" or \
            result_tag == "edit_url":
             self.buffer_widget.cleanup_links()
@@ -1082,6 +1088,12 @@ class BrowserBuffer(Buffer):
         ''' Copy code.'''
         self.buffer_widget.get_code_markers()
         self.send_input_message("Copy code: ", "copy_code");
+
+    @interactive(insert_or_do=True)
+    def select_text(self):
+        ''' Select Text.'''
+        self.buffer_widget.get_text_markers()
+        self.send_input_message("Select Text: ", "select_marker_text");
 
     @interactive(insert_or_do=True)
     def open_link(self):

@@ -30,6 +30,9 @@ import signal
 import threading
 import getpass
 import json
+from urllib import request
+from http.server import SimpleHTTPRequestHandler
+from socketserver import TCPServer
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -37,16 +40,21 @@ class AppBuffer(BrowserBuffer):
 
         # Get free port.
         self.port = get_free_port()
+        self.http_url = "http://127.0.0.1:{0}".format(get_free_port())
         self.url = url
 
         arguments_dict = json.loads(arguments)
         self.command = arguments_dict["command"]
         self.start_directory = arguments_dict["directory"]
         self.current_directory = self.start_directory
-        self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
+        self.executing_command = ""
+        self.index_file = "{0}/index.html".format(self.http_url)
         self.server_js = os.path.join(os.path.dirname(__file__), "server.js")
 
         self.buffer_widget.titleChanged.connect(self.change_title)
+
+        http_thread = threading.Thread(target=self.run_http_server, args=())
+        http_thread.start()
 
         # Start server process.
         self.background_process = subprocess.Popen(
@@ -67,6 +75,19 @@ class AppBuffer(BrowserBuffer):
         self.timer.start(250)
         self.timer.timeout.connect(self.checking_status)
 
+    def run_http_server(self):
+        class Handler(SimpleHTTPRequestHandler):
+            def __init__(self, *args, **kwargs):
+                # directory=os.path.dirname(__file__), This argument add in python3.7 after
+                super().__init__(*args, **kwargs)
+            def translate_path(self, path):
+                # On python3.7 before version, http server don't support setting directory
+                # default use the project path.
+                path = super().translate_path(path)
+                return os.path.dirname(__file__) + path[len(os.getcwd()):]
+        with TCPServer(("127.0.0.1", int(self.http_url.split(":")[-1])), Handler) as h:
+            h.serve_forever()
+
     def focus_terminal(self):
         event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
         QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
@@ -77,16 +98,28 @@ class AppBuffer(BrowserBuffer):
         if self.emacs_var_dict["eaf-terminal-dark-mode"] == "true" or \
            (self.emacs_var_dict["eaf-terminal-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
-        with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", str(self.port)).replace("%2", "file://" + os.path.join(os.path.dirname(__file__))).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory)
+
+        with request.urlopen(self.index_file) as f:
+            html = f.read().decode("utf-8").replace("%1", str(self.port)).replace("%2", self.http_url).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory)
             self.buffer_widget.setHtml(html)
 
     def checking_status(self):
         changed_directory = str(self.buffer_widget.execute_js("title"))
-        if not changed_directory == self.current_directory:
+        changed_executing_command = str(self.buffer_widget.execute_js("executing_command"))
+        if len(changed_executing_command) > 30:
+            changed_executing_command = changed_executing_command[:30]
+
+        if changed_executing_command != self.executing_command and changed_executing_command != "":
+            self.change_title(changed_executing_command)
+            self.executing_command = changed_executing_command
+        elif changed_executing_command == "" and self.executing_command != "" or not changed_directory == self.current_directory:
             self.change_title(changed_directory)
-            self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
-            self.current_directory = changed_directory
+            if not changed_directory == self.current_directory:
+                self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory +'''")''')
+                self.current_directory = changed_directory
+            if self.executing_command != "":
+                self.executing_command = ""
+
         if subprocess.Popen.poll(self.background_process) is not None:
             self.destroy_buffer()
 
