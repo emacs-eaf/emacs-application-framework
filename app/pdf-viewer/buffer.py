@@ -879,7 +879,14 @@ class PdfViewerWidget(QWidget):
                     # if only one char selected.
                     line_rect_list.append(bbox_list[0])
 
-            line_rect_list = list(map(lambda x: fitz.Rect(x), line_rect_list))
+            def check_rect(rect):
+                tl_x, tl_y, br_x, br_y = rect
+                if tl_x <= br_x and tl_y <= br_y:
+                    return fitz.Rect(rect)
+                # discard the illegal rect. return a micro rect
+                return fitz.Rect(tl_x, tl_y, tl_x+1, tl_y+1)
+
+            line_rect_list = list(map(check_rect, line_rect_list))
 
             page = self.document[page_index]
             old_annot = self.select_area_annot_cache_dict[page_index]
