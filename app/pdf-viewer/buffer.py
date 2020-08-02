@@ -243,6 +243,7 @@ class PdfViewerWidget(QWidget):
 
         # annot
         self.is_hover_annot = False
+        self.edited_page_annot = (None, None)
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -958,13 +959,15 @@ class PdfViewerWidget(QWidget):
                     self.get_focus_text.emit(self.buffer_id, annot.info["content"])
                 else:
                     self.buffer.message_to_emacs.emit("Cannot edit. Only support text annot type.")
+                self.edited_page_annot = (page, annot)
 
     def update_annot_text(self, annot_text):
-        page, annot = self.hover_annot()
+        page, annot = self.edited_page_annot
         if annot.parent:
             annot.setInfo(content=annot_text)
             annot.update()
         self.save_annot()
+        self.edited_annot = (None, None)
 
     def jump_to_page(self, page_num):
         self.update_vertical_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
