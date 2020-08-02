@@ -283,6 +283,34 @@ It must defined at `eaf-browser-search-engines'."
 Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
+(defcustom eaf-browser-caret-mode-keybinding
+  '(
+    ("/" . "caret_search_forward")
+    ("?" . "caret_search_backward")
+    ("q" . "caret_exit")
+    ("v" . "caret_exit")
+    ("C-q" . "caret_exit")
+    ("j" . "caret_next_line")
+    ("k" . "caret_previous_line")
+    ("l" . "caret_next_character")
+    ("h" . "caret_previous_character")
+    ("w" . "caret_next_word")
+    ("b" . "caret_previous_word")
+    ("g" . "caret_to_bottom")
+    ("G" . "caret_to_top")
+    ("C-s" . "caret_search_forward")
+    ("C-r" . "caret_search_backward")
+    ("C-n" . "caret_next_line")
+    ("C-p" . "caret_previous_line")
+    ("C-f" . "caret_next_character")
+    ("C-b" . "caret_previous_character")
+    ("M-f" . "caret_next_word")
+    ("M-b" . "caret_previous_word")
+    ("C-." . "caret_clear_search")
+    )
+  "The keybinding of EAF Browser Caret Mode."
+  :type 'cons)
+
 (defcustom eaf-browser-keybinding
   '(("C--" . "zoom_out")
     ("C-=" . "zoom_in")
@@ -317,19 +345,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
-    ("C-q" . "caret_exit")
-    ("s" . "insert_or_caret_next_line")
-    ("w" . "insert_or_caret_previous_line")
-    ("d" . "insert_or_caret_next_character")
-    ("a" . "insert_or_caret_previous_character")
-    ("D" . "insert_or_caret_next_word")
-    ("A" . "insert_or_caret_previous_word")
-    ("S" . "insert_or_caret_to_bottom")
-    ("W" . "insert_or_caret_to_top")
-    ("/" . "insert_or_caret_search_forward")
-    ("?" . "insert_or_caret_search_backward")
     ("C-i" . "caret_toggle_mark")
-    ("C-." . "caret_clear_search")
     ("J" . "insert_or_select_left_tab")
     ("K" . "insert_or_select_right_tab")
     ("j" . "insert_or_scroll_up")
@@ -1079,11 +1095,12 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
-(defun eaf--gen-keybinding-map (keybinding)
+(defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
-          (set-keymap-parent map eaf-mode-map*)
+          (unless no-inherit-eaf-mode-map*
+            (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in keybinding
                    do (define-key map (kbd key)
                         (cond
@@ -1096,7 +1113,14 @@ to edit EAF keybindings!" fun fun)))
                          ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
                          ((string-match "-" fun)
                           (intern fun))))
-                   finally return map))))
+                   finally return map)))
+  )
+
+(defun eaf--toggle-caret-browsing (caret-status)
+  (if caret-status
+      (eaf--gen-keybinding-map eaf-browser-caret-mode-keybinding t)
+    (eaf--gen-keybinding-map eaf-browser-keybinding))
+  (setq eaf--buffer-map-alist (list (cons t eaf-mode-map))))
 
 (defun eaf--get-app-bindings (app-name)
   "Get the specified APP-NAME keybinding.

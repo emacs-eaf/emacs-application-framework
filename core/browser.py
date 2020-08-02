@@ -973,56 +973,59 @@ class BrowserBuffer(Buffer):
             self.caret_browsing_activated = True
             self.caret_browsing_search_text = ""
 
+
+    @interactive()
     def caret_exit(self):
         ''' Exit caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
             self.message_to_emacs.emit("Caret browsing deactivated.")
+            self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing nil)''')
             self.caret_browsing_activated = False
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_next_line(self):
         ''' Switch to next line in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'line');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_previous_line(self):
         ''' Switch to previous line in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'line');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_next_character(self):
         ''' Switch to next character in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'character');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_previous_character(self):
         ''' Switch to previous character in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'character');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_next_word(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'word');")
             
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_previous_word(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'word');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_to_bottom(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'documentboundary');")
             
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_to_top(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1034,9 +1037,11 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.eval_js("CaretBrowsing.toggleMark();")
             if self.buffer_widget.execute_js("CaretBrowsing.markEnabled"):
                 self.caret_browsing_mark_activated = True
+                self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing t)''')
                 self.message_to_emacs.emit("Mark is on.")
             else:
                 self.caret_browsing_mark_activated = False
+                self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing nil)''')
                 self.message_to_emacs.emit("Mark is off.")
 
     def caret_clear_search(self):
@@ -1046,7 +1051,7 @@ class BrowserBuffer(Buffer):
                 self.caret_browsing_search_text = ""
                 self.message_to_emacs.emit("Cleared caret search text.")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_search_forward(self):
         ''' Search Text forward in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1056,7 +1061,7 @@ class BrowserBuffer(Buffer):
                 else:
                     self._caret_search_text(self.caret_browsing_search_text)
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_search_backward(self):
         ''' Search Text backward in caret browsing.'''
         if self.caret_browsing_activated:
