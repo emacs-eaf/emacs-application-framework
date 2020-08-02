@@ -929,19 +929,28 @@ class PdfViewerWidget(QWidget):
             annots.append(annot)
             annot = annot.next
 
+        is_hover_annot = False
+        current_annot = None
         for annot in annots:
             if fitz.Point(ex, ey) in annot.rect:
-                self.is_hover_annot = True
-                annot.setOpacity(0.5)
+                # self.buffer.message_to_emacs.emit(annot.info["content"])
+                is_hover_annot = True
+                current_annot = annot
+                opacity = 0.5
                 self.buffer.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
             else:
-                annot.setOpacity(1) # restore annot
-                self.is_hover_annot = False
-            annot.update()
+                opacity = 1.0
+            if opacity != annot.opacity:
+                annot.setOpacity(opacity)
+                annot.update()
 
-        self.page_cache_pixmap_dict.clear()
-        self.update()
-        return page, annot
+        # update only if changed
+        if is_hover_annot != self.is_hover_annot:
+            self.is_hover_annot = is_hover_annot
+            self.page_cache_pixmap_dict.clear()
+            self.update()
+
+        return page, current_annot
 
     def save_annot(self):
         self.document.saveIncr()
