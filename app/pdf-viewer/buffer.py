@@ -955,11 +955,8 @@ class PdfViewerWidget(QWidget):
                 page.deleteAnnot(annot)
                 self.save_annot()
             if action == "edit":
-                if annot.type[0] == 0:
-                    self.get_focus_text.emit(self.buffer_id, annot.info["content"])
-                else:
-                    self.buffer.message_to_emacs.emit("Cannot edit. Only support text annot type.")
                 self.edited_page_annot = (page, annot)
+                self.get_focus_text.emit(self.buffer_id, annot.info["content"].replace("\r", "\n"))
 
     def update_annot_text(self, annot_text):
         page, annot = self.edited_page_annot
