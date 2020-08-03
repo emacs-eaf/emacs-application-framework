@@ -70,6 +70,7 @@ class BrowserView(QWebEngineView):
 
         self.get_markers_raw = self.read_js_content("get_markers.js")
         self.goto_marker_raw = self.read_js_content("goto_marker.js")
+        self.marker_js = self.read_js_content("marker.js")
         self.get_codes_raw = self.read_js_content("get_codes.js")
         self.goto_code_raw = self.read_js_content("goto_code.js")
         self.get_focus_text_js = self.read_js_content("get_focus_text.js")
@@ -425,16 +426,16 @@ class BrowserView(QWebEngineView):
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+        self.eval_js("Marker.generateMarker('a, input, button, [class*=\"btn\"], [aria-haspopup], [role=\"button\"], textarea, select, summary, [class=\"gap\"], [ng-click]')")
 
     def get_text_markers(self):
-        ''' Get link markers.'''
-        self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]).replace("%2", "select_text"));
+        ''' Get visiable text markers.'''
+        self.eval_js("Marker.generateMarker(Marker.generateTextNodeMarker)");
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.execute_js(self.goto_marker_js)
+        link = self.execute_js("Marker.gotoMarker('%s',Marker.getMarkerLink)" % str(marker))
+        
         self.cleanup_links()
         return link
 
@@ -466,15 +467,27 @@ class BrowserView(QWebEngineView):
 
     def get_code_markers(self):
         ''' Get the code markers.'''
-        self.eval_js(self.get_codes_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+        self.eval_js("Marker.generateMarker('pre')")
 
     def get_code_content(self, marker):
         ''' Get the code content according to marker.'''
-        self.goto_code_js = self.goto_code_raw.replace("%1", str(marker));
-        content = self.execute_js(self.goto_code_js)
+        content = self.execute_js("Marker.gotoMarker('%s', (e)=> e.textContent)" % str(marker))
         self.cleanup_links()
         return content
 
+    def enable_caret_by_marker(self, marker):
+        '''Enable caret by marker'''
+        self.execute_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
+        self.cleanup_links()
+
+        self.eval_js("CaretBrowsing.setInitialCursor(true);")
+        self.buffer.caret_browsing_activated = True
+        self.buffer.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.buffer.caret_browsing_activated else "nil"))
+
+        self.buffer.caret_toggle_mark()
+        self.buffer.caret_next_word()
+
+        
     def copy_code_content(self, marker):
         ''' Copy the code content according to marker.'''
         content = self.get_code_content(marker)
@@ -796,6 +809,7 @@ class BrowserBuffer(Buffer):
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
             self.buffer_widget.eval_js(self.buffer_widget.caret_browsing_js)
+            self.buffer_widget.eval_js(self.buffer_widget.marker_js.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
             self.eval_caret_js = True
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
                 self.buffer_widget.load_adblocker()
@@ -898,6 +912,8 @@ class BrowserBuffer(Buffer):
             self._caret_search_text(str(result_content), True)
         elif result_tag == "jump_link" or result_tag == "select_marker_text":
             self.buffer_widget.jump_to_link(str(result_content).strip())
+        elif result_tag == "marker_enable_caret":
+            self.buffer_widget.enable_caret_by_marker(str(result_content).strip())
         elif result_tag == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
         elif result_tag == "jump_link_background_buffer":
@@ -933,6 +949,7 @@ class BrowserBuffer(Buffer):
            result_tag == "jump_link_new_buffer" or \
            result_tag == "jump_link_background_buffer" or \
            result_tag == "select_marker_text" or \
+           result_tag == "marker_enable_caret" or \
            result_tag == "copy_link" or \
            result_tag == "edit_url":
             self.buffer_widget.cleanup_links()
@@ -965,23 +982,35 @@ class BrowserBuffer(Buffer):
 
                 subprocess.Popen(aria2_args, stdout=null_file)
 
-    def caret_browsing(self):
+    def caret_toggle_browsing(self):
         ''' Init caret browsing.'''
         if self.eval_caret_js:
-            self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
-            self.message_to_emacs.emit("Caret browsing activated.")
-            self.caret_browsing_activated = True
-            self.caret_browsing_search_text = ""
+            if self.caret_browsing_activated:
+                self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
+                self.message_to_emacs.emit("Caret browsing deactivated.")
+                self.caret_browsing_activated = False
+            else:
+                self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
+                self.message_to_emacs.emit("Caret browsing activated.")
+                self.caret_browsing_activated = True
+            self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.caret_browsing_activated else "nil"))
 
-
-    @interactive()
     def caret_exit(self):
         ''' Exit caret browsing.'''
         if self.caret_browsing_activated:
-            self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
-            self.message_to_emacs.emit("Caret browsing deactivated.")
-            self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing nil)''')
-            self.caret_browsing_activated = False
+            self.caret_toggle_browsing()
+
+    @interactive()
+    def caret_next_sentence(self):
+        ''' Switch to next line in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'sentence');")
+
+    @interactive()
+    def caret_previous_sentence(self):
+        ''' Switch to previous line in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'sentence');")
 
     @interactive()
     def caret_next_line(self):
@@ -1031,19 +1060,26 @@ class BrowserBuffer(Buffer):
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'documentboundary');")
             
+    @interactive()
+    def caret_rotate_selection(self):
+        ''' Rotate selection.'''
+        if self.caret_browsing_activated:
+            if self.caret_browsing_mark_activated:
+                self.buffer_widget.eval_js("CaretBrowsing.rotateSelection();")
+        
+    @interactive()
     def caret_toggle_mark(self):
         ''' Toggle mark in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.toggleMark();")
             if self.buffer_widget.execute_js("CaretBrowsing.markEnabled"):
                 self.caret_browsing_mark_activated = True
-                self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing t)''')
                 self.message_to_emacs.emit("Mark is on.")
             else:
                 self.caret_browsing_mark_activated = False
-                self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing nil)''')
                 self.message_to_emacs.emit("Mark is off.")
 
+    @interactive()
     def caret_clear_search(self):
         ''' Clear search text in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1103,6 +1139,11 @@ class BrowserBuffer(Buffer):
         ''' Select Text.'''
         self.buffer_widget.get_text_markers()
         self.send_input_message("Select Text: ", "select_marker_text");
+
+    @interactive(insert_or_do=True)
+    def marker_enable_caret(self):
+        self.buffer_widget.get_text_markers()
+        self.send_input_message("Toggle Caret at:", "marker_enable_caret");
 
     @interactive(insert_or_do=True)
     def open_link(self):
