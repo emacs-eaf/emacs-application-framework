@@ -340,40 +340,64 @@ class PdfViewerWidget(QWidget):
             pixmap.invertIRect(pixmap.irect)
 
             # exclude images
-            imagelist = page.getImageList()
+            imagelist = page.getImageList(full=True)
             imagebboxlist = []
-            overlapbboxlist = []
             for image in imagelist:
                 try:
-                    # image[7] is the name of the picture
-                    imagerect = page.getImageBbox(image[7])
+                    imagerect = page.getImageBbox(image)
                     if imagerect.isInfinite or imagerect.isEmpty:
                         continue
                     else:
                         imagebboxlist.append(imagerect)
                 except Exception:
                     pass
-            
-            # calculate overlaps
-            for i in range(len(imagebboxlist)):
-                for j in range(i+1,len(imagebboxlist)):
-                    x0a = imagebboxlist[i].x0
-                    y0a = imagebboxlist[i].y0
-                    x1a = imagebboxlist[i].x1
-                    y1a = imagebboxlist[i].y1
-                    x0b = imagebboxlist[j].x0
-                    y0b = imagebboxlist[j].y0
-                    x1b = imagebboxlist[j].x1
-                    y1b = imagebboxlist[j].y1
-                    x0c = max(x0a,x0b)
-                    y0c = max(y0a,y0b)
-                    x1c = min(x1a,x1b)
-                    y1c = min(y1a,y1b)
-                    if x0c < x1c and y0c < y1c:
-                        overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
+
+            newly_added_overlapbboxlist = imagebboxlist
+
+            # Nth time of loop represents N+1 rectanges' intesects' overlaps
+            time = 0
+            while len(newly_added_overlapbboxlist) > 1:
+                temp_overlapbboxlist = []
+                time += 1
+                # calculate overlap
+                for i in range(len(newly_added_overlapbboxlist)):
+                    for j in range(i+1,len(newly_added_overlapbboxlist)):
+                        x0a = newly_added_overlapbboxlist[i].x0
+                        y0a = newly_added_overlapbboxlist[i].y0
+                        x1a = newly_added_overlapbboxlist[i].x1
+                        y1a = newly_added_overlapbboxlist[i].y1
+                        x0b = newly_added_overlapbboxlist[j].x0
+                        y0b = newly_added_overlapbboxlist[j].y0
+                        x1b = newly_added_overlapbboxlist[j].x1
+                        y1b = newly_added_overlapbboxlist[j].y1
+                        x0c = max(x0a,x0b)
+                        y0c = max(y0a,y0b)
+                        x1c = min(x1a,x1b)
+                        y1c = min(y1a,y1b)
+                        if x0c < x1c and y0c < y1c:
+                            temp_overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
+                # remove duplicate overlaps for one time
+                for item in set(temp_overlapbboxlist):
+                    if temp_overlapbboxlist.count(item) % 2 == 0:
+                        while item in temp_overlapbboxlist:
+                            temp_overlapbboxlist.remove(item)
+                    else:
+                        while temp_overlapbboxlist.count(item) > 1:
+                            temp_overlapbboxlist.remove(item)
+                newly_added_overlapbboxlist = temp_overlapbboxlist
+                imagebboxlist.extend(newly_added_overlapbboxlist)
+                if time%2 == 1 and time//2 > 0:
+                    imagebboxlist.extend(newly_added_overlapbboxlist)
+
+            # remove duplicate to make it run faster
+            for item in set(imagebboxlist):
+                if imagebboxlist.count(item) % 2 == 0:
+                    while item in imagebboxlist:
+                        imagebboxlist.remove(item)
+                else:
+                    while imagebboxlist.count(item) > 1:
+                        imagebboxlist.remove(item)
             for bbox in imagebboxlist:
-                pixmap.invertIRect(bbox * self.scale)
-            for bbox in overlapbboxlist:
                 pixmap.invertIRect(bbox * self.scale)
 
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
