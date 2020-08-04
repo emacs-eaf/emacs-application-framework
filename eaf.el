@@ -366,6 +366,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("c" . "insert_or_copy_link")
     ("C" . "insert_or_copy_code")
     ("u" . "insert_or_scroll_down_page")
+    ("d" . "insert_or_scroll_up_page")
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
