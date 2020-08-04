@@ -389,14 +389,15 @@ class PdfViewerWidget(QWidget):
                 if time%2 == 1 and time//2 > 0:
                     imagebboxlist.extend(newly_added_overlapbboxlist)
 
-            # remove duplicate to make it run faster
-            for item in set(imagebboxlist):
-                if imagebboxlist.count(item) % 2 == 0:
-                    while item in imagebboxlist:
-                        imagebboxlist.remove(item)
-                else:
-                    while imagebboxlist.count(item) > 1:
-                        imagebboxlist.remove(item)
+            if len(imagebboxlist) != len(set(imagebboxlist)):
+                # remove duplicate to make it run faster
+                for item in set(imagebboxlist):
+                    if imagebboxlist.count(item) % 2 == 0:
+                        while item in imagebboxlist:
+                            imagebboxlist.remove(item)
+                    else:
+                        while imagebboxlist.count(item) > 1:
+                            imagebboxlist.remove(item)
             for bbox in imagebboxlist:
                 pixmap.invertIRect(bbox * self.scale)
 
