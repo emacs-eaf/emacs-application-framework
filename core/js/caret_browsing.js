@@ -556,9 +556,9 @@ CaretBrowsing.caretWidth = 0;
 
 CaretBrowsing.caretHeight = 0;
 
-CaretBrowsing.caretForeground = "#000";
+CaretBrowsing.caretForeground = "%2";
 
-CaretBrowsing.caretBackground = "#fff";
+CaretBrowsing.caretBackground = "%1";
 
 CaretBrowsing.isSelectionCollapsed = false;
 
@@ -669,7 +669,7 @@ CaretBrowsing.injectCaretStyles = function() {
         "  position: absolute;" +
         "  z-index: 2147483647;" +
         "  min-height: 10px;" +
-        "  background-color: #000;" +
+        "  background-color: %1;" +
         "}" +
         ".CaretBrowsing_AnimateCaret {" +
         "  position: absolute;" +
@@ -951,11 +951,8 @@ CaretBrowsing.updateCaretOrSelection =
         if (elem.constructor === Text) {
             elem = elem.parentElement;
         }
-        const style = window.getComputedStyle(elem);
-        const bg = axs.utils.getBgColor(style, elem);
-        const fg = axs.utils.getFgColor(style, elem, bg);
-        CaretBrowsing.caretBackground = axs.color.colorToString(bg);
-        CaretBrowsing.caretForeground = axs.color.colorToString(fg);
+        CaretBrowsing.caretBackground = "%1";
+        CaretBrowsing.caretForeground = "%2";
 
         if (scrollToSelection) {
             const rect = CaretBrowsing.getCursorRect(
