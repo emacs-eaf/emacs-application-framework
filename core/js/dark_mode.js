@@ -1576,7 +1576,7 @@
         return overridesList.map(function (_a) {
             var dataAttr = _a.dataAttr, customProp = _a.customProp, cssProp = _a.cssProp;
             return [
-                "[" + dataAttr + "] {",
+                "[" + dataAttr + ":not(.CaretBrowsing)] {",
                 "  " + cssProp + ": var(" + customProp + ") !important;",
                 '}',
             ].join('\n');

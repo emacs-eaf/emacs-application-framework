@@ -78,7 +78,7 @@ class BrowserView(QWebEngineView):
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
         self.dark_mode_js = self.read_js_content("dark_mode.js")
-        self.caret_browsing_js = self.read_js_content("caret_browsing.js")
+        self.caret_browsing_js_raw = self.read_js_content("caret_browsing.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
 
@@ -630,6 +630,8 @@ class BrowserBuffer(Buffer):
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
+        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
+        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
 
         self.current_url = ""
         self.request_url = ""
@@ -808,8 +810,26 @@ class BrowserBuffer(Buffer):
             self.update()
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
-            self.buffer_widget.eval_js(self.buffer_widget.caret_browsing_js)
             self.buffer_widget.eval_js(self.buffer_widget.marker_js.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+            if self.dark_mode_is_enable():
+                if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
+                    self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", "#"+ str(hex(self.caret_background_color.red()//16)).replace("0x","")+ \
+                                                                                                         str(hex(self.caret_background_color.green()//16)).replace("0x","")+ \
+                                                                                                         str(hex(self.caret_background_color.blue()//16)).replace("0x","")).replace("%2", "#"+ str(hex(self.caret_foreground_color.red()//16)).replace("0x","")+ \
+                                                                                                                                                                                               str(hex(self.caret_foreground_color.green()//16)).replace("0x","")+ \
+                                                                                                                                                                                               str(hex(self.caret_foreground_color.blue()//16)).replace("0x",""))
+                else:
+                    self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", "#FFF").replace("%2", "#000")
+            else:
+                if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
+                    self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", "#"+ str(hex(self.caret_background_color.red()//16)).replace("0x","") + \
+                                                                                                         str(hex(self.caret_background_color.green()//16)).replace("0x","")+ \
+                                                                                                         str(hex(self.caret_background_color.blue()//16)).replace("0x","")).replace("%2", "#"+ str(hex(self.caret_foreground_color.red()//16)).replace("0x","")+ \
+                                                                                                                                                                                               str(hex(self.caret_foreground_color.green()//16)).replace("0x","")+ \
+                                                                                                                                                                                               str(hex(self.caret_foreground_color.blue()//16)).replace("0x",""))
+                else:
+                    self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", "#000").replace("%2", "#FFF")
+            self.buffer_widget.eval_js(self.caret_browsing_js)
             self.eval_caret_js = True
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
                 self.buffer_widget.load_adblocker()
