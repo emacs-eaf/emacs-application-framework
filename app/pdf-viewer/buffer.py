@@ -341,15 +341,40 @@ class PdfViewerWidget(QWidget):
 
             # exclude images
             imagelist = page.getImageList()
+            imagebboxlist = []
+            overlapbboxlist = []
             for image in imagelist:
                 try:
                     # image[7] is the name of the picture
                     imagerect = page.getImageBbox(image[7])
                     if imagerect.isInfinite or imagerect.isEmpty:
                         continue
-                    pixmap.invertIRect(imagerect * self.scale)
+                    else:
+                        imagebboxlist.append(imagerect)
                 except Exception:
                     pass
+            
+            # calculate overlaps
+            for i in range(len(imagebboxlist)):
+                for j in range(i+1,len(imagebboxlist)):
+                    x0a = imagebboxlist[i].x0
+                    y0a = imagebboxlist[i].y0
+                    x1a = imagebboxlist[i].x1
+                    y1a = imagebboxlist[i].y1
+                    x0b = imagebboxlist[j].x0
+                    y0b = imagebboxlist[j].y0
+                    x1b = imagebboxlist[j].x1
+                    y1b = imagebboxlist[j].y1
+                    x0c = max(x0a,x0b)
+                    y0c = max(y0a,y0b)
+                    x1c = min(x1a,x1b)
+                    y1c = min(y1a,y1b)
+                    if x0c < x1c and y0c < y1c:
+                        overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
+            for bbox in imagebboxlist:
+                pixmap.invertIRect(bbox * self.scale)
+            for bbox in overlapbboxlist:
+                pixmap.invertIRect(bbox * self.scale)
 
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
