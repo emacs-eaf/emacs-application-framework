@@ -2211,6 +2211,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "This command use for generate keybindings document."
   (interactive)
   (let ((vars (list 'eaf-browser-keybinding
+                    'eaf-browser-caret-mode-keybinding
                     'eaf-pdf-viewer-keybinding
                     'eaf-video-player-keybinding
                     'eaf-js-video-player-keybinding
