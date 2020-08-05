@@ -947,7 +947,7 @@ class PdfViewerWidget(QWidget):
         # update only if changed
         if is_hover_annot != self.is_hover_annot:
             self.is_hover_annot = is_hover_annot
-            del self.page_cache_pixmap_dict[page_index]
+            self.page_cache_pixmap_dict.clear()
             self.update()
 
         return page, current_annot
