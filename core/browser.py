@@ -638,8 +638,10 @@ class BrowserBuffer(Buffer):
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
-        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
-        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+
+        # Reverse background and foreground color, to help cursor recognition.
+        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
+        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
 
         self.current_url = ""
         self.request_url = ""
