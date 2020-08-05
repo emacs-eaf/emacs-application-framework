@@ -300,6 +300,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("."   . "caret_clear_search")
     ("v"   . "caret_toggle_mark")
     ("o"   . "caret_rotate_selection")
+    ("y"   . "caret_translate_text")
     ("q"   . "caret_exit")
 
     ("C-n" . "caret_next_line")
@@ -317,6 +318,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-." . "caret_clear_search")
     ("C-i" . "caret_toggle_mark")
     ("C-o" . "caret_rotate_selection")
+    ("C-y" . "caret_translate_text")
     ("C-q" . "caret_exit")
 
     ("M-c" . "caret_toggle_browsing")

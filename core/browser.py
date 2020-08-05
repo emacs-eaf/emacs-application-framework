@@ -226,9 +226,16 @@ class BrowserView(QWebEngineView):
 
     def select_text_change(self):
         ''' Change selected text.'''
-        modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ControlModifier:
-            self.translate_selected_text.emit(self.selectedText())
+        # Not translate text if just exit caret mode.
+        if self.buffer.caret_browsing_exit_flag:
+            self.buffer.caret_browsing_exit_flag = False
+            return
+
+        # Only translate text when not in caret mode.
+        if not self.buffer.caret_browsing_activated:
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers == Qt.ControlModifier and self.selectedText().strip() != "":
+                self.translate_selected_text.emit(self.selectedText())
 
     def load_cookie(self):
         ''' Load cookies.'''
@@ -435,7 +442,7 @@ class BrowserView(QWebEngineView):
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
         link = self.execute_js("Marker.gotoMarker('%s',Marker.getMarkerLink)" % str(marker))
-        
+
         self.cleanup_links()
         return link
 
@@ -487,7 +494,7 @@ class BrowserView(QWebEngineView):
         self.buffer.caret_toggle_mark()
         self.buffer.caret_next_word()
 
-        
+
     def copy_code_content(self, marker):
         ''' Copy the code content according to marker.'''
         content = self.get_code_content(marker)
@@ -623,6 +630,7 @@ class BrowserBuffer(Buffer):
         self.eval_dark_js = False
         self.eval_caret_js = False
         self.caret_browsing_activated = False
+        self.caret_browsing_exit_flag = True
         self.caret_browsing_mark_activated = False
         self.caret_browsing_search_text = ""
         self.progressbar_progress = 0
@@ -701,8 +709,8 @@ class BrowserBuffer(Buffer):
             """ % (form_data,password))
             break
         return new_id
-        
-    
+
+
     def init_auto_fill(self):
         if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
             self.autofill_id = self.auto_fill(0)
@@ -1018,6 +1026,9 @@ class BrowserBuffer(Buffer):
     def caret_exit(self):
         ''' Exit caret browsing.'''
         if self.caret_browsing_activated:
+            # Avoid popup tranlsate tips when exit caret mode.
+            self.caret_browsing_exit_flag = True
+
             self.caret_toggle_browsing()
 
     @interactive()
@@ -1061,7 +1072,7 @@ class BrowserBuffer(Buffer):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'word');")
-            
+
     @interactive()
     def caret_previous_word(self):
         ''' Switch to previous word in caret browsing.'''
@@ -1073,20 +1084,20 @@ class BrowserBuffer(Buffer):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'documentboundary');")
-            
+
     @interactive()
     def caret_to_top(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'documentboundary');")
-            
+
     @interactive()
     def caret_rotate_selection(self):
         ''' Rotate selection.'''
         if self.caret_browsing_activated:
             if self.caret_browsing_mark_activated:
                 self.buffer_widget.eval_js("CaretBrowsing.rotateSelection();")
-        
+
     @interactive()
     def caret_toggle_mark(self):
         ''' Toggle mark in caret browsing.'''
@@ -1136,6 +1147,11 @@ class BrowserBuffer(Buffer):
         else:
             if not self.buffer_widget.execute_js("window.find('"+text+"')"):
                 self.message_to_emacs.emit("Unable to find more, please try backward search.")
+
+    @interactive()
+    def caret_translate_text(self):
+        if self.buffer_widget.selectedText().strip() != "":
+            self.buffer_widget.translate_selected_text.emit(self.buffer_widget.selectedText())
 
     @interactive(insert_or_do=True)
     def open_download_manage_page(self):
@@ -1384,7 +1400,7 @@ class PasswordDb(object):
         """, (host, str(form_data)))
         if len(list(result))>0:
             self._conn.execute("""
-            UPDATE autofill SET password=? 
+            UPDATE autofill SET password=?
             WHERE host=? and form_data=?
             """, (password, host, str(form_data)))
         else:
