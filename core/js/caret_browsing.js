@@ -556,9 +556,9 @@ CaretBrowsing.caretWidth = 0;
 
 CaretBrowsing.caretHeight = 0;
 
-CaretBrowsing.caretForeground = "#000";
+CaretBrowsing.caretForeground = "%2";
 
-CaretBrowsing.caretBackground = "#fff";
+CaretBrowsing.caretBackground = "%1";
 
 CaretBrowsing.isSelectionCollapsed = false;
 
@@ -669,7 +669,7 @@ CaretBrowsing.injectCaretStyles = function() {
         "  position: absolute;" +
         "  z-index: 2147483647;" +
         "  min-height: 10px;" +
-        "  background-color: #000;" +
+        "  background-color: %1;" +
         "}" +
         ".CaretBrowsing_AnimateCaret {" +
         "  position: absolute;" +
@@ -692,7 +692,7 @@ CaretBrowsing.injectCaretStyles = function() {
     document.body.appendChild(node);
 };
 
-CaretBrowsing.setInitialCursor = function() {
+CaretBrowsing.setInitialCursor = function(noScrollToSelection) {
     if (CaretBrowsing.post_message_down("CaretBrowsing.setInitialCursor")) {
         return;
     }
@@ -718,7 +718,7 @@ CaretBrowsing.setInitialCursor = function() {
             CaretBrowsing.markEnabled = false;
             sel.collapse(sel.anchorNode, sel.anchorOffset);
             window.setTimeout(() => {
-                CaretBrowsing.updateCaretOrSelection(true);
+                CaretBrowsing.updateCaretOrSelection((!noScrollToSelection));
             }, 0);
         }
     }
@@ -826,7 +826,7 @@ CaretBrowsing.getCursorRect = function(cursor) { // eslint-disable-line max-stat
     const rect = {
         "left": 0,
         "top": 0,
-        "width": 1,
+        "width": 5,
         "height": 0,
     };
     if (node.constructor === Text) {
@@ -951,11 +951,8 @@ CaretBrowsing.updateCaretOrSelection =
         if (elem.constructor === Text) {
             elem = elem.parentElement;
         }
-        const style = window.getComputedStyle(elem);
-        const bg = axs.utils.getBgColor(style, elem);
-        const fg = axs.utils.getFgColor(style, elem, bg);
-        CaretBrowsing.caretBackground = axs.color.colorToString(bg);
-        CaretBrowsing.caretForeground = axs.color.colorToString(fg);
+        CaretBrowsing.caretBackground = "%1";
+        CaretBrowsing.caretForeground = "%2";
 
         if (scrollToSelection) {
             const rect = CaretBrowsing.getCursorRect(
@@ -1098,6 +1095,16 @@ CaretBrowsing.toggleMark = function() {
         }, 0);
     }
 };
+
+CaretBrowsing.rotateSelection = function() {
+        var selection = window.getSelection();
+        var pos = [selection.anchorNode, selection.anchorOffset];
+        selection.collapse(selection.focusNode, selection.focusOffset);
+        selection.extend(pos[0], pos[1]);
+        window.setTimeout(() => {
+            CaretBrowsing.updateCaretOrSelection(true);
+        }, 0);
+}
 
 CaretBrowsing.cutSelection = function() {
     if (CaretBrowsing.post_message_down("CaretBrowsing.cutSelection")) {

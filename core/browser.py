@@ -70,6 +70,7 @@ class BrowserView(QWebEngineView):
 
         self.get_markers_raw = self.read_js_content("get_markers.js")
         self.goto_marker_raw = self.read_js_content("goto_marker.js")
+        self.marker_js = self.read_js_content("marker.js")
         self.get_codes_raw = self.read_js_content("get_codes.js")
         self.goto_code_raw = self.read_js_content("goto_code.js")
         self.get_focus_text_js = self.read_js_content("get_focus_text.js")
@@ -77,7 +78,7 @@ class BrowserView(QWebEngineView):
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
         self.dark_mode_js = self.read_js_content("dark_mode.js")
-        self.caret_browsing_js = self.read_js_content("caret_browsing.js")
+        self.caret_browsing_js_raw = self.read_js_content("caret_browsing.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
 
@@ -225,9 +226,16 @@ class BrowserView(QWebEngineView):
 
     def select_text_change(self):
         ''' Change selected text.'''
-        modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ControlModifier:
-            self.translate_selected_text.emit(self.selectedText())
+        # Not translate text if just exit caret mode.
+        if self.buffer.caret_browsing_exit_flag:
+            self.buffer.caret_browsing_exit_flag = False
+            return
+
+        # Only translate text when not in caret mode.
+        if not self.buffer.caret_browsing_activated:
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers == Qt.ControlModifier and self.selectedText().strip() != "":
+                self.translate_selected_text.emit(self.selectedText())
 
     def load_cookie(self):
         ''' Load cookies.'''
@@ -359,6 +367,7 @@ class BrowserView(QWebEngineView):
         ''' Scroll to the bottom.'''
         self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
+    @interactive()
     def get_selection_text(self):
         ''' Get the selected text.'''
         return self.execute_js(self.get_selection_text_js)
@@ -424,12 +433,16 @@ class BrowserView(QWebEngineView):
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js(self.get_markers_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+        self.eval_js("Marker.generateMarker('a, input, button, [class*=\"btn\"], [aria-haspopup], [role=\"button\"], textarea, select, summary, [class=\"gap\"], [ng-click]')")
+
+    def get_text_markers(self):
+        ''' Get visiable text markers.'''
+        self.eval_js("Marker.generateMarker(Marker.generateTextNodeMarker)");
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
-        self.goto_marker_js = self.goto_marker_raw.replace("%1", str(marker));
-        link = self.execute_js(self.goto_marker_js)
+        link = self.execute_js("Marker.gotoMarker('%s',Marker.getMarkerLink)" % str(marker))
+
         self.cleanup_links()
         return link
 
@@ -461,14 +474,26 @@ class BrowserView(QWebEngineView):
 
     def get_code_markers(self):
         ''' Get the code markers.'''
-        self.eval_js(self.get_codes_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]));
+        self.eval_js("Marker.generateMarker('pre')")
 
     def get_code_content(self, marker):
         ''' Get the code content according to marker.'''
-        self.goto_code_js = self.goto_code_raw.replace("%1", str(marker));
-        content = self.execute_js(self.goto_code_js)
+        content = self.execute_js("Marker.gotoMarker('%s', (e)=> e.textContent)" % str(marker))
         self.cleanup_links()
         return content
+
+    def enable_caret_by_marker(self, marker):
+        '''Enable caret by marker'''
+        self.execute_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
+        self.cleanup_links()
+
+        self.eval_js("CaretBrowsing.setInitialCursor(true);")
+        self.buffer.caret_browsing_activated = True
+        self.buffer.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.buffer.caret_browsing_activated else "nil"))
+
+        self.buffer.caret_toggle_mark()
+        self.buffer.caret_next_word()
+
 
     def copy_code_content(self, marker):
         ''' Copy the code content according to marker.'''
@@ -606,6 +631,7 @@ class BrowserBuffer(Buffer):
         self.eval_dark_js = False
         self.eval_caret_js = False
         self.caret_browsing_activated = False
+        self.caret_browsing_exit_flag = True
         self.caret_browsing_mark_activated = False
         self.caret_browsing_search_text = ""
         self.progressbar_progress = 0
@@ -613,6 +639,10 @@ class BrowserBuffer(Buffer):
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
+
+        # Reverse background and foreground color, to help cursor recognition.
+        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
+        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
 
         self.current_url = ""
         self.request_url = ""
@@ -682,8 +712,8 @@ class BrowserBuffer(Buffer):
             """ % (form_data,password))
             break
         return new_id
-        
-    
+
+
     def init_auto_fill(self):
         if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
             self.autofill_id = self.auto_fill(0)
@@ -791,8 +821,30 @@ class BrowserBuffer(Buffer):
             self.update()
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
-            self.buffer_widget.eval_js(self.buffer_widget.caret_browsing_js)
+            self.buffer_widget.eval_js(self.buffer_widget.marker_js.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+
+            cursor_foreground_color = ""
+            cursor_background_color = ""
+
+            if self.dark_mode_is_enable():
+                if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
+                    cursor_foreground_color = self.caret_background_color.name()
+                    cursor_background_color = self.caret_foreground_color.name()
+                else:
+                    cursor_foreground_color = "#FFF"
+                    cursor_background_color = "#000"
+            else:
+                if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
+                    cursor_foreground_color = self.caret_background_color.name()
+                    cursor_background_color = self.caret_foreground_color.name()
+                else:
+                    cursor_foreground_color = "#000"
+                    cursor_background_color = "#FFF"
+
+            self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", cursor_foreground_color).replace("%2", cursor_background_color)
+            self.buffer_widget.eval_js(self.caret_browsing_js)
             self.eval_caret_js = True
+
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
                 self.buffer_widget.load_adblocker()
             if self.dark_mode_is_enable():
@@ -892,8 +944,10 @@ class BrowserBuffer(Buffer):
             self._caret_search_text(str(result_content))
         elif result_tag == "caret_search_text_backward":
             self._caret_search_text(str(result_content), True)
-        elif result_tag == "jump_link":
+        elif result_tag == "jump_link" or result_tag == "select_marker_text":
             self.buffer_widget.jump_to_link(str(result_content).strip())
+        elif result_tag == "marker_enable_caret":
+            self.buffer_widget.enable_caret_by_marker(str(result_content).strip())
         elif result_tag == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
         elif result_tag == "jump_link_background_buffer":
@@ -928,6 +982,8 @@ class BrowserBuffer(Buffer):
         if result_tag == "jump_link" or \
            result_tag == "jump_link_new_buffer" or \
            result_tag == "jump_link_background_buffer" or \
+           result_tag == "select_marker_text" or \
+           result_tag == "marker_enable_caret" or \
            result_tag == "copy_link" or \
            result_tag == "edit_url":
             self.buffer_widget.cleanup_links()
@@ -960,69 +1016,95 @@ class BrowserBuffer(Buffer):
 
                 subprocess.Popen(aria2_args, stdout=null_file)
 
-    def caret_browsing(self):
+    def caret_toggle_browsing(self):
         ''' Init caret browsing.'''
         if self.eval_caret_js:
-            self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
-            self.message_to_emacs.emit("Caret browsing activated.")
-            self.caret_browsing_activated = True
-            self.caret_browsing_search_text = ""
+            if self.caret_browsing_activated:
+                self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
+                self.message_to_emacs.emit("Caret browsing deactivated.")
+                self.caret_browsing_activated = False
+            else:
+                self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
+                self.message_to_emacs.emit("Caret browsing activated.")
+                self.caret_browsing_activated = True
+            self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.caret_browsing_activated else "nil"))
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
         if self.caret_browsing_activated:
-            self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
-            self.message_to_emacs.emit("Caret browsing deactivated.")
-            self.caret_browsing_activated = False
+            # Avoid popup tranlsate tips when exit caret mode.
+            self.caret_browsing_exit_flag = True
 
-    @interactive(insert_or_do=True)
+            self.caret_toggle_browsing()
+
+    @interactive()
+    def caret_next_sentence(self):
+        ''' Switch to next line in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'sentence');")
+
+    @interactive()
+    def caret_previous_sentence(self):
+        ''' Switch to previous line in caret browsing.'''
+        if self.caret_browsing_activated:
+            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'sentence');")
+
+    @interactive()
     def caret_next_line(self):
         ''' Switch to next line in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'line');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_previous_line(self):
         ''' Switch to previous line in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'line');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_next_character(self):
         ''' Switch to next character in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'character');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_previous_character(self):
         ''' Switch to previous character in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'character');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_next_word(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'word');")
-            
-    @interactive(insert_or_do=True)
+
+    @interactive()
     def caret_previous_word(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'word');")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_to_bottom(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'documentboundary');")
-            
-    @interactive(insert_or_do=True)
+
+    @interactive()
     def caret_to_top(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_activated:
             self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'documentboundary');")
-            
+
+    @interactive()
+    def caret_rotate_selection(self):
+        ''' Rotate selection.'''
+        if self.caret_browsing_activated:
+            if self.caret_browsing_mark_activated:
+                self.buffer_widget.eval_js("CaretBrowsing.rotateSelection();")
+
+    @interactive()
     def caret_toggle_mark(self):
         ''' Toggle mark in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1034,6 +1116,7 @@ class BrowserBuffer(Buffer):
                 self.caret_browsing_mark_activated = False
                 self.message_to_emacs.emit("Mark is off.")
 
+    @interactive()
     def caret_clear_search(self):
         ''' Clear search text in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1041,7 +1124,7 @@ class BrowserBuffer(Buffer):
                 self.caret_browsing_search_text = ""
                 self.message_to_emacs.emit("Cleared caret search text.")
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_search_forward(self):
         ''' Search Text forward in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1051,7 +1134,7 @@ class BrowserBuffer(Buffer):
                 else:
                     self._caret_search_text(self.caret_browsing_search_text)
 
-    @interactive(insert_or_do=True)
+    @interactive()
     def caret_search_backward(self):
         ''' Search Text backward in caret browsing.'''
         if self.caret_browsing_activated:
@@ -1071,6 +1154,11 @@ class BrowserBuffer(Buffer):
             if not self.buffer_widget.execute_js("window.find('"+text+"')"):
                 self.message_to_emacs.emit("Unable to find more, please try backward search.")
 
+    @interactive()
+    def caret_translate_text(self):
+        if self.buffer_widget.selectedText().strip() != "":
+            self.buffer_widget.translate_selected_text.emit(self.buffer_widget.selectedText())
+
     @interactive(insert_or_do=True)
     def open_download_manage_page(self):
         ''' Open download manage page.'''
@@ -1087,6 +1175,17 @@ class BrowserBuffer(Buffer):
         ''' Copy code.'''
         self.buffer_widget.get_code_markers()
         self.send_input_message("Copy code: ", "copy_code");
+
+    @interactive(insert_or_do=True)
+    def select_text(self):
+        ''' Select Text.'''
+        self.buffer_widget.get_text_markers()
+        self.send_input_message("Select Text: ", "select_marker_text");
+
+    @interactive(insert_or_do=True)
+    def marker_enable_caret(self):
+        self.buffer_widget.get_text_markers()
+        self.send_input_message("Toggle Caret at: ", "marker_enable_caret");
 
     @interactive(insert_or_do=True)
     def open_link(self):
@@ -1307,7 +1406,7 @@ class PasswordDb(object):
         """, (host, str(form_data)))
         if len(list(result))>0:
             self._conn.execute("""
-            UPDATE autofill SET password=? 
+            UPDATE autofill SET password=?
             WHERE host=? and form_data=?
             """, (password, host, str(form_data)))
         else:

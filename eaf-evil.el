@@ -43,8 +43,8 @@
 
 ;; EAF evil Key Configuration
 (defun eaf-evil-lookup-key (key)
-  (or (lookup-key (current-local-map) (kbd key))
-      (lookup-key eaf-mode-map* (kbd key))
+  (or (lookup-key eaf-mode-map (kbd key))
+      (lookup-key (current-local-map) (kbd key))
       ;; sequence key
       (when (or (string-prefix-p "C-" key)
                 (string-prefix-p "M-" key))

@@ -275,10 +275,55 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
-    (eaf-emacs-theme-mode . ""))
+    (eaf-emacs-theme-mode . "")
+    (eaf-emacs-theme-background-color . "")
+    (eaf-emacs-theme-foreground-color . ""))
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
+  :type 'cons)
+
+(defcustom eaf-browser-caret-mode-keybinding
+  '(
+    ("j"   . "caret_next_line")
+    ("k"   . "caret_previous_line")
+    ("l"   . "caret_next_character")
+    ("h"   . "caret_previous_character")
+    ("w"   . "caret_next_word")
+    ("b"   . "caret_previous_word")
+    (")"   . "caret_next_sentence")
+    ("("   . "caret_previous_sentence")
+    ("g"   . "caret_to_bottom")
+    ("G"   . "caret_to_top")
+    ("/"   . "caret_search_forward")
+    ("?"   . "caret_search_backward")
+    ("."   . "caret_clear_search")
+    ("v"   . "caret_toggle_mark")
+    ("o"   . "caret_rotate_selection")
+    ("y"   . "caret_translate_text")
+    ("q"   . "caret_exit")
+
+    ("C-n" . "caret_next_line")
+    ("C-p" . "caret_previous_line")
+    ("C-f" . "caret_next_character")
+    ("C-b" . "caret_previous_character")
+    ("M-f" . "caret_next_word")
+    ("M-b" . "caret_previous_word")
+    ("M-e" . "caret_next_sentence")
+    ("M-a" . "caret_previous_sentence")
+    ("C-<" . "caret_to_bottom")
+    ("C->" . "caret_to_top")
+    ("C-s" . "caret_search_forward")
+    ("C-r" . "caret_search_backward")
+    ("C-." . "caret_clear_search")
+    ("C-i" . "caret_toggle_mark")
+    ("C-o" . "caret_rotate_selection")
+    ("C-y" . "caret_translate_text")
+    ("C-q" . "caret_exit")
+
+    ("M-c" . "caret_toggle_browsing")
+    )
+  "The keybinding of EAF Browser Caret Mode."
   :type 'cons)
 
 (defcustom eaf-browser-keybinding
@@ -295,7 +340,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-w" . "kill_text")
     ("M-e" . "edit_focus_text")
-    ("M-c" . "caret_browsing")
+    ("M-c" . "caret_toggle_browsing")
+    ("M-D" . "select_text")
     ("M-s" . "open_link")
     ("M-S" . "open_link_new_buffer")
     ("M-d" . "open_link_background_buffer")
@@ -314,31 +360,21 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M->" . "scroll_to_bottom")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
-    ("C-q" . "caret_exit")
-    ("s" . "insert_or_caret_next_line")
-    ("w" . "insert_or_caret_previous_line")
-    ("d" . "insert_or_caret_next_character")
-    ("a" . "insert_or_caret_previous_character")
-    ("D" . "insert_or_caret_next_word")
-    ("A" . "insert_or_caret_previous_word")
-    ("S" . "insert_or_caret_to_bottom")
-    ("W" . "insert_or_caret_to_top")
-    ("/" . "insert_or_caret_search_forward")
-    ("?" . "insert_or_caret_search_backward")
-    ("C-i" . "caret_toggle_mark")
-    ("C-." . "caret_clear_search")
     ("J" . "insert_or_select_left_tab")
     ("K" . "insert_or_select_right_tab")
     ("j" . "insert_or_scroll_up")
     ("k" . "insert_or_scroll_down")
     ("h" . "insert_or_scroll_left")
     ("l" . "insert_or_scroll_right")
+    ;; ("b" . "insert_or_select_text")
+    ("b" . "insert_or_marker_enable_caret")
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
     ("B" . "insert_or_open_link_background_buffer")
     ("c" . "insert_or_copy_link")
     ("C" . "insert_or_copy_code")
     ("u" . "insert_or_scroll_down_page")
+    ("d" . "insert_or_scroll_up_page")
     ("H" . "insert_or_history_backward")
     ("L" . "insert_or_history_forward")
     ("t" . "insert_or_new_blank_page")
@@ -1075,11 +1111,12 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
-(defun eaf--gen-keybinding-map (keybinding)
+(defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
   (setq eaf-mode-map
         (let ((map (make-sparse-keymap)))
-          (set-keymap-parent map eaf-mode-map*)
+          (unless no-inherit-eaf-mode-map*
+            (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in keybinding
                    do (define-key map (kbd key)
                         (cond
@@ -1092,7 +1129,14 @@ to edit EAF keybindings!" fun fun)))
                          ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
                          ((string-match "-" fun)
                           (intern fun))))
-                   finally return map))))
+                   finally return map)))
+  )
+
+(defun eaf--toggle-caret-browsing (caret-status)
+  (if caret-status
+      (eaf--gen-keybinding-map eaf-browser-caret-mode-keybinding t)
+    (eaf--gen-keybinding-map eaf-browser-keybinding))
+  (setq eaf--buffer-map-alist (list (cons t eaf-mode-map))))
 
 (defun eaf--get-app-bindings (app-name)
   "Get the specified APP-NAME keybinding.
@@ -2088,13 +2132,25 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf-get-theme-mode ()
   (format "%s"(frame-parameter nil 'background-mode)))
 
+(defun eaf-get-theme-background-color ()
+  (format "%s"(frame-parameter nil 'background-color)))
+
+(defun eaf-get-theme-foreground-color ()
+  (format "%s"(frame-parameter nil 'foreground-color)))
+
 (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+
+(eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+
+(eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
 
 (advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
   "Update `eaf-emacs-theme-mode' after execute `load-theme'."
   (apply orig-fun arg args)
-  (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode)))
+  (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+  (eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+  (eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
 
 (define-minor-mode eaf-pdf-outline-mode
   "EAF pdf outline mode."
@@ -2155,6 +2211,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "This command use for generate keybindings document."
   (interactive)
   (let ((vars (list 'eaf-browser-keybinding
+                    'eaf-browser-caret-mode-keybinding
                     'eaf-pdf-viewer-keybinding
                     'eaf-video-player-keybinding
                     'eaf-js-video-player-keybinding

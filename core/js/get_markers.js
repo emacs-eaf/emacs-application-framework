@@ -8,9 +8,9 @@
         return `${path.join(' > ')}`.toLowerCase();
     }
 
-    function getCoords(link){
-        let rect = link.getBoundingClientRect();
-        return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(link) ];
+    function getCoords(node){
+        let rect = node.getBoundingClientRect();
+        return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(node) ];
     }
 
     function isElementOnScreen(rect){
@@ -60,11 +60,11 @@
     function generateKeys(markerContainer) {
         let lettersString = "%1";
         let letters = lettersString.split("");
-        let linkNum = markerContainer.children.length;
-        let keyLen = linkNum == 1 ? 1 : Math.ceil(Math.log(linkNum)/Math.log(letters.length));
+        let nodeNum = markerContainer.children.length;
+        let keyLen = nodeNum == 1 ? 1 : Math.ceil(Math.log(nodeNum)/Math.log(letters.length));
         let keyCounter = [];
         for(let i = 0; i < keyLen; i++) keyCounter[i] = 0;
-        for(let l = 0; l < linkNum; l++) {
+        for(let l = 0; l < nodeNum; l++) {
             let keyStr = '';
             for(let k = 0; k < keyLen; k++) {
                 let mark = document.createElement('span');
@@ -136,20 +136,52 @@ border-radius: 3px;\
 box-shadow: 0px 3px 7px 0px rgba(0, 0, 0, 0.3);\
 z-index: 100000;\
 }'));
-
+    let operationString = "%2";
     let validRects = [];
-    addElementToRects(validRects, document.links); // collect links
-    addElementToRects(validRects, document.querySelectorAll('a')); // collect <a> without href
-    addElementToRects(validRects, document.querySelectorAll('input')); // collect <input>
-    addElementToRects(validRects, document.querySelectorAll('button')); // collect <button>
-    addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect class=btn buttons
-    addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
-    addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
-    addElementToRects(validRects, document.querySelectorAll('textarea')); // collect <textarea>
-    addElementToRects(validRects, document.querySelectorAll('select')); // collect <select>
-    addElementToRects(validRects, document.querySelectorAll('summary')); // collect <summary>
-    addElementToRects(validRects, document.querySelectorAll('[class="gap"]')); // collect class="gap"
-    addElementToRects(validRects, document.querySelectorAll('[ng-click]')); // collect ng-click
+    if (operationString != "select_text") {
+        addElementToRects(validRects, document.links); // collect links
+        addElementToRects(validRects, document.querySelectorAll('a')); // collect <a> without href
+        addElementToRects(validRects, document.querySelectorAll('input')); // collect <input>
+        addElementToRects(validRects, document.querySelectorAll('button')); // collect <button>
+        addElementToRects(validRects, document.querySelectorAll('[class*="btn"]')); // collect class=btn buttons
+        addElementToRects(validRects, document.querySelectorAll('[aria-haspopup]')); // collect menu buttons
+        addElementToRects(validRects, document.querySelectorAll('[role="button"]')); // collect role="button"
+        addElementToRects(validRects, document.querySelectorAll('textarea')); // collect <textarea>
+        addElementToRects(validRects, document.querySelectorAll('select')); // collect <select>
+        addElementToRects(validRects, document.querySelectorAll('summary')); // collect <summary>
+        addElementToRects(validRects, document.querySelectorAll('[class="gap"]')); // collect class="gap"
+        addElementToRects(validRects, document.querySelectorAll('[ng-click]')); // collect ng-click
+    }
+    else {
+        addElementToRects(validRects, document.querySelectorAll('p')); // collect <p>
+        let spanElements = document.querySelectorAll('span')
+        let FilteredspanElements = [];
+        for(let i = 0; i < spanElements.length; i++) {
+            if(spanElements[i].innerText != "") {
+                isInnerElement = false;
+                parNode = spanElements[i].parentNode;
+                if(parNode) {
+                    while(parNode.nodeName.toLowerCase() != 'html' && parNode.nodeName.toLowerCase() != 'div'){
+                        if(parNode.nodeName.toLowerCase() != 'p' && parNode.nodeName.toLowerCase() != 'span') {
+                            parNode = parNode.parentNode;
+                            if(!parNode) {
+                                break
+                            }
+                        }
+                        else {
+                            isInnerElement = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isInnerElement) {
+                    // collect <span> elements with text and not being Inner Element
+                    FilteredspanElements.push(spanElements[i]);
+                }
+            }
+        }
+        addElementToRects(validRects, FilteredspanElements);
+    }
 
     let body = document.querySelector('body');
     let markerContainer = document.createElement('div');

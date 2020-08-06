@@ -22,34 +22,37 @@
 
     if(match != undefined){
         let selector = match.getAttribute('pointed-link');
-        let link = document.querySelector(selector);
+        let node = document.querySelector(selector);
 
-        if(link.nodeName.toLowerCase() === 'select'){
-            link.focus();
-        }else if(link.nodeName.toLowerCase() === 'input' ||
-           link.nodeName.toLowerCase() === 'textarea') {
-            if((link.getAttribute('type') === 'submit') ||
-               (link.getAttribute('type') === 'checkbox')){
-                link.click();
+        if(node.nodeName.toLowerCase() === 'select'){
+            node.focus();
+        }else if(node.nodeName.toLowerCase() === 'input' ||
+           node.nodeName.toLowerCase() === 'textarea') {
+            if((node.getAttribute('type') === 'submit') ||
+               (node.getAttribute('type') === 'checkbox')){
+                node.click();
             } else {
-                link.focus();   // focus
-                link.click();   // show blink cursor
-                moveCursorToEnd(link); // move cursor to the end of line after focus.
+                node.focus();   // focus
+                node.click();   // show blink cursor
+                moveCursorToEnd(node); // move cursor to the end of line after focus.
             }
-        } else if((link.nodeName.toLowerCase() === 'button') || // normal button
-                  (link.nodeName.toLowerCase() === 'summary') || // summary button
-                  (link.hasAttribute('aria-haspopup')) || // menu button
-                  (link.getAttribute('role') === 'button') || // role="button" buttons
-                  (link.hasAttribute('ng-click')) || // ng-click buttons
-                  (link.classList.contains('btn')) || // class="btn" buttons
-                  (link.classList.contains('gap')) || // class="gap" links
-                  (link.getAttribute('href') === '') || // special href button
-                  (link.getAttribute('href') === '#')){  // special href # button
-            link.click();
-        } else if(link.href != undefined && link.href != '' && link.getAttribute('href') != ''){
-            return link.href;
-        } else if(link.nodeName.toLowerCase() === 'a') {
-            link.click(); // most general a tag without href
+        } else if((node.nodeName.toLowerCase() === 'button') || // normal button
+                  (node.nodeName.toLowerCase() === 'summary') || // summary button
+                  (node.hasAttribute('aria-haspopup')) || // menu button
+                  (node.getAttribute('role') === 'button') || // role="button" buttons
+                  (node.hasAttribute('ng-click')) || // ng-click buttons
+                  (node.classList.contains('btn')) || // class="btn" buttons
+                  (node.classList.contains('gap')) || // class="gap" links
+                  (node.getAttribute('href') === '') || // special href button
+                  (node.getAttribute('href') === '#')){  // special href # button
+            node.click();
+        } else if(node.nodeName.toLowerCase() === 'p'||
+           node.nodeName.toLowerCase() === 'span') {  // select text section
+            window.getSelection().selectAllChildren(node);
+        } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != ''){
+            return node.href;
+        } else if(node.nodeName.toLowerCase() === 'a') {
+            node.click(); // most general a tag without href
         }
     }
     return "";

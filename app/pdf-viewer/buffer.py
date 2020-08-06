@@ -243,6 +243,7 @@ class PdfViewerWidget(QWidget):
 
         # annot
         self.is_hover_annot = False
+        self.edited_page_annot = (None, None)
 
         # Init scroll attributes.
         self.scroll_step = 20
@@ -256,8 +257,10 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_height = 22
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_light_color = QColor("#333333")
-        self.page_annotate_dark_color = QColor("#999999")
+        self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.page_annotate_dark_color = QColor(1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).redF(),\
+                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).greenF(),\
+                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).blueF())
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -272,6 +275,16 @@ class PdfViewerWidget(QWidget):
         self.is_page_just_changed = False
 
         self.remember_offset = None
+
+    def handle_color(self,color,inverted=False):
+        r = float(color.redF())
+        g = float(color.greenF())
+        b = float(color.blueF())
+        if inverted:
+            r = 1.0-r
+            g = 1.0-g
+            b = 1.0-b
+        return (r,g,b)
 
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
@@ -316,6 +329,10 @@ class PdfViewerWidget(QWidget):
             self.char_dict[index] = self.get_page_char_rect_list(index)
             self.select_area_annot_cache_dict[index] = None
 
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and os.path.splitext(self.url)[-1] == ".pdf":
+            col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
+            page.drawRect(page.rect, color=col, fill=col, overlay=False)
+
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
 
@@ -323,16 +340,66 @@ class PdfViewerWidget(QWidget):
             pixmap.invertIRect(pixmap.irect)
 
             # exclude images
-            imagelist = page.getImageList()
+            imagelist = page.getImageList(full=True)
+            imagebboxlist = []
             for image in imagelist:
                 try:
-                    # image[7] is the name of the picture
-                    imagerect = page.getImageBbox(image[7])
+                    imagerect = page.getImageBbox(image)
                     if imagerect.isInfinite or imagerect.isEmpty:
                         continue
-                    pixmap.invertIRect(imagerect * self.scale)
+                    else:
+                        imagebboxlist.append(imagerect)
                 except Exception:
                     pass
+
+            newly_added_overlapbboxlist = imagebboxlist
+
+            # Nth time of loop represents N+1 rectanges' intesects' overlaps
+            time = 0
+            while len(newly_added_overlapbboxlist) > 1:
+                temp_overlapbboxlist = []
+                time += 1
+                # calculate overlap
+                for i in range(len(newly_added_overlapbboxlist)):
+                    for j in range(i+1,len(newly_added_overlapbboxlist)):
+                        x0a = newly_added_overlapbboxlist[i].x0
+                        y0a = newly_added_overlapbboxlist[i].y0
+                        x1a = newly_added_overlapbboxlist[i].x1
+                        y1a = newly_added_overlapbboxlist[i].y1
+                        x0b = newly_added_overlapbboxlist[j].x0
+                        y0b = newly_added_overlapbboxlist[j].y0
+                        x1b = newly_added_overlapbboxlist[j].x1
+                        y1b = newly_added_overlapbboxlist[j].y1
+                        x0c = max(x0a,x0b)
+                        y0c = max(y0a,y0b)
+                        x1c = min(x1a,x1b)
+                        y1c = min(y1a,y1b)
+                        if x0c < x1c and y0c < y1c:
+                            temp_overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
+                # remove duplicate overlaps for one time
+                for item in set(temp_overlapbboxlist):
+                    if temp_overlapbboxlist.count(item) % 2 == 0:
+                        while item in temp_overlapbboxlist:
+                            temp_overlapbboxlist.remove(item)
+                    else:
+                        while temp_overlapbboxlist.count(item) > 1:
+                            temp_overlapbboxlist.remove(item)
+                newly_added_overlapbboxlist = temp_overlapbboxlist
+                imagebboxlist.extend(newly_added_overlapbboxlist)
+                if time%2 == 1 and time//2 > 0:
+                    imagebboxlist.extend(newly_added_overlapbboxlist)
+
+            if len(imagebboxlist) != len(set(imagebboxlist)):
+                # remove duplicate to make it run faster
+                for item in set(imagebboxlist):
+                    if imagebboxlist.count(item) % 2 == 0:
+                        while item in imagebboxlist:
+                            imagebboxlist.remove(item)
+                    else:
+                        while imagebboxlist.count(item) > 1:
+                            imagebboxlist.remove(item)
+            for bbox in imagebboxlist:
+                pixmap.invertIRect(bbox * self.scale)
 
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
@@ -863,7 +930,14 @@ class PdfViewerWidget(QWidget):
                     # if only one char selected.
                     line_rect_list.append(bbox_list[0])
 
-            line_rect_list = list(map(lambda x: fitz.Rect(x), line_rect_list))
+            def check_rect(rect):
+                tl_x, tl_y, br_x, br_y = rect
+                if tl_x <= br_x and tl_y <= br_y:
+                    return fitz.Rect(rect)
+                # discard the illegal rect. return a micro rect
+                return fitz.Rect(tl_x, tl_y, tl_x+1, tl_y+1)
+
+            line_rect_list = list(map(check_rect, line_rect_list))
 
             page = self.document[page_index]
             old_annot = self.select_area_annot_cache_dict[page_index]
@@ -905,19 +979,28 @@ class PdfViewerWidget(QWidget):
             annots.append(annot)
             annot = annot.next
 
+        is_hover_annot = False
+        current_annot = None
         for annot in annots:
             if fitz.Point(ex, ey) in annot.rect:
-                self.is_hover_annot = True
-                annot.setOpacity(0.5)
+                # self.buffer.message_to_emacs.emit(annot.info["content"])
+                is_hover_annot = True
+                current_annot = annot
+                opacity = 0.5
                 self.buffer.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
             else:
-                annot.setOpacity(1) # restore annot
-                self.is_hover_annot = False
-            annot.update()
+                opacity = 1.0
+            if opacity != annot.opacity:
+                annot.setOpacity(opacity)
+                annot.update()
 
-        self.page_cache_pixmap_dict.clear()
-        self.update()
-        return page, annot
+        # update only if changed
+        if is_hover_annot != self.is_hover_annot:
+            self.is_hover_annot = is_hover_annot
+            del self.page_cache_pixmap_dict[page_index]
+            self.update()
+
+        return page, current_annot
 
     def save_annot(self):
         self.document.saveIncr()
@@ -931,17 +1014,16 @@ class PdfViewerWidget(QWidget):
                 page.deleteAnnot(annot)
                 self.save_annot()
             if action == "edit":
-                if annot.type[0] == 0:
-                    self.get_focus_text.emit(self.buffer_id, annot.info["content"])
-                else:
-                    self.buffer.message_to_emacs.emit("Cannot edit. Only support text annot type.")
+                self.edited_page_annot = (page, annot)
+                self.get_focus_text.emit(self.buffer_id, annot.info["content"].replace("\r", "\n"))
 
     def update_annot_text(self, annot_text):
-        page, annot = self.hover_annot()
+        page, annot = self.edited_page_annot
         if annot.parent:
             annot.setInfo(content=annot_text)
             annot.update()
         self.save_annot()
+        self.edited_annot = (None, None)
 
     def jump_to_page(self, page_num):
         self.update_vertical_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))

@@ -50,7 +50,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 ## 安装
 1. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。
 
-以下这行是针对*Archlinux*，同样的包的安装方式在别的发行版略有不同，请善用搜索引擎：
+以下这行是*Arch*系安装方式，同样的包在别的发行版的安装方式略有不同，请善用搜索引擎：
 
 ```Bash
 yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-pymupdf python-grip filebrowser-bin
