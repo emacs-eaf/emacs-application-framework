@@ -50,8 +50,8 @@
 
   (add-hook 'evil-normal-state-entry-hook
             (lambda ()
-              (define-key eaf-mode-map (kbd eaf-evil-leader-key) eaf-evil-leader-keymap)
               (when (derived-mode-p 'eaf-mode)
+                (define-key eaf-mode-map (kbd eaf-evil-leader-key) eaf-evil-leader-keymap)
                 (setq emulation-mode-map-alists
                       (delq 'evil-mode-map-alist emulation-mode-map-alists)))))
 
