@@ -211,7 +211,7 @@ class AppBuffer(BrowserBuffer):
             self._search_text(self.search_term, True)
 
     @interactive()
-    def search_quit(self):
+    def action_quit(self):
         if self.search_term != "":
             self._search_text("")
 

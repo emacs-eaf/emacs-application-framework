@@ -62,7 +62,7 @@ class BrowserView(QWebEngineView):
 
         self.selectionChanged.connect(self.select_text_change)
 
-        self.urlChanged.connect(lambda url: self.search_quit())
+        self.urlChanged.connect(lambda url: self.action_quit())
 
         self.load_cookie()
 
@@ -218,9 +218,9 @@ class BrowserView(QWebEngineView):
         else:
             self._search_text(self.search_term, True)
 
-    @interactive(new_name = "action_quit")
-    def search_quit(self):
-        ''' Quit search.'''
+    @interactive()
+    def action_quit(self):
+        ''' Quit action.'''
         if self.search_term != "":
             self._search_text("")
 
