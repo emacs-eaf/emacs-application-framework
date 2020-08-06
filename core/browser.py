@@ -843,7 +843,7 @@ class BrowserBuffer(Buffer):
             self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", cursor_foreground_color).replace("%2", cursor_background_color)
             self.buffer_widget.eval_js(self.caret_browsing_js)
             self.eval_caret_js = True
-            
+
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
                 self.buffer_widget.load_adblocker()
             if self.dark_mode_is_enable():
@@ -1184,7 +1184,7 @@ class BrowserBuffer(Buffer):
     @interactive(insert_or_do=True)
     def marker_enable_caret(self):
         self.buffer_widget.get_text_markers()
-        self.send_input_message("Toggle Caret at:", "marker_enable_caret");
+        self.send_input_message("Toggle Caret at: ", "marker_enable_caret");
 
     @interactive(insert_or_do=True)
     def open_link(self):
