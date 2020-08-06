@@ -218,7 +218,6 @@ class BrowserView(QWebEngineView):
         else:
             self._search_text(self.search_term, True)
 
-    @interactive()
     def action_quit(self):
         ''' Quit action.'''
         if self.search_term != "":
