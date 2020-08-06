@@ -961,7 +961,8 @@ For now only EAF browser app is supported."
   (set-process-sentinel
    eaf-process
    #'(lambda (process event)
-       (when (string-prefix-p "exited abnormally with code" event)
+       (when (or (string-prefix-p "exited abnormally with code" event)
+                 (string-match "finished" event))
          (switch-to-buffer eaf-name))
        (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
   (message "[EAF] Process starting..."))
