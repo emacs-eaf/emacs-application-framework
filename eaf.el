@@ -2176,7 +2176,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                         (butlast (split-string (buffer-string) "\n"))))
       (goto-line (seq-count (apply-partially #'>= page-number) toc))
       (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
-      (read-only-mode 1)
+      (let ((view-read-only nil))
+        (read-only-mode 1))
       (eaf-pdf-outline-mode 1))
 
     ;; Popup ouline buffer.
