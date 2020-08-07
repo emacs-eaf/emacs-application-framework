@@ -247,9 +247,10 @@ class BrowserView(QWebEngineView):
         for cookie in self.cookie_storage.load_cookie():
             self.cookie_store.setCookie(cookie)
 
-    def clear_cookies(self):
+    def _clear_cookies(self):
         ''' Clear cookies.'''
         self.cookie_storage.clear_cookies(self.cookie_store)
+        self.buffer.message_to_emacs.emit("Cleared all cookies.")
 
     def createWindow(self, window_type):
         ''' Create new browser window.'''
@@ -579,7 +580,6 @@ class BrowserCookieStorage:
     def clear_cookies(self, cookie_store):
         ''' Clear cookies.'''
         cookie_store.deleteAllCookies()
-
         open(self.cookie_file, 'w').close()
 
 class HistoryPage():
@@ -981,6 +981,10 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.open_url(str(result_content))
         elif callback_tag == "copy_code":
             self.buffer_widget.copy_code_content(str(result_content).strip())
+        elif callback_tag == "clear_history":
+            self._clear_history()
+        elif callback_tag == "clear_cookies":
+            self.buffer_widget._clear_cookies()
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
@@ -992,11 +996,6 @@ class BrowserBuffer(Buffer):
            callback_tag == "copy_link" or \
            callback_tag == "edit_url":
             self.buffer_widget.cleanup_links()
-
-    def clear_cookies(self):
-        ''' Clear all cookies.'''
-        self.buffer_widget.clear_cookies()
-        self.message_to_emacs.emit("Cleared all cookies.")
 
     def try_start_aria2_daemon(self):
         ''' Try to start aria2 daemon.'''
@@ -1280,13 +1279,22 @@ class BrowserBuffer(Buffer):
         ''' Open new blank page.'''
         self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
 
-    def clear_history(self):
-        ''' Clear browsing history.'''
+    def _clear_history(self):
         if os.path.exists(self.history_log_file_path):
             os.remove(self.history_log_file_path)
             self.message_to_emacs.emit("Cleared browsing history.")
         else:
             self.message_to_emacs.emit("There is no browsing history.")
+
+    @interactive()
+    def clear_history(self):
+        ''' Clear browsing history.'''
+        self.send_input_message("Are you sure you want to clear all browsing history?", "clear_history", "yes-or-no")
+
+    @interactive()
+    def clear_cookies(self):
+        ''' Clear cookies.'''
+        self.send_input_message("Are you sure you want to clear all browsing cookies?", "clear_cookies", "yes-or-no")
 
     def record_close_page(self, url):
         ''' Record closing pages.'''
