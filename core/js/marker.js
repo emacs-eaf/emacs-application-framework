@@ -48,8 +48,12 @@
     }
 
     function getCoords(node){
-        let rect = node.getBoundingClientRect();
-        return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(node) ];
+        if (node.getBoundingClientRect){
+            let rect = node.getBoundingClientRect();
+            return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(node) ];
+        }
+
+        return getCoords(node.parentNode); // TextNode not define getBoundingClientRect
     }
 
     function isElementOnScreen(rect){
@@ -255,15 +259,28 @@ z-index: 100000;\
 
 
     self.generateTextNodeMarker = () => {
-        var elements = getVisibleElements(function(e, v) {
-            var aa = e.childNodes;
-            for (var i = 0, len = aa.length; i < len; i++) {
+
+        let elements = getVisibleElements(function(e, v) {
+            let aa = e.childNodes;
+            for (let i = 0, len = aa.length; i < len; i++) {
                 if (aa[i].nodeType == Node.TEXT_NODE && aa[i].data.length > 0) {
                     v.push(e);
                     break;
                 }
             }
         });
+
+        elements = Array.prototype.concat.apply([], elements.map(function (e) {
+            let aa = e.childNodes;
+            let bb = [];
+            for (let i = 0, len = aa.length; i < len; i++) {
+                if (aa[i].nodeType == Node.TEXT_NODE && aa[i].data.trim().length > 1) {
+                    bb.push(aa[i]);
+                }
+            }
+            return bb;
+        }));
+
         return elements;
     }
 
