@@ -665,6 +665,7 @@ class BrowserBuffer(Buffer):
             settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
             settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
             settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
+            settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
         except Exception:
             pass
 
