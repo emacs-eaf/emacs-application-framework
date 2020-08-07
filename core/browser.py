@@ -321,13 +321,13 @@ class BrowserView(QWebEngineView):
         ''' Reset the magnification.'''
         self.setZoomFactor(float(self.buffer.emacs_var_dict["eaf-browser-default-zoom"]))
 
-    def eval_js(self, js):
+    def _eval_js(self, js):
         ''' Run JavaScript.'''
         self.web_page.runJavaScript(js)
 
-    def eval_js_file(self, js_file):
+    def _eval_js_file(self, js_file):
         ''' Run JavaScript from JS file.'''
-        self.eval_js(self.read_js_content(js_file))
+        self._eval_js(self.read_js_content(js_file))
 
     def execute_js(self, js):
         ''' Execute JavaScript.'''
@@ -336,42 +336,42 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_left(self):
         ''' Scroll to left side.'''
-        self.eval_js("document.scrollingElement.scrollBy(-35, 0)")
+        self._eval_js("document.scrollingElement.scrollBy(-35, 0)")
 
     @interactive(insert_or_do=True)
     def scroll_right(self):
         ''' Scroll to right side.'''
-        self.eval_js("document.scrollingElement.scrollBy(35, 0)")
+        self._eval_js("document.scrollingElement.scrollBy(35, 0)")
 
     @interactive(insert_or_do=True)
     def scroll_up(self):
         ''' Scroll up.'''
-        self.eval_js("document.scrollingElement.scrollBy(0, 50)")
+        self._eval_js("document.scrollingElement.scrollBy(0, 50)")
 
     @interactive(insert_or_do=True)
     def scroll_down(self):
         ''' Scroll down.'''
-        self.eval_js("document.scrollingElement.scrollBy(0, -50)")
+        self._eval_js("document.scrollingElement.scrollBy(0, -50)")
 
     @interactive(insert_or_do=True)
     def scroll_up_page(self):
         ''' Scroll up a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+        self._eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
         ''' Scroll down a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+        self._eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_begin(self):
         ''' Scroll to the beginning.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+        self._eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_bottom(self):
         ''' Scroll to the bottom.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+        self._eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive()
     def get_selection_text(self):
@@ -422,12 +422,12 @@ class BrowserView(QWebEngineView):
     def select_all(self):
         ''' Select all text.'''
         # We need window focus before select all text.
-        self.eval_js("window.focus()")
+        self._eval_js("window.focus()")
         self.triggerPageAction(self.web_page.SelectAll)
 
     def select_input_text(self):
         ''' Select input text.'''
-        self.eval_js(self.select_input_text_js)
+        self._eval_js(self.select_input_text_js)
 
     @interactive()
     def get_url(self):
@@ -436,16 +436,16 @@ class BrowserView(QWebEngineView):
 
     def cleanup_links(self):
         ''' Clean up links.'''
-        self.eval_js("document.querySelector('.eaf-marker-container').remove();")
-        self.eval_js("document.querySelector('.eaf-style').remove();")
+        self._eval_js("document.querySelector('.eaf-marker-container').remove();")
+        self._eval_js("document.querySelector('.eaf-style').remove();")
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js("Marker.generateMarker('a, input, button, [class*=\"btn\"], [aria-haspopup], [role=\"button\"], textarea, select, summary, [class=\"gap\"], [ng-click]')")
+        self._eval_js("Marker.generateMarker('a, input, button, [class*=\"btn\"], [aria-haspopup], [role=\"button\"], textarea, select, summary, [class=\"gap\"], [ng-click]')")
 
     def get_text_markers(self):
         ''' Get visiable text markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateTextNodeMarker)");
+        self._eval_js("Marker.generateMarker(Marker.generateTextNodeMarker)");
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
@@ -454,25 +454,25 @@ class BrowserView(QWebEngineView):
         self.cleanup_links()
         return link
 
-    def jump_to_link(self, marker):
+    def _open_link(self, marker):
         ''' Jump to link according to marker.'''
         link = self.get_marker_link(marker)
         if link != "":
             self.open_url(link)
 
-    def jump_to_link_new_buffer(self, marker):
-        ''' Jump to a new buffer of the link.'''
+    def _open_link_new_buffer(self, marker):
+        ''' Open the link at the markre in a new buffer.'''
         link = self.get_marker_link(marker)
         if link != "":
             self.open_url_new_buffer(link)
 
-    def jump_to_link_background_buffer(self, marker):
-        ''' Jump to the bacground buffer of the link.'''
+    def _open_link_background_buffer(self, marker):
+        ''' Open link at the marker in the background.'''
         link = self.get_marker_link(marker)
         if link != "":
             self.open_url_background_buffer(link)
 
-    def copy_link(self, marker):
+    def _copy_link(self, marker):
         ''' Copy the link.'''
         link = self.get_marker_link(marker)
         if link != "":
@@ -482,7 +482,7 @@ class BrowserView(QWebEngineView):
 
     def get_code_markers(self):
         ''' Get the code markers.'''
-        self.eval_js("Marker.generateMarker('pre')")
+        self._eval_js("Marker.generateMarker('pre')")
 
     def get_code_content(self, marker):
         ''' Get the code content according to marker.'''
@@ -490,12 +490,12 @@ class BrowserView(QWebEngineView):
         self.cleanup_links()
         return content
 
-    def enable_caret_at_line(self, marker):
+    def _caret_at_line(self, marker):
         '''Enable caret by marker'''
         self.execute_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
         self.cleanup_links()
 
-        self.eval_js("CaretBrowsing.setInitialCursor(true);")
+        self._eval_js("CaretBrowsing.setInitialCursor(true);")
         self.buffer.caret_browsing_mode = True
         self.buffer.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.buffer.caret_browsing_mode else "nil"))
 
@@ -519,7 +519,7 @@ class BrowserView(QWebEngineView):
     def set_focus_text(self, new_text):
         ''' Set the focus text.'''
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
-        self.eval_js(self.set_focus_text_js)
+        self._eval_js(self.set_focus_text_js)
 
     @interactive(insert_or_do=True)
     def focus_input(self):
@@ -529,12 +529,12 @@ class BrowserView(QWebEngineView):
     @interactive()
     def clear_focus(self):
         ''' Clear the focus.'''
-        self.eval_js(self.clear_focus_js)
+        self._eval_js(self.clear_focus_js)
 
     @interactive()
     def dark_mode(self):
         ''' Dark mode support.'''
-        self.eval_js(self.dark_mode_js)
+        self._eval_js(self.dark_mode_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -828,7 +828,7 @@ class BrowserBuffer(Buffer):
             self.update()
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
-            self.buffer_widget.eval_js(self.buffer_widget.marker_js.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+            self.buffer_widget._eval_js(self.buffer_widget.marker_js.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
 
             cursor_foreground_color = ""
             cursor_background_color = ""
@@ -849,7 +849,7 @@ class BrowserBuffer(Buffer):
                     cursor_background_color = "#FFF"
 
             self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", cursor_foreground_color).replace("%2", cursor_background_color)
-            self.buffer_widget.eval_js(self.caret_browsing_js)
+            self.buffer_widget._eval_js(self.caret_browsing_js)
             self.eval_caret_js = True
 
             if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
@@ -896,10 +896,26 @@ class BrowserBuffer(Buffer):
 
             self.message_to_emacs.emit("Downloading: " + download_url)
 
+    def _save_as_pdf(self):
+        parsed = urlparse(self.url)
+        qd = parse_qs(parsed.query, keep_blank_values=True)
+        pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
+        self.message_to_emacs.emit("Saving as pdf...")
+        self.buffer_widget.web_page.printToPdf(pdf_path)
+
     @interactive(insert_or_do=True)
     def save_as_pdf(self):
         ''' Request to save as pdf.'''
         self.send_input_message("Save current webpage as PDF?", "save_as_pdf", "yes-or-no")
+
+    def _save_as_single_file(self):
+        parsed = urlparse(self.url)
+        qd = parse_qs(parsed.query, keep_blank_values=True)
+        file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(parsed.netloc))
+        self.message_to_emacs.emit("Saving as single file...")
+        args = ["monolith", self.url, "-o", file_path]
+        handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
+        call_and_check_code(args, handler)
 
     @interactive(insert_or_do=True)
     def save_as_single_file(self):
@@ -943,46 +959,37 @@ class BrowserBuffer(Buffer):
 
     def handle_input_response(self, callback_tag, result_content):
         ''' Handle input message.'''
+        result_content = str(result_content)
         if callback_tag == "search_text_forward":
-            self.buffer_widget._search_text(str(result_content))
+            self.buffer_widget._search_text(result_content)
         elif callback_tag == "search_text_backward":
-            self.buffer_widget._search_text(str(result_content), True)
+            self.buffer_widget._search_text(result_content, True)
         elif callback_tag == "caret_search_text_forward":
-            self._caret_search_text(str(result_content))
+            self._caret_search_text(result_content)
         elif callback_tag == "caret_search_text_backward":
-            self._caret_search_text(str(result_content), True)
-        elif callback_tag == "jump_link" or callback_tag == "select_marker_text":
-            self._jump_to_link(str(result_content).strip())
+            self._caret_search_text(result_content, True)
         elif callback_tag == "caret_at_line":
-            self._caret_at_line(str(result_content).strip())
-        elif callback_tag == "jump_link_new_buffer":
-            self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
+            self.buffer_widget._caret_at_line(result_content.strip())
+        elif callback_tag == "open_link" or callback_tag == "select_marker_text":
+            self.buffer_widget._open_link(result_content.strip())
+        elif callback_tag == "open_link_new_buffer":
+            self.buffer_widget._open_link_new_buffer(result_content.strip())
         elif callback_tag == "jump_link_background_buffer":
-            self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
+            self.buffer_widget._open_link_background_buffer(result_content.strip())
         elif callback_tag == "copy_link":
-            self.buffer_widget.copy_link(str(result_content).strip())
+            self.buffer_widget._copy_link(result_content.strip())
         elif callback_tag == "eval_js_file":
-            self.buffer_widget.eval_js_file(str(result_content))
+            self.buffer_widget._eval_js_file(result_content)
         elif callback_tag == "eval_js":
-            self.buffer_widget.eval_js(str(result_content))
+            self.buffer_widget._eval_js(result_content)
         elif callback_tag == "save_as_pdf":
-            parsed = urlparse(self.url)
-            qd = parse_qs(parsed.query, keep_blank_values=True)
-            pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
-            self.message_to_emacs.emit("Saving as pdf...")
-            self.buffer_widget.web_page.printToPdf(pdf_path)
+            self._save_as_pdf()
         elif callback_tag == "save_as_single_file":
-            parsed = urlparse(self.url)
-            qd = parse_qs(parsed.query, keep_blank_values=True)
-            file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(parsed.netloc))
-            self.message_to_emacs.emit("Saving as single file...")
-            args = ["monolith", self.url, "-o", file_path]
-            handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
-            call_and_check_code(args, handler)
+            self._save_as_single_file()
         elif callback_tag == "edit_url":
-            self.buffer_widget.open_url(str(result_content))
+            self.buffer_widget.open_url(result_content)
         elif callback_tag == "copy_code":
-            self.buffer_widget.copy_code_content(str(result_content).strip())
+            self.buffer_widget.copy_code_content(result_content.strip())
         elif callback_tag == "clear_history":
             self._clear_history()
         elif callback_tag == "clear_cookies":
@@ -990,8 +997,8 @@ class BrowserBuffer(Buffer):
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
-        if callback_tag == "jump_link" or \
-           callback_tag == "jump_link_new_buffer" or \
+        if callback_tag == "open_link" or \
+           callback_tag == "open_link_new_buffer" or \
            callback_tag == "jump_link_background_buffer" or \
            callback_tag == "select_marker_text" or \
            callback_tag == "caret_at_line" or \
@@ -1026,11 +1033,11 @@ class BrowserBuffer(Buffer):
         ''' Init caret browsing.'''
         if self.eval_caret_js:
             if self.caret_browsing_mode:
-                self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
+                self.buffer_widget._eval_js("CaretBrowsing.shutdown();")
                 self.message_to_emacs.emit("Caret browsing deactivated.")
                 self.caret_browsing_mode = False
             else:
-                self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
+                self.buffer_widget._eval_js("CaretBrowsing.setInitialCursor();")
                 self.message_to_emacs.emit("Caret browsing activated.")
                 self.caret_browsing_mode = True
             self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.caret_browsing_mode else "nil"))
@@ -1047,74 +1054,74 @@ class BrowserBuffer(Buffer):
     def caret_next_sentence(self):
         ''' Switch to next line in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'sentence');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('forward', 'sentence');")
 
     @interactive()
     def caret_previous_sentence(self):
         ''' Switch to previous line in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'sentence');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('backward', 'sentence');")
 
     @interactive()
     def caret_next_line(self):
         ''' Switch to next line in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'line');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('forward', 'line');")
 
     @interactive()
     def caret_previous_line(self):
         ''' Switch to previous line in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'line');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('backward', 'line');")
 
     @interactive()
     def caret_next_character(self):
         ''' Switch to next character in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'character');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('forward', 'character');")
 
     @interactive()
     def caret_previous_character(self):
         ''' Switch to previous character in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'character');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('backward', 'character');")
 
     @interactive()
     def caret_next_word(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'word');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('forward', 'word');")
 
     @interactive()
     def caret_previous_word(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'word');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('backward', 'word');")
 
     @interactive()
     def caret_to_bottom(self):
         ''' Switch to next word in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('forward', 'documentboundary');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('forward', 'documentboundary');")
 
     @interactive()
     def caret_to_top(self):
         ''' Switch to previous word in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.move('backward', 'documentboundary');")
+            self.buffer_widget._eval_js("CaretBrowsing.move('backward', 'documentboundary');")
 
     @interactive()
     def caret_rotate_selection(self):
         ''' Rotate selection.'''
         if self.caret_browsing_mode:
             if self.caret_browsing_mark_activated:
-                self.buffer_widget.eval_js("CaretBrowsing.rotateSelection();")
+                self.buffer_widget._eval_js("CaretBrowsing.rotateSelection();")
 
     @interactive()
     def caret_toggle_mark(self):
         ''' Toggle mark in caret browsing.'''
         if self.caret_browsing_mode:
-            self.buffer_widget.eval_js("CaretBrowsing.toggleMark();")
+            self.buffer_widget._eval_js("CaretBrowsing.toggleMark();")
             if self.buffer_widget.execute_js("CaretBrowsing.markEnabled"):
                 self.caret_browsing_mark_activated = True
                 self.message_to_emacs.emit("Caret Mark set")
@@ -1195,15 +1202,15 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def open_link(self):
-        ''' Open Link.'''
+        ''' Open Link through a marker.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link: ", "jump_link");
+        self.send_input_message("Open Link: ", "open_link");
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer(self):
         ''' Open Link in New Buffer.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in New Buffer: ", "jump_link_new_buffer");
+        self.send_input_message("Open Link in New Buffer: ", "open_link_new_buffer");
 
     @interactive(insert_or_do=True)
     def open_link_background_buffer(self):
@@ -1345,7 +1352,7 @@ class BrowserBuffer(Buffer):
         self.send_input_message("Eval JS file: ", "eval_js_file", "file")
 
     def eval_js(self):
-        ''' Eval JS.'''
+        ''' Eval JS interactively.'''
         self.send_input_message("Eval JS: ", "eval_js")
 
     def open_dev_tool_page(self):
