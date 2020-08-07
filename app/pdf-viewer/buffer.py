@@ -137,9 +137,6 @@ class AppBuffer(Buffer):
         else:
             self.message_to_emacs.emit("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
-    def current_percent(self):
-        return str(self.buffer_widget.current_percent())
-
     def current_page(self):
         return str(self.buffer_widget.get_start_page_index() + 1)
 
@@ -1033,9 +1030,6 @@ class PdfViewerWidget(QWidget):
 
     def jump_to_percent(self, percent):
         self.update_vertical_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
-
-    def current_percent(self):
-        return self.scroll_offset/self.max_scroll_offset()
 
     def update_vertical_offset(self, new_offset):
         if self.scroll_offset != new_offset:
