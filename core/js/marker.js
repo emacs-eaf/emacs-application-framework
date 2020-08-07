@@ -1,13 +1,38 @@
 (function(_) {
-    var self = {}
+    let self;
     _.Marker = self = {};
+
+
+    function getVisibleElements(filter) {
+        let all = Array.from(document.documentElement.getElementsByTagName("*"));
+        let visibleElements = [];
+        for (let i = 0; i < all.length; i++) {
+            let e = all[i];
+            // include elements in a shadowRoot.
+            if (e.shadowRoot) {
+                let cc = e.shadowRoot.querySelectorAll('*');
+                for (let j = 0; j < cc.length; j++) {
+                    all.push(cc[j]);
+                }
+            }
+            let rect = e.getBoundingClientRect();
+            if ( (rect.top <= window.innerHeight) && (rect.bottom >= 0)
+                 && (rect.left <= window.innerWidth) && (rect.right >= 0)
+                 && rect.height > 0
+                 && getComputedStyle(e).visibility !== 'hidden'
+               ) {
+                filter(e, visibleElements);
+            }
+        }
+        return visibleElements;
+    }
 
     function moveCursorToEnd(el) {
         if (typeof el.selectionStart == "number") {
             el.selectionStart = el.selectionEnd = el.value.length;
         } else if (typeof el.createTextRange != "undefined") {
             el.focus();
-            var range = el.createTextRange();
+            let range = el.createTextRange();
             range.collapse(false);
             range.select();
         }
@@ -62,31 +87,6 @@
         }
     }
 
-    function getVisibleElements(filter) {
-        var all = Array.from(document.documentElement.getElementsByTagName("*"));
-        var visibleElements = [];
-        for (var i = 0; i < all.length; i++) {
-            var e = all[i];
-            // include elements in a shadowRoot.
-            if (e.shadowRoot) {
-                var cc = e.shadowRoot.querySelectorAll('*');
-                for (var j = 0; j < cc.length; j++) {
-                    all.push(cc[j]);
-                }
-            }
-            var rect = e.getBoundingClientRect();
-            if ( (rect.top <= window.innerHeight) && (rect.bottom >= 0)
-                 && (rect.left <= window.innerWidth) && (rect.right >= 0)
-                 && rect.height > 0
-                 && getComputedStyle(e).visibility !== 'hidden'
-               ) {
-                filter(e, visibleElements);
-            }
-        }
-        return visibleElements;
-    }
-
-
     function cAdd1(keyCounter, index, maxDigit){
         if(keyCounter[index] + 1 == maxDigit){
             keyCounter[index] = 0;
@@ -117,6 +117,7 @@
             markerContainer.children[l].id = keyStr;
         }
     }
+
 
     self.generateMarker = (selectors) => {
 
@@ -179,9 +180,9 @@ z-index: 100000;\
 
         let validRects = [];
         if (typeof(selectors)=="function"){
-            addElementToRects(validRects, selectors.call()); // collect links
+            addElementToRects(validRects, selectors());
         }else if (typeof(selectors) == "string"){
-            selectors = selectors.split(",")
+            selectors = selectors.split(",");
             selectors.forEach((s)=>addElementToRects(validRects, document.querySelectorAll(s.trim())));
         }
 
@@ -212,7 +213,7 @@ z-index: 100000;\
         if (match !== undefined && callback !== undefined){
             let selectors = match.getAttribute('pointed-link');
             let node = document.querySelector(selectors);
-            return callback(node)
+            return callback(node);
         } else
             return "";
     }
@@ -249,8 +250,9 @@ z-index: 100000;\
         } else if(node.nodeName.toLowerCase() === 'a') {
             node.click(); // most general a tag without href
         }
-        return ""
+        return "";
     }
+
 
     self.generateTextNodeMarker = () => {
         var elements = getVisibleElements(function(e, v) {
