@@ -386,6 +386,8 @@ class BrowserView(QWebEngineView):
     def copy_text(self):
         ''' Copy selected text.'''
         self.triggerPageAction(self.web_page.Copy)
+        if self.buffer.caret_browsing_mode and self.buffer.caret_browsing_mark_activated:
+            self.buffer.caret_exit()
 
     @interactive(msg_emacs="Yank selected text.")
     def yank_text(self):
