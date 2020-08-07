@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Jul 12 21:48:49 2020 (-0400)
+;; Last-Updated: Thu Aug  6 22:36:41 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -284,8 +284,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-browser-caret-mode-keybinding
-  '(
-    ("j"   . "caret_next_line")
+  '(("j"   . "caret_next_line")
     ("k"   . "caret_previous_line")
     ("l"   . "caret_next_character")
     ("h"   . "caret_previous_character")
@@ -302,7 +301,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("o"   . "caret_rotate_selection")
     ("y"   . "caret_translate_text")
     ("q"   . "caret_exit")
-
     ("C-n" . "caret_next_line")
     ("C-p" . "caret_previous_line")
     ("C-f" . "caret_next_character")
@@ -316,13 +314,13 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-s" . "caret_search_forward")
     ("C-r" . "caret_search_backward")
     ("C-." . "caret_clear_search")
-    ("C-i" . "caret_toggle_mark")
+    ("C-SPC" . "caret_toggle_mark")
     ("C-o" . "caret_rotate_selection")
     ("C-y" . "caret_translate_text")
     ("C-q" . "caret_exit")
-
+    ("c"   . "insert_or_caret_at_line")
     ("M-c" . "caret_toggle_browsing")
-    )
+    ("<escape>" . "caret_exit"))
   "The keybinding of EAF Browser Caret Mode."
   :type 'cons)
 
@@ -366,13 +364,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("k" . "insert_or_scroll_down")
     ("h" . "insert_or_scroll_left")
     ("l" . "insert_or_scroll_right")
-    ;; ("b" . "insert_or_select_text")
-    ("b" . "insert_or_marker_enable_caret")
     ("f" . "insert_or_open_link")
     ("F" . "insert_or_open_link_new_buffer")
     ("B" . "insert_or_open_link_background_buffer")
-    ("c" . "insert_or_copy_link")
-    ("C" . "insert_or_copy_code")
+    ("c" . "insert_or_caret_at_line")
     ("u" . "insert_or_scroll_down_page")
     ("d" . "insert_or_scroll_up_page")
     ("H" . "insert_or_history_backward")
@@ -397,6 +392,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("2" . "insert_or_save_as_single_file")
     ("v" . "insert_or_view_source")
     ("e" . "insert_or_edit_url")
+    ("M-C" . "copy_code")
+    ("C-M-f" . "copy_link")
     ("C-a" . "select_all_or_input_text")
     ("M-u" . "clear_focus")
     ("M-i" . "open_download_manage_page")
@@ -965,7 +962,8 @@ For now only EAF browser app is supported."
   (set-process-sentinel
    eaf-process
    #'(lambda (process event)
-       (when (string-prefix-p "exited abnormally with code" event)
+       (when (or (string-prefix-p "exited abnormally with code" event)
+                 (string-match "finished" event))
          (switch-to-buffer eaf-name))
        (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
   (message "[EAF] Process starting..."))
@@ -1499,8 +1497,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive-type initial-content)))
     (if input-message
-        (eaf-call "handle_input_message" input-buffer-id callback-tag input-message)
-      (eaf-call "cancel_input_message" input-buffer-id callback-tag))))
+        (eaf-call "handle_input_response" input-buffer-id callback-tag input-message)
+      (eaf-call "cancel_input_response" input-buffer-id callback-tag))))
 
 (defun eaf-read-input (interactive-string interactive-type initial-content)
   "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
@@ -2208,7 +2206,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (format "%s:%s:%s:%s:%s" eaf--buffer-id x y w h)))
 
 (defun eaf-generate-keymap-doc ()
-  "This command use for generate keybindings document."
+  "This command use for generate keybindings document Wiki."
   (interactive)
   (let ((vars (list 'eaf-browser-keybinding
                     'eaf-browser-caret-mode-keybinding

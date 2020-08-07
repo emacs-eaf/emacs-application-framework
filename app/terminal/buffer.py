@@ -211,12 +211,12 @@ class AppBuffer(BrowserBuffer):
             self._search_text(self.search_term, True)
 
     @interactive()
-    def search_quit(self):
+    def action_quit(self):
         if self.search_term != "":
             self._search_text("")
 
-    def handle_input_message(self, result_tag, result_content):
-        if result_tag == "search_text_forward":
+    def handle_input_response(self, callback_tag, result_content):
+        if callback_tag == "search_text_forward":
             self.buffer_widget._search_text(str(result_content))
-        elif result_tag == "search_text_backward":
+        elif callback_tag == "search_text_backward":
             self.buffer_widget._search_text(str(result_content), True)

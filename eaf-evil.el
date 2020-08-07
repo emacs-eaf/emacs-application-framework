@@ -37,67 +37,27 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-(defvar eaf-printable-character
-  (mapcar #'char-to-string (number-sequence ?! ?~))
-  "printable character")
+(defcustom eaf-evil-leader-key "C-SPC"
+  "Leader key trigger" )
 
-;; EAF evil Key Configuration
-(defun eaf-evil-lookup-key (key)
-  (or (lookup-key eaf-mode-map (kbd key))
-      (lookup-key (current-local-map) (kbd key))
-      ;; sequence key
-      (when (or (string-prefix-p "C-" key)
-                (string-prefix-p "M-" key))
-        (lookup-key (current-global-map) (kbd key)))
-      'eaf-send-key))
-
-
-(defun eaf-generate-normal-state-key-func (key)
-  (lambda () (interactive)
-    (call-interactively (eaf-evil-lookup-key key))))
-
-(defun eaf-evil-define-single-keys ()
-  (dolist (key (append  eaf-printable-character
-                        '("<escape>" "RET" "DEL" "TAB" "SPC" "<backtab>" "<home>" "<end>" "<left>" "<right>" "<up>" "<down>" "<prior>" "<next>" "<delete>" "<backspace>" "<return>")))
-    (evil-define-key* '(normal insert) eaf-mode-map* (kbd key)
-      (eaf-generate-normal-state-key-func key))))
-
-(defun eaf-evil-define-ctrl-keys ()
-  (dolist (key (seq-difference  eaf-printable-character
-                                (mapcar #'char-to-string "wWxXcChH[1234567890")))
-    (evil-define-key* '(normal insert) eaf-mode-map* (kbd (format "C-%s" key))
-      (eaf-generate-normal-state-key-func (format "C-%s" key)))))
-
-
-(defun eaf-evil-define-meta-keys ()
-  (dolist (key (seq-difference  eaf-printable-character
-                                (mapcar #'char-to-string "xX::1234567890")))
-    (evil-define-key* '(normal insert) eaf-mode-map* (kbd (format "M-%s" key))
-      (eaf-generate-normal-state-key-func (format "M-%s" key)))))
-
-(defun eaf-browser-focus-p ()
-  (eq (eaf-call "call_function" eaf--buffer-id "is_focus") t))
-
-(defun eaf-browser-focus-handler ()
-  (if (eaf-browser-focus-p)
-      (unless (evil-insert-state-p) (evil-insert-state))
-    (when (evil-insert-state-p) (evil-normal-state))))
+(defcustom eaf-evil-leader-keymap #'doom/leader
+  "Leader key bind"
+  :type 'keymap)
 
 (defun eaf-enable-evil-intergration ()
   "EAF evil intergration."
   (interactive)
-  (when (featurep 'evil)
-    (eaf-evil-define-single-keys)
-    (eaf-evil-define-ctrl-keys)
-    (eaf-evil-define-meta-keys)
-    (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
-    (eaf-bind-key clear_focus "<escape>" eaf-browser-keybinding)
-    (add-hook 'eaf-browser-hook (lambda () (add-hook 'post-command-hook #'eaf-browser-focus-handler nil t)))
-    ;; TODO: add 'eaf-terminal-hook
-    ;; (add-hook 'eaf-mode-hook (lambda () ()
-    ;;                            (when (string= "terminal" eaf--buffer-app-name)
-    ;;                                 (evil-emacs-state))))
-    ))
+
+  (add-hook 'evil-normal-state-entry-hook
+            (lambda ()
+              (when (derived-mode-p 'eaf-mode)
+                (define-key eaf-mode-map (kbd eaf-evil-leader-key) eaf-evil-leader-keymap)
+                (setq emulation-mode-map-alists
+                      (delq 'evil-mode-map-alist emulation-mode-map-alists)))))
+
+  (add-to-list 'evil-insert-state-modes 'eaf-edit-mode)
+
+  (eaf-bind-key clear_focus "<escape>" eaf-browser-keybinding))
 
 (with-eval-after-load "evil"
   (eaf-enable-evil-intergration))

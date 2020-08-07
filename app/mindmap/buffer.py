@@ -151,15 +151,15 @@ class AppBuffer(BrowserBuffer):
 
         self.save_file(False)
 
-    def handle_input_message(self, result_type, result_content):
-        if result_type == "update_node_topic":
+    def handle_input_response(self, callback_tag, result_content):
+        if callback_tag == "update_node_topic":
             self.handle_update_node_topic(str(result_content))
-        elif result_type == "change_node_background":
+        elif callback_tag == "change_node_background":
             print(str(result_content))
             self.buffer_widget.eval_js("change_node_background('{}');".format(str(result_content)))
-        elif result_type == "change_background_color":
+        elif callback_tag == "change_background_color":
             self.buffer_widget.eval_js("change_background_color('{}');".format(str(result_content)))
-        elif result_type == "change_text_color":
+        elif callback_tag == "change_text_color":
             self.buffer_widget.eval_js("change_text_color('{}');".format(str(result_content)))
 
     def add_multiple_sub_nodes(self):

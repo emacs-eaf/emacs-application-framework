@@ -46,23 +46,23 @@ class AppBuffer(Buffer):
     def delete_subscription(self):
         self.send_input_message("Are you sure you want to delete the current feed? (y or n): ", "delete_subscription")
 
-    def handle_input_message(self, result_type, result_content):
-        if result_type == "search_text_forward":
+    def handle_input_response(self, callback_tag, result_content):
+        if callback_tag == "search_text_forward":
             self.buffer_widget.browser._search_text(str(result_content))
-        elif result_type == "search_text_backward":
+        elif callback_tag == "search_text_backward":
             self.buffer_widget.browser._search_text(str(result_content), True)
-        elif result_type == "jump_link":
+        elif callback_tag == "jump_link":
             self.buffer_widget.browser.jump_to_link(str(result_content))
-        elif result_type == "jump_link_new_buffer":
+        elif callback_tag == "jump_link_new_buffer":
             self.buffer_widget.browser.jump_to_link(str(result_content), "true")
-        elif result_type == "add_subscription":
+        elif callback_tag == "add_subscription":
             self.buffer_widget.add_subscription(result_content)
-        elif result_type == "delete_subscription":
+        elif callback_tag == "delete_subscription":
             if result_content == "y":
                 self.buffer_widget.delete_subscription()
 
-    def cancel_input_message(self, result_type):
-        if result_type == "jump_link" or result_type == "jump_link_new_buffer":
+    def cancel_input_response(self, callback_tag):
+        if callback_tag == "jump_link" or callback_tag == "jump_link_new_buffer":
             self.buffer_widget.browser.cleanup_links()
 
     def open_link(self):
