@@ -397,18 +397,18 @@ class EAF(dbus.service.Object):
             self.buffer_dict[buffer_id].fake_key_sequence(event_string)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="sss", out_signature="")
-    def handle_input_message(self, buffer_id, callback_type, callback_result):
+    def handle_input_response(self, buffer_id, callback_tag, callback_result):
         ''' Handle input message for specified buffer.'''
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
-                buffer.handle_input_message(callback_type, callback_result)
+                buffer.handle_input_response(callback_tag, callback_result)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
-    def cancel_input_message(self, buffer_id, callback_type):
+    def cancel_input_response(self, buffer_id, callback_tag):
         ''' Cancel input message for specified buffer.'''
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
-                buffer.cancel_input_message(callback_type)
+                buffer.cancel_input_response(callback_tag)
 
     @dbus.service.method(EAF_DBUS_NAME, in_signature="ss", out_signature="")
     def update_focus_text(self, buffer_id, new_text):
@@ -490,7 +490,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def input_message(self, buffer_id, message, callback_type, input_type, input_content):
+    def input_message(self, buffer_id, message, callback_tag, input_type, input_content):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

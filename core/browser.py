@@ -935,37 +935,37 @@ class BrowserBuffer(Buffer):
             else:
                 self.scroll_down()
 
-    def handle_input_message(self, result_tag, result_content):
+    def handle_input_response(self, callback_tag, result_content):
         ''' Handle input message.'''
-        if result_tag == "search_text_forward":
+        if callback_tag == "search_text_forward":
             self.buffer_widget._search_text(str(result_content))
-        elif result_tag == "search_text_backward":
+        elif callback_tag == "search_text_backward":
             self.buffer_widget._search_text(str(result_content), True)
-        elif result_tag == "caret_search_text_forward":
+        elif callback_tag == "caret_search_text_forward":
             self._caret_search_text(str(result_content))
-        elif result_tag == "caret_search_text_backward":
+        elif callback_tag == "caret_search_text_backward":
             self._caret_search_text(str(result_content), True)
-        elif result_tag == "jump_link" or result_tag == "select_marker_text":
-            self.buffer_widget.jump_to_link(str(result_content).strip())
-        elif result_tag == "caret_at_line":
-            self.buffer_widget.enable_caret_at_line(str(result_content).strip())
-        elif result_tag == "jump_link_new_buffer":
+        elif callback_tag == "jump_link" or callback_tag == "select_marker_text":
+            self._jump_to_link(str(result_content).strip())
+        elif callback_tag == "caret_at_line":
+            self._caret_at_line(str(result_content).strip())
+        elif callback_tag == "jump_link_new_buffer":
             self.buffer_widget.jump_to_link_new_buffer(str(result_content).strip())
-        elif result_tag == "jump_link_background_buffer":
+        elif callback_tag == "jump_link_background_buffer":
             self.buffer_widget.jump_to_link_background_buffer(str(result_content).strip())
-        elif result_tag == "copy_link":
+        elif callback_tag == "copy_link":
             self.buffer_widget.copy_link(str(result_content).strip())
-        elif result_tag == "eval_js_file":
+        elif callback_tag == "eval_js_file":
             self.buffer_widget.eval_js_file(str(result_content))
-        elif result_tag == "eval_js":
+        elif callback_tag == "eval_js":
             self.buffer_widget.eval_js(str(result_content))
-        elif result_tag == "save_as_pdf":
+        elif callback_tag == "save_as_pdf":
             parsed = urlparse(self.url)
             qd = parse_qs(parsed.query, keep_blank_values=True)
             pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
             self.message_to_emacs.emit("Saving as pdf...")
             self.buffer_widget.web_page.printToPdf(pdf_path)
-        elif result_tag == "save_as_single_file":
+        elif callback_tag == "save_as_single_file":
             parsed = urlparse(self.url)
             qd = parse_qs(parsed.query, keep_blank_values=True)
             file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(parsed.netloc))
@@ -973,20 +973,20 @@ class BrowserBuffer(Buffer):
             args = ["monolith", self.url, "-o", file_path]
             handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
             call_and_check_code(args, handler)
-        elif result_tag == "edit_url":
+        elif callback_tag == "edit_url":
             self.buffer_widget.open_url(str(result_content))
-        elif result_tag == "copy_code":
+        elif callback_tag == "copy_code":
             self.buffer_widget.copy_code_content(str(result_content).strip())
 
-    def cancel_input_message(self, result_tag):
+    def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
-        if result_tag == "jump_link" or \
-           result_tag == "jump_link_new_buffer" or \
-           result_tag == "jump_link_background_buffer" or \
-           result_tag == "select_marker_text" or \
-           result_tag == "caret_at_line" or \
-           result_tag == "copy_link" or \
-           result_tag == "edit_url":
+        if callback_tag == "jump_link" or \
+           callback_tag == "jump_link_new_buffer" or \
+           callback_tag == "jump_link_background_buffer" or \
+           callback_tag == "select_marker_text" or \
+           callback_tag == "caret_at_line" or \
+           callback_tag == "copy_link" or \
+           callback_tag == "edit_url":
             self.buffer_widget.cleanup_links()
 
     def clear_cookies(self):

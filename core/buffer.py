@@ -227,16 +227,25 @@ class Buffer(QGraphicsScene):
         return [self.buffer_widget]
 
     def send_input_message(self, message, callback_tag, input_type="string", initial_content=""):
-        ''' Send input message.'''
+        ''' Send an input message to Emacs side for the user to respond.
+
+        MESSAGE is a message string that would be sent to the user.
+
+        CALLBACK_TAG is the reference tag when handle_input_message is invoked.
+
+        INPUT_TYPE must be one of "string", "file", or "yes-or-no".
+
+        INITIAL_CONTENT is the intial content of the user response, it is only useful when INPUT_TYPE is "string".
+        '''
         self.input_message.emit(self.buffer_id, message, callback_tag, input_type, initial_content)
 
-    def handle_input_message(self, result_type, result_content):
+    def handle_input_response(self, callback_tag, result_content):
         pass
 
     def action_quit(self):
         pass
 
-    def cancel_input_message(self, result_type):
+    def cancel_input_response(self, callback_tag):
         pass
 
     def scroll_other_buffer(self, scroll_direction, scroll_type):

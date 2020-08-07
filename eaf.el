@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Jul 12 21:48:49 2020 (-0400)
+;; Last-Updated: Thu Aug  6 22:36:41 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1499,8 +1499,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive-type initial-content)))
     (if input-message
-        (eaf-call "handle_input_message" input-buffer-id callback-tag input-message)
-      (eaf-call "cancel_input_message" input-buffer-id callback-tag))))
+        (eaf-call "handle_input_response" input-buffer-id callback-tag input-message)
+      (eaf-call "cancel_input_response" input-buffer-id callback-tag))))
 
 (defun eaf-read-input (interactive-string interactive-type initial-content)
   "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
@@ -2208,7 +2208,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (format "%s:%s:%s:%s:%s" eaf--buffer-id x y w h)))
 
 (defun eaf-generate-keymap-doc ()
-  "This command use for generate keybindings document."
+  "This command use for generate keybindings document Wiki."
   (interactive)
   (let ((vars (list 'eaf-browser-keybinding
                     'eaf-browser-caret-mode-keybinding
