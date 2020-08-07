@@ -320,9 +320,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-q" . "caret_exit")
     ("c"   . "insert_or_caret_at_line")
     ("M-c" . "caret_toggle_browsing")
-    ("<escape>" . "caret_exit")
-    ("C-g" . "caret_exit")
-    )
+    ("<escape>" . "caret_exit"))
   "The keybinding of EAF Browser Caret Mode."
   :type 'cons)
 

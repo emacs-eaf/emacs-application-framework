@@ -218,12 +218,16 @@ class BrowserView(QWebEngineView):
         else:
             self._search_text(self.search_term, True)
 
+    @interactive()
     def action_quit(self):
         ''' Quit action.'''
         if self.search_term != "":
             self._search_text("")
         if self.buffer.caret_browsing_mode:
-            self.buffer.caret_toggle_mark()
+            if self.buffer.caret_browsing_mark_activated:
+                self.buffer.caret_toggle_mark()
+            else:
+                self.buffer.caret_exit()
 
     def select_text_change(self):
         ''' Change selected text.'''
