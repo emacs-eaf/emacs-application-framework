@@ -68,11 +68,7 @@ class BrowserView(QWebEngineView):
 
         self.search_term = ""
 
-        self.get_markers_raw = self.read_js_content("get_markers.js")
-        self.goto_marker_raw = self.read_js_content("goto_marker.js")
-        self.marker_js = self.read_js_content("marker.js")
-        self.get_codes_raw = self.read_js_content("get_codes.js")
-        self.goto_code_raw = self.read_js_content("goto_code.js")
+        self.marker_js_raw = self.read_js_content("marker.js")
         self.get_focus_text_js = self.read_js_content("get_focus_text.js")
         self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
         self.clear_focus_js = self.read_js_content("clear_focus.js")
@@ -828,7 +824,7 @@ class BrowserBuffer(Buffer):
             self.update()
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
-            self.buffer_widget._eval_js(self.buffer_widget.marker_js.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+            self.buffer_widget._eval_js(self.buffer_widget.marker_js_raw.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
 
             cursor_foreground_color = ""
             cursor_background_color = ""
