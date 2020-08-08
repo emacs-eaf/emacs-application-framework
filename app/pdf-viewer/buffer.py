@@ -104,6 +104,10 @@ class AppBuffer(Buffer):
     def jump_to_percent(self):
         self.send_input_message("Jump to Percent: ", "jump_percent")
 
+    def jump_to_percent_with_num(self, percent):
+        self.buffer_widget.jump_to_percent(float(percent))
+        return ""
+        
     def jump_to_link(self):
         self.buffer_widget.add_mark_jump_link_tips()
         self.send_input_message("Jump to Link: ", "jump_link")
@@ -139,6 +143,9 @@ class AppBuffer(Buffer):
 
     def current_page(self):
         return str(self.buffer_widget.get_start_page_index() + 1)
+
+    def current_percent(self):
+        return str(self.buffer_widget.current_percent())
 
     def add_annot_highlight(self):
         if self.buffer_widget.is_select_mode:
@@ -1030,6 +1037,9 @@ class PdfViewerWidget(QWidget):
 
     def jump_to_percent(self, percent):
         self.update_vertical_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
+
+    def current_percent(self):
+        return 100.0 * self.scroll_offset / self.max_scroll_offset()
 
     def update_vertical_offset(self, new_offset):
         if self.scroll_offset != new_offset:
