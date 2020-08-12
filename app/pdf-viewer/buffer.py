@@ -1039,7 +1039,7 @@ class PdfViewerWidget(QWidget):
         self.update_vertical_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
 
     def current_percent(self):
-        return 100.0 * self.scroll_offset / self.max_scroll_offset()
+        return 100.0 * self.scroll_offset / (self.max_scroll_offset() + self.rect().height())
 
     def update_vertical_offset(self, new_offset):
         if self.scroll_offset != new_offset:
