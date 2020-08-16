@@ -753,6 +753,12 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
+(defcustom eaf-wm-focus-fix-wms `("i3")
+  "set mouse cursor to frame bottom in these wms.
+add $DESKTOP_SESSION environment variable to this list."
+  :type 'list
+  :group 'eaf)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -1157,6 +1163,7 @@ keybinding variable to eaf-app-binding-alist."
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (set (make-local-variable 'eaf--buffer-args) args)
+      (eaf-move-mouse-to-frame-bottom)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
@@ -2303,6 +2310,16 @@ Make sure that your smartphone is connected to the same WiFi network as this com
         (other-window -1))
     (other-window -1)
     (apply orig-fun direction line args)))
+
+(defun eaf-move-mouse-to-frame-bottom ()
+  "Move mouse position to bottom"
+  (if (member (getenv "DESKTOP_SESSION") eaf-wm-focus-fix-wms)
+      (let ((frame (car (mouse-position)))
+            (xdotool-executable (executable-find "xdotool")))
+        (if xdotool-executable
+            (shell-command (format "%s mousemove %d %d" xdotool-executable
+                                   (car (frame-edges)) (nth 3 (frame-edges))))
+          (message "please install xdotool to make mouse to frame bottom automatically")))))
 
 (provide 'eaf)
 
