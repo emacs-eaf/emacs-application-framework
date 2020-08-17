@@ -754,8 +754,8 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
   :type 'boolean)
 
 (defcustom eaf-wm-focus-fix-wms `("i3")
-  "set mouse cursor to frame bottom in these wms.
-add $DESKTOP_SESSION environment variable to this list."
+  "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
+Add $DESKTOP_SESSION environment variable to this list."
   :type 'list
   :group 'eaf)
 
@@ -927,10 +927,10 @@ For now only EAF browser app is supported."
 (defun eaf-call (method &rest args)
   "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
   (let ((result (apply #'dbus-call-method
-                       :session                   ; use the session (not system) bus
-                       "com.lazycat.eaf"          ; service name
-                       "/com/lazycat/eaf"         ; path name
-                       "com.lazycat.eaf"          ; interface name
+                       :session     ; use the session (not system) bus
+                       "com.lazycat.eaf"  ; service name
+                       "/com/lazycat/eaf" ; path name
+                       "com.lazycat.eaf"  ; interface name
                        method
                        :timeout 1000000
                        args)))
@@ -1753,7 +1753,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                 (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2204,6 +2204,17 @@ Make sure that your smartphone is connected to the same WiFi network as this com
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))
 
+(defun eaf-move-mouse-to-frame-bottom ()
+  "Move mouse position to bottom."
+  (if (member (getenv "DESKTOP_SESSION") eaf-wm-focus-fix-wms)
+      (let ((xdotool-path (executable-find "xdotool")))
+        (if xdotool-path
+            (shell-command (format "%s mousemove %d %d"
+                                   xdotool-path
+                                   (car (frame-edges))
+                                   (nth 3 (frame-edges))))
+          (message "Please install xdotool to make mouse to frame bottom automatically.")))))
+
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
   (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
@@ -2310,16 +2321,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
         (other-window -1))
     (other-window -1)
     (apply orig-fun direction line args)))
-
-(defun eaf-move-mouse-to-frame-bottom ()
-  "Move mouse position to bottom"
-  (if (member (getenv "DESKTOP_SESSION") eaf-wm-focus-fix-wms)
-      (let ((frame (car (mouse-position)))
-            (xdotool-executable (executable-find "xdotool")))
-        (if xdotool-executable
-            (shell-command (format "%s mousemove %d %d" xdotool-executable
-                                   (car (frame-edges)) (nth 3 (frame-edges))))
-          (message "please install xdotool to make mouse to frame bottom automatically")))))
 
 (provide 'eaf)
 
