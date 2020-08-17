@@ -753,6 +753,12 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
+(defcustom eaf-wm-focus-fix-wms `("i3")
+  "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
+Add $DESKTOP_SESSION environment variable to this list."
+  :type 'list
+  :group 'eaf)
+
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
     ("pdf-viewer" . eaf-pdf-viewer-keybinding)
@@ -921,10 +927,10 @@ For now only EAF browser app is supported."
 (defun eaf-call (method &rest args)
   "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
   (let ((result (apply #'dbus-call-method
-                       :session                   ; use the session (not system) bus
-                       "com.lazycat.eaf"          ; service name
-                       "/com/lazycat/eaf"         ; path name
-                       "com.lazycat.eaf"          ; interface name
+                       :session     ; use the session (not system) bus
+                       "com.lazycat.eaf"  ; service name
+                       "/com/lazycat/eaf" ; path name
+                       "com.lazycat.eaf"  ; interface name
                        method
                        :timeout 1000000
                        args)))
@@ -1157,6 +1163,7 @@ keybinding variable to eaf-app-binding-alist."
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (set (make-local-variable 'eaf--buffer-args) args)
+      (eaf-move-mouse-to-frame-bottom)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
@@ -1746,7 +1753,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                 (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2196,6 +2203,17 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (when eaf-pdf-outline-window-configuration
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))
+
+(defun eaf-move-mouse-to-frame-bottom ()
+  "Move mouse position to bottom."
+  (if (member (getenv "DESKTOP_SESSION") eaf-wm-focus-fix-wms)
+      (let ((xdotool-path (executable-find "xdotool")))
+        (if xdotool-path
+            (shell-command (format "%s mousemove %d %d"
+                                   xdotool-path
+                                   (car (frame-edges))
+                                   (nth 3 (frame-edges))))
+          (message "Please install xdotool to make mouse to frame bottom automatically.")))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
