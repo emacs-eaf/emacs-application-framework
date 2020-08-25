@@ -80,16 +80,18 @@ class AppBuffer(Buffer):
                 self.scroll_down()
 
     def save_session_data(self):
-        return "{0}:{1}:{2}:{3}".format(self.buffer_widget.scroll_offset,
+        return "{0}:{1}:{2}:{3}:{4}".format(self.buffer_widget.scroll_offset,
                                         self.buffer_widget.scale,
                                         self.buffer_widget.read_mode,
-                                        self.buffer_widget.inverted_mode)
+                                        self.buffer_widget.inverted_mode,
+                                        self.buffer_widget.rotation)
 
     def restore_session_data(self, session_data):
-        (scroll_offset, scale, read_mode, inverted_mode) = session_data.split(":")
+        (scroll_offset, scale, read_mode, inverted_mode, rotation) = session_data.split(":")
         self.buffer_widget.scroll_offset = float(scroll_offset)
         self.buffer_widget.scale = float(scale)
         self.buffer_widget.read_mode = read_mode
+        self.buffer_widget.rotation = int(rotation)
         if self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore":
             self.buffer_widget.inverted_mode = inverted_mode == "True"
         self.buffer_widget.update()
@@ -206,11 +208,16 @@ class PdfViewerWidget(QWidget):
         self.first_pixmap = self.document.getPagePixmap(0)
         self.page_width = self.first_pixmap.width
         self.page_height = self.first_pixmap.height
+        self.original_page_width = self.page_width
+        self.original_page_height = self.page_height
         self.page_total_number = self.document.pageCount
 
         # Init scale and scale mode.
         self.scale = 1.0
         self.read_mode = "fit_to_width"
+
+        self.rotation = 0
+
         # Simple string comparation.
         if (self.emacs_var_dict["eaf-pdf-default-zoom"] != "1.0"):
             self.read_mode = "fit_to_customize"
@@ -283,6 +290,11 @@ class PdfViewerWidget(QWidget):
 
         self.remember_offset = None
 
+        # To avoid 'PDF only' method errors
+        self.inpdf = True
+        if os.path.splitext(self.url)[-1] != ".pdf":
+            self.inpdf = False
+
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
@@ -312,7 +324,7 @@ class PdfViewerWidget(QWidget):
             self.remember_offset = current_scroll_offset
             self.buffer.message_to_emacs.emit("Jumped to saved position.")
 
-    def get_page_pixmap(self, index, scale):
+    def get_page_pixmap(self, index, scale, rotation=0):
         # Just return cache pixmap when found match index and scale in cache dict.
         if self.page_cache_scale == scale:
             if index in self.page_cache_pixmap_dict.keys():
@@ -324,6 +336,8 @@ class PdfViewerWidget(QWidget):
             self.page_cache_trans = fitz.Matrix(scale, scale)
 
         page = self.document[index]
+        if self.inpdf:
+            page.setRotation(rotation)
         if self.is_mark_link:
             page = self.add_mark_link(index)
 
@@ -336,12 +350,18 @@ class PdfViewerWidget(QWidget):
             self.char_dict[index] = self.get_page_char_rect_list(index)
             self.select_area_annot_cache_dict[index] = None
 
-        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and os.path.splitext(self.url)[-1] == ".pdf":
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.inpdf:
             col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
-            page.drawRect(page.rect, color=col, fill=col, overlay=False)
+            page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
+        if rotation % 180 != 0:
+            self.page_width = self.original_page_height
+            self.page_height = self.original_page_width
+        else:
+            self.page_width = self.original_page_width
+            self.page_height = self.original_page_height
 
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
@@ -406,7 +426,10 @@ class PdfViewerWidget(QWidget):
                         while imagebboxlist.count(item) > 1:
                             imagebboxlist.remove(item)
             for bbox in imagebboxlist:
-                pixmap.invertIRect(bbox * self.scale)
+                if self.inpdf:
+                    pixmap.invertIRect(bbox * page.rotationMatrix * self.scale)
+                else:
+                    pixmap.invertIRect(bbox * self.scale)
 
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
@@ -459,7 +482,7 @@ class PdfViewerWidget(QWidget):
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
                 # Get page image.
-                qpixmap = self.get_page_pixmap(index, self.scale)
+                qpixmap = self.get_page_pixmap(index, self.scale, self.rotation)
 
                 # Init render rect.
                 render_width = self.page_width * self.scale
@@ -544,7 +567,7 @@ class PdfViewerWidget(QWidget):
             last_page_index = min(self.page_total_number, self.get_last_page_index() + 1)
 
             for index in list(range(start_page_index, last_page_index)):
-                self.get_page_pixmap(index, self.scale)
+                self.get_page_pixmap(index, self.scale, self.rotation)
 
     def scale_to(self, new_scale):
         self.scroll_offset = new_scale * 1.0 / self.scale * self.scroll_offset
@@ -655,6 +678,32 @@ class PdfViewerWidget(QWidget):
 
         self.page_cache_pixmap_dict.clear()
         self.update()
+    
+    @interactive()
+    def rotate_clockwise(self):
+        if self.inpdf:
+            self.rotation = (self.rotation + 90) % 360
+
+            # Need clear page cache first, otherwise current page will not inverted until next page.
+            self.page_cache_pixmap_dict.clear()
+
+            self.update_scale()
+            self.update()
+        else:
+            self.buffer.message_to_emacs.emit("Only support PDF!")
+
+    @interactive()
+    def rotate_counterclockwise(self):
+        if self.inpdf:
+            self.rotation = (self.rotation - 90) % 360
+
+            # Need clear page cache first, otherwise current page will not inverted until next page.
+            self.page_cache_pixmap_dict.clear()
+
+            self.update_scale()
+            self.update()
+        else:
+            self.buffer.message_to_emacs.emit("Only support PDF!")
 
     def add_mark_link(self, index):
         annot_list = []
@@ -1074,6 +1123,17 @@ class PdfViewerWidget(QWidget):
                     page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
                     page_index = index + 1
                 y = (ey + page_offset) * 1.0 / self.scale
+
+                temp = x
+                if self.rotation == 90:
+                    x = y
+                    y = self.page_width - temp
+                elif self.rotation == 180:
+                    x = self.page_width - x
+                    y = self.page_height - y
+                elif self.rotation == 270:
+                    x = self.page_height - y
+                    y = temp
 
                 return x, y, page_index
         return None, None, None

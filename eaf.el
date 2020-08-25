@@ -450,6 +450,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-s" . "search_text_forward")
     ("C-r" . "search_text_backward")
     ("x" . "close_buffer")
+    ("C-<right>" . "rotate_clockwise")
+    ("C-<left>" . "rotate_counterclockwise")
     ("M-h" . "add_annot_highlight")
     ("M-u" . "add_annot_underline")
     ("M-s" . "add_annot_squiggly")
