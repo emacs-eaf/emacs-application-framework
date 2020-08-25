@@ -80,16 +80,18 @@ class AppBuffer(Buffer):
                 self.scroll_down()
 
     def save_session_data(self):
-        return "{0}:{1}:{2}:{3}".format(self.buffer_widget.scroll_offset,
+        return "{0}:{1}:{2}:{3}:{4}".format(self.buffer_widget.scroll_offset,
                                         self.buffer_widget.scale,
                                         self.buffer_widget.read_mode,
-                                        self.buffer_widget.inverted_mode)
+                                        self.buffer_widget.inverted_mode,
+                                        self.buffer_widget.rotation)
 
     def restore_session_data(self, session_data):
-        (scroll_offset, scale, read_mode, inverted_mode) = session_data.split(":")
+        (scroll_offset, scale, read_mode, inverted_mode, rotation) = session_data.split(":")
         self.buffer_widget.scroll_offset = float(scroll_offset)
         self.buffer_widget.scale = float(scale)
         self.buffer_widget.read_mode = read_mode
+        self.buffer_widget.rotation = int(rotation)
         if self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore":
             self.buffer_widget.inverted_mode = inverted_mode == "True"
         self.buffer_widget.update()
