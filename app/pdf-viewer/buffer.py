@@ -206,6 +206,8 @@ class PdfViewerWidget(QWidget):
         self.first_pixmap = self.document.getPagePixmap(0)
         self.page_width = self.first_pixmap.width
         self.page_height = self.first_pixmap.height
+        self.original_page_width = self.page_width
+        self.original_page_height = self.page_height
         self.page_total_number = self.document.pageCount
 
         # Init scale and scale mode.
@@ -352,8 +354,12 @@ class PdfViewerWidget(QWidget):
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
-        self.page_width = pixmap.width
-        self.page_height = pixmap.height
+        if rotation % 180 != 0:
+            self.page_width = self.original_page_height
+            self.page_height = self.original_page_width
+        else:
+            self.page_width = self.original_page_width
+            self.page_height = self.original_page_height
 
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
@@ -1116,10 +1122,16 @@ class PdfViewerWidget(QWidget):
                     page_index = index + 1
                 y = (ey + page_offset) * 1.0 / self.scale
 
-                if self.inpdf:
-                    coord = fitz.Point(x, y) * self.document[page_index].rotationMatrix
-                    x = coord.x
-                    y = coord.y
+                temp = x
+                if self.rotation == 90:
+                    x = y
+                    y = self.page_width - temp
+                elif self.rotation == 180:
+                    x = self.page_width - x
+                    y = self.page_height - y
+                elif self.rotation == 270:
+                    x = self.page_height - y
+                    y = temp
 
                 return x, y, page_index
         return None, None, None
