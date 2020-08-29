@@ -87,7 +87,11 @@ class AppBuffer(Buffer):
                                         self.buffer_widget.rotation)
 
     def restore_session_data(self, session_data):
-        (scroll_offset, scale, read_mode, inverted_mode, rotation) = session_data.split(":")
+        (scroll_offset, scale, read_mode, inverted_mode, rotation) = ("", "", "", "", "0")
+        if session_data.count(":") == 3:
+            (scroll_offset, scale, read_mode, inverted_mode) = session_data.split(":")
+        else:
+            (scroll_offset, scale, read_mode, inverted_mode, rotation) = session_data.split(":")
         self.buffer_widget.scroll_offset = float(scroll_offset)
         self.buffer_widget.scale = float(scale)
         self.buffer_widget.read_mode = read_mode
