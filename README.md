@@ -57,6 +57,12 @@ The following line is for *Arch*-based distros, same packages should be availabl
 yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-pymupdf python-grip filebrowser-bin
 ```
 
+Also need below commands to fix bug of newest of pymupdf.
+```
+pip install frontend
+pip install PyMuPDF==1.17.4
+```
+
 2. Clone this repository.
 
 ```Bash
