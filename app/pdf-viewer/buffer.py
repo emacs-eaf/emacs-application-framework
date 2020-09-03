@@ -113,7 +113,7 @@ class AppBuffer(Buffer):
     def jump_to_percent_with_num(self, percent):
         self.buffer_widget.jump_to_percent(float(percent))
         return ""
-        
+
     def jump_to_link(self):
         self.buffer_widget.add_mark_jump_link_tips()
         self.send_input_message("Jump to Link: ", "jump_link")
@@ -272,7 +272,6 @@ class PdfViewerWidget(QWidget):
         self.page_padding = 10
 
         # Init font.
-        self.page_annotate_height = 22
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
         self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
@@ -516,12 +515,15 @@ class PdfViewerWidget(QWidget):
         else:
             painter.setPen(self.page_annotate_light_color)
 
+        # Draw progress.
+        progress_percent = int((start_page_index + 1) * 100 / self.page_total_number)
+        current_page = start_page_index + 1
         painter.drawText(QRect(self.rect().x(),
-                               self.rect().y() + self.rect().height() - self.page_annotate_height - self.page_annotate_padding_bottom,
+                               self.rect().y(),
                                self.rect().width() - self.page_annotate_padding_right,
-                               self.page_annotate_height),
-                         Qt.AlignRight,
-                         "{0}% ({1}/{2})".format(int((start_page_index + 1) * 100 / self.page_total_number), start_page_index + 1, self.page_total_number))
+                               self.rect().height() - self.page_annotate_padding_bottom),
+                         Qt.AlignRight | Qt.AlignBottom,
+                         "{0}% ({1}/{2})".format(progress_percent, current_page, self.page_total_number))
 
     def build_context_wrap(f):
         def wrapper(*args):
@@ -682,7 +684,7 @@ class PdfViewerWidget(QWidget):
 
         self.page_cache_pixmap_dict.clear()
         self.update()
-    
+
     @interactive()
     def rotate_clockwise(self):
         if self.inpdf:
