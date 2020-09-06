@@ -54,13 +54,14 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 The following line is for *Arch*-based distros, same packages should be available to install on your particular distribution:
 
 ```Bash
-yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-pymupdf python-grip filebrowser-bin
+yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip filebrowser-bin
 ```
 
-Also need below commands to fix bug of newest of pymupdf.
+You need install pymupdf from pip to avoid undefined symbol ```jbig2_page_out``` error.
 ```
-pip install frontend
-pip install PyMuPDF==1.17.4
+sudo pacman -R python-pymupdf
+pip uninstall fitz
+pip install pympdf
 ```
 
 2. Clone this repository.
