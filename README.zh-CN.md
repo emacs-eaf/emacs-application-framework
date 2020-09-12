@@ -60,7 +60,7 @@ yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-f
 ```
 sudo pacman -R python-pymupdf
 pip uninstall fitz
-pip install pympdf
+pip install pymupdf
 ```
 
 2. 使用 ```git clone``` 下载这个仓库.

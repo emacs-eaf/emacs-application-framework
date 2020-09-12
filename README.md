@@ -61,7 +61,7 @@ You need install pymupdf from pip to avoid undefined symbol ```jbig2_page_out```
 ```
 sudo pacman -R python-pymupdf
 pip uninstall fitz
-pip install pympdf
+pip install pymupdf
 ```
 
 2. Clone this repository.
