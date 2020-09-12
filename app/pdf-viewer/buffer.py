@@ -1099,7 +1099,7 @@ class PdfViewerWidget(QWidget):
             annot.setInfo(content=annot_text)
             annot.update()
         self.save_annot()
-        self.edited_annot = (None, None)
+        self.edited_page_annot = (None, None)
 
     def jump_to_page(self, page_num):
         self.update_vertical_offset(min(max(self.scale * (int(page_num) - 1) * self.page_height, 0), self.max_scroll_offset()))
