@@ -147,6 +147,9 @@ class AppBuffer(Buffer):
         else:
             self.message_to_emacs.emit("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
+    def page_total_number(self):
+        return str(self.buffer_widget.page_total_number)
+
     def current_page(self):
         return str(self.buffer_widget.get_start_page_index() + 1)
 
