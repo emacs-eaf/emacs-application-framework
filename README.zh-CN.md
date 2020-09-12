@@ -53,7 +53,14 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 以下这行是*Arch*系安装方式，同样的包在别的发行版的安装方式略有不同，请善用搜索引擎：
 
 ```Bash
-yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-pymupdf python-grip filebrowser-bin
+yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip filebrowser-bin
+```
+
+同时，使用pip安装pymupdf库，避免错误打开PDF时遇到```jbig2_page_out```。
+```
+sudo pacman -R python-pymupdf
+pip uninstall fitz
+pip install pympdf
 ```
 
 2. 使用 ```git clone``` 下载这个仓库.

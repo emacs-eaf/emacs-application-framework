@@ -306,11 +306,19 @@ class BrowserView(QWebEngineView):
     def zoom_in(self):
         ''' Zoom in.'''
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
+        if float(self.buffer.emacs_var_dict["eaf-browser-default-zoom"]) == self.zoomFactor():
+            self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
+        else:
+            self.buffer.zoom_data.add_entry(urlparse(self.buffer.current_url).hostname, self.zoomFactor())
 
     @interactive(insert_or_do=True)
     def zoom_out(self):
         ''' Zoom out.'''
         self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
+        if float(self.buffer.emacs_var_dict["eaf-browser-default-zoom"]) == self.zoomFactor():
+            self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
+        else:
+            self.buffer.zoom_data.add_entry(urlparse(self.buffer.current_url).hostname, self.zoomFactor())
 
     @interactive(insert_or_do=True)
     def zoom_reset(self):
@@ -603,6 +611,8 @@ class BrowserBuffer(Buffer):
         touch(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
         self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
         self.autofill_id = 0
+
+        self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(config_dir), "browser", "zoom_data.db"))
 
         self.history_list = []
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
@@ -1229,7 +1239,11 @@ class BrowserBuffer(Buffer):
     def reset_default_zoom(self):
         ''' Reset default magnification.'''
         if hasattr(self, "buffer_widget"):
-            self.buffer_widget.setZoomFactor(float(self.emacs_var_dict["eaf-browser-default-zoom"]))
+            result = self.zoom_data.get_entry(urlparse(self.url).hostname)
+            zoom_factor = float(self.emacs_var_dict["eaf-browser-default-zoom"])
+            for row in result:
+                zoom_factor = float(row[0])
+            self.buffer_widget.setZoomFactor(zoom_factor)
 
     def edit_focus_text(self):
         ''' Edit the focus text.'''
@@ -1440,3 +1454,41 @@ class PasswordDb(object):
         SELECT id, host, password, form_data FROM autofill
         WHERE host=? and id>? ORDER BY id
         """, (host, id))
+
+class ZoomSizeDb(object):
+    def __init__(self, dbpath):
+        self._conn = sqlite3.connect(dbpath)
+        self._conn.execute("""
+        CREATE TABLE IF NOT EXISTS ZoomSize
+        (Host TEXT PRIMARY KEY, ZoomScale REAL)
+        """)
+
+    def add_entry(self, host, zoom_scale):
+        result = self._conn.execute("""
+        SELECT Host, ZoomScale FROM ZoomSize
+        WHERE Host=?
+        """, (host,))
+        if len(list(result))>0:
+            self._conn.execute("""
+            UPDATE ZoomSize SET ZoomScale=?
+            WHERE Host=?
+            """, (zoom_scale, host))
+        else:
+            self._conn.execute("""
+            INSERT INTO ZoomSize (Host, ZoomScale)
+            VALUES (?, ?)
+            """, (host, zoom_scale))
+        self._conn.commit()
+
+    def get_entry(self, host):
+        return self._conn.execute("""
+        SELECT ZoomScale FROM ZoomSize
+        WHERE Host=?
+        """, (host,))
+
+    def delete_entry(self, host):
+        self._conn.execute("""
+        DELETE FROM ZoomSize
+        WHERE Host=?
+        """, (host,))
+        self._conn.commit()
