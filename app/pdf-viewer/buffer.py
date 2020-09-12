@@ -24,6 +24,7 @@ from PyQt5.QtCore import Qt, QRect, QEvent
 from PyQt5.QtGui import QColor, QPixmap, QImage, QFont, QCursor
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QToolTip
 from core.buffer import Buffer
 from core.utils import touch, interactive
 import fitz
@@ -295,6 +296,8 @@ class PdfViewerWidget(QWidget):
         self.is_page_just_changed = False
 
         self.remember_offset = None
+
+        self.last_hover_annot_id = None
 
         # To avoid 'PDF only' method errors
         self.inpdf = True
@@ -1064,6 +1067,14 @@ class PdfViewerWidget(QWidget):
             self.is_hover_annot = is_hover_annot
             self.page_cache_pixmap_dict.clear()
             self.update()
+
+        if current_annot and current_annot.info["content"]:
+            if current_annot.info["id"] != self.last_hover_annot_id or not QToolTip.isVisible():
+                QToolTip.showText(QCursor.pos(), current_annot.info["content"], None, QRect(), 10 * 1000)
+            self.last_hover_annot_id = current_annot.info["id"]
+        else:
+            if QToolTip.isVisible():
+                QToolTip.hideText()
 
         return page, current_annot
 
