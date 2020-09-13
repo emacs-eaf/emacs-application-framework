@@ -178,14 +178,17 @@ class BrowserView(QWebEngineView):
             self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
 
     @interactive()
-    def record_form_data(self):
+    def save_page_password(self):
         ''' Record form data.'''
-        self.buffer.add_password_entry()
-        self.buffer.message_to_emacs.emit("Successfully recorded form data!")
+        if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
+            self.buffer.add_password_entry()
+            self.buffer.message_to_emacs.emit("Successfully recorded current page's password!")
+        else:
+            self.buffer.message_to_emacs.emit("Autofill is not enabled! Enable it with C-t")
 
     @interactive()
-    def toggle_autofill(self):
-        ''' Toggle Autofill status and data'''
+    def toggle_password_autofill(self):
+        ''' Toggle Autofill status for password data'''
         if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "false":
             self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "true", "true")
             self.buffer.autofill_id = self.buffer.auto_fill(0)
