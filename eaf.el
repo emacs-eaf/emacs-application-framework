@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Aug  6 22:36:41 2020 (-0400)
+;; Last-Updated: Sat Sep 12 18:56:21 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -349,8 +349,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-f" . "history_forward")
     ("M-b" . "history_backward")
     ("M-q" . "clear_cookies")
-    ("C-t" . "toggle_autofill")
-    ("C-d" . "record_form_data")
+    ("C-t" . "toggle_password_autofill")
+    ("C-d" . "save_page_password")
     ("M-a" . "toggle_adblocker")
     ("C-M-q" . "clear_history")
     ("M-v" . "scroll_down_page")
