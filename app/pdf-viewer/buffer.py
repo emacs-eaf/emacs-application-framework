@@ -180,12 +180,17 @@ class AppBuffer(Buffer):
             self.buffer_widget.get_focus_text.emit(self.buffer_id, "")
         elif self.buffer_widget.is_hover_annot:
             self.buffer_widget.annot_handler("edit")
+        else:
+            self.buffer_widget.enable_free_text_annot_mode()
 
     def set_focus_text(self, new_text):
+        self.message_to_emacs.emit(new_text);
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.annot_select_char_area("text", new_text)
         elif self.buffer_widget.is_hover_annot:
             self.buffer_widget.update_annot_text(new_text)
+        else:
+            self.buffer_widget.annot_free_text_annot(new_text)
 
     def get_toc(self):
         result = ""
@@ -265,6 +270,8 @@ class PdfViewerWidget(QWidget):
 
         # annot
         self.is_hover_annot = False
+        self.is_free_text_annot_mode = False
+        self.free_text_annot_pos = (None, None)
         self.edited_page_annot = (None, None)
 
         # Init scroll attributes.
@@ -965,6 +972,19 @@ class PdfViewerWidget(QWidget):
         self.document.saveIncr()
         self.select_area_annot_quad_cache_dict.clear()
 
+    def annot_free_text_annot(self, text=None):
+        (point, page_index) = self.free_text_annot_pos
+        if point == None or page_index == None:
+            return
+
+        page = self.document[page_index]
+        new_annot = page.addTextAnnot(point, text, icon="Note")
+        new_annot.parent = page
+
+        self.disable_free_text_annot_mode()
+
+        self.save_annot()
+
     def cleanup_select(self):
         self.is_select_mode = False
         self.delete_all_mark_select_area()
@@ -1204,24 +1224,45 @@ class PdfViewerWidget(QWidget):
             if self.is_select_mode:
                 self.cleanup_select()
 
-            if event.button() == Qt.LeftButton:
-                # In order to catch mouse move event when drap mouse.
-                self.setMouseTracking(False)
-            elif event.button() == Qt.RightButton:
-                self.handle_click_link()
+            if self.is_free_text_annot_mode:
+                if event.button() != Qt.LeftButton:
+                    self.disable_free_text_annot_mode()
+            else:
+                if event.button() == Qt.LeftButton:
+                    # In order to catch mouse move event when drap mouse.
+                    self.setMouseTracking(False)
+                elif event.button() == Qt.RightButton:
+                    self.handle_click_link()
 
         elif event.type() == QEvent.MouseButtonRelease:
             # Capture move event, event without holding down the mouse.
             self.setMouseTracking(True)
             self.releaseMouse()
+            if self.is_free_text_annot_mode:
+                self.handle_free_text_annot_mode()
+                self.disable_free_text_annot_mode()
 
         elif event.type() == QEvent.MouseButtonDblClick:
+            self.disable_free_text_annot_mode()
             if self.is_mark_search:
                 self.cleanup_search()
             if event.button() == Qt.RightButton:
                 self.handle_translate_word()
 
         return False
+
+    def enable_free_text_annot_mode(self):
+        self.is_free_text_annot_mode = True
+        self.free_text_annot_pos = (None, None)
+
+    def disable_free_text_annot_mode(self):
+        self.is_free_text_annot_mode = False
+
+    def handle_free_text_annot_mode(self):
+        ex, ey, page_index = self.get_cursor_absolute_position()
+        self.free_text_annot_pos = (fitz.Point(ex, ey), page_index)
+
+        self.get_focus_text.emit(self.buffer_id, "")
 
     def handle_select_mode(self):
         self.is_select_mode = True
