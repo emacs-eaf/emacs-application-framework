@@ -2037,12 +2037,16 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (defun eaf-edit-buffer-switch-to-org-mode ()
   "Switch to org-mode to edit table handly."
   (interactive)
-  (org-mode)
-  (outline-show-all)
-  (beginning-of-buffer)
-  (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
-  (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
-  (eaf--edit-set-header-line))
+  (let ((buffer-app-name eaf--buffer-app-name)
+        (buffer-id eaf--buffer-id))
+    (org-mode)
+    (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
+    (set (make-local-variable 'eaf--buffer-id) buffer-id)
+    (outline-show-all)
+    (beginning-of-buffer)
+    (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
+    (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
+    (eaf--edit-set-header-line)))
 
 (defun eaf-create-mindmap ()
   "Create a new Mindmap file."
@@ -2088,9 +2092,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
   (other-window 1)
-  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text" eaf--buffer-app-name))))
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text" eaf--buffer-app-name)))
+        (buffer-app-name eaf--buffer-app-name))
     (with-current-buffer edit-text-buffer
       (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
       (set (make-local-variable 'eaf--buffer-id) buffer-id))
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "")
