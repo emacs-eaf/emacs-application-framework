@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QRect, QEvent
+from PyQt5.QtCore import Qt, QRect, QEvent, QTimer
 from PyQt5.QtGui import QColor, QPixmap, QImage, QFont, QCursor
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
@@ -184,7 +184,6 @@ class AppBuffer(Buffer):
             self.buffer_widget.enable_free_text_annot_mode()
 
     def set_focus_text(self, new_text):
-        self.message_to_emacs.emit(new_text);
         if self.buffer_widget.is_select_mode:
             self.buffer_widget.annot_select_char_area("text", new_text)
         elif self.buffer_widget.is_hover_annot:
@@ -270,6 +269,10 @@ class PdfViewerWidget(QWidget):
 
         # annot
         self.is_hover_annot = False
+        self.free_text_annot_timer = QTimer()
+        self.free_text_annot_timer.setInterval(300)
+        self.free_text_annot_timer.setSingleShot(True)
+        self.free_text_annot_timer.timeout.connect(self.handle_free_text_annot_mode)
         self.is_free_text_annot_mode = False
         self.free_text_annot_pos = (None, None)
         self.edited_page_annot = (None, None)
@@ -981,8 +984,6 @@ class PdfViewerWidget(QWidget):
         new_annot = page.addTextAnnot(point, text, icon="Note")
         new_annot.parent = page
 
-        self.disable_free_text_annot_mode()
-
         self.save_annot()
 
     def cleanup_select(self):
@@ -1238,9 +1239,8 @@ class PdfViewerWidget(QWidget):
             # Capture move event, event without holding down the mouse.
             self.setMouseTracking(True)
             self.releaseMouse()
-            if self.is_free_text_annot_mode:
-                self.handle_free_text_annot_mode()
-                self.disable_free_text_annot_mode()
+            if not self.free_text_annot_timer.isActive():
+                self.free_text_annot_timer.start()
 
         elif event.type() == QEvent.MouseButtonDblClick:
             self.disable_free_text_annot_mode()
@@ -1259,10 +1259,12 @@ class PdfViewerWidget(QWidget):
         self.is_free_text_annot_mode = False
 
     def handle_free_text_annot_mode(self):
-        ex, ey, page_index = self.get_cursor_absolute_position()
-        self.free_text_annot_pos = (fitz.Point(ex, ey), page_index)
+        if self.is_free_text_annot_mode:
+            self.disable_free_text_annot_mode()
+            ex, ey, page_index = self.get_cursor_absolute_position()
+            self.free_text_annot_pos = (fitz.Point(ex, ey), page_index)
 
-        self.get_focus_text.emit(self.buffer_id, "")
+            self.get_focus_text.emit(self.buffer_id, "")
 
     def handle_select_mode(self):
         self.is_select_mode = True
