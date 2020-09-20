@@ -1129,12 +1129,14 @@ to edit EAF keybindings!" fun fun)))
                          ;; If command is normal symbol, just call it directly.
                          ((symbolp fun)
                           fun)
-                         ;; If command is string and include _ , it's command in python side, build elisp proxy function to call it.
-                         ((string-match "_" fun)
-                          (eaf--make-proxy-function fun))
                          ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
                          ((string-match "-" fun)
-                          (intern fun))))
+                          (intern fun))
+                         ;; If command is not built-in function and not include char '-'
+                         ;; it's command in python side, build elisp proxy function to call it.
+                         (t
+                          (eaf--make-proxy-function fun))
+                         ))
                    finally return map)))
   )
 
