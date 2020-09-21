@@ -39,7 +39,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.setUrl(QUrl("file://" + self.url))
 
     def is_image_file(self, f):
-        return Path(f).suffix.lower() in ["jpg", "jpeg", "png", "bmp", "gif", "svg", "webp"]
+        return Path(f).suffix[1:].lower() in ["jpg", "jpeg", "png", "bmp", "gif", "svg", "webp"]
 
     def get_same_dir_images(self):
         files = [f for f in os.listdir(self.parent_dir) if os.path.isfile(os.path.join(self.parent_dir, f))]
@@ -54,7 +54,9 @@ class AppBuffer(BrowserBuffer):
             else:
                 image_index += 1
 
-            self.load_image(os.path.join(self.parent_dir, images[image_index]))
+            self.image_name = images[image_index]
+            self.load_image(os.path.join(self.parent_dir, self.image_name))
+            self.change_title(self.image_name)
 
     def load_prev_image(self):
         images = self.get_same_dir_images()
@@ -65,4 +67,6 @@ class AppBuffer(BrowserBuffer):
             else:
                 image_index -= 1
 
-            self.load_image(os.path.join(self.parent_dir, images[image_index]))
+            self.image_name = images[image_index]
+            self.load_image(os.path.join(self.parent_dir, self.image_name))
+            self.change_title(self.image_name)
