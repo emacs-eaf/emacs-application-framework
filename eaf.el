@@ -356,6 +356,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
+    ("M-p" . "duplicate_page")
     ("M-t" . "new_blank_page")
     ("SPC" . "insert_or_scroll_up_page")
     ("J" . "insert_or_select_left_tab")
@@ -388,6 +389,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("y" . "insert_or_download_youtube_video")
     ("Y" . "insert_or_download_youtube_audio")
     ("p" . "insert_or_toggle_device")
+    ("P" . "insert_or_duplicate_page")
     ("1" . "insert_or_save_as_pdf")
     ("2" . "insert_or_save_as_single_file")
     ("v" . "insert_or_view_source")
@@ -1675,6 +1677,15 @@ In that way the corresponding function will be called to retrieve the HTML
   "Open EAF browser application given a URL and ARGS."
   (interactive "M[EAF/browser] URL: ")
   (eaf-open (eaf-wrap-url url) "browser" args))
+
+(dbus-register-signal
+ :session "com.lazycat.eaf" "/com/lazycat/eaf"
+ "com.lazycat.eaf" "duplicate_page_in_new_tab"
+ #'eaf-browser--duplicate-page-in-new-tab)
+
+(defun eaf-browser--duplicate-page-in-new-tab (url)
+  "Duplicate a new tab for the dedicated URL."
+  (eaf-open (eaf-wrap-url url) "browser" nil t))
 
 (defun eaf-is-valid-url (url)
   "Return the same URL if it is valid."

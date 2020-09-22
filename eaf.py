@@ -177,6 +177,7 @@ class EAF(dbus.service.Object):
         app_buffer.update_buffer_details.connect(self.update_buffer_details)
         app_buffer.translate_text.connect(self.translate_text)
         app_buffer.open_url_in_new_tab.connect(self.open_url_in_new_tab)
+        app_buffer.duplicate_page_in_new_tab.connect(self.duplicate_page_in_new_tab)
         app_buffer.open_url_in_background_tab.connect(self.open_url_in_background_tab)
         app_buffer.goto_left_tab.connect(self.goto_left_tab)
         app_buffer.goto_right_tab.connect(self.goto_right_tab)
@@ -467,6 +468,10 @@ class EAF(dbus.service.Object):
 
     @dbus.service.signal(EAF_DBUS_NAME)
     def open_url_in_new_tab(self, url):
+        pass
+
+    @dbus.service.signal(EAF_DBUS_NAME)
+    def duplicate_page_in_new_tab(self, url):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

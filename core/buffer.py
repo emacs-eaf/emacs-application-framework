@@ -101,6 +101,7 @@ class Buffer(QGraphicsScene):
 
     update_buffer_details = QtCore.pyqtSignal(str, str, str)
     open_url_in_new_tab = QtCore.pyqtSignal(str)
+    duplicate_page_in_new_tab = QtCore.pyqtSignal(str) 
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_text = QtCore.pyqtSignal(str)
     input_message = QtCore.pyqtSignal(str, str, str, str, str)
