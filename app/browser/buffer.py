@@ -49,6 +49,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.translate_selected_text.connect(self.translate_text)
 
         self.buffer_widget.open_url_in_new_tab.connect(self.open_url_in_new_tab)
+        self.buffer_widget.duplicate_page_in_new_tab.connect(self.duplicate_page_in_new_tab)
         self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
 
         self.buffer_widget.urlChanged.connect(self.set_adblocker)
