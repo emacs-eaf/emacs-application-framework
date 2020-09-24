@@ -193,7 +193,7 @@ buffer."
     ))
 
 (defun eaf-interleave-add-file-url ()
-  "Add new url on note if property is none. else modify current url"
+  "Add a new url on note if the property is none, else modify current url."
   (interactive)
   (let ((url (read-file-name "Please specify path: " nil nil t)))
     (org-entry-put (point) eaf-interleave--url-prop url)))
@@ -212,7 +212,7 @@ This show the previous notes and synchronizes the PDF to the right page number."
   (eaf-interleave-sync-current-note))
 
 (defun eaf-interleave-open-notes-file ()
-  "Find current EAF url corresponding note files if exists"
+  "Find current EAF url corresponding note files if it exists."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
       (cond ((equal eaf--buffer-app-name "pdf-viewer")

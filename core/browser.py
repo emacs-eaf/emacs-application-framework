@@ -42,6 +42,7 @@ MOUSE_FORWARD_BUTTON = 16
 class BrowserView(QWebEngineView):
 
     open_url_in_new_tab = QtCore.pyqtSignal(str)
+    duplicate_page_in_new_tab = QtCore.pyqtSignal(str)
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_selected_text = QtCore.pyqtSignal(str)
     trigger_focus_event = QtCore.pyqtSignal(str)
@@ -1348,6 +1349,10 @@ class BrowserBuffer(Buffer):
                     self.message_to_emacs.emit("No page need recovery.")
         else:
             self.message_to_emacs.emit("No page need recovery.")
+
+    @interactive(insert_or_do=True)
+    def duplicate_page(self):
+        self.buffer_widget.duplicate_page_in_new_tab.emit(self.current_url)
 
     @interactive(insert_or_do=True)
     def open_browser(self):
