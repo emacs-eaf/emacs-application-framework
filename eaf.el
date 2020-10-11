@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Oct 11 02:12:29 2020 (-0400)
+;; Last-Updated: Wed Sep 23 02:33:02 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -819,8 +819,8 @@ A new app can use this to configure extensions which should
 handled by it.")
 
 (defvar eaf--monitor-configuration-p t
-  "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
-This variable is used to open buffer in backend and avoid graphics blink.
+  "When this variable is non-nil, `eaf-monitor-configuration-change' execute.
+This variable use to open buffer in backend and avoid graphics blink.
 
 EAF call python method `new_buffer' to create EAF application buffer.
 EAF call python method `update_views' to create EAF application view.
@@ -841,12 +841,6 @@ Python process only create application view when Emacs window or buffer state ch
 (defvar-local eaf--bookmark-title nil)
 
 (defvar-local eaf-mindmap--current-add-mode nil)
-
-(defmacro eaf-for-each-eaf-buffer (&rest body)
-  "A syntactic sugar to loop through each EAF buffer and evaluat BODY."
-  `(dolist (buffer (eaf--get-eaf-buffers))
-     (with-current-buffer buffer
-       ,@body)))
 
 (defun eaf-browser-restore-buffers ()
   "EAF restore all opened EAF Browser buffers in the previous Emacs session.
@@ -935,9 +929,7 @@ For now only EAF browser app is supported."
              (start-process "" nil "xdg-open" path-or-url))))))
 
 (defun eaf-call (method &rest args)
-  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS.
-
-Return t or nil based on the result of the call."
+  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
   (let ((result (apply #'dbus-call-method
                        :session     ; use the session (not system) bus
                        "com.lazycat.eaf"  ; service name
@@ -950,6 +942,18 @@ Return t or nil based on the result of the call."
           ((equal result "False") nil)
           (t result))))
 
+(defun eaf-call-async (method handler &rest args)
+  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
+  (apply #'dbus-call-method-asynchronously
+         :session                   ; use the session (not system) bus
+         "com.lazycat.eaf"          ; service name
+         "/com/lazycat/eaf"         ; path name
+         "com.lazycat.eaf"          ; interface name
+         method
+         handler
+         :timeout 1000000
+         args))
+
 (defun eaf-get-emacs-xid (frame)
   "Get emacs FRAME xid."
   (frame-parameter frame 'window-id))
@@ -961,7 +965,7 @@ Return t or nil based on the result of the call."
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
-   ((not eaf--active-buffers)
+   ((eq eaf--active-buffers nil)
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((process-live-p eaf-process)
     (user-error "[EAF] Process is already running")))
@@ -989,18 +993,24 @@ Return t or nil based on the result of the call."
 (defun eaf-stop-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
 
-If RESTART is non-nil, cached URL and app-name will not be cleared."
+When RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
+  ;; Kill EAF buffers.
+  (let ((count 0))
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (when (derived-mode-p 'eaf-mode)
+        (cl-incf count)
+        (kill-buffer buffer)))
+    ;; Just report to me when EAF buffer exists.
+    (if (> count 1)
+        (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s" ""))))
+  (when (get-buffer eaf-name)
+    (kill-buffer eaf-name))
+
+  ;; Clear active buffers
   (unless restart
-    ;; Clear active buffers
-    (setq eaf--active-buffers nil)
-    ;; Remove all EAF related hooks since the EAF process is stopped.
-    (remove-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill)
-    (remove-hook 'kill-emacs-hook #'eaf--monitor-emacs-kill)
-    (remove-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save)
-    (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
-    (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
+    (setq eaf--active-buffers nil))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
@@ -1008,14 +1018,6 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   (setq eaf-org-file-list nil)
   (setq eaf-org-killed-file-list nil)
   (setq-local eaf-fullscreen-p nil)
-
-  ;; Kill EAF-mode buffers.
-  (let* ((eaf-buffers (eaf--get-eaf-buffers))
-         (count (length eaf-buffers)))
-    (dolist (buffer eaf-buffers)
-      (kill-buffer buffer))
-    ;; Just report to me when EAF buffer exists.
-    (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s!" "!")))
 
   ;; Kill process after kill buffer, make application can save session data.
   (eaf--kill-python-process))
@@ -1029,9 +1031,6 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
       ;; Delete EAF server process.
       (progn
         (delete-process eaf-process)
-        ;; Kill *eaf* buffer
-        (when (get-buffer eaf-name)
-          (kill-buffer eaf-name))
         (message "[EAF] Process terminated."))
     (message "[EAF] Process already terminated.")))
 
@@ -1039,8 +1038,10 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   "Stop and restart EAF process."
   (interactive)
   (setq eaf--active-buffers nil)
-  (eaf-for-each-eaf-buffer
-   (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers))
+  (dolist (buffer (buffer-list))
+    (set-buffer buffer)
+    (when (derived-mode-p 'eaf-mode)
+      (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers)))
   (eaf-stop-process t)
   (eaf-start-process))
 
@@ -1193,49 +1194,51 @@ keybinding variable to eaf-app-binding-alist."
    "is_support"
    url))
 
+
 (defun eaf-monitor-window-size-change (frame)
-  "Delay some time and run `eaf-try-adjust-view-with-frame-size' to compare with Emacs FRAME size."
+  "Update eaf view once emacs FRAME size changed."
   (when (process-live-p eaf-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
-    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame)))))
+    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size)))))
 
-(defun eaf-try-adjust-view-with-frame-size (frame)
-  "Update EAF view once Emacs window size of the FRAME is changed."
-  (unless (and (equal (frame-pixel-width frame) eaf-last-frame-width)
-               (equal (frame-pixel-height frame) eaf-last-frame-height))
+(defun eaf-try-adjust-view-with-frame-size ()
+  "Update eaf view once emacs window size changed."
+  (when (and (equal (frame-pixel-width) eaf-last-frame-width)
+             (equal (frame-pixel-height) eaf-last-frame-height))
     (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
-  "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
              (process-live-p eaf-process))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
           (dolist (window (window-list frame))
-            (with-current-buffer (window-buffer window)
-              (when (derived-mode-p 'eaf-mode)
-                ;; When `eaf-fullscreen-p' is non-nil, and only the EAF window is present, use frame size
-                (if (and eaf-fullscreen-p (equal (length (window-list frame)) 1))
-                    (push (format "%s:%s:%s:%s:%s:%s"
-                                  eaf--buffer-id
-                                  (eaf-get-emacs-xid frame)
-                                  0 0 (frame-pixel-width frame) (frame-pixel-height frame))
-                          view-infos)
-                  (let* ((window-allocation (eaf-get-window-allocation window))
-                         (x (nth 0 window-allocation))
-                         (y (nth 1 window-allocation))
-                         (w (nth 2 window-allocation))
-                         (h (nth 3 window-allocation)))
-                    (push (format "%s:%s:%s:%s:%s:%s"
-                                  eaf--buffer-id
-                                  (eaf-get-emacs-xid frame)
-                                  x y w h)
-                          view-infos)))))))
+            (let ((buffer (window-buffer window)))
+              (with-current-buffer buffer
+                (if (derived-mode-p 'eaf-mode)
+                    ;; Use frame size if just have one window in current frame and `eaf-fullscreen-p' is non-nil.
+                    (if (and (equal (length (window-list frame)) 1)
+                             eaf-fullscreen-p)
+                        (push (format "%s:%s:%s:%s:%s:%s"
+                                      eaf--buffer-id
+                                      (eaf-get-emacs-xid frame)
+                                      0 0 (frame-pixel-width frame) (frame-pixel-height frame))
+                              view-infos)
+                      (let* ((window-allocation (eaf-get-window-allocation window))
+                             (x (nth 0 window-allocation))
+                             (y (nth 1 window-allocation))
+                             (w (nth 2 window-allocation))
+                             (h (nth 3 window-allocation)))
+                        (push (format "%s:%s:%s:%s:%s:%s"
+                                      eaf--buffer-id
+                                      (eaf-get-emacs-xid frame)
+                                      x y w h)
+                              view-infos))))))))
         ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
         ;; So I package two-dimensional list in string, then unpack on server side. ;)
-        (eaf-call "update_views" (mapconcat #'identity view-infos ","))))))
+        (eaf-call-async "update_views" nil (mapconcat #'identity view-infos ","))))))
 
 (defun eaf--delete-org-preview-file (org-file)
   "Delete the org-preview file when given ORG-FILE name."
@@ -1252,22 +1255,14 @@ keybinding variable to eaf-app-binding-alist."
       (eaf--delete-org-preview-file org-killed-buffer)))
   (setq eaf-org-killed-file-list nil))
 
-(defun eaf--get-eaf-buffers ()
-  "A function that return a list of EAF buffers."
-  (cl-remove-if-not
-   (lambda (buffer)
-     (with-current-buffer buffer
-       (derived-mode-p 'eaf-mode)))
-   (buffer-list)))
-
 (defun eaf--monitor-buffer-kill ()
-  "A function monitoring when an EAF buffer is killed."
+  "Function monitoring when an EAF buffer is killed."
   (ignore-errors
     (eaf-call "kill_buffer" eaf--buffer-id)
     (message "[EAF] Killed %s." eaf--buffer-id)))
 
 (defun eaf--monitor-emacs-kill ()
-  "Function monitoring when Emacs is killed."
+  "Function monitoring when Emacs is killed, kill all EAF buffers."
   (ignore-errors
     (when eaf-browser-continue-where-left-off
       (let* ((browser-restore-file-path
@@ -1277,10 +1272,10 @@ keybinding variable to eaf-app-binding-alist."
                       "restore.txt"))
              (browser-urls ""))
         (write-region
-         (dolist (buffer (eaf--get-eaf-buffers) browser-urls)
-           (with-current-buffer buffer
-             (when (equal eaf--buffer-app-name "browser")
-               (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
+         (dolist (buffer (buffer-list) browser-urls)
+           (set-buffer buffer)
+           (when (and (derived-mode-p 'eaf-mode) (equal eaf--buffer-app-name "browser"))
+             (setq browser-urls (concat eaf--buffer-url "\n" browser-urls))))
          nil browser-restore-file-path)))
     (eaf-call "kill_emacs")))
 
@@ -1396,10 +1391,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf-focus-buffer (focus-buffer-id)
   "Focus the buffer given the FOCUS-BUFFER-ID."
   (catch 'found-eaf
-    (eaf-for-each-eaf-buffer
-     (when (string= eaf--buffer-id focus-buffer-id)
-       (select-window (get-buffer-window buffer))
-       (throw 'found-eaf t)))))
+    (dolist (frame (frame-list))
+      (dolist (window (window-list frame))
+        (let ((buffer (window-buffer window)))
+          (with-current-buffer buffer
+            (when (and (derived-mode-p 'eaf-mode)
+                       (string= eaf--buffer-id focus-buffer-id)
+                       (select-window window)
+                       (throw 'found-eaf t)))))))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1451,11 +1450,13 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
 (defun eaf-request-kill-buffer (kill-buffer-id)
   "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
   (catch 'found-eaf
-    (eaf-for-each-eaf-buffer
-     (when (string= eaf--buffer-id kill-buffer-id)
-       (kill-buffer buffer)
-       (message "[EAF] Request to kill buffer %s." kill-buffer-id)
-       (throw 'found-eaf t)))))
+    (dolist (buffer (buffer-list))
+      (set-buffer buffer)
+      (when (and (derived-mode-p 'eaf-mode)
+                 (string= eaf--buffer-id kill-buffer-id))
+        (kill-buffer buffer)
+        (message "[EAF] Request to kill buffer %s." kill-buffer-id)
+        (throw 'found-eaf t)))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1777,7 +1778,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1952,11 +1953,13 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (let (exists-eaf-buffer)
         ;; Try to open buffer
         (catch 'found-eaf
-          (eaf-for-each-eaf-buffer
-           (when (and (string= eaf--buffer-url url)
-                      (string= eaf--buffer-app-name app-name))
-             (setq exists-eaf-buffer buffer)
-             (throw 'found-eaf t))))
+          (dolist (buffer (buffer-list))
+            (set-buffer buffer)
+            (when (derived-mode-p 'eaf-mode)
+              (when (and (string= eaf--buffer-url url)
+                         (string= eaf--buffer-app-name app-name))
+                (setq exists-eaf-buffer buffer)
+                (throw 'found-eaf t)))))
         ;; Switch to existing buffer,
         ;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
@@ -2142,10 +2145,10 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "enter_fullscreen_request"
- #'eaf--enter-fullscreen-request)
+ #'eaf--enter_fullscreen_request)
 
-(defun eaf--enter-fullscreen-request ()
-  "Entering EAF browser fullscreen use Emacs frame's size."
+(defun eaf--enter_fullscreen_request ()
+  "Entering EAF browser fullscreen use emacs frame's size."
   (setq-local eaf-fullscreen-p t)
   (eaf-monitor-configuration-change))
 
