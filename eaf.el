@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Oct 11 00:54:51 2020 (-0400)
+;; Last-Updated: Sun Oct 11 02:12:29 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -842,6 +842,12 @@ Python process only create application view when Emacs window or buffer state ch
 
 (defvar-local eaf-mindmap--current-add-mode nil)
 
+(defmacro eaf-for-each-eaf-buffer (&rest body)
+  "A syntactic sugar to loop through each EAF buffer and evaluat BODY."
+  `(dolist (buffer (eaf--get-eaf-buffers))
+     (with-current-buffer buffer
+       ,@body)))
+
 (defun eaf-browser-restore-buffers ()
   "EAF restore all opened EAF Browser buffers in the previous Emacs session.
 
@@ -985,8 +991,8 @@ Return t or nil based on the result of the call."
 
 If RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
-  ;; Clear active buffers
   (unless restart
+    ;; Clear active buffers
     (setq eaf--active-buffers nil)
     ;; Remove all EAF related hooks since the EAF process is stopped.
     (remove-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill)
@@ -1033,9 +1039,8 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   "Stop and restart EAF process."
   (interactive)
   (setq eaf--active-buffers nil)
-  (dolist (buffer (eaf--get-eaf-buffers))
-    (with-current-buffer buffer
-      (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers)))
+  (eaf-for-each-eaf-buffer
+   (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers))
   (eaf-stop-process t)
   (eaf-start-process))
 
@@ -1259,10 +1264,7 @@ keybinding variable to eaf-app-binding-alist."
   "A function monitoring when an EAF buffer is killed."
   (ignore-errors
     (eaf-call "kill_buffer" eaf--buffer-id)
-    (message "[EAF] Killed %s." eaf--buffer-id)
-    (when (and (eq (length (eaf--get-eaf-buffers)) 1)
-               (not eaf--active-buffers))
-      (eaf-stop-process t))))
+    (message "[EAF] Killed %s." eaf--buffer-id)))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
@@ -1275,10 +1277,10 @@ keybinding variable to eaf-app-binding-alist."
                       "restore.txt"))
              (browser-urls ""))
         (write-region
-         (dolist (buffer (buffer-list) browser-urls)
-           (set-buffer buffer)
-           (when (and (derived-mode-p 'eaf-mode) (equal eaf--buffer-app-name "browser"))
-             (setq browser-urls (concat eaf--buffer-url "\n" browser-urls))))
+         (dolist (buffer (eaf--get-eaf-buffers) browser-urls)
+           (with-current-buffer buffer
+             (when (equal eaf--buffer-app-name "browser")
+               (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
          nil browser-restore-file-path)))
     (eaf-call "kill_emacs")))
 
@@ -1394,14 +1396,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf-focus-buffer (focus-buffer-id)
   "Focus the buffer given the FOCUS-BUFFER-ID."
   (catch 'found-eaf
-    (dolist (frame (frame-list))
-      (dolist (window (window-list frame))
-        (let ((buffer (window-buffer window)))
-          (with-current-buffer buffer
-            (when (and (derived-mode-p 'eaf-mode)
-                       (string= eaf--buffer-id focus-buffer-id)
-                       (select-window window)
-                       (throw 'found-eaf t)))))))))
+    (eaf-for-each-eaf-buffer
+     (when (string= eaf--buffer-id focus-buffer-id)
+       (select-window (get-buffer-window buffer))
+       (throw 'found-eaf t)))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1453,13 +1451,11 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
 (defun eaf-request-kill-buffer (kill-buffer-id)
   "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
   (catch 'found-eaf
-    (dolist (buffer (buffer-list))
-      (set-buffer buffer)
-      (when (and (derived-mode-p 'eaf-mode)
-                 (string= eaf--buffer-id kill-buffer-id))
-        (kill-buffer buffer)
-        (message "[EAF] Request to kill buffer %s." kill-buffer-id)
-        (throw 'found-eaf t)))))
+    (eaf-for-each-eaf-buffer
+     (when (string= eaf--buffer-id kill-buffer-id)
+       (kill-buffer buffer)
+       (message "[EAF] Request to kill buffer %s." kill-buffer-id)
+       (throw 'found-eaf t)))))
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
@@ -1956,13 +1952,11 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (let (exists-eaf-buffer)
         ;; Try to open buffer
         (catch 'found-eaf
-          (dolist (buffer (buffer-list))
-            (set-buffer buffer)
-            (when (derived-mode-p 'eaf-mode)
-              (when (and (string= eaf--buffer-url url)
-                         (string= eaf--buffer-app-name app-name))
-                (setq exists-eaf-buffer buffer)
-                (throw 'found-eaf t)))))
+          (eaf-for-each-eaf-buffer
+           (when (and (string= eaf--buffer-url url)
+                      (string= eaf--buffer-app-name app-name))
+             (setq exists-eaf-buffer buffer)
+             (throw 'found-eaf t))))
         ;; Switch to existing buffer,
         ;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
