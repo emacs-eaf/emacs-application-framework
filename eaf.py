@@ -52,7 +52,7 @@ class EAF(dbus.service.Object):
         (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
-        eaf_config_dir = os.path.expanduser(config_dir)
+        eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
 
         self.buffer_dict = {}
         self.view_dict = {}
@@ -278,7 +278,7 @@ class EAF(dbus.service.Object):
                 self.view_dict[key].destroy_view()
                 self.view_dict.pop(key, None)
 
-        # Create new view and udpate in view dict.
+        # Create new view and update in view dict.
         if view_infos != ['']:
             for view_info in view_infos:
                 if view_info not in self.view_dict:
