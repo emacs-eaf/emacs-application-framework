@@ -950,6 +950,18 @@ Return t or nil based on the result of the call."
           ((equal result "False") nil)
           (t result))))
 
+(defun eaf-call-async (method handler &rest args)
+  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
+  (apply #'dbus-call-method-asynchronously
+                       :session     ; use the session (not system) bus
+                       "com.lazycat.eaf"  ; service name
+                       "/com/lazycat/eaf" ; path name
+                       "com.lazycat.eaf"  ; interface name
+                       method
+                       handler
+                       :timeout 1000000
+                       args))
+
 (defun eaf-get-emacs-xid (frame)
   "Get emacs FRAME xid."
   (frame-parameter frame 'window-id))
@@ -1235,7 +1247,7 @@ keybinding variable to eaf-app-binding-alist."
                           view-infos)))))))
         ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
         ;; So I package two-dimensional list in string, then unpack on server side. ;)
-        (eaf-call "update_views" (mapconcat #'identity view-infos ","))))))
+        (eaf-call-async "update_views" nil (mapconcat #'identity view-infos ","))))))
 
 (defun eaf--delete-org-preview-file (org-file)
   "Delete the org-preview file when given ORG-FILE name."
