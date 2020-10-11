@@ -1000,7 +1000,14 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
 
   ;; Clear active buffers
   (unless restart
-    (setq eaf--active-buffers nil))
+    (setq eaf--active-buffers nil)
+    ;; Remove all EAF related hooks since the EAF process is stopped.
+    (remove-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill)
+    (remove-hook 'kill-emacs-hook #'eaf--monitor-emacs-kill)
+    (remove-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save)
+    (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
+    (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
+    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
