@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Oct 10 23:36:14 2020 (-0400)
+;; Last-Updated: Sun Oct 11 00:54:51 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -955,7 +955,7 @@ Return t or nil based on the result of the call."
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
-   ((eq eaf--active-buffers nil)
+   ((not eaf--active-buffers)
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((process-live-p eaf-process)
     (user-error "[EAF] Process is already running")))
@@ -983,21 +983,8 @@ Return t or nil based on the result of the call."
 (defun eaf-stop-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
 
-When RESTART is non-nil, cached URL and app-name will not be cleared."
+If RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
-  ;; Kill EAF buffers.
-  (let ((count 0))
-    (dolist (buffer (buffer-list))
-      (set-buffer buffer)
-      (when (derived-mode-p 'eaf-mode)
-        (cl-incf count)
-        (kill-buffer buffer)))
-    ;; Just report to me when EAF buffer exists.
-    (if (> count 1)
-        (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s" ""))))
-  (when (get-buffer eaf-name)
-    (kill-buffer eaf-name))
-
   ;; Clear active buffers
   (unless restart
     (setq eaf--active-buffers nil)
@@ -1016,6 +1003,14 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
   (setq eaf-org-killed-file-list nil)
   (setq-local eaf-fullscreen-p nil)
 
+  ;; Kill EAF-mode buffers.
+  (let* ((eaf-buffers (eaf--get-eaf-buffers))
+         (count (length eaf-buffers)))
+    (dolist (buffer eaf-buffers)
+      (kill-buffer buffer))
+    ;; Just report to me when EAF buffer exists.
+    (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s!" "!")))
+
   ;; Kill process after kill buffer, make application can save session data.
   (eaf--kill-python-process))
 
@@ -1028,6 +1023,9 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
       ;; Delete EAF server process.
       (progn
         (delete-process eaf-process)
+        ;; Kill *eaf* buffer
+        (when (get-buffer eaf-name)
+          (kill-buffer eaf-name))
         (message "[EAF] Process terminated."))
     (message "[EAF] Process already terminated.")))
 
@@ -1035,9 +1033,8 @@ When RESTART is non-nil, cached URL and app-name will not be cleared."
   "Stop and restart EAF process."
   (interactive)
   (setq eaf--active-buffers nil)
-  (dolist (buffer (buffer-list))
-    (set-buffer buffer)
-    (when (derived-mode-p 'eaf-mode)
+  (dolist (buffer (eaf--get-eaf-buffers))
+    (with-current-buffer buffer
       (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers)))
   (eaf-stop-process t)
   (eaf-start-process))
@@ -1263,8 +1260,9 @@ keybinding variable to eaf-app-binding-alist."
   (ignore-errors
     (eaf-call "kill_buffer" eaf--buffer-id)
     (message "[EAF] Killed %s." eaf--buffer-id)
-    (when (eq (length (eaf--get-eaf-buffers)) 1)
-      (eaf-stop-process))))
+    (when (and (eq (length (eaf--get-eaf-buffers)) 1)
+               (not eaf--active-buffers))
+      (eaf-stop-process t))))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
