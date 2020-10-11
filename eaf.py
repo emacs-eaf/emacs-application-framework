@@ -278,7 +278,7 @@ class EAF(dbus.service.Object):
                 self.view_dict[key].destroy_view()
                 self.view_dict.pop(key, None)
 
-        # Create new view and udpate in view dict.
+        # Create new view and update in view dict.
         if view_infos != ['']:
             for view_info in view_infos:
                 if view_info not in self.view_dict:

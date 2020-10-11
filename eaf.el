@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Sep 23 02:33:02 2020 (-0400)
+;; Last-Updated: Sat Oct 10 23:36:14 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -819,8 +819,8 @@ A new app can use this to configure extensions which should
 handled by it.")
 
 (defvar eaf--monitor-configuration-p t
-  "When this variable is non-nil, `eaf-monitor-configuration-change' execute.
-This variable use to open buffer in backend and avoid graphics blink.
+  "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
+This variable is used to open buffer in backend and avoid graphics blink.
 
 EAF call python method `new_buffer' to create EAF application buffer.
 EAF call python method `update_views' to create EAF application view.
@@ -929,7 +929,9 @@ For now only EAF browser app is supported."
              (start-process "" nil "xdg-open" path-or-url))))))
 
 (defun eaf-call (method &rest args)
-  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
+  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS.
+
+Return t or nil based on the result of the call."
   (let ((result (apply #'dbus-call-method
                        :session     ; use the session (not system) bus
                        "com.lazycat.eaf"  ; service name
@@ -1182,48 +1184,46 @@ keybinding variable to eaf-app-binding-alist."
    "is_support"
    url))
 
-
 (defun eaf-monitor-window-size-change (frame)
-  "Update eaf view once emacs FRAME size changed."
+  "Delay some time and run `eaf-try-adjust-view-with-frame-size' to compare with Emacs FRAME size."
   (when (process-live-p eaf-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
-    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size)))))
+    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame)))))
 
-(defun eaf-try-adjust-view-with-frame-size ()
-  "Update eaf view once emacs window size changed."
-  (when (and (equal (frame-pixel-width) eaf-last-frame-width)
-             (equal (frame-pixel-height) eaf-last-frame-height))
+(defun eaf-try-adjust-view-with-frame-size (frame)
+  "Update EAF view once Emacs window size of the FRAME is changed."
+  (unless (and (equal (frame-pixel-width frame) eaf-last-frame-width)
+               (equal (frame-pixel-height frame) eaf-last-frame-height))
     (eaf-monitor-configuration-change)))
 
 (defun eaf-monitor-configuration-change (&rest _)
+  "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
              (process-live-p eaf-process))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
           (dolist (window (window-list frame))
-            (let ((buffer (window-buffer window)))
-              (with-current-buffer buffer
-                (if (derived-mode-p 'eaf-mode)
-                    ;; Use frame size if just have one window in current frame and `eaf-fullscreen-p' is non-nil.
-                    (if (and (equal (length (window-list frame)) 1)
-                             eaf-fullscreen-p)
-                        (push (format "%s:%s:%s:%s:%s:%s"
-                                      eaf--buffer-id
-                                      (eaf-get-emacs-xid frame)
-                                      0 0 (frame-pixel-width frame) (frame-pixel-height frame))
-                              view-infos)
-                      (let* ((window-allocation (eaf-get-window-allocation window))
-                             (x (nth 0 window-allocation))
-                             (y (nth 1 window-allocation))
-                             (w (nth 2 window-allocation))
-                             (h (nth 3 window-allocation)))
-                        (push (format "%s:%s:%s:%s:%s:%s"
-                                      eaf--buffer-id
-                                      (eaf-get-emacs-xid frame)
-                                      x y w h)
-                              view-infos))))))))
+            (with-current-buffer (window-buffer window)
+              (when (derived-mode-p 'eaf-mode)
+                ;; When `eaf-fullscreen-p' is non-nil, and only the EAF window is present, use frame size
+                (if (and eaf-fullscreen-p (equal (length (window-list frame)) 1))
+                    (push (format "%s:%s:%s:%s:%s:%s"
+                                  eaf--buffer-id
+                                  (eaf-get-emacs-xid frame)
+                                  0 0 (frame-pixel-width frame) (frame-pixel-height frame))
+                          view-infos)
+                  (let* ((window-allocation (eaf-get-window-allocation window))
+                         (x (nth 0 window-allocation))
+                         (y (nth 1 window-allocation))
+                         (w (nth 2 window-allocation))
+                         (h (nth 3 window-allocation)))
+                    (push (format "%s:%s:%s:%s:%s:%s"
+                                  eaf--buffer-id
+                                  (eaf-get-emacs-xid frame)
+                                  x y w h)
+                          view-infos)))))))
         ;; I don't know how to make Emacs send dbus-message with two-dimensional list.
         ;; So I package two-dimensional list in string, then unpack on server side. ;)
         (eaf-call "update_views" (mapconcat #'identity view-infos ","))))))
@@ -2133,10 +2133,10 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "enter_fullscreen_request"
- #'eaf--enter_fullscreen_request)
+ #'eaf--enter-fullscreen-request)
 
-(defun eaf--enter_fullscreen_request ()
-  "Entering EAF browser fullscreen use emacs frame's size."
+(defun eaf--enter-fullscreen-request ()
+  "Entering EAF browser fullscreen use Emacs frame's size."
   (setq-local eaf-fullscreen-p t)
   (eaf-monitor-configuration-change))
 
