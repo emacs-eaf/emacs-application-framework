@@ -1250,14 +1250,24 @@ keybinding variable to eaf-app-binding-alist."
       (eaf--delete-org-preview-file org-killed-buffer)))
   (setq eaf-org-killed-file-list nil))
 
+(defun eaf--get-eaf-buffers ()
+  "A function that return a list of EAF buffers."
+  (cl-remove-if-not
+   (lambda (buffer)
+     (with-current-buffer buffer
+       (derived-mode-p 'eaf-mode)))
+   (buffer-list)))
+
 (defun eaf--monitor-buffer-kill ()
-  "Function monitoring when an EAF buffer is killed."
+  "A function monitoring when an EAF buffer is killed."
   (ignore-errors
     (eaf-call "kill_buffer" eaf--buffer-id)
-    (message "[EAF] Killed %s." eaf--buffer-id)))
+    (message "[EAF] Killed %s." eaf--buffer-id)
+    (when (eq (length (eaf--get-eaf-buffers)) 1)
+      (eaf-stop-process))))
 
 (defun eaf--monitor-emacs-kill ()
-  "Function monitoring when Emacs is killed, kill all EAF buffers."
+  "Function monitoring when Emacs is killed."
   (ignore-errors
     (when eaf-browser-continue-where-left-off
       (let* ((browser-restore-file-path
