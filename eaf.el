@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Oct 11 02:12:29 2020 (-0400)
+;; Last-Updated: Mon Oct 12 12:22:55 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -843,7 +843,9 @@ Python process only create application view when Emacs window or buffer state ch
 (defvar-local eaf-mindmap--current-add-mode nil)
 
 (defmacro eaf-for-each-eaf-buffer (&rest body)
-  "A syntactic sugar to loop through each EAF buffer and evaluat BODY."
+  "A syntactic sugar to loop through each EAF buffer and evaluat BODY.
+
+Within BODY, `buffer' can be used to"
   `(dolist (buffer (eaf--get-eaf-buffers))
      (with-current-buffer buffer
        ,@body)))
@@ -951,7 +953,7 @@ Return t or nil based on the result of the call."
           (t result))))
 
 (defun eaf-call-async (method handler &rest args)
-  "Call EAF Python process using `dbus-call-method' with METHOD and ARGS."
+  "Call EAF Python process using `dbus-call-method-asynchronously' with METHOD, HANDLER and ARGS."
   (apply #'dbus-call-method-asynchronously
                        :session     ; use the session (not system) bus
                        "com.lazycat.eaf"  ; service name

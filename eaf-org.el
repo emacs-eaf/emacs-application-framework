@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2020-05-17 12:31:12
 ;; Version: 0.5
-;; Last-Updated: Sun Sep 27 23:44:55 2020 (-0400)
+;; Last-Updated: Mon Oct 12 12:17:09 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -39,7 +39,9 @@
 
 ;;; Code:
 
-(require 'ol)
+(if (version< emacs-version "27")
+    (require 'org-docview)
+  (require 'ol))
 
 (defcustom eaf-org-override-pdf-links nil
   "When enabled, this will override existing PDF file links's open function.
