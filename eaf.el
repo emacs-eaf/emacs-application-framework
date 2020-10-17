@@ -1843,12 +1843,8 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-git-viewer ()
   "Open EAF git viewer."
   (interactive)
-  (let ((args (make-hash-table :test 'equal))
-        (project (project-current))
-        (project-root-dir ""))
-    (when project
-      (setq project-root-dir (expand-file-name (cdr project))))
-    (puthash "project-root" project-root-dir args)
+  (let ((args (make-hash-table :test 'equal)))
+    (puthash "directory" (expand-file-name (eaf--non-remote-default-directory)) args)
     (eaf-open "eaf-git-viewer" "git-viewer" (json-encode-hash-table args) t)))
 
 ;;;###autoload

@@ -23,7 +23,7 @@ from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from core.buffer import Buffer
 
-from pygit2 import Repository
+from pygit2 import Repository, discover_repository
 from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE
 
 from datetime import datetime
@@ -36,93 +36,95 @@ class AppBuffer(Buffer):
 
         arguments_dict = json.loads(arguments)
 
-        self.add_widget(GitViewerWidget(buffer_id, config_dir, arguments_dict["project-root"]))
+        self.add_widget(GitViewerWidget(buffer_id, config_dir, arguments_dict["directory"]))
 
 class GitViewerWidget(QWidget):
 
-    def __init__(self, buffer_id, config_dir, project_root):
+    def __init__(self, buffer_id, config_dir, directory):
         super(GitViewerWidget, self).__init__()
 
-        repo = Repository(project_root)
-        commit_size = 0
-        lastest_commit = None
-        for commit in repo.walk(repo.head.target, GIT_SORT_TOPOLOGICAL):
-            commit_size += 1
+        repo_path = discover_repository(directory)
+        if repo_path:
+            repo = Repository(repo_path)
+            commit_size = 0
+            lastest_commit = None
+            for commit in repo.walk(repo.head.target, GIT_SORT_TOPOLOGICAL):
+                commit_size += 1
 
-            if not lastest_commit:
-                lastest_commit = commit
+                if not lastest_commit:
+                    lastest_commit = commit
 
-        remote_branch_size = 0
-        for branch in repo.branches.remote:
-            if branch != "origin/HEAD" and branch != "origin/master":
-                remote_branch_size += 1
+            remote_branch_size = 0
+            for branch in repo.branches.remote:
+                if branch != "origin/HEAD" and branch != "origin/master":
+                    remote_branch_size += 1
 
-        # Change background.
-        self.setStyleSheet("background-color: #000000");
+            # Change background.
+            self.setStyleSheet("background-color: #000000");
 
-        # Add main box.
-        main_box = QVBoxLayout()
-        main_box.setSpacing(0)
-        main_box.setContentsMargins(0, 0, 0, 0)
+            # Add main box.
+            main_box = QVBoxLayout()
+            main_box.setSpacing(0)
+            main_box.setContentsMargins(0, 0, 0, 0)
 
-        self.setLayout(main_box)
+            self.setLayout(main_box)
 
-        # Add repo top area.
-        self.repo_top_font_size = 18
-        self.repo_top_area = QWidget()
-        self.repo_top_layout = QVBoxLayout()
-        self.repo_top_layout.setSpacing(0)
-        self.repo_top_layout.setContentsMargins(30, 30, 30, 30)
-        self.repo_top_area.setLayout(self.repo_top_layout)
-        main_box.addWidget(self.repo_top_area)
+            # Add repo top area.
+            self.repo_top_font_size = 18
+            self.repo_top_area = QWidget()
+            self.repo_top_layout = QVBoxLayout()
+            self.repo_top_layout.setSpacing(0)
+            self.repo_top_layout.setContentsMargins(30, 30, 30, 30)
+            self.repo_top_area.setLayout(self.repo_top_layout)
+            main_box.addWidget(self.repo_top_area)
 
-        # Add repo title.
-        self.repo_title = QLabel(repo.path)
-        self.repo_title.setStyleSheet("QLabel {color: #E98123;}")
-        self.repo_title.setFont(QFont('Arial', 20))
-        self.repo_top_layout.addWidget(self.repo_title)
+            # Add repo title.
+            self.repo_title = QLabel(repo.path)
+            self.repo_title.setStyleSheet("QLabel {color: #E98123;}")
+            self.repo_title.setFont(QFont('Arial', 20))
+            self.repo_top_layout.addWidget(self.repo_title)
 
-        # Add summary info.
-        self.repo_summary_area = QWidget()
-        self.repo_summary_layout = QHBoxLayout()
-        self.repo_summary_layout.setSpacing(30)
-        self.repo_summary_layout.setContentsMargins(0, 0, 0, 0)
-        self.repo_summary_area.setLayout(self.repo_summary_layout)
-        self.repo_top_layout.addWidget(self.repo_summary_area)
+            # Add summary info.
+            self.repo_summary_area = QWidget()
+            self.repo_summary_layout = QHBoxLayout()
+            self.repo_summary_layout.setSpacing(30)
+            self.repo_summary_layout.setContentsMargins(0, 0, 0, 0)
+            self.repo_summary_area.setLayout(self.repo_summary_layout)
+            self.repo_top_layout.addWidget(self.repo_summary_area)
 
-        # Add head info.
-        self.head_info = QLabel("{}    {}    {}".format(
-            repo.head.shorthand,
-            str(remote_branch_size) + " branches",
-            str(commit_size) + " commits"
-        ))
-        self.head_info.setStyleSheet("QLabel {color: #C46C1D;}")
-        self.head_info.setFont(QFont('Arial', self.repo_top_font_size))
-        self.repo_summary_layout.addWidget(self.head_info)
+            # Add head info.
+            self.head_info = QLabel("{}    {}    {}".format(
+                repo.head.shorthand,
+                str(remote_branch_size) + " branches",
+                str(commit_size) + " commits"
+            ))
+            self.head_info.setStyleSheet("QLabel {color: #C46C1D;}")
+            self.head_info.setFont(QFont('Arial', self.repo_top_font_size))
+            self.repo_summary_layout.addWidget(self.head_info)
 
-        self.repo_summary_layout.addStretch(1)
+            self.repo_summary_layout.addStretch(1)
 
-        # Add lastest commit info.
-        self.lastest_commit_area = QWidget()
-        self.lastest_commit_layout = QHBoxLayout()
-        self.lastest_commit_layout.setSpacing(30)
-        self.lastest_commit_layout.setContentsMargins(0, 30, 0, 30)
-        self.lastest_commit_area.setLayout(self.lastest_commit_layout)
-        self.repo_top_layout.addWidget(self.lastest_commit_area)
+            # Add lastest commit info.
+            self.lastest_commit_area = QWidget()
+            self.lastest_commit_layout = QHBoxLayout()
+            self.lastest_commit_layout.setSpacing(30)
+            self.lastest_commit_layout.setContentsMargins(0, 30, 0, 30)
+            self.lastest_commit_area.setLayout(self.lastest_commit_layout)
+            self.repo_top_layout.addWidget(self.lastest_commit_area)
 
-        self.lastest_commit_info = QLabel("Lastest: {}    {}...    {}    {}".format(
-            lastest_commit.author.name,
-            lastest_commit.message.split("\n")[0][:40],
-            lastest_commit.hex[:7],
-            datetime.utcfromtimestamp(lastest_commit.author.time).strftime('%Y-%m-%d %H:%M:%S')))
-        self.lastest_commit_info.setStyleSheet("QLabel {color: #6C6C6C;}")
-        self.lastest_commit_info.setFont(QFont('Arial', self.repo_top_font_size))
-        self.lastest_commit_layout.addWidget(self.lastest_commit_info)
+            self.lastest_commit_info = QLabel("Lastest: {}    {}...    {}    {}".format(
+                lastest_commit.author.name,
+                lastest_commit.message.split("\n")[0][:40],
+                lastest_commit.hex[:7],
+                datetime.utcfromtimestamp(lastest_commit.author.time).strftime('%Y-%m-%d %H:%M:%S')))
+            self.lastest_commit_info.setStyleSheet("QLabel {color: #6C6C6C;}")
+            self.lastest_commit_info.setFont(QFont('Arial', self.repo_top_font_size))
+            self.lastest_commit_layout.addWidget(self.lastest_commit_info)
 
-        self.lastest_commit_layout.addStretch(1)
+            self.lastest_commit_layout.addStretch(1)
 
-        # Add commit status.
+            # Add commit status.
 
-        # Add commit list.
+            # Add commit list.
 
-        main_box.addStretch(1)
+            main_box.addStretch(1)
