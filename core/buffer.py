@@ -101,7 +101,7 @@ class Buffer(QGraphicsScene):
 
     update_buffer_details = QtCore.pyqtSignal(str, str, str)
     open_url_in_new_tab = QtCore.pyqtSignal(str)
-    duplicate_page_in_new_tab = QtCore.pyqtSignal(str) 
+    duplicate_page_in_new_tab = QtCore.pyqtSignal(str)
     open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_text = QtCore.pyqtSignal(str)
     input_message = QtCore.pyqtSignal(str, str, str, str, str)
@@ -125,7 +125,7 @@ class Buffer(QGraphicsScene):
         self.module_path = module_path
         self.fit_to_view = fit_to_view
         if emacs_var_dict["eaf-emacs-theme-mode"] == "dark":
-            self.background_color = QColor(233, 129, 35, 255)
+            self.background_color = QColor(0, 0, 0, 255)
         else:
             self.background_color = QColor(255, 255, 255, 255)
         self.setBackgroundBrush(QBrush(self.background_color))

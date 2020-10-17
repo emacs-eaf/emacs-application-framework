@@ -955,14 +955,14 @@ Return t or nil based on the result of the call."
 (defun eaf-call-async (method handler &rest args)
   "Call EAF Python process using `dbus-call-method-asynchronously' with METHOD, HANDLER and ARGS."
   (apply #'dbus-call-method-asynchronously
-                       :session     ; use the session (not system) bus
-                       "com.lazycat.eaf"  ; service name
-                       "/com/lazycat/eaf" ; path name
-                       "com.lazycat.eaf"  ; interface name
-                       method
-                       handler
-                       :timeout 1000000
-                       args))
+         :session                   ; use the session (not system) bus
+         "com.lazycat.eaf"          ; service name
+         "/com/lazycat/eaf"         ; path name
+         "com.lazycat.eaf"          ; interface name
+         method
+         handler
+         :timeout 1000000
+         args))
 
 (defun eaf-get-emacs-xid (frame)
   "Get emacs FRAME xid."
@@ -1791,7 +1791,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1838,6 +1838,18 @@ choose a search engine defined in `eaf-browser-search-engines'"
   "Open EAF demo screen to verify that EAF is working properly."
   (interactive)
   (eaf-open "eaf-demo" "demo"))
+
+;;;###autoload
+(defun eaf-open-git-viewer ()
+  "Open EAF git viewer."
+  (interactive)
+  (let ((args (make-hash-table :test 'equal))
+        (project (project-current))
+        (project-root-dir ""))
+    (when project
+      (setq project-root-dir (expand-file-name (cdr project))))
+    (puthash "project-root" project-root-dir args)
+    (eaf-open "eaf-git-viewer" "git-viewer" (json-encode-hash-table args) t)))
 
 ;;;###autoload
 (defun eaf-open-camera ()
