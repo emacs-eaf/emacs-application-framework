@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Oct 12 12:22:55 2020 (-0400)
+;; Last-Updated: Sat Oct 17 18:57:18 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1072,12 +1072,11 @@ We need calcuate render allocation to make sure no black border around render co
   "Get WINDOW allocation."
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
-         ;; Support emacs 27 tab-line-mode.
-         ;; Tab-line-mode news: https://github.com/emacs-mirror/emacs/blob/master/etc/NEWS.27#L2755
          (y (+ (nth 1 window-edges)
                (window-header-line-height window)
-               (if (require 'tab-line nil t)
-                   (if tab-line-mode (window-tab-line-height window) 0)
+               (if (and (require 'tab-line nil t)
+                        tab-line-mode) ; Support emacs 27 tab-line-mode
+                   (window-tab-line-height window)
                  0)))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
@@ -1841,11 +1840,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
 
 ;;;###autoload
 (defun eaf-open-git ()
-  "Open EAF git viewer."
+  "Open EAF git status screen."
   (interactive)
   (let ((args (make-hash-table :test 'equal)))
     (puthash "directory" (expand-file-name (eaf--non-remote-default-directory)) args)
-    (eaf-open "eaf-git-viewer" "git-viewer" (json-encode-hash-table args) t)))
+    (eaf-open "eaf-git" "git" (json-encode-hash-table args) t)))
 
 ;;;###autoload
 (defun eaf-open-camera ()
