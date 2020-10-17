@@ -20,7 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView
+from PyQt5.QtCore import QStringListModel
+
 from core.buffer import Buffer
 
 from pygit2 import Repository, discover_repository
@@ -125,11 +127,54 @@ class GitViewerWidget(QWidget):
 
             self.lastest_commit_layout.addStretch(1)
 
-            # Add commit status.
+            # Add info box.
+            info_box = QWidget()
+            info_area_layout = QHBoxLayout()
+            info_area_layout.setSpacing(30)
+            info_area_layout.setContentsMargins(30, 0, 30, 30)
+            info_box.setLayout(info_area_layout)
 
-            # Add commit list.
+            # Add category panel.
+            category_panel_listview = QListView()
+            category_panel_listview.setSpacing(10)
+            category_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
+            category_panel_model = QStringListModel()
+            category_panel_list = ["Status", "Commit", "Branch", "Submodule"]
+            category_panel_model.setStringList(category_panel_list)
+            category_panel_listview.setModel(category_panel_model)
 
-            main_box.addStretch(1)
+            info_area_layout.addWidget(category_panel_listview)
+            info_area_layout.setStretchFactor(category_panel_listview, 1)
+
+            # Add view panel.
+            view_panel_listview = QListView()
+            view_panel_listview.setSpacing(10)
+            view_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
+            view_panel_model = QStringListModel()
+            view_panel_list = ["Current repo update to date."]
+            view_panel_model.setStringList(view_panel_list)
+            view_panel_listview.setModel(view_panel_model)
+
+            info_area_layout.addWidget(view_panel_listview)
+            info_area_layout.setStretchFactor(view_panel_listview, 4)
+
+            # Add help panel.
+            help_panel_listview = QListView()
+            help_panel_listview.setSpacing(10)
+            help_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
+            help_panel_model = QStringListModel()
+            help_panel_list = ["Press l: Git pull",
+                               "Press u: Git push",
+                               "Press a: Commit all",
+                               "Press s: Commit file",
+                               "Press k: Cancel file"]
+            help_panel_model.setStringList(help_panel_list)
+            help_panel_listview.setModel(help_panel_model)
+
+            info_area_layout.addWidget(help_panel_listview)
+            info_area_layout.setStretchFactor(help_panel_listview, 1)
+
+            main_box.addWidget(info_box)
 
 def get_dir_size(start_path = '.'):
     total_size = 0
