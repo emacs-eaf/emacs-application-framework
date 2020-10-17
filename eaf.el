@@ -1840,7 +1840,7 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (eaf-open "eaf-demo" "demo"))
 
 ;;;###autoload
-(defun eaf-open-git-viewer ()
+(defun eaf-open-git ()
   "Open EAF git viewer."
   (interactive)
   (let ((args (make-hash-table :test 'equal)))
