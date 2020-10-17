@@ -29,6 +29,7 @@ from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE
 from datetime import datetime
 
 import json
+import os
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -93,10 +94,11 @@ class GitViewerWidget(QWidget):
             self.repo_top_layout.addWidget(self.repo_summary_area)
 
             # Add head info.
-            self.head_info = QLabel("{}    {}    {}".format(
+            self.head_info = QLabel("{}    {}    {}    {}".format(
                 repo.head.shorthand,
                 str(remote_branch_size) + " branches",
-                str(commit_size) + " commits"
+                str(commit_size) + " commits",
+                format_bytes(get_dir_size(repo_path))
             ))
             self.head_info.setStyleSheet("QLabel {color: #C46C1D;}")
             self.head_info.setFont(QFont('Arial', self.repo_top_font_size))
@@ -128,3 +130,24 @@ class GitViewerWidget(QWidget):
             # Add commit list.
 
             main_box.addStretch(1)
+
+def get_dir_size(start_path = '.'):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            # skip if it is symbolic link
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+
+    return total_size
+
+def format_bytes(size):
+    # 2**10 = 1024
+    power = 2**10
+    n = 0
+    power_labels = {0 : '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+    while size > power:
+        size /= power
+        n += 1
+    return str(round(size, 2)) + power_labels[n]+'B'
