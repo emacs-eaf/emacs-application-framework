@@ -985,7 +985,9 @@ Return t or nil based on the result of the call."
                    (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
                    (list (eaf-serialization-var-list))
                    ))
-        (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
+        (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
+        (process-environment (cl-copy-list process-environment)))
+    (setenv "QT_QPA_PLATFORM" "xcb")
     (setq eaf-process
           (if eaf-enable-debug
               (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
