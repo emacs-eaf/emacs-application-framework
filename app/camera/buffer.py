@@ -24,7 +24,7 @@ from PyQt5.QtGui import QBrush
 from PyQt5.QtGui import QColor
 from PyQt5.QtMultimedia import QCameraInfo, QCamera, QCameraImageCapture
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QFrame
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
 from pathlib import Path
@@ -65,13 +65,13 @@ class CameraWidget(QWidget):
         self.graphics_view = QGraphicsView(self.scene)
         self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.graphics_view.setFrameStyle(0)
-        self.graphics_view.setStyleSheet("QGraphicsView {background: transparent; border: 3px; outline: none;}")
+        self.graphics_view.setFrameStyle(QFrame.NoFrame)
         self.graphics_view.scale(-1, 1) # this make live video from camero mirror.
         self.video_item = QGraphicsVideoItem()
         self.scene.addItem(self.video_item)
 
         self.layout = QVBoxLayout(self)
+        self.layout.setSpacing(0)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.graphics_view)
 

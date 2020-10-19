@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Oct 12 12:22:55 2020 (-0400)
+;; Last-Updated: Sat Oct 17 18:57:18 2020 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -955,14 +955,14 @@ Return t or nil based on the result of the call."
 (defun eaf-call-async (method handler &rest args)
   "Call EAF Python process using `dbus-call-method-asynchronously' with METHOD, HANDLER and ARGS."
   (apply #'dbus-call-method-asynchronously
-                       :session     ; use the session (not system) bus
-                       "com.lazycat.eaf"  ; service name
-                       "/com/lazycat/eaf" ; path name
-                       "com.lazycat.eaf"  ; interface name
-                       method
-                       handler
-                       :timeout 1000000
-                       args))
+         :session                   ; use the session (not system) bus
+         "com.lazycat.eaf"          ; service name
+         "/com/lazycat/eaf"         ; path name
+         "com.lazycat.eaf"          ; interface name
+         method
+         handler
+         :timeout 1000000
+         args))
 
 (defun eaf-get-emacs-xid (frame)
   "Get emacs FRAME xid."
@@ -1072,12 +1072,11 @@ We need calcuate render allocation to make sure no black border around render co
   "Get WINDOW allocation."
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
-         ;; Support emacs 27 tab-line-mode.
-         ;; Tab-line-mode news: https://github.com/emacs-mirror/emacs/blob/master/etc/NEWS.27#L2755
          (y (+ (nth 1 window-edges)
                (window-header-line-height window)
-               (if (require 'tab-line nil t)
-                   (if tab-line-mode (window-tab-line-height window) 0)
+               (if (and (require 'tab-line nil t)
+                        tab-line-mode) ; Support emacs 27 tab-line-mode
+                   (window-tab-line-height window)
                  0)))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
@@ -1791,7 +1790,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1838,6 +1837,14 @@ choose a search engine defined in `eaf-browser-search-engines'"
   "Open EAF demo screen to verify that EAF is working properly."
   (interactive)
   (eaf-open "eaf-demo" "demo"))
+
+;;;###autoload
+(defun eaf-open-git ()
+  "Open EAF git status screen."
+  (interactive)
+  (let ((args (make-hash-table :test 'equal)))
+    (puthash "directory" (expand-file-name (eaf--non-remote-default-directory)) args)
+    (eaf-open "eaf-git" "git" (json-encode-hash-table args) t)))
 
 ;;;###autoload
 (defun eaf-open-camera ()
