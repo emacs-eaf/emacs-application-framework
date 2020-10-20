@@ -385,8 +385,14 @@ class PdfViewerWidget(QWidget):
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
 
-            # exclude images
-            imagelist = page.getImageList(full=True)
+            # Exclude images
+            imagelist = None
+            try:
+                imagelist = page.getImageList(full=True)
+            except Exception:
+                # PyMupdf 1.14 not include argument 'full'.
+                imagelist = page.getImageList()
+
             imagebboxlist = []
             for image in imagelist:
                 try:
