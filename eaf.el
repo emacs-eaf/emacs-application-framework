@@ -1469,7 +1469,6 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
     (eaf-for-each-eaf-buffer
      (when (string= eaf--buffer-id kill-buffer-id)
        (kill-buffer buffer)
-       (message "[EAF] Request to kill buffer %s." kill-buffer-id)
        (throw 'found-eaf t)))))
 
 (dbus-register-signal
