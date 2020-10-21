@@ -63,10 +63,11 @@ pip uninstall fitz
 pip install pymupdf
 ```
 
-2. 使用 ```git clone``` 下载这个仓库.
+2. 下载EAF源代码:
 
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
+wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
+unzip master.zip && mv emacs-application-framework-master emacs-application-framework
 ```
 
 3. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:

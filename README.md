@@ -64,10 +64,11 @@ pip uninstall fitz
 pip install pymupdf
 ```
 
-2. Clone this repository.
+2. Download source code:
 
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
+wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
+unzip master.zip && mv emacs-application-framework-master emacs-application-framework
 ```
 
 3. Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
