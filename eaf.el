@@ -1278,8 +1278,7 @@ keybinding variable to eaf-app-binding-alist."
 (defun eaf--monitor-buffer-kill ()
   "A function monitoring when an EAF buffer is killed."
   (ignore-errors
-    (eaf-call "kill_buffer" eaf--buffer-id)
-    (message "[EAF] Killed %s." eaf--buffer-id)))
+    (eaf-call "kill_buffer" eaf--buffer-id)))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
@@ -1791,7 +1790,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
