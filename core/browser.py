@@ -766,10 +766,19 @@ class BrowserBuffer(Buffer):
         ''' Record the url.'''
         self.request_url = url.toString()
 
+        self.draw_background_filter()
+
+    def draw_background_filter(self):
+        '''Because Qt WebEngine will draw light background before loading new page.
+        We draw dark background to avoid page flash when dark mode.
+
+        This function include a white-list to control variable no_need_draw_background,
+        we can add url to white-list if you found unnecessary loading at same page, such as, scroll to anchor.
+        '''
         if self.dark_mode_is_enable():
             current_urls = self.current_url.rsplit("/", 1)
             request_urls = self.request_url.rsplit("/", 1)
-            # Emacs-china forum thread don't need draw background that avoid flash.
+
             if self.request_url == "https://emacs-china.org/":
                 self.no_need_draw_background = False
             if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
@@ -777,6 +786,8 @@ class BrowserBuffer(Buffer):
             elif self.current_url.startswith("https://livebook.manning.com/book/") and self.request_url.startswith("https://livebook.manning.com/book/"):
                 self.no_need_draw_background = current_urls[0] == request_urls[0]
             elif self.current_url.startswith("https://web.telegram.org") and self.request_url.startswith("https://web.telegram.org"):
+                self.no_need_draw_background = True
+            elif self.current_url.startswith("https://www.wikiwand.com/"):
                 self.no_need_draw_background = True
 
     def dark_mode_is_enable(self):

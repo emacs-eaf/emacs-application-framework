@@ -385,8 +385,14 @@ class PdfViewerWidget(QWidget):
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
 
-            # exclude images
-            imagelist = page.getImageList(full=True)
+            # Exclude images
+            imagelist = None
+            try:
+                imagelist = page.getImageList(full=True)
+            except Exception:
+                # PyMupdf 1.14 not include argument 'full'.
+                imagelist = page.getImageList()
+
             imagebboxlist = []
             for image in imagelist:
                 try:
@@ -516,7 +522,12 @@ class PdfViewerWidget(QWidget):
                 # Draw page image.
                 if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
                     render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
-                painter.drawPixmap(QRect(render_x, render_y, qpixmap.width(), qpixmap.height()), qpixmap)
+
+                # Different page has different width, if pixmap size is not equal render_width, page render will slight blurry.
+                # 
+                # And we can't draw pixmap will pixmap's width and height,
+                # because it will cause render width is not same if different page has different width.
+                painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
         # Clean unused pixmap cache that avoid use too much memory.
         self.clean_unused_page_cache_pixmap()
