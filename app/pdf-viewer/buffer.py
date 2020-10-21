@@ -349,16 +349,26 @@ class PdfViewerWidget(QWidget):
             if index in self.page_cache_pixmap_dict.keys():
                 return self.page_cache_pixmap_dict[index]
         # Clear dict if page scale changed.
-        else:
-            self.page_cache_pixmap_dict.clear()
-            self.page_cache_scale = scale
-            self.page_cache_trans = fitz.Matrix(scale, scale)
+
+        self.page_cache_pixmap_dict.clear()
+        self.page_cache_scale = scale
 
         page = self.document[index]
         if self.inpdf:
             page.setRotation(rotation)
         if self.is_mark_link:
             page = self.add_mark_link(index)
+
+        if rotation % 180 != 0:
+            self.page_width = self.original_page_height
+            self.page_height = self.original_page_width
+        else:
+            self.page_width = self.original_page_width
+            self.page_height = self.original_page_height
+
+        scale = scale * self.page_width / page.rect.width
+        self.page_cache_trans = None
+
 
         # follow page search text
         if self.is_mark_search:
@@ -375,12 +385,6 @@ class PdfViewerWidget(QWidget):
 
         trans = self.page_cache_trans if self.page_cache_trans is not None else fitz.Matrix(scale, scale)
         pixmap = page.getPixmap(matrix=trans, alpha=False)
-        if rotation % 180 != 0:
-            self.page_width = self.original_page_height
-            self.page_height = self.original_page_width
-        else:
-            self.page_width = self.original_page_width
-            self.page_height = self.original_page_height
 
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
@@ -452,9 +456,9 @@ class PdfViewerWidget(QWidget):
                             imagebboxlist.remove(item)
             for bbox in imagebboxlist:
                 if self.inpdf:
-                    pixmap.invertIRect(bbox * page.rotationMatrix * self.scale)
+                    pixmap.invertIRect(bbox * page.rotationMatrix * scale)
                 else:
-                    pixmap.invertIRect(bbox * self.scale)
+                    pixmap.invertIRect(bbox * scale)
 
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
@@ -503,6 +507,8 @@ class PdfViewerWidget(QWidget):
         translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
         painter.translate(0, translate_y)
 
+        render_x = 0
+        render_y = 0
         # Render pages in visible area.
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
@@ -510,10 +516,10 @@ class PdfViewerWidget(QWidget):
                 qpixmap = self.get_page_pixmap(index, self.scale, self.rotation)
 
                 # Init render rect.
-                render_width = self.page_width * self.scale
-                render_height = self.page_height * self.scale
+                render_width = qpixmap.width()
+                render_height = qpixmap.height()
+
                 render_x = (self.rect().width() - render_width) / 2
-                render_y = (index - start_page_index) * self.scale * self.page_height
 
                 # Add padding between pages.
                 if (index - start_page_index) > 0:
@@ -523,11 +529,9 @@ class PdfViewerWidget(QWidget):
                 if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
                     render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
 
-                # Different page has different width, if pixmap size is not equal render_width, page render will slight blurry.
-                # 
-                # And we can't draw pixmap will pixmap's width and height,
-                # because it will cause render width is not same if different page has different width.
                 painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
+
+                render_y += render_height
 
         # Clean unused pixmap cache that avoid use too much memory.
         self.clean_unused_page_cache_pixmap()
