@@ -88,6 +88,7 @@
 (require 'eaf-mindmap)
 (require 'eaf-interleave)
 (require 'json)
+(require 's)
 
 ;;; Code:
 
