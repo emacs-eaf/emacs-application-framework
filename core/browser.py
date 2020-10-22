@@ -682,6 +682,20 @@ class BrowserBuffer(Buffer):
             settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
             settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
+
+            font_family = self.emacs_var_dict[ 'eaf-browser-font-family']
+            if font_family:
+                for ff in (
+                    settings.StandardFont,
+                    settings.FixedFont,
+                    settings.SerifFont,
+                    settings.SansSerifFont,
+                    # What's these font families?
+                    # settings.CursiveFont,
+                    # settings.FantasyFont,
+                    # settings.PictographFont
+                ):
+                    settings.setFontFamily(ff, font_family)
         except Exception:
             pass
 
