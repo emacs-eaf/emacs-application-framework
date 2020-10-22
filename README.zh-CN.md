@@ -63,8 +63,12 @@ pip uninstall fitz
 pip install pymupdf
 ```
 
-2. 下载EAF源代码:
-
+2.
+- 使用*Git Clone*:
+```Bash
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
+```
+- *快速下载*:
 ```Bash
 wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
 unzip master.zip && mv emacs-application-framework-master emacs-application-framework
