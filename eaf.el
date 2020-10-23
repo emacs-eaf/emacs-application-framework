@@ -2341,14 +2341,15 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   #+END_SRC
 
 * Global keybindings
-  | Key   | Event                 |
-  |-------+-----------------------|
-  | C-h m | eaf-describe-bindings |
-  | C-c b | eaf-open-bookmark     |
-  | C-c e | eaf-open-external     |
-  | M-/   | eaf-get-path-or-url   |
-  | M-'   | eaf-toggle-fullscreen |
-  | M-[   | eaf-share-path-or-url |
+  | Key   | Event                       |
+  |-------+-----------------------------|
+  | C-h m | eaf-describe-bindings       |
+  | C-c b | eaf-open-bookmark           |
+  | C-c e | eaf-open-external           |
+  | C-c i | eaf-import-chrome-bookmarks |
+  | M-/   | eaf-get-path-or-url         |
+  | M-'   | eaf-toggle-fullscreen       |
+  | M-[   | eaf-share-path-or-url       |
 
 * Browser Edit Mode
   | Key     | Event                              |
