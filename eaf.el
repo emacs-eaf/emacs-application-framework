@@ -113,6 +113,7 @@
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
+    (define-key map (kbd "C-c i") #'eaf-import-chrome-bookmarks)
     (define-key map (kbd "C-c e") #'eaf-open-external)
     (define-key map (kbd "M-'") #'eaf-toggle-fullscreen)
     (define-key map (kbd "M-/") #'eaf-get-path-or-url)
@@ -254,6 +255,10 @@ It must defined at `eaf-browser-search-engines'."
 (defcustom eaf-config-location (expand-file-name (locate-user-emacs-file "eaf/"))
   "Directory where eaf will store configuration files."
   :type 'directory)
+
+(defcustom eaf-chrome-bookmark-file "~/.config/google-chrome/Default/Bookmarks"
+  "The default chrome bookmark file to import."
+  :type 'string)
 
 (defcustom eaf-var-list
   '((eaf-camera-save-path . "~/Downloads")
@@ -897,6 +902,13 @@ For now only EAF browser app is supported."
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
 
+(defun eaf--browser-chrome-bookmark (name url)
+  "Restore EAF buffer according to chrome bookmark of given title and web URL."
+  `((handler . eaf--bookmark-restore)
+    (eaf-app . "browser")
+    (defaults . ,(list name))
+    (filename . ,url)))
+
 (defun eaf--pdf-viewer-bookmark ()
   "Restore EAF buffer according to pdf bookmark from the current file path or web URL."
   `((handler . eaf--bookmark-restore)
@@ -929,6 +941,31 @@ For now only EAF browser app is supported."
              (message "This command can only be called in an EAF buffer!"))
            ;; create new one for current buffer with provided name
            (bookmark-set cand)))))
+
+(defun eaf-import-chrome-bookmarks ()
+  "Command to import chrome bookmarks."
+  (interactive)
+  (when (eaf-read-input "Are you sure to import chrome bookmarks to EAF" "yes-or-no" "")
+    (if (not (file-exists-p eaf-chrome-bookmark-file))
+        (message "Chrome bookmark file is not exist, check `eaf-chrome-bookmark-file` setting.")
+      (let ((orig-bookmark-record-fn bookmark-make-record-function)
+            (data (json-read-file eaf-chrome-bookmark-file)))
+        (cl-labels ((fn (item)
+                        (pcase (alist-get 'type item)
+                          ("url"
+                           (let ((name (alist-get 'name item))
+                                 (url (alist-get 'url item)))
+                             (if (not (equal "chrome://bookmarks/" url))
+                                 (progn
+                                   (setq-local bookmark-make-record-function
+                                               #'(lambda () (eaf--browser-chrome-bookmark name url)))
+                                   (bookmark-set name)))))
+                          ("folder"
+                           (mapc #'fn (alist-get 'children item))))))
+          (fn (alist-get 'bookmark_bar (alist-get 'roots data)))
+          (setq-local bookmark-make-record-function orig-bookmark-record-fn)
+          (bookmark-save)
+          (message "Import success."))))))
 
 (defun eaf-open-external ()
   "Command to open current path or url with external application."
