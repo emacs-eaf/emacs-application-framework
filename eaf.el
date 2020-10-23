@@ -947,7 +947,7 @@ For now only EAF browser app is supported."
   (interactive)
   (when (eaf-read-input "Are you sure to import chrome bookmarks to EAF" "yes-or-no" "")
     (if (not (file-exists-p eaf-chrome-bookmark-file))
-        (message "Chrome bookmark file is not exist, check `eaf-chrome-bookmark-file` setting.")
+        (message "Chrome bookmark file: '%s' is not exist, check `eaf-chrome-bookmark-file` setting." eaf-chrome-bookmark-file)
       (let ((orig-bookmark-record-fn bookmark-make-record-function)
             (data (json-read-file eaf-chrome-bookmark-file)))
         (cl-labels ((fn (item)
