@@ -314,13 +314,6 @@ class PdfViewerWidget(QWidget):
         if os.path.splitext(self.url)[-1] != ".pdf":
             self.inpdf = False
 
-    def refresh_file(self):
-        '''
-        Refresh content with PDF file changed.
-        '''
-        self.document = fitz.open(self.url)
-        self.update()
-
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
@@ -333,6 +326,14 @@ class PdfViewerWidget(QWidget):
 
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
+
+    @interactive()
+    def refresh_file(self):
+        '''
+        Refresh content with PDF file changed.
+        '''
+        self.document = fitz.open(self.url)
+        self.update()
 
     @interactive()
     def save_current_pos(self):
