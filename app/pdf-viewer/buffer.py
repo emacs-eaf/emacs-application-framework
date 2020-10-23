@@ -314,6 +314,13 @@ class PdfViewerWidget(QWidget):
         if os.path.splitext(self.url)[-1] != ".pdf":
             self.inpdf = False
 
+    def refresh(self):
+        '''
+        Refresh content with PDF file changed.
+        '''
+        self.document = fitz.open(self.url)
+        self.update()
+
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
