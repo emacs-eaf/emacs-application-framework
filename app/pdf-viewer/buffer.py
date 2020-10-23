@@ -314,7 +314,7 @@ class PdfViewerWidget(QWidget):
         if os.path.splitext(self.url)[-1] != ".pdf":
             self.inpdf = False
 
-    def refresh(self):
+    def refresh_file(self):
         '''
         Refresh content with PDF file changed.
         '''
