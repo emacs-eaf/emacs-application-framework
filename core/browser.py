@@ -1347,7 +1347,7 @@ class BrowserBuffer(Buffer):
     def _import_chrome_history(self):
         dbpath = os.path.expanduser(self.emacs_var_dict["eaf-browser-chrome-history-file"])
         if not os.path.exists(dbpath):
-            self.message_to_emacs.emit("The chrome history file not exist, please check your setting.")
+            self.message_to_emacs.emit("The chrome history file: '{}' not exist, please check your setting.".format(dbpath))
             return
 
         self.message_to_emacs.emit("Importing from {}...".format(dbpath))
