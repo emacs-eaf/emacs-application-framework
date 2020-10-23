@@ -1027,6 +1027,8 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.copy_code_content(result_content.strip())
         elif callback_tag == "clear_history":
             self._clear_history()
+        elif callback_tag == "import_chrome_history":
+            self._import_chrome_history()
         elif callback_tag == "clear_cookies":
             self.buffer_widget._clear_cookies()
 
@@ -1285,42 +1287,45 @@ class BrowserBuffer(Buffer):
         ''' Return bool of whether the buffer is focused.'''
         return self.buffer_widget.get_focus_text() != None or self.url == "devtools://devtools/bundled/devtools_app.html"
 
+    def _record_history(self, new_title, new_url):
+        # Throw traceback info if algorithm has bug and protection of historical record is not erased.
+        try:
+            noprefix_new_url_match = re.match(self.noprefix_url_pattern, new_url)
+            if noprefix_new_url_match is not None:
+                found = False
+                for history in self.history_list:
+                    noprefix_url_match = re.match(self.noprefix_url_pattern, history.url)
+                    if noprefix_url_match is not None:
+                        noprefix_url = noprefix_url_match.group(2)
+                        noprefix_new_url = noprefix_new_url_match.group(2)
+                        nopostfix_new_url_match = re.match(self.nopostfix_url_pattern, noprefix_new_url)
+
+                        if noprefix_url == noprefix_new_url: # found unique url
+                            history.title = new_title
+                            history.url = new_url
+                            history.hit += 0.5
+                            found = True
+                        elif nopostfix_new_url_match is not None and noprefix_url == nopostfix_new_url_match.group():
+                            # also increment parent
+                            history.hit += 0.25
+
+                if not found:
+                    self.history_list.append(HistoryPage(new_title, new_url, 1))
+
+            self.history_list.sort(key = lambda x: x.hit, reverse = True)
+
+            with open(self.history_log_file_path, "w") as f:
+                f.writelines(map(lambda history: history.title + "ᛝ" + history.url + "ᛡ" + str(history.hit) + "\n", self.history_list))
+        except Exception:
+            import traceback
+            self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
+
     def record_history(self, new_title):
         ''' Record browser history.'''
         new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.buffer_widget.filter_title(new_title) != "" and \
            self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
-            # Throw traceback info if algorithm has bug and protection of historical record is not erased.
-            try:
-                noprefix_new_url_match = re.match(self.noprefix_url_pattern, new_url)
-                if noprefix_new_url_match is not None:
-                    found = False
-                    for history in self.history_list:
-                        noprefix_url_match = re.match(self.noprefix_url_pattern, history.url)
-                        if noprefix_url_match is not None:
-                            noprefix_url = noprefix_url_match.group(2)
-                            noprefix_new_url = noprefix_new_url_match.group(2)
-                            nopostfix_new_url_match = re.match(self.nopostfix_url_pattern, noprefix_new_url)
-
-                            if noprefix_url == noprefix_new_url: # found unique url
-                                history.title = new_title
-                                history.url = new_url
-                                history.hit += 0.5
-                                found = True
-                            elif nopostfix_new_url_match is not None and noprefix_url == nopostfix_new_url_match.group():
-                                # also increment parent
-                                history.hit += 0.25
-
-                    if not found:
-                        self.history_list.append(HistoryPage(new_title, new_url, 1))
-
-                self.history_list.sort(key = lambda x: x.hit, reverse = True)
-
-                with open(self.history_log_file_path, "w") as f:
-                    f.writelines(map(lambda history: history.title + "ᛝ" + history.url + "ᛡ" + str(history.hit) + "\n", self.history_list))
-            except Exception:
-                import traceback
-                self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
+            self._record_history(new_title, new_url)
 
     @interactive(insert_or_do=True)
     def new_blank_page(self):
@@ -1338,6 +1343,40 @@ class BrowserBuffer(Buffer):
     def clear_history(self):
         ''' Clear browsing history.'''
         self.send_input_message("Are you sure you want to clear all browsing history?", "clear_history", "yes-or-no")
+
+    def _import_chrome_history(self):
+        dbpath = os.path.expanduser(self.emacs_var_dict["eaf-browser-chrome-history-file"])
+        if not os.path.exists(dbpath):
+            self.message_to_emacs.emit("The chrome history file not exist, please check your setting.")
+            return
+
+        self.message_to_emacs.emit("Importing from {}...".format(dbpath))
+
+        conn = sqlite3.connect(dbpath)
+        # Keep lastest entry in dict by last_visit_time asc order.
+        sql = 'select title, url from urls order by last_visit_time asc'
+        # May fetch many by many not fetch all,
+        # but this should called only once, so not important now.
+        try:
+            chrome_histories = conn.execute(sql).fetchall()
+        except sqlite3.OperationalError as e:
+            if e.args[0] == 'database is locked':
+                self.message_to_emacs.emit("The chrome history file is locked, please close your chrome app first.")
+            else:
+                self.message_to_emacs.emit("Failed to read chrome history entries: {}.".format(e))
+            return
+
+        histories = dict(chrome_histories)  # Drop duplications with same title.
+        total = len(histories)
+        for i, (title, url) in enumerate(histories.items(), 1):
+            self._record_history(title, url)
+            self.message_to_emacs.emit("Importing {} / {} ...".format(i, total))
+        self.message_to_emacs.emit("{} chrome history entries imported.".format(total))
+
+    @interactive()
+    def import_chrome_history(self):
+        ''' Import history entries from chrome history db.'''
+        self.send_input_message("Are you sure you want to import all history from chrome?", "import_chrome_history", "yes-or-no")
 
     @interactive()
     def clear_cookies(self):
