@@ -45,7 +45,11 @@ class AppBuffer(BrowserBuffer):
 
         self.cut_node_id = None
 
-        for method_name in ["add_sub_node", "add_brother_node", "remove_node", "remove_middle_node", "add_middle_node", "update_node_topic_inline"]:
+        edit_mode = "true" if self.emacs_var_dict["eaf-mindmap-edit-mode"] == "true" else "false"
+        for method_name in ["add_sub_node", "add_brother_node", "add_middle_node"]:
+            self.build_js_method(method_name, True, js_kwargs={"inline": edit_mode})
+
+        for method_name in ["remove_node", "remove_middle_node", "update_node_topic_inline"]:
             self.build_js_method(method_name, True)
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset",
@@ -86,9 +90,11 @@ class AppBuffer(BrowserBuffer):
 
         self.change_title(self.get_root_node_topic())
 
-    def build_js_method(self, method_name, auto_save=False):
+    def build_js_method(self, method_name, auto_save=False, js_kwargs=None):
+        js_kwargs = js_kwargs or {}
+        js_func_args = ", ".join('{}={}'.format(k, v) for k, v in js_kwargs.items())
         def _do ():
-            self.buffer_widget.eval_js("{}();".format(method_name))
+            self.buffer_widget.eval_js("{}({});".format(method_name, js_func_args))
 
             if auto_save:
                 self.save_file(False)

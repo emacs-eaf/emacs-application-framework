@@ -283,6 +283,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-terminal-font-family . "")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
+    (eaf-mindmap-edit-mode . "false")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")

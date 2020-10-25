@@ -60,7 +60,7 @@
           }
       }
 
-      function add_sub_node(){
+      function add_sub_node(inline=false){
           var selected_node = _jm.get_selected_node(); // as parent of new node
           if(!selected_node) {
               _jm.move_node(selected_id,'_first_');
@@ -69,6 +69,9 @@
           var nodeid = jsMind.util.uuid.newid();
           var node = _jm.add_node(selected_node, nodeid, 'Topic');
           _jm.select_node(node);
+          if (inline) {
+              _jm.begin_edit(node);
+          }
       }
 
       function add_texted_sub_node(text){
@@ -81,7 +84,7 @@
           _jm.add_node(selected_node, nodeid, text);
       }
 
-      function add_brother_node(){
+      function add_brother_node(inline=false){
           var selected_node = _jm.get_selected_node(); // as parent of new node
           if(!selected_node) {
               _jm.move_node(selected_id,'_first_');
@@ -92,6 +95,9 @@
               var nodeid = jsMind.util.uuid.newid();
               var node = _jm.insert_node_after(selected_node, nodeid, 'Topic');
               _jm.select_node(node);
+              if (inline) {
+                  _jm.begin_edit(node);
+              }
           }
       }
 
@@ -291,12 +297,12 @@
           }
       }
 
-      function add_middle_node() {
+      function add_middle_node(inline=false) {
           var selected_node = _jm.get_selected_node(); // as parent of new node
           if(!!selected_node) {
               var topic = selected_node.topic;
 
-              add_brother_node();
+              add_brother_node(inline=false);
 
               var brother_node = _jm.get_selected_node();
               _jm.update_node(brother_node.id, topic);
@@ -305,6 +311,9 @@
               _jm.move_node(selected_node, selected_node.id, brother_node.id, brother_node.direction);
 
               _jm.select_node(selected_node);
+              if (inline) {
+                  _jm.begin_edit(selected_node);
+              }
           }
       }
 
