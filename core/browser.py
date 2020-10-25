@@ -449,7 +449,7 @@ class BrowserView(QWebEngineView):
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js("Marker.generateMarker('a, input, button, [class*=\"btn\"], [aria-haspopup], [role=\"button\"], textarea, select, summary, [class=\"gap\"], [ng-click]')")
+        self.eval_js("Marker.generateMarker('a, input, button, [class*=\"btn\"], [class*=\"collapsible\"], [aria-haspopup], [role=\"button\"], textarea, select, summary, [class=\"gap\"], [ng-click]')")
 
     def get_text_markers(self):
         ''' Get visiable text markers.'''

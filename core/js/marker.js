@@ -242,6 +242,7 @@ z-index: 100000;\
                   (node.getAttribute('role') === 'button') || // role="button" buttons
                   (node.hasAttribute('ng-click')) || // ng-click buttons
                   (node.classList.contains('btn')) || // class="btn" buttons
+                  (node.classList.contains('collapsible')) || // class="collapsible" buttons
                   (node.classList.contains('gap')) || // class="gap" links
                   (node.getAttribute('href') === '') || // special href button
                   (node.getAttribute('href') === '#')){  // special href # button
