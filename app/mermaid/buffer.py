@@ -61,4 +61,4 @@ class AppBuffer(BrowserBuffer):
     def render(self):
         with open(self.url, "r") as f:
             html = markdown.markdown(f.read(), extensions=['app.mermaid.md_mermaid'])
-            self.buffer_widget.setHtml(html)
+            self.buffer_widget.setHtml(html, QUrl("file://"))
