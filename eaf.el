@@ -1119,7 +1119,9 @@ We need calcuate render allocation to make sure no black border around render co
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
          (y (+ (nth 1 window-edges)
-               (window-header-line-height window)
+               (if (version< emacs-version "27.0")
+                   (window-header-line-height window)
+                 (window-tab-line-height window))
                (if (and (require 'tab-line nil t)
                         tab-line-mode) ; Support emacs 27 tab-line-mode
                    (window-tab-line-height window)
@@ -1834,7 +1836,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
