@@ -252,6 +252,11 @@ It must defined at `eaf-browser-search-engines'."
   "The Python interpreter used to run eaf.py."
   :type 'string)
 
+(defcustom eaf-python-environment '()
+  "The Python process environment."
+  :type '(alist :key-type (string :tag "Environment name")
+                :value-type (string :tag "Environment value")))
+
 (defcustom eaf-config-location (expand-file-name (locate-user-emacs-file "eaf/"))
   "Directory where eaf will store configuration files."
   :type 'directory)
@@ -1031,7 +1036,8 @@ Return t or nil based on the result of the call."
                    ))
         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
         (process-environment (cl-copy-list process-environment)))
-    (setenv "QT_QPA_PLATFORM" "xcb")
+    (dolist (env eaf-python-environment)
+      (setenv (car env) (cdr env)))
     (setq eaf-process
           (if eaf-enable-debug
               (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
