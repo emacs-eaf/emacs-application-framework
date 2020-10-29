@@ -538,6 +538,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-0" . "zoom_reset")
     ("C-S-c" . "copy_text")
     ("C-S-v" . "yank_text")
+    ("C-s" . "search_text_forward")
+    ("M-s" . "search_text_backward")
     ("C-a" . "eaf-send-key-sequence")
     ("C-e" . "eaf-send-key-sequence")
     ("C-f" . "eaf-send-key-sequence")

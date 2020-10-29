@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QApplication
-from core.utils import interactive
+from core.utils import interactive, abstract
 import abc
 import string
 
@@ -154,7 +154,8 @@ class Buffer(QGraphicsScene):
     def build_interactive_method(self, origin_class, class_method_name, new_method_name=None, msg_emacs=None, insert_or_do=False):
         ''' Build interactive methods.'''
         new_name = class_method_name if new_method_name is None else new_method_name
-        self.__dict__.update({new_name: getattr(origin_class, class_method_name)})
+        if (not hasattr(self, class_method_name)) or hasattr(getattr(self, class_method_name), "abstract"):
+            self.__dict__.update({new_name: getattr(origin_class, class_method_name)})
         if msg_emacs is not None:
             self.message_to_emacs.emit(msg_emacs)
         if insert_or_do:
@@ -214,12 +215,15 @@ class Buffer(QGraphicsScene):
         ''' Close buffer.'''
         self.request_close_buffer.emit(self.buffer_id)
 
+    @abstract
     def all_views_hide(self):
         pass
 
+    @abstract
     def some_view_show(self):
         pass
 
+    @abstract
     def resize_view(self):
         pass
 
@@ -240,24 +244,30 @@ class Buffer(QGraphicsScene):
         '''
         self.input_message.emit(self.buffer_id, message, callback_tag, input_type, initial_content)
 
+    @abstract
     def handle_input_response(self, callback_tag, result_content):
         pass
 
+    @abstract
     def action_quit(self):
         pass
 
+    @abstract
     def cancel_input_response(self, callback_tag):
         pass
 
+    @abstract
     def scroll_other_buffer(self, scroll_direction, scroll_type):
         pass
 
     def save_session_data(self):
         return ""
 
+    @abstract
     def restore_session_data(self, session_data):
         pass
 
+    @abstract
     def update_with_data(self, update_data):
         pass
 
@@ -273,6 +283,7 @@ class Buffer(QGraphicsScene):
         ''' Call function with arguments.'''
         return getattr(self, function_name)(args_string)
 
+    @abstract
     def fake_key_event_filter(self, event_string):
         pass
 
