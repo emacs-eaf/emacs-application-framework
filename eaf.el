@@ -983,7 +983,7 @@ A hashtable, key is url and value is title.")
   "Bookmarks that should be imported from firefox.")
 
 (defun eaf--load-existing-bookmarks()
-  "Load existing bookmarks to `eaf--bookmarks'."
+  "Load existing bookmarks."
   (let ((bookmarks (make-hash-table :test 'equal)))
     (dolist (bm bookmark-alist)
       (let* ((name (car bm))
@@ -992,10 +992,12 @@ A hashtable, key is url and value is title.")
     bookmarks))
 
 (defun eaf--useful-firefox-bookmark? (uri)
+  "Check whether uri is a website url."
   (or (string-prefix-p "http://" uri)
       (string-prefix-p "https://" uri)))
 
 (defun eaf--firefox-bookmark-to-import? (title uri)
+  "Check whether uri should be imported."
   (when (eaf--useful-firefox-bookmark? uri)
     (let ((old (gethash uri eaf--existing-bookmarks)))
       (when (or
