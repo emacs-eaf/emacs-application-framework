@@ -56,6 +56,8 @@ class AppBuffer(BrowserBuffer):
         http_thread = threading.Thread(target=self.run_http_server, args=())
         http_thread.start()
 
+        self.search_term = ""
+
         # Start server process.
         self.background_process = subprocess.Popen(
             "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
@@ -199,14 +201,14 @@ class AppBuffer(BrowserBuffer):
     @interactive()
     def search_text_forward(self):
         if self.search_term == "":
-            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
+            self.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
             self._search_text(self.search_term)
 
     @interactive()
     def search_text_backward(self):
         if self.search_term == "":
-            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
+            self.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
@@ -217,6 +219,6 @@ class AppBuffer(BrowserBuffer):
 
     def handle_input_response(self, callback_tag, result_content):
         if callback_tag == "search_text_forward":
-            self.buffer_widget._search_text(str(result_content))
+            self._search_text(str(result_content))
         elif callback_tag == "search_text_backward":
-            self.buffer_widget._search_text(str(result_content), True)
+            self._search_text(str(result_content), True)

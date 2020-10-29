@@ -142,3 +142,16 @@ def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
             return f(*args, **kwargs)
         return wrapped_f
     return wrap
+
+def abstract(f):
+    """
+    Add a `abstract` flag to a method,
+
+    We don't use abs.abstractmethod cause we don't need strict
+    implementation check.
+    """
+    f.abstract = True
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        return f(*args, **kwargs)
+    return wrap
