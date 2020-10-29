@@ -973,6 +973,72 @@ For now only EAF browser app is supported."
           (bookmark-save)
           (message "Import success."))))))
 
+(defalias 'eaf--browser-firefox-bookmark 'eaf--browser-chrome-bookmark)
+
+(defvar eaf--existing-bookmarks nil
+  "Existing bookmarks in Emacs. 
+A hashtable, key is url and value is title.")
+
+(defvar eaf--firefox-bookmarks nil
+  "Bookmarks that should be imported from firefox.")
+
+(defun eaf--load-existing-bookmarks()
+  "Load existing bookmarks to `eaf--bookmarks'."
+  (let ((bookmarks (make-hash-table :test 'equal)))
+    (dolist (bm bookmark-alist)
+      (let* ((name (car bm))
+             (file (bookmark-get-filename name)))
+        (puthash file name bookmarks)))
+    bookmarks))
+
+(defun eaf--useful-firefox-bookmark? (uri)
+  (or (string-prefix-p "http://" uri)
+      (string-prefix-p "https://" uri)))
+
+(defun eaf--firefox-bookmark-to-import? (title uri)
+  (when (eaf--useful-firefox-bookmark? uri)
+    (let ((old (gethash uri eaf--existing-bookmarks)))
+      (when (or
+             (not old)
+             (and (string-equal old "") (not (string-equal title ""))))
+        t))))
+
+(defun eaf--firefox-bookmark-to-import (title uri)
+  (puthash uri title eaf--existing-bookmarks)
+  (add-to-list 'eaf--firefox-bookmarks (cons uri title)))
+
+(defun eaf-import-firefox-bookmarks ()
+  "Command to import firefox bookmarks."
+  (interactive)
+  (when (eaf-read-input "In order to import, you should first backup firefox's bookmarks to a json file. Continue?" "yes-or-no" "")
+    (let ((fx-bookmark-file (read-file-name "Choose firefox bookmark file:")))
+      (if (not (file-exists-p fx-bookmark-file))
+          (message "Firefox bookmark file: '%s' is not exist." fx-bookmark-file)
+        (setq eaf--firefox-bookmarks nil)
+        (setq eaf--existing-bookmarks (eaf--load-existing-bookmarks))
+        (let ((orig-bookmark-record-fn bookmark-make-record-function)
+              (data (json-read-file fx-bookmark-file)))
+          (cl-labels ((fn (item)
+                          (pcase (alist-get 'typeCode item)
+                            (1
+                             (let ((title (alist-get 'title item ""))
+                                   (uri (alist-get 'uri item)))
+                               (when (eaf--firefox-bookmark-to-import? title uri)
+                                 (eaf--firefox-bookmark-to-import title uri))))
+                            (2
+                             (mapc #'fn (alist-get 'children item))))))
+            (fn data)
+            (dolist (bm eaf--firefox-bookmarks)
+              (let ((uri (car bm))
+                    (title (cdr bm)))
+                (message "uri %s, title %s" uri title)
+                (setq-local bookmark-make-record-function
+                            #'(lambda () (eaf--browser-firefox-bookmark title uri)))
+                (bookmark-set title)))
+            (setq-local bookmark-make-record-function orig-bookmark-record-fn)
+            (bookmark-save)
+            (message "Import success.")))))))
+
 (defun eaf-open-external ()
   "Command to open current path or url with external application."
   (interactive)
