@@ -417,7 +417,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-i" . "open_download_manage_page")
     ("M-o" . "eval_js")
     ("M-O" . "eval_js_file")
-    ("M-g" . "exit_fullscreen")
+    ("<escape>" . "eaf-browser-send-esc-or-exit-fullscreen")
     ("M-," . "eaf-send-down-key")
     ("M-." . "eaf-send-up-key")
     ("M-m" . "eaf-send-return-key")
@@ -978,7 +978,7 @@ For now only EAF browser app is supported."
 (defalias 'eaf--browser-firefox-bookmark 'eaf--browser-chrome-bookmark)
 
 (defvar eaf--existing-bookmarks nil
-  "Existing bookmarks in Emacs. 
+  "Existing bookmarks in Emacs.
 A hashtable, key is url and value is title.")
 
 (defvar eaf--firefox-bookmarks nil
@@ -1911,7 +1911,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2302,6 +2302,14 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (eaf-monitor-configuration-change))
 
 (dbus-register-service :session "com.lazycat.emacs")
+
+(defun eaf-browser-send-esc-or-exit-fullscreen ()
+  "Escape fullscreen status if browser current is fullscreen.
+Otherwise send key 'esc' to browser."
+  (interactive)
+  (if eaf-fullscreen-p
+      (eaf-call "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")
+    (eaf-call "send_key" eaf--buffer-id "<escape>")))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
