@@ -1033,7 +1033,6 @@ A hashtable, key is url and value is title.")
             (dolist (bm eaf--firefox-bookmarks)
               (let ((uri (car bm))
                     (title (cdr bm)))
-                (message "uri %s, title %s" uri title)
                 (setq-local bookmark-make-record-function
                             #'(lambda () (eaf--browser-firefox-bookmark title uri)))
                 (bookmark-set title)))
