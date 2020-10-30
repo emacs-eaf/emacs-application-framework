@@ -1399,7 +1399,11 @@ keybinding variable to eaf-app-binding-alist."
 (defun eaf--monitor-buffer-kill ()
   "A function monitoring when an EAF buffer is killed."
   (ignore-errors
-    (eaf-call "kill_buffer" eaf--buffer-id)))
+    (eaf-call "kill_buffer" eaf--buffer-id))
+
+  ;; Kill eaf process when last eaf buffer closed.
+  (when (equal (length (eaf--get-eaf-buffers)) 1)
+    (eaf--kill-python-process)))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
