@@ -198,12 +198,6 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 (setq eaf-proxy-type "socks5")
 ```
 
-### 在Wayland环境下运行EAF？
-如果你使用Wayland桌面环境，你可以通过设置Qt的环境变量来兼容X11
-```Elisp
-(setq eaf-python-environment '(("QT_QPA_PLATFORM" . "xcb")))
-```
-
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。

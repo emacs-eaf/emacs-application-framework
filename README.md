@@ -202,12 +202,6 @@ If you use Socks5 as local proxy, one can set proxy type with:
 (setq eaf-proxy-type "socks5")
 ```
 
-### Use Wayland desktop?
-If you use the Wayland desktop, you can setting the Qt backend to `xcb` compatible `X11`.
-```Elisp
-(setq eaf-python-environment '(("QT_QPA_PLATFORM" . "xcb")))
-```
-
 ## EAF in the community
 
 A list of other community packages that use EAF to enhance their graphical experiences!
