@@ -484,8 +484,7 @@ class BrowserView(QWebEngineView):
         ''' Copy the link.'''
         link = self.get_marker_link(marker)
         if link != "":
-            clipboard = QApplication.clipboard()
-            clipboard.setText(link)
+            self.buffer.set_clipboard_text(link)
             self.buffer.message_to_emacs.emit("Copy link")
 
     def get_code_markers(self):
@@ -515,8 +514,7 @@ class BrowserView(QWebEngineView):
         ''' Copy the code content according to marker.'''
         content = self.get_code_content(marker)
         if content != "":
-            clipboard = QApplication.clipboard()
-            clipboard.setText(content)
+            self.buffer.set_clipboard_text(content)
             self.buffer.message_to_emacs.emit("Copy code")
 
     def get_focus_text(self):
