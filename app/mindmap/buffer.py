@@ -116,7 +116,7 @@ class AppBuffer(BrowserBuffer):
 
     @interactive(insert_or_do=True)
     def paste_node_topic(self):
-        text = QApplication.clipboard().text()
+        text = self.get_clipboard_text()
         if text.strip() != "":
             self.buffer_widget.eval_js("update_node_topic('{}');".format(text))
             self.message_to_emacs.emit("Paste: {}".format(text))

@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtGui import QBrush, QColor, QClipboard
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
@@ -345,6 +345,26 @@ class Buffer(QGraphicsScene):
     def get_url(self):
         ''' Get url.'''
         return self.url
+
+    def get_clipboard_text(self):
+        ''' Get text from system clipboard.'''
+        clipboard = QApplication.clipboard()
+        text = clipboard.text()
+        if text:
+            return text
+
+        if clipboard.supportsSelection():
+            return clipboard.text(QClipboard.Selection)
+
+        return ""
+
+    def set_clipboard_text(self, text):
+        ''' Set text to system clipboard.'''
+        clipboard = QApplication.clipboard()
+        clipboard.setText(text)
+
+        if clipboard.supportsSelection():
+            clipboard.setText(text, QClipboard.Selection)
 
     @interactive(insert_or_do=True)
     def save_as_bookmark(self):

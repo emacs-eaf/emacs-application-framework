@@ -136,14 +136,13 @@ class AppBuffer(BrowserBuffer):
         if text == "":
             self.message_to_emacs.emit("Nothing selected")
         else:
-            clipboard = QApplication.clipboard()
-            clipboard.setText(text)
+            self.set_clipboard_text(text)
             self.message_to_emacs.emit("Copy text")
 
     @interactive()
     def yank_text(self):
-        text = QApplication.clipboard().text()
-        self.buffer_widget.eval_js("paste('{}');".format(text))
+        text = self.get_clipboard_text()
+        self.buffer_widget.eval_js("paste(`{}`);".format(text))
 
     @interactive()
     def scroll_other_buffer(self, scroll_direction, scroll_type):
