@@ -47,6 +47,10 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 | <img src="./screenshot/mermaid.gif" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
+| Jupyter                                          |                                                         |
+| :--------:                                       | :----------:                                            |
+| <img src="./screenshot/jupyter.png" width="400"> |                                                         |
+|                                                  |                                                         |
 
 ## Install
 1. Install EAF dependencies, an explaination of each dependency can be found in [Dependency List](#dependency-list).
@@ -113,6 +117,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | aria2                          | Browser                              | Download files from the web                   |
 | libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
 | filebrowser-bin                | File Browser                         | Share files between computer and smartphone   |
+| qtconsole                      | Jupyter                              | Provide RichJupyterWidget                     |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -134,6 +139,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
 | MS Office Viewer    | `M-x eaf-open-office`                                                  |
 | Mermaid             | `M-x eaf-open` Mermaid file (*.mmd)                                    |
+| Jupyter             | `M-x eaf-open-jupyter`                                                 |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
 - To open the file under the cursor in `dired` using appropriate EAF Application, use `eaf-open-this-from-dired` instead.

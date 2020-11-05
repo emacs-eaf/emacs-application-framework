@@ -46,6 +46,10 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 | <img src="./screenshot/mermaid.gif" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
+| Jupyter                                          |                                                         |
+| :--------:                                       | :--------:                                              |
+| <img src="./screenshot/jupyter.png" width="400"> |                                                         |
+|                                                  |                                                         |
 
 ## 安装
 1. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。
@@ -111,6 +115,7 @@ unzip master.zip && mv emacs-application-framework-master emacs-application-fram
 | nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                  |
 | libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
 | filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
+| qtconsole                      | jupyter                      | 提供RichJupyterWidget                    |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
@@ -132,6 +137,7 @@ unzip master.zip && mv emacs-application-framework-master emacs-application-fram
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软Office阅读器 | `M-x eaf-open-office`                                                       |
 | 流程图           | `M-x eaf-open` 输入 mmd 格式文件                                            |
+| jupyter          | `M-x eaf-open-jupyter`                                                      |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
 
 - 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
