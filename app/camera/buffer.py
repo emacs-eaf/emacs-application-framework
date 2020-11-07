@@ -34,6 +34,9 @@ import os
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
+
+        self.background_color = QColor(0, 0, 0)
+
         self.add_widget(CameraWidget(QColor(0, 0, 0, 255)))
 
     def all_views_hide(self):

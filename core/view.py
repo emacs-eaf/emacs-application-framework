@@ -21,7 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
-from PyQt5.QtGui import QPainter, QWindow
+from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 
 class View(QWidget):
@@ -53,11 +53,20 @@ class View(QWidget):
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.graphics_view = QGraphicsView(buffer, self)
+
+        # Set background color.
+        # When fit_to_view is True, QGraphicsView will fill color around app view.
+        # We fill color with buffer's attribute "background_color".
+        if hasattr(self.buffer, "background_color") and self.buffer.background_color:
+            self.graphics_view.setBackgroundBrush(QBrush(self.buffer.background_color))
+
+        # Remove border from QGraphicsView.
         self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
-        # Remove damn border from QGraphicsView.
         self.graphics_view.setFrameStyle(QFrame.NoFrame)
+
+        # Add graphics view.
         self.layout.addWidget(self.graphics_view)
 
         # NOTE: show function must start before resize to trigger *first* resizeEvent after show.

@@ -35,7 +35,9 @@ import os
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
+        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
+
+        self.background_color = QColor(0, 0, 0)
 
         arguments_dict = json.loads(arguments)
 
@@ -66,20 +68,21 @@ class GitViewerWidget(QWidget):
             self.setStyleSheet("background-color: #000000");
 
             # Add main box.
-            main_box = QVBoxLayout()
-            main_box.setSpacing(0)
-            main_box.setContentsMargins(0, 0, 0, 0)
+            main_layout = QVBoxLayout()
+            main_layout.setSpacing(0)
+            main_layout.setContentsMargins(0, 0, 0, 0)
 
-            self.setLayout(main_box)
+            self.setLayout(main_layout)
 
             # Add repo top area.
-            self.repo_top_font_size = 18
+            self.repo_top_font_size = 16
+            self.lastest_commit_font_size = 16
             self.repo_top_area = QWidget()
             self.repo_top_layout = QVBoxLayout()
             self.repo_top_layout.setSpacing(0)
             self.repo_top_layout.setContentsMargins(30, 30, 30, 30)
             self.repo_top_area.setLayout(self.repo_top_layout)
-            main_box.addWidget(self.repo_top_area)
+            main_layout.addWidget(self.repo_top_area)
 
             # Add repo title.
             self.repo_title = QLabel(repo.path)
@@ -112,17 +115,17 @@ class GitViewerWidget(QWidget):
             self.lastest_commit_area = QWidget()
             self.lastest_commit_layout = QHBoxLayout()
             self.lastest_commit_layout.setSpacing(30)
-            self.lastest_commit_layout.setContentsMargins(0, 30, 0, 30)
+            self.lastest_commit_layout.setContentsMargins(0, 30, 0, 0)
             self.lastest_commit_area.setLayout(self.lastest_commit_layout)
             self.repo_top_layout.addWidget(self.lastest_commit_area)
 
-            self.lastest_commit_info = QLabel("Lastest: {}    {}...    {}    {}".format(
+            self.lastest_commit_info = QLabel("Lastest commit:\n{}    {}    {}    \n{}".format(
                 lastest_commit.author.name,
-                lastest_commit.message.split("\n")[0][:40],
-                lastest_commit.hex[:7],
-                datetime.utcfromtimestamp(lastest_commit.author.time).strftime('%Y-%m-%d %H:%M:%S')))
+                lastest_commit.hex,
+                datetime.utcfromtimestamp(lastest_commit.author.time).strftime('%Y-%m-%d %H:%M:%S'),
+                lastest_commit.message))
             self.lastest_commit_info.setStyleSheet("QLabel {color: #6C6C6C;}")
-            self.lastest_commit_info.setFont(QFont('Arial', self.repo_top_font_size))
+            self.lastest_commit_info.setFont(QFont('Arial', self.lastest_commit_font_size))
             self.lastest_commit_layout.addWidget(self.lastest_commit_info)
 
             self.lastest_commit_layout.addStretch(1)
@@ -139,7 +142,7 @@ class GitViewerWidget(QWidget):
             category_panel_listview.setSpacing(10)
             category_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
             category_panel_model = QStringListModel()
-            category_panel_list = ["Status", "Commit", "Branch", "Submodule"]
+            category_panel_list = ["1: Status", "2: Commit", "3: Branch", "4: Submodule"]
             category_panel_model.setStringList(category_panel_list)
             category_panel_listview.setModel(category_panel_model)
 
@@ -174,7 +177,7 @@ class GitViewerWidget(QWidget):
             info_area_layout.addWidget(help_panel_listview)
             info_area_layout.setStretchFactor(help_panel_listview, 1)
 
-            main_box.addWidget(info_box)
+            main_layout.addWidget(info_box)
 
 def get_dir_size(start_path = '.'):
     total_size = 0

@@ -124,11 +124,7 @@ class Buffer(QGraphicsScene):
         self.emacs_var_dict = emacs_var_dict
         self.module_path = module_path
         self.fit_to_view = fit_to_view
-        if emacs_var_dict["eaf-emacs-theme-mode"] == "dark":
-            self.background_color = QColor(0, 0, 0, 255)
-        else:
-            self.background_color = QColor(255, 255, 255, 255)
-        self.setBackgroundBrush(QBrush(self.background_color))
+
         self.title = ""
 
         self.buffer_widget = None

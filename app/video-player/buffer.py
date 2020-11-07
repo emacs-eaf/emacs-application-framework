@@ -31,6 +31,8 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
 
+        self.background_color = QColor(0, 0, 0)
+
         self.add_widget(VideoPlayerWidget())
         self.buffer_widget.play(url)
 
