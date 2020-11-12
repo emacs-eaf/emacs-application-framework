@@ -20,12 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QBrush, QColor, QClipboard
+from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QApplication
-from core.utils import interactive, abstract
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text
 import abc
 import string
 
@@ -344,23 +344,11 @@ class Buffer(QGraphicsScene):
 
     def get_clipboard_text(self):
         ''' Get text from system clipboard.'''
-        clipboard = QApplication.clipboard()
-        text = clipboard.text()
-        if text:
-            return text
-
-        if clipboard.supportsSelection():
-            return clipboard.text(QClipboard.Selection)
-
-        return ""
+        return get_clipboard_text()
 
     def set_clipboard_text(self, text):
         ''' Set text to system clipboard.'''
-        clipboard = QApplication.clipboard()
-        clipboard.setText(text)
-
-        if clipboard.supportsSelection():
-            clipboard.setText(text, QClipboard.Selection)
+        set_clipboard_text(text)
 
     @interactive(insert_or_do=True)
     def save_as_bookmark(self):

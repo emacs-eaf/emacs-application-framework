@@ -286,7 +286,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-mindmap-edit-mode . "false")
     (eaf-jupyter-font-size . "13")
     (eaf-jupyter-font-family . "")
-    (eaf-jupyter-syntax-style . "default")
+    (eaf-jupyter-dark-mode . "follow")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
@@ -699,16 +699,27 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-jupyter-keybinding
-  '(("C-a" . "eaf-send-key-sequence")
+  '(("C-+" . "zoom_in")
+    ("C--" . "zoom_out")
+    ("C-0" . "zoom_reset")
+    ("C-l" . "eaf-send-key-sequence")
+    ("C-a" . "eaf-send-key-sequence")
     ("C-e" . "eaf-send-key-sequence")
+    ("C-u" . "eaf-send-key-sequence")
+    ("C-k" . "eaf-send-key-sequence")
+    ("C-y" . "eaf-send-key-sequence")
+    ("C-p" . "eaf-send-key-sequence")
+    ("C-n" . "eaf-send-key-sequence")
     ("C-f" . "eaf-send-key-sequence")
     ("C-b" . "eaf-send-key-sequence")
     ("C-d" . "eaf-send-key-sequence")
-    ("C-n" . "eaf-send-key-sequence")
-    ("C-p" . "eaf-send-key-sequence")
-    ("C-r" . "eaf-send-key-sequence")
-    ("C-y" . "eaf-send-key-sequence")
-    ("C-k" . "eaf-send-key-sequence")
+    ("M-b" . "eaf-send-key-sequence")
+    ("M-f" . "eaf-send-key-sequence")
+    ("M-d" . "eaf-send-key-sequence")
+    ("M-<" . "eaf-send-key-sequence")
+    ("M->" . "eaf-send-key-sequence")
+    ("<C-return>" . "eaf-send-ctrl-return-sequence")
+    ("<S-return>" . "eaf-send-shift-return-sequence")
     )
   "The keybinding of EAF Jupyter."
   :type 'cons)
@@ -1497,6 +1508,11 @@ keybinding variable to eaf-app-binding-alist."
   "Directly send Alt-Backspace key sequence to EAF Python side."
   (interactive)
   (eaf-call "send_key_sequence" eaf--buffer-id "M-<backspace>"))
+
+(defun eaf-send-shift-return-sequence ()
+  "Directly send Shift-Return key sequence to EAF Python side."
+  (interactive)
+  (eaf-call "send_key_sequence" eaf--buffer-id "S-RET"))
 
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."

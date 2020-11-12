@@ -24,6 +24,8 @@ from qtconsole import styles
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.manager import QtKernelManager
 from core.buffer import Buffer
+from core.utils import interactive
+from core.kill_ring import EafKillRing
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -34,9 +36,10 @@ class AppBuffer(Buffer):
 
         font_size = int(self.emacs_var_dict["eaf-jupyter-font-size"])
         font_family = self.emacs_var_dict["eaf-jupyter-font-family"]
-        style = self.emacs_var_dict["eaf-jupyter-syntax-style"]
 
-        self.add_widget(EafJupyterWidget(style, self.kernel, font_size=font_size, font_family=font_family))
+        self.add_widget(EafJupyterWidget(emacs_var_dict, self.kernel, font_size=font_size, font_family=font_family))
+
+        self.build_all_methods(self.buffer_widget)
 
     def get_key_event_widgets(self):
         ''' Send key event to RichJupyterWidget's focusProxy widget.'''
@@ -52,8 +55,12 @@ class AppBuffer(Buffer):
 
 
 class EafJupyterWidget(RichJupyterWidget):
-    def __init__(self, style, kernel, *args, **kwargs):
-        self._init_style(style)
+    def __init__(self, emacs_var_dict, kernel, *args, **kwargs):
+        bg_color = emacs_var_dict["eaf-emacs-theme-background-color"]
+        fg_color = emacs_var_dict["eaf-emacs-theme-foreground-color"]
+        dark_mode = emacs_var_dict["eaf-jupyter-dark-mode"] == "true" or \
+           (emacs_var_dict["eaf-jupyter-dark-mode"] == "follow" and emacs_var_dict["eaf-emacs-theme-mode"] == "dark")
+        self._init_style(bg_color, fg_color, dark_mode)
 
         self.scrollbar_visibility = False
 
@@ -71,6 +78,20 @@ class EafJupyterWidget(RichJupyterWidget):
         self._control.setStyleSheet("border: none;")
         self._page_control.setStyleSheet("border: none;")
 
+        self._kill_ring = EafKillRing(self._control)
+
+    @interactive()
+    def zoom_in(self):
+        self.change_font_size(1)
+
+    @interactive()
+    def zoom_out(self):
+        self.change_font_size(-1)
+
+    @interactive()
+    def zoom_reset(self):
+        self.reset_font()
+
     def focusProxy(self):
         if self._control.isVisible():
             return self._control
@@ -79,19 +100,13 @@ class EafJupyterWidget(RichJupyterWidget):
         else:
             return None
 
-    def _init_style(self, style):
-        if not style:
-            self.set_default_style()
-            return
-
-        if style == "bw":
-            colors = "nocolor"
-        elif styles.dark_style(style):
-            colors = "linux"
+    def _init_style(self, bg_color, fg_color, dark_mode):
+        if dark_mode:
+            self.style_sheet = styles.default_dark_style_template % dict(bgcolor=bg_color, fgcolor=fg_color, select="#555")
+            self.syntax_style = styles.default_dark_syntax_style
         else:
-            colors = "lightbg"
-        self.style_sheet = styles.sheet_from_template(style, colors)
-        self.syntax_style = style
+            self.style_sheet = styles.default_light_style_template % dict(bgcolor=bg_color, fgcolor=fg_color, select="#ccc")
+            self.syntax_style = styles.default_light_syntax_style
         self._syntax_style_changed()
         self._style_sheet_changed()
 

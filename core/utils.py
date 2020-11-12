@@ -20,6 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
+from PyQt5.QtGui import QClipboard
+from PyQt5.QtWidgets import QApplication
 import functools
 import os
 import socket
@@ -127,6 +129,27 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
     thread.start()
     # returns immediately after the thread starts
     return thread
+
+def get_clipboard_text():
+    ''' Get text from system clipboard.'''
+    clipboard = QApplication.clipboard()
+    text = clipboard.text()
+    if text:
+        return text
+
+    if clipboard.supportsSelection():
+        return clipboard.text(QClipboard.Selection)
+
+    return ""
+
+def set_clipboard_text(text):
+    ''' Set text to system clipboard.'''
+    clipboard = QApplication.clipboard()
+    clipboard.setText(text)
+
+    if clipboard.supportsSelection():
+        clipboard.setText(text, QClipboard.Selection)
+
 
 def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
     """
