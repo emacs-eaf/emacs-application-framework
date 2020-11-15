@@ -20,10 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView, QStackedWidget, QPushButton
 from PyQt5.QtCore import QStringListModel
 
 from core.buffer import Buffer
+from core.utils import interactive
 
 from pygit2 import Repository, discover_repository
 from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE
@@ -42,6 +43,18 @@ class AppBuffer(Buffer):
         arguments_dict = json.loads(arguments)
 
         self.add_widget(GitViewerWidget(buffer_id, config_dir, arguments_dict["directory"]))
+
+    def show_status_info(self):
+        self.buffer_widget.info_stacked_widget.setCurrentIndex(0)
+
+    def show_commit_info(self):
+        self.buffer_widget.info_stacked_widget.setCurrentIndex(1)
+
+    def show_branch_info(self):
+        self.buffer_widget.info_stacked_widget.setCurrentIndex(2)
+
+    def show_submodule_info(self):
+        self.buffer_widget.info_stacked_widget.setCurrentIndex(3)
 
 class GitViewerWidget(QWidget):
 
@@ -149,17 +162,23 @@ class GitViewerWidget(QWidget):
             info_area_layout.addWidget(category_panel_listview)
             info_area_layout.setStretchFactor(category_panel_listview, 1)
 
-            # Add view panel.
-            view_panel_listview = QListView()
-            view_panel_listview.setSpacing(10)
-            view_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
-            view_panel_model = QStringListModel()
-            view_panel_list = ["Current repo update to date."]
-            view_panel_model.setStringList(view_panel_list)
-            view_panel_listview.setModel(view_panel_model)
+            # Add content widget.
+            self.info_stacked_widget = QStackedWidget()
 
-            info_area_layout.addWidget(view_panel_listview)
-            info_area_layout.setStretchFactor(view_panel_listview, 4)
+            self.git_status_widget = QPushButton("Git status")
+            self.git_commit_widget = QPushButton("Git commit")
+            self.git_branch_widget = QPushButton("Git branch")
+            self.git_submodule_widget = QPushButton("Git submodule")
+
+            self.info_stacked_widget.addWidget(self.git_status_widget)
+            self.info_stacked_widget.addWidget(self.git_commit_widget)
+            self.info_stacked_widget.addWidget(self.git_branch_widget)
+            self.info_stacked_widget.addWidget(self.git_submodule_widget)
+
+            self.info_stacked_widget.setCurrentIndex(0)
+
+            info_area_layout.addWidget(self.info_stacked_widget)
+            info_area_layout.setStretchFactor(self.info_stacked_widget, 4)
 
             # Add help panel.
             help_panel_listview = QListView()
