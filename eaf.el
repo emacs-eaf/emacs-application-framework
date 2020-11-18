@@ -474,6 +474,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-s" . "add_annot_squiggly")
     ("M-d" . "add_annot_strikeout_or_delete_annot")
     ("M-e" . "add_annot_text_or_edit_annot")
+    ("M-p" . "toggle_presentation_mode")
     ("J" . "select_left_tab")
     ("K" . "select_right_tab")
     ("o" . "eaf-pdf-outline"))
