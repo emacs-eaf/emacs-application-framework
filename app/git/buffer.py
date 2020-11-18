@@ -20,14 +20,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView, QStackedWidget, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView, QStackedWidget, QPushButton, QTextEdit
 from PyQt5.QtCore import QStringListModel
 
 from core.buffer import Buffer
 from core.utils import interactive
 
 from pygit2 import Repository, discover_repository
-from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE
+from pygit2 import GIT_SORT_TOPOLOGICAL, GIT_SORT_REVERSE, GIT_STATUS_WT_NEW, GIT_STATUS_WT_MODIFIED, GIT_STATUS_WT_DELETED, GIT_STATUS_WT_TYPECHANGE, GIT_STATUS_WT_RENAMED, GIT_STATUS_WT_UNREADABLE
 
 from datetime import datetime
 
@@ -44,17 +44,7 @@ class AppBuffer(Buffer):
 
         self.add_widget(GitViewerWidget(buffer_id, config_dir, arguments_dict["directory"]))
 
-    def show_status_info(self):
-        self.buffer_widget.info_stacked_widget.setCurrentIndex(0)
-
-    def show_commit_info(self):
-        self.buffer_widget.info_stacked_widget.setCurrentIndex(1)
-
-    def show_branch_info(self):
-        self.buffer_widget.info_stacked_widget.setCurrentIndex(2)
-
-    def show_submodule_info(self):
-        self.buffer_widget.info_stacked_widget.setCurrentIndex(3)
+        self.build_all_methods(self.buffer_widget)
 
 class GitViewerWidget(QWidget):
 
@@ -165,7 +155,7 @@ class GitViewerWidget(QWidget):
             # Add content widget.
             self.info_stacked_widget = QStackedWidget()
 
-            self.git_status_widget = QPushButton("Git status")
+            self.git_status_widget = QTextEdit()
             self.git_commit_widget = QPushButton("Git commit")
             self.git_branch_widget = QPushButton("Git branch")
             self.git_submodule_widget = QPushButton("Git submodule")
@@ -176,6 +166,12 @@ class GitViewerWidget(QWidget):
             self.info_stacked_widget.addWidget(self.git_submodule_widget)
 
             self.info_stacked_widget.setCurrentIndex(0)
+
+            status_text = ""
+            for filepath, flag in repo.status().items():
+                if flag == GIT_STATUS_WT_MODIFIED:
+                    status_text += "{}: {}".format("Modified", filepath)
+            self.git_status_widget.setText(status_text)        
 
             info_area_layout.addWidget(self.info_stacked_widget)
             info_area_layout.setStretchFactor(self.info_stacked_widget, 4)
@@ -197,6 +193,22 @@ class GitViewerWidget(QWidget):
             info_area_layout.setStretchFactor(help_panel_listview, 1)
 
             main_layout.addWidget(info_box)
+
+    @interactive()
+    def show_status_info(self):
+        self.info_stacked_widget.setCurrentIndex(0)
+
+    @interactive()
+    def show_commit_info(self):
+        self.info_stacked_widget.setCurrentIndex(1)
+
+    @interactive()
+    def show_branch_info(self):
+        self.info_stacked_widget.setCurrentIndex(2)
+
+    @interactive()
+    def show_submodule_info(self):
+        self.info_stacked_widget.setCurrentIndex(3)
 
 def get_dir_size(start_path = '.'):
     total_size = 0
