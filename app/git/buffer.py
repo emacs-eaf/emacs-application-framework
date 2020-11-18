@@ -20,8 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtGui import QColor, QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView, QStackedWidget, QPushButton, QTextEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView, QStackedWidget, QPushButton, QTextEdit, QTableWidget, QTableWidgetItem, QFrame, QHeaderView
 from PyQt5.QtCore import QStringListModel
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 
 from core.buffer import Buffer
 from core.utils import interactive
@@ -53,17 +55,17 @@ class GitViewerWidget(QWidget):
 
         repo_path = discover_repository(directory)
         if repo_path:
-            repo = Repository(repo_path)
+            self.repo = Repository(repo_path)
             commit_size = 0
             lastest_commit = None
-            for commit in repo.walk(repo.head.target, GIT_SORT_TOPOLOGICAL):
+            for commit in self.repo.walk(self.repo.head.target, GIT_SORT_TOPOLOGICAL):
                 commit_size += 1
 
                 if not lastest_commit:
                     lastest_commit = commit
 
             remote_branch_size = 0
-            for branch in repo.branches.remote:
+            for branch in self.repo.branches.remote:
                 if branch != "origin/HEAD" and branch != "origin/master":
                     remote_branch_size += 1
 
@@ -88,7 +90,7 @@ class GitViewerWidget(QWidget):
             main_layout.addWidget(self.repo_top_area)
 
             # Add repo title.
-            self.repo_title = QLabel(repo.path)
+            self.repo_title = QLabel(self.repo.path)
             self.repo_title.setStyleSheet("QLabel {color: #E98123;}")
             self.repo_title.setFont(QFont('Arial', 20))
             self.repo_top_layout.addWidget(self.repo_title)
@@ -103,7 +105,7 @@ class GitViewerWidget(QWidget):
 
             # Add head info.
             self.head_info = QLabel("{}    {}    {}    {}".format(
-                repo.head.shorthand,
+                self.repo.head.shorthand,
                 str(remote_branch_size) + " branches",
                 str(commit_size) + " commits",
                 format_bytes(get_dir_size(repo_path))
@@ -155,7 +157,7 @@ class GitViewerWidget(QWidget):
             # Add content widget.
             self.info_stacked_widget = QStackedWidget()
 
-            self.git_status_widget = QTextEdit()
+            self.git_status_widget = QtWidgets.QTableView()
             self.git_commit_widget = QPushButton("Git commit")
             self.git_branch_widget = QPushButton("Git branch")
             self.git_submodule_widget = QPushButton("Git submodule")
@@ -167,11 +169,7 @@ class GitViewerWidget(QWidget):
 
             self.info_stacked_widget.setCurrentIndex(0)
 
-            status_text = ""
-            for filepath, flag in repo.status().items():
-                if flag == GIT_STATUS_WT_MODIFIED:
-                    status_text += "{}: {}".format("Modified", filepath)
-            self.git_status_widget.setText(status_text)        
+            self.init_git_status()
 
             info_area_layout.addWidget(self.info_stacked_widget)
             info_area_layout.setStretchFactor(self.info_stacked_widget, 4)
@@ -209,6 +207,61 @@ class GitViewerWidget(QWidget):
     @interactive()
     def show_submodule_info(self):
         self.info_stacked_widget.setCurrentIndex(3)
+
+    def init_git_status(self):
+        status_data = []
+        for filepath, flag in self.repo.status().items():
+            if flag == GIT_STATUS_WT_MODIFIED:
+                status_data.append(["Unchange", "Modified", filepath])
+            elif flag == GIT_STATUS_WT_DELETED:
+                status_data.append(["Unchange", "Deleted", filepath])
+            elif flag == GIT_STATUS_WT_NEW:
+                status_data.append(["Unchange", "New", filepath])
+            elif flag == GIT_STATUS_WT_RENAMED:
+                status_data.append(["Unchange", "Renamed", filepath])
+
+        status_model = TableModel(status_data)
+        self.git_status_widget.setStyleSheet(
+            """
+QTableView::item
+{
+  border: 0px;
+  padding: 20px;
+}
+            """)
+        self.git_status_widget.verticalHeader().setVisible(False)
+        self.git_status_widget.horizontalHeader().setStretchLastSection(True)
+        self.git_status_widget.setModel(status_model)
+
+
+class TableModel(QtCore.QAbstractTableModel):
+
+    header_labels = ["Stage Status", "Status Type", "File path"]
+
+    def __init__(self, data):
+        super(TableModel, self).__init__()
+        self._data = data
+
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            # See below for the nested-list data structure.
+            # .row() indexes into the outer list,
+            # .column() indexes into the sub-list
+            return self._data[index.row()][index.column()]
+
+    def rowCount(self, index):
+        # The length of the outer list.
+        return len(self._data)
+
+    def columnCount(self, index):
+        # The following takes the first sub-list, and returns
+        # the length (only works if all rows are an equal length)
+        return len(self._data[0])
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.header_labels[section]
+        return QtCore.QAbstractTableModel.headerData(self, section, orientation, role)
 
 def get_dir_size(start_path = '.'):
     total_size = 0
