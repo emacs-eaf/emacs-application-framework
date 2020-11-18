@@ -278,9 +278,11 @@ class PdfViewerWidget(QWidget):
         self.edited_page_annot = (None, None)
 
         # Init scroll attributes.
-        self.scroll_step = 20
         self.scroll_offset = 0
         self.mouse_scroll_offset = 20
+
+        # Default presentation mode
+        self.presentation_mode = False
 
         # Padding between pages.
         self.page_padding = 10
@@ -334,6 +336,25 @@ class PdfViewerWidget(QWidget):
         '''
         self.document = fitz.open(self.url)
         self.update()
+
+    @interactive()
+    def toggle_presentation_mode(self):
+        '''
+        Toggle presentation mode.
+        '''
+        self.presentation_mode = not self.presentation_mode
+        if self.presentation_mode:
+            # Make current page fill the view.
+            self.zoom_reset("fit_to_height")
+            self.jump_to_page(self.get_start_page_index() + 1)
+
+            self.buffer.message_to_emacs.emit("Presentation Mode.")
+        else:
+            self.buffer.message_to_emacs.emit("Continuous Mode.")
+
+    @property
+    def scroll_step(self):
+        return 0 if self.presentation_mode else 20
 
     @interactive()
     def save_current_pos(self):
@@ -692,10 +713,10 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     @interactive()
-    def zoom_reset(self):
+    def zoom_reset(self, read_mode="fit_to_width"):
         if self.is_mark_search:
             self.cleanup_search()
-        self.read_mode = "fit_to_width"
+        self.read_mode = read_mode
         self.update_scale()
         self.update()
 
