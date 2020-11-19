@@ -131,16 +131,16 @@ class GitViewerWidget(QWidget):
             info_box.setLayout(info_area_layout)
 
             # Add category panel.
-            category_panel_listview = QListView()
-            category_panel_listview.setSpacing(10)
-            category_panel_listview.setStyleSheet("QListView {font-size: 40px; padding: 10px;}")
+            self.category_panel_listview = QListView()
+            self.category_panel_listview.setSpacing(10)
+            self.category_panel_listview.setStyleSheet("QListView {font-size: 40px; padding: 10px;}")
             category_panel_model = QStringListModel()
             category_panel_list = ["1: Status", "2: Commit", "3: Branch", "4: Submodule"]
             category_panel_model.setStringList(category_panel_list)
-            category_panel_listview.setModel(category_panel_model)
+            self.category_panel_listview.setModel(category_panel_model)
 
-            info_area_layout.addWidget(category_panel_listview)
-            info_area_layout.setStretchFactor(category_panel_listview, 1)
+            info_area_layout.addWidget(self.category_panel_listview)
+            info_area_layout.setStretchFactor(self.category_panel_listview, 1)
 
             # Add content widget.
             self.info_stacked_widget = QStackedWidget()
@@ -278,7 +278,7 @@ class GitCommitWidget(QFrame):
 
     def handle_commits(self, commit_data):
         if len(commit_data) > 0:
-            commit_model = TableModel(commit_data)
+            commit_model = CommitTableModel(commit_data)
 
             self.commit_view = QtWidgets.QTableView()
             self.commit_view.setModel(commit_model)
@@ -305,6 +305,38 @@ class GitCommitWidget(QFrame):
             self.commit_view.setShowGrid(False)
 
             self.layout.addWidget(self.commit_view)
+
+class CommitTableModel(QtCore.QAbstractTableModel):
+
+    def __init__(self, data):
+        super(CommitTableModel, self).__init__()
+        self._data = data
+
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            # See below for the nested-list data structure.
+            # .row() indexes into the outer list,
+            # .column() indexes into the sub-list
+            return self._data[index.row()][index.column()]
+
+        if role == Qt.ForegroundRole:
+            if index.column() == 0:
+                return QtGui.QColor(80, 80, 80)
+            elif index.column() == 1:
+                return QtGui.QColor(0, 128, 0)
+            elif index.column() == 2:
+                return QtGui.QColor(218, 121, 35)
+            else:
+                return QtGui.QColor(81, 175, 239)
+
+    def rowCount(self, index):
+        # The length of the outer list.
+        return len(self._data)
+
+    def columnCount(self, index):
+        # The following takes the first sub-list, and returns
+        # the length (only works if all rows are an equal length)
+        return len(self._data[0])
 
 class ParseCommitsThread(QtCore.QThread):
     parse_finish = QtCore.pyqtSignal(list)
