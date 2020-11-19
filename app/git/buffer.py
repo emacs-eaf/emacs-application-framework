@@ -23,7 +23,7 @@ from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListView, QStackedWidget, QPushButton, QTextEdit, QTableWidget, QTableWidgetItem, QFrame, QHeaderView
 from PyQt5.QtCore import QStringListModel
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 
 from core.buffer import Buffer
 from core.utils import interactive
@@ -117,23 +117,11 @@ class GitViewerWidget(QWidget):
             self.repo_summary_layout.addStretch(1)
 
             # Add lastest commit info.
-            self.lastest_commit_area = QWidget()
-            self.lastest_commit_layout = QHBoxLayout()
-            self.lastest_commit_layout.setSpacing(30)
-            self.lastest_commit_layout.setContentsMargins(0, 30, 0, 0)
-            self.lastest_commit_area.setLayout(self.lastest_commit_layout)
-            self.repo_top_layout.addWidget(self.lastest_commit_area)
-
-            self.lastest_commit_info = QLabel("Lastest commit:\n{}    {}    {}    \n{}".format(
-                lastest_commit.author.name,
-                lastest_commit.hex,
-                datetime.utcfromtimestamp(lastest_commit.author.time).strftime('%Y-%m-%d %H:%M:%S'),
-                lastest_commit.message))
+            self.lastest_commit_info = QLabel("Head: {}".format(lastest_commit.message))
             self.lastest_commit_info.setStyleSheet("QLabel {color: #6C6C6C;}")
             self.lastest_commit_info.setFont(QFont('Arial', self.lastest_commit_font_size))
-            self.lastest_commit_layout.addWidget(self.lastest_commit_info)
-
-            self.lastest_commit_layout.addStretch(1)
+            self.repo_top_layout.addSpacing(40)
+            self.repo_top_layout.addWidget(self.lastest_commit_info)
 
             # Add info box.
             info_box = QWidget()
@@ -145,7 +133,7 @@ class GitViewerWidget(QWidget):
             # Add category panel.
             category_panel_listview = QListView()
             category_panel_listview.setSpacing(10)
-            category_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
+            category_panel_listview.setStyleSheet("QListView {font-size: 40px; padding: 10px;}")
             category_panel_model = QStringListModel()
             category_panel_list = ["1: Status", "2: Commit", "3: Branch", "4: Submodule"]
             category_panel_model.setStringList(category_panel_list)
@@ -157,8 +145,8 @@ class GitViewerWidget(QWidget):
             # Add content widget.
             self.info_stacked_widget = QStackedWidget()
 
-            self.git_status_widget = QtWidgets.QTableView()
-            self.git_commit_widget = QPushButton("Git commit")
+            self.git_status_widget = GitStatusWidget(self.repo)
+            self.git_commit_widget = GitCommitWidget(self.repo)
             self.git_branch_widget = QPushButton("Git branch")
             self.git_submodule_widget = QPushButton("Git submodule")
 
@@ -169,15 +157,13 @@ class GitViewerWidget(QWidget):
 
             self.info_stacked_widget.setCurrentIndex(0)
 
-            self.init_git_status()
-
             info_area_layout.addWidget(self.info_stacked_widget)
             info_area_layout.setStretchFactor(self.info_stacked_widget, 4)
 
             # Add help panel.
             help_panel_listview = QListView()
             help_panel_listview.setSpacing(10)
-            help_panel_listview.setStyleSheet("QListView {font-size: 40px;}")
+            help_panel_listview.setStyleSheet("QListView {font-size: 40px; padding: 10px;}")
             help_panel_model = QStringListModel()
             help_panel_list = ["Press l: Git pull",
                                "Press u: Git push",
@@ -208,35 +194,137 @@ class GitViewerWidget(QWidget):
     def show_submodule_info(self):
         self.info_stacked_widget.setCurrentIndex(3)
 
-    def init_git_status(self):
+class GitStatusWidget(QFrame):
+
+    def __init__(self, repo):
+        super(GitStatusWidget, self).__init__()
+        self.setStyleSheet("font-size: 40px; padding: 10px; border: 1px solid rgb(30, 30, 30);")
+
+        layout = QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+
         status_data = []
-        for filepath, flag in self.repo.status().items():
+        for filepath, flag in repo.status().items():
             if flag == GIT_STATUS_WT_MODIFIED:
-                status_data.append(["Unchange", "Modified", filepath])
+                status_data.append(["Modified", filepath])
             elif flag == GIT_STATUS_WT_DELETED:
-                status_data.append(["Unchange", "Deleted", filepath])
+                status_data.append(["Deleted", filepath])
             elif flag == GIT_STATUS_WT_NEW:
-                status_data.append(["Unchange", "New", filepath])
+                status_data.append(["New", filepath])
             elif flag == GIT_STATUS_WT_RENAMED:
-                status_data.append(["Unchange", "Renamed", filepath])
+                status_data.append(["Renamed", filepath])
 
-        status_model = TableModel(status_data)
-        self.git_status_widget.setStyleSheet(
-            """
-QTableView::item
-{
-  border: 0px;
-  padding: 20px;
-}
-            """)
-        self.git_status_widget.verticalHeader().setVisible(False)
-        self.git_status_widget.horizontalHeader().setStretchLastSection(True)
-        self.git_status_widget.setModel(status_model)
+        if len(status_data) > 0:
+            status_model = TableModel(status_data)
 
+            self.unstage_label = QLabel("Unstaged changes ({})".format(len(status_data)))
+            self.unstage_label.setStyleSheet("border: 0px;")
+
+            self.unstaged_view = QtWidgets.QTableView()
+            self.unstaged_view.setModel(status_model)
+            self.unstaged_view.setStyleSheet(
+                """
+                QTableView
+                {
+                border: 0px;
+                }
+
+                QTableView::item
+                {
+                border: 0px;
+                padding-left: 60px;
+                }
+                """)
+            self.unstaged_view.verticalHeader().setVisible(False)
+            self.unstaged_view.horizontalHeader().setVisible(False)
+            self.unstaged_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            self.unstaged_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.unstaged_view.setShowGrid(False)
+
+            layout.addWidget(self.unstage_label)
+            layout.addWidget(self.unstaged_view)
+        else:
+            nothing_change_label = QLabel("Nothing change in local repo.")
+            nothing_change_label.setStyleSheet("border: 0px;")
+
+            layout.addWidget(nothing_change_label)
+            layout.addStretch(1)
+
+        self.setLayout(layout)
+
+class GitCommitWidget(QFrame):
+
+    def __init__(self, repo):
+        super(GitCommitWidget, self).__init__()
+        self.setStyleSheet("font-size: 40px; padding: 10px; border: 1px solid rgb(30, 30, 30);")
+
+        self.repo = repo
+
+        self.layout = QVBoxLayout()
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.setLayout(self.layout)
+
+        self.parse_thread = ParseCommitsThread(self.repo)
+        self.parse_thread.parse_finish.connect(self.handle_commits)
+
+        # Wait 1 second to parse commit, acceleration interface display.
+        QTimer().singleShot(1000, self.start_parse)
+
+    def start_parse(self):
+        self.parse_thread.start()
+
+    def handle_commits(self, commit_data):
+        if len(commit_data) > 0:
+            commit_model = TableModel(commit_data)
+
+            self.commit_view = QtWidgets.QTableView()
+            self.commit_view.setModel(commit_model)
+            self.commit_view.setStyleSheet(
+                """
+                QTableView
+                {
+                border: 0px;
+                }
+
+                QTableView::item
+                {
+                border: 0px;
+                padding-left: 10px;
+                }
+                """)
+            self.commit_view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+            self.commit_view.verticalHeader().setVisible(False)
+            self.commit_view.horizontalHeader().setVisible(False)
+            self.commit_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            self.commit_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.commit_view.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+            self.commit_view.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+            self.commit_view.setShowGrid(False)
+
+            self.layout.addWidget(self.commit_view)
+
+class ParseCommitsThread(QtCore.QThread):
+    parse_finish = QtCore.pyqtSignal(list)
+
+    def __init__(self, repo):
+        super().__init__()
+
+        self.repo = repo
+
+    def run(self):
+        commit_data = []
+        for commit in self.repo.walk(self.repo.head.target, GIT_SORT_TOPOLOGICAL):
+            commit_data.append([commit.hex[:7],
+                                commit.message,
+                                commit.author.name,
+                                datetime.utcfromtimestamp(commit.author.time).strftime('%Y-%m-%d %H:%M:%S')])
+
+        self.parse_finish.emit(commit_data)
 
 class TableModel(QtCore.QAbstractTableModel):
-
-    header_labels = ["Stage Status", "Status Type", "File path"]
 
     def __init__(self, data):
         super(TableModel, self).__init__()
@@ -257,11 +345,6 @@ class TableModel(QtCore.QAbstractTableModel):
         # The following takes the first sub-list, and returns
         # the length (only works if all rows are an equal length)
         return len(self._data[0])
-
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            return self.header_labels[section]
-        return QtCore.QAbstractTableModel.headerData(self, section, orientation, role)
 
 def get_dir_size(start_path = '.'):
     total_size = 0
