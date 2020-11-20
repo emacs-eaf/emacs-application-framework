@@ -241,6 +241,8 @@ z-index: 100000;\
                   (node.hasAttribute('aria-haspopup')) || // menu button
                   (node.getAttribute('role') === 'button') || // role="button" buttons
                   (node.hasAttribute('ng-click')) || // ng-click buttons
+                  (node.hasAttribute('menu-item-click')) || // dingtalk support
+                  (node.hasAttribute('on-conv-click')) || // dingtalk support
                   (node.classList.contains('btn')) || // class="btn" buttons
                   (node.classList.contains('collapsible')) || // class="collapsible" buttons
                   (node.classList.contains('gap')) || // class="gap" links
