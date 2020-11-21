@@ -107,16 +107,14 @@ class AppBuffer(BrowserBuffer):
         if os.path.exists(self.url):
             with open(self.url, "r") as f:
                 self.buffer_widget.execute_js("refresh('{}');".format(string_to_base64(f.read())))
-        else:
-            self.buffer_widget.eval_js("init_root_node();")
 
-        color = "#FFFFFF"
-        if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
-           (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
-            color = "#242525"
-        self.buffer_widget.eval_js("init_background('{}');".format(color))
+            color = "#FFFFFF"
+            if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
+               (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+                color = "#242525"
+            self.buffer_widget.eval_js("init_background('{}');".format(color))
 
-        self.change_title(self.get_root_node_topic())
+            self.change_title(self.get_root_node_topic())
 
     @interactive(insert_or_do=True)
     def change_background_color(self):
