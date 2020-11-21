@@ -241,6 +241,18 @@
           _jm.screenshot.shootDownload();
       }
 
+     
+      function refresh(file_base64_content) {
+          var file_data = decodeURIComponent(escape(window.atob(file_base64_content)));
+          var mind = jsMind.util.json.string2json(file_data);
+
+          if(!!mind){
+              _jm.show(mind);
+
+              select_root_node();
+          }
+      }
+
       function open_file(file_base64_content) {
           _jm = jsMind.show(options);
 
