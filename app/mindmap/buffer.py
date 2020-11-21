@@ -100,6 +100,22 @@ class AppBuffer(BrowserBuffer):
                 self.save_file(False)
         setattr(self, method_name, _do)
 
+    @interactive()
+    def refresh_page(self):
+        self.url = os.path.expanduser(self.url)
+
+        if os.path.exists(self.url):
+            with open(self.url, "r") as f:
+                self.buffer_widget.execute_js("refresh('{}');".format(string_to_base64(f.read())))
+
+            color = "#FFFFFF"
+            if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
+               (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+                color = "#242525"
+            self.buffer_widget.eval_js("init_background('{}');".format(color))
+
+            self.change_title(self.get_root_node_topic())
+
     @interactive(insert_or_do=True)
     def change_background_color(self):
         self.send_input_message("Change node background color(Input color): ", "change_background_color")
