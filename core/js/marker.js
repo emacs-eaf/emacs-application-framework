@@ -69,6 +69,103 @@
         return topElement != undefined && (element.isSameNode(topElement) || element.contains(topElement) || topElement.contains(element));
     }
 
+    function isElementClickable(e) {
+        var cssSelector = "a, button, select, input, textarea, summary, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button, *[role=button], *[role=link], *[role=menuitem], *[role=option], *[role=switch], *[role=tab], *[role=checkbox], *[role=combobox], *[role=menuitemcheckbox], *[role=menuitemradio]";
+
+        return e.matches(cssSelector)
+            || getComputedStyle(e).cursor === "pointer"
+            || getComputedStyle(e).cursor.substr(0, 4) === "url("
+            || e.closest("a, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button") !== null;
+    }
+
+    function isEditable(element) {
+        return element
+            && !element.disabled && (element.localName === 'textarea'
+                                     || element.localName === 'select'
+                                     || element.isContentEditable
+                                     || (element.localName === 'input' && /^(?!button|checkbox|file|hidden|image|radio|reset|submit)/i.test(element.type)));
+    }
+
+    function isElementDrawn(e, rect) {
+        var min = isEditable(e) ? 1 : 4;
+        rect = rect || e.getBoundingClientRect();
+        return rect.width > min && rect.height > min;
+    }
+
+    function getRealRect(elm) {
+        if (elm.childElementCount === 0) {
+            var r = elm.getClientRects();
+            if (r.length === 3) {
+                // for a clipped A tag
+                return r[1];
+            } else if (r.length === 2) {
+                // for a wrapped A tag
+                return r[0];
+            } else {
+                return elm.getBoundingClientRect();
+            }
+        } else if (elm.childElementCount === 1 && elm.firstElementChild.textContent) {
+            var r = elm.firstElementChild.getBoundingClientRect();
+            if (r.width === 0 || r.height === 0) {
+                r = elm.getBoundingClientRect();
+            }
+            return r;
+        } else {
+            return elm.getBoundingClientRect();
+        }
+    }
+
+    function filterOverlapElements(elements) {
+        // filter out tiny elements
+        elements = elements.filter(function(e) {
+            var be = getRealRect(e);
+            if (e.disabled || e.readOnly || !isElementDrawn(e, be)) {
+                return false;
+            } else if (e.matches("input, textarea, select, form") || e.contentEditable === "true") {
+                return true;
+            } else {
+                var el = document.elementFromPoint(be.left + be.width/2, be.top + be.height/2);
+                return !el || el.shadowRoot && el.childElementCount === 0 || el.contains(e) || e.contains(el);
+            }
+        });
+
+        // if an element has href, all its children will be filtered out.
+        var elementWithHref = null;
+        elements = elements.filter(function(e) {
+            var flag = true;
+            if (e.href) {
+                elementWithHref = e;
+            }
+            if (elementWithHref && elementWithHref !== e && elementWithHref.contains(e)) {
+                flag = false;
+            }
+            return flag;
+        });
+
+        return filterAncestors(elements);
+    }
+
+    function last(array) {
+        return array[array.length - 1];
+    }
+
+    function filterAncestors(elements) {
+        if (elements.length === 0) {
+            return elements;
+        }
+
+        // filter out element which has its children covered
+        let result = [last(elements)];
+        for (let i = elements.length - 2; i >= 0; i--) {
+            if (!elements[i].contains(last(result))) {
+                result.push(elements[i]);
+            }
+        }
+
+        // To restore original order of elements
+        return result.reverse();
+    }
+
     function hasCopy(validRects, rect){
         for(let i = 0; i < validRects.length; i++) {
             let each = validRects[i];
@@ -236,28 +333,23 @@ z-index: 100000;\
                 node.click();   // show blink cursor
                 moveCursorToEnd(node); // move cursor to the end of line after focus.
             }
-        } else if((node.nodeName.toLowerCase() === 'button') || // normal button
-                  (node.nodeName.toLowerCase() === 'summary') || // summary button
-                  (node.hasAttribute('aria-haspopup')) || // menu button
-                  (node.getAttribute('role') === 'button') || // role="button" buttons
-                  (node.hasAttribute('ng-click')) || // ng-click buttons
-                  (node.hasAttribute('menu-item-click')) || // dingtalk support
-                  (node.hasAttribute('on-conv-click')) || // dingtalk support
-                  (node.classList.contains('btn')) || // class="btn" buttons
-                  (node.classList.contains('collapsible')) || // class="collapsible" buttons
-                  (node.classList.contains('gap')) || // class="gap" links
-                  (node.getAttribute('href') === '') || // special href button
-                  (node.getAttribute('href') === '#')){  // special href # button
+        } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != ''){
+            return node.href;
+        } else if(isElementClickable(node)){  // special href # button
             node.click();
         } else if(node.nodeName.toLowerCase() === 'p'||
                   node.nodeName.toLowerCase() === 'span') {  // select text section
             window.getSelection().selectAllChildren(node);
-        } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != ''){
-            return node.href;
-        } else if(node.nodeName.toLowerCase() === 'a') {
-            node.click(); // most general a tag without href
         }
         return "";
+    }
+
+    self.generateMarkerForClick = () => {
+        let elements = getVisibleElements(function(e, v) {
+            if(isElementClickable(e)) v.push(e)
+        });
+        elements = filterOverlapElements(elements);
+        return elements;
     }
 
 
