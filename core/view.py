@@ -111,11 +111,7 @@ class View(QWidget):
         #
         # So we use wmctrl activate on Emacs window after Alt + Tab operation.
         if event.type() in [QEvent.ShortcutOverride, QEvent.Enter]:
-            activate_result = activate_emacs_window()
-
-            if activate_result:
-                print("Receive ShortcutOverride event, activate Emacs window.")
-            else:
+            if not activate_emacs_window():
                 self.buffer.message_to_emacs.emit(
                     "You need install tool 'wmctrl' to activate Emacs window, make Emacs input correctly after Alt + Tab operation.")
 
