@@ -110,7 +110,7 @@ class View(QWidget):
         # Emacs window cannot get the focus normally if mouse in EAF buffer area.
         #
         # So we use wmctrl activate on Emacs window after Alt + Tab operation.
-        if event.type() in [QEvent.ShortcutOverride, QEvent.Enter]:
+        if event.type() in [QEvent.ShortcutOverride]:
             if not activate_emacs_window():
                 self.buffer.message_to_emacs.emit(
                     "You need install tool 'wmctrl' to activate Emacs window, make Emacs input correctly after Alt + Tab operation.")
