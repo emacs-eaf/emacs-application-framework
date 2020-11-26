@@ -58,7 +58,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 The following line is for *Arch*-based distros, same packages should be available to install on your particular distribution:
 
 ```Bash
-yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip python-qtconsole filebrowser-bin
+yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip python-qtconsole filebrowser-bin wmctrl
 ```
 
 You need install pymupdf from pip to avoid undefined symbol ```jbig2_page_out``` error.
@@ -107,6 +107,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
 | python-dbus                    | Core                                 | DBus IPC to connect Python with Elisp         |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
+| wmctrl           | Core                                 | Activate Emacs window input focus           |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
 | python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
 | python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |

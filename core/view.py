@@ -23,6 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
+from core.utils import activate_emacs_window
 
 class View(QWidget):
 
@@ -105,6 +106,19 @@ class View(QWidget):
                 horizontal_padding, vertical_padding)
 
     def eventFilter(self, obj, event):
+        # When we press Alt + Tab in operating system.
+        # Emacs window cannot get the focus normally if mouse in EAF buffer area.
+        #
+        # So we use wmctrl activate on Emacs window after Alt + Tab operation.
+        if event.type() in [QEvent.ShortcutOverride, QEvent.Enter]:
+            activate_result = activate_emacs_window()
+
+            if activate_result:
+                print("Receive ShortcutOverride event, activate Emacs window.")
+            else:
+                self.buffer.message_to_emacs.emit(
+                    "You need install tool 'wmctrl' to activate Emacs window, make Emacs input correctly after Alt + Tab operation.")
+
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseButtonDblClick, QEvent.Wheel]:
