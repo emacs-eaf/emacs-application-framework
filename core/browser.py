@@ -649,7 +649,7 @@ class BrowserBuffer(Buffer):
         self.caret_browsing_mark_activated = False
         self.caret_browsing_search_text = ""
         self.progressbar_progress = 0
-        self.progressbar_color = QColor(233, 129, 35, 255)
+        self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
