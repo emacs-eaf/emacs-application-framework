@@ -120,8 +120,8 @@ class BrowserView(QWebEngineView):
         self.web_page.scripts().remove(script)
 
     def open_download_manage_page(self):
-        ''' Open aria2-webui download manage page. '''
-        self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-webui", "index.html")))
+        ''' Open aria2 download manage page. '''
+        self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-ng", "index.html")))
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
