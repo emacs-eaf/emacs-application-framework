@@ -49,9 +49,12 @@ class AppBuffer(Buffer):
 
     def take_photo(self):
         if os.path.exists(os.path.expanduser(self.emacs_var_dict["eaf-camera-save-path"])):
-            self.buffer_widget.take_photo(self.emacs_var_dict["eaf-camera-save-path"])
+            location = self.emacs_var_dict["eaf-camera-save-path"]
         else:
-            self.buffer_widget.take_photo("~/Downloads")
+            location = "~/Downloads"
+        result = self.buffer_widget.take_photo(location)
+        if result:
+            self.message_to_emacs.emit("Captured Photo at " + location)
 
     def destroy_buffer(self):
         self.buffer_widget.stop_camera()
@@ -97,8 +100,7 @@ class CameraWidget(QWidget):
         image_capture = QCameraImageCapture(self.camera)
         save_path = str(Path(os.path.expanduser(camera_save_path)))
         photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
-        image_capture.capture(photo_path)
-        self.message_to_emacs.emit("Captured Photo at " + photo_path)
+        return image_capture.capture(photo_path)
 
     def stop_camera(self):
         self.camera.stop()
