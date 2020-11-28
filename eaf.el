@@ -2483,6 +2483,10 @@ Otherwise send key 'esc' to browser."
   #+BEGIN_SRC emacs-lisp
     (eaf-bind-key scroll_up \"C-n\" eaf-pdf-viewer-keybinding)
   #+END_SRC
+  To *unbind* an existing keybinding, use the following:
+  #+begin_src emacs-lisp
+    (eaf-bind-key nil \"C-n\" eaf-pdf-viewer-keybinding)
+  #+end_src
 
 * Global keybindings
   | Key   | Event                       |
