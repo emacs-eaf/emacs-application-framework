@@ -405,13 +405,14 @@ class GitSubmoduleWidget(QFrame):
         self.setLayout(self.layout)
 
         submodule_data = []
+
         for submodule in self.repo.listall_submodules():
             submodule_data.append([submodule, ""])
 
         if len(submodule_data) > 0:
             submodule_model = TableModel(submodule_data)
 
-            self.submodule_label = QLabel("Submodulees ({})".format(len(submodule_data)))
+            self.submodule_label = QLabel("Submodules ({})".format(len(submodule_data)))
             self.submodule_label.setStyleSheet("border: 0px;")
 
             self.submodule_view = QtWidgets.QTableView()
@@ -438,6 +439,12 @@ class GitSubmoduleWidget(QFrame):
 
             self.layout.addWidget(self.submodule_label)
             self.layout.addWidget(self.submodule_view)
+        else:
+            self.no_submodule_label = QLabel("No submodule in repo.")
+            self.no_submodule_label.setStyleSheet("border: 0px;")
+
+            self.layout.addWidget(self.no_submodule_label)
+            self.layout.addStretch(1)
 
 class ParseCommitsThread(QtCore.QThread):
     parse_finish = QtCore.pyqtSignal(list)
