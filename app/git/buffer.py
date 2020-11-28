@@ -147,8 +147,8 @@ class GitViewerWidget(QWidget):
 
             self.git_status_widget = GitStatusWidget(self.repo)
             self.git_commit_widget = GitCommitWidget(self.repo)
-            self.git_branch_widget = QPushButton("Git branch")
-            self.git_submodule_widget = QPushButton("Git submodule")
+            self.git_branch_widget = GitBranchWidget(self.repo)
+            self.git_submodule_widget = GitSubmoduleWidget(self.repo)
 
             self.info_stacked_widget.addWidget(self.git_status_widget)
             self.info_stacked_widget.addWidget(self.git_commit_widget)
@@ -337,6 +337,107 @@ class CommitTableModel(QtCore.QAbstractTableModel):
         # The following takes the first sub-list, and returns
         # the length (only works if all rows are an equal length)
         return len(self._data[0])
+
+class GitBranchWidget(QFrame):
+
+    def __init__(self, repo):
+        super(GitBranchWidget, self).__init__()
+
+        self.setStyleSheet("font-size: 40px; padding: 10px; border: 1px solid rgb(30, 30, 30);")
+
+        self.repo = repo
+
+        self.layout = QVBoxLayout()
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.setLayout(self.layout)
+
+
+        branch_data = []
+        for branch in self.repo.branches.remote:
+            if branch != "origin/HEAD":
+                branch_data.append([branch, ""])
+
+        if len(branch_data) > 0:
+            branch_model = TableModel(branch_data)
+
+            self.branch_label = QLabel("Remote branches ({})".format(len(branch_data)))
+            self.branch_label.setStyleSheet("border: 0px;")
+
+            self.branch_view = QtWidgets.QTableView()
+            self.branch_view.setModel(branch_model)
+            self.branch_view.setStyleSheet(
+                """
+                QTableView
+                {
+                border: 0px;
+                }
+
+                QTableView::item
+                {
+                border: 0px;
+                padding-left: 60px;
+                }
+                """)
+            self.branch_view.verticalHeader().setVisible(False)
+            self.branch_view.horizontalHeader().setVisible(False)
+            self.branch_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            self.branch_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.branch_view.setShowGrid(False)
+
+            self.layout.addWidget(self.branch_label)
+            self.layout.addWidget(self.branch_view)
+
+class GitSubmoduleWidget(QFrame):
+
+    def __init__(self, repo):
+        super(GitSubmoduleWidget, self).__init__()
+
+        self.setStyleSheet("font-size: 40px; padding: 10px; border: 1px solid rgb(30, 30, 30);")
+
+        self.repo = repo
+
+        self.layout = QVBoxLayout()
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.setLayout(self.layout)
+
+        submodule_data = []
+        for submodule in self.repo.listall_submodules():
+            submodule_data.append([submodule, ""])
+
+        if len(submodule_data) > 0:
+            submodule_model = TableModel(submodule_data)
+
+            self.submodule_label = QLabel("Submodulees ({})".format(len(submodule_data)))
+            self.submodule_label.setStyleSheet("border: 0px;")
+
+            self.submodule_view = QtWidgets.QTableView()
+            self.submodule_view.setModel(submodule_model)
+            self.submodule_view.setStyleSheet(
+                """
+                QTableView
+                {
+                border: 0px;
+                }
+
+                QTableView::item
+                {
+                border: 0px;
+                padding-left: 60px;
+                }
+                """)
+            self.submodule_view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+            self.submodule_view.verticalHeader().setVisible(False)
+            self.submodule_view.horizontalHeader().setVisible(False)
+            self.submodule_view.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            self.submodule_view.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+            self.submodule_view.setShowGrid(False)
+
+            self.layout.addWidget(self.submodule_label)
+            self.layout.addWidget(self.submodule_view)
 
 class ParseCommitsThread(QtCore.QThread):
     parse_finish = QtCore.pyqtSignal(list)
