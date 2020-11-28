@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Nov 27 19:10:50 2020 (-0500)
+;; Last-Updated: Fri Nov 27 19:11:21 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -754,7 +754,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-video-extension-list
-  '("avi" "rmvb" "ogg" "mp4" "mkv")
+  '("avi" "rmvb" "ogg" "mp4" "mkv" "m4v")
   "The extension list of video player application."
   :type 'cons)
 
