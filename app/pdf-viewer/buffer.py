@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QRect, QEvent, QTimer
+from PyQt5.QtCore import Qt, QRect, QEvent, QTimer, QFileSystemWatcher
 from PyQt5.QtGui import QColor, QPixmap, QImage, QFont, QCursor
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
@@ -316,6 +316,8 @@ class PdfViewerWidget(QWidget):
         if os.path.splitext(self.url)[-1] != ".pdf":
             self.inpdf = False
 
+        self.refresh_file()
+
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
@@ -329,13 +331,27 @@ class PdfViewerWidget(QWidget):
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
 
-    @interactive()
+    def handle_file_changed(self, path):
+        '''
+        Use the QFileSystemWatcher watch file changed. If the watch file have been remove or rename,
+        this watch will auto remove.
+        '''
+        if path == self.url:
+            self.buffer.message_to_emacs.emit("Detect %s pdf file have been changed." %path)
+            self.page_cache_pixmap_dict.clear()
+            self.document = fitz.open(path)
+            self.update()
+            # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
+            if len(self.file_changed_wacher.files()) == 0 :
+                self.file_changed_wacher.addPath(self.url)
+
     def refresh_file(self):
         '''
         Refresh content with PDF file changed.
         '''
-        self.document = fitz.open(self.url)
-        self.update()
+        self.file_changed_wacher = QFileSystemWatcher()
+        if self.file_changed_wacher.addPath(self.url):
+            self.file_changed_wacher.fileChanged.connect(self.handle_file_changed)
 
     @interactive()
     def toggle_presentation_mode(self):
