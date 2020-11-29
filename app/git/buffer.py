@@ -92,7 +92,7 @@ class GitViewerWidget(QWidget):
             # Add repo title.
             self.repo_title = QLabel(self.repo.path)
             self.repo_title.setStyleSheet("QLabel {color: #E98123;}")
-            self.repo_title.setFont(QFont('Arial', 20))
+            self.repo_title.setFont(QFont('Arial', 16))
             self.repo_top_layout.addWidget(self.repo_title)
 
             # Add summary info.
@@ -117,11 +117,12 @@ class GitViewerWidget(QWidget):
             self.repo_summary_layout.addStretch(1)
 
             # Add lastest commit info.
-            self.lastest_commit_info = QLabel("Head: {}".format(lastest_commit.message))
+            self.lastest_commit_info = QLabel("Head: {}".format(filter_empty_lines(lastest_commit.message)))
             self.lastest_commit_info.setStyleSheet("QLabel {color: #6C6C6C;}")
             self.lastest_commit_info.setFont(QFont('Arial', self.lastest_commit_font_size))
-            self.repo_top_layout.addSpacing(40)
+            self.repo_top_layout.addSpacing(30)
             self.repo_top_layout.addWidget(self.lastest_commit_info)
+            self.repo_top_layout.addSpacing(10)
 
             # Add info box.
             info_box = QWidget()
@@ -506,3 +507,6 @@ def format_bytes(size):
         size /= power
         n += 1
     return str(round(size, 2)) + power_labels[n]+'B'
+
+def filter_empty_lines(text):
+    return "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
