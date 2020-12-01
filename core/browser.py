@@ -361,10 +361,18 @@ class BrowserView(QWebEngineView):
         ''' Scroll down.'''
         self.eval_js("document.scrollingElement.scrollBy(0, -50)")
 
-    @interactive(insert_or_do=True)
-    def scroll_up_page(self):
-        ''' Scroll up a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+    @interactive()
+    def insert_or_scroll_up_page(self):
+        '''
+If input is focus send space key to insert space.
+If browser is fullscreen, send space key to play/pause video.
+
+Otherwise, scroll page up.
+        '''
+        if self.buffer.is_focus() or self.buffer.is_fullscreen:
+            self.buffer.fake_key_event(self.buffer.current_event_string)
+        else:
+            self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
