@@ -243,6 +243,11 @@ class PdfViewerWidget(QWidget):
              self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
             self.inverted_mode = True
 
+        # Inverted mode exclude image.
+        self.inverted_mode_exclude_image = True
+        if (self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "false"):
+            self.inverted_mode_exclude_image = False
+
         # mark link
         self.is_mark_link = False
         self.mark_link_annot_cache_dict = {}
@@ -431,76 +436,77 @@ class PdfViewerWidget(QWidget):
         if self.inverted_mode:
             pixmap.invertIRect(pixmap.irect)
 
-            # Exclude images
-            imagelist = None
-            try:
-                imagelist = page.getImageList(full=True)
-            except Exception:
-                # PyMupdf 1.14 not include argument 'full'.
-                imagelist = page.getImageList()
-
-            imagebboxlist = []
-            for image in imagelist:
+            if self.inverted_mode_exclude_image:
+                # Exclude images
+                imagelist = None
                 try:
-                    imagerect = page.getImageBbox(image)
-                    if imagerect.isInfinite or imagerect.isEmpty:
-                        continue
-                    else:
-                        imagebboxlist.append(imagerect)
+                    imagelist = page.getImageList(full=True)
                 except Exception:
-                    pass
+                    # PyMupdf 1.14 not include argument 'full'.
+                    imagelist = page.getImageList()
 
-            newly_added_overlapbboxlist = imagebboxlist
+                imagebboxlist = []
+                for image in imagelist:
+                    try:
+                        imagerect = page.getImageBbox(image)
+                        if imagerect.isInfinite or imagerect.isEmpty:
+                            continue
+                        else:
+                            imagebboxlist.append(imagerect)
+                    except Exception:
+                        pass
 
-            # Nth time of loop represents N+1 rectanges' intesects' overlaps
-            time = 0
-            while len(newly_added_overlapbboxlist) > 1:
-                temp_overlapbboxlist = []
-                time += 1
-                # calculate overlap
-                for i in range(len(newly_added_overlapbboxlist)):
-                    for j in range(i+1,len(newly_added_overlapbboxlist)):
-                        x0a = newly_added_overlapbboxlist[i].x0
-                        y0a = newly_added_overlapbboxlist[i].y0
-                        x1a = newly_added_overlapbboxlist[i].x1
-                        y1a = newly_added_overlapbboxlist[i].y1
-                        x0b = newly_added_overlapbboxlist[j].x0
-                        y0b = newly_added_overlapbboxlist[j].y0
-                        x1b = newly_added_overlapbboxlist[j].x1
-                        y1b = newly_added_overlapbboxlist[j].y1
-                        x0c = max(x0a,x0b)
-                        y0c = max(y0a,y0b)
-                        x1c = min(x1a,x1b)
-                        y1c = min(y1a,y1b)
-                        if x0c < x1c and y0c < y1c:
-                            temp_overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
-                # remove duplicate overlaps for one time
-                for item in set(temp_overlapbboxlist):
-                    if temp_overlapbboxlist.count(item) % 2 == 0:
-                        while item in temp_overlapbboxlist:
-                            temp_overlapbboxlist.remove(item)
-                    else:
-                        while temp_overlapbboxlist.count(item) > 1:
-                            temp_overlapbboxlist.remove(item)
-                newly_added_overlapbboxlist = temp_overlapbboxlist
-                imagebboxlist.extend(newly_added_overlapbboxlist)
-                if time%2 == 1 and time//2 > 0:
+                newly_added_overlapbboxlist = imagebboxlist
+
+                # Nth time of loop represents N+1 rectanges' intesects' overlaps
+                time = 0
+                while len(newly_added_overlapbboxlist) > 1:
+                    temp_overlapbboxlist = []
+                    time += 1
+                    # calculate overlap
+                    for i in range(len(newly_added_overlapbboxlist)):
+                        for j in range(i+1,len(newly_added_overlapbboxlist)):
+                            x0a = newly_added_overlapbboxlist[i].x0
+                            y0a = newly_added_overlapbboxlist[i].y0
+                            x1a = newly_added_overlapbboxlist[i].x1
+                            y1a = newly_added_overlapbboxlist[i].y1
+                            x0b = newly_added_overlapbboxlist[j].x0
+                            y0b = newly_added_overlapbboxlist[j].y0
+                            x1b = newly_added_overlapbboxlist[j].x1
+                            y1b = newly_added_overlapbboxlist[j].y1
+                            x0c = max(x0a,x0b)
+                            y0c = max(y0a,y0b)
+                            x1c = min(x1a,x1b)
+                            y1c = min(y1a,y1b)
+                            if x0c < x1c and y0c < y1c:
+                                temp_overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
+                    # remove duplicate overlaps for one time
+                    for item in set(temp_overlapbboxlist):
+                        if temp_overlapbboxlist.count(item) % 2 == 0:
+                            while item in temp_overlapbboxlist:
+                                temp_overlapbboxlist.remove(item)
+                        else:
+                            while temp_overlapbboxlist.count(item) > 1:
+                                temp_overlapbboxlist.remove(item)
+                    newly_added_overlapbboxlist = temp_overlapbboxlist
                     imagebboxlist.extend(newly_added_overlapbboxlist)
+                    if time%2 == 1 and time//2 > 0:
+                        imagebboxlist.extend(newly_added_overlapbboxlist)
 
-            if len(imagebboxlist) != len(set(imagebboxlist)):
-                # remove duplicate to make it run faster
-                for item in set(imagebboxlist):
-                    if imagebboxlist.count(item) % 2 == 0:
-                        while item in imagebboxlist:
-                            imagebboxlist.remove(item)
+                if len(imagebboxlist) != len(set(imagebboxlist)):
+                    # remove duplicate to make it run faster
+                    for item in set(imagebboxlist):
+                        if imagebboxlist.count(item) % 2 == 0:
+                            while item in imagebboxlist:
+                                imagebboxlist.remove(item)
+                        else:
+                            while imagebboxlist.count(item) > 1:
+                                imagebboxlist.remove(item)
+                for bbox in imagebboxlist:
+                    if self.inpdf:
+                        pixmap.invertIRect(bbox * page.rotationMatrix * scale)
                     else:
-                        while imagebboxlist.count(item) > 1:
-                            imagebboxlist.remove(item)
-            for bbox in imagebboxlist:
-                if self.inpdf:
-                    pixmap.invertIRect(bbox * page.rotationMatrix * scale)
-                else:
-                    pixmap.invertIRect(bbox * scale)
+                        pixmap.invertIRect(bbox * scale)
 
         img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
         qpixmap = QPixmap.fromImage(img)
@@ -742,7 +748,13 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
 
         # Toggle inverted status.
-        self.inverted_mode = not self.inverted_mode
+        if self.inverted_mode and self.inverted_mode_exclude_image:
+            self.inverted_mode_exclude_image = False
+        elif self.inverted_mode:
+            self.inverted_mode = False
+        else:
+            self.inverted_mode_exclude_image = True
+            self.inverted_mode = True
 
         # Re-render page.
         self.update()
