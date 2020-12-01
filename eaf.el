@@ -1576,7 +1576,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (catch 'found-eaf
     (eaf-for-each-eaf-buffer
      (when (string= eaf--buffer-id focus-buffer-id)
-       (select-window (get-buffer-window buffer))
+       (when buffer
+         (select-window (get-buffer-window buffer)))
        (throw 'found-eaf t)))))
 
 (dbus-register-signal
@@ -1954,7 +1955,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
