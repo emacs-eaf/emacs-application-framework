@@ -244,9 +244,7 @@ class PdfViewerWidget(QWidget):
             self.inverted_mode = True
 
         # Inverted mode exclude image.
-        self.inverted_mode_exclude_image = True
-        if (self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "false"):
-            self.inverted_mode_exclude_image = False
+        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true"
 
         # mark link
         self.is_mark_link = False
