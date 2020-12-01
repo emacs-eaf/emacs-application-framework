@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF, QFile
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtNetwork import QNetworkCookie
@@ -267,6 +267,20 @@ class BrowserView(QWebEngineView):
 
     def eventFilter(self, obj, event):
         ''' Handle event.'''
+        # Control mouse cursor.
+        import time
+        if event.type() != 1:
+            print(time.time(), event.type(), self.rect())
+
+        if event.type() in [QEvent.MouseMove]:
+            # Hide cursor in fullscreen.
+            if self.buffer.is_fullscreen:
+                self.buffer.show_cursor()
+                self.buffer.try_hide_cursor()
+            # Show cursor if not in fullscreen.
+            else:
+                self.buffer.show_cursor()
+
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseButtonDblClick, QEvent.Wheel]:
@@ -362,6 +376,11 @@ class BrowserView(QWebEngineView):
         self.eval_js("document.scrollingElement.scrollBy(0, -50)")
 
     @interactive()
+    def scroll_up_page(self):
+        ''' Scroll page up.'''
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+
+    @interactive()
     def insert_or_scroll_up_page(self):
         '''
 If input is focus send space key to insert space.
@@ -372,7 +391,7 @@ Otherwise, scroll page up.
         if self.buffer.is_focus() or self.buffer.is_fullscreen:
             self.buffer.fake_key_event(self.buffer.current_event_string)
         else:
-            self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.buffer.emacs_var_dict["eaf-browser-scroll-behavior"] + "'})")
+            self.scroll_up_page()
 
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
@@ -669,6 +688,7 @@ class BrowserBuffer(Buffer):
         self.current_url = ""
         self.request_url = ""
         self.no_need_draw_background = False
+        self.try_hide_cursor_timer = None
 
         self.init_background_color()
 
@@ -911,8 +931,12 @@ class BrowserBuffer(Buffer):
         ''' Handle fullscreen request.'''
         if request.toggleOn():
             self.enter_fullscreen_request.emit()
+
+            self.try_hide_cursor()
         else:
             self.exit_fullscreen_request.emit()
+
+            self.show_cursor()
 
         request.accept()
 
@@ -937,6 +961,18 @@ class BrowserBuffer(Buffer):
             resp = jsonrpc.addUris(download_url)
 
             self.message_to_emacs.emit("Downloading: " + download_url)
+
+    def show_cursor(self):
+        if self.try_hide_cursor_timer:
+            self.try_hide_cursor_timer.stop()
+
+        QtWidgets.qApp.restoreOverrideCursor()
+
+    def hide_cursor(self):
+        QtWidgets.qApp.setOverrideCursor(Qt.BlankCursor)
+
+    def try_hide_cursor(self):
+        self.try_hide_cursor_timer = QTimer.singleShot(5000, self.hide_cursor)
 
     def _save_as_pdf(self):
         parsed = urlparse(self.url)

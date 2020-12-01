@@ -25,6 +25,7 @@
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
 from sys import version_info
 
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
@@ -259,6 +260,9 @@ class EAF(dbus.service.Object):
     def update_views(self, args):
         ''' Update views.'''
         view_infos = args.split(",")
+
+        # Show cursor anyway.
+        QtWidgets.qApp.restoreOverrideCursor()
 
         # Do something if buffer's all view hide after update_views operation.
         old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
