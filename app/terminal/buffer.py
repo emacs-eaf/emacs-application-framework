@@ -19,8 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
-from PyQt5.QtGui import QColor, QMouseEvent
+from PyQt5.QtCore import QUrl, QTimer, QPointF, Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
 from core.utils import PostGui, get_free_port, interactive
@@ -69,7 +69,7 @@ class AppBuffer(BrowserBuffer):
 
         self.reset_default_zoom()
 
-        QTimer.singleShot(250, self.focus_terminal)
+        QTimer.singleShot(250, self.focus_widget)
 
         self.build_all_methods(self)
 
@@ -89,10 +89,6 @@ class AppBuffer(BrowserBuffer):
                 return os.path.dirname(__file__) + path[len(os.getcwd()):]
         with TCPServer(("127.0.0.1", int(self.http_url.split(":")[-1])), Handler) as h:
             h.serve_forever()
-
-    def focus_terminal(self):
-        event = QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-        QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
 
     @PostGui()
     def open_terminal_page(self):

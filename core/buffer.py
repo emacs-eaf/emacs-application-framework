@@ -21,6 +21,7 @@
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtGui import QFocusEvent
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
@@ -364,3 +365,8 @@ class Buffer(QGraphicsScene):
     def select_right_tab(self):
         ''' Select right tab.'''
         self.goto_right_tab.emit()
+
+    def focus_widget(self):
+        '''Focus buffer widget.'''
+        event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
+        QApplication.sendEvent(self.buffer_widget.focusProxy(), event)

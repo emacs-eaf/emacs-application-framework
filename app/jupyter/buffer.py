@@ -20,8 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from PyQt5.QtCore import QTimer, QEvent, Qt
-from PyQt5.QtGui import QFocusEvent
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication
 from qtconsole import styles
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
@@ -45,10 +44,6 @@ class AppBuffer(Buffer):
         QTimer.singleShot(500, self.focus_widget)
 
         self.build_all_methods(self.buffer_widget)
-
-    def focus_widget(self):
-        event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
-        QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
 
     def get_key_event_widgets(self):
         ''' Send key event to RichJupyterWidget's focusProxy widget.'''
