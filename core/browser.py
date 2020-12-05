@@ -268,9 +268,9 @@ class BrowserView(QWebEngineView):
     def eventFilter(self, obj, event):
         ''' Handle event.'''
         # Control mouse cursor.
-        import time
-        if event.type() != 1:
-            print(time.time(), event.type(), self.rect())
+        # if event.type() != 1:
+        #     import time
+        #     print(time.time(), event.type(), self.rect())
 
         if event.type() in [QEvent.MouseMove]:
             # Hide cursor in fullscreen.

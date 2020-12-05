@@ -334,7 +334,11 @@ z-index: 100000;\
                 moveCursorToEnd(node); // move cursor to the end of line after focus.
             }
         } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != ''){
-            return node.href;
+            if (node.href.includes('javascript:void')){
+                node.click();
+            } else {
+                return node.href;
+            }
         } else if(isElementClickable(node)){  // special href # button
             node.click();
         } else if(node.nodeName.toLowerCase() === 'p'||
