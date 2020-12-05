@@ -162,6 +162,8 @@ EAF主要实现这几个功能：
 2. 通过DBus IPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
 3. 通过Qt5的QGraphicsScene来实现镜像窗口，以对应Emacs的Buffer/Window模型
 
+若想了解更多EAF设计背景，请看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
+
 ### EAF vs EXWM?
 1. EAF和EXWM的共同点都是：“提升Emacs和别的程序的协作效率“
 2. EXWM是一个X11窗口管理器，通过X11协议来控制Emacs和其他程序，但是EXWM只是管理其他程序，但是它并不会修改应用程序的内在行为。
@@ -177,6 +179,11 @@ EAF主要实现这几个功能：
 2. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
 
 欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：DBus，QGraphicsScene
+
+### 为什么通过WM使用EAF无法接收输入信息？
+我们认为不同的Window Manager对于x11 protocol的支持不够完善才导致这样的问题。
+
+现在的解决方案是将`$DESKTOP_SESSION`环境变量添加进`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
 
 ### `[EAF] *eaf* aborted (core dumped)` 奔溃了怎么办？
 请检查 `*eaf*` 这个窗口的内容。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。

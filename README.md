@@ -165,6 +165,8 @@ EAF implements three major functionalities:
 2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via DBus IPC.
 3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
+Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)!
+
 ### EAF vs EXWM?
 1. EAF and EXWM share a common goal: enhance collaboration between the standard GNU Emacs with other GUI tools.
 2. EXWM is an X11 Window Manager, it manages and controls other software using a keyboard, but it cannot modify, customize and extend the behavior of other software.
@@ -179,6 +181,11 @@ Both projects are similar in terms of interface, but they are two completely dif
 2. Qt5's QGraphicsScene technology does not work on MacOS.
 
 If you've figure them out, PRs are always welcome!
+
+### Why doesn't EAF receive input events on WM?
+We suspect there are some issues with how all the Window Managers implement their x11 protocols.
+
+One workaround is to add `$DESKTOP_SESSION` environment variable to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
 
 ### `[EAF] *eaf* aborted (core dumped)` error
 Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
