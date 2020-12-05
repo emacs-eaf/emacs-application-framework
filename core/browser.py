@@ -476,15 +476,15 @@ Otherwise, scroll page up.
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateMarkerForClick)")
+        self.eval_js("Marker.generateMarker(Marker.generateClickMarkerList)")
 
     def get_text_markers(self):
         ''' Get visiable text markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateTextNodeMarker)");
+        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList)");
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
-        link = self.execute_js("Marker.gotoMarker('%s',Marker.getMarkerLink)" % str(marker))
+        link = self.execute_js("Marker.gotoMarker('%s', Marker.getMarkerAction)" % str(marker))
 
         self.cleanup_links()
         return link

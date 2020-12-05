@@ -2,7 +2,6 @@
     let self;
     _.Marker = self = {};
 
-
     function getVisibleElements(filter) {
         let all = Array.from(document.documentElement.getElementsByTagName("*"));
         let visibleElements = [];
@@ -284,7 +283,7 @@ z-index: 100000;\
             addElementToRects(validRects, selectors());
         }else if (typeof(selectors) == "string"){
             selectors = selectors.split(",");
-            selectors.forEach((s)=>addElementToRects(validRects, document.querySelectorAll(s.trim())));
+            selectors.forEach((s) => addElementToRects(validRects, document.querySelectorAll(s.trim())));
         }
 
         let body = document.querySelector('body');
@@ -300,7 +299,7 @@ z-index: 100000;\
             markerContainer.appendChild(marker);
         }
         generateKeys(markerContainer);
-    }
+    };
 
     self.gotoMarker = (key, callback)=>{
         let markers = document.querySelectorAll('.eaf-marker');
@@ -315,12 +314,13 @@ z-index: 100000;\
             let selectors = match.getAttribute('pointed-link');
             let node = document.querySelector(selectors);
             return callback(node);
-        } else
+        } else {
             return "";
-    }
+        }
+    };
 
     // this is callback function which call by core/browser.py get_mark_link
-    self.getMarkerLink = (node) => {
+    self.getMarkerAction = (node) => {
         if(node.nodeName.toLowerCase() === 'select'){
             node.focus();
         }else if(node.nodeName.toLowerCase() === 'input' ||
@@ -346,19 +346,17 @@ z-index: 100000;\
             window.getSelection().selectAllChildren(node);
         }
         return "";
-    }
+    };
 
-    self.generateMarkerForClick = () => {
+    self.generateClickMarkerList = () => {
         let elements = getVisibleElements(function(e, v) {
-            if(isElementClickable(e)) v.push(e)
+            if(isElementClickable(e)) v.push(e);
         });
         elements = filterOverlapElements(elements);
         return elements;
-    }
+    };
 
-
-    self.generateTextNodeMarker = () => {
-
+    self.generateTextMarkerList = () => {
         let elements = getVisibleElements(function(e, v) {
             let aa = e.childNodes;
             for (let i = 0, len = aa.length; i < len; i++) {
@@ -381,6 +379,6 @@ z-index: 100000;\
         }));
 
         return elements;
-    }
+    };
 
 })(window);
