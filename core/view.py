@@ -24,6 +24,7 @@ from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 from core.utils import activate_emacs_window
+import os
 
 class View(QWidget):
 
@@ -83,7 +84,7 @@ class View(QWidget):
         if self.buffer.fit_to_view:
             if event.oldSize().isValid():
                 self.graphics_view.fitInView(self.graphics_view.scene().sceneRect(), Qt.KeepAspectRatio)
-        QWidget.resizeEvent(self, event)
+                QWidget.resizeEvent(self, event)
 
     def adjust_aspect_ratio(self):
         widget_width = self.width
@@ -106,15 +107,21 @@ class View(QWidget):
                 horizontal_padding, vertical_padding)
 
     def eventFilter(self, obj, event):
-        # When we press Alt + Tab in operating system.
-        # Emacs window cannot get the focus normally if mouse in EAF buffer area.
-        #
-        # So we use wmctrl activate on Emacs window after Alt + Tab operation.
-        #
-        # NOTE: turn off this behavior under i3 window manager.
+        # import time
+        # print(time.time(), event.type())
+
         if event.type() in [QEvent.ShortcutOverride]:
-            import os
-            if os.environ.get("DESKTOP_SESSION") != "i3":
+            # When switch app focus in WM, such as, i3 or qtile.
+            # Emacs window cannot get the focus normally if mouse in EAF buffer area.
+            #
+            # So we move mouse to frame bottom of Emacs, to make EAF receive input event.
+            if os.environ.get("DESKTOP_SESSION") in self.buffer.wm_focus_fix_list:
+                self.buffer.eval_in_emacs.emit('''(eaf-move-mouse-to-frame-bottom)''')
+            # When press Alt + Tab in DE, such as KDE.
+            # Emacs window cannot get the focus normally if mouse in EAF buffer area.
+            #
+            # So we use wmctrl activate on Emacs window after Alt + Tab operation.
+            else:
                 if not activate_emacs_window():
                     self.buffer.message_to_emacs.emit(
                         "You need install tool 'wmctrl' to activate Emacs window, make Emacs input correctly after Alt + Tab operation.")

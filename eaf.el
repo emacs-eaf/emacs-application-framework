@@ -809,7 +809,7 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
-(defcustom eaf-wm-focus-fix-wms `("i3")
+(defcustom eaf-wm-focus-fix-wms `("i3" "/usr/share/xsessions/qtile")
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 Add $DESKTOP_SESSION environment variable to this list."
   :type 'list
@@ -1125,6 +1125,10 @@ Return t or nil based on the result of the call."
   "Serialize variable list."
   (json-encode eaf-var-list))
 
+(defun eaf-serialization-wm-focus-fix-wms-list ()
+  "Serialize `eaf-wm-focus-fix-wms'."
+  (json-encode eaf-wm-focus-fix-wms))
+
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -1137,6 +1141,7 @@ Return t or nil based on the result of the call."
                    (eaf-get-render-size)
                    (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
                    (list (eaf-serialization-var-list))
+                   (list (eaf-serialization-wm-focus-fix-wms-list))
                    ))
         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
         (process-environment (cl-copy-list process-environment)))
@@ -1957,7 +1962,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))

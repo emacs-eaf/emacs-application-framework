@@ -43,17 +43,18 @@ EAF_OBJECT_NAME = "/com/lazycat/eaf"
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string, wm_focus_fix_list_string
 
         dbus.service.Object.__init__(
             self,
             dbus.service.BusName(EAF_DBUS_NAME, bus=dbus.SessionBus()),
             EAF_OBJECT_NAME)
 
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string, wm_list_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
+        wm_focus_fix_list_string = wm_list_string
 
         self.buffer_dict = {}
         self.view_dict = {}
@@ -161,7 +162,7 @@ class EAF(dbus.service.Object):
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
         ''' Create buffer.'''
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string
+        global emacs_width, emacs_height, eaf_config_dir, proxy_string, wm_focus_fix_list_string
 
         # Create application buffer.
         module = importlib.import_module(module_path)
@@ -169,6 +170,9 @@ class EAF(dbus.service.Object):
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer
+
+        # Add wm focus fix list.
+        app_buffer.wm_focus_fix_list = json.loads(wm_focus_fix_list_string)
 
         # Resize buffer with emacs max window size,
         # view (QGraphicsView) will adjust visual area along with emacs window changed.
