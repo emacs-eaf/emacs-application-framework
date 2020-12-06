@@ -183,6 +183,8 @@ Both projects are similar in terms of interface, but they are two completely dif
 If you've figure them out, PRs are always welcome!
 
 ### Why doesn't EAF receive input events on WM?
+EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE.
+
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
 One workaround is to add `$DESKTOP_SESSION` environment variable to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.

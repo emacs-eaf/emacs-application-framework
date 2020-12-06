@@ -180,8 +180,10 @@ EAF主要实现这几个功能：
 
 欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：DBus，QGraphicsScene
 
-### 为什么通过WM使用EAF无法接收输入信息？
-我们认为不同的Window Manager对于x11 protocol的支持不够完善才导致这样的问题。
+### 为什么通过窗口管理器使用EAF无法接收输入信息？
+EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、XFce、LXDE、i3、qtile.
+
+我们认为不同的窗口管理器对于X11协议的支持不够完善才导致这样的问题。
 
 现在的解决方案是将`$DESKTOP_SESSION`环境变量添加进`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
 
