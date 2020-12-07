@@ -204,10 +204,10 @@ class EAF(dbus.service.Object):
 
         # Handle get_focus_text signal.
         if getattr(app_buffer, "get_focus_text", False) and getattr(app_buffer.get_focus_text, "connect", False):
-            app_buffer.get_focus_text.connect(self.edit_focus_text)
+            app_buffer.get_focus_text.connect(self.atomic_edit)
 
         if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(app_buffer.buffer_widget.get_focus_text, "connect", False):
-            app_buffer.buffer_widget.get_focus_text.connect(self.edit_focus_text)
+            app_buffer.buffer_widget.get_focus_text.connect(self.atomic_edit)
 
         # Handle get_sub_node_id signal.
         if getattr(app_buffer, "get_sub_node_id", False) and getattr(app_buffer.get_sub_node_id, "connect", False):
@@ -527,7 +527,7 @@ class EAF(dbus.service.Object):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)
-    def edit_focus_text(self, buffer_id, focus_text):
+    def atomic_edit(self, buffer_id, focus_text):
         pass
 
     @dbus.service.signal(EAF_DBUS_NAME)

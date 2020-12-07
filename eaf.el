@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Nov 28 00:41:26 2020 (-0500)
+;; Last-Updated: Mon Dec  7 16:01:12 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -351,7 +351,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-v" . "scroll_up_page")
     ("C-y" . "yank_text")
     ("C-w" . "kill_text")
-    ("M-e" . "edit_focus_text")
+    ("M-e" . "atomic_edit")
     ("M-c" . "caret_toggle_browsing")
     ("M-D" . "select_text")
     ("M-s" . "open_link")
@@ -2314,14 +2314,14 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "edit_focus_text"
- #'eaf--edit-focus-text)
+ "com.lazycat.eaf" "atomic_edit"
+ #'eaf--atomic-edit)
 
-(defun eaf--edit-focus-text (buffer-id focus-text)
+(defun eaf--atomic-edit (buffer-id focus-text)
   "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
   (other-window 1)
-  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-edit-focus-text" eaf--buffer-app-name)))
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-atomic-edit" eaf--buffer-app-name)))
         (buffer-app-name eaf--buffer-app-name))
     (with-current-buffer edit-text-buffer
       (eaf-edit-mode)

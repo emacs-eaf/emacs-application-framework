@@ -1318,7 +1318,7 @@ class BrowserBuffer(Buffer):
                 zoom_factor = float(row[0])
             self.buffer_widget.setZoomFactor(zoom_factor)
 
-    def edit_focus_text(self):
+    def atomic_edit(self):
         ''' Edit the focus text.'''
         text = self.buffer_widget.get_focus_text()
         if text != None:
