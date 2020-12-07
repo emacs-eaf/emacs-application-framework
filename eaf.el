@@ -809,7 +809,12 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
-(defcustom eaf-wm-focus-fix-wms `("i3" "/usr/share/xsessions/qtile")
+(defcustom eaf-wm-focus-fix-wms
+  `(
+    "i3"
+    "/usr/share/xsessions/i3"
+    "qtile"
+    "/usr/share/xsessions/qtile")
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 Add $DESKTOP_SESSION environment variable to this list."
   :type 'list
