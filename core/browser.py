@@ -469,7 +469,7 @@ Otherwise, scroll page up.
         ''' Get current url.'''
         return self.execute_js("window.location.href;")
 
-    def cleanup_links(self):
+    def cleanup_links_dom(self):
         ''' Clean up links.'''
         self.eval_js("document.querySelector('.eaf-marker-container').remove();")
         self.eval_js("document.querySelector('.eaf-style').remove();")
@@ -484,35 +484,36 @@ Otherwise, scroll page up.
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
+        # print(self.execute_js("Marker.getMarkerSelector('%s')" % str(marker)))
         link = self.execute_js("Marker.gotoMarker('%s', Marker.getMarkerAction)" % str(marker))
-
-        self.cleanup_links()
-        return link
+        self.cleanup_links_dom()
+        if link.startswith("eaf::"):
+            print(link)
+            return False
+        else:
+            return link
 
     def _open_link(self, marker):
         ''' Jump to link according to marker.'''
         link = self.get_marker_link(marker)
-        if link != "":
-            self.open_url(link)
+        if link: self.open_url(link)
 
     def _open_link_new_buffer(self, marker):
         ''' Open the link at the markre in a new buffer.'''
         link = self.get_marker_link(marker)
-        if link != "":
-            self.open_url_new_buffer(link)
+        if link: self.open_url_new_buffer(link)
 
     def _open_link_background_buffer(self, marker):
         ''' Open link at the marker in the background.'''
         link = self.get_marker_link(marker)
-        if link != "":
-            self.open_url_background_buffer(link)
+        if link: self.open_url_background_buffer(link)
 
     def _copy_link(self, marker):
         ''' Copy the link.'''
         link = self.get_marker_link(marker)
-        if link != "":
+        if link:
             self.buffer.set_clipboard_text(link)
-            self.buffer.message_to_emacs.emit("Copy link")
+            self.buffer.message_to_emacs.emit("Copied " + link)
 
     def get_code_markers(self):
         ''' Get the code markers.'''
@@ -521,13 +522,13 @@ Otherwise, scroll page up.
     def get_code_content(self, marker):
         ''' Get the code content according to marker.'''
         content = self.execute_js("Marker.gotoMarker('%s', (e)=> e.textContent)" % str(marker))
-        self.cleanup_links()
+        self.cleanup_links_dom()
         return content
 
     def _caret_at_line(self, marker):
         '''Enable caret by marker'''
         self.execute_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
-        self.cleanup_links()
+        self.cleanup_links_dom()
 
         self.eval_js("CaretBrowsing.setInitialCursor(true);")
         self.buffer.caret_browsing_mode = True
@@ -1084,7 +1085,7 @@ class BrowserBuffer(Buffer):
            callback_tag == "caret_at_line" or \
            callback_tag == "copy_link" or \
            callback_tag == "edit_url":
-            self.buffer_widget.cleanup_links()
+            self.buffer_widget.cleanup_links_dom()
 
     def try_start_aria2_daemon(self):
         ''' Try to start aria2 daemon.'''

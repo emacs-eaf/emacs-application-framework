@@ -69,12 +69,12 @@
     }
 
     function isElementClickable(e) {
-        var cssSelector = "a, button, select, input, textarea, summary, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button, *[role=button], *[role=link], *[role=menuitem], *[role=option], *[role=switch], *[role=tab], *[role=checkbox], *[role=combobox], *[role=menuitemcheckbox], *[role=menuitemradio]";
-
-        return e.matches(cssSelector)
-            || getComputedStyle(e).cursor === "pointer"
-            || getComputedStyle(e).cursor.substr(0, 4) === "url("
-            || e.closest("a, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button") !== null;
+        let cssSelector = "a, button, select, input, textarea, summary, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button, *[role=button], *[role=link], *[role=menuitem], *[role=option], *[role=switch], *[role=tab], *[role=checkbox], *[role=combobox], *[role=menuitemcheckbox], *[role=menuitemradio]";
+        let blacklistSelector = "path, svg";
+        return (e.matches(cssSelector) || getComputedStyle(e).cursor === "pointer"
+                || getComputedStyle(e).cursor.substr(0, 4) === "url("
+                || e.closest("a, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button") !== null)
+            && ! e.matches(blacklistSelector);
     }
 
     function isEditable(element) {
@@ -301,7 +301,7 @@ z-index: 100000;\
         generateKeys(markerContainer);
     };
 
-    self.gotoMarker = (key, callback)=>{
+    self.getMarkerSelector = (key) => {
         let markers = document.querySelectorAll('.eaf-marker');
         let match;
         for(let i = 0; i < markers.length; i++) {
@@ -310,10 +310,17 @@ z-index: 100000;\
                 break;
             }
         }
-        if (match !== undefined && callback !== undefined){
-            let selectors = match.getAttribute('pointed-link');
-            let node = document.querySelector(selectors);
-            return callback(node);
+        if (match !== undefined) {
+            return match.getAttribute('pointed-link');
+        } else {
+            return undefined;
+        }
+    };
+
+    self.gotoMarker = (key, callback)=>{
+        selector = self.getMarkerSelector(key);
+        if (selector !== undefined && callback !== undefined){
+            return callback(document.querySelector(selector));
         } else {
             return "";
         }
@@ -321,31 +328,38 @@ z-index: 100000;\
 
     // this is callback function which call by core/browser.py get_mark_link
     self.getMarkerAction = (node) => {
+        action = "";
         if(node.nodeName.toLowerCase() === 'select'){
+            action = "eaf::[select]focus";
             node.focus();
         }else if(node.nodeName.toLowerCase() === 'input' ||
                  node.nodeName.toLowerCase() === 'textarea') {
             if((node.getAttribute('type') === 'submit') ||
                (node.getAttribute('type') === 'checkbox')){
+                action = "eaf::[" + node.nodeName + "&" + node.getAttribute('type') + "]click";
                 node.click();
             } else {
+                action = "eaf::focus_click_movecursor_to_end";
                 node.focus();   // focus
                 node.click();   // show blink cursor
                 moveCursorToEnd(node); // move cursor to the end of line after focus.
             }
         } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != ''){
             if (node.href.includes('javascript:void')){
+                action = "eaf::[js:void]click";
                 node.click();
             } else {
                 return node.href;
             }
         } else if(isElementClickable(node)){  // special href # button
+            action = "eaf::click";
             node.click();
         } else if(node.nodeName.toLowerCase() === 'p'||
                   node.nodeName.toLowerCase() === 'span') {  // select text section
+            action = "eaf::select_p_span";
             window.getSelection().selectAllChildren(node);
         }
-        return "";
+        return action;
     };
 
     self.generateClickMarkerList = () => {
