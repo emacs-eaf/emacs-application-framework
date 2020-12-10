@@ -46,35 +46,10 @@
         return `${path.join(' > ')}`.toLowerCase();
     }
 
-    function getCoords(node){
-        if (node.getBoundingClientRect){
-            let rect = node.getBoundingClientRect();
-            return [ rect.top, rect.left, rect.right, rect.bottom, cssSelector(node) ];
-        }
-
-        return getCoords(node.parentNode); // TextNode not define getBoundingClientRect
-    }
-
-    function isElementOnScreen(rect){
-        let clientHeight = document.documentElement.clientHeight;
-        let clientWidth = document.documentElement.clientWidth;
-        return (rect[0] >= 0 && rect[0] <= clientHeight &&
-                rect[1] >= 0 && rect[1] <= clientWidth &&
-                rect[2] != 0 && rect[3] != 0);
-    }
-
-    function isElementOnTop(element, rect){
-        let topElement = document.elementFromPoint((rect[1] + rect[2])/2, (rect[0] + rect[3])/2);
-        return topElement != undefined && (element.isSameNode(topElement) || element.contains(topElement) || topElement.contains(element));
-    }
-
     function isElementClickable(e) {
-        let cssSelector = "a, button, select, input, textarea, summary, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button, *[role=button], *[role=link], *[role=menuitem], *[role=option], *[role=switch], *[role=tab], *[role=checkbox], *[role=combobox], *[role=menuitemcheckbox], *[role=menuitemradio]";
-        let blacklistSelector = "path, svg";
-        return (e.matches(cssSelector) || getComputedStyle(e).cursor === "pointer"
-                || getComputedStyle(e).cursor.substr(0, 4) === "url("
-                || e.closest("a, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button") !== null)
-            && ! e.matches(blacklistSelector);
+        let clickSelectors = "a, button, select, input, textarea, summary, *[onclick], *[contenteditable=true], *.jfk-button, *.goog-flat-menu-button, *[role=button], *[role=link], *[role=menuitem], *[role=option], *[role=switch], *[role=tab], *[role=checkbox], *[role=combobox], *[role=menuitemcheckbox], *[role=menuitemradio]";
+
+        return e.matches(clickSelectors) || getComputedStyle(e).cursor.substr(0, 4) === "url(";
     }
 
     function isEditable(element) {
@@ -92,8 +67,11 @@
     }
 
     function getRealRect(elm) {
+        if(!elm.getBoundingClientRect){
+            return getRealRect(elm.parentNode);
+        };
         if (elm.childElementCount === 0) {
-            var r = elm.getClientRects();
+            let r = elm.getClientRects();
             if (r.length === 3) {
                 // for a clipped A tag
                 return r[1];
@@ -104,7 +82,7 @@
                 return elm.getBoundingClientRect();
             }
         } else if (elm.childElementCount === 1 && elm.firstElementChild.textContent) {
-            var r = elm.firstElementChild.getBoundingClientRect();
+            let r = elm.firstElementChild.getBoundingClientRect();
             if (r.width === 0 || r.height === 0) {
                 r = elm.getBoundingClientRect();
             }
@@ -117,14 +95,14 @@
     function filterOverlapElements(elements) {
         // filter out tiny elements
         elements = elements.filter(function(e) {
-            var be = getRealRect(e);
+            let be = getRealRect(e);
             if (e.disabled || e.readOnly || !isElementDrawn(e, be)) {
                 return false;
             } else if (e.matches("input, textarea, select, form") || e.contentEditable === "true") {
                 return true;
             } else {
-                var el = document.elementFromPoint(be.left + be.width/2, be.top + be.height/2);
-                return !el || el.shadowRoot && el.childElementCount === 0 || el.contains(e) || e.contains(el);
+                let topElement = document.elementFromPoint(be.left + be.width/2, be.top + be.height/2);
+                return !topElement || (topElement.shadowRoot && topElement.childElementCount === 0) || topElement.isSameNode(e) || e.contains(topElement) || topElement.contains(e);
             }
         });
 
@@ -165,28 +143,6 @@
         return result.reverse();
     }
 
-    function hasCopy(validRects, rect){
-        for(let i = 0; i < validRects.length; i++) {
-            let each = validRects[i];
-            if(each[0] === rect[0] && each[1] === rect[1]){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function addElementToRects(validRects, elements){
-        let rect;
-        for(let i = 0; i < elements.length; i++) {
-            rect = getCoords(elements[i]);
-            if(!hasCopy(validRects, rect) &&
-               isElementOnScreen(rect) &&
-               isElementOnTop(elements[i], rect)){
-                validRects.push(rect);
-            }
-        }
-    }
-
     function cAdd1(keyCounter, index, maxDigit){
         if(keyCounter[index] + 1 == maxDigit){
             keyCounter[index] = 0;
@@ -220,7 +176,6 @@
 
 
     self.generateMarker = (selectors) => {
-
         let style = document.createElement('style');
         document.head.appendChild(style);
         style.type = 'text/css';
@@ -278,25 +233,22 @@ box-shadow: 0px 3px 7px 0px rgba(0, 0, 0, 0.3);\
 z-index: 100000;\
 }'));
 
-        let validRects = [];
-        if (typeof(selectors)=="function"){
-            addElementToRects(validRects, selectors());
-        }else if (typeof(selectors) == "string"){
-            selectors = selectors.split(",");
-            selectors.forEach((s) => addElementToRects(validRects, document.querySelectorAll(s.trim())));
-        }
-
         let body = document.querySelector('body');
         let markerContainer = document.createElement('div');
         markerContainer.setAttribute('class', 'eaf-marker-container');
         body.insertAdjacentElement('afterend', markerContainer);
-        for(let i = 0; i < validRects.length; i++) {
-            let marker = document.createElement('div');
-            marker.setAttribute('class', 'eaf-marker');
-            marker.setAttribute('style', 'left: ' + validRects[i][1] + 'px; top: ' + validRects[i][0] + 'px;');
-            marker.setAttribute('pointed-link', validRects[i][4]);
-
-            markerContainer.appendChild(marker);
+        for(let i = 0; i < selectors.length; i++) {
+            if(selectors[i] != undefined){
+                if(!selectors[i].tagName){
+                    selectors[i] = selectors[i].parentNode;
+                }
+                let marker = document.createElement('div');
+                let rect = selectors[i].getBoundingClientRect();
+                marker.setAttribute('class', 'eaf-marker');
+                marker.setAttribute('style', 'left: ' + rect.x + 'px; top: ' + rect.y + 'px;');
+                marker.setAttribute('pointed-link', cssSelector(selectors[i]));
+                markerContainer.appendChild(marker);
+            }
         }
         generateKeys(markerContainer);
     };
@@ -319,7 +271,7 @@ z-index: 100000;\
 
     self.gotoMarker = (key, callback)=>{
         selector = self.getMarkerSelector(key);
-        if (selector !== undefined && callback !== undefined){
+        if (selector != undefined && callback != undefined){
             return callback(document.querySelector(selector));
         } else {
             return "";
@@ -345,8 +297,8 @@ z-index: 100000;\
                 moveCursorToEnd(node); // move cursor to the end of line after focus.
             }
         } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != ''){
-            if (node.href.includes('javascript:void')){
-                action = "eaf::[js:void]click";
+            if (node.href.includes('javascript:void') || node.getAttribute('href') == '#'){
+                action = "eaf::[href]click";
                 node.click();
             } else {
                 return node.href;

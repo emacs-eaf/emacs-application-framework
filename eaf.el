@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Dec  7 16:01:12 2020 (-0500)
+;; Last-Updated: Wed Dec  9 11:11:22 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1335,6 +1335,7 @@ to edit EAF keybindings!" fun fun)))
   )
 
 (defun eaf--toggle-caret-browsing (caret-status)
+  "Toggle caret browsing given CARET-STATUS."
   (if caret-status
       (eaf--gen-keybinding-map eaf-browser-caret-mode-keybinding t)
     (eaf--gen-keybinding-map eaf-browser-keybinding))

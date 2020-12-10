@@ -476,11 +476,11 @@ Otherwise, scroll page up.
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateClickMarkerList)")
+        self.eval_js("Marker.generateMarker(Marker.generateClickMarkerList())")
 
     def get_text_markers(self):
         ''' Get visiable text markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList)");
+        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList())");
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
@@ -517,7 +517,7 @@ Otherwise, scroll page up.
 
     def get_code_markers(self):
         ''' Get the code markers.'''
-        self.eval_js("Marker.generateMarker('pre')")
+        self.eval_js("Marker.generateMarker(document.querySelectorAll('pre'))")
 
     def get_code_content(self, marker):
         ''' Get the code content according to marker.'''
@@ -533,7 +533,6 @@ Otherwise, scroll page up.
         self.eval_js("CaretBrowsing.setInitialCursor(true);")
         self.buffer.caret_browsing_mode = True
         self.buffer.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.buffer.caret_browsing_mode else "nil"))
-
         self.buffer.caret_toggle_mark()
         self.buffer.caret_next_word()
 
@@ -543,7 +542,7 @@ Otherwise, scroll page up.
         content = self.get_code_content(marker)
         if content != "":
             self.buffer.set_clipboard_text(content)
-            self.buffer.message_to_emacs.emit("Copy code")
+            self.buffer.message_to_emacs.emit("Copied code block!")
 
     def get_focus_text(self):
         ''' Get the focus text.'''
@@ -1084,6 +1083,7 @@ class BrowserBuffer(Buffer):
            callback_tag == "select_marker_text" or \
            callback_tag == "caret_at_line" or \
            callback_tag == "copy_link" or \
+           callback_tag == "copy_code" or \
            callback_tag == "edit_url":
             self.buffer_widget.cleanup_links_dom()
 
@@ -1262,7 +1262,7 @@ class BrowserBuffer(Buffer):
     def copy_text(self):
         ''' Copy selected text.'''
         self.buffer_widget.copy_text()
-        self.message_to_emacs.emit("Copy selected text.")
+        self.message_to_emacs.emit("Copied selected text.")
 
     @interactive()
     def copy_code(self):
