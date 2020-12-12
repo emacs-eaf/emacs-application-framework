@@ -340,9 +340,15 @@ class PdfViewerWidget(QWidget):
         this watch will auto remove.
         '''
         if path == self.url:
+            try:
+                # Some program will generate `middle` file, but file already changed, fitz try to
+                # open the `middle` file caused error.
+                self.document = fitz.open(path)
+            except:
+                return
+
             self.buffer.message_to_emacs.emit("Detect %s pdf file have been changed." %path)
             self.page_cache_pixmap_dict.clear()
-            self.document = fitz.open(path)
             self.update()
             # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
             if len(self.file_changed_wacher.files()) == 0 :
