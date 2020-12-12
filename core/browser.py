@@ -730,6 +730,10 @@ class BrowserBuffer(Buffer):
         self.build_interactive_method(self.buffer_widget, "back", "history_backward", insert_or_do=True)
         self.build_interactive_method(self.buffer_widget, "forward", "history_forward", insert_or_do=True)
 
+        # Reset to default zoom when page init or page url changed.
+        self.reset_default_zoom()
+        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+
     def add_password_entry(self):
         password, form_data = self.buffer_widget.execute_js("""
         var password = "";

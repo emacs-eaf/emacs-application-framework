@@ -65,9 +65,6 @@ class AppBuffer(BrowserBuffer):
 
         self.build_all_methods(self)
 
-        # Reset to default zoom when page init or url changed.
-        self.reset_default_zoom()
-        
         QTimer.singleShot(500, self.init_file)
 
     def resize_view(self):

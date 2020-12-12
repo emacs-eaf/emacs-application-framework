@@ -55,12 +55,10 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.urlChanged.connect(self.set_adblocker)
         self.buffer_widget.urlChanged.connect(self.caret_exit)
 
-        # Reset to default zoom when page init or url changed.
-        self.reset_default_zoom()
+        # Record url when url changed.
         self.buffer_widget.urlChanged.connect(self.update_url)
 
     def update_url(self, url):
-        self.reset_default_zoom()
         self.url = self.buffer_widget.url().toString()
 
     def set_adblocker(self, url):

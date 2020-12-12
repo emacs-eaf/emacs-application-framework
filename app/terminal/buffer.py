@@ -67,8 +67,6 @@ class AppBuffer(BrowserBuffer):
 
         self.open_terminal_page()
 
-        self.reset_default_zoom()
-
         QTimer.singleShot(250, self.focus_widget)
 
         self.build_all_methods(self)
