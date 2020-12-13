@@ -1968,7 +1968,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2455,10 +2455,14 @@ Otherwise send key 'esc' to browser."
   (if (member (getenv "DESKTOP_SESSION") eaf-wm-focus-fix-wms)
       (let ((xdotool-path (executable-find "xdotool")))
         (if xdotool-path
-            (shell-command (format "%s mousemove %d %d"
-                                   xdotool-path
-                                   (car (frame-edges))
-                                   (nth 3 (frame-edges))))
+            ;; `inhibit-message' can shut up Emacs, but we want
+            ;; it doesn't clean up echo area during saving
+            (with-temp-message ""
+              (let ((inhibit-message t))
+                (shell-command (format "%s mousemove %d %d"
+                                       xdotool-path
+                                       (car (frame-edges))
+                                       (nth 3 (frame-edges))))))
           (message "Please install xdotool to make mouse to frame bottom automatically.")))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
