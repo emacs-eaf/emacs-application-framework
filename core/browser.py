@@ -86,11 +86,13 @@ class BrowserView(QWebEngineView):
         css = path.readAll().data().decode("utf-8")
         SCRIPT = """
         (function() {
+        try {
         css = document.createElement('style');
         css.type = 'text/css';
         css.id = "%s";
         document.head.appendChild(css);
         css.innerText = `%s`;
+        } catch(e) {}
         })()
         """ % (name, css)
 
