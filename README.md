@@ -68,15 +68,17 @@ pip uninstall fitz
 pip install pymupdf
 ```
 
-2.
+2. For installing EAF, there are two routes: 
+Please make sure to modify `~/emacs.d/site-lisp` as per your setup/convenience.
 - *Git Clone*:
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/
 ```
+
 - *Quick Install*:
 ```Bash
 wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
-unzip master.zip && mv emacs-application-framework-master emacs-application-framework
+unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framework-master ~/.emacs.d/site-lisp/emacs-application-framework
 ```
 Use *Quick Install* option if you want to quickly install EAF source code and try it out.
 
