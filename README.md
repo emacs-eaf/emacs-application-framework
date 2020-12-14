@@ -100,6 +100,7 @@ If you use [use-package](https://github.com/jwiegley/use-package), you can use t
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
 Note 1: Do add (package-initialize) before using the use-package syntax, if you are using Emacs 24 onwards.
+
 Note 2: If you get the error `File is missing: Cannot open load file, No such file or directory, s` please make sure to add stable-melpa and elpa to your config and install `s.el`
 
 ### Dependency List
