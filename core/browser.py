@@ -469,7 +469,7 @@ Otherwise, scroll page up.
     @interactive()
     def get_url(self):
         ''' Get current url.'''
-        return self.execute_js("window.location.href;")
+        return self.url().toString().replace(" ", "%20")
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''
@@ -1013,7 +1013,7 @@ class BrowserBuffer(Buffer):
     def destroy_buffer(self):
         ''' Destroy the buffer.'''
         # Record close page.
-        self.close_page.emit(self.buffer_widget.url().toString())
+        self.close_page.emit(self.buffer_widget.get_url())
 
         # Load blank page to stop video playing, such as youtube.com.
         self.buffer_widget.open_url("about:blank")
@@ -1372,7 +1372,7 @@ class BrowserBuffer(Buffer):
 
     def record_history(self, new_title):
         ''' Record browser history.'''
-        new_url = self.buffer_widget.filter_url(self.buffer_widget.url().toString())
+        new_url = self.buffer_widget.filter_url(self.buffer_widget.get_url())
         if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.buffer_widget.filter_title(new_title) != "" and \
            self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
             self._record_history(new_title, new_url)
@@ -1516,7 +1516,7 @@ class BrowserBuffer(Buffer):
 
     def download_youtube_file(self, only_audio=False):
         ''' Download Youtube File.'''
-        url = self.buffer_widget.url().toString()
+        url = self.buffer_widget.get_url()
         if url.startswith("https://www.youtube.com"):
             import shutil
 

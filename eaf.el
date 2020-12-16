@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Dec  9 11:11:22 2020 (-0500)
+;; Last-Updated: Wed Dec 16 10:16:47 2020 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1972,8 +1972,8 @@ This function works best if paired with a fuzzy search package."
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
-         (history-url (eaf-is-valid-url (when (string-match "[^\s]+$" history)
-                                          (match-string 0 history)))))
+         (history-url (eaf-is-valid-url (when (string-match "⇰\s\\(.+\\)$" history)
+                                          (match-string 1 history)))))
     (cond (history-url (eaf-open-browser history-url))
           ((eaf-is-valid-url history) (eaf-open-browser history))
           (t (eaf-search-it history)))))
