@@ -67,24 +67,26 @@ pip uninstall fitz
 pip install pymupdf
 ```
 
-2.
+2. 两种下载EAF的方法：
+请注意将`~/emacs.d/site-lisp`替换成你的Emacs的对应配置路径。
 - 使用*Git Clone*:
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/
 ```
+
 - *快速下载*:
 ```Bash
 wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
-unzip master.zip && mv emacs-application-framework-master emacs-application-framework
+unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framework-master ~/.emacs.d/site-lisp/emacs-application-framework
 ```
 
-3. 把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
+3. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
 (require 'eaf)
 ```
 
-如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
+或者，如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
 ```Elisp
 (use-package eaf
@@ -152,7 +154,13 @@ EAF使用DBus的普通权限总线 (session bus)，请不要用 sudo 来启动EA
 ## Wiki
 强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)。
 
-Wiki包括架构设计，按键绑定，自定义选项和任务列表等文档。你还会在Wiki发现很多有用的技巧，比如Docker，Helm等，
+Wikio囊括了各种你想了解的EAF相关文档，包括了：
+1. 按键绑定
+2. 自定义选项
+3. 架构设计
+4. 任务列表
+
+你还会在Wiki发现很多有用的技巧，如Docker，Helm等，
 
 ## 常用问题
 

@@ -68,8 +68,8 @@ pip uninstall fitz
 pip install pymupdf
 ```
 
-2. For installing EAF, there are two routes: 
-Please make sure to modify `~/emacs.d/site-lisp` as per your setup/convenience.
+2. For installing EAF, there are two routes:
+Please make sure to modify `~/emacs.d/site-lisp` as per your Emacs setup.
 - *Git Clone*:
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/
@@ -89,7 +89,7 @@ Use *Quick Install* option if you want to quickly install EAF source code and tr
 (require 'eaf)
 ```
 or,
-If you use [use-package](https://github.com/jwiegley/use-package), you can use the following configuration.
+If you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
 
 ```Elisp
 (use-package eaf
@@ -101,9 +101,6 @@ If you use [use-package](https://github.com/jwiegley/use-package), you can use t
   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
   (eaf-bind-key take_photo "p" eaf-camera-keybinding))
 ```
-Note 1: Do add (package-initialize) before using the use-package syntax, if you are using Emacs 24 onwards.
-
-Note 2: If you get the error `File is missing: Cannot open load file, No such file or directory, s` please make sure to add stable-melpa and elpa to your config and install `s.el`
 
 ### Dependency List
 
@@ -164,9 +161,9 @@ Please don't use EAF when Emacs is started with sudo or root user, a root user c
 It is **highly** suggested to read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first before using EAF.
 
 Wiki consists of documentations on:
-* Keybindings 
+* Keybindings
 * Customization
-* Design 
+* Design
 * TODOLIST
 
 There also are some helpful tips to make EAF work with Docker, Helm, etc.
