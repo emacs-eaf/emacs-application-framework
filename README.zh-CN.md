@@ -154,7 +154,7 @@ EAF使用DBus的普通权限总线 (session bus)，请不要用 sudo 来启动EA
 ## Wiki
 强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)。
 
-Wikio囊括了各种你想了解的EAF相关文档，包括了：
+Wiki囊括了各种你想了解的EAF相关文档，包括了：
 1. 按键绑定
 2. 自定义选项
 3. 架构设计
