@@ -86,8 +86,6 @@ Use *Quick Install* option if you want to quickly install EAF source code and tr
 3. From here on, you can either Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
 ```Elisp
-;; For debugging uncomment Following
-;; (message "Loading [EAF] ...")
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/"')
 (require 'eaf)
 ```
@@ -212,12 +210,6 @@ If you're sure Python dependences are installed correctly, please create an issu
 If you use EAF Markdown Previewer, to get consistent previewing, you need to access [Github Personal access token site](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token. Then set the token:
 
 ```Elisp
-;; for security reasons (if you add files to git) you can create secret.el with 
-;; following parameters and then load it (instead of setting directly inside init.el)
-;; put in the rigth path to replace, and add it to .gitignore
-;; (load "~/.emacs.d/secret.el")
-
-;; inside secret.el [or init.el if you are fine with that.]
 (setq eaf-grip-token "yourtokencode")
 ```
 
