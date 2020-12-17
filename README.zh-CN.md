@@ -64,14 +64,15 @@ yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-f
 ```
 sudo pacman -R python-pymupdf
 pip uninstall fitz
-pip install pymupdf
+# grip 有依赖 flask 和 Markdown
+pip install pymupdf grip flask Markdown 
 ```
 
 2. 两种下载EAF的方法：
-请注意将`~/emacs.d/site-lisp`替换成你的Emacs的对应配置路径。
+请注意将`~/emacs.d/site-lisp/emacs-application-framework`替换成你的Emacs的对应配置路径。
 - 使用*Git Clone*:
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
 - *快速下载*:
@@ -83,6 +84,9 @@ unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framew
 3. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
+;; 用于调试取消注释
+;; (message "Loading [EAF] ...")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/"')
 (require 'eaf)
 ```
 
@@ -202,6 +206,12 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 Markdown预览程序依赖grip，你需要访问[Github Personal access token](https://github.com/settings/tokens/new?scopes=)去获取你个人的标记，然后通过下面的命令设置标记后，grip才能正常的工作：
 
 ```Elisp
+;; 出于安全原因（如果将文件添加到git），可以使用以下命令创建secret.el
+;; 以下参数，然后加载它（而不是直接在init.el中设置）
+;; 放入rigth路径进行替换，并将其添加到.gitignore
+;; (load "~/.emacs.d/secret.el")
+
+;; 内部secret.el [或init.el，如果可以的话。]
 (setq eaf-grip-token "yourtokencode")
 ```
 
