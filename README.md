@@ -65,14 +65,15 @@ You need install pymupdf from pip to avoid undefined symbol ```jbig2_page_out```
 ```
 sudo pacman -R python-pymupdf
 pip uninstall fitz
-pip install pymupdf
+# Grip has dependency of flask and Markdown
+pip install pymupdf grip flask Markdown
 ```
 
 2. For installing EAF, there are two routes:
 Please make sure to modify `~/emacs.d/site-lisp` as per your Emacs setup.
 - *Git Clone*:
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
 - *Quick Install*:

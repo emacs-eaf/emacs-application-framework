@@ -64,14 +64,15 @@ yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-f
 ```
 sudo pacman -R python-pymupdf
 pip uninstall fitz
-pip install pymupdf
+# grip 有依赖 flask 和 Markdown
+pip install pymupdf grip flask Markdown 
 ```
 
 2. 两种下载EAF的方法：
-请注意将`~/emacs.d/site-lisp`替换成你的Emacs的对应配置路径。
+请注意将`~/emacs.d/site-lisp/emacs-application-framework`替换成你的Emacs的对应配置路径。
 - 使用*Git Clone*:
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/
+git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
 - *快速下载*:
@@ -83,6 +84,9 @@ unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framew
 3. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
+;; 用于调试取消注释
+;; (message "Loading [EAF] ...")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/"')
 (require 'eaf)
 ```
 
