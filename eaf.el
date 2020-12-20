@@ -1448,8 +1448,13 @@ keybinding variable to eaf-app-binding-alist."
     (eaf-call "kill_buffer" eaf--buffer-id))
 
   ;; Kill eaf process when last eaf buffer closed.
-  (when (equal (length (eaf--get-eaf-buffers)) 1)
-    (eaf--kill-python-process)))
+  ;; We need add timer to avoid the last web page kill when terminal is exited.
+  (run-at-time
+   5 nil
+   (lambda ()
+     (when (equal (length (eaf--get-eaf-buffers)) 0)
+       (eaf--kill-python-process))
+     )))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
