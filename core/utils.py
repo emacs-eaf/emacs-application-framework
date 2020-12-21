@@ -179,29 +179,3 @@ def abstract(f):
         return f(*args, **kwargs)
     return wrap
 
-def activate_emacs_window():
-    """
-    When we press Alt + Tab in operating system.
-    Emacs window cannot get the focus normally if mouse in EAF buffer area.
-
-    So we use wmctrl activate on Emacs window after Alt + Tab operation.
-    """
-    import os
-    import shutil
-    import subprocess
-
-    if shutil.which("wmctrl"):
-        # Get emacs process pid.
-        emacs_pid = os.getppid()
-
-        # Get emacs window's xid from emacs process pid.
-        # Then use wmctrl activate emacs window.
-        #
-        # NOTE:
-        # Elisp code "(frame-parameter nil 'window-id)" just get xid of Emacs subwindow,
-        # not Emacs client window.
-        subprocess.Popen("wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==" + str(emacs_pid) + " {print $1; exit}')", shell=True)
-
-        return True
-    else:
-        return False

@@ -65,7 +65,7 @@ yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-f
 sudo pacman -R python-pymupdf
 pip uninstall fitz
 # grip 有依赖 flask 和 Markdown
-pip install pymupdf grip flask Markdown 
+pip install pymupdf grip flask Markdown
 ```
 
 2. 两种下载EAF的方法：
@@ -197,7 +197,7 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 我们认为不同的窗口管理器对于X11协议的支持不够完善才导致这样的问题。
 
-现在的解决方案是将`$DESKTOP_SESSION`环境变量添加进`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
+现在的解决方案是将命令`wmctrl -m`中Name的值加入`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
 
 ### `[EAF] *eaf* aborted (core dumped)` 奔溃了怎么办？
 请检查 `*eaf*` 这个窗口的内容。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。

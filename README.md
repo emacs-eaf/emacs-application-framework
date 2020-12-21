@@ -199,7 +199,7 @@ EAF confirms that the desktop environment or window manager you can work include
 
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
-One workaround is to add `$DESKTOP_SESSION` environment variable to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
+One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
 
 ### `[EAF] *eaf* aborted (core dumped)` error
 Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.

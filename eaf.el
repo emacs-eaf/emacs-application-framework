@@ -809,14 +809,18 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
+(defcustom eaf-wm-name ""
+  "The desktop name, set by function `eaf--get-current-desktop-name'."
+  :type 'string
+  :group 'eaf)
+
 (defcustom eaf-wm-focus-fix-wms
   `(
-    "i3"
-    "/usr/share/xsessions/i3"
-    "qtile"
-    "/usr/share/xsessions/qtile")
+    "i3"                                ;i3
+    "LG3D"                              ;qtile
+    )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
-Add $DESKTOP_SESSION environment variable to this list."
+Add NAME of command `wmctrl -m' to this list."
   :type 'list
   :group 'eaf)
 
@@ -1130,10 +1134,6 @@ Return t or nil based on the result of the call."
   "Serialize variable list."
   (json-encode eaf-var-list))
 
-(defun eaf-serialization-wm-focus-fix-wms-list ()
-  "Serialize `eaf-wm-focus-fix-wms'."
-  (json-encode eaf-wm-focus-fix-wms))
-
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -1146,7 +1146,6 @@ Return t or nil based on the result of the call."
                    (eaf-get-render-size)
                    (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
                    (list (eaf-serialization-var-list))
-                   (list (eaf-serialization-wm-focus-fix-wms-list))
                    ))
         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
         (process-environment (cl-copy-list process-environment)))
@@ -1362,7 +1361,6 @@ keybinding variable to eaf-app-binding-alist."
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (set (make-local-variable 'eaf--buffer-args) args)
-      (eaf-move-mouse-to-frame-bottom)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
@@ -2455,20 +2453,35 @@ Otherwise send key 'esc' to browser."
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))
 
-(defun eaf-move-mouse-to-frame-bottom ()
-  "Move mouse position to bottom."
-  (if (member (getenv "DESKTOP_SESSION") eaf-wm-focus-fix-wms)
-      (let ((xdotool-path (executable-find "xdotool")))
-        (if xdotool-path
-            ;; `inhibit-message' can shut up Emacs, but we want
-            ;; it doesn't clean up echo area during saving
-            (with-temp-message ""
-              (let ((inhibit-message t))
-                (shell-command (format "%s mousemove %d %d"
-                                       xdotool-path
-                                       (car (frame-edges))
-                                       (nth 3 (frame-edges))))))
-          (message "Please install xdotool to make mouse to frame bottom automatically.")))))
+(defun eaf--get-current-desktop-name ()
+  "Get current desktop name by `wmctrl'."
+  (if (string-empty-p eaf-wm-name)
+      (if (executable-find "wmctrl")
+          ;; Get desktop name by command `wmctrl -m'.
+          (second (split-string (first (split-string (shell-command-to-string "wmctrl -m") "\n")) ": "))
+        ;; Otherwise notify user and return emptry string.
+        (message "You need install wmctrl to get the name of desktop.")
+        "")
+    eaf-wm-name))
+
+(defun eaf-activate-emacs-window ()
+  "Activate emacs window."
+  (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
+      ;; When switch app focus in WM, such as, i3 or qtile.
+      ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
+      ;;
+      ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
+      (if (executable-find "xdotool")
+          (shell-command-to-string (format "xdotool mousemove %d %d" (car (frame-edges)) (nth 3 (frame-edges))))
+        (message "Please install xdotool to make mouse to frame bottom automatically."))
+
+    ;; When press Alt + Tab in DE, such as KDE.
+    ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
+    ;;
+    ;; So we use wmctrl activate on Emacs window after Alt + Tab operation.
+    (if (executable-find "wmctrl")
+        (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
+      (message "Please install wmctrl to active emacs window."))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()

@@ -23,7 +23,6 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import activate_emacs_window
 import os
 
 class View(QWidget):
@@ -111,20 +110,7 @@ class View(QWidget):
         # print(time.time(), event.type())
 
         if event.type() in [QEvent.ShortcutOverride]:
-            # When switch app focus in WM, such as, i3 or qtile.
-            # Emacs window cannot get the focus normally if mouse in EAF buffer area.
-            #
-            # So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-            if os.environ.get("DESKTOP_SESSION") in self.buffer.wm_focus_fix_list:
-                self.buffer.eval_in_emacs.emit('''(eaf-move-mouse-to-frame-bottom)''')
-            # When press Alt + Tab in DE, such as KDE.
-            # Emacs window cannot get the focus normally if mouse in EAF buffer area.
-            #
-            # So we use wmctrl activate on Emacs window after Alt + Tab operation.
-            else:
-                if not activate_emacs_window():
-                    self.buffer.message_to_emacs.emit(
-                        "You need install tool 'wmctrl' to activate Emacs window, make Emacs input correctly after Alt + Tab operation.")
+            self.buffer.eval_in_emacs.emit('''(eaf-activate-emacs-window)''')
 
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
