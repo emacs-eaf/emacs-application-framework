@@ -181,6 +181,9 @@ class AppBuffer(BrowserBuffer):
     def clear_selection(self):
         self.buffer_widget.eval_js("clear_selection();")
 
+    def clear(self):
+        self.buffer_widget.eval_js("clear();")
+
     def _search_text(self, text, is_backward = False):
         if self.search_term != text:
             self.search_term = text
