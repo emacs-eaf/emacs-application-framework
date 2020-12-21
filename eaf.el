@@ -563,6 +563,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-y" . "yank_text")
     ("C-S-a" . "select_all")
     ("C-S-l" . "clear_selection")
+    ("C-M-l" . "clear")
     ("M-DEL" . "eaf-send-alt-backspace-sequence")
     ("M-<backspace>" . "eaf-send-alt-backspace-sequence"))
   "The keybinding of EAF Terminal."
