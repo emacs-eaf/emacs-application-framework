@@ -1,0 +1,12 @@
+PyQt5==5.15.2
+PyQt5-sip==12.8.1
+PyQtWebEngine==5.15.2
+qrcode==6.1
+feedparser==6.0.2
+dbus-python==1.2.16
+pyinotify==0.9.6
+Markdown==3.3.3
+grip==4.5.2
+qtconsole==5.0.1
+pymupdf==1.18.4
+pygit2==1.4.0
