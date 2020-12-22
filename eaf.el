@@ -2459,7 +2459,7 @@ Otherwise send key 'esc' to browser."
   (if (string-empty-p eaf-wm-name)
       (if (executable-find "wmctrl")
           ;; Get desktop name by command `wmctrl -m'.
-          (second (split-string (first (split-string (shell-command-to-string "wmctrl -m") "\n")) ": "))
+          (cl-second (split-string (cl-first (split-string (shell-command-to-string "wmctrl -m") "\n")) ": "))
         ;; Otherwise notify user and return emptry string.
         (message "You need install wmctrl to get the name of desktop.")
         "")
