@@ -28,6 +28,7 @@ from core.utils import touch, string_to_base64, interactive
 from html import escape, unescape
 import os
 import base64
+import time
 
 class AppBuffer(BrowserBuffer):
 
@@ -237,7 +238,7 @@ class AppBuffer(BrowserBuffer):
 
     def get_save_path(self, extension_name):
         if self.url.strip() == "":
-            return os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic() + "." + extension_name)
+            return os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-mindmap-save-path"]), self.get_root_node_topic().replace(" ", "_") + time.strftime("_%Y%m%d_%H%M%S", time.localtime(int(time.time()))) + "." + extension_name)
         else:
             return os.path.splitext(self.url)[0] + "." + extension_name
 

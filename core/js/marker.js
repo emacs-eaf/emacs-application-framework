@@ -215,7 +215,7 @@ top: auto;\
 vertical-align: baseline;\
 white-space: normal;\
 width: auto;\
-z-index: 100000;\
+z-index: 2140000001;\
 }'));
         style.appendChild(document.createTextNode('\
 .eaf-marker {\
@@ -230,7 +230,7 @@ padding-right: 3px;\
 border: 1px solid #c38a22;\
 border-radius: 3px;\
 box-shadow: 0px 3px 7px 0px rgba(0, 0, 0, 0.3);\
-z-index: 100000;\
+z-index: 2140000001;\
 }'));
 
         let body = document.querySelector('body');

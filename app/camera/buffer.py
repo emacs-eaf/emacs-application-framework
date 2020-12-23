@@ -99,7 +99,7 @@ class CameraWidget(QWidget):
     def take_photo(self, camera_save_path):
         image_capture = QCameraImageCapture(self.camera)
         save_path = str(Path(os.path.expanduser(camera_save_path)))
-        photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(int(time.time()))))
+        photo_path = os.path.join(save_path, "EAF_Camera_Photo_" + time.strftime("%Y%m%d_%H%M%S", time.localtime(int(time.time()))))
         return image_capture.capture(photo_path)
 
     def stop_camera(self):
