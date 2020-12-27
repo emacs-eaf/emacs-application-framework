@@ -1972,7 +1972,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2483,6 +2483,24 @@ Otherwise send key 'esc' to browser."
     (if (executable-find "wmctrl")
         (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
       (message "Please install wmctrl to active emacs window."))))
+
+(defun eaf-elfeed-open-url ()
+  "Display the currently selected item in an eaf buffer."
+  (interactive)
+  (when (featurep 'elfeed)
+    (let ((browser (get-window-with-predicate
+                    (lambda (window)
+                      (with-current-buffer (window-buffer window)
+                        (string= eaf--buffer-app-name "browser")))))
+          (entry (elfeed-search-selected :ignore-region)))
+      (require 'elfeed-show)
+      (when (elfeed-entry-p entry)
+        (elfeed-untag entry 'unread)
+        (elfeed-search-update-entry entry)
+        (unless elfeed-search-remain-on-entry (forward-line))
+
+        (select-window (or browser (split-window-no-error nil nil 'right)))
+        (eaf-open-browser (elfeed-entry-link entry))))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
