@@ -31,7 +31,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 | <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
 |                                                    |                                                        |
 
-| Terminal Emulator                                 | RSS Reader (Integrated with Elfeed) Reader                                          |
+| Terminal Emulator                                 | RSS Reader (Integrated with Elfeed)                                           |
 | :--------:                                        | :------:                                            |
 | <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
 |                                                   |                                                     |
