@@ -2617,13 +2617,17 @@ Otherwise send key 'esc' to browser."
     (other-window -1)
     (apply orig-fun direction line args)))
 
-;; Make EAF as default pdf viewer.
+;; Make EAF as default app for supported extensions.
 (defun adviser-find-file (orig-fn file &rest args)
-  (let ((fn (if (commandp 'eaf-open) 'eaf-open orig-fn)))
-    (pcase (file-name-extension file)
-      ("pdf"  (apply fn file nil))
-      ("epub" (apply fn file nil))
-      (_      (apply orig-fn file args)))))
+  (let ((fn (if (commandp 'eaf-open) #'(lambda (file)
+                                         (eaf-open file)
+                                         (setq default-directory (file-name-directory file)))
+              orig-fn))
+        (ext (file-name-extension file))
+        (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list eaf-image-extension-list eaf-mindmap-extension-list)))
+    (if (member ext supported-exts)
+        (apply fn file nil)
+      (apply orig-fn file args))))
 (advice-add #'find-file :around #'adviser-find-file)
 
 (provide 'eaf)
