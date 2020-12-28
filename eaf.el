@@ -805,6 +805,11 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
   "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
   :type 'string)
 
+(defcustom eaf-elfeed-split-direction "below"
+  "Elfeed browser page display location.
+Default is `below', you can chang it with right."
+  :type 'string)
+
 (defcustom eaf-enable-debug nil
   "If you got segfault error, please turn this option.
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
@@ -812,8 +817,7 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
 
 (defcustom eaf-wm-name ""
   "The desktop name, set by function `eaf--get-current-desktop-name'."
-  :type 'string
-  :group 'eaf)
+  :type 'string)
 
 (defcustom eaf-wm-focus-fix-wms
   `(
@@ -822,8 +826,7 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 Add NAME of command `wmctrl -m' to this list."
-  :type 'list
-  :group 'eaf)
+  :type 'list)
 
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
@@ -1972,7 +1975,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2487,20 +2490,45 @@ Otherwise send key 'esc' to browser."
 (defun eaf-elfeed-open-url ()
   "Display the currently selected item in an eaf buffer."
   (interactive)
-  (when (featurep 'elfeed)
-    (let ((browser (get-window-with-predicate
-                    (lambda (window)
-                      (with-current-buffer (window-buffer window)
-                        (string= eaf--buffer-app-name "browser")))))
-          (entry (elfeed-search-selected :ignore-region)))
-      (require 'elfeed-show)
-      (when (elfeed-entry-p entry)
-        (elfeed-untag entry 'unread)
-        (elfeed-search-update-entry entry)
-        (unless elfeed-search-remain-on-entry (forward-line))
+  (if (featurep 'elfeed)
+      (let ((browser (get-window-with-predicate
+                      (lambda (window)
+                        (with-current-buffer (window-buffer window)
+                          (string= eaf--buffer-app-name "browser")))))
+            (entry (elfeed-search-selected :ignore-region))
+            current-window)
+        (require 'elfeed-show)
+        (when (elfeed-entry-p entry)
+          (elfeed-untag entry 'unread)
+          (elfeed-search-update-entry entry)
+          (unless elfeed-search-remain-on-entry (forward-line))
 
-        (select-window (or browser (split-window-no-error nil nil 'right)))
-        (eaf-open-browser (elfeed-entry-link entry))))))
+          ;; Open elfeed item in other window, and keep focus current window.
+          ;; We can use `scroll-other-window' scroll EAF browser buffer, it's a better way.
+          (if (string-equal eaf-elfeed-split-direction "below")
+              (if browser
+                  (progn
+                    (setq current-window (get-buffer-window))
+                    (select-window browser)
+                    (eaf-open-browser (elfeed-entry-link entry))
+                    (select-window current-window))
+                (split-window-no-error nil 30 'up)
+                (eaf-open-browser (elfeed-entry-link entry))
+                (other-window -1))
+            (if browser
+                (progn
+                  (setq current-window (get-buffer-window))
+                  (select-window browser)
+                  (eaf-open-browser (elfeed-entry-link entry))
+                  (select-window current-window))
+              (setq current-window (get-buffer-window))
+              (split-window-no-error nil 60 'right)
+              (other-window -1)
+              (eaf-open-browser (elfeed-entry-link entry))
+              (select-window current-window)
+              ))
+          ))
+    (message "Please install elfeed first.")))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
