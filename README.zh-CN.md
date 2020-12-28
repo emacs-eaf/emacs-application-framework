@@ -31,7 +31,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 | <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
 |                                                    |                                                        |
 
-| 终端模拟器                                        | RSS阅读器                                           |
+| 终端模拟器                                        | RSS阅读器 (集成Elfeed)                                           |
 | :--------:                                        | :------:                                            |
 | <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
 |                                                   |                                                     |
@@ -57,7 +57,7 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 以下这行是*Arch*系安装方式，同样的包在别的发行版的安装方式略有不同，请善用搜索引擎：
 
 ```Bash
-yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-feedparser python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip python-qtconsole filebrowser-bin wmctrl
+yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip python-qtconsole filebrowser-bin wmctrl
 ```
 
 同时，使用pip安装pymupdf库，避免错误打开PDF时遇到```jbig2_page_out```。
@@ -115,7 +115,6 @@ unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framew
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
 | python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务               |
 | python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
-| python-feedparser              | RSS阅读器                    | 解析RSS/Atom信息                         |
 | python-pyinotify               | 流程图                       | 监听 mmd 格式文件的变动                  |
 | python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式 |
 | aria2                          | 浏览器                       | 下载网络文件                             |
@@ -140,7 +139,6 @@ unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framew
 | 二维码下载文件   | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`           |
 | 二维码在线浏览器 | `M-x eaf-file-browser-qrcode`                                               |
 | 无线分享         | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
-| RSS新闻阅读器    | `M-x eaf-open-rss-reader`                                                   |
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软Office阅读器 | `M-x eaf-open-office`                                                       |
 | 流程图           | `M-x eaf-open` 输入 mmd 格式文件                                            |

@@ -574,37 +574,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Camera."
   :type 'cons)
 
-(defcustom eaf-rss-reader-keybinding
-  '(("a" . "add_subscription")
-    ("d" . "delete_subscription")
-    ("n" . "next_subscription")
-    ("p" . "prev_subscription")
-    ("N" . "last_subscription")
-    ("P" . "first_subscription")
-    ("j" . "next_article")
-    ("k" . "prev_article")
-    ("J" . "last_article")
-    ("K" . "first_article")
-    ("x" . "close_buffer")
-    ("," . "scroll_up")
-    ("." . "scroll_down")
-    ("SPC" . "scroll_up_page")
-    ("b" . "scroll_down_page")
-    ("<" . "scroll_to_begin")
-    (">" . "scroll_to_bottom")
-    ("M-s" . "open_link")
-    ("M-S" . "open_link_new_buffer")
-    ("C-s" . "search_text_forward")
-    ("C-r" . "search_text_backward")
-    ("C-n" . "scroll_up")
-    ("C-p" . "scroll_down")
-    ("C-v" . "scroll_up_page")
-    ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom"))
-  "The keybinding of EAF RSS Reader."
-  :type 'cons)
-
 (defcustom eaf-mindmap-keybinding
   '(("TAB" . "add_sub_node")
     ("RET" . "add_brother_node")
@@ -838,7 +807,6 @@ Add NAME of command `wmctrl -m' to this list."
     ("terminal" . eaf-terminal-keybinding)
     ("markdown-previewer" . eaf-browser-keybinding)
     ("org-previewer" . eaf-browser-keybinding)
-    ("rss-reader" . eaf-rss-reader-keybinding)
     ("mindmap" . eaf-mindmap-keybinding)
     ("mermaid" . eaf-mermaid-keybinding)
     ("jupyter" . eaf-jupyter-keybinding)
@@ -1859,12 +1827,6 @@ In that way the corresponding function will be called to retrieve the HTML
       (insert html))
     (eaf-open file "browser" "temp_html_file")))
 
-;;;###autoload
-(defun eaf-open-rss-reader ()
-  "Open EAF RSS Reader."
-  (interactive)
-  (eaf-open "RSS Reader" "rss-reader"))
-
 (dbus-register-signal
  :session "com.lazycat.eaf" "/com/lazycat/eaf"
  "com.lazycat.eaf" "open_dev_tools_page"
@@ -2550,7 +2512,6 @@ Otherwise send key 'esc' to browser."
                     'eaf-image-viewer-keybinding
                     'eaf-terminal-keybinding
                     'eaf-camera-keybinding
-                    'eaf-rss-reader-keybinding
                     'eaf-mindmap-keybinding
                     'eaf-mermaid-keybinding
                     'eaf-jupyter-keybinding
