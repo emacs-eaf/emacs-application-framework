@@ -776,7 +776,7 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 
 (defcustom eaf-elfeed-split-direction "below"
   "Elfeed browser page display location.
-Default is `below', you can chang it with right."
+Default is `below', you can chang it with `right'."
   :type 'string)
 
 (defcustom eaf-enable-debug nil
@@ -1937,7 +1937,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2454,44 +2454,41 @@ Otherwise send key 'esc' to browser."
   "Display the currently selected item in an eaf buffer."
   (interactive)
   (if (featurep 'elfeed)
-      (let ((browser (get-window-with-predicate
-                      (lambda (window)
-                        (with-current-buffer (window-buffer window)
-                          (string= eaf--buffer-app-name "browser")))))
-            (entry (elfeed-search-selected :ignore-region))
-            current-window)
+      (let ((entry (elfeed-search-selected :ignore-region)))
         (require 'elfeed-show)
         (when (elfeed-entry-p entry)
+          ;; Move to next feed item.
           (elfeed-untag entry 'unread)
           (elfeed-search-update-entry entry)
           (unless elfeed-search-remain-on-entry (forward-line))
 
-          ;; Open elfeed item in other window, and keep focus current window.
-          ;; We can use `scroll-other-window' scroll EAF browser buffer, it's a better way.
-          (if (string-equal eaf-elfeed-split-direction "below")
-              (if browser
-                  (progn
-                    (setq current-window (get-buffer-window))
-                    (select-window browser)
-                    (eaf-open-browser (elfeed-entry-link entry))
-                    (select-window current-window))
-                (split-window-no-error nil 30 'up)
-                (eaf-open-browser (elfeed-entry-link entry))
-                (other-window -1))
-            (if browser
-                (progn
-                  (setq current-window (get-buffer-window))
-                  (select-window browser)
-                  (eaf-open-browser (elfeed-entry-link entry))
-                  (select-window current-window))
-              (setq current-window (get-buffer-window))
-              (split-window-no-error nil 60 'right)
-              (other-window -1)
-              (eaf-open-browser (elfeed-entry-link entry))
-              (select-window current-window)
-              ))
+          ;; Open elfeed item in other window,
+          ;; and scroll EAF browser content by command `scroll-other-window'.
+          (delete-other-windows)
+          (pcase eaf-elfeed-split-direction
+            ("below"
+             (split-window-no-error nil 30 'up)
+             (eaf--select-window-by-direction "down")
+             (eaf-open-browser (elfeed-entry-link entry))
+             (eaf--select-window-by-direction "up"))
+            ("right"
+             (split-window-no-error nil 60 'right)
+             (eaf--select-window-by-direction "right")
+             (eaf-open-browser (elfeed-entry-link entry))
+             (eaf--select-window-by-direction "left")))
           ))
     (message "Please install elfeed first.")))
+
+(defun eaf--select-window-by-direction (direction)
+  "Select the most on the side according to the direction."
+  (ignore-errors
+    (dotimes (i 50)
+      (pcase direction
+        ("left" (windmove-left))
+        ("right" (windmove-right))
+        ("up" (windmove-up))
+        ("below" (windmove-down))
+        ))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
