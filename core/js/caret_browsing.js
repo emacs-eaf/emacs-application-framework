@@ -537,6 +537,8 @@ try {
 
     const CaretBrowsing = {};
 
+    window.CaretBrowsing = CaretBrowsing;
+
     CaretBrowsing.isEnabled = false;
 
     CaretBrowsing.onEnable = "flash";
