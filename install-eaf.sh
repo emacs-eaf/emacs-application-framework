@@ -2,68 +2,41 @@
 
 set -eu
 
+ARCH_PACKAGES=(git nodejs aria2 libreoffice wmctrl xdotool)
+ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode)
+ARCH_PACKAGES+=(python-dbus python-pyinotify python-markdown python-qtconsole)
+
+# System dependencies
 if apt-get -v &> /dev/null; then
     sudo apt-get install git nodejs aria2 libreoffice wmctrl xdotool
     sudo apt-get install libglib2.0-dev libdbus-1-3 libdbus-1-dev
     # Missing in Ubuntu: filebrowser-bin
+
+    sudo apt-get install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
+         python3-qrcode python3-feedparser python3-dbus python3-pyinotify \
+         python3-markdown python3-qtconsole python3-pygit2
+
 elif type pacman &> /dev/null; then
-    sudo pacman -Sy --needed yay nodejs aria2 libreoffice wmctrl xdotool
-    yay -S filebrowser-bin
-else
-    echo "Unsupported distribution."
-    exit 1
-fi
-
-# Use .emacs.d if not present
-export EMACS_ROOT="$XDG_CONFIG_HOME"/emacs
-
-if [ ! -d "$EMACS_ROOT" ]; then
-    export EMACS_ROOT="$HOME"/.emacs.d
-
-    if [ ! -d "$EMACS_ROOT" ]; then
-        echo "Could not determine the location of your Emacs config directory."
-        exit 1
+    sudo pacman -Sy --needed "${ARCH_PACKAGES[@]}"
+    if type yay &> /dev/null; then
+        yay -S filebrowser-bin
     fi
-fi
-
-export EAF_ROOT="$EMACS_ROOT"/eaf
-mkdir -p "$EAF_ROOT"/git "$EAF_ROOT"/venv "$EAF_ROOT"/bin
-
-if [ ! -d "$EAF_ROOT"/git/emacs-application-framework ]; then
-    git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 "$EAF_ROOT"/git/emacs-application-framework
-fi
-
-if type virtualenv &>/dev/null; then
-    virtualenv "$EAF_ROOT"/venv/emacs-application-framework
 else
-    echo "Cannot find virtualenv. Please install it."
+    echo "Unsupported distribution/package manager. Here are the packages that needs to be installed:"
+    for PCK in "${ARCH_PACKAGES[@]}";
+    do
+        echo "- ${PCK}"
+    done
+    echo "Please test their installation and submit an issue/PR to https://github.com/manateelazycat/emacs-application-framework for the script to be updated."
     exit 1
 fi
 
-source "$EAF_ROOT"/venv/emacs-application-framework/bin/activate
-
-if type pip &>/dev/null; then
-    pip install -r requirements.txt
+# Python dependencies
+if type pip3 &>/dev/null; then
+    pip3 install --user pymupdf grip
 elif type pip &>/dev/null; then
-    pip3 install -r requirements.txt
+    pip install --user pymupdf grip
 else
-    echo "Cannot find pip. Please install it !"
+    echo "Cannot find pip. Please install it before launching the script again."
     exit 1
 fi
-
-LAUNCH_SCRIPT="$EAF_ROOT"/bin/emacs-eaf.sh
-echo "Creating Emacs-EAF shortcut"
-{
-    echo "#!/bin/bash" ;
-    echo "" ;
-    echo "" ;
-    echo "source $EAF_ROOT/venv/emacs-application-framework/bin/activate"
-    echo "$HOME/.local/emacs/current/bin/emacs"
-} > "$LAUNCH_SCRIPT"
-chmod u+x "$LAUNCH_SCRIPT"
-
-echo "EAF is now installed !"
-echo "Remaining steps:"
-echo "- Set EAF load-path to: $EAF_ROOT/git/emacs-application-framework"
-echo "- Add $EAF_ROOT/bin to your PATH variable, e.g. export PATH=$EAF_ROOT/bin:\$PATH"
-echo "- Launch EAF-enabled Emacs via emacs-eaf.sh"
