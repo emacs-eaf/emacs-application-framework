@@ -52,40 +52,22 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 |                                                  |                                                         |
 
 ## 安装
-1. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。
-
-以下这行是*Arch*系安装方式，同样的包在别的发行版的安装方式略有不同，请善用搜索引擎：
-
-```Bash
-yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip python-qtconsole filebrowser-bin wmctrl
-```
-
-同时，使用pip安装pymupdf库，避免错误打开PDF时遇到```jbig2_page_out```。
-```
-sudo pacman -R python-pymupdf
-pip uninstall fitz
-# grip 有依赖 flask 和 Markdown
-pip install pymupdf grip flask Markdown
-```
-
-2. 两种下载EAF的方法：
-请注意将`~/emacs.d/site-lisp/emacs-application-framework`替换成你的Emacs的对应配置路径。
-- 使用*Git Clone*:
+1. 下载EAF:
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
-- *快速下载*:
+2. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。
+
 ```Bash
-wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
-unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framework-master ~/.emacs.d/site-lisp/emacs-application-framework
+cd emacs-application-framework
+chmod +x ./install-eaf.sh
+./install-eaf.sh
 ```
 
 3. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
-;; 用于调试取消注释
-;; (message "Loading [EAF] ...")
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/"')
 (require 'eaf)
 ```

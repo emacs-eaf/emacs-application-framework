@@ -53,35 +53,18 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 |                                                  |                                                         |
 
 ## Install
-1. Install EAF dependencies, an explaination of each dependency can be found in [Dependency List](#dependency-list).
-
-The following line is for *Arch*-based distros, same packages should be available to install on your particular distribution:
-
-```Bash
-yay -S python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode python-dbus python-pyinotify python-markdown nodejs aria2 libreoffice python-grip python-qtconsole filebrowser-bin wmctrl
-```
-
-You need install pymupdf from pip to avoid undefined symbol ```jbig2_page_out``` error.
-```
-sudo pacman -R python-pymupdf
-pip uninstall fitz
-# Grip has dependency of flask and Markdown
-pip install pymupdf grip flask Markdown
-```
-
-2. For installing EAF, there are two routes:
-Please make sure to modify `~/emacs.d/site-lisp` as per your Emacs setup.
-- *Git Clone*:
+1. Download EAF
 ```Bash
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
-- *Quick Install*:
+2. Install EAF dependencies, an explaination of each dependency can be found in [Dependency List](#dependency-list).
+
 ```Bash
-wget https://github.com/manateelazycat/emacs-application-framework/archive/master.zip
-unzip master.zip && mkdir -p ~/.emacs.d/site-lisp && mv emacs-application-framework-master ~/.emacs.d/site-lisp/emacs-application-framework
+cd emacs-application-framework
+chmod +x ./install-eaf.sh
+./install-eaf.sh
 ```
-Use *Quick Install* option if you want to quickly install EAF source code and try it out.
 
 3. From here on, you can either Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
