@@ -166,7 +166,7 @@
           var re = /:([^\x07].*?)\x07/g;
           arr = re.exec(msg.data)
           if(arr) {
-              title = arr[1];
+              title = arr[1].trimLeft();
               executing_command = ""
           }
       }
