@@ -68,7 +68,7 @@ chmod +x ./install-eaf.sh
 3. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
-(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/"')
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 (require 'eaf)
 ```
 
