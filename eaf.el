@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Dec 16 10:16:47 2020 (-0500)
+;; Last-Updated: Sat Jan  2 23:55:09 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -2588,17 +2588,43 @@ Otherwise send key 'esc' to browser."
     (apply orig-fun direction line args)))
 
 ;; Make EAF as default app for supported extensions.
-(defun adviser-find-file (orig-fn file &rest args)
-  (let ((fn (if (commandp 'eaf-open) #'(lambda (file)
-                                         (eaf-open file)
-                                         (setq default-directory (file-name-directory file)))
+;; Use `eaf-open' in `find-file'
+(defun eaf--find-file-advisor (orig-fn file &rest args)
+  "Advisor of `find-file' that opens EAF supported file using EAF.
+
+It currently identifies PDF, videos, images, and mindmap file extensions."
+  (let ((fn (if (commandp 'eaf-open)
+                #'(lambda (file)
+                    (eaf-open file)
+                    (setq default-directory (file-name-directory file)))
               orig-fn))
         (ext (file-name-extension file))
-        (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list eaf-image-extension-list eaf-mindmap-extension-list)))
+        (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
+                                eaf-image-extension-list eaf-mindmap-extension-list)))
     (if (member ext supported-exts)
         (apply fn file nil)
       (apply orig-fn file args))))
-(advice-add #'find-file :around #'adviser-find-file)
+(advice-add #'find-file :around #'eaf--find-file-advisor)
+
+;; Use `eaf-open' in `dired-find-file' and `dired-find-alternate-file'
+(defun eaf--dired-find-file-advisor (orig-fn)
+  "Advisor of `dired-find-file' and `dired-find-alternate-file' that opens EAF supported file using EAF.
+
+It currently identifies PDF, videos, images, and mindmap file extensions."
+  (dolist (file (dired-get-marked-files))
+    (let ((fn (if (commandp 'eaf-open)
+                  #'(lambda (file)
+                      (eaf-open file)
+                      (setq default-directory (file-name-directory file)))
+                orig-fn))
+          (ext (file-name-extension file))
+          (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
+                                  eaf-image-extension-list eaf-mindmap-extension-list)))
+      (if (member ext supported-exts)
+          (apply fn file nil)
+        (funcall-interactively orig-fn)))))
+(advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
+(advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
 (provide 'eaf)
 
