@@ -52,6 +52,13 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 | <img src="./screenshot/jupyter.png" width="400"> |                                                         |
 |                                                  |                                                         |
 
+## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
+- EAF talk & demo on the EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD).
+- Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
+- Youtube link:
+
+[![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
+
 ## Install
 1. Download EAF
 ```Bash
