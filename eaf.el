@@ -217,12 +217,6 @@ been initialized."
 
 (defvar eaf-last-frame-height 0)
 
-(defvar eaf-find-alternate-file-in-dired nil
-  "If non-nil, calling `eaf-open-this-from-dired' determines file types to open.
-
-EAF unrecognizable files will be opened by `dired-find-alternate-file' normally.
-Otherwise they will be opened normally with `dired-find-file'.")
-
 (defcustom eaf-grip-token ""
   "Github personal acess token, used by grip."
   :type 'string)
@@ -2047,24 +2041,6 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
 (defun eaf-get-file-name-extension (file)
   "A wrapper around `file-name-extension' that downcases the extension of the FILE."
   (downcase (file-name-extension file)))
-
-(defun eaf-open-this-from-dired ()
-  "Open html/pdf/image/video files whenever possible with EAF in dired.
-Other files will open normally with `dired-find-file' or `dired-find-alternate-file'"
-  (interactive)
-  (dolist (file (dired-get-marked-files))
-    (cond
-     ((member (eaf-get-file-name-extension file) eaf-office-extension-list)
-      (eaf-open-office file))
-     ((eaf--get-app-for-extension
-       (eaf-get-file-name-extension file))
-      (eaf-open file))
-     (eaf-find-alternate-file-in-dired
-      (dired-find-alternate-file))
-     (t (dired-find-file)))))
-
-;;;###autoload
-(define-obsolete-function-alias 'eaf-file-open-in-dired #'eaf-open-this-from-dired)
 
 ;;;###autoload
 (defun eaf-open (url &optional app-name args always-new)
