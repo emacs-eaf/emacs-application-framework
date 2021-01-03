@@ -121,7 +121,7 @@ class BrowserView(QWebEngineView):
         script = self.web_page.scripts().findScript(name)
         self.web_page.scripts().remove(script)
 
-    def open_download_manage_page(self):
+    def open_downloads_setting(self):
         ''' Open aria2 download manage page. '''
         self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-ng", "index.html")))
 
@@ -1260,10 +1260,10 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.translate_selected_text.emit(self.buffer_widget.selectedText())
 
     @interactive(insert_or_do=True)
-    def open_download_manage_page(self):
+    def open_downloads_setting(self):
         ''' Open download manage page.'''
         self.try_start_aria2_daemon()
-        self.buffer_widget.open_download_manage_page()
+        self.buffer_widget.open_downloads_setting()
 
     def copy_text(self):
         ''' Copy selected text.'''
@@ -1487,7 +1487,7 @@ class BrowserBuffer(Buffer):
         ''' Eval JS interactively.'''
         self.send_input_message("Eval JS: ", "eval_js")
 
-    def open_dev_tool_page(self):
+    def open_devtools(self):
         ''' Open dev-tool page.'''
         self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
 

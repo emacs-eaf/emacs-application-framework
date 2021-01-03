@@ -44,6 +44,8 @@
 try {
     const axs = {};
 
+    window.axs = axs;
+
     axs.dom = {};
 
     axs.color = {};
