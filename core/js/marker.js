@@ -1,6 +1,6 @@
-(function(_) {
-    let self;
-    _.Marker = self = {};
+try {
+    let Marker = {};
+    window.Marker = Marker;
 
     function getVisibleElements(filter) {
         let all = Array.from(document.documentElement.getElementsByTagName("*"));
@@ -175,7 +175,7 @@
     }
 
 
-    self.generateMarker = (selectors) => {
+    Marker.generateMarker = (selectors) => {
         let style = document.createElement('style');
         document.head.appendChild(style);
         style.type = 'text/css';
@@ -253,7 +253,7 @@ z-index: 2140000001;\
         generateKeys(markerContainer);
     };
 
-    self.getMarkerSelector = (key) => {
+    Marker.getMarkerSelector = (key) => {
         let markers = document.querySelectorAll('.eaf-marker');
         let match;
         for(let i = 0; i < markers.length; i++) {
@@ -269,8 +269,8 @@ z-index: 2140000001;\
         }
     };
 
-    self.gotoMarker = (key, callback)=>{
-        selector = self.getMarkerSelector(key);
+    Marker.gotoMarker = (key, callback)=>{
+        selector = Marker.getMarkerSelector(key);
         if (selector != undefined && callback != undefined){
             return callback(document.querySelector(selector));
         } else {
@@ -279,7 +279,7 @@ z-index: 2140000001;\
     };
 
     // this is callback function which call by core/browser.py get_mark_link
-    self.getMarkerAction = (node) => {
+    Marker.getMarkerAction = (node) => {
         action = "";
         if(node.nodeName.toLowerCase() === 'select'){
             action = "eaf::[select]focus";
@@ -314,7 +314,7 @@ z-index: 2140000001;\
         return action;
     };
 
-    self.generateClickMarkerList = () => {
+    Marker.generateClickMarkerList = () => {
         let elements = getVisibleElements(function(e, v) {
             if(isElementClickable(e)) v.push(e);
         });
@@ -322,7 +322,7 @@ z-index: 2140000001;\
         return elements;
     };
 
-    self.generateTextMarkerList = () => {
+    Marker.generateTextMarkerList = () => {
         let elements = getVisibleElements(function(e, v) {
             let aa = e.childNodes;
             for (let i = 0, len = aa.length; i < len; i++) {
@@ -347,4 +347,12 @@ z-index: 2140000001;\
         return elements;
     };
 
-})(window);
+
+    Marker.cleanupLinks = () => {
+        try {
+            document.querySelector('.eaf-marker-container').remove();
+            document.querySelector('.eaf-style').remove();
+        } catch (err) {}
+    };
+
+} catch (e) {}

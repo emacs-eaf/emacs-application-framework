@@ -47,12 +47,13 @@ class BrowserView(QWebEngineView):
     translate_selected_text = QtCore.pyqtSignal(str)
     trigger_focus_event = QtCore.pyqtSignal(str)
 
-    def __init__(self, buffer_id, config_dir):
+    def __init__(self, buffer_id, config_dir, emacs_var_dict):
         super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
         self.buffer_id = buffer_id
         self.config_dir = config_dir
+        self.emacs_var_dict = emacs_var_dict
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
@@ -471,22 +472,28 @@ Otherwise, scroll page up.
         ''' Get current url.'''
         return self.url().toString().replace(" ", "%20")
 
+    def load_marker_file(self):
+        self.eval_js(self.marker_js_raw.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+
     def cleanup_links_dom(self):
         ''' Clean up links.'''
-        self.eval_js("document.querySelector('.eaf-marker-container').remove();")
-        self.eval_js("document.querySelector('.eaf-style').remove();")
+        self.load_marker_file()
+        self.eval_js("Marker.cleanupLinks();")
 
     def get_link_markers(self):
         ''' Get link markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateClickMarkerList())")
+        self.load_marker_file()
+        self.eval_js("Marker.generateMarker(Marker.generateClickMarkerList());")
 
     def get_text_markers(self):
         ''' Get visiable text markers.'''
-        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList())");
+        self.load_marker_file()
+        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList());");
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
         # print(self.execute_js("Marker.getMarkerSelector('%s')" % str(marker)))
+        self.load_marker_file()
         link = self.execute_js("Marker.gotoMarker('%s', Marker.getMarkerAction)" % str(marker))
         self.cleanup_links_dom()
         if link.startswith("eaf::"):
@@ -519,16 +526,19 @@ Otherwise, scroll page up.
 
     def get_code_markers(self):
         ''' Get the code markers.'''
+        self.load_marker_file()
         self.eval_js("Marker.generateMarker(document.querySelectorAll('pre'))")
 
     def get_code_content(self, marker):
         ''' Get the code content according to marker.'''
+        self.load_marker_file()
         content = self.execute_js("Marker.gotoMarker('%s', (e)=> e.textContent)" % str(marker))
         self.cleanup_links_dom()
         return content
 
     def _caret_at_line(self, marker):
         '''Enable caret by marker'''
+        self.load_marker_file()
         self.execute_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
         self.cleanup_links_dom()
 
@@ -634,7 +644,7 @@ class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view)
 
-        self.add_widget(BrowserView(buffer_id, config_dir))
+        self.add_widget(BrowserView(buffer_id, config_dir, emacs_var_dict))
 
         self.config_dir = config_dir
         self.page_closed = False
@@ -896,7 +906,7 @@ class BrowserBuffer(Buffer):
             self.update()
         elif progress == 100 and self.draw_progressbar:
             self.init_auto_fill()
-            self.buffer_widget.eval_js(self.buffer_widget.marker_js_raw.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+            self.buffer_widget.load_marker_file()
 
             cursor_foreground_color = ""
             cursor_background_color = ""
