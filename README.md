@@ -104,7 +104,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
 | python-dbus                    | Core                                 | DBus IPC to connect Python with Elisp         |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
-| wmctrl           | Core                                 | Activate Emacs window input focus           |
+| wmctrl                         | Core                                 | Activate Emacs window input focus             |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
 | python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
 | python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |

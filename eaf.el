@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jan  2 23:55:09 2021 (-0500)
+;; Last-Updated: Wed Jan  6 16:37:42 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -2572,7 +2572,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
   (let ((fn (if (commandp 'eaf-open)
                 #'(lambda (file)
                     (eaf-open file)
-                    (setq default-directory (file-name-directory file)))
+                    (setq-local default-directory (file-name-directory file)))
               orig-fn))
         (ext (file-name-extension file))
         (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
@@ -2591,7 +2591,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
     (let ((fn (if (commandp 'eaf-open)
                   #'(lambda (file)
                       (eaf-open file)
-                      (setq default-directory (file-name-directory file)))
+                      (setq-local default-directory (file-name-directory file)))
                 orig-fn))
           (ext (file-name-extension file))
           (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
