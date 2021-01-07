@@ -65,13 +65,19 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
-2. Install EAF dependencies, an explaination of each dependency can be found in [Dependency List](#dependency-list).
+2. Install EAF dependencies, an explaination of each dependency can be found in
+[Dependency List](#dependency-list). The following install script should work
+correctly for arch and debian based distributions, and probably for Fedora.<sup>[1](#myfootnote1)</sup>
 
 ```Bash
 cd emacs-application-framework
 chmod +x ./install-eaf.sh
 ./install-eaf.sh
 ```
+
+For other distributions use the before mentioned dependency list to instal the correct dependencies manually
+
+<a name="myfootnote1">1</a>: The current list of required Fedora packages has not been tested. Feedback about it (in)completeness is very welcome.
 
 3. From here on, you can either Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
