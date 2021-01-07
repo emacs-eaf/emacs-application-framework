@@ -15,6 +15,14 @@ if apt-get -v &> /dev/null; then
     sudo apt-get install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
          python3-qrcode python3-feedparser python3-dbus python3-pyinotify \
          python3-markdown python3-qtconsole python3-pygit2
+         
+elif dnf &> /dev/null; then
+        sudo dnf install git nodejs aria2 libreoffice wmctrl xdotool
+        sudo dnf install glib2-devel dbus-devel
+
+        sudo dnf install python3-pyqt5-sip pyqtwebengine-devel python3-qrcode \
+             python3-feedparser python3-dbus  python3-inotify python3-markdown \
+             python3-qtconsole python3-pygit2
 
 elif type pacman &> /dev/null; then
     sudo pacman -Sy --needed "${ARCH_PACKAGES[@]}"
