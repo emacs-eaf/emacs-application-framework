@@ -1,4 +1,4 @@
-;; eaf-evil.el --- Emacs application framework  -*- lexical-binding: t; -*-
+;;; eaf-evil.el --- Emacs application framework  -*- lexical-binding: t; -*-
 
 ;; Filename: eaf-evil.el
 ;; Description: Emacs application framework
@@ -44,6 +44,7 @@
   "Leader key bind"
   :type 'keymap)
 
+;;;###autoload
 (defun eaf-enable-evil-intergration ()
   "EAF evil intergration."
   (interactive)
@@ -59,7 +60,7 @@
 
   (eaf-bind-key clear_focus "<escape>" eaf-browser-keybinding))
 
-(with-eval-after-load "evil"
+(with-eval-after-load "eaf"
   (eaf-enable-evil-intergration))
 
 (provide 'eaf-evil)
