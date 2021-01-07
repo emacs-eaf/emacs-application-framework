@@ -60,7 +60,7 @@
 
   (eaf-bind-key clear_focus "<escape>" eaf-browser-keybinding))
 
-(with-eval-after-load "evil"
+(with-eval-after-load "eaf"
   (eaf-enable-evil-intergration))
 
 (provide 'eaf-evil)
