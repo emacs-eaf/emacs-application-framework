@@ -1,4 +1,4 @@
-;; eaf.el --- Emacs application framework  -*- lexical-binding: t; -*-
+;;; eaf.el --- Emacs application framework  -*- lexical-binding: t; -*-
 
 ;; Filename: eaf.el
 ;; Description: Emacs application framework
