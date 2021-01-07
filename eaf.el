@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Jan  6 16:37:42 2021 (-0500)
+;; Last-Updated: Wed Jan  6 22:15:01 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -1315,6 +1315,8 @@ keybinding variable to eaf-app-binding-alist."
          (eaf-buffer (generate-new-buffer eaf-buffer-name)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
+      (when (file-exists-p url)
+        (setq-local default-directory (file-name-directory url)))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
@@ -2571,8 +2573,7 @@ Otherwise send key 'esc' to browser."
 It currently identifies PDF, videos, images, and mindmap file extensions."
   (let ((fn (if (commandp 'eaf-open)
                 #'(lambda (file)
-                    (eaf-open file)
-                    (setq-local default-directory (file-name-directory file)))
+                    (eaf-open file))
               orig-fn))
         (ext (file-name-extension file))
         (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
@@ -2590,8 +2591,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
   (dolist (file (dired-get-marked-files))
     (let ((fn (if (commandp 'eaf-open)
                   #'(lambda (file)
-                      (eaf-open file)
-                      (setq-local default-directory (file-name-directory file)))
+                      (eaf-open file))
                 orig-fn))
           (ext (file-name-extension file))
           (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
