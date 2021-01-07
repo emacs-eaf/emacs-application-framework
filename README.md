@@ -138,7 +138,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Jupyter             | `M-x eaf-open-jupyter`                                                 |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
-- To open the file under the cursor in `dired` using appropriate EAF Application, use `eaf-open-this-from-dired` instead.
 - EAF Browser and PDF Viewer support Emacs built-in bookmark operation, with `M-x bookmark-set` (defaulted to `C-x r m`) and `M-x bookmark-bmenu-list` (defaulted to `C-x r l`).
 
 ```

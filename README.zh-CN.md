@@ -136,7 +136,6 @@ chmod +x ./install-eaf.sh
 | jupyter          | `M-x eaf-open-jupyter`                                                      |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
 
-- 在`dired`文件管理器中，建议绑定按键到命令 `eaf-open-this-from-dired` ，它会自动用合适的EAF应用来打开文件。
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
 ```
