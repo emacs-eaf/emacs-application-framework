@@ -44,6 +44,7 @@
   "Leader key bind"
   :type 'keymap)
 
+;;;###autoload
 (defun eaf-enable-evil-intergration ()
   "EAF evil intergration."
   (interactive)
