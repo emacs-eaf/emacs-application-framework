@@ -934,6 +934,7 @@ For now only EAF browser app is supported."
           ((equal app "pdf-viewer")
            (eaf-open (cdr (assq 'filename bookmark)))))))
 
+;;;###autoload
 (defun eaf-open-bookmark ()
   "Command to open or create EAF bookmarks with completion."
   (interactive)
