@@ -1219,7 +1219,7 @@ class PdfViewerWidget(QWidget):
 
     def get_cursor_absolute_position(self):
         start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
+        last_page_index = min(self.page_total_number - 1, self.get_last_page_index())
         pos = self.mapFromGlobal(QCursor.pos()) # map global coordinate to widget coordinate.
         ex, ey = pos.x(), pos.y()
 
