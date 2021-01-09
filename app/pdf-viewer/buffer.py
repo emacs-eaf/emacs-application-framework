@@ -1130,47 +1130,50 @@ class PdfViewerWidget(QWidget):
         self.start_char_rect_index = None
 
     def hover_annot(self):
-        ex, ey, page_index = self.get_cursor_absolute_position()
-        page = self.document[page_index]
-        annot = page.firstAnnot
-        if not annot:
-            return None, None
+        try:
+            ex, ey, page_index = self.get_cursor_absolute_position()
+            page = self.document[page_index]
+            annot = page.firstAnnot
+            if not annot:
+                return None, None
 
-        annots = []
-        while annot:
-            annots.append(annot)
-            annot = annot.next
+            annots = []
+            while annot:
+                annots.append(annot)
+                annot = annot.next
 
-        is_hover_annot = False
-        current_annot = None
-        for annot in annots:
-            if fitz.Point(ex, ey) in annot.rect:
-                # self.buffer.message_to_emacs.emit(annot.info["content"])
-                is_hover_annot = True
-                current_annot = annot
-                opacity = 0.5
-                self.buffer.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
+            is_hover_annot = False
+            current_annot = None
+            for annot in annots:
+                if fitz.Point(ex, ey) in annot.rect:
+                    # self.buffer.message_to_emacs.emit(annot.info["content"])
+                    is_hover_annot = True
+                    current_annot = annot
+                    opacity = 0.5
+                    self.buffer.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
+                else:
+                    opacity = 1.0
+                if opacity != annot.opacity:
+                    annot.setOpacity(opacity)
+                    annot.update()
+
+            # update only if changed
+            if is_hover_annot != self.is_hover_annot:
+                self.is_hover_annot = is_hover_annot
+                self.page_cache_pixmap_dict.clear()
+                self.update()
+
+            if current_annot and current_annot.info["content"]:
+                if current_annot.info["id"] != self.last_hover_annot_id or not QToolTip.isVisible():
+                    QToolTip.showText(QCursor.pos(), current_annot.info["content"], None, QRect(), 10 * 1000)
+                self.last_hover_annot_id = current_annot.info["id"]
             else:
-                opacity = 1.0
-            if opacity != annot.opacity:
-                annot.setOpacity(opacity)
-                annot.update()
+                if QToolTip.isVisible():
+                    QToolTip.hideText()
 
-        # update only if changed
-        if is_hover_annot != self.is_hover_annot:
-            self.is_hover_annot = is_hover_annot
-            self.page_cache_pixmap_dict.clear()
-            self.update()
-
-        if current_annot and current_annot.info["content"]:
-            if current_annot.info["id"] != self.last_hover_annot_id or not QToolTip.isVisible():
-                QToolTip.showText(QCursor.pos(), current_annot.info["content"], None, QRect(), 10 * 1000)
-            self.last_hover_annot_id = current_annot.info["id"]
-        else:
-            if QToolTip.isVisible():
-                QToolTip.hideText()
-
-        return page, current_annot
+            return page, current_annot
+        except:
+            return None, None
 
     def save_annot(self):
         self.document.saveIncr()
