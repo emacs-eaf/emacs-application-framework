@@ -343,6 +343,7 @@ class PdfViewerWidget(QWidget):
             try:
                 # Some program will generate `middle` file, but file already changed, fitz try to
                 # open the `middle` file caused error.
+                time.sleep(0.1)
                 self.document = fitz.open(path)
             except:
                 return
