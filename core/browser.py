@@ -421,6 +421,7 @@ Otherwise, scroll page up.
         ''' Refresh the page.'''
         self.reload()
 
+    @interactive(insert_or_do=True)
     def copy_text(self):
         ''' Copy selected text.'''
         self.triggerPageAction(self.web_page.Copy)
