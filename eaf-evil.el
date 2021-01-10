@@ -64,3 +64,9 @@
   (eaf-enable-evil-intergration))
 
 (provide 'eaf-evil)
+
+; don't use-package byte-compile to suppress clear_focus error
+; https://github.com/melpa/melpa/issues/1817#issuecomment-47467282
+;; Local Variables:
+;; no-byte-compile: t
+;; End:
