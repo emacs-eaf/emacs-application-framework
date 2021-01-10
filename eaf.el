@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Jan  6 22:15:01 2021 (-0500)
+;; Last-Updated: Sun Jan 10 01:30:31 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -732,6 +732,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 (defcustom eaf-office-extension-list
   '("docx" "doc" "ppt" "pptx" "xlsx" "xls")
   "The extension list of office application."
+  :type 'cons)
+
+(defcustom eaf-find-file-ext-whitelist '()
+  "A whitelist of extensions to avoid when opening `find-file' file using EAF."
   :type 'cons)
 
 (defcustom eaf-mua-get-html
@@ -2566,6 +2570,14 @@ Otherwise send key 'esc' to browser."
     (other-window -1)
     (apply orig-fun direction line args)))
 
+(defun eaf--find-file-ext-p (ext)
+  "Determine file extension EXT can be opened by EAF directly by `find-file'.
+
+You can configure a whitelist using `eaf-find-file-ext-whitelist'"
+  (and (member ext (append eaf-pdf-extension-list eaf-video-extension-list
+                           eaf-image-extension-list eaf-mindmap-extension-list))
+       (not (member ext eaf-find-file-ext-whitelist))))
+
 ;; Make EAF as default app for supported extensions.
 ;; Use `eaf-open' in `find-file'
 (defun eaf--find-file-advisor (orig-fn file &rest args)
@@ -2576,10 +2588,8 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
                 #'(lambda (file)
                     (eaf-open file))
               orig-fn))
-        (ext (file-name-extension file))
-        (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
-                                eaf-image-extension-list eaf-mindmap-extension-list)))
-    (if (member ext supported-exts)
+        (ext (file-name-extension file)))
+    (if (eaf--find-file-ext-p ext)
         (apply fn file nil)
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
@@ -2594,10 +2604,8 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
                   #'(lambda (file)
                       (eaf-open file))
                 orig-fn))
-          (ext (file-name-extension file))
-          (supported-exts (append eaf-pdf-extension-list eaf-video-extension-list
-                                  eaf-image-extension-list eaf-mindmap-extension-list)))
-      (if (member ext supported-exts)
+          (ext (file-name-extension file)))
+      (if (eaf--find-file-ext-p ext)
           (apply fn file nil)
         (funcall-interactively orig-fn)))))
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
