@@ -80,6 +80,12 @@
 
 (add-subdirs-to-load-path (expand-file-name "app" (file-name-directory (locate-library "eaf"))))
 
+(defun install-eaf-dependencies ()
+  (interactive)
+  (let ((default-directory "/sudo::")
+        (eaf-dir (file-name-directory (locate-library "eaf"))))
+    (shell-command (concat eaf-dir "install-eaf.sh" "&"))))
+
 (require 'dbus)
 (require 'subr-x)
 (require 'map)
