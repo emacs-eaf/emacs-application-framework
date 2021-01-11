@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Jan 10 01:30:31 2021 (-0500)
+;; Last-Updated: Mon Jan 11 13:47:34 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf.el
 ;; Keywords:
@@ -734,8 +734,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of office application."
   :type 'cons)
 
-(defcustom eaf-find-file-ext-whitelist '()
-  "A whitelist of extensions to avoid when opening `find-file' file using EAF."
+(defcustom eaf-find-file-ext-blacklist '()
+  "A blacklist of extensions to avoid when opening `find-file' file using EAF."
   :type 'cons)
 
 (defcustom eaf-mua-get-html
@@ -2573,10 +2573,10 @@ Otherwise send key 'esc' to browser."
 (defun eaf--find-file-ext-p (ext)
   "Determine file extension EXT can be opened by EAF directly by `find-file'.
 
-You can configure a whitelist using `eaf-find-file-ext-whitelist'"
+You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (and (member ext (append eaf-pdf-extension-list eaf-video-extension-list
                            eaf-image-extension-list eaf-mindmap-extension-list))
-       (not (member ext eaf-find-file-ext-whitelist))))
+       (not (member ext eaf-find-file-ext-blacklist))))
 
 ;; Make EAF as default app for supported extensions.
 ;; Use `eaf-open' in `find-file'
