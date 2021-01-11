@@ -7,20 +7,20 @@ ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode
 ARCH_PACKAGES+=(python-dbus python-pyinotify python-markdown python-qtconsole)
 
 # System dependencies
-if apt-get -v &> /dev/null; then
-    sudo apt-get install git nodejs aria2 libreoffice wmctrl xdotool
-    sudo apt-get install libglib2.0-dev libdbus-1-3 libdbus-1-dev
+if apt -v &> /dev/null; then
+    sudo apt -y install git nodejs aria2 libreoffice wmctrl xdotool
+    sudo apt -y install libglib2.0-dev libdbus-1-3 libdbus-1-dev
     # Missing in Ubuntu: filebrowser-bin
 
-    sudo apt-get install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
+    sudo apt -y install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
          python3-qrcode python3-feedparser python3-dbus python3-pyinotify \
          python3-markdown python3-qtconsole python3-pygit2
          
 elif dnf &> /dev/null; then
-        sudo dnf install git nodejs aria2 libreoffice wmctrl xdotool
-        sudo dnf install glib2-devel dbus-devel
+        sudo dnf -y install git nodejs aria2 libreoffice wmctrl xdotool
+        sudo dnf -y install glib2-devel dbus-devel
 
-        sudo dnf install python3-pyqt5-sip pyqtwebengine-devel python3-qrcode \
+        sudo dnf -y install python3-pyqt5-sip pyqtwebengine-devel python3-qrcode \
              python3-feedparser python3-dbus  python3-inotify python3-markdown \
              python3-qtconsole python3-pygit2
 
