@@ -15,19 +15,20 @@ if apt -v &> /dev/null; then
     sudo apt -y install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
          python3-qrcode python3-feedparser python3-dbus python3-pyinotify \
          python3-markdown python3-qtconsole python3-pygit2
-         
-elif dnf &> /dev/null; then
-        sudo dnf -y install git nodejs aria2 libreoffice wmctrl xdotool
-        sudo dnf -y install glib2-devel dbus-devel
 
-        sudo dnf -y install python3-pyqt5-sip pyqtwebengine-devel python3-qrcode \
-             python3-feedparser python3-dbus  python3-inotify python3-markdown \
-             python3-qtconsole python3-pygit2
+elif dnf &> /dev/null; then
+    sudo dnf -y install git nodejs aria2 libreoffice wmctrl xdotool
+    sudo dnf -y install glib2-devel dbus-devel
+    # TODO: please add filebrowser-bin if it exists in Fedora repo.
+
+    sudo dnf -y install python3-pyqt5-sip pyqtwebengine-devel python3-qrcode \
+         python3-feedparser python3-dbus  python3-inotify python3-markdown \
+         python3-qtconsole python3-pygit2
 
 elif type pacman &> /dev/null; then
-    sudo pacman -Sy --needed "${ARCH_PACKAGES[@]}"
+    sudo pacman -Sy --noconfirm --needed "${ARCH_PACKAGES[@]}"
     if type yay &> /dev/null; then
-        yay -S filebrowser-bin
+        yay -Sc --noconfirm filebrowser-bin
     fi
 else
     echo "Unsupported distribution/package manager. Here are the packages that needs to be installed:"

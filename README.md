@@ -72,7 +72,9 @@ or you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 ```
 
 2. Install EAF dependencies. An explanation of each dependency can be found in [Dependency List](#dependency-list).
-On Ubuntu or Fedora based distributions run `M-x install-eaf-dependencies`. On Arch bases distributions, `cd` to the emacs-application-framework directory and run install-eaf.sh: 
+```M-x install-eaf-dependencies```
+
+or run install-eaf.sh:
 
 ```Bash
 cd emacs-application-framework
@@ -191,7 +193,7 @@ Both projects are similar in terms of interface, but they are two completely dif
 If you've figure them out, PRs are always welcome!
 
 ### Why doesn't EAF receive input events on WM?
-EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE，Xpra.
+EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE, Xpra.
 
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
