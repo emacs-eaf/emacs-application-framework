@@ -191,7 +191,7 @@ Both projects are similar in terms of interface, but they are two completely dif
 If you've figure them out, PRs are always welcome!
 
 ### Why doesn't EAF receive input events on WM?
-EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE.
+EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE，Xpra.
 
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
