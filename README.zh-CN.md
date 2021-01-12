@@ -66,9 +66,8 @@ git clone https://github.com/manateelazycat/emacs-application-framework.git --de
 
 2. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。
 
-```M-x install-eaf-dependencies```
-
-或者，手动调用安装脚本:
+- `M-x install-eaf-dependencies`
+- 或者，手动调用安装脚本:
 
 ```Bash
 cd emacs-application-framework

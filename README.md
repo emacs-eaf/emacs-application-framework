@@ -72,9 +72,8 @@ or you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 ```
 
 2. Install EAF dependencies. An explanation of each dependency can be found in [Dependency List](#dependency-list).
-```M-x install-eaf-dependencies```
-
-or run install-eaf.sh:
+- `M-x install-eaf-dependencies`
+- or run `install-eaf.sh`:
 
 ```Bash
 cd emacs-application-framework
