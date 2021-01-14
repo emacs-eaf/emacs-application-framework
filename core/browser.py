@@ -577,7 +577,7 @@ Otherwise, scroll page up.
         ''' Clear the focus.'''
         self.eval_js(self.clear_focus_js)
 
-    @interactive()
+    @interactive(insert_or_do=True)
     def dark_mode(self):
         ''' Dark mode support.'''
         self.eval_js(self.dark_mode_js)
