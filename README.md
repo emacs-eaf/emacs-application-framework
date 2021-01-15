@@ -53,7 +53,7 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 |                                                  |                                                         |
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
-- EAF talk & demo on the EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD).
+- EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
 - Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
 - Youtube link:
 
@@ -81,14 +81,13 @@ chmod +x ./install-eaf.sh
 ./install-eaf.sh
 ```
 
-3. From here on, you can either Add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+3. From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
 ```Elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 (require 'eaf)
 ```
-or,
-If you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
+or, if you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
 
 ```Elisp
 (use-package eaf
