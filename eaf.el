@@ -277,6 +277,8 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-aria2-proxy-port . "")
     (eaf-browser-dark-mode . "follow")
     (eaf-browser-chrome-history-file . "~/.config/google-chrome/Default/History")
+    ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
+    (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
     (eaf-pdf-dark-mode . "follow")
     (eaf-pdf-default-zoom . "1.0")
     (eaf-pdf-dark-exclude-image . "true")

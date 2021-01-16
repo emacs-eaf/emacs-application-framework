@@ -713,28 +713,35 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
 
-        settings = QWebEngineSettings.globalSettings()
+        self.settings = QWebEngineSettings.globalSettings()
         try:
-            settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
-            settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
-            settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
-            settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
-            settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
-            settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
+            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
+            self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
+            self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
+
+            if self.emacs_var_dict["eaf-browser-unknown-url-scheme-policy"] == "DisallowUnknownUrlSchemes":
+                self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
+            elif self.emacs_var_dict["eaf-browser-unknown-url-scheme-policy"] == "AllowUnknownUrlSchemesFromUserInteraction":
+                self.settings.setUnknownUrlSchemePolicy(self.settings.AllowUnknownUrlSchemesFromUserInteraction)
+            elif self.emacs_var_dict["eaf-browser-unknown-url-scheme-policy"] == "AllowAllUnknownUrlSchemes":
+                self.settings.setUnknownUrlSchemePolicy(self.settings.AllowAllUnknownUrlSchemes)
 
             font_family = self.emacs_var_dict[ 'eaf-browser-font-family']
             if font_family:
                 for ff in (
-                    settings.StandardFont,
-                    settings.FixedFont,
-                    settings.SerifFont,
-                    settings.SansSerifFont,
+                    self.settings.StandardFont,
+                    self.settings.FixedFont,
+                    self.settings.SerifFont,
+                    self.settings.SansSerifFont,
                     # What's these font families?
-                    # settings.CursiveFont,
-                    # settings.FantasyFont,
-                    # settings.PictographFont
+                    # self.settings.CursiveFont,
+                    # self.settings.FantasyFont,
+                    # self.settings.PictographFont
                 ):
-                    settings.setFontFamily(ff, font_family)
+                    self.settings.setFontFamily(ff, font_family)
         except Exception:
             pass
 
