@@ -284,6 +284,8 @@ class PdfViewerWidget(QWidget):
         self.scroll_offset = 0
         self.scroll_ratio = 0.05
         self.scroll_wheel_lasttime = time.time()
+        if self.emacs_var_dict["eaf-pdf-scroll-ratio"] != "0.05":
+            self.scroll_ratio = float(self.emacs_var_dict["eaf-pdf-scroll-ratio"])
 
         # Default presentation mode
         self.presentation_mode = False
