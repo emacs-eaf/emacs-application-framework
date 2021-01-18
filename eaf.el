@@ -1579,10 +1579,6 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
       (eaf-set (intern name) value)
     (set (intern name) value)))
 
-(defun eaf--eval-in-emacs (elisp-code-string)
-  "Used by Python applications to evaluate ELISP-CODE-STRING as Emacs Lisp code on the Emacs side."
-  (eval (read elisp-code-string) 'lexical))
-
 (defun eaf--create-new-browser-buffer (new-window-buffer-id)
   "Function for creating a new browser buffer with the specified NEW-WINDOW-BUFFER-ID."
   (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))

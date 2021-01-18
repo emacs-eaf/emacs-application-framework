@@ -204,7 +204,7 @@ class EAF(dbus.service.Object):
         app_buffer.set_emacs_var.connect(self.set_emacs_var)
 
         # Handle eval form in emacs.
-        app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
+        app_buffer.eval_in_emacs.connect(self.execute_elisp)
 
         # Handle get_focus_text signal.
         if getattr(app_buffer, "get_focus_text", False) and getattr(app_buffer.get_focus_text, "connect", False):
@@ -511,9 +511,6 @@ class EAF(dbus.service.Object):
 
     def set_emacs_var(self, var_name, var_value, eaf_specific):
         self.execute_elisp('(eaf--set-emacs-var \"{}\" \"{}\" \"{}\")'.format(var_name, var_value, eaf_specific))
-
-    def eval_in_emacs(self, elisp_code_string):
-        self.execute_elisp('(eaf--eval-in-emacs \"{}\")'.format(elisp_code_string))
 
     def atomic_edit(self, buffer_id, focus_text):
         self.execute_elisp('(eaf--atomic-edit \"{}\" \"{}\")'.format(buffer_id, focus_text))
