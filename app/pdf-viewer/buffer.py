@@ -282,7 +282,8 @@ class PdfViewerWidget(QWidget):
 
         # Init scroll attributes.
         self.scroll_offset = 0
-        self.mouse_scroll_offset = 20
+        self.scroll_ratio = 0.05
+        self.scroll_wheel_lasttime = time.time()
 
         # Default presentation mode
         self.presentation_mode = False
@@ -380,7 +381,7 @@ class PdfViewerWidget(QWidget):
 
     @property
     def scroll_step(self):
-        return 0 if self.presentation_mode else 20
+        return self.rect().height() if self.presentation_mode else self.rect().size().height() * self.scroll_ratio
 
     @interactive()
     def save_current_pos(self):
@@ -635,9 +636,21 @@ class PdfViewerWidget(QWidget):
     def wheelEvent(self, event):
         if not event.accept():
             if event.angleDelta().y():
-                self.update_vertical_offset(max(min(self.scroll_offset - self.scale * event.angleDelta().y() / 120 * self.mouse_scroll_offset, self.max_scroll_offset()), 0))
+                numSteps = event.angleDelta().y()
+                if self.presentation_mode:
+                    # page scrolling
+                    curtime = time.time()
+                    if curtime - self.scroll_wheel_lasttime > 0.1:
+                        numSteps = 1 if numSteps > 0 else -1
+                        self.scroll_wheel_lasttime = curtime
+                    else:
+                        numSteps = 0
+                else:
+                    # fixed pixel scrolling
+                    numSteps = numSteps / 120
+                self.update_vertical_offset(max(min(self.scroll_offset - numSteps * self.scroll_step, self.max_scroll_offset()), 0))
             if event.angleDelta().x():
-                new_pos = (self.horizontal_offset + self.scale * event.angleDelta().x() / 120 * self.mouse_scroll_offset)
+                new_pos = (self.horizontal_offset + event.angleDelta().x() / 120 * self.scroll_step)
                 max_pos = (self.page_width * self.scale - self.rect().width())
                 self.update_horizontal_offset(max(min(new_pos , max_pos), -max_pos))
 
@@ -691,19 +704,19 @@ class PdfViewerWidget(QWidget):
 
     @interactive()
     def scroll_up(self):
-        self.update_vertical_offset(min(self.scroll_offset + self.scale * self.scroll_step, self.max_scroll_offset()))
+        self.update_vertical_offset(min(self.scroll_offset + self.scroll_step, self.max_scroll_offset()))
 
     @interactive()
     def scroll_down(self):
-        self.update_vertical_offset(max(self.scroll_offset - self.scale * self.scroll_step, 0))
+        self.update_vertical_offset(max(self.scroll_offset - self.scroll_step, 0))
 
     @interactive()
     def scroll_right(self):
-        self.update_horizontal_offset(max(self.horizontal_offset - self.scale * 30, (self.rect().width() - self.page_width * self.scale) / 2))
+        self.update_horizontal_offset(max(self.horizontal_offset - self.scroll_step, (self.rect().width() - self.page_width * self.scale) / 2))
 
     @interactive()
     def scroll_left(self):
-        self.update_horizontal_offset(min(self.horizontal_offset + (self.scale * 30), (self.page_width * self.scale - self.rect().width()) / 2))
+        self.update_horizontal_offset(min(self.horizontal_offset + self.scroll_step, (self.page_width * self.scale - self.rect().width()) / 2))
 
     @interactive()
     def scroll_up_page(self):
