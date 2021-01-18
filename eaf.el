@@ -282,6 +282,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-pdf-dark-mode . "follow")
     (eaf-pdf-default-zoom . "1.0")
     (eaf-pdf-dark-exclude-image . "true")
+    (eaf-pdf-scroll-ratio . "0.05")
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
     (eaf-terminal-font-family . "")
