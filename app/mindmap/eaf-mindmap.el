@@ -84,11 +84,6 @@
 
 ;;; Code:
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "export_org_json"
- #'eaf--export-org-json)
-
 (defun eaf--export-org-json (org-json-content org-file-path)
   (let (org-parse-data)
     (with-temp-buffer
@@ -304,11 +299,6 @@ actural call `org-json-gen-alist1' to work."
       (concat h " " vs))
     ))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "add_multiple_sub_nodes"
- #'eaf--add-multiple-sub-nodes)
-
 (defun eaf--add-multiple-sub-nodes (buffer-id)
   "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
@@ -333,11 +323,6 @@ actural call `org-json-gen-alist1' to work."
       (beginning-of-buffer))
     ))
 
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "add_multiple_brother_nodes"
- #'eaf--add-multiple-brother-nodes)
-
 (defun eaf--add-multiple-brother-nodes (buffer-id)
   "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
   (split-window-below -10)
@@ -361,11 +346,6 @@ actural call `org-json-gen-alist1' to work."
     (when (> (line-number-at-pos) 30)
       (beginning-of-buffer))
     ))
-
-(dbus-register-signal
- :session "com.lazycat.eaf" "/com/lazycat/eaf"
- "com.lazycat.eaf" "add_multiple_middle_nodes"
- #'eaf--add-multiple-middle-nodes)
 
 (defun eaf--add-multiple-middle-nodes (buffer-id)
   "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."

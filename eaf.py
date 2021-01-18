@@ -37,9 +37,15 @@ import importlib
 import json
 import os
 import subprocess
+import socket
 
 EAF_DBUS_NAME = "com.lazycat.eaf"
 EAF_OBJECT_NAME = "/com/lazycat/eaf"
+
+def connect():
+    conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    conn.connect(('127.0.0.1', 9999))
+    return conn
 
 class EAF(dbus.service.Object):
     def __init__(self, args):
@@ -60,6 +66,8 @@ class EAF(dbus.service.Object):
         self.emacs_var_dict = {}
 
         self.update_emacs_var_dict(var_dict_string)
+
+        self.elisp_connect = connect()
 
         self.first_start(self.webengine_include_private_codec())
 
@@ -446,97 +454,78 @@ class EAF(dbus.service.Object):
                 for line in str(new_text).split("\n"):
                     buffer.add_texted_middle_node(line)
 
-    @dbus.service.signal(EAF_DBUS_NAME)
+    def execute_elisp(self, code):
+        self.elisp_connect.send(str.encode(code))
+
     def add_multiple_sub_nodes(self, buffer_id):
-        pass
+        self.execute_elisp('(eaf--add-multiple-sub-nodes \"{}\"'.format(buffer_id))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def add_multiple_brother_nodes(self, buffer_id):
-        pass
+        self.execute_elisp('(eaf--add-multiple-brother-nodes \"{}\"'.format(buffer_id))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def add_multiple_middle_nodes(self, buffer_id):
-        pass
+        self.execute_elisp('(eaf--add-multiple-middle-nodes \"{}\")'.format(buffer_id))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def focus_emacs_buffer(self, message):
-        pass
+        self.execute_elisp('(eaf-focus-buffer \"{}\")'.format(message))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def first_start(self, webengine_include_private_codec):
-        pass
+        self.execute_elisp('(eaf--first-start \"{}\")'.format(webengine_include_private_codec))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def update_buffer_details(self, buffer_id, title, url):
-        pass
+        self.execute_elisp('(eaf--update-buffer-details \"{}\" \"{}\" \"{}\")'.format(buffer_id, title, url))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def open_url_in_new_tab(self, url):
-        pass
+        self.execute_elisp('(eaf-open-browser \"{}\")'.format(url))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def duplicate_page_in_new_tab(self, url):
-        pass
+        self.execute_elisp('(eaf-browser--duplicate-page-in-new-tab \"{}\")'.format(url))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def open_dev_tools_page(self):
-        pass
+        self.execute_elisp('(eaf-open-dev-tool-page)')
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def open_url_in_background_tab(self, url):
-        pass
+        self.execute_elisp('(eaf-open-browser-in-background \"{}\")'.format(url))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def goto_left_tab(self):
-        pass
+        self.execute_elisp('(eaf-goto-left-tab)')
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def goto_right_tab(self):
-        pass
+        self.execute_elisp('(eaf-goto-right-tab)')
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def translate_text(self, text):
-        pass
+        self.execute_elisp('(eaf-translate-text \"{}\")'.format(text))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def input_message(self, buffer_id, message, callback_tag, input_type, input_content):
-        pass
+        self.execute_elisp(
+            '(eaf--input-message \"{}\" \"{}\" \"{}\" \"{}\" \"{}\")'.format(buffer_id, message, callback_tag, input_type, input_content))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def create_new_browser_buffer(self, buffer_id):
-        pass
+        self.execute_elisp('(eaf--create-new-browser-buffer \"{}\")'.format(buffer_id))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def request_kill_buffer(self, buffer_id):
-        pass
+        self.execute_elisp('(eaf-request-kill-buffer \"{}\")'.format(buffer_id))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def message_to_emacs(self, message):
-        pass
+        self.execute_elisp('(eaf--show-message \"{}\")'.format(message))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def set_emacs_var(self, var_name, var_value, eaf_specific):
-        pass
+        self.execute_elisp('(eaf--set-emacs-var \"{}\" \"{}\" \"{}\")'.format(var_name, var_value, eaf_specific))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def eval_in_emacs(self, elisp_code_string):
-        pass
+        self.execute_elisp('(eaf--eval-in-emacs \"{}\")'.format(elisp_code_string))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def atomic_edit(self, buffer_id, focus_text):
-        pass
+        self.execute_elisp('(eaf--atomic-edit \"{}\" \"{}\")'.format(buffer_id, focus_text))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def export_org_json(self, org_json_content, org_file_path):
-        pass
+        self.execute_elisp('(eaf--export-org-json \"{}\" \"{}\")'.format(org_json_content, org_file_path))
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def enter_fullscreen_request(self):
-        pass
+        self.execute_elisp('(eaf--enter-fullscreen-request)')
 
-    @dbus.service.signal(EAF_DBUS_NAME)
     def exit_fullscreen_request(self):
-        pass
+        self.execute_elisp('(eaf--exit_fullscreen_request)')
 
     def open_dev_tools_tab(self, web_page):
         ''' Open dev-tools tab'''
