@@ -71,7 +71,8 @@
 ;;
 ;;
 
-;;; Require
+;;; Code:
+
 (defun add-subdirs-to-load-path (dir)
   "Recursive add directory DIR to `load-path'."
   (mapcar
@@ -97,10 +98,6 @@
 (require 'json)
 (require 's)
 (require 'eaf-server)
-
-;;; Code:
-
-(eaf-server-start 9999)
 
 ;; Remove the relevant environment variables from the process-environment to disable QT scaling,
 ;; let EAF qt program follow the system scale.
@@ -1130,6 +1127,7 @@ Return t or nil based on the result of the call."
           (if eaf-enable-debug
               (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
             (apply #'start-process eaf-name eaf-name eaf-python-command eaf-args))))
+  (eaf-server-start 9999)
   (set-process-query-on-exit-flag eaf-process nil)
   (set-process-sentinel
    eaf-process
@@ -1154,7 +1152,8 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save)
     (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
+    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
+    (eaf-server-stop 9999))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
