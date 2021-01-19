@@ -7,11 +7,11 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2020-05-17 12:31:12
 ;; Version: 0.5
-;; Last-Updated: Mon Oct 12 12:17:09 2020 (-0400)
+;; Last-Updated: Tue Jan 19 01:15:08 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
-;; URL: http://www.emacswiki.org/emacs/download/eaf.el
+;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
-;; Compatibility: GNU Emacs 27.0.50
+;; Compatibility: emacs-version >= 27
 ;;
 ;; Features that might be required by this library:
 ;;
