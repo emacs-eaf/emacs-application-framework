@@ -6,7 +6,7 @@
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Version: 0.5
-;; Last-Updated: Tue Jan 19 01:16:21 2021 (-0500)
+;; Last-Updated: Tue Jan 19 05:02:06 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -100,9 +100,13 @@
    (list (read-number "Enter the port number the server is listening to: "
                       9999)))
   (let ((server-proc (eaf-server-get-process port)))
-    (eaf-server-delete-clients server-proc)
-    (delete-process server-proc)
-    (kill-buffer (concat "*eaf-server:" (number-to-string port) "*"))))
+    (if (process-live-p server-proc)
+        (progn
+          (eaf-server-delete-clients server-proc)
+          (delete-process server-proc)
+          (kill-buffer (concat "*eaf-server:" (number-to-string port) "*"))
+          (message "[EAF] Server terminated."))
+      (message "[EAF] Server already terminated."))))
 
 (defun eaf-server-append-to-proc-buffer (proc string)
   (let ((buffer (process-contact proc :buffer))
