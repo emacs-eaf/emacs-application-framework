@@ -458,7 +458,9 @@ class EAF(dbus.service.Object):
         code = "(" + str(fname)
         for farg in fargs_list:
             arg = str(farg).replace('"', '\\"')
-            if len(arg) == 0 or arg[0] != "'":
+            if len(arg) > 0 and arg[0] == ">":
+                arg = arg[1:]
+            elif len(arg) == 0 or arg[0] != "'":
                 arg = '"' + arg + '"'
             code = code + ' ' + arg
         code += ")"
