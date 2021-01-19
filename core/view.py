@@ -110,7 +110,7 @@ class View(QWidget):
         # print(time.time(), event.type())
 
         if event.type() in [QEvent.ShortcutOverride]:
-            self.buffer.eval_in_emacs.emit('''(eaf-activate-emacs-window)''')
+            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
 
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,

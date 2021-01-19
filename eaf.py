@@ -454,75 +454,81 @@ class EAF(dbus.service.Object):
                 for line in str(new_text).split("\n"):
                     buffer.add_texted_middle_node(line)
 
-    def eval_in_emacs(self, code):
+    def eval_in_emacs(self, fname, fargs_list):
+        code = "(" + str(fname)
+        for farg in fargs_list:
+            arg = str(farg).replace('"', '\\"')
+            if len(arg) == 0 or arg[0] != "'":
+                arg = '"' + arg + '"'
+            code = code + ' ' + arg
+        code += ")"
         self.elisp_connect.send(str.encode(code))
 
     def add_multiple_sub_nodes(self, buffer_id):
-        self.eval_in_emacs('(eaf--add-multiple-sub-nodes \"{}\"'.format(buffer_id))
+        self.eval_in_emacs('eaf--add-multiple-sub-nodes', [buffer_id])
 
     def add_multiple_brother_nodes(self, buffer_id):
-        self.eval_in_emacs('(eaf--add-multiple-brother-nodes \"{}\"'.format(buffer_id))
+        self.eval_in_emacs('eaf--add-multiple-brother-nodes', [buffer_id])
 
     def add_multiple_middle_nodes(self, buffer_id):
-        self.eval_in_emacs('(eaf--add-multiple-middle-nodes \"{}\")'.format(buffer_id))
+        self.eval_in_emacs('eaf--add-multiple-middle-nodes', [buffer_id])
 
     def focus_emacs_buffer(self, message):
-        self.eval_in_emacs('(eaf-focus-buffer \"{}\")'.format(message))
+        self.eval_in_emacs('eaf-focus-buffer', [message])
 
     def first_start(self, webengine_include_private_codec):
-        self.eval_in_emacs('(eaf--first-start \"{}\")'.format(webengine_include_private_codec))
+        self.eval_in_emacs('eaf--first-start', [webengine_include_private_codec])
 
     def update_buffer_details(self, buffer_id, title, url):
-        self.eval_in_emacs('(eaf--update-buffer-details \"{}\" \"{}\" \"{}\")'.format(buffer_id, title, url))
+        self.eval_in_emacs('eaf--update-buffer-details', [buffer_id, title, url])
 
     def open_url_in_new_tab(self, url):
-        self.eval_in_emacs('(eaf-open-browser \"{}\")'.format(url))
+        self.eval_in_emacs('eaf-open-browser', [url])
 
     def duplicate_page_in_new_tab(self, url):
-        self.eval_in_emacs('(eaf-browser--duplicate-page-in-new-tab \"{}\")'.format(url))
+        self.eval_in_emacs('eaf-browser--duplicate-page-in-new-tab', [url])
 
     def open_dev_tools_page(self):
-        self.eval_in_emacs('(eaf-open-dev-tool-page)')
+        self.eval_in_emacs('eaf-open-dev-tool-page', [])
 
     def open_url_in_background_tab(self, url):
-        self.eval_in_emacs('(eaf-open-browser-in-background \"{}\")'.format(url))
+        self.eval_in_emacs('eaf-open-browser-in-background', [url])
 
     def goto_left_tab(self):
-        self.eval_in_emacs('(eaf-goto-left-tab)')
+        self.eval_in_emacs('eaf-goto-left-tab', [])
 
     def goto_right_tab(self):
-        self.eval_in_emacs('(eaf-goto-right-tab)')
+        self.eval_in_emacs('eaf-goto-right-tab', [])
 
     def translate_text(self, text):
-        self.eval_in_emacs('(eaf-translate-text \"{}\")'.format(text))
+        self.eval_in_emacs('eaf-translate-text', [text])
 
     def input_message(self, buffer_id, message, callback_tag, input_type, input_content):
-        self.eval_in_emacs(
-            '(eaf--input-message \"{}\" \"{}\" \"{}\" \"{}\" \"{}\")'.format(buffer_id, message, callback_tag, input_type, input_content))
+        self.eval_in_emacs('eaf--input-message', [buffer_id, message, callback_tag, input_type, input_content])
 
     def create_new_browser_buffer(self, buffer_id):
-        self.eval_in_emacs('(eaf--create-new-browser-buffer \"{}\")'.format(buffer_id))
+        self.eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
 
     def request_kill_buffer(self, buffer_id):
-        self.eval_in_emacs('(eaf-request-kill-buffer \"{}\")'.format(buffer_id))
+        self.eval_in_emacs('eaf-request-kill-buffer', [buffer_id])
 
     def message_to_emacs(self, message):
-        self.eval_in_emacs('(eaf--show-message \"{}\")'.format(message))
+        self.eval_in_emacs('eaf--show-message', [message])
 
     def set_emacs_var(self, var_name, var_value, eaf_specific):
-        self.eval_in_emacs('(eaf--set-emacs-var \"{}\" \"{}\" \"{}\")'.format(var_name, var_value, eaf_specific))
+        self.eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, eaf_specific])
 
     def atomic_edit(self, buffer_id, focus_text):
-        self.eval_in_emacs('(eaf--atomic-edit \"{}\" \"{}\")'.format(buffer_id, focus_text))
+        self.eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
 
     def export_org_json(self, org_json_content, org_file_path):
-        self.eval_in_emacs('(eaf--export-org-json \"{}\" \"{}\")'.format(org_json_content, org_file_path))
+        self.eval_in_emacs('eaf--export-org-json', [org_json_content, org_file_path])
 
     def enter_fullscreen_request(self):
-        self.eval_in_emacs('(eaf--enter-fullscreen-request)')
+        self.eval_in_emacs('eaf--enter-fullscreen-request', [])
 
     def exit_fullscreen_request(self):
-        self.eval_in_emacs('(eaf--exit_fullscreen_request)')
+        self.eval_in_emacs('eaf--exit_fullscreen_request', [])
 
     def open_dev_tools_tab(self, web_page):
         ''' Open dev-tools tab'''

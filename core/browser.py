@@ -545,7 +545,7 @@ Otherwise, scroll page up.
 
         self.eval_js("CaretBrowsing.setInitialCursor(true);")
         self.buffer.caret_browsing_mode = True
-        self.buffer.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.buffer.caret_browsing_mode else "nil"))
+        self.buffer.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["t" if self.buffer.caret_browsing_mode else "nil"])
         self.buffer.caret_toggle_mark()
         self.buffer.caret_next_word()
 
@@ -1145,7 +1145,7 @@ class BrowserBuffer(Buffer):
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
                 self.message_to_emacs.emit("Caret browsing activated.")
                 self.caret_browsing_mode = True
-            self.eval_in_emacs.emit('''(eaf--toggle-caret-browsing %s)''' % ("t" if self.caret_browsing_mode else "nil"))
+            self.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["t" if self.caret_browsing_mode else "nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
@@ -1398,7 +1398,7 @@ class BrowserBuffer(Buffer):
     @interactive(insert_or_do=True)
     def new_blank_page(self):
         ''' Open new blank page.'''
-        self.eval_in_emacs.emit('''(eaf-open \"{0}\" \"browser\" \"\" t)'''''.format(self.emacs_var_dict["eaf-browser-blank-page-url"]))
+        self.eval_in_emacs.emit('eaf-open', [self.emacs_var_dict["eaf-browser-blank-page-url"], "browser", "", 't'])
 
     def _clear_history(self):
         if os.path.exists(self.history_log_file_path):
@@ -1488,7 +1488,7 @@ class BrowserBuffer(Buffer):
     @interactive(insert_or_do=True)
     def open_browser(self):
         ''' Open browser.'''
-        self.eval_in_emacs.emit('''(call-interactively 'eaf-open-browser-with-history)''')
+        self.eval_in_emacs.emit('call-interactively', ['\'eaf-open-browser-with-history'])
 
     def select_all_or_input_text(self):
         ''' Select all or input text.'''

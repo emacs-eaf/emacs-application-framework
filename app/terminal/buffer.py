@@ -111,7 +111,7 @@ class AppBuffer(BrowserBuffer):
         elif changed_executing_command == "" and self.executing_command != "" or not changed_directory == self.current_directory:
             self.change_title(changed_directory)
             if not changed_directory == self.current_directory:
-                self.eval_in_emacs.emit('''(setq default-directory "'''+ changed_directory + "/" +'''")''')
+                self.eval_in_emacs.emit('setq', ['default-directory', '"' + changed_directory + '/"'])
                 self.current_directory = changed_directory
             if self.executing_command != "":
                 self.executing_command = ""
