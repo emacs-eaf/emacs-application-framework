@@ -1889,7 +1889,9 @@ choose a search engine defined in `eaf-browser-search-engines'"
                                eaf-browser-search-engines))
                    (error (format "[EAF/browser] Search engine %s is unknown to EAF!" real-search-engine))))
          (current-symbol (if mark-active
-                             (buffer-substring (region-beginning) (region-end))
+                             (if (eq major-mode 'pdf-view-mode)
+                                 (car (pdf-view-active-region-text))
+                               (buffer-substring (region-beginning) (region-end)))
                            (symbol-at-point)))
          (search-url (if search-string
                          (format link search-string)
