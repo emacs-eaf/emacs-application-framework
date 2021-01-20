@@ -1,4 +1,0 @@
-As before, avoid odd sizes in favor of even sizes.
-
-It's curious that the Japanese font is handled so poorly, especially with
-Windows 8 and later.
