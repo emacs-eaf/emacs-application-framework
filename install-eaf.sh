@@ -40,6 +40,12 @@ else
     exit 1
 fi
 
+branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+if [[ $branch == "master" ]]; then
+    echo "Installing npm dependencies..."
+    npm install
+fi
+
 # Python dependencies
 if type pip3 &>/dev/null; then
     pip3 install --user pymupdf grip
