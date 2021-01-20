@@ -497,7 +497,7 @@ Otherwise, scroll page up.
         self.load_marker_file()
         link = self.execute_js("Marker.gotoMarker('%s', Marker.getMarkerAction)" % str(marker))
         self.cleanup_links_dom()
-        if link.startswith("eaf::"):
+        if link is None or link.startswith("eaf::"):
             print(link)
             return False
         else:
