@@ -51,7 +51,7 @@
     "html-minifier": "^4.0.0",
     "iconv-lite": "^0.4.24",
     "is-regexp": "^1.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lower-case": "^1.1.4",
     "mermaid": "^8.4.8",
     "minify": "^4.1.3",
