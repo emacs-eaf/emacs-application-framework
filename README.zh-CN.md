@@ -61,7 +61,15 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 ## 安装
 1. 下载EAF:
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
+git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+```
+注意：如果你无法正常使用`npm install`，请将`master`替换成`master-full`。
+
+你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
+```Emacs-lisp
+(quelpa '(eaf (:fetcher github
+               :repo  "manateelazycat/emacs-application-framework"
+               :files ("*"))))
 ```
 
 2. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。

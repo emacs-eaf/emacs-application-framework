@@ -62,9 +62,11 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 ## Install
 1. Download EAF
 ```Bash
-git clone https://github.com/manateelazycat/emacs-application-framework.git --depth=1 ~/.emacs.d/site-lisp/emacs-application-framework/
+git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
-or you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
+Note: change `master` to `master-full` if you cannot properly use `npm install`.
+
+Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 ```Emacs-lisp
 (quelpa '(eaf (:fetcher github
                :repo  "manateelazycat/emacs-application-framework"
