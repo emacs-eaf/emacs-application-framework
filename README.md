@@ -184,8 +184,9 @@ Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-f
 
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
-### EAF can't works with Mac. Why?
+### EAF can't works on MacOS. Why?
 1. Qt5's QGraphicsScene technology does not work on MacOS.
+2. QWindow Reparent technology need use the original API of Mac platform for replacement.
 
 If you've figure them out, PRs are always welcome!
 
