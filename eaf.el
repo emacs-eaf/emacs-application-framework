@@ -1103,11 +1103,11 @@ A hashtable, key is url and value is title.")
         (process-environment (cl-copy-list process-environment)))
     (unless (equal (getenv "WAYLAND_DISPLAY") "")
       (setenv "QT_QPA_PLATFORM" "xcb"))
+    (eaf-server-start 9999)
     (setq eaf-process
           (if eaf-enable-debug
               (epc:start-epc "gdb" (append gdb-args eaf-args))
             (epc:start-epc eaf-python-command eaf-args))))
-  (eaf-server-start 9999)
   (message "[EAF] Process starting..."))
 
 (defun eaf-stop-process (&optional restart)
