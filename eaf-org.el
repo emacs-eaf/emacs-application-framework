@@ -78,9 +78,9 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
                   eaf--buffer-url))
            (extra-args (cl-case (intern app)
                          ('pdf-viewer
-                          (eaf-call "call_function" eaf--buffer-id "current_page"))
+                          (eaf-epc-call-sync "call_function" eaf--buffer-id "current_page"))
                          ('js-video-player
-                          (eaf-call "call_function" eaf--buffer-id "save_session_data"))))
+                          (eaf-epc-call-sync "call_function" eaf--buffer-id "save_session_data"))))
            (link (if extra-args
                      (concat "eaf:" app "::" url "::" extra-args)
                    (concat "eaf:" app "::" url)))
@@ -118,13 +118,13 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
            (eaf-open url "browser"))
           ('pdf-viewer
            (eaf-open url "pdf-viewer")
-           (eaf-call "call_function_with_args" eaf--buffer-id
+           (eaf-epc-call-sync "call_function_with_args" eaf--buffer-id
                      "jump_to_page_with_num" (format "%s" extra-args)))
           ('mindmap
            (eaf-open url "mindmap"))
           ('js-video-player
            (eaf-open url "js-video-player")
-           (eaf-call "call_function_with_args" eaf--buffer-id
+           (eaf-epc-call-sync "call_function_with_args" eaf--buffer-id
                      "restore_session_data" (format "%s" extra-args)))
           (t (eaf-open url))))
     ;; for other link types spec: "<link-type>:URL:(parameters)"
@@ -137,7 +137,7 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
          (if eaf-org-override-pdf-links
              (progn (eaf-open (expand-file-name url) "pdf-viewer")
                     (when extra-args
-                      (eaf-call "call_function_with_args" eaf--buffer-id
+                      (eaf-epc-call-sync "call_function_with_args" eaf--buffer-id
                                 "jump_to_page_with_num" (format "%s" extra-args))))
            (dolist (type eaf-org-override-pdf-links-list)
              ;; restore to original :follow function, since eaf-org-override-pdf-links is nil

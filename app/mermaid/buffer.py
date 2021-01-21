@@ -26,7 +26,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
 from core.utils import string_to_base64
-from core.utils import PostGui
 import threading
 import pyinotify
 import markdown

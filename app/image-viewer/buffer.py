@@ -22,7 +22,6 @@
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
-from core.utils import PostGui
 from pathlib import Path
 import os
 
