@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jan 19 01:15:08 2021 (-0500)
+;; Last-Updated: Thu Jan 21 12:34:39 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -242,10 +242,6 @@ Each element has the form (NAME . URL).
   "The default search engine used by `eaf-open-browser' and `eaf-search-it'.
 
 It must defined at `eaf-browser-search-engines'."
-  :type 'string)
-
-(defcustom eaf-name "*eaf*"
-  "Name of EAF buffer."
   :type 'string)
 
 (defcustom eaf-python-command "python3"
@@ -1150,9 +1146,6 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
       ;; Delete EAF server process.
       (progn
         (epc:stop-epc eaf-process)
-        ;; Kill *eaf* buffer
-        (when (get-buffer eaf-name)
-          (kill-buffer eaf-name))
         (message "[EAF] Process terminated."))
     (message "[EAF] Process already terminated.")))
 
