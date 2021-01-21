@@ -40,16 +40,16 @@ from epc.server import ThreadingEPCServer
 import logging
 from core.utils import PostGui
 
-def connect():
+def build_emacs_server_connect(port):
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    conn.connect(('127.0.0.1', 9999))
+    conn.connect(('127.0.0.1', port))
     return conn
 
 class EAF(object):
     def __init__(self, args):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
@@ -97,7 +97,7 @@ class EAF(object):
         # And this print must be first print code, otherwise Emacs client will failed to start.
         self.server.print_port()
 
-        self.elisp_connect = connect()
+        self.emacs_server_connect = build_emacs_server_connect(int(emacs_server_port))
 
         self.first_start(self.webengine_include_private_codec())
 
@@ -490,7 +490,7 @@ class EAF(object):
                 arg = '"' + arg + '"'
             code = code + ' ' + arg
         code += ")"
-        self.elisp_connect.send(str.encode(code))
+        self.emacs_server_connect.send(str.encode(code))
 
     def add_multiple_sub_nodes(self, buffer_id):
         self.eval_in_emacs('eaf--add-multiple-sub-nodes', [buffer_id])

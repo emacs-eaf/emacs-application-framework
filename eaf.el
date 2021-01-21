@@ -1071,7 +1071,7 @@ A hashtable, key is url and value is title.")
              (start-process "" nil "xdg-open" path-or-url))))))
 
 (defun eaf-call-async (method &rest args)
-   "Call Python EPC function asynchronous."
+  "Call Python EPC function asynchronous."
   (deferred:$
     (epc:call-deferred eaf-process (read method) args)
     ))
@@ -1088,6 +1088,30 @@ A hashtable, key is url and value is title.")
   "Serialize variable list."
   (json-encode eaf-var-list))
 
+(defun eaf-get-free-port ()
+  "Return a free (unused) TCP port.
+The port is chosen randomly from the ephemeral ports. "
+  (let (myserver
+        (port 50000))                  ; this should be ephemeral base
+    (while
+        (not
+         (processp
+          (condition-case sig
+              (setq myserver
+                    (make-network-process
+                     :name "*test-proc*"
+                     :server t
+                     :host 'local
+                     :service port
+                     :family 'ipv4))
+            (file-error
+             (if (equal
+                  "Cannot bind server socket address already in use"
+                  (mapconcat 'identity (cdr sig) " "))
+                 (setq port (+ 50000 (random 5000)))))))))
+    (delete-process myserver)
+    port))
+
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -1095,17 +1119,20 @@ A hashtable, key is url and value is title.")
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((epc:live-p eaf-process)
     (user-error "[EAF] Process is already running")))
-  (let ((eaf-args (append
-                   (list eaf-python-file)
-                   (eaf-get-render-size)
-                   (list eaf-proxy-host eaf-proxy-port eaf-proxy-type eaf-config-location)
-                   (list (eaf-serialization-var-list))
-                   ))
-        (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
-        (process-environment (cl-copy-list process-environment)))
+  (let* ((eaf-server-port (eaf-get-free-port))
+         (eaf-args (append
+                    (list eaf-python-file)
+                    (eaf-get-render-size)
+                    (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
+                    (list eaf-config-location)
+                    (list (number-to-string eaf-server-port))
+                    (list (eaf-serialization-var-list))
+                    ))
+         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
+         (process-environment (cl-copy-list process-environment)))
     (unless (equal (getenv "WAYLAND_DISPLAY") "")
       (setenv "QT_QPA_PLATFORM" "xcb"))
-    (eaf-server-start 9999)
+    (eaf-server-start eaf-server-port)
     (setq eaf-process
           (if eaf-enable-debug
               (epc:start-epc "gdb" (append gdb-args eaf-args))
@@ -1483,8 +1510,8 @@ keybinding variable to eaf-app-binding-alist."
   "Send second part of key sequence to terminal."
   (interactive)
   (eaf-call-async "send_key_sequence"
-                eaf--buffer-id
-                (nth 1 (split-string (key-description (this-command-keys-vector))))))
+                  eaf--buffer-id
+                  (nth 1 (split-string (key-description (this-command-keys-vector))))))
 
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
@@ -2073,20 +2100,20 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
   (cond ((equal eaf-mindmap--current-add-mode "sub")
          (eaf-call-async "update_multiple_sub_nodes"
-                   eaf--buffer-id
-                   (buffer-string)))
+                         eaf--buffer-id
+                         (buffer-string)))
         ((equal eaf-mindmap--current-add-mode "brother")
          (eaf-call-async "update_multiple_brother_nodes"
-                   eaf--buffer-id
-                   (buffer-string)))
+                         eaf--buffer-id
+                         (buffer-string)))
         ((equal eaf-mindmap--current-add-mode "middle")
          (eaf-call-async "update_multiple_middle_nodes"
-                   eaf--buffer-id
-                   (buffer-string)))
+                         eaf--buffer-id
+                         (buffer-string)))
         (t
          (eaf-call-async "update_focus_text"
-                   eaf--buffer-id
-                   (buffer-string))))
+                         eaf--buffer-id
+                         (buffer-string))))
   (kill-buffer)
   (delete-window))
 
@@ -2410,7 +2437,7 @@ Otherwise send key 'esc' to browser."
   (if (derived-mode-p 'eaf-mode)
       (progn
         (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "up"
-                  (if arg "line" "page"))
+                        (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
     (apply orig-fun arg args)))
@@ -2422,7 +2449,7 @@ Otherwise send key 'esc' to browser."
   (if (derived-mode-p 'eaf-mode)
       (progn
         (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "down"
-                  (if arg "line" "page"))
+                        (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
     (apply orig-fun arg args)))
@@ -2436,8 +2463,8 @@ Otherwise send key 'esc' to browser."
   (if (derived-mode-p 'eaf-mode)
       (progn
         (eaf-call-async "scroll_other_buffer" (eaf-get-view-info)
-                  (if (string-equal direction "up") "up" "down")
-                  (if line "line" "page"))
+                        (if (string-equal direction "up") "up" "down")
+                        (if line "line" "page"))
         (other-window -1))
     (other-window -1)
     (apply orig-fun direction line args)))
