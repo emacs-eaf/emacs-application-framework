@@ -1,12 +1,12 @@
 FROM archlinux/base
 
 RUN pacman -Syy && \
-    pacman -S sudo git emacs libpulse nss python python-pip python-dbus  --noconfirm && \
+    pacman -S sudo git emacs libpulse nss python python-pip --noconfirm && \
     yes|pacman -Scc
 
 RUN pip install --upgrade pip
 
-RUN pip install PyMuPDF grip qrcode pyqt5 && rm -rf /root/.cache
+RUN pip install PyMuPDF grip qrcode pyqt5 epc && rm -rf /root/.cache
 
 RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
 

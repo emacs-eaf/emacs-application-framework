@@ -83,7 +83,12 @@ chmod +x ./install-eaf.sh
 ./install-eaf.sh
 ```
 
-3. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
+3. 安装Elisp依赖包:
+- [emacs-ctable](https://github.com/kiwanami/emacs-ctable)
+- [emacs-deferred](https://github.com/kiwanami/emacs-deferred)
+- [emacs-epc](https://github.com/kiwanami/emacs-epc)
+
+4. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
 ```Elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
@@ -111,7 +116,6 @@ chmod +x ./install-eaf.sh
 | 包名                           | 依赖                         | 解释                                     |
 | :--------                      | :------                      | :------                                  |
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                |
-| python-dbus                    | 核心                         | DBus库，用于在Emacs和Python进程间通讯    |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
 | wmctrl           | 核心                         | 激活Emacs窗口输入焦点                 |
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
@@ -149,11 +153,6 @@ chmod +x ./install-eaf.sh
 
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
-```
-注意：
-EAF使用DBus的普通权限总线 (session bus)，请不要用 sudo 来启动EAF，root用户只能访问系统权限总线 (system bus)
-```
-
 ## Wiki
 强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)。
 
@@ -170,7 +169,7 @@ Wiki囊括了各种你想了解的EAF相关文档，包括了：
 ### EAF是怎么工作的？
 EAF主要实现这几个功能：
 1. 利用QWindow的Reparent技术来实现PyQt应用进程的窗口粘贴到Emacs对应的Buffer区域
-2. 通过DBus IPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
+2. 通过Python EPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
 3. 通过Qt5的QGraphicsScene来实现镜像窗口，以对应Emacs的Buffer/Window模型
 
 若想了解更多EAF设计背景，请看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
@@ -185,11 +184,8 @@ EAF主要实现这几个功能：
 
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
-### 为什么EAF只能在Linux下工作？
-1. DBus是Linux下专用的进程间通讯技术，其他操作系统可能无法支持DBus
-2. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
-
-欢迎操作系统级别黑客移植EAF，目前为止，我知道的主要的迁移障碍就只有两个：DBus，QGraphicsScene
+### 为什么EAF无法在MacOS下工作？
+Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
 
 ### 为什么通过窗口管理器使用EAF无法接收输入信息？
 EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、XFce、LXDE、i3、QTile、Xpra.

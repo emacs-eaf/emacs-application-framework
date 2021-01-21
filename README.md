@@ -83,7 +83,12 @@ chmod +x ./install-eaf.sh
 ./install-eaf.sh
 ```
 
-3. From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+3. Install Elisp packages:
+- [emacs-ctable](https://github.com/kiwanami/emacs-ctable)
+- [emacs-deferred](https://github.com/kiwanami/emacs-deferred)
+- [emacs-epc](https://github.com/kiwanami/emacs-epc)
+
+4. From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
 ```Elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
@@ -111,7 +116,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Package                        | Dependent                            | Description                                   |
 | :--------                      | :------                              | :------                                       |
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
-| python-dbus                    | Core                                 | DBus IPC to connect Python with Elisp         |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
 | wmctrl                         | Core                                 | Activate Emacs window input focus             |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
@@ -149,12 +153,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 
 - EAF Browser and PDF Viewer support Emacs built-in bookmark operation, with `M-x bookmark-set` (defaulted to `C-x r m`) and `M-x bookmark-bmenu-list` (defaulted to `C-x r l`).
 
-```
-NOTE:
-EAF use DBus' session bus, it must run by a general user.
-Please don't use EAF when Emacs is started with sudo or root user, a root user can only access DBus's system bus.
-```
-
 ## Wiki
 
 It is **highly** suggested to read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first before using EAF.
@@ -172,7 +170,7 @@ There also are some helpful tips to make EAF work with Docker, Helm, etc.
 ### How does EAF work?
 EAF implements three major functionalities:
 1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
-2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via DBus IPC.
+2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via Python EPC.
 3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
 
 Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)!
@@ -186,9 +184,8 @@ Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-f
 
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
-### EAF is (currently) Linux only. Why?
-1. DBus is Linux-specific technology, it's difficult to support DBus in other operating systems.
-2. Qt5's QGraphicsScene technology does not work on MacOS.
+### EAF can't works with Mac. Why?
+1. Qt5's QGraphicsScene technology does not work on MacOS.
 
 If you've figure them out, PRs are always welcome!
 

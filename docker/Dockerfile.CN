@@ -4,14 +4,14 @@ RUN sed -i '1i Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/
     sed -i '2i Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' /etc/pacman.d/mirrorlist && \
     pacman -Syyu --noconfirm && \
     pacman -S --needed --noconfirm sudo git emacs python-pip wqy-microhei wqy-zenhei && \
-    pacman -S --needed --noconfirm python-pyqt5 python-pyqt5-sip python-dbus python-pyqtwebengine wmctrl && \
+    pacman -S --needed --noconfirm python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl && \
     pacman -S --needed --noconfirm python-qrcode && \
     yes|pacman -Scc
 
 RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pip -U && \
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-RUN pip install PyMuPDF grip && rm -rf /root/.cache
+RUN pip install PyMuPDF grip epc && rm -rf /root/.cache
 
 RUN git clone --depth=1 https://gitee.com/emacs-hub/emacs-application-framework.git  && \
     git clone --depth=1 https://github.com/magnars/s.el.git
