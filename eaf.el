@@ -778,11 +778,6 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Default is `below', you can chang it with `right'."
   :type 'string)
 
-(defcustom eaf-enable-debug nil
-  "If you got segfault error, please turn this option.
-Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
-  :type 'boolean)
-
 (defcustom eaf-wm-name ""
   "The desktop name, set by function `eaf--get-current-desktop-name'."
   :type 'string)
@@ -1104,15 +1099,11 @@ A hashtable, key is url and value is title.")
                     (list (number-to-string eaf-server-port))
                     (list (eaf-serialization-var-list))
                     ))
-         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
          (process-environment (cl-copy-list process-environment)))
     (unless (equal (getenv "WAYLAND_DISPLAY") "")
       (setenv "QT_QPA_PLATFORM" "xcb"))
     (eaf-server-start eaf-server-port)
-    (setq eaf-process
-          (if eaf-enable-debug
-              (epc:start-epc "gdb" (append gdb-args eaf-args))
-            (epc:start-epc eaf-python-command eaf-args))))
+    (setq eaf-process (epc:start-epc eaf-python-command eaf-args)))
   (message "[EAF] Process starting..."))
 
 (defun eaf-stop-process (&optional restart)

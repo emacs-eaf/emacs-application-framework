@@ -235,11 +235,6 @@ Markdown预览程序依赖grip，你需要访问[Github Personal access token](h
 
 如果```emacs -q```环境下问题依旧，请到[这里](https://github.com/manateelazycat/emacs-application-framework/issues/new)反馈。
 
-如果你遇到崩溃的问题, 请用下面的方式来收集崩溃信息:
-1. 先安装gdb并打开选项 `eaf-enable-debug`
-2. 使用命令 `eaf-stop-process` 停止EAF进程
-3. 重新打开EAF, 并在下次崩溃时发送 `*epc:server*` 的内容
-
 ## 加入我们
 你想把Emacs开发成一个操作系统吗？
 
