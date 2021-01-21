@@ -7,11 +7,11 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Jan 11 13:47:34 2021 (-0500)
+;; Last-Updated: Tue Jan 19 01:15:08 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
-;; URL: http://www.emacswiki.org/emacs/download/eaf.el
+;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
-;; Compatibility: GNU Emacs 27.0.50
+;; Compatibility: emacs-version >= 27
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -71,7 +71,8 @@
 ;;
 ;;
 
-;;; Require
+;;; Code:
+
 (defun add-subdirs-to-load-path (dir)
   "Recursive add directory DIR to `load-path'."
   (mapcar
@@ -97,10 +98,6 @@
 (require 's)
 (require 'eaf-server)
 (require 'epc)
-
-;;; Code:
-
-(eaf-server-start 9999)
 
 ;; Remove the relevant environment variables from the process-environment to disable QT scaling,
 ;; let EAF qt program follow the system scale.
@@ -1109,20 +1106,8 @@ A hashtable, key is url and value is title.")
     (setq eaf-process
           (if eaf-enable-debug
               (epc:start-epc "gdb" (append gdb-args eaf-args))
-            (epc:start-epc eaf-python-command eaf-args)))
-    ;; (setq eaf-process
-    ;;       (if eaf-enable-debug
-    ;;           (apply #'start-process eaf-name eaf-name "gdb" (append gdb-args eaf-args))
-    ;;         (apply #'start-process eaf-name eaf-name eaf-python-command eaf-args)))
-    )
-  ;; (set-process-query-on-exit-flag eaf-process nil)
-  ;; (set-process-sentinel
-  ;;  eaf-process
-  ;;  #'(lambda (process event)
-  ;;      (when (or (string-prefix-p "exited abnormally with code" event)
-  ;;                (string-match "finished" event))
-  ;;        (switch-to-buffer eaf-name))
-  ;;      (message "[EAF] %s %s" process (replace-regexp-in-string "\n$" "" event))))
+            (epc:start-epc eaf-python-command eaf-args))))
+  (eaf-server-start 9999)
   (message "[EAF] Process starting..."))
 
 (defun eaf-stop-process (&optional restart)
@@ -1139,7 +1124,8 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save)
     (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
+    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
+    (eaf-server-stop 9999))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
@@ -1858,7 +1844,9 @@ choose a search engine defined in `eaf-browser-search-engines'"
                                eaf-browser-search-engines))
                    (error (format "[EAF/browser] Search engine %s is unknown to EAF!" real-search-engine))))
          (current-symbol (if mark-active
-                             (buffer-substring (region-beginning) (region-end))
+                             (if (eq major-mode 'pdf-view-mode)
+                                 (car (pdf-view-active-region-text))
+                               (buffer-substring (region-beginning) (region-end)))
                            (symbol-at-point)))
          (search-url (if search-string
                          (format link search-string)

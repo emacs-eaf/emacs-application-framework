@@ -142,7 +142,7 @@ class AppBuffer(Buffer):
     def copy_select(self):
         if self.buffer_widget.is_select_mode:
             content = self.buffer_widget.parse_select_char_list()
-            self.eval_in_emacs.emit('''(kill-new "{}")'''.format(content))
+            self.eval_in_emacs.emit('kill-new', [content])
             self.message_to_emacs.emit(content)
             self.buffer_widget.cleanup_select()
         else:
@@ -351,7 +351,7 @@ class PdfViewerWidget(QWidget):
             except:
                 return
 
-            self.buffer.message_to_emacs.emit("Detect %s pdf file have been changed." %path)
+            self.buffer.message_to_emacs.emit("Detected that %s has been changed. Refreshing buffer..." %path)
             self.page_cache_pixmap_dict.clear()
             self.update()
             # if the file have been renew save, file_changed_watcher will remove the path form monitor list.

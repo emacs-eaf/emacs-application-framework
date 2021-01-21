@@ -125,7 +125,7 @@ class AppBuffer(BrowserBuffer):
     @interactive(insert_or_do=True)
     def copy_node_topic(self):
         node_topic = self.buffer_widget.execute_js("get_node_topic();")
-        self.eval_in_emacs.emit('''(kill-new "{}")'''.format(node_topic))
+        self.eval_in_emacs.emit('kill-new', [node_topic])
         self.message_to_emacs.emit("Copy: {}".format(node_topic))
 
     @interactive(insert_or_do=True)

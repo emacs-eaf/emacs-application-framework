@@ -7,11 +7,11 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2020-05-17 12:31:12
 ;; Version: 0.5
-;; Last-Updated: Mon Oct 12 12:17:09 2020 (-0400)
+;; Last-Updated: Wed Jan 20 05:34:13 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
-;; URL: http://www.emacswiki.org/emacs/download/eaf.el
+;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
-;; Compatibility: GNU Emacs 27.0.50
+;; Compatibility: emacs-version >= 27
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -54,6 +54,28 @@ Enable this when the you want to ensure the PDF link in the org file can be
   :type 'boolean
   :safe #'booleanp
   :group 'org-link)
+
+(defun eaf-org-export-to-pdf-and-open ()
+  "Run `org-latex-export-to-pdf', delete the tex file and `eaf-open' pdf in a new buffer."
+  (interactive)
+  (with-current-buffer (current-buffer)
+    (when (derived-mode-p 'org-mode)
+      (save-buffer)
+      (let* ((pdf-name (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))
+             (pdf-name-with-ext (concat pdf-name ".pdf"))
+             (eaf-pdf-buffer (get-buffer pdf-name-with-ext))
+             (pdf-full-path (concat (file-name-directory (buffer-file-name)) pdf-name-with-ext)))
+        (let ((exported (org-latex-export-to-pdf)))
+          (message (concat "Trying to open " pdf-name-with-ext))
+          (delete-file (concat pdf-name ".tex"))
+          (delete-other-windows)
+          (split-window-right)
+          (other-window 1)
+          (if (and eaf-pdf-buffer
+                   (with-current-buffer eaf-pdf-buffer
+                     (derived-mode-p 'eaf-mode)))
+              (switch-to-buffer eaf-pdf-buffer)
+            (eaf-open pdf-full-path)))))))
 
 (defvar eaf-org-override-pdf-links-list
   '("docview" "pdfview" "pdftools")

@@ -109,7 +109,7 @@ class Buffer(QGraphicsScene):
     request_close_buffer = QtCore.pyqtSignal(str)
     message_to_emacs = QtCore.pyqtSignal(str)
     set_emacs_var = QtCore.pyqtSignal(str, str, str)
-    eval_in_emacs = QtCore.pyqtSignal(str)
+    eval_in_emacs = QtCore.pyqtSignal(str, list)
     goto_left_tab = QtCore.pyqtSignal()
     goto_right_tab = QtCore.pyqtSignal()
     aspect_ratio_change = QtCore.pyqtSignal()
@@ -354,7 +354,7 @@ class Buffer(QGraphicsScene):
     @interactive(insert_or_do=True)
     def save_as_bookmark(self):
         ''' Save as bookmark.'''
-        self.eval_in_emacs.emit('''(bookmark-set)''')
+        self.eval_in_emacs.emit('bookmark-set', [])
 
     @interactive(insert_or_do=True)
     def select_left_tab(self):

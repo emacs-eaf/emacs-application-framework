@@ -7,11 +7,11 @@
 ;; Copyright (C) 2020, Andy Stewart, all rights reserved.
 ;; Created: 2020-02-28 16:09:02
 ;; Version: 0.1
-;; Last-Updated: 2020-02-28 16:09:02
-;;           By: Andy Stewart
+;; Last-Updated: Tue Jan 19 01:15:47 2021 (-0500)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-mindmap.el
 ;; Keywords:
-;; Compatibility: GNU Emacs 26.3
+;; Compatibility: emacs-version >= 27
 ;;
 ;; Features that might be required by this library:
 ;;

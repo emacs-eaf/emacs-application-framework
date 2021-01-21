@@ -133,7 +133,7 @@
           window.addEventListener("resize", sendSizeToServer);
 
           term.onLineFeed(() => {
-              const buffer = term.buffer;
+              const buffer = term.buffer.active;
               const new_line = buffer.getLine(buffer.baseY + buffer.cursorY);
               if (new_line && !new_line.isWrapped) {
                   var input_data = get_line_data(buffer, buffer.baseY + buffer.cursorY - 1);

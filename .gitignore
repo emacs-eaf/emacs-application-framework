@@ -1,3 +1,6 @@
 *.elc
 *.pyc
 /.log/
+/app/js-video-player/node_modules/
+/app/mermaid/node_modules/
+/app/terminal/node_modules/
