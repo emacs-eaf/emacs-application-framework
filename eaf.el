@@ -1088,30 +1088,6 @@ A hashtable, key is url and value is title.")
   "Serialize variable list."
   (json-encode eaf-var-list))
 
-(defun eaf-get-free-port ()
-  "Return a free (unused) TCP port.
-The port is chosen randomly from the ephemeral ports. "
-  (let (myserver
-        (port 50000))                  ; this should be ephemeral base
-    (while
-        (not
-         (processp
-          (condition-case sig
-              (setq myserver
-                    (make-network-process
-                     :name "*test-proc*"
-                     :server t
-                     :host 'local
-                     :service port
-                     :family 'ipv4))
-            (file-error
-             (if (equal
-                  "Cannot bind server socket address already in use"
-                  (mapconcat 'identity (cdr sig) " "))
-                 (setq port (+ 50000 (random 5000)))))))))
-    (delete-process myserver)
-    port))
-
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -1119,7 +1095,7 @@ The port is chosen randomly from the ephemeral ports. "
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((epc:live-p eaf-process)
     (user-error "[EAF] Process is already running")))
-  (let* ((eaf-server-port (eaf-get-free-port))
+  (let* ((eaf-server-port 9999)
          (eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
