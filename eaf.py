@@ -70,25 +70,7 @@ class EAF(object):
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.allow_reuse_address = True
 
-        self.server.register_function(self.send_key)
-        self.server.register_function(self.send_key_sequence)
-        self.server.register_function(self.kill_buffer)
-        self.server.register_function(self.update_views)
-        self.server.register_function(self.new_buffer)
-        self.server.register_function(self.update_buffer_with_url)
-        self.server.register_function(self.scroll_other_buffer)
-        self.server.register_function(self.update_emacs_var_dict)
-        self.server.register_function(self.kill_emacs)
-        self.server.register_function(self.execute_function)
-        self.server.register_function(self.handle_input_response)
-        self.server.register_function(self.cancel_input_response)
-        self.server.register_function(self.update_focus_text)
-        self.server.register_function(self.update_multiple_sub_nodes)
-        self.server.register_function(self.update_multiple_brother_nodes)
-        self.server.register_function(self.update_multiple_middle_nodes)
-        self.server.register_function(self.action_quit)
-        self.server.register_function(self.call_function)
-        self.server.register_function(self.call_function_with_args)
+        self.server.register_instance(self)
 
         self.server_thread.start()
 
