@@ -197,7 +197,7 @@ We suspect there are some issues with how all the Window Managers implement thei
 One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
 
 ### `[EAF] *epc:server* aborted (core dumped)` error
-Please check the `*epc:server*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
+Please check the `*epc:server*` buffer (it is invisible, find it using `C-b SPC`), something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
 
 If you're sure Python dependences are installed correctly, please create an issue with the `*epc:server*` buffer content, it contains many clues that can help us locate the problem faster.
 
@@ -235,11 +235,13 @@ If we missed your package, please make a PR to add it to the list.
 
 ## Report bug
 
-For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
+### For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
 
-If you encounter any problem with EAF, please use command `emacs -q` with a minimal setup that only contains EAF and verify the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your Emacs config.
+If you encounter a problem with EAF, and it occured after pulling the latest commit, please check the [Discussions](https://github.com/manateelazycat/emacs-application-framework/discussions/527) page first.
 
-If the problem persists, please [report bug here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
+For any other problems, please use `emacs -q` and load a minimal setup with only EAF to verify that the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your Emacs config.
+
+If the problem persists, please report it [here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
 
 ## Join Us
 Do you want to make Emacs a real "operating system"?
