@@ -452,9 +452,11 @@ class EAF(object):
     @PostGui()
     def update_focus_text(self, buffer_id, new_text):
         ''' Update focus text for specified buffer.'''
+        import base64
+
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
-                buffer.set_focus_text(new_text)
+                buffer.set_focus_text(base64.b64decode(new_text).decode("utf-8"))
 
     @PostGui()
     def update_multiple_sub_nodes(self, buffer_id, new_text):

@@ -2080,7 +2080,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
         (t
          (eaf-call-async "update_focus_text"
                          eaf--buffer-id
-                         (buffer-string))))
+                         (base64-encode-string (buffer-string)))))
   (kill-buffer)
   (delete-window))
 
