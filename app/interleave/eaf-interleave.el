@@ -463,12 +463,12 @@ Consider a headline with property PROPERTY as parent headline."
 (defun eaf-interleave--pdf-viewer-current-page (url)
   "get current page index."
   (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
-    (string-to-number (eaf-epc-call-sync "call_function" id "current_page"))))
+    (string-to-number (eaf-call-sync "call_function" id "current_page"))))
 
 (defun eaf-interleave--pdf-viewer-goto-page (url page)
   "goto page"
   (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
-    (eaf-epc-call "handle_input_response" id "jump_page" page)))
+    (eaf-call-async "handle_input_response" id "jump_page" page)))
 
 (defun eaf-interleave--ensure-buffer-window (buffer)
   "If BUFFER don't display, will use other window display"

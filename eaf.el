@@ -1070,12 +1070,14 @@ A hashtable, key is url and value is title.")
            (let ((process-connection-type nil))
              (start-process "" nil "xdg-open" path-or-url))))))
 
-(defun eaf-epc-call (method &rest args)
+(defun eaf-call-async (method &rest args)
+   "Call Python EPC function asynchronous."
   (deferred:$
     (epc:call-deferred eaf-process (read method) args)
     ))
 
-(defun eaf-epc-call-sync (method &rest args)
+(defun eaf-call-sync (method &rest args)
+  "Call Python EPC function synchronously."
   (epc:call-sync eaf-process (read method) args))
 
 (defun eaf-get-emacs-xid (frame)
@@ -1223,14 +1225,14 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
       (if (called-interactively-p 'any)
-          (message "%s" (kill-new (eaf-epc-call-sync "call_function" eaf--buffer-id "get_url")))
-        (eaf-epc-call-sync "call_function" eaf--buffer-id "get_url"))
+          (message "%s" (kill-new (eaf-call-sync "call_function" eaf--buffer-id "get_url")))
+        (eaf-call-sync "call_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
 (defun eaf-toggle-fullscreen ()
   "Toggle fullscreen."
   (interactive)
-  (eaf-epc-call "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
+  (eaf-call-async "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
 (defun eaf-share-path-or-url ()
   "Share the current file path or web URL as QRCode."
@@ -1246,7 +1248,7 @@ When called interactively, copy to ‘kill-ring’."
           (interactive)
           ;; Ensure this is only called from EAF buffer
           (if (derived-mode-p 'eaf-mode)
-              (eaf-epc-call "execute_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
+              (eaf-call-async "execute_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
             (message "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
@@ -1353,7 +1355,7 @@ keybinding variable to eaf-app-binding-alist."
                                   (eaf-get-emacs-xid frame)
                                   x y w h)
                           view-infos)))))))
-        (eaf-epc-call "update_views" (mapconcat #'identity view-infos ","))
+        (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))
         ))))
 
 (defun eaf--delete-org-preview-file (org-file)
@@ -1382,7 +1384,7 @@ keybinding variable to eaf-app-binding-alist."
 (defun eaf--monitor-buffer-kill ()
   "A function monitoring when an EAF buffer is killed."
   (ignore-errors
-    (eaf-epc-call "kill_buffer" eaf--buffer-id))
+    (eaf-call-async "kill_buffer" eaf--buffer-id))
 
   ;; Kill eaf process when last eaf buffer closed.
   ;; We need add timer to avoid the last web page kill when terminal is exited.
@@ -1409,7 +1411,7 @@ keybinding variable to eaf-app-binding-alist."
              (when (equal eaf--buffer-app-name "browser")
                (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
          nil browser-restore-file-path)))
-    (eaf-epc-call "kill_emacs")))
+    (eaf-call-async "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
   "Function monitoring when org-preview application is killed."
@@ -1428,59 +1430,59 @@ keybinding variable to eaf-app-binding-alist."
     (ignore-errors
       ;; eaf-org-file-list?
       (org-html-export-to-html)
-      (eaf-epc-call "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
+      (eaf-call-async "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
       (message "[EAF] Export %s to HTML." (buffer-file-name)))))
 
 (defun eaf-keyboard-quit ()
   "Wrap around `keyboard-quit' and signals a ‘quit’ condition to EAF applications."
   (interactive)
-  (eaf-epc-call "action_quit" eaf--buffer-id)
+  (eaf-call-async "action_quit" eaf--buffer-id)
   (call-interactively 'keyboard-quit))
 
 (defun eaf-send-key ()
   "Directly send key to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key" eaf--buffer-id (key-description (this-command-keys-vector))))
+  (eaf-call-async "send_key" eaf--buffer-id (key-description (this-command-keys-vector))))
 
 (defun eaf-send-down-key ()
   "Directly send down key to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key" eaf--buffer-id "<down>"))
+  (eaf-call-async "send_key" eaf--buffer-id "<down>"))
 
 (defun eaf-send-up-key ()
   "Directly send up key to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key" eaf--buffer-id "<up>"))
+  (eaf-call-async "send_key" eaf--buffer-id "<up>"))
 
 (defun eaf-send-return-key ()
   "Directly send return key to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key" eaf--buffer-id "RET"))
+  (eaf-call-async "send_key" eaf--buffer-id "RET"))
 
 (defun eaf-send-key-sequence ()
   "Directly send key sequence to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
+  (eaf-call-async "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
 
 (defun eaf-send-ctrl-return-sequence ()
   "Directly send Ctrl-Return key sequence to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key_sequence" eaf--buffer-id "C-RET"))
+  (eaf-call-async "send_key_sequence" eaf--buffer-id "C-RET"))
 
 (defun eaf-send-alt-backspace-sequence ()
   "Directly send Alt-Backspace key sequence to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key_sequence" eaf--buffer-id "M-<backspace>"))
+  (eaf-call-async "send_key_sequence" eaf--buffer-id "M-<backspace>"))
 
 (defun eaf-send-shift-return-sequence ()
   "Directly send Shift-Return key sequence to EAF Python side."
   (interactive)
-  (eaf-epc-call "send_key_sequence" eaf--buffer-id "S-RET"))
+  (eaf-call-async "send_key_sequence" eaf--buffer-id "S-RET"))
 
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."
   (interactive)
-  (eaf-epc-call "send_key_sequence"
+  (eaf-call-async "send_key_sequence"
                 eaf--buffer-id
                 (nth 1 (split-string (key-description (this-command-keys-vector))))))
 
@@ -1491,7 +1493,7 @@ For convenience, use the Lisp macro `eaf-setq' instead."
   (setf (map-elt eaf-var-list sym) val)
   (when (epc:live-p eaf-process)
     ;; Update python side variable dynamically.
-    (eaf-epc-call "update_emacs_var_dict" (eaf-serialization-var-list)))
+    (eaf-call-async "update_emacs_var_dict" (eaf-serialization-var-list)))
   val)
 
 (defmacro eaf-setq (var val)
@@ -1603,8 +1605,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive-type initial-content)))
     (if input-message
-        (eaf-epc-call "handle_input_response" input-buffer-id callback-tag input-message)
-      (eaf-epc-call "cancel_input_response" input-buffer-id callback-tag))))
+        (eaf-call-async "handle_input_response" input-buffer-id callback-tag input-message)
+      (eaf-call-async "cancel_input_response" input-buffer-id callback-tag))))
 
 (defun eaf-read-input (interactive-string interactive-type initial-content)
   "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
@@ -1621,7 +1623,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args)))
     (with-current-buffer buffer
-      (eaf-epc-call "new_buffer" eaf--buffer-id url app-name args))
+      (eaf-call-async "new_buffer" eaf--buffer-id url app-name args))
     (eaf--display-app-buffer app-name buffer))
   (eaf--post-open-actions url app-name args))
 
@@ -2070,19 +2072,19 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
   (cond ((equal eaf-mindmap--current-add-mode "sub")
-         (eaf-epc-call "update_multiple_sub_nodes"
+         (eaf-call-async "update_multiple_sub_nodes"
                    eaf--buffer-id
                    (buffer-string)))
         ((equal eaf-mindmap--current-add-mode "brother")
-         (eaf-epc-call "update_multiple_brother_nodes"
+         (eaf-call-async "update_multiple_brother_nodes"
                    eaf--buffer-id
                    (buffer-string)))
         ((equal eaf-mindmap--current-add-mode "middle")
-         (eaf-epc-call "update_multiple_middle_nodes"
+         (eaf-call-async "update_multiple_middle_nodes"
                    eaf--buffer-id
                    (buffer-string)))
         (t
-         (eaf-epc-call "update_focus_text"
+         (eaf-call-async "update_focus_text"
                    eaf--buffer-id
                    (buffer-string))))
   (kill-buffer)
@@ -2183,8 +2185,8 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 Otherwise send key 'esc' to browser."
   (interactive)
   (if eaf-fullscreen-p
-      (eaf-epc-call "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")
-    (eaf-epc-call "send_key" eaf--buffer-id "<escape>")))
+      (eaf-call-async "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")
+    (eaf-call-async "send_key" eaf--buffer-id "<escape>")))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
@@ -2221,8 +2223,8 @@ Otherwise send key 'esc' to browser."
   "Create PDF outline."
   (interactive)
   (let ((buffer-name (buffer-name (current-buffer)))
-        (toc (eaf-epc-call-sync "call_function" eaf--buffer-id "get_toc"))
-        (page-number (string-to-number (eaf-epc-call-sync "call_function" eaf--buffer-id "current_page"))))
+        (toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc"))
+        (page-number (string-to-number (eaf-call-sync "call_function" eaf--buffer-id "current_page"))))
     ;; Save window configuration before outline.
     (setq eaf-pdf-outline-window-configuration (current-window-configuration))
 
@@ -2250,7 +2252,7 @@ Otherwise send key 'esc' to browser."
          (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
     ;; Jump to page.
     (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
-    (eaf-epc-call-sync "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
+    (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
 
     ;; Restore window configuration before outline operation.
     (when eaf-pdf-outline-window-configuration
@@ -2407,7 +2409,7 @@ Otherwise send key 'esc' to browser."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-epc-call "scroll_other_buffer" (eaf-get-view-info) "up"
+        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "up"
                   (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
@@ -2419,7 +2421,7 @@ Otherwise send key 'esc' to browser."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-epc-call "scroll_other_buffer" (eaf-get-view-info) "down"
+        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "down"
                   (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
@@ -2433,7 +2435,7 @@ Otherwise send key 'esc' to browser."
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-epc-call "scroll_other_buffer" (eaf-get-view-info)
+        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info)
                   (if (string-equal direction "up") "up" "down")
                   (if line "line" "page"))
         (other-window -1))
