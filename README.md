@@ -196,10 +196,10 @@ We suspect there are some issues with how all the Window Managers implement thei
 
 One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
 
-### `[EAF] *eaf* aborted (core dumped)` error
-Please check the `*eaf*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
+### `[EAF] *epc:server* aborted (core dumped)` error
+Please check the `*epc:server*` buffer, something is wrong on the Python side. Usually due to Python dependencies are not installed correctly.
 
-If you're sure Python dependences are installed correctly, please create an issue with the `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
+If you're sure Python dependences are installed correctly, please create an issue with the `*epc:server*` buffer content, it contains many clues that can help us locate the problem faster.
 
 ### What is Github Personal Access Tokens?
 If you use EAF Markdown Previewer, to get consistent previewing, you need to access [Github Personal access token site](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token. Then set the token:
@@ -244,7 +244,7 @@ If the problem persists, please [report bug here](https://github.com/manateelazy
 If you got segfault error, please use the following way to collect crash information:
 1. Install gdb and turn on option `eaf-enable-debug`
 2. Use command `eaf-stop-process` stop current process
-3. Restart eaf, send issue with `*eaf*` buffer content when next crash
+3. Restart eaf, send issue with `*epc:server*` buffer content when next crash
 
 ## Join Us
 Do you want to make Emacs a real "operating system"?
