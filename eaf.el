@@ -1096,8 +1096,11 @@ A hashtable, key is url and value is title.")
                     (list (eaf-serialization-var-list))
                     ))
          (process-environment (cl-copy-list process-environment)))
-    (unless (equal (getenv "WAYLAND_DISPLAY") "")
-      (setenv "QT_QPA_PLATFORM" "xcb"))
+
+    (let ((wayland-display (getenv "WAYLAND_DISPLAY")))
+      (when (and wayland-display (not (string= wayland-display "")))
+        (setenv "QT_QPA_PLATFORM" "xcb")))
+
     (eaf-server-start eaf-server-port)
     (setq eaf-process (epc:start-epc eaf-python-command eaf-args)))
   (message "[EAF] Process starting..."))
