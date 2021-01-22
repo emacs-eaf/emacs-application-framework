@@ -64,11 +64,10 @@ class EAF(object):
 
         self.server.logger.setLevel(logging.DEBUG)
 
-        epc_log_dir = os.path.join(os.path.expanduser('~'), '.emacs.d', 'eaf');
-        if not os.path.exists(epc_log_dir):
-            os.makedirs(epc_log_dir);
+        if not os.path.exists(eaf_config_dir):
+            os.makedirs(eaf_config_dir);
 
-        ch = logging.FileHandler(filename=os.path.join(epc_log_dir, 'epc_log.txt'), mode='w')
+        ch = logging.FileHandler(filename=os.path.join(eaf_config_dir, 'epc_log.txt'), mode='w')
         ch.setLevel(logging.DEBUG)
         self.server.logger.addHandler(ch)
 
