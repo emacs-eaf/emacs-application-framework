@@ -88,9 +88,6 @@
         (eaf-dir (file-name-directory (locate-library "eaf"))))
     (shell-command (concat eaf-dir "install-eaf.sh" "&"))))
 
-(defconst IS-LINUX   (eq system-type 'gnu/linux))
-(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
-
 (require 'subr-x)
 (require 'map)
 (require 'bookmark)
@@ -1099,9 +1096,11 @@ A hashtable, key is url and value is title.")
                     (list (eaf-serialization-var-list))
                     ))
          (process-environment (cl-copy-list process-environment)))
-    (if IS-LINUX
-        (unless (equal (getenv "WAYLAND_DISPLAY") "")
-          (setenv "QT_QPA_PLATFORM" "xcb")))
+
+    (let ((wayland-display (getenv "WAYLAND_DISPLAY")))
+      (when (and wayland-display (not (string= wayland-display "")))
+        (setenv "QT_QPA_PLATFORM" "xcb")))
+
     (eaf-server-start eaf-server-port)
     (setq eaf-process (epc:start-epc eaf-python-command eaf-args)))
   (message "[EAF] Process starting..."))
