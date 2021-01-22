@@ -36,8 +36,8 @@ class AppBuffer(BrowserBuffer):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
         self.url = url
-        index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
-        self.buffer_widget.setUrl(QUrl(index_file))
+        index_file = os.path.join(os.path.dirname(__file__), "index.html")
+        self.buffer_widget.setUrl(QUrl.fromLocalFile(index_file))
 
         for method_name in ["toggle_play", "forward", "backward", "restart", "increase_volume", "decrease_volume"]:
             self.build_js_method(method_name)
@@ -55,7 +55,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js("set_current_time('{}');".format(self.position))
 
     def play_video(self):
-        self.buffer_widget.eval_js("play('{}');".format("file://" + self.url))
+        self.buffer_widget.eval_js("play('{}');".format(QUrl.fromLocalFile(self.url).toString()))
 
     def build_js_method(self, method_name):
         def _do ():

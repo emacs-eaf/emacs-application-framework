@@ -28,6 +28,7 @@ import subprocess
 import os
 import qrcode
 import signal
+import tempfile
 
 from core.buffer import Buffer
 
@@ -107,8 +108,10 @@ class FileUploaderWidget(QWidget):
 
         self.qrcode_label.setPixmap(qrcode.make(self.address, image_factory=Image).pixmap())
 
+        tmp_db_file = os.path.join(tempfile.gettempdir(), "filebrowser.db")
         self.background_process = subprocess.Popen(
-            "cd {0} && filebrowser --noauth -d /tmp/filebrowser.db --address {1} -p {2}".format(url, self.local_ip, self.port),
+            "filebrowser --noauth -d {0} --address {1} -p {2}".format(tmp_db_file, self.local_ip, self.port),
+            cwd=url,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             shell=True)

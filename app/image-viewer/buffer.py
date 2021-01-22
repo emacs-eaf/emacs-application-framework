@@ -35,7 +35,7 @@ class AppBuffer(BrowserBuffer):
         self.url = url
         self.parent_dir = os.path.abspath(os.path.join(url, os.pardir))
         self.image_name = os.path.basename(url)
-        self.buffer_widget.setUrl(QUrl("file://" + self.url))
+        self.buffer_widget.setUrl(QUrl.fromLocalFile(self.url))
 
     def is_image_file(self, f):
         return Path(f).suffix[1:].lower() in ["jpg", "jpeg", "png", "bmp", "gif", "svg", "webp"]

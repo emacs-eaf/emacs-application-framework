@@ -41,8 +41,8 @@ class AppBuffer(BrowserBuffer):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
         self.url = url
-        index_file = "file://" + (os.path.join(os.path.dirname(__file__), "index.html"))
-        self.buffer_widget.setUrl(QUrl(index_file))
+        index_file = os.path.join(os.path.dirname(__file__), "index.html")
+        self.buffer_widget.setUrl(QUrl.fromLocalFile(index_file))
 
         self.cut_node_id = None
 
