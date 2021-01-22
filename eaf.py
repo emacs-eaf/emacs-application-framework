@@ -63,7 +63,7 @@ class EAF(object):
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
 
         self.server.logger.setLevel(logging.DEBUG)
-        ch = logging.FileHandler(filename=os.path.expanduser('~/.emacs.d/eaf/epc_log.txt'), mode='w')
+        ch = logging.FileHandler(filename=os.path.expanduser(os.path.join(eaf_config_dir,'epc_log.txt')), mode='w')
         ch.setLevel(logging.DEBUG)
         self.server.logger.addHandler(ch)
 
