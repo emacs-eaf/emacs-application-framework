@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jan 21 12:34:39 2021 (-0500)
+;; Last-Updated: Fri Jan 22 14:06:49 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -83,13 +83,16 @@
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
+  "An interactive function that run install-eaf.sh or install-eaf-win32.js for Linux or Windows respectively."
   (interactive)
-  (let ((default-directory "/sudo::")
-        (eaf-dir (file-name-directory (locate-library "eaf"))))
-    (cond ((memq system-type '(ms-dos windows-nt))
+  (let ((eaf-dir (file-name-directory (locate-library "eaf"))))
+    (cond ((string-equal system-type "gnu/linux")
+           (let ((default-directory "/sudo::"))
+             (shell-command (concat eaf-dir "install-eaf.sh" "&"))))
+          ((string-equal system-type "windows-nt")
            (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
-          ((eq system-type gnu/linux)
-           (shell-command (concat eaf-dir "install-eaf.sh" "&"))))))
+          ((string-equal system-type "darwin")
+           (user-error "Unfortunately MacOS is not supported, see README for details")))))
 
 (require 'subr-x)
 (require 'map)

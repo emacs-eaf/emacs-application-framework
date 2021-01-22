@@ -72,13 +72,11 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
                :files ("*"))))
 ```
 
-2. 安装EAF依赖，对于每个依赖的解释可以在[依赖列表](#依赖列表)找到。
-
-- `M-x install-eaf-dependencies`
+2. 通过`M-x install-eaf-dependencies`安装EAF依赖，
 
 如果你更喜欢手动执行安装脚本，
 
-在Linux系统下:
+- GNU/Linux用户：
 
 ```Bash
 cd emacs-application-framework
@@ -86,12 +84,15 @@ chmod +x ./install-eaf.sh
 ./install-eaf.sh
 ```
 
-在Windows系统下:
+- Windows用户：
 
-```Bash
+```shell
+>>>>>>> Update README and eaf-install-dependencies (need Windows testing)
 cd emacs-application-framework
 node ./install-eaf-win32.js
 ```
+
+脚本里安装的每一个依赖的解释可以在[依赖列表](#依赖列表)找到。
 
 3. 安装Elisp依赖包:
 - [emacs-ctable](https://github.com/kiwanami/emacs-ctable)

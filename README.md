@@ -73,12 +73,11 @@ Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
                :files ("*"))))
 ```
 
-2. Install EAF dependencies. An explanation of each dependency can be found in [Dependency List](#dependency-list).
-- `M-x install-eaf-dependencies`
+2. Install EAF dependencies using `M-x install-eaf-dependencies`.
 
 If you prefer to manually call the installation script in the terminal,
 
-In Linux system:
+- If you use GNU/Linux,
 
 ```Bash
 cd emacs-application-framework
@@ -86,12 +85,14 @@ chmod +x ./install-eaf.sh
 ./install-eaf.sh
 ```
 
-In Windows system:
+- If you use Windows,
 
-```Bash
+```shell
 cd emacs-application-framework
 node ./install-eaf-win32.js
 ```
+
+Feel free to inspect the install script yourself. An explanation of each dependency can be found at [Dependency List](#dependency-list).
 
 3. Install Elisp packages:
 - [emacs-ctable](https://github.com/kiwanami/emacs-ctable)
