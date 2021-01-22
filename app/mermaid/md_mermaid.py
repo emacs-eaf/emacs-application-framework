@@ -12,6 +12,7 @@ License: GNU GPLv3
 
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
+from PyQt5.QtCore import QUrl
 
 import re
 import os
@@ -31,10 +32,10 @@ class MermaidPreprocessor(Preprocessor):
         is_mermaid = False
         old_line = ""
 
-        js_file = "file://" + (os.path.join(os.path.dirname(__file__), "node_modules", "mermaid", "dist", "mermaid.js"))
+        js_file = os.path.join(os.path.dirname(__file__), "node_modules", "mermaid", "dist", "mermaid.js")
 
         new_lines.append('<meta charset="utf-8">')
-        new_lines.append('<script src="{}"></script>'.format(js_file))
+        new_lines.append('<script src="{}"></script>'.format(QUrl.fromLocalFile(js_file).toString()))
         new_lines.append('<script>mermaid.initialize({startOnLoad:true});</script>')
 
         for line in lines:

@@ -124,7 +124,8 @@ class BrowserView(QWebEngineView):
 
     def open_downloads_setting(self):
         ''' Open aria2 download manage page. '''
-        self.open_url_new_buffer("file://" + (os.path.join(os.path.dirname(__file__), "aria2-ng", "index.html")))
+        index_file = os.path.join(os.path.dirname(__file__), "aria2-ng", "index.html")
+        self.open_url_new_buffer(QUrl.fromLocalFile(index_file).toString())
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
