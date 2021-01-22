@@ -86,7 +86,10 @@
   (interactive)
   (let ((default-directory "/sudo::")
         (eaf-dir (file-name-directory (locate-library "eaf"))))
-    (shell-command (concat eaf-dir "install-eaf.sh" "&"))))
+    (cond ((memq system-type '(ms-dos windows-nt))
+           (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
+          ((eq system-type gnu/linux)
+           (shell-command (concat eaf-dir "install-eaf.sh" "&"))))))
 
 (require 'subr-x)
 (require 'map)
