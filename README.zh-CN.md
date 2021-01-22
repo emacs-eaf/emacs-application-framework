@@ -111,6 +111,10 @@ node ./install-eaf-win32.js
 ```Elisp
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+  :init
+  (use-package epc :defer t)
+  (use-package ctable :defer t)
+  (use-package deferred :defer t)
   :custom
   (eaf-browser-continue-where-left-off t)
   :config
