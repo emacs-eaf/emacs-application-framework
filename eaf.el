@@ -215,7 +215,6 @@ been initialized."
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
 (defvar eaf-server-port 9999)
-(defvar eaf-epc-port 6666)
 
 (defvar eaf-epc-process nil)
 
@@ -1114,7 +1113,6 @@ A hashtable, key is url and value is title.")
                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
                     (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
-                    (list (number-to-string eaf-epc-port))
                     (list (eaf-serialization-var-list))
                     ))
          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
@@ -1591,7 +1589,7 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
        (kill-buffer buffer)
        (throw 'found-eaf t)))))
 
-(defun eaf--first-start (webengine-include-private-codec)
+(defun eaf--first-start (eaf-epc-port webengine-include-private-codec)
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."

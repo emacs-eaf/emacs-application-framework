@@ -45,10 +45,9 @@ class EAF(object):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Parse init arguments.
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, epc_server_port, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
-        epc_server_port = int(epc_server_port)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
 
         # Init variables.
@@ -61,7 +60,7 @@ class EAF(object):
         self.update_emacs_var_dict(var_dict_string)
 
         # Build EPC server.
-        self.server = ThreadingEPCServer(('localhost', epc_server_port), log_traceback=True)
+        self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
         self.server.logger.setLevel(logging.DEBUG)
         self.server.allow_reuse_address = True
 
@@ -81,8 +80,8 @@ class EAF(object):
         # Build emacs server connect, used to send message from Python to elisp side.
         self.emacs_server_connect = self.build_emacs_server_connect(int(emacs_server_port))
 
-        # Pass webengine codec information to Emacs when first start EAF.
-        self.first_start(self.webengine_include_private_codec())
+        # Pass epc port and webengine codec information to Emacs when first start EAF.
+        self.first_start(self.server.server_address[1], self.webengine_include_private_codec())
 
         # Set Network proxy.
         if proxy_host != "" and proxy_port != "":
@@ -488,8 +487,8 @@ class EAF(object):
     def focus_emacs_buffer(self, message):
         self.eval_in_emacs('eaf-focus-buffer', [message])
 
-    def first_start(self, webengine_include_private_codec):
-        self.eval_in_emacs('eaf--first-start', [webengine_include_private_codec])
+    def first_start(self, port, webengine_include_private_codec):
+        self.eval_in_emacs('eaf--first-start', [port, webengine_include_private_codec])
 
     def update_buffer_details(self, buffer_id, title, url):
         self.eval_in_emacs('eaf--update-buffer-details', [buffer_id, title, url])
