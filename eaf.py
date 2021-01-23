@@ -23,45 +23,44 @@
 # QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
-from sys import version_info
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
+from core.utils import PostGui
 from core.view import View
+from epc.server import ThreadingEPCServer
+from sys import version_info
 import importlib
 import json
-import os
-import subprocess
-import socket
-import threading
-from epc.server import ThreadingEPCServer
 import logging
-from core.utils import PostGui
-
-def build_emacs_server_connect(port):
-    conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    conn.connect(('127.0.0.1', port))
-    return conn
+import os
+import socket
+import subprocess
+import threading
 
 class EAF(object):
     def __init__(self, args):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
+        # Parse init arguments.
         (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
 
+        # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
         self.emacs_var_dict = {}
+        self.session_file = os.path.join(eaf_config_dir, "session.json")        
 
+        # Update Emacs var dictionary.
         self.update_emacs_var_dict(var_dict_string)
 
+        # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
-
         self.server.logger.setLevel(logging.DEBUG)
 
         if not os.path.exists(eaf_config_dir):
@@ -71,11 +70,11 @@ class EAF(object):
         ch.setLevel(logging.DEBUG)
         self.server.logger.addHandler(ch)
 
+        self.server.register_instance(self) # register instance functions let elisp side call
+
+        # Start EPC server with sub-thread, avoid block Qt main loop.
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.allow_reuse_address = True
-
-        self.server.register_instance(self)
-
         self.server_thread.start()
 
         # NOTE:
@@ -83,11 +82,11 @@ class EAF(object):
         # And this print must be first print code, otherwise Emacs client will failed to start.
         self.server.print_port()
 
-        self.emacs_server_connect = build_emacs_server_connect(int(emacs_server_port))
+        # Build emacs server connect, used to send message from Python to elisp side.
+        self.emacs_server_connect = self.build_emacs_server_connect(int(emacs_server_port))
 
+        # Pass webengine codec information to Emacs when first start EAF.
         self.first_start(self.webengine_include_private_codec())
-
-        self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         # Set Network proxy.
         if proxy_host != "" and proxy_port != "":
@@ -102,6 +101,11 @@ class EAF(object):
             proxy.setHostName(proxy_host)
             proxy.setPort(int(proxy_port))
             QNetworkProxy.setApplicationProxy(proxy)
+
+    def build_emacs_server_connect(self, port):
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        conn.connect(('127.0.0.1', port))
+        return conn
 
     def get_command_result(self, command):
         ''' Execute the command and return the result. '''
