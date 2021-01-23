@@ -33,6 +33,7 @@ import random
 import math
 import os
 import hashlib
+import json
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -197,6 +198,30 @@ class AppBuffer(Buffer):
         for line in toc:
             result += "{0}{1} {2}\n".format("".join("    " * (line[0] - 1)), line[1], line[2])
         return result
+
+    def get_annots(self, page_index):
+        '''
+        Return a list of annotations on page_index of types.
+        '''
+        # Notes: annots need the pymupdf above 1.16.4 version.
+        annots = self.buffer_widget.get_annots(int(page_index))
+        result = {}
+        for annot in annots:
+            id = annot.info["id"]
+            rect = annot.rect
+            type = annot.type
+            if len(type) != 2:
+                continue
+            result[id] = {"page": page_index, "type_int": type[0], "type_name": type[1], "rect": "%s:%s:%s:%s" %(rect.x0, rect.y0, rect.x1, rect.y1)}
+        return json.dumps(result)
+
+    def jump_to_rect(self, page_index, rect):
+        arr = rect.split(":")
+        if len(arr) != 4:
+            return ""
+        rect = fitz.Rect(float(arr[0]), float(arr[1]), float(arr[2]), float(arr[3]))
+        self.buffer_widget.jump_to_rect(int(page_index), rect)
+        return ""
 
 class PdfViewerWidget(QWidget):
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -1144,6 +1169,14 @@ class PdfViewerWidget(QWidget):
         self.start_char_page_index = None
         self.start_char_rect_index = None
 
+    def get_annots(self, page_index, types=None):
+        '''
+        Return a list of annotations on page_index of types.
+        '''
+        # Notes: annots need the pymupdf above 1.16.4 version.
+        page = self.document[page_index]
+        return page.annots(types)
+
     def hover_annot(self):
         try:
             ex, ey, page_index = self.get_cursor_absolute_position()
@@ -1187,7 +1220,8 @@ class PdfViewerWidget(QWidget):
                     QToolTip.hideText()
 
             return page, current_annot
-        except:
+        except Exception as e:
+            print("Hove Annot: ", e)
             return None, None
 
     def save_annot(self):
@@ -1218,6 +1252,10 @@ class PdfViewerWidget(QWidget):
 
     def jump_to_percent(self, percent):
         self.update_vertical_offset(min(max(self.scale * (self.page_total_number * self.page_height * percent / 100.0), 0), self.max_scroll_offset()))
+
+    def jump_to_rect(self, page_index, rect):
+        quad = rect.quad
+        self.update_vertical_offset((page_index * self.page_height + quad.ul.y) * self.scale)
 
     def current_percent(self):
         return 100.0 * self.scroll_offset / (self.max_scroll_offset() + self.rect().height())
