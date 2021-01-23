@@ -276,9 +276,9 @@ class Buffer(QGraphicsScene):
         ''' Call function.'''
         return getattr(self, function_name)()
 
-    def call_function_with_args(self, function_name, args_string):
+    def call_function_with_args(self, function_name, *args, **kwargs):
         ''' Call function with arguments.'''
-        return getattr(self, function_name)(args_string)
+        return getattr(self, function_name)(*args, **kwargs)
 
     @abstract
     def fake_key_event_filter(self, event_string):

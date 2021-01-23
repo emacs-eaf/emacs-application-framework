@@ -391,11 +391,11 @@ class EAF(object):
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
-    def call_function_with_args(self, buffer_id, function_name, args_string):
+    def call_function_with_args(self, buffer_id, function_name, *args, **kwargs):
         ''' Call function with arguments and return the result. '''
         if buffer_id in self.buffer_dict:
             try:
-                return str(self.buffer_dict[buffer_id].call_function_with_args(function_name, args_string))
+                return str(self.buffer_dict[buffer_id].call_function_with_args(function_name, *args, **kwargs))
             except AttributeError:
                 import traceback
                 traceback.print_exc()
