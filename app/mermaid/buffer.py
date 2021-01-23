@@ -21,15 +21,10 @@
 
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, QTimer
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QFileSystemWatcher
 from core.browser import BrowserBuffer
-from core.utils import string_to_base64
-import threading
-import pyinotify
 import markdown
-import os
 
 class AppBuffer(BrowserBuffer):
 
@@ -40,22 +35,9 @@ class AppBuffer(BrowserBuffer):
 
         self.url = url
         self.render()
-
-        self.update_content.connect(self.render)
-        threading.Timer(1, self.monitor_file_change).start()
-
-    def monitor_file_change(self):
-        parent = self
-
-        class ModHandler(pyinotify.ProcessEvent):
-            def process_IN_CLOSE_WRITE(self, evt):
-                parent.update_content.emit()
-
-        handler = ModHandler()
-        wm = pyinotify.WatchManager()
-        notifier = pyinotify.Notifier(wm, handler)
-        wdd = wm.add_watch(self.url, pyinotify.IN_CLOSE_WRITE)
-        notifier.loop()
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.fileChanged.connect(self.render)
+        self.file_watcher.addPath(url)
 
     def render(self):
         with open(self.url, "r") as f:
