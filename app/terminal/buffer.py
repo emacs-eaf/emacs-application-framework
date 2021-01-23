@@ -120,7 +120,6 @@ class AppBuffer(BrowserBuffer):
             self.destroy_buffer()
 
     def destroy_buffer(self):
-        super().destroy_buffer()
         self.close_buffer()
         self.timer.stop()
 
