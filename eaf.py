@@ -63,6 +63,7 @@ class EAF(object):
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', epc_server_port), log_traceback=True)
         self.server.logger.setLevel(logging.DEBUG)
+        self.server.allow_reuse_address = True
 
         if not os.path.exists(eaf_config_dir):
             os.makedirs(eaf_config_dir);
@@ -75,7 +76,6 @@ class EAF(object):
 
         # Start EPC server with sub-thread, avoid block Qt main loop.
         self.server_thread = threading.Thread(target=self.server.serve_forever)
-        self.server_thread.allow_reuse_address = True
         self.server_thread.start()
 
         # Build emacs server connect, used to send message from Python to elisp side.
