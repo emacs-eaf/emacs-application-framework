@@ -468,16 +468,12 @@ class EAF(object):
                 for line in str(new_text).split("\n"):
                     buffer.add_texted_middle_node(line)
 
-    def eval_in_emacs(self, fname, fargs_list):
-        code = "(" + str(fname)
-        for farg in fargs_list:
-            arg = str(farg).replace('"', '\\"')
-            if len(arg) > 0 and arg[0] == ">":
-                arg = arg[1:]
-            elif len(arg) == 0 or arg[0] != "'":
-                arg = '"' + arg + '"'
-            code = code + ' ' + arg
+    def eval_in_emacs(self, method_name, args_list):
+        code = "(" + str(method_name)
+        for arg in args_list:
+            code += " \"{}\"".format(str(arg))
         code += ")"
+
         self.emacs_server_connect.send(str.encode(code))
 
     def add_multiple_sub_nodes(self, buffer_id):
