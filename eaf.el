@@ -1155,7 +1155,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
     (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-    (eaf-server-stop 9999))
+    (eaf-server-stop eaf-server-port))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
