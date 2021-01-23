@@ -214,7 +214,14 @@ been initialized."
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
-(defvar eaf-process nil)
+(defvar eaf-server-port 9999)
+(defvar eaf-epc-port 6666)
+
+(defvar eaf-epc-process nil)
+
+(defvar eaf-internal-process nil)
+(defvar eaf-internal-process-prog nil)
+(defvar eaf-internal-process-args nil)
 
 (defvar eaf--active-buffers nil
   "Contains a list of '(buffer-url buffer-app-name buffer-args).")
@@ -895,7 +902,7 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
              (browser-url-list
               (with-temp-buffer (insert-file-contents browser-restore-file-path)
                                 (split-string (buffer-string) "\n" t))))
-        (if (epc:live-p eaf-process)
+        (if (epc:live-p eaf-epc-process)
             (dolist (url browser-url-list)
               (eaf-open-browser url))
           (dolist (url browser-url-list)
@@ -1070,12 +1077,12 @@ A hashtable, key is url and value is title.")
 (defun eaf-call-async (method &rest args)
   "Call Python EPC function asynchronous."
   (deferred:$
-    (epc:call-deferred eaf-process (read method) args)
+    (epc:call-deferred eaf-epc-process (read method) args)
     ))
 
 (defun eaf-call-sync (method &rest args)
   "Call Python EPC function synchronously."
-  (epc:call-sync eaf-process (read method) args))
+  (epc:call-sync eaf-epc-process (read method) args))
 
 (defun eaf-get-emacs-xid (frame)
   "Get emacs FRAME xid."
@@ -1090,15 +1097,15 @@ A hashtable, key is url and value is title.")
   (cond
    ((not eaf--active-buffers)
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
-   ((epc:live-p eaf-process)
+   ((epc:live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
-  (let* ((eaf-server-port 9999)
-         (eaf-args (append
+  (let* ((eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
                     (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
+                    (list (number-to-string eaf-epc-port))
                     (list (eaf-serialization-var-list))
                     ))
          (process-environment (cl-copy-list process-environment)))
@@ -1107,8 +1114,15 @@ A hashtable, key is url and value is title.")
       (when (and wayland-display (not (string= wayland-display "")))
         (setenv "QT_QPA_PLATFORM" "xcb")))
 
+    ;; Start emacs server.
     (eaf-server-start eaf-server-port)
-    (setq eaf-process (epc:start-epc eaf-python-command eaf-args)))
+
+    ;; Start python process.
+    (setq eaf-internal-process-prog eaf-python-command)
+    (setq eaf-internal-process-args eaf-args)
+    (setq eaf-internal-process
+          (apply 'start-process "*eaf*" "*eaf*" eaf-python-command eaf-args))
+    (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
 
 (defun eaf-stop-process (&optional restart)
@@ -1151,10 +1165,10 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf--kill-python-process ()
   "Kill EAF background python process."
   (interactive)
-  (if (epc:live-p eaf-process)
+  (if (epc:live-p eaf-epc-process)
       ;; Delete EAF server process.
       (progn
-        (epc:stop-epc eaf-process)
+        (epc:stop-epc eaf-epc-process)
         (message "[EAF] Process terminated."))
     (message "[EAF] Process already terminated.")))
 
@@ -1313,7 +1327,7 @@ keybinding variable to eaf-app-binding-alist."
 
 (defun eaf-monitor-window-size-change (frame)
   "Delay some time and run `eaf-try-adjust-view-with-frame-size' to compare with Emacs FRAME size."
-  (when (epc:live-p eaf-process)
+  (when (epc:live-p eaf-epc-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
     (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame)))))
@@ -1327,7 +1341,7 @@ keybinding variable to eaf-app-binding-alist."
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
-             (epc:live-p eaf-process))
+             (epc:live-p eaf-epc-process))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
@@ -1422,7 +1436,7 @@ keybinding variable to eaf-app-binding-alist."
 
 (defun eaf--org-preview-monitor-buffer-save ()
   "Save org-preview buffer."
-  (when (epc:live-p eaf-process)
+  (when (epc:live-p eaf-epc-process)
     (ignore-errors
       ;; eaf-org-file-list?
       (org-html-export-to-html)
@@ -1487,7 +1501,7 @@ keybinding variable to eaf-app-binding-alist."
 
 For convenience, use the Lisp macro `eaf-setq' instead."
   (setf (map-elt eaf-var-list sym) val)
-  (when (epc:live-p eaf-process)
+  (when (epc:live-p eaf-epc-process)
     ;; Update python side variable dynamically.
     (eaf-call-async "update_emacs_var_dict" (eaf-serialization-var-list)))
   val)
@@ -1561,6 +1575,16 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
+  ;; Make EPC process.
+  (setq eaf-epc-process (make-epc:manager
+                     :server-process eaf-internal-process
+                     :commands (cons eaf-internal-process-prog eaf-internal-process-args)
+                     :title (mapconcat 'identity (cons eaf-internal-process-prog eaf-internal-process-args) " ")
+                     :port eaf-epc-port
+                     :connection (epc:connect "localhost" eaf-epc-port)
+                     ))
+  (epc:init-epc-layer eaf-epc-process)
+
   ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
   (setq eaf--webengine-include-private-codec webengine-include-private-codec)
   (let* ((first-buffer-info (pop eaf--active-buffers))
@@ -1813,7 +1837,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1980,7 +2004,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
   ;; Open URL with EAF application
-  (if (epc:live-p eaf-process)
+  (if (epc:live-p eaf-epc-process)
       (let (exists-eaf-buffer)
         ;; Try to open buffer
         (catch 'found-eaf

@@ -45,22 +45,23 @@ class EAF(object):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Parse init arguments.
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, epc_server_port, var_dict_string) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
+        epc_server_port = int(epc_server_port)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
 
         # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
         self.emacs_var_dict = {}
-        self.session_file = os.path.join(eaf_config_dir, "session.json")        
+        self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         # Update Emacs var dictionary.
         self.update_emacs_var_dict(var_dict_string)
 
         # Build EPC server.
-        self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
+        self.server = ThreadingEPCServer(('localhost', epc_server_port), log_traceback=True)
         self.server.logger.setLevel(logging.DEBUG)
 
         if not os.path.exists(eaf_config_dir):
@@ -76,11 +77,6 @@ class EAF(object):
         self.server_thread = threading.Thread(target=self.server.serve_forever)
         self.server_thread.allow_reuse_address = True
         self.server_thread.start()
-
-        # NOTE:
-        # Emacs epc client need fetch port from Python process print.
-        # And this print must be first print code, otherwise Emacs client will failed to start.
-        self.server.print_port()
 
         # Build emacs server connect, used to send message from Python to elisp side.
         self.emacs_server_connect = self.build_emacs_server_connect(int(emacs_server_port))
