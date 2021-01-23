@@ -2297,6 +2297,18 @@ Otherwise send key 'esc' to browser."
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))
 
+(defun eaf-pdf-get-annots (page)
+  "Return a map of annotations on PAGE.
+
+The key is the annot id on PAGE."
+  (eaf-call-sync "call_function_with_args" eaf--buffer-id "get_annots" (format "%s" page)))
+
+(defun eaf-pdf-jump-to-annot (annot)
+  "Jump to specifical pdf annot."
+  (let ((rect (gethash "rect" annot))
+        (page (gethash "page" annot)))
+    (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_rect" (format "%s" page) rect)))
+
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."
   (if (string-empty-p eaf-wm-name)
