@@ -2325,6 +2325,10 @@ Otherwise send key 'esc' to browser."
         ("below" (windmove-down))
         ))))
 
+(defun eaf--change-default-directory (directory)
+  "Change default directory."
+  (setq default-directory directory))
+
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
   (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
