@@ -259,6 +259,11 @@ For any other problems, please use `emacs -q` and load a minimal setup with only
 
 If the problem persists, please report it [here](https://github.com/manateelazycat/emacs-application-framework/issues/new).
 
+If you got segfault error, please use the following way to collect crash information:
+1. Install gdb and turn on option `eaf-enable-debug`
+2. Use command `eaf-stop-process` stop current process
+3. Restart eaf, send issue with `*eaf*` buffer content when next crash
+
 ## Join Us
 Do you want to make Emacs a real "operating system"?
 

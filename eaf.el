@@ -791,6 +791,11 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 Default is `below', you can chang it with `right'."
   :type 'string)
 
+(defcustom eaf-enable-debug nil
+  "If you got segfault error, please turn this option.
+Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
+  :type 'boolean)
+
 (defcustom eaf-wm-name ""
   "The desktop name, set by function `eaf--get-current-desktop-name'."
   :type 'string)
@@ -1112,6 +1117,7 @@ A hashtable, key is url and value is title.")
                     (list (number-to-string eaf-epc-port))
                     (list (eaf-serialization-var-list))
                     ))
+         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
          (process-environment (cl-copy-list process-environment)))
 
     (let ((wayland-display (getenv "WAYLAND_DISPLAY")))
@@ -1122,10 +1128,17 @@ A hashtable, key is url and value is title.")
     (eaf-server-start eaf-server-port)
 
     ;; Start python process.
-    (setq eaf-internal-process-prog eaf-python-command)
-    (setq eaf-internal-process-args eaf-args)
+    (if eaf-enable-debug
+        (progn
+          (setq eaf-internal-process-prog "gdb")
+          (setq eaf-internal-process-args (append gdb-args eaf-args)))
+      (setq eaf-internal-process-prog eaf-python-command)
+      (setq eaf-internal-process-args eaf-args))
+
     (setq eaf-internal-process
-          (apply 'start-process eaf-name eaf-name eaf-python-command eaf-args))
+          (apply 'start-process
+                 eaf-name eaf-name
+                 eaf-internal-process-prog eaf-internal-process-args))
     (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
 
