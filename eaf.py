@@ -470,7 +470,11 @@ class EAF(object):
     def eval_in_emacs(self, method_name, args_list):
         code = "(" + str(method_name)
         for arg in args_list:
-            code += " \"{}\"".format(str(arg))
+            arg = str(arg)
+            if len(arg) > 0 and arg[0] == "'":
+                code += " {}".format(arg)
+            else:
+                code += " \"{}\"".format(arg)
         code += ")"
 
         self.emacs_server_connect.send(str.encode(code))
