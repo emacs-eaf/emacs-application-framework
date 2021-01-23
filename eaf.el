@@ -240,6 +240,10 @@ been initialized."
   "Github personal acess token, used by grip."
   :type 'string)
 
+(defcustom eaf-name "*eaf*"
+  "Name of EAF buffer."
+  :type 'string)
+
 (defcustom eaf-browser-search-engines `(("google" . "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
                                         ("duckduckgo" . "https://duckduckgo.com/?q=%s"))
   "The default search engines offered by EAF.
@@ -1121,7 +1125,7 @@ A hashtable, key is url and value is title.")
     (setq eaf-internal-process-prog eaf-python-command)
     (setq eaf-internal-process-args eaf-args)
     (setq eaf-internal-process
-          (apply 'start-process "*eaf*" "*eaf*" eaf-python-command eaf-args))
+          (apply 'start-process eaf-name eaf-name eaf-python-command eaf-args))
     (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
 
@@ -1169,6 +1173,9 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
       ;; Delete EAF server process.
       (progn
         (epc:stop-epc eaf-epc-process)
+        ;; Kill *eaf* buffer.
+        (when (get-buffer eaf-name)
+          (kill-buffer eaf-name))
         (message "[EAF] Process terminated."))
     (message "[EAF] Process already terminated.")))
 
@@ -1577,12 +1584,12 @@ If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   ;; Make EPC process.
   (setq eaf-epc-process (make-epc:manager
-                     :server-process eaf-internal-process
-                     :commands (cons eaf-internal-process-prog eaf-internal-process-args)
-                     :title (mapconcat 'identity (cons eaf-internal-process-prog eaf-internal-process-args) " ")
-                     :port eaf-epc-port
-                     :connection (epc:connect "localhost" eaf-epc-port)
-                     ))
+                         :server-process eaf-internal-process
+                         :commands (cons eaf-internal-process-prog eaf-internal-process-args)
+                         :title (mapconcat 'identity (cons eaf-internal-process-prog eaf-internal-process-args) " ")
+                         :port eaf-epc-port
+                         :connection (epc:connect "localhost" eaf-epc-port)
+                         ))
   (epc:init-epc-layer eaf-epc-process)
 
   ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".

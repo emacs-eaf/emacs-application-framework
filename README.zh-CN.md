@@ -210,8 +210,8 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 现在的解决方案是将命令`wmctrl -m`中Name的值加入`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
 
-### `[EAF] *epc:server* aborted (core dumped)` 奔溃了怎么办？
-请检查 `*epc:server*` 这个窗口的内容（通过`C-b SPC`，因为这是个隐藏窗口）。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*epc:server*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。
+### `[EAF] *eaf* aborted (core dumped)` 奔溃了怎么办？
+请检查 `*eaf*` 这个窗口的内容。通常是EAF的Python依赖没有安装好，如果你确定依赖没有问题，请附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。
 
 ### Github 个人访问标记干什么用的？
 Markdown预览程序依赖grip，你需要访问[Github Personal access token](https://github.com/settings/tokens/new?scopes=)去获取你个人的标记，然后通过下面的命令设置标记后，grip才能正常的工作：
