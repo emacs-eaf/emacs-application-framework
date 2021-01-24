@@ -25,7 +25,7 @@
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QLibraryInfo, QTimer
+from PyQt5.QtCore import QLibraryInfo, QTimer, Qt
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
 from core.utils import PostGui
@@ -113,9 +113,8 @@ class EAF(object):
     def webengine_include_private_codec(self):
         ''' Return bool of whether the QtWebEngineProcess include private codec. '''
         if platform.system() == "Windows":
-            # TODO: PyQtWebEngine installed by pip just does not support video accel. But need a way to check this.
             # see https://wiki.qt.io/QtWebEngine/VideoAcceleration#Qt_WebEngine
-            return False
+            return QApplication.testAttribute(Qt.AA_UseOpenGLES)
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
@@ -624,6 +623,8 @@ if __name__ == "__main__":
     emacs_width = emacs_height = 0
     eaf_config_dir = ""
 
+    if platform.system() == "Windows":
+        QApplication.setAttribute(Qt.AA_UseOpenGLES)
     app = QApplication(sys.argv + ["--disable-web-security"])
 
     eaf = EAF(sys.argv[1:])
