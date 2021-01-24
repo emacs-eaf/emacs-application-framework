@@ -1610,7 +1610,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
          (first-start-app-name (nth 1 first-buffer-info))
          (first-start-args (nth 2 first-buffer-info)))
     (when (and (string-equal first-start-app-name "video-player")
-               webengine-include-private-codec)
+               (string-equal eaf--webengine-include-private-codec "True"))
       (setq first-start-app-name "js-video-player"))
     ;; Start first app.
     (eaf--open-internal first-start-url first-start-app-name first-start-args))
@@ -1968,7 +1968,7 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
                   return app)))
     (if (string-equal app-name "video-player")
         ;; Use Browser play video if QWebEngine include private codec.
-        (if eaf--webengine-include-private-codec "js-video-player" "video-player")
+        (if (string-equal eaf--webengine-include-private-codec "True") "js-video-player" "video-player")
       app-name)))
 
 ;;;###autoload
