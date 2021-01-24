@@ -136,7 +136,6 @@ node ./install-eaf-win32.js
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
 | python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务               |
 | python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
-| python-pyinotify               | 流程图                       | 监听 mmd 格式文件的变动                  |
 | python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式 |
 | aria2                          | 浏览器                       | 下载网络文件                             |
 | nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                  |
