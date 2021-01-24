@@ -63,7 +63,6 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 ```Bash
 git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
-注意：如果你无法正常使用`npm install`，请将`master`替换成`master-full`。
 
 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
 ```Emacs-lisp
