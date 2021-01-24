@@ -665,7 +665,7 @@ class BrowserBuffer(Buffer):
             self.nopostfix_url_pattern = re.compile("^[^#\?]*")
             self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
             touch(self.history_log_file_path)
-            with open(self.history_log_file_path, "r") as f:
+            with open(self.history_log_file_path, "r", encoding="utf-8") as f:
                 raw_list = f.readlines()
                 for raw_his in raw_list:
                     his_line = re.match(self.history_pattern, raw_his)
@@ -1383,7 +1383,7 @@ class BrowserBuffer(Buffer):
 
             self.history_list.sort(key = lambda x: x.hit, reverse = True)
 
-            with open(self.history_log_file_path, "w") as f:
+            with open(self.history_log_file_path, "w", encoding="utf-8") as f:
                 f.writelines(map(lambda history: history.title + "ᛝ" + history.url + "ᛡ" + str(history.hit) + "\n", self.history_list))
         except Exception:
             import traceback
