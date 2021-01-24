@@ -2320,8 +2320,18 @@ The key is the annot id on PAGE."
         "")
     eaf-wm-name))
 
-(defun eaf-activate-emacs-window ()
-  "Activate emacs window."
+(defun eaf--activate-emacs-win32-window()
+  "Use vbs activate emacs win32 window."
+  (let* ((activate-window-file-path
+          (concat eaf-config-location "activate-window.vbs"))
+         (activate-window-file-exists (file-exists-p activate-window-file-path)))
+    (unless activate-window-file-exists
+      (with-temp-file activate-window-file-path
+        (insert "set WshShell = CreateObject(\"WScript.Shell\")\nWshShell.AppActivate Wscript.Arguments(0)")))
+    (shell-command-to-string (format "cscript %s %s" activate-window-file-path (emacs-pid)))))
+
+(defun eaf--activate-emacs-linux-window ()
+  "Activate emacs window by `wmctrl'."
   (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
       ;; When switch app focus in WM, such as, i3 or qtile.
       ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
@@ -2338,6 +2348,12 @@ The key is the annot id on PAGE."
     (if (executable-find "wmctrl")
         (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
       (message "Please install wmctrl to active emacs window."))))
+
+(defun eaf-activate-emacs-window()
+  "Activate emacs window."
+  (if (memq system-type '(cygwin windows-nt ms-dos))
+      (eaf--activate-emacs-win32-window)
+    (eaf--activate-emacs-linux-window)))
 
 (defun eaf-elfeed-open-url ()
   "Display the currently selected item in an eaf buffer."
