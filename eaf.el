@@ -1810,7 +1810,8 @@ In that way the corresponding function will be called to retrieve the HTML
   "Wraps URL with prefix http:// if URL does not include it."
   (if (or (string-prefix-p "http://" url)
           (string-prefix-p "https://" url)
-          (string-prefix-p "file://" url))
+          (string-prefix-p "file://" url)
+          (string-prefix-p "chrome://" url))
       url
     (concat "http://" url)))
 
