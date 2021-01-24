@@ -114,6 +114,7 @@ class EAF(object):
         ''' Return bool of whether the QtWebEngineProcess include private codec. '''
         if platform.system() == "Windows":
             # TODO: PyQtWebEngine installed by pip just does not support video accel. But need a way to check this.
+            # see https://wiki.qt.io/QtWebEngine/VideoAcceleration#Qt_WebEngine
             return False
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""

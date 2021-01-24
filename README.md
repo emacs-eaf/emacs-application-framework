@@ -203,6 +203,10 @@ Both projects are similar in terms of interface, but they are two completely dif
 
 If you've figure them out, PRs are always welcome!
 
+### EAF can't play video files on Windows. Why?
+1. `js-video-player`, it does not work for now.
+2. `video-player`, extra video/audio codec(like k-lite codec pack) may needed to work.
+
 ### Why doesn't EAF receive input events on WM?
 EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE, Xpra.
 
