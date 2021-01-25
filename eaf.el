@@ -260,7 +260,7 @@ Each element has the form (NAME . URL).
 It must defined at `eaf-browser-search-engines'."
   :type 'string)
 
-(defcustom eaf-python-command "python3"
+(defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python3.exe" "python3")
   "The Python interpreter used to run eaf.py."
   :type 'string)
 
