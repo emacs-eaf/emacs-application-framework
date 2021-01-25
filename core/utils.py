@@ -155,7 +155,7 @@ def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
     """
     Defines an interactive command invoked from Emacs.
     """
-    def wrap(f):
+    def wrap(f, insert_or_do = insert_or_do, msg_emacs = msg_emacs, new_name = new_name):
         f.interactive = True
         f.insert_or_do = insert_or_do
         f.msg_emacs = msg_emacs
@@ -164,7 +164,13 @@ def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
         def wrapped_f(*args, **kwargs):
             return f(*args, **kwargs)
         return wrapped_f
-    return wrap
+
+    # Support both @interactive and @interactive() as valid syntax.
+    if callable(insert_or_do):
+        return wrap(insert_or_do, insert_or_do = False, msg_emacs = None, new_name = None)
+    else:
+        return wrap
+
 
 def abstract(f):
     """
@@ -178,4 +184,3 @@ def abstract(f):
     def wrap(*args, **kwargs):
         return f(*args, **kwargs)
     return wrap
-

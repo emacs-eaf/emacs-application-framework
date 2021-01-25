@@ -84,15 +84,15 @@ class EafJupyterWidget(RichJupyterWidget):
 
         self._kill_ring = EafKillRing(self._control)
 
-    @interactive()
+    @interactive
     def zoom_in(self):
         self.change_font_size(1)
 
-    @interactive()
+    @interactive
     def zoom_out(self):
         self.change_font_size(-1)
 
-    @interactive()
+    @interactive
     def zoom_reset(self):
         self.reset_font()
 

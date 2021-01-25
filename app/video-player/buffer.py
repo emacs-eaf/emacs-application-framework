@@ -101,12 +101,12 @@ class VideoPlayerWidget(QWidget):
         self.media_player.setMedia(QMediaContent(QUrl.fromLocalFile(url)))
         self.media_player.play()
 
-    @interactive()
+    @interactive
     def play_forward(self):
         video_position = self.media_player.position()
         self.media_player.setPosition(video_position + self.video_seek_durcation)
 
-    @interactive()
+    @interactive
     def play_backward(self):
         video_position = self.media_player.position()
         self.media_player.setPosition(max(video_position - self.video_seek_durcation, 0))

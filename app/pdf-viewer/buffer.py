@@ -391,7 +391,7 @@ class PdfViewerWidget(QWidget):
         if self.file_changed_wacher.addPath(self.url):
             self.file_changed_wacher.fileChanged.connect(self.handle_file_changed)
 
-    @interactive()
+    @interactive
     def toggle_presentation_mode(self):
         '''
         Toggle presentation mode.
@@ -410,12 +410,12 @@ class PdfViewerWidget(QWidget):
     def scroll_step(self):
         return self.rect().height() if self.presentation_mode else self.rect().size().height() * self.scroll_ratio
 
-    @interactive()
+    @interactive
     def save_current_pos(self):
         self.remember_offset = self.scroll_offset
         self.buffer.message_to_emacs.emit("Saved current position.")
 
-    @interactive()
+    @interactive
     def jump_to_saved_pos(self):
         if self.remember_offset is None:
             self.buffer.message_to_emacs.emit("Cannot jump from this position.")
@@ -717,7 +717,7 @@ class PdfViewerWidget(QWidget):
     def max_scroll_offset(self):
         return self.scale * self.page_height * self.page_total_number - self.rect().height()
 
-    @interactive()
+    @interactive
     def toggle_read_mode(self):
         if self.read_mode == "fit_to_customize":
             self.read_mode = "fit_to_width"
@@ -729,41 +729,41 @@ class PdfViewerWidget(QWidget):
         self.update_scale()
         self.update()
 
-    @interactive()
+    @interactive
     def scroll_up(self):
         self.update_vertical_offset(min(self.scroll_offset + self.scroll_step, self.max_scroll_offset()))
 
-    @interactive()
+    @interactive
     def scroll_down(self):
         self.update_vertical_offset(max(self.scroll_offset - self.scroll_step, 0))
 
-    @interactive()
+    @interactive
     def scroll_right(self):
         self.update_horizontal_offset(max(self.horizontal_offset - self.scroll_step, (self.rect().width() - self.page_width * self.scale) / 2))
 
-    @interactive()
+    @interactive
     def scroll_left(self):
         self.update_horizontal_offset(min(self.horizontal_offset + self.scroll_step, (self.page_width * self.scale - self.rect().width()) / 2))
 
-    @interactive()
+    @interactive
     def scroll_up_page(self):
         # Adjust scroll step to make users continue reading fluently.
         self.update_vertical_offset(min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset()))
 
-    @interactive()
+    @interactive
     def scroll_down_page(self):
         # Adjust scroll step to make users continue reading fluently.
         self.update_vertical_offset(max(self.scroll_offset - self.rect().height() + self.scroll_step, 0))
 
-    @interactive()
+    @interactive
     def scroll_to_begin(self):
         self.update_vertical_offset(0)
 
-    @interactive()
+    @interactive
     def scroll_to_end(self):
         self.update_vertical_offset(self.max_scroll_offset())
 
-    @interactive()
+    @interactive
     def zoom_in(self):
         if self.is_mark_search:
             self.cleanup_search()
@@ -771,7 +771,7 @@ class PdfViewerWidget(QWidget):
         self.scale_to(min(10, self.scale + 0.2))
         self.update()
 
-    @interactive()
+    @interactive
     def zoom_out(self):
         if self.is_mark_search:
             self.cleanup_search()
@@ -779,7 +779,7 @@ class PdfViewerWidget(QWidget):
         self.scale_to(max(1, self.scale - 0.2))
         self.update()
 
-    @interactive()
+    @interactive
     def zoom_reset(self, read_mode="fit_to_width"):
         if self.is_mark_search:
             self.cleanup_search()
@@ -787,7 +787,7 @@ class PdfViewerWidget(QWidget):
         self.update_scale()
         self.update()
 
-    @interactive()
+    @interactive
     def toggle_inverted_mode(self):
         # Need clear page cache first, otherwise current page will not inverted until next page.
         self.page_cache_pixmap_dict.clear()
@@ -804,7 +804,7 @@ class PdfViewerWidget(QWidget):
         # Re-render page.
         self.update()
 
-    @interactive()
+    @interactive
     def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
         if self.is_mark_link:
             self.cleanup_mark_link()
@@ -814,7 +814,7 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
         self.update()
 
-    @interactive()
+    @interactive
     def rotate_clockwise(self):
         if self.inpdf:
             self.rotation = (self.rotation + 90) % 360
@@ -827,7 +827,7 @@ class PdfViewerWidget(QWidget):
         else:
             self.buffer.message_to_emacs.emit("Only support PDF!")
 
-    @interactive()
+    @interactive
     def rotate_counterclockwise(self):
         if self.inpdf:
             self.rotation = (self.rotation - 90) % 360
