@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jan 22 14:06:49 2021 (-0500)
+;; Last-Updated: Sat Jan 23 06:43:13 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -86,12 +86,12 @@
   "An interactive function that run install-eaf.sh or install-eaf-win32.js for Linux or Windows respectively."
   (interactive)
   (let ((eaf-dir (file-name-directory (locate-library "eaf"))))
-    (cond ((string-equal system-type "gnu/linux")
+    (cond ((eq system-type 'gnu/linux)
            (let ((default-directory "/sudo::"))
              (shell-command (concat eaf-dir "install-eaf.sh" "&"))))
-          ((string-equal system-type "windows-nt")
+          ((memq system-type '(cygwin windows-nt ms-dos))
            (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
-          ((string-equal system-type "darwin")
+          ((eq system-type 'darwin)
            (user-error "Unfortunately MacOS is not supported, see README for details")))))
 
 (require 'subr-x)
@@ -1074,26 +1074,25 @@ A hashtable, key is url and value is title.")
   "Command to open current path or url with external application."
   (interactive)
   (let ((path-or-url (eaf-get-path-or-url)))
-    (cond ((string-equal system-type "windows-nt")
+    (cond ((memq system-type '(cygwin windows-nt ms-dos))
            (w32-shell-execute "open" path-or-url))
-          ((string-equal system-type "darwin")
+          ((eq system-type 'darwin)
            (concat "open " (shell-quote-argument path-or-url)))
-          ((string-equal system-type "gnu/linux")
+          ((eq system-type 'gnu/linux)
            (let ((process-connection-type nil))
              (start-process "" nil "xdg-open" path-or-url))))))
 
 (defun eaf-call-async (method &rest args)
-  "Call Python EPC function asynchronous."
+  "Call Python EPC function METHOD and ARGS asynchronously."
   (deferred:$
-    (epc:call-deferred eaf-epc-process (read method) args)
-    ))
+    (epc:call-deferred eaf-epc-process (read method) args)))
 
 (defun eaf-call-sync (method &rest args)
-  "Call Python EPC function synchronously."
+  "Call Python EPC function METHOD and ARGS synchronously."
   (epc:call-sync eaf-epc-process (read method) args))
 
 (defun eaf-get-emacs-xid (frame)
-  "Get emacs FRAME xid."
+  "Get Emacs FRAME xid."
   (frame-parameter frame 'window-id))
 
 (defun eaf-serialization-var-list ()
@@ -1383,8 +1382,7 @@ keybinding variable to eaf-app-binding-alist."
                                   (eaf-get-emacs-xid frame)
                                   x y w h)
                           view-infos)))))))
-        (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))
-        ))))
+        (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
 
 (defun eaf--delete-org-preview-file (org-file)
   "Delete the org-preview file when given ORG-FILE name."
