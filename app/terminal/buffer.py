@@ -123,7 +123,7 @@ class AppBuffer(BrowserBuffer):
         self.close_buffer()
         self.timer.stop()
 
-    @interactive()
+    @interactive
     def copy_text(self):
         text = self.buffer_widget.execute_js("get_selection();")
         if text == "":
@@ -132,12 +132,12 @@ class AppBuffer(BrowserBuffer):
             self.set_clipboard_text(text)
             self.message_to_emacs.emit("Copy text")
 
-    @interactive()
+    @interactive
     def yank_text(self):
         text = self.get_clipboard_text()
         self.buffer_widget.eval_js("paste(`{}`);".format(text))
 
-    @interactive()
+    @interactive
     def scroll_other_buffer(self, scroll_direction, scroll_type):
         if scroll_type == "page":
             if scroll_direction == "up":
@@ -150,27 +150,27 @@ class AppBuffer(BrowserBuffer):
             else:
                 self.scroll_down()
 
-    @interactive()
+    @interactive
     def scroll_up(self):
         self.buffer_widget.eval_js("scroll_line(1);")
 
-    @interactive()
+    @interactive
     def scroll_down(self):
         self.buffer_widget.eval_js("scroll_line(-1);")
 
-    @interactive()
+    @interactive
     def scroll_up_page(self):
         self.buffer_widget.eval_js("scroll_page(1);")
 
-    @interactive()
+    @interactive
     def scroll_down_page(self):
         self.buffer_widget.eval_js("scroll_page(-1);")
 
-    @interactive()
+    @interactive
     def scroll_to_begin(self):
         self.buffer_widget.eval_js("scroll_to_begin();")
 
-    @interactive()
+    @interactive
     def scroll_to_bottom(self):
         self.buffer_widget.eval_js("scroll_to_bottom();")
 
@@ -193,21 +193,21 @@ class AppBuffer(BrowserBuffer):
             # self.web_page.findText(self.search_term)
             self.buffer_widget.eval_js("find_prev('{}')".format(text))
 
-    @interactive()
+    @interactive
     def search_text_forward(self):
         if self.search_term == "":
             self.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
             self._search_text(self.search_term)
 
-    @interactive()
+    @interactive
     def search_text_backward(self):
         if self.search_term == "":
             self.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
-    @interactive()
+    @interactive
     def action_quit(self):
         if self.search_term != "":
             self._search_text("")
