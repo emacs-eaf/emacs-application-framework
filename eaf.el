@@ -607,6 +607,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-h" . "select_left_node")
     ("M-l" . "select_right_node")
     ("SPC" . "toggle_node_selection")
+    ("C-n" . "eaf-send-down-key")
+    ("C-p" . "eaf-send-up-key")
+    ("C-f" . "eaf-send-right-key")
+    ("C-b" . "eaf-send-left-key")
     ("x" . "insert_or_close_buffer")
     ("j" . "insert_or_select_down_node")
     ("k" . "insert_or_select_up_node")
@@ -1470,6 +1474,16 @@ keybinding variable to eaf-app-binding-alist."
   "Directly send key to EAF Python side."
   (interactive)
   (eaf-call-async "send_key" eaf--buffer-id (key-description (this-command-keys-vector))))
+
+(defun eaf-send-left-key ()
+  "Directly send left key to EAF Python side."
+  (interactive)
+  (eaf-call-async "send_key" eaf--buffer-id "<left>"))
+
+(defun eaf-send-right-key ()
+  "Directly send right key to EAF Python side."
+  (interactive)
+  (eaf-call-async "send_key" eaf--buffer-id "<right>"))
 
 (defun eaf-send-down-key ()
   "Directly send down key to EAF Python side."
