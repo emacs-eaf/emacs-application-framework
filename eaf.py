@@ -113,8 +113,8 @@ class EAF(object):
     def webengine_include_private_codec(self):
         ''' Return bool of whether the QtWebEngineProcess include private codec. '''
         if platform.system() == "Windows":
-            # see https://wiki.qt.io/QtWebEngine/VideoAcceleration#Qt_WebEngine
-            return QApplication.testAttribute(Qt.AA_UseOpenGLES)
+            dll_ffmpeg = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "ffmpeg.dll")
+            return os.path.exists(dll_ffmpeg)
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
@@ -623,8 +623,6 @@ if __name__ == "__main__":
     emacs_width = emacs_height = 0
     eaf_config_dir = ""
 
-    if platform.system() == "Windows":
-        QApplication.setAttribute(Qt.AA_UseOpenGLES)
     app = QApplication(sys.argv + ["--disable-web-security"])
 
     eaf = EAF(sys.argv[1:])
