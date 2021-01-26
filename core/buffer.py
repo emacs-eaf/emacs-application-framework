@@ -366,7 +366,8 @@ class Buffer(QGraphicsScene):
         ''' Select right tab.'''
         self.goto_right_tab.emit()
 
-    def focus_widget(self):
+    def focus_widget(self, event=None):
         '''Focus buffer widget.'''
-        event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
+        if event is None:
+            event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
         QApplication.sendEvent(self.buffer_widget.focusProxy(), event)

@@ -20,9 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, QTimer
+from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QMouseEvent
 from core.browser import BrowserBuffer
 from core.utils import touch, string_to_base64, interactive
 from html import escape, unescape
@@ -66,10 +66,15 @@ class AppBuffer(BrowserBuffer):
 
         self.build_all_methods(self)
 
-        QTimer.singleShot(500, self.init_file)
+        QTimer.singleShot(500, self.initialize)
 
     def resize_view(self):
         self.buffer_widget.eval_js("relayout();")
+
+    def initialize(self):
+        self.init_file()
+
+        self.focus_widget(QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier))
 
     def init_file(self):
         self.url = os.path.expanduser(self.url)
