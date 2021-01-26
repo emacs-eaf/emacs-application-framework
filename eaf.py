@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui
+from core.utils import PostGui, string_to_base64
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -534,7 +534,7 @@ class EAF(object):
         self.eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, eaf_specific])
 
     def atomic_edit(self, buffer_id, focus_text):
-        self.eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
+        self.eval_in_emacs('eaf--atomic-edit', [buffer_id, string_to_base64(focus_text)])
 
     def export_org_json(self, org_json_content, org_file_path):
         self.eval_in_emacs('eaf--export-org-json', [org_json_content, org_file_path])

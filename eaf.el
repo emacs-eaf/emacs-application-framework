@@ -2203,7 +2203,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
-    (insert focus-text)
+    (insert (base64-decode-string focus-text))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (beginning-of-buffer))
