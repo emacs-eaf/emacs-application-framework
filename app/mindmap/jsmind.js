@@ -73,10 +73,10 @@
                 editnode   : 113,// F2
                 delnode    : 46, // Delete
                 toggle     : 32, // Space
-                left       : 37, // Left
-                up         : 38, // Up
-                right      : 39, // Right
-                down       : 40, // Down
+                // left       : 37, // Left
+                // up         : 38, // Up
+                // right      : 39, // Right
+                // down       : 40, // Down
             }
         },
     };
