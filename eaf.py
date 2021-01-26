@@ -25,7 +25,7 @@
 from app.browser.buffer import AppBuffer as NeverUsed # noqa
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QLibraryInfo, QTimer, Qt
+from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
 from core.utils import PostGui

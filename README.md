@@ -204,7 +204,7 @@ Both projects are similar in terms of interface, but they are two completely dif
 If you've figure them out, PRs are always welcome!
 
 ### EAF can't play video files on Windows. Why?
-1. `js-video-player`, it does not work for now.
+1. `js-video-player`, it requires that qtwebengine built against ffmpeg to support `h264/aac`.
 2. `video-player`, extra video/audio codec(like k-lite codec pack) may needed to work.
 
 ### Why doesn't EAF receive input events on WM?
