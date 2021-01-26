@@ -546,7 +546,7 @@ Otherwise, scroll page up.
 
         self.eval_js("CaretBrowsing.setInitialCursor(true);")
         self.buffer.caret_browsing_mode = True
-        self.buffer.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["t" if self.buffer.caret_browsing_mode else "nil"])
+        self.buffer.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["'t" if self.buffer.caret_browsing_mode else "'nil"])
         self.buffer.caret_toggle_mark()
         self.buffer.caret_next_word()
 
@@ -1146,7 +1146,7 @@ class BrowserBuffer(Buffer):
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
                 self.message_to_emacs.emit("Caret browsing activated.")
                 self.caret_browsing_mode = True
-            self.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["t" if self.caret_browsing_mode else "nil"])
+            self.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
