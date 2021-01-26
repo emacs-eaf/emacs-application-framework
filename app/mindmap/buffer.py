@@ -55,7 +55,7 @@ class AppBuffer(BrowserBuffer):
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
-                            "toggle_node", "save_screenshot"]:
+                            "toggle_node", "toggle_node_selection", "save_screenshot"]:
             self.build_js_method(method_name)
 
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node",

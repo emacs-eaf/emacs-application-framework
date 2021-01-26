@@ -606,6 +606,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-k" . "select_up_node")
     ("M-h" . "select_left_node")
     ("M-l" . "select_right_node")
+    ("SPC" . "toggle_node_selection")
     ("x" . "insert_or_close_buffer")
     ("j" . "insert_or_select_down_node")
     ("k" . "insert_or_select_up_node")
