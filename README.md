@@ -113,6 +113,7 @@ or, if you use [use-package](https://github.com/jwiegley/use-package), you can u
   (use-package epc :defer t)
   (use-package ctable :defer t)
   (use-package deferred :defer t)
+  (use-package s :defer t :ensure t)
   :custom
   (eaf-browser-continue-where-left-off t)
   :config

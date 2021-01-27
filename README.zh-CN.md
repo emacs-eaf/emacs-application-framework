@@ -114,6 +114,7 @@ node ./install-eaf-win32.js
   (use-package epc :defer t)
   (use-package ctable :defer t)
   (use-package deferred :defer t)
+  (use-package s :defer t :ensure t)
   :custom
   (eaf-browser-continue-where-left-off t)
   :config
