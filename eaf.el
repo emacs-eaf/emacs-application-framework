@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jan 23 06:43:13 2021 (-0500)
+;; Last-Updated: Wed Jan 27 09:25:35 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1337,7 +1337,7 @@ keybinding variable to eaf-app-binding-alist."
          (eaf-buffer (generate-new-buffer eaf-buffer-name)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (when (file-exists-p url)
+      (when (file-accessible-directory-p url)
         (setq-local default-directory (file-name-directory url)))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
@@ -2409,8 +2409,9 @@ The key is the annot id on PAGE."
         ))))
 
 (defun eaf--change-default-directory (directory)
-  "Change default directory."
-  (setq default-directory directory))
+  "Change default directory to DIRECTORY."
+  (when (file-accessible-directory-p directory)
+    (setq-local default-directory directory)))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()

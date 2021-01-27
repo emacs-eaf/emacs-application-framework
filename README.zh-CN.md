@@ -97,6 +97,7 @@ node ./install-eaf-win32.js
 - [emacs-ctable](https://github.com/kiwanami/emacs-ctable)
 - [emacs-deferred](https://github.com/kiwanami/emacs-deferred)
 - [emacs-epc](https://github.com/kiwanami/emacs-epc)
+- [s.el](https://github.com/magnars/s.el)
 
 4. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
