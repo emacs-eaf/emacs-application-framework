@@ -201,9 +201,8 @@ EAF主要实现这几个功能：
 1. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
 2. QWindow Reparent技术无法在MacOS下正常工作，也就无法实现Qt应用进程的窗口粘贴到Emacs对应的Buffer区域
 
-### 为什么EAF在Windows下无法播放视频文件？
-1. `js-video-player`, 需要qtwebengine编译时链接到ffmpeg，才能支持`h264/aac`.
-2. `video-player`, 可能需要安装额外的音频/视频编解码器(如k-lite-codec-pack).
+### 为什么EAF的js-video-player在Windows下无法播放视频文件？
+`js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.
 
 ### 为什么通过窗口管理器使用EAF无法接收输入信息？
 EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、XFce、LXDE、i3、QTile、Xpra.
