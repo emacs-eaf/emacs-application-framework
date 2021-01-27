@@ -206,6 +206,9 @@ Both projects are similar in terms of interface, but they are two completely dif
 
 If you've figure them out, PRs are always welcome!
 
+### EAF js-video-player can't play some video on Windows. Why?
+`js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.
+
 ### Why doesn't EAF receive input events on WM?
 EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE, Xpra.
 

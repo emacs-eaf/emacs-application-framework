@@ -36,6 +36,7 @@ import importlib
 import json
 import logging
 import os
+import platform
 import socket
 import subprocess
 import threading
@@ -111,6 +112,9 @@ class EAF(object):
 
     def webengine_include_private_codec(self):
         ''' Return bool of whether the QtWebEngineProcess include private codec. '''
+        if platform.system() == "Windows":
+            dll_ffmpeg = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "ffmpeg.dll")
+            return os.path.exists(dll_ffmpeg)
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
