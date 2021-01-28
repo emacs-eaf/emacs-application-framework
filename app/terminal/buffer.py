@@ -59,11 +59,12 @@ class AppBuffer(BrowserBuffer):
         self.search_term = ""
 
         # Start server process.
+        args = ["node", self.server_js, str(self.port), self.start_directory, self.command]
         self.background_process = subprocess.Popen(
-            "node {0} {1} '{2}' '{3}'".format(self.server_js, self.port, self.start_directory, self.command),
+            args,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            shell=True)
+            shell=False)
 
         self.open_terminal_page()
 
