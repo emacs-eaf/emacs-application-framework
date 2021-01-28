@@ -583,6 +583,12 @@ Otherwise, scroll page up.
         ''' Dark mode support.'''
         self.eval_js(self.dark_mode_js)
 
+    @interactive(insert_or_do=True)
+    def disable_dark_mode(self):
+        ''' Remove dark mode support.'''
+        self.eval_js("""Window.EAF_DARK_READER && Window.EAF_DARK_READER.disable();""")
+
+
 class BrowserPage(QWebEnginePage):
     def __init__(self):
         QWebEnginePage.__init__(self)
@@ -694,6 +700,7 @@ class BrowserBuffer(Buffer):
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
+        self.is_dark_mode_enabled = self.dark_mode_is_enable()
 
         # Reverse background and foreground color, to help cursor recognition.
         self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
@@ -860,8 +867,7 @@ class BrowserBuffer(Buffer):
         return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or \
                 (self.emacs_var_dict["eaf-browser-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
                 and module_name in ["browser", "terminal", "mindmap", "js-video-player"] \
-                and self.url != "devtools://devtools/bundled/devtools_app.html" \
-                and not self.url.startswith("https://www.reddit.com")
+                and self.url != "devtools://devtools/bundled/devtools_app.html"
 
     def init_background_color(self):
         ''' Initialize the background colour.'''
@@ -1522,6 +1528,14 @@ class BrowserBuffer(Buffer):
             self.set_aspect_ratio(0)
 
         self.refresh_page()
+
+    @interactive
+    def toggle_dark_mode(self):
+        self.is_dark_mode_enabled = not self.is_dark_mode_enabled
+        if self.is_dark_mode_enabled:
+            self.dark_mode()
+        else:
+            self.disable_dark_mode()
 
     @interactive(insert_or_do=True)
     def download_youtube_video(self):

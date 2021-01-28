@@ -388,6 +388,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M->" . "scroll_to_bottom")
     ("M-p" . "duplicate_page")
     ("M-t" . "new_blank_page")
+    ("M-d" . "toggle_dark_mode")
     ("SPC" . "insert_or_scroll_up_page")
     ("J" . "insert_or_select_left_tab")
     ("K" . "insert_or_select_right_tab")
