@@ -371,7 +371,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-D" . "select_text")
     ("M-s" . "open_link")
     ("M-S" . "open_link_new_buffer")
-    ("M-d" . "open_link_background_buffer")
+    ("M-B" . "open_link_background_buffer")
     ("C-/" . "undo_action")
     ("M-_" . "redo_action")
     ("M-w" . "copy_text")
