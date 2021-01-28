@@ -537,7 +537,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("," . "scroll_up_page")
     ("." . "scroll_down_page")
     ("<" . "scroll_to_begin")
-    (">" . "scroll_to_bottom"))
+    (">" . "scroll_to_bottom")
+    ("<f12>" . "open_devtools")
+    )
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
@@ -2532,8 +2534,9 @@ The key is the annot id on PAGE."
   "Determine file extension EXT can be opened by EAF directly by `find-file'.
 
 You can configure a blacklist using `eaf-find-file-ext-blacklist'"
-  (and (member ext (append eaf-pdf-extension-list eaf-video-extension-list
-                           eaf-image-extension-list eaf-mindmap-extension-list))
+  (and ext
+       (member (downcase ext) (append eaf-pdf-extension-list eaf-video-extension-list
+                                      eaf-image-extension-list eaf-mindmap-extension-list))
        (not (member ext eaf-find-file-ext-blacklist))))
 
 ;; Make EAF as default app for supported extensions.

@@ -29,13 +29,17 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
+        self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.load_image(url)
 
     def load_image(self, url):
         self.url = url
         self.parent_dir = os.path.abspath(os.path.join(url, os.pardir))
         self.image_name = os.path.basename(url)
-        self.buffer_widget.setUrl(QUrl.fromLocalFile(self.url))
+
+        with open(self.index_file, "r") as f:
+            html = f.read().replace("%1", os.path.join(os.path.dirname(__file__))).replace("%2", os.path.join("file://", url))
+            self.buffer_widget.setHtml(html, QUrl("file://"))
 
     def is_image_file(self, f):
         return Path(f).suffix[1:].lower() in ["jpg", "jpeg", "png", "bmp", "gif", "svg", "webp"]

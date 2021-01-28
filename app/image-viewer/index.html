@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+        <script type="text/javascript" src="%1/node_modules/viewerjs/dist/viewer.js"></script>
+        <link rel="stylesheet" href="%1/node_modules/viewerjs/dist/viewer.css" />
+
+        <style>
+         html, body {
+             width: 100%;
+             height: 100%;
+             padding: 0;
+             margin: 0;
+         }
+
+         img {
+             display: none;
+             background: #7F7F7F;
+         }
+
+         .viewer-fullscreen, .viewer-fullscreen-exit {
+             display: none;
+         }
+        </style>
+    </head>
+    <body>
+        <div>
+            <img id="image" src="%2">
+        </div>
+
+        <script type="module">
+         // View an image
+         const viewer = new Viewer(document.getElementById('image'), {
+             inline: true,
+             navbar: false,
+             toolbar: {
+                 zoomIn: 4,
+                 zoomOut: 4,
+                 oneToOne: 4,
+                 reset: 4,
+                 rotateLeft: 4,
+                 rotateRight: 4,
+                 flipHorizontal: 4,
+                 flipVertical: 4,
+             },
+             view() {
+                 viewer.full();
+             },
+         });
+        </script>
+    </body>
+</html>
