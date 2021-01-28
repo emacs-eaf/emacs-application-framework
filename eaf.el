@@ -1575,7 +1575,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
        (throw 'found-eaf t)))))
 
 (defun eaf--show-message (format-string)
-  (message (concat "[EAF/" eaf--buffer-app-name "] " format-string)))
+  (message (concat "[EAF/" eaf--buffer-app-name "] " (base64-decode-string format-string))))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
   "Set Lisp variable NAME with VALUE on the Emacs side.

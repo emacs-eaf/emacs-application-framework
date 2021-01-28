@@ -531,7 +531,7 @@ class EAF(object):
         self.eval_in_emacs('eaf-request-kill-buffer', [buffer_id])
 
     def message_to_emacs(self, message):
-        self.eval_in_emacs('eaf--show-message', [message])
+        self.eval_in_emacs('eaf--show-message', [string_to_base64(message)])
 
     def set_emacs_var(self, var_name, var_value, eaf_specific):
         self.eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, eaf_specific])
