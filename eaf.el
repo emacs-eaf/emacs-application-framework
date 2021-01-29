@@ -1340,7 +1340,7 @@ keybinding variable to eaf-app-binding-alist."
          (eaf-buffer (generate-new-buffer eaf-buffer-name)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (when (file-accessible-directory-p url)
+      (when (file-accessible-directory-p (file-name-directory url))
         (setq-local default-directory (file-name-directory url)))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
@@ -2414,7 +2414,7 @@ The key is the annot id on PAGE."
 
 (defun eaf--change-default-directory (directory)
   "Change default directory to DIRECTORY."
-  (when (file-accessible-directory-p directory)
+  (when (file-accessible-directory-p (file-name-directory directory))
     (setq-local default-directory directory)))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
