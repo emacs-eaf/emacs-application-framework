@@ -1,6 +1,8 @@
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const http = require("http");
+const url = require("url");
 
 const mume = require("@shd101wyy/mume");
 
@@ -67,15 +69,25 @@ async function render(inputFile, outputFile, darkMode) {
     await writeFile(outputFile, html);
 }
 
+async function server_handler(req, resp) {
+    const q = url.parse(req.url, true).query;
+    const inputFile = q.input_file;
+    const outputFile = q.output_file;
+    const darkMode = q.dark_mode == "true";
+
+    resp.writeHead(200, {'Content-Type': 'text/plain'});
+    try {
+	await render(inputFile, outputFile, darkMode);
+	resp.end('ok');
+    } catch (err) {
+	resp.end(err.message);
+    }
+}
+
 async function main() {
     const argv = process.argv;
-    inputFile = argv[2];
-    outputFile = argv[3];
-    darkMode = argv[4] == "true";
-
-    await render(inputFile, outputFile, darkMode);
-
-    return process.exit();
+    const port = Number(argv[2]);
+    http.createServer(server_handler).listen(port);
 }
 
 main()
