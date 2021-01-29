@@ -7,7 +7,7 @@ const crypto = require("crypto");
 const os = require("os");
 const url = require("url");
 
-const nodeApps = ["js-video-player", "mermaid", "terminal"];
+const nodeApps = ["js-video-player", "terminal"];
 
 function getAppPath(name) {
     return path.join("app", name);
@@ -29,7 +29,6 @@ const pythonDeps = [
     "pymupdf",
     "grip",
     "qrcode",
-    "markdown",
     "epc"
 ];
 

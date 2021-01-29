@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "(cd app/js-video-player && npm install); (cd app/mermaid && npm install); (cd app/terminal && npm install); (cd app/image-viewer && npm install)"
+    "postinstall": "(cd app/js-video-player && npm install); (cd app/terminal && npm install); (cd app/image-viewer && npm install)"
   },
   "repository": {
     "type": "git",

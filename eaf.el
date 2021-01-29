@@ -643,52 +643,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Mindmap."
   :type 'cons)
 
-(defcustom eaf-mermaid-keybinding
-  '(("C--" . "zoom_out")
-    ("C-=" . "zoom_in")
-    ("C-0" . "zoom_reset")
-    ("C-s" . "search_text_forward")
-    ("C-r" . "search_text_backward")
-    ("C-n" . "scroll_up")
-    ("C-p" . "scroll_down")
-    ("C-f" . "scroll_right")
-    ("C-b" . "scroll_left")
-    ("C-v" . "scroll_up_page")
-    ("C-w" . "kill_text")
-    ("M-w" . "copy_text")
-    ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom")
-    ("M-t" . "new_blank_page")
-    ("SPC" . "insert_or_scroll_up_page")
-    ("x" . "insert_or_close_buffer")
-    ("J" . "insert_or_select_left_tab")
-    ("K" . "insert_or_select_right_tab")
-    ("j" . "insert_or_scroll_up")
-    ("k" . "insert_or_scroll_down")
-    ("h" . "insert_or_scroll_left")
-    ("l" . "insert_or_scroll_right")
-    ("d" . "insert_or_scroll_up_page")
-    ("u" . "insert_or_scroll_down_page")
-    ("t" . "insert_or_new_blank_page")
-    ("T" . "insert_or_recover_prev_close_page")
-    ("r" . "insert_or_refresh_page")
-    ("g" . "insert_or_scroll_to_begin")
-    ("x" . "insert_or_close_buffer")
-    ("G" . "insert_or_scroll_to_bottom")
-    ("-" . "insert_or_zoom_out")
-    ("=" . "insert_or_zoom_in")
-    ("0" . "insert_or_zoom_reset")
-    ("m" . "insert_or_save_as_bookmark")
-    ("C-a" . "select_all_or_input_text")
-    ("M-o" . "eval_js")
-    ("M-p" . "eval_js_file")
-    ("<f5>" . "refresh_page")
-    ("<f12>" . "open_devtools")
-    )
-  "The keybinding of EAF Mermaid."
-  :type 'cons)
-
 (defcustom eaf-jupyter-keybinding
   '(("C-+" . "zoom_in")
     ("C--" . "zoom_out")
@@ -723,11 +677,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
-  :type 'cons)
-
-(defcustom eaf-mermaid-extension-list
-  '("mmd")
-  "The extension list of mermaid application."
   :type 'cons)
 
 (defcustom eaf-image-extension-list
@@ -825,7 +774,6 @@ Add NAME of command `wmctrl -m' to this list."
     ("markdown-previewer" . eaf-browser-keybinding)
     ("org-previewer" . eaf-browser-keybinding)
     ("mindmap" . eaf-mindmap-keybinding)
-    ("mermaid" . eaf-mermaid-keybinding)
     ("jupyter" . eaf-jupyter-keybinding)
     )
   "Mapping app names to keybinding variables.
@@ -834,8 +782,7 @@ Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
 (defvar eaf-app-display-function-alist
-  '(("mermaid" . eaf--mermaid-preview-display)
-    ("markdown-previewer" . eaf--markdown-preview-display)
+  '(("markdown-previewer" . eaf--markdown-preview-display)
     ("org-previewer" . eaf--org-preview-display))
   "Mapping app names to display functions.
 
@@ -857,7 +804,6 @@ A bookmark handler function is used as
 (defvar eaf-app-extensions-alist
   '(("pdf-viewer" . eaf-pdf-extension-list)
     ("markdown-previewer" . eaf-markdown-extension-list)
-    ("mermaid" . eaf-mermaid-extension-list)
     ("image-viewer" . eaf-image-extension-list)
     ("video-player" . eaf-video-extension-list)
     ("browser" . eaf-browser-extension-list)
@@ -1686,15 +1632,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
              (with-current-buffer (file-name-nondirectory url)
                (rename-buffer (concat "[Converted] " (substring args 0 (- office-pdf 1))) t)))))))
 
-(defun eaf--mermaid-preview-display (buf)
-  "Given BUF, split window to show file and previewer."
-  (eaf-split-preview-windows
-   (buffer-local-value
-    'eaf--buffer-url buf))
-  (switch-to-buffer buf)
-  (other-window +1)
-  (markdown-mode))
-
 (defun eaf--markdown-preview-display (buf)
   "Given BUF, split window to show file and previewer."
   (eaf-split-preview-windows
@@ -2435,7 +2372,6 @@ The key is the annot id on PAGE."
                     'eaf-terminal-keybinding
                     'eaf-camera-keybinding
                     'eaf-mindmap-keybinding
-                    'eaf-mermaid-keybinding
                     'eaf-jupyter-keybinding
                     )))
     (erase-buffer)

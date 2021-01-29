@@ -138,7 +138,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
 | python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
 | python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |
-| python-markdown                | Mermaid                              | Covert markdown format to mermaid html format |
 | nodejs                         | Terminal                             | Communicate between browser and local TTY     |
 | aria2                          | Browser                              | Download files from the web                   |
 | libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
@@ -163,7 +162,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Airshare            | `M-x eaf-open-airshare`                                                |
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
 | MS Office Viewer    | `M-x eaf-open-office`                                                  |
-| Mermaid             | `M-x eaf-open` Mermaid file (*.mmd)                                    |
 | Jupyter             | `M-x eaf-open-jupyter`                                                 |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 
