@@ -136,7 +136,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
 | wmctrl                         | Core                                 | Activate Emacs window input focus             |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
-| python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
 | python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |
 | python-markdown                | Mermaid                              | Covert markdown format to mermaid html format |
 | nodejs                         | Terminal                             | Communicate between browser and local TTY     |
