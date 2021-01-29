@@ -135,7 +135,6 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
 | wmctrl                         | Core                                 | Activate Emacs window input focus             |
 | python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
-| python-grip                    | Markdown Previewer                   | Markdown rendering server                     |
 | python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |
 | python-markdown                | Mermaid                              | Covert markdown format to mermaid html format |
 | nodejs                         | Terminal                             | Communicate between browser and local TTY     |
@@ -214,15 +213,6 @@ EAF confirms that the desktop environment or window manager you can work include
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
 One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
-
-### What is Github Personal Access Tokens?
-If you use EAF Markdown Previewer, to get consistent previewing, you need to access [Github Personal access token site](https://github.com/settings/tokens/new?scopes=), fill something in "Token description" and click button "Generate token" to get your personal token. Then set the token:
-
-```Elisp
-(setq eaf-grip-token "yourtokencode")
-```
-
-Although Markdown Previewer works for the first few times by entering empty string when prompted, eventually it stops working and gives "GitHub Rate Limit Reached" error.
 
 ### Proxy
 If you need to use proxy to access internet, one can configure the proxy settings.

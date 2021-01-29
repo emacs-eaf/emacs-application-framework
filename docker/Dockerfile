@@ -6,7 +6,7 @@ RUN pacman -Syy && \
 
 RUN pip install --upgrade pip
 
-RUN pip install PyMuPDF grip qrcode pyqt5 epc && rm -rf /root/.cache
+RUN pip install PyMuPDF qrcode pyqt5 epc retrying && rm -rf /root/.cache
 
 RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
 
