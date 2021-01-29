@@ -22,6 +22,7 @@
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
+from core.utils import interactive
 from pathlib import Path
 import os
 
@@ -73,3 +74,36 @@ class AppBuffer(BrowserBuffer):
             self.image_name = images[image_index]
             self.load_image(os.path.join(self.parent_dir, self.image_name))
             self.change_title(self.image_name)
+
+    @interactive
+    def rotate_left(self):
+        self.buffer_widget.eval_js("rotate_left();")
+
+    @interactive
+    def rotate_right(self):
+        self.buffer_widget.eval_js("rotate_right();")
+
+    @interactive
+    def zoom_out(self):
+        self.buffer_widget.eval_js("zoom_out();")
+
+    @interactive
+    def zoom_in(self):
+        self.buffer_widget.eval_js("zoom_in();")
+
+    @interactive
+    def zoom_reset(self):
+        self.buffer_widget.eval_js("zoom_reset();")
+
+    @interactive
+    def zoom_toggle(self):
+        self.buffer_widget.eval_js("zoom_toggle();")
+
+    @interactive
+    def flip_horizontal(self):
+        self.buffer_widget.eval_js("flip_horizontal();")
+
+    @interactive
+    def flip_vertical(self):
+        self.buffer_widget.eval_js("flip_vertical();")
+

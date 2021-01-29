@@ -31,7 +31,7 @@
             <img id="image" src="%2">
         </div>
 
-        <script type="module">
+        <script type="text/javascript">
          // View an image
          const viewer = new Viewer(document.getElementById('image'), {
              inline: true,
@@ -51,6 +51,38 @@
                  viewer.full();
              },
          });
+
+         function rotate_left() {
+             viewer.rotate(-90);
+         }
+
+         function rotate_right() {
+             viewer.rotate(90);
+         }
+
+         function zoom_out() {
+             viewer.zoom(-0.1, true);
+         }
+
+         function zoom_in() {
+             viewer.zoom(0.1, true);
+         }
+
+         function zoom_reset() {
+             viewer.reset();
+         }
+
+         function zoom_toggle() {
+             viewer.toggle();
+         }
+
+         function flip_horizontal() {
+             viewer.scaleX(-viewer.imageData.scaleX || -1);
+         }
+
+         function flip_vertical() {
+             viewer.scaleY(-viewer.imageData.scaleY || -1);
+         }
         </script>
     </body>
 </html>
