@@ -297,7 +297,6 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
     (eaf-terminal-font-family . "")
-    (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-mindmap-edit-mode . "false")
