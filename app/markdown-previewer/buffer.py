@@ -19,36 +19,52 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QColor
+
+from PyQt5 import QtCore
+from PyQt5.QtCore import QUrl, QFileSystemWatcher, QTimer
 from core.browser import BrowserBuffer
-from core.utils import PostGui, get_free_port
+from core.utils import get_free_port
+from urllib.error import URLError
+from urllib.request import urlopen
+from urllib.parse import urlencode
 import os
 import subprocess
-import threading
+import tempfile
 
 class AppBuffer(BrowserBuffer):
+
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
-        # Get free port to render markdown.
-        self.port = get_free_port()
         self.url = url
+        self.preview_file = tempfile.mkstemp(prefix='eaf-', suffix='.html', text=True)[1]
+        self.render_js = os.path.join(os.path.dirname(__file__), "render.js")
+        self.server_port = get_free_port();
+        self.dark_mode = "false"
+        if emacs_var_dict["eaf-markdown-dark-mode"] == "true" or \
+           (emacs_var_dict["eaf-markdown-dark-mode"] == "follow" and emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+            self.dark_mode = "true"
 
-        # Start markdown render process.
-        if arguments == "":
-            subprocess.Popen("grip {0} {1}".format(url, self.port), shell=True)
+        self.run_render_server()
+        QTimer.singleShot(500, self.render)
+
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.fileChanged.connect(self.render)
+        self.file_watcher.addPath(url)
+
+    def run_render_server(self):
+        args = ["node", self.render_js, str(self.server_port)]
+        subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+
+    def render(self):
+        params = {
+            "input_file": self.url,
+            "output_file": self.preview_file,
+            "dark_mode": self.dark_mode
+        }
+        url = 'http://localhost:{}?{}'.format(self.server_port, urlencode(params))
+        resp = urlopen(url).read().decode("utf-8")
+        if resp == "ok":
+            self.buffer_widget.load(QUrl.fromLocalFile(self.preview_file))
         else:
-            subprocess.Popen("grip --pass {0} {1} {2}".format(arguments, url, self.port), shell=True)
-
-        # Add timer make load markdown preview link after grip process start finish.
-        timer = threading.Timer(2, self.load_markdown_server)
-        timer.start()
-
-    @PostGui()
-    def load_markdown_server(self):
-        self.buffer_widget.setUrl(QUrl("http://localhost:{0}".format(self.port)))
-
-        paths = os.path.split(self.url)
-        if len(paths) > 0:
-            self.change_title(paths[-1])
+            self.message_to_emacs.emit("preview failed: {}".format(resp))
