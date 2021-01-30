@@ -1334,11 +1334,12 @@ keybinding variable to eaf-app-binding-alist."
   (let* ((eaf-buffer-name (if (equal (file-name-nondirectory url) "")
                               url
                             (file-name-nondirectory url)))
-         (eaf-buffer (generate-new-buffer eaf-buffer-name)))
+         (eaf-buffer (generate-new-buffer eaf-buffer-name))
+         (url-directory (or (file-name-directory url) url)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (when (file-accessible-directory-p (file-name-directory url))
-        (setq-local default-directory (file-name-directory url)))
+      (when (file-accessible-directory-p url-directory)
+        (setq-local default-directory url-directory))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
