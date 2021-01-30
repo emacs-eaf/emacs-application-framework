@@ -157,6 +157,7 @@ node ./install-eaf-win32.js
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软Office阅读器 | `M-x eaf-open-office`                                                       |
 | jupyter          | `M-x eaf-open-jupyter`                                                      |
+| 音乐          | `M-x eaf-open-music`                                                      |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
 
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
