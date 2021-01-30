@@ -136,7 +136,6 @@ node ./install-eaf-win32.js
 | wmctrl           | 核心                         | 激活Emacs窗口输入焦点                 |
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
 | python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
-| python-markdown                | 流程图                       | 转换 mmd 格式为 mermaid 识别的 html 格式 |
 | aria2                          | 浏览器                       | 下载网络文件                             |
 | nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                  |
 | libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
@@ -162,7 +161,6 @@ node ./install-eaf-win32.js
 | 无线分享         | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软Office阅读器 | `M-x eaf-open-office`                                                       |
-| 流程图           | `M-x eaf-open` 输入 mmd 格式文件                                            |
 | jupyter          | `M-x eaf-open-jupyter`                                                      |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
 
