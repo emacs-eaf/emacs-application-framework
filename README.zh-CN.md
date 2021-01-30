@@ -6,7 +6,7 @@ EAF 是一个全新的图形应用框架，通过扩展Emacs的多媒体能力�
 ## EAF 应用展示
 EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集成在Emacs中。
 
-| 浏览器                                           | Markdown预览程序                                    |
+| 浏览器                                           | Markdown预览(支持Mermaid和PlantUML)                                    |
 | :--------:                                       | :----:                                                      |
 | <img src="./screenshot/browser.gif" width="400"> | <img src="./screenshot/markdown_previewer.gif" width="400"> |
 
@@ -41,14 +41,9 @@ EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集�
 | <img src="./screenshot/aria2.gif" width="400"> | <img src="./screenshot/mindmap.gif" width="400"> |
 |                                                |                                                  |
 
-| 流程图                                           | 笔记管理系统                                            |
+| Jupyter                                           | 笔记管理系统                                            |
 | :--------:                                       | :--------:                                              |
-| <img src="./screenshot/mermaid.gif" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
-|                                                  |                                                         |
-
-| Jupyter                                          |                                                         |
-| :--------:                                       | :--------:                                              |
-| <img src="./screenshot/jupyter.png" width="400"> |                                                         |
+| <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）

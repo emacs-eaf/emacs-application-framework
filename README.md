@@ -6,7 +6,7 @@ EAF is a GUI application framework that revolutionizes Emacs graphical capabilit
 ## EAF Application Overview
 EAF is an extensible framework, one can develop any Qt5 application and integrate it into Emacs.
 
-| Browser                                          | Markdown Previewer                                          |
+| Browser                                          | Markdown Previewer (support Mermaid and PlantUML)                                          |
 | :--------:                                       | :----:                                                      |
 | <img src="./screenshot/browser.gif" width="400"> | <img src="./screenshot/markdown_previewer.gif" width="400"> |
 
@@ -42,14 +42,9 @@ EAF is an extensible framework, one can develop any Qt5 application and integrat
 |                                                |           |
 
 
-| Mermaid                                          | EAF Interleave                                          |
+| Jupyter                                          | EAF Interleave                                          |
 | :--------:                                       | :----------:                                            |
-| <img src="./screenshot/mermaid.gif" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
-|                                                  |                                                         |
-
-| Jupyter                                          |                                                         |
-| :--------:                                       | :----------:                                            |
-| <img src="./screenshot/jupyter.png" width="400"> |                                                         |
+| <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
