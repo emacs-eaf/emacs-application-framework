@@ -2341,7 +2341,7 @@ The key is the annot id on PAGE."
 
 (defun eaf--change-default-directory (directory)
   "Change default directory to DIRECTORY."
-  (when (file-accessible-directory-p (file-name-directory directory))
+  (when (file-accessible-directory-p (or (file-name-directory directory) directory))
     (setq-local default-directory directory)))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
