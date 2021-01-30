@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Jan 27 09:25:35 2021 (-0500)
+;; Last-Updated: Sat Jan 30 14:28:53 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1531,7 +1531,9 @@ of `eaf--buffer-app-name' inside the EAF buffer."
        (throw 'found-eaf t)))))
 
 (defun eaf--show-message (format-string)
-  (message (concat "[EAF/" eaf--buffer-app-name "] " (base64-decode-string format-string))))
+  "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
+  (message (concat "[EAF/" eaf--buffer-app-name "] "
+                   (decode-coding-string (base64-decode-string format-string) 'utf-8))))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
   "Set Lisp variable NAME with VALUE on the Emacs side.
@@ -2161,11 +2163,10 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
-    (insert (base64-decode-string focus-text))
+    (insert (decode-coding-string (base64-decode-string focus-text) 'utf-8))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
-      (beginning-of-buffer))
-    ))
+      (goto-char (point-min)))))
 
 (defun eaf--edit-set-header-line ()
   "Set header line."
