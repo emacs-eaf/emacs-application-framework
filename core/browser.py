@@ -852,6 +852,7 @@ class BrowserBuffer(Buffer):
 
             if self.request_url == "https://emacs-china.org/":
                 self.no_need_draw_background = False
+
             if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
                 self.no_need_draw_background = current_urls[0] == request_urls[0] or self.request_url == current_urls[0]
             elif self.current_url.startswith("https://livebook.manning.com/book/") and self.request_url.startswith("https://livebook.manning.com/book/"):
@@ -859,6 +860,8 @@ class BrowserBuffer(Buffer):
             elif self.current_url.startswith("https://web.telegram.org") and self.request_url.startswith("https://web.telegram.org"):
                 self.no_need_draw_background = True
             elif self.current_url.startswith("https://www.wikiwand.com/"):
+                self.no_need_draw_background = True
+            elif self.current_url.startswith("https://vk.com"):
                 self.no_need_draw_background = True
 
     def dark_mode_is_enable(self):

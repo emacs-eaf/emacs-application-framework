@@ -135,13 +135,13 @@ node ./install-eaf-win32.js
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
 | wmctrl           | 核心                         | 激活Emacs窗口输入焦点                 |
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
-| python-grip                    | Markdown预览                 | 建立Markdown文件的HTML服务               |
 | python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
 | aria2                          | 浏览器                       | 下载网络文件                             |
 | nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                  |
 | libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
 | filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
 | qtconsole                      | jupyter                      | 提供RichJupyterWidget                    |
+| java-openjdk                      | Markdown 预览                              | 正常渲染Markdown文档中的PlantUML代码                     |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
@@ -210,15 +210,6 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 我们认为不同的窗口管理器对于X11协议的支持不够完善才导致这样的问题。
 
 现在的解决方案是将命令`wmctrl -m`中Name的值加入`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
-
-### Github 个人访问标记干什么用的？
-Markdown预览程序依赖grip，你需要访问[Github Personal access token](https://github.com/settings/tokens/new?scopes=)去获取你个人的标记，然后通过下面的命令设置标记后，grip才能正常的工作：
-
-```Elisp
-(setq eaf-grip-token "yourtokencode")
-```
-
-尽管不设置访问标记一开始也能成功使用，但Github过段时间会弹出 "GitHub Rate Limit Reached" 的错误。
 
 ### 代理
 可以通过下面设置来通过代理访问互联网：

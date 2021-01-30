@@ -2,7 +2,7 @@
 
 set -eu
 
-ARCH_PACKAGES=(git nodejs aria2 libreoffice wmctrl xdotool)
+ARCH_PACKAGES=(git nodejs aria2 libreoffice wmctrl xdotool java-openjdk)
 ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode)
 ARCH_PACKAGES+=(python-markdown python-qtconsole)
 
@@ -48,9 +48,9 @@ fi
 
 # Python dependencies
 if type pip3 &>/dev/null; then
-    pip3 install --user pymupdf grip epc
+    pip3 install --user pymupdf epc retrying
 elif type pip &>/dev/null; then
-    pip install --user pymupdf grip epc
+    pip install --user pymupdf epc retrying
 else
     echo "Cannot find pip. Please install it before launching the script again."
     exit 1

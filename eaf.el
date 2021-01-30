@@ -235,10 +235,6 @@ been initialized."
 
 (defvar eaf-last-frame-height 0)
 
-(defcustom eaf-grip-token ""
-  "Github personal acess token, used by grip."
-  :type 'string)
-
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
   :type 'string)
@@ -297,6 +293,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
     (eaf-terminal-font-family . "")
+    (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
     (eaf-mindmap-edit-mode . "false")
@@ -1280,11 +1277,12 @@ keybinding variable to eaf-app-binding-alist."
   (let* ((eaf-buffer-name (if (equal (file-name-nondirectory url) "")
                               url
                             (file-name-nondirectory url)))
-         (eaf-buffer (generate-new-buffer eaf-buffer-name)))
+         (eaf-buffer (generate-new-buffer eaf-buffer-name))
+         (url-directory (or (file-name-directory url) url)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      (when (file-accessible-directory-p (file-name-directory url))
-        (setq-local default-directory (file-name-directory url)))
+      (when (file-accessible-directory-p url-directory)
+        (setq-local default-directory url-directory))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
@@ -1948,11 +1946,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
       ;; Initialize url, app-name and args
       (setq app-name (eaf--get-app-for-extension extension-name))
       (cond
-       ((equal app-name "markdown-previewer")
-        ;; Try get user's github token if `eaf-grip-token' is nil.
-        (setq args
-              (or eaf-grip-token
-                  (read-string (concat "[EAF/" app-name "] Fill your own Github token (or set `eaf-grip-token' with token string): ")))))
        ((equal app-name "browser")
         (setq url (concat "file://" url)))
        ((equal app-name "office")
