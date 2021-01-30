@@ -1961,7 +1961,16 @@ When called interactively, URL accepts a file that can be opened by EAF."
        ((equal app-name "browser")
         (setq url (concat "file://" url)))
        ((equal app-name "office")
-        (user-error "Please use `eaf-open-office' instead!")))))
+        (user-error "Please use `eaf-open-office' instead!"))
+       ((equal app-name "markdown-previewer")
+        ;; Warning user install java if found PlantUML syntax in markdown file.
+        (with-temp-buffer
+          (insert-file-contents url)
+          (goto-char (point-min))
+          (when (search-forward "```puml" nil t)
+            (unless (executable-find "java")
+              (user-error (format "Have PlantUML code in file '%s', you need to install Java to preview normally." url))
+              )))))))
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
