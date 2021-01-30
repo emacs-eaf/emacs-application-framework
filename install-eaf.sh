@@ -2,7 +2,7 @@
 
 set -eu
 
-ARCH_PACKAGES=(git nodejs aria2 libreoffice wmctrl xdotool)
+ARCH_PACKAGES=(git nodejs aria2 libreoffice wmctrl xdotool java-openjdk)
 ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode)
 ARCH_PACKAGES+=(python-markdown python-qtconsole)
 

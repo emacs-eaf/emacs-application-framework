@@ -142,6 +142,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
 | filebrowser-bin                | File Browser                         | Share files between computer and smartphone   |
 | qtconsole                      | Jupyter                              | Provide RichJupyterWidget                     |
+| java-openjdk                      | Markdown Previewer                              | Make mume.js can render PlantUML content                     |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |

@@ -142,6 +142,7 @@ node ./install-eaf-win32.js
 | libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
 | filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
 | qtconsole                      | jupyter                      | 提供RichJupyterWidget                    |
+| java-openjdk                      | Markdown 预览                              | 正常渲染Markdown文档中的PlantUML代码                     |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
