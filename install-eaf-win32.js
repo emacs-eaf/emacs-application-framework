@@ -7,7 +7,7 @@ const crypto = require("crypto");
 const os = require("os");
 const url = require("url");
 
-const nodeApps = ["js-video-player", "markdown-previewer", "mermaid", "terminal"];
+const nodeApps = ["js-video-player", "mermaid", "terminal"];
 
 function getAppPath(name) {
     return path.join("app", name);
@@ -27,6 +27,7 @@ const pythonDeps = [
     "pyqt5-sip",
     "pyqtwebengine",
     "pymupdf",
+    "grip",
     "qrcode",
     "markdown",
     "epc"
