@@ -11,7 +11,7 @@ RUN sed -i '1i Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/
 RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pip -U && \
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-RUN pip install PyMuPDF grip epc && rm -rf /root/.cache
+RUN pip install PyMuPDF epc retrying && rm -rf /root/.cache
 
 RUN git clone --depth=1 https://gitee.com/emacs-hub/emacs-application-framework.git  && \
     git clone --depth=1 https://github.com/magnars/s.el.git
