@@ -692,6 +692,11 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of video player application."
   :type 'cons)
 
+(defcustom eaf-music-extension-list
+  '("mp3")
+  "The extension list of music player application."
+  :type 'cons)
+
 (defcustom eaf-browser-extension-list
   '("html" "htm")
   "The extension list of browser application."
@@ -810,6 +815,7 @@ A bookmark handler function is used as
     ("markdown-previewer" . eaf-markdown-extension-list)
     ("image-viewer" . eaf-image-extension-list)
     ("video-player" . eaf-video-extension-list)
+    ("music" . eaf-music-extension-list)
     ("browser" . eaf-browser-extension-list)
     ("org-previewer" . eaf-org-extension-list)
     ("mindmap" . eaf-mindmap-extension-list)
@@ -2483,8 +2489,12 @@ The key is the annot id on PAGE."
 
 You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (and ext
-       (member (downcase ext) (append eaf-pdf-extension-list eaf-video-extension-list
-                                      eaf-image-extension-list eaf-mindmap-extension-list))
+       (member (downcase ext) (append
+                               eaf-pdf-extension-list
+                               eaf-video-extension-list
+                               eaf-music-extension-list
+                               eaf-image-extension-list
+                               eaf-mindmap-extension-list))
        (not (member ext eaf-find-file-ext-blacklist))))
 
 ;; Make EAF as default app for supported extensions.
