@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="/home/andy/lazycat-emacs/site-lisp/extensions/emacs-application-framework/app/music/echarts.js"></script>
+        <script src="/home/andy/lazycat-emacs/site-lisp/extensions/emacs-application-framework/app/music/circular-audio-wave.js"></script>
+
+        <style>
+         html, body {
+             width: 100%;
+             height: 100%;
+             padding: 0;
+             margin: 0;
+         }
+        </style>
+    </head>
+    <body>
+        <div id="chart-container" style="width: 100%; height: 100%;"></div>
+        <script>
+         let wave = new CircularAudioWave(document.getElementById('chart-container'));
+         wave.loadAudio('%1');
+        </script>
+    </body>
+</html>

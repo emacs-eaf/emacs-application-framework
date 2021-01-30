@@ -537,6 +537,12 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
+(defcustom eaf-music-keybinding
+  '(("<f12>" . "open_devtools")
+    )
+  "The keybinding of EAF Music."
+  :type 'cons)
+
 (defcustom eaf-terminal-keybinding
   '(("M-n" . "scroll_up")
     ("M-p" . "scroll_down")
@@ -766,6 +772,7 @@ Add NAME of command `wmctrl -m' to this list."
     ("video-player" . eaf-video-player-keybinding)
     ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
+    ("music" . eaf-music-keybinding)
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
     ("markdown-previewer" . eaf-browser-keybinding)
@@ -1804,7 +1811,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -1853,6 +1860,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
   "Open EAF demo screen to verify that EAF is working properly."
   (interactive)
   (eaf-open "eaf-demo" "demo"))
+
+(defun eaf-open-music (file)
+  "Open EAF music player."
+  (interactive "F[EAF] Play Music: ")
+  (eaf-open file "music"))
 
 ;;;###autoload
 (defun eaf-open-camera ()
@@ -2362,6 +2374,7 @@ The key is the annot id on PAGE."
                     'eaf-video-player-keybinding
                     'eaf-js-video-player-keybinding
                     'eaf-image-viewer-keybinding
+                    'eaf-music-keybinding
                     'eaf-terminal-keybinding
                     'eaf-camera-keybinding
                     'eaf-mindmap-keybinding
