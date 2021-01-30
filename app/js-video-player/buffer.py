@@ -55,7 +55,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js("set_current_time('{}');".format(self.position))
 
     def play_video(self):
-        self.buffer_widget.eval_js("play('{}');".format(QUrl.fromLocalFile(self.url).toString()))
+        self.buffer_widget.eval_js("play(\"{}\");".format(QUrl.fromLocalFile(self.url).toString()))
 
     def build_js_method(self, method_name):
         def _do ():
