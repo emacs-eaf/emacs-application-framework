@@ -20,10 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
-from core.utils import interactive
-from pathlib import Path
 import os
 
 class AppBuffer(BrowserBuffer):
