@@ -130,6 +130,7 @@ node ./install-eaf-win32.js
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                    |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎     |
 | wmctrl, xdotool                | 核心                         | 激活Emacs窗口输入焦点        |
+| pygetwindow                    | 核心                         | 从Windows中eaf激活WSL中Emacs窗口输入焦点 |
 | nodejs                         | 核心                         | 下载依赖与应用交互           |
 | python-pymupdf                 | PDF阅读器                    | 解析PDF文件                  |
 | python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码       |

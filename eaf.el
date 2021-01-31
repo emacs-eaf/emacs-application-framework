@@ -1105,7 +1105,9 @@ A hashtable, key is url and value is title.")
 
 (defun eaf-get-emacs-xid (frame)
   "Get Emacs FRAME xid."
-  (frame-parameter frame 'window-id))
+  (if (eaf--called-from-wsl-on-windows-p)
+      (eaf-call-sync "get_emacs_xid")
+    (frame-parameter frame 'window-id)))
 
 (defun eaf-serialization-var-list ()
   "Serialize variable list."
@@ -1140,11 +1142,11 @@ A hashtable, key is url and value is title.")
           (setq eaf-internal-process-args (append gdb-args eaf-args)))
       (setq eaf-internal-process-prog eaf-python-command)
       (setq eaf-internal-process-args eaf-args))
-
-    (setq eaf-internal-process
-          (apply 'start-process
-                 eaf-name eaf-name
-                 eaf-internal-process-prog eaf-internal-process-args))
+    (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p))))
+      (setq eaf-internal-process
+            (apply 'start-process
+                   eaf-name eaf-name
+                   eaf-internal-process-prog eaf-internal-process-args)))
     (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
 
@@ -1690,7 +1692,11 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args)))
     (with-current-buffer buffer
-      (eaf-call-async "new_buffer" eaf--buffer-id url app-name args))
+      (eaf-call-async "new_buffer" eaf--buffer-id
+                      (if (eaf--called-from-wsl-on-windows-p)
+                          (eaf--translate-wsl-url-to-windows url)
+                        url)
+                      app-name args))
     (eaf--display-app-buffer app-name buffer))
   (eaf--post-open-actions url app-name args))
 
@@ -2001,6 +2007,15 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
 (defun eaf-get-file-name-extension (file)
   "A wrapper around `file-name-extension' that downcases the extension of the FILE."
   (downcase (file-name-extension file)))
+
+(defun eaf--called-from-wsl-on-windows-p ()
+  "Check whether eaf is called by Emacs on WSL and is running on Windows."
+  (and (eq system-type 'gnu/linux)
+       (string-match-p ".exe" eaf-python-command)))
+
+(defun eaf--translate-wsl-url-to-windows (path)
+  "Translate from a WSL path to a Windows path'"
+  (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" path))
 
 ;;;###autoload
 (defun eaf-open (url &optional app-name args always-new)
@@ -2359,6 +2374,10 @@ The key is the annot id on PAGE."
         (insert "set WshShell = CreateObject(\"WScript.Shell\")\nWshShell.AppActivate Wscript.Arguments(0)")))
     (shell-command-to-string (format "cscript %s %s" activate-window-file-path (emacs-pid)))))
 
+(defun eaf--activate-emacs-wsl-window()
+  "Activate emacs window running on Wsl."
+  (eaf-call-async "activate_emacs_wsl_window" (frame-parameter nil 'name)))
+
 (defun eaf--activate-emacs-linux-window ()
   "Activate emacs window by `wmctrl'."
   (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
@@ -2380,9 +2399,13 @@ The key is the annot id on PAGE."
 
 (defun eaf-activate-emacs-window()
   "Activate emacs window."
-  (if (memq system-type '(cygwin windows-nt ms-dos))
-      (eaf--activate-emacs-win32-window)
-    (eaf--activate-emacs-linux-window)))
+  (cond
+   ((eaf--called-from-wsl-on-windows-p)
+    (eaf--activate-emacs-wsl-window))
+   ((memq system-type '(cygwin windows-nt ms-dos))
+    (eaf--activate-emacs-win32-window))
+   ((eq system-type 'gnu/linux)
+    (eaf--activate-emacs-linux-window))))
 
 (defun eaf-elfeed-open-url ()
   "Display the currently selected item in an eaf buffer."
