@@ -66,7 +66,7 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
                :files ("*"))))
 ```
 
-2. 通过`M-x install-eaf-dependencies`安装EAF依赖，
+2. 通过`M-x eaf-install-dependencies`安装EAF依赖，
 
 如果你更喜欢手动执行安装脚本，
 
