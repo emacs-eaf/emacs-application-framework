@@ -1542,7 +1542,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (message "[EAF/%s] %s"
            eaf--buffer-app-name
-           (decode-coding-string (base64-decode-string format-string) 'utf-8)))
+           (eaf--decode-string format-string)
+           ))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
   "Set Lisp variable NAME with VALUE on the Emacs side.
@@ -1601,12 +1602,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--update-buffer-details (buffer-id title-string url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
-<<<<<<< HEAD
-  (let ((title (decode-coding-string (base64-decode-string title-string) 'utf-8)))
-=======
-  (let ((title (eaf--decode-string title))
+  (let ((title (eaf--decode-string title-string))
         (url (eaf--decode-string url)))
->>>>>>> 6f538218519ac7646b7bd4c1ec7fcdbb57b81d70
     (when (> (length title) 0)
       (catch 'found-eaf
         (dolist (window (window-list))
