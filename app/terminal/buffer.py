@@ -23,7 +23,7 @@ from PyQt5.QtCore import QUrl, QTimer, QPointF, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
-from core.utils import PostGui, get_free_port, interactive
+from core.utils import PostGui, get_free_port, interactive, string_to_base64
 import os
 import subprocess
 import signal
@@ -136,7 +136,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def yank_text(self):
         text = self.get_clipboard_text()
-        self.buffer_widget.eval_js("paste(`{}`);".format(text))
+        self.buffer_widget.eval_js("paste('{}');".format(string_to_base64(text)))
 
     @interactive
     def scroll_other_buffer(self, scroll_direction, scroll_type):
