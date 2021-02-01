@@ -58,7 +58,7 @@
       }
 
       function paste(text) {
-          term.paste(text);
+          term.paste(decodeURIComponent(escape(window.atob(text))));
       }
 
       function scroll_line(number) {
