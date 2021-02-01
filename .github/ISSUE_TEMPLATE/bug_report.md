@@ -21,6 +21,8 @@ A clear and concise description of what you expected to happen.
  - Versions of Dependencies:
  - M-x emacs-version:
 
+Notes: please add a corresponding GitHub Label so future people can find this issue easier.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 

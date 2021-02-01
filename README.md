@@ -67,7 +67,7 @@ Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
                :files ("*"))))
 ```
 
-2. Install EAF dependencies using `M-x install-eaf-dependencies`.
+2. Install EAF dependencies using `M-x eaf-install-dependencies`.
 
 If you prefer to manually call the installation script in the terminal,
 
