@@ -252,9 +252,8 @@ been initialized."
        (epc:define-method
         mngr 'eval-in-emacs
         (lambda (&rest args)
-          (apply (read (first args))
-                 ;; Decode argument with Base64 format automatically.
-                 (mapcar (lambda (arg) (eaf--decode-string arg)) (rest args)))
+          ;; Decode argument with Base64 format automatically.
+          (apply (read (first args)) (mapcar #'eaf--decode-string (rest args)))
           ))))
    eaf-server-port))
 
