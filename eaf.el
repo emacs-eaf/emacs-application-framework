@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jan 30 14:28:53 2021 (-0500)
+;; Last-Updated: Sun Jan 31 22:27:09 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1159,6 +1159,14 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   (eaf-stop-process t)
   (eaf-start-process))
 
+(defun eaf--decode-string (str)
+  "Decode string STR with UTF-8 coding using Base64."
+  (decode-coding-string (base64-decode-string str) 'utf-8))
+
+(defun eaf--encode-string (str)
+  "Encode string STR with UTF-8 coding using Base64."
+  (base64-encode-string (encode-coding-string str 'utf-8)))
+
 (defun eaf-get-render-size ()
   "Get allocation for render application in backend.
 We need calcuate render allocation to make sure no black border around render content."
@@ -1533,7 +1541,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (message (concat "[EAF/" eaf--buffer-app-name "] "
-                   (decode-coding-string (base64-decode-string format-string) 'utf-8))))
+                   (eaf--decode-string format-string))))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
   "Set Lisp variable NAME with VALUE on the Emacs side.
@@ -1592,19 +1600,21 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
-  (when (> (length title) 0)
-    (catch 'found-eaf
-      (dolist (window (window-list))
-        (let ((buffer (window-buffer window)))
-          (with-current-buffer buffer
-            (when (and
-                   (derived-mode-p 'eaf-mode)
-                   (equal eaf--buffer-id buffer-id))
-              (setq mode-name (concat "EAF/" eaf--buffer-app-name))
-              (setq-local eaf--bookmark-title title)
-              (setq-local eaf--buffer-url url)
-              (rename-buffer (format eaf-buffer-title-format title) t)
-              (throw 'found-eaf t))))))))
+  (let ((title (eaf--decode-string title))
+        (url (eaf--decode-string url)))
+    (when (> (length title) 0)
+      (catch 'found-eaf
+        (dolist (window (window-list))
+          (let ((buffer (window-buffer window)))
+            (with-current-buffer buffer
+              (when (and
+                     (derived-mode-p 'eaf-mode)
+                     (equal eaf--buffer-id buffer-id))
+                (setq mode-name (concat "EAF/" eaf--buffer-app-name))
+                (setq-local eaf--bookmark-title title)
+                (setq-local eaf--buffer-url url)
+                (rename-buffer (format eaf-buffer-title-format title) t)
+                (throw 'found-eaf t)))))))))
 
 (defun eaf-translate-text (text)
   "Use sdcv to translate selected TEXT."
@@ -2097,12 +2107,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
         (t
          (eaf-call-async "update_focus_text"
                          eaf--buffer-id
-                         (base64-encode-string (encode-coding-string (buffer-string) 'utf-8)))))
+                         (eaf--encode-string (buffer-string)))))
   (kill-buffer)
   (delete-window))
 
 (defun eaf-edit-buffer-switch-to-org-mode ()
-  "Switch to org-mode to edit table handly."
+  "Switch to `org-mode' to edit table handily."
   (interactive)
   (let ((buffer-app-name eaf--buffer-app-name)
         (buffer-id eaf--buffer-id))
@@ -2163,7 +2173,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
-    (insert (decode-coding-string (base64-decode-string focus-text) 'utf-8))
+    (insert (eaf--decode-string focus-text))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (goto-char (point-min)))))

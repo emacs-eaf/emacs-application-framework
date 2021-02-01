@@ -498,7 +498,7 @@ class EAF(object):
         self.eval_in_emacs('eaf--first-start', [port, webengine_include_private_codec])
 
     def update_buffer_details(self, buffer_id, title, url):
-        self.eval_in_emacs('eaf--update-buffer-details', [buffer_id, title, url])
+        self.eval_in_emacs('eaf--update-buffer-details', [buffer_id, string_to_base64(title), string_to_base64(url)])
 
     def open_url_in_new_tab(self, url):
         self.eval_in_emacs('eaf-open-browser', [url])
