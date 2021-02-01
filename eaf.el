@@ -1532,8 +1532,9 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
-  (message (concat "[EAF/" eaf--buffer-app-name "] "
-                   (decode-coding-string (base64-decode-string format-string) 'utf-8))))
+  (message "[EAF/%s] %s"
+           eaf--buffer-app-name
+           (decode-coding-string (base64-decode-string format-string) 'utf-8)))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
   "Set Lisp variable NAME with VALUE on the Emacs side.
@@ -1590,21 +1591,22 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   (dolist (buffer-info eaf--active-buffers)
     (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info))))
 
-(defun eaf--update-buffer-details (buffer-id title url)
+(defun eaf--update-buffer-details (buffer-id title-string url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
-  (when (> (length title) 0)
-    (catch 'found-eaf
-      (dolist (window (window-list))
-        (let ((buffer (window-buffer window)))
-          (with-current-buffer buffer
-            (when (and
-                   (derived-mode-p 'eaf-mode)
-                   (equal eaf--buffer-id buffer-id))
-              (setq mode-name (concat "EAF/" eaf--buffer-app-name))
-              (setq-local eaf--bookmark-title title)
-              (setq-local eaf--buffer-url url)
-              (rename-buffer (format eaf-buffer-title-format title) t)
-              (throw 'found-eaf t))))))))
+  (let ((title (decode-coding-string (base64-decode-string title-string) 'utf-8)))
+    (when (> (length title) 0)
+      (catch 'found-eaf
+        (dolist (window (window-list))
+          (let ((buffer (window-buffer window)))
+            (with-current-buffer buffer
+              (when (and
+                     (derived-mode-p 'eaf-mode)
+                     (equal eaf--buffer-id buffer-id))
+                (setq mode-name (concat "EAF/" eaf--buffer-app-name))
+                (setq-local eaf--bookmark-title title)
+                (setq-local eaf--buffer-url url)
+                (rename-buffer (format eaf-buffer-title-format title) t)
+                (throw 'found-eaf t)))))))))
 
 (defun eaf-translate-text (text)
   "Use sdcv to translate selected TEXT."
@@ -1819,7 +1821,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
