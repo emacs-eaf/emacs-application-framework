@@ -41,6 +41,10 @@
     }
 
     if (elements.length >= 1) {
-        elements[0].focus();
+        var focusElement = elements[0];
+        var value = focusElement.value;
+        focusElement.focus();
+        focusElement.value = "";
+        focusElement.value = value;
     }
 })();
