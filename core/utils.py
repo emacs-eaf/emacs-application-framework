@@ -86,7 +86,7 @@ def is_port_in_use(port):
         return s.connect_ex(('localhost', port)) == 0
 
 def string_to_base64(text):
-    return str(base64.b64encode(text.encode("utf-8")), "utf-8")
+    return str(base64.b64encode(str(text).encode("utf-8")), "utf-8")
 
 def get_local_ip():
     try:

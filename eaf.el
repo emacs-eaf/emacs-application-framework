@@ -94,16 +94,17 @@
           ((eq system-type 'darwin)
            (user-error "Unfortunately MacOS is not supported, see README for details")))))
 
-(require 'subr-x)
-(require 'map)
 (require 'bookmark)
-(require 'seq)
-(require 'eaf-mindmap)
+(require 'cl)
 (require 'eaf-interleave)
-(require 'json)
-(require 's)
-(require 'eaf-server)
+(require 'eaf-mindmap)
 (require 'epc)
+(require 'epcs)
+(require 'json)
+(require 'map)
+(require 's)
+(require 'seq)
+(require 'subr-x)
 
 ;; Remove the relevant environment variables from the process-environment to disable QT scaling,
 ;; let EAF qt program follow the system scale.
@@ -215,6 +216,52 @@ been initialized."
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
 (defvar eaf-server-port 9999)
+
+(defun epcs:server-start (connect-function &optional port)
+  "Start TCP Server and return the main process object."
+  (lexical-let*
+      ((connect-function connect-function)
+       (name (format "EPC Server %s" (epc:uid)))
+       (buf (epc:make-procbuf (format "*%s*" name)))
+       (main-process
+        (make-network-process
+         :name name
+         :buffer buf
+         :family 'ipv4
+         :server t
+         :host "127.0.0.1"
+         :service (or port t)
+         :sentinel
+         (lambda (process message)
+           (epcs:sentinel process message connect-function)))))
+    (unless port
+      ;; notify port number to the parent process via STDOUT.
+      (message "%s\n" (process-contact main-process :service)))
+    (push (cons main-process
+                (make-epcs:server
+                 :name name :process main-process
+                 :port (process-contact main-process :service)
+                 :connect-function connect-function))
+          epcs:server-processes)
+    main-process))
+
+(defvar eaf-server
+  (epcs:server-start
+   (lambda (mngr)
+     (lexical-let ((mngr mngr))
+       (epc:define-method
+        mngr 'eval-in-emacs
+        (lambda (&rest args)
+          (apply (read (first args))
+                 ;; Decode argument with Base64 format automatically.
+                 (mapcar (lambda (arg) (eaf--decode-string arg)) (rest args)))
+          ))))
+   eaf-server-port))
+
+(when noninteractive
+  ;; Start "event loop".
+  (loop repeat 600
+        do (sleep-for 0.1)))
 
 (defvar eaf-epc-process nil)
 
@@ -1082,9 +1129,6 @@ A hashtable, key is url and value is title.")
       (when (and wayland-display (not (string= wayland-display "")))
         (setenv "QT_QPA_PLATFORM" "xcb")))
 
-    ;; Start emacs server.
-    (eaf-server-start eaf-server-port)
-
     ;; Start python process.
     (if eaf-enable-debug
         (progn
@@ -1114,8 +1158,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save)
     (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
-    (eaf-server-stop eaf-server-port))
+    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
@@ -1542,7 +1585,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (message "[EAF/%s] %s"
            eaf--buffer-app-name
-           (eaf--decode-string format-string)
+           format-string
            ))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
@@ -1600,23 +1643,21 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   (dolist (buffer-info eaf--active-buffers)
     (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info))))
 
-(defun eaf--update-buffer-details (buffer-id title-string url)
+(defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
-  (let ((title (eaf--decode-string title-string))
-        (url (eaf--decode-string url)))
-    (when (> (length title) 0)
-      (catch 'found-eaf
-        (dolist (window (window-list))
-          (let ((buffer (window-buffer window)))
-            (with-current-buffer buffer
-              (when (and
-                     (derived-mode-p 'eaf-mode)
-                     (equal eaf--buffer-id buffer-id))
-                (setq mode-name (concat "EAF/" eaf--buffer-app-name))
-                (setq-local eaf--bookmark-title title)
-                (setq-local eaf--buffer-url url)
-                (rename-buffer (format eaf-buffer-title-format title) t)
-                (throw 'found-eaf t)))))))))
+  (when (> (length title) 0)
+    (catch 'found-eaf
+      (dolist (window (window-list))
+        (let ((buffer (window-buffer window)))
+          (with-current-buffer buffer
+            (when (and
+                   (derived-mode-p 'eaf-mode)
+                   (equal eaf--buffer-id buffer-id))
+              (setq mode-name (concat "EAF/" eaf--buffer-app-name))
+              (setq-local eaf--bookmark-title title)
+              (setq-local eaf--buffer-url url)
+              (rename-buffer (format eaf-buffer-title-format title) t)
+              (throw 'found-eaf t))))))))
 
 (defun eaf-translate-text (text)
   "Use sdcv to translate selected TEXT."
@@ -2175,7 +2216,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "")
     (eaf--edit-set-header-line)
-    (insert (eaf--decode-string focus-text))
+    (insert focus-text)
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
       (goto-char (point-min)))))
