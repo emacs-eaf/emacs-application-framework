@@ -2,9 +2,9 @@
 
 set -eu
 
-ARCH_PACKAGES=(git nodejs aria2 wmctrl xdotool)
-ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine python-qrcode)
-ARCH_PACKAGES+=(python-markdown python-qtconsole)
+ARCH_PACKAGES=(git nodejs)
+ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl xdotool)
+ARCH_PACKAGES+=(python-qrcode aria2 python-qtconsole)
 
 # System dependencies
 if apt -v &> /dev/null; then

@@ -124,19 +124,18 @@ node ./install-eaf-win32.js
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
-| 包名                           | 依赖                         | 解释                                     |
-| :--------                      | :------                      | :------                                  |
-| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                |
-| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
-| wmctrl           | 核心                         | 激活Emacs窗口输入焦点                 |
-| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
-| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
-| aria2                          | 浏览器                       | 下载网络文件                             |
-| nodejs                         | 终端模拟器                   | 通过浏览器与本地TTY交互                  |
-| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
-| filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
-| qtconsole                      | jupyter                      | 提供RichJupyterWidget                    |
-| java-openjdk                      | Markdown 预览                              | 正常渲染Markdown文档中的PlantUML代码                     |
+| 包名                           | 依赖                         | 解释                         |
+| :--------                      | :------                      | :------                      |
+| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                    |
+| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎     |
+| wmctrl, xdotool                | 核心                         | 激活Emacs窗口输入焦点        |
+| nodejs                         | 核心                         | 下载依赖与应用交互           |
+| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                  |
+| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码       |
+| aria2                          | 浏览器                       | 下载网络文件                 |
+| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式         |
+| filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件 |
+| python-qtconsole               | jupyter                      | 提供RichJupyterWidget        |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |

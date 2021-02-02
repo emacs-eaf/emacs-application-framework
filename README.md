@@ -124,19 +124,18 @@ or, if you use [use-package](https://github.com/jwiegley/use-package), you can u
 
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package                        | Dependent                            | Description                                   |
-| :--------                      | :------                              | :------                                       |
-| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                         |
-| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine           |
-| wmctrl                         | Core                                 | Activate Emacs window input focus             |
-| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                          |
-| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files        |
-| nodejs                         | Terminal                             | Communicate between browser and local TTY     |
-| aria2                          | Browser                              | Download files from the web                   |
-| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                       |
-| filebrowser-bin                | File Browser                         | Share files between computer and smartphone   |
-| qtconsole                      | Jupyter                              | Provide RichJupyterWidget                     |
-| java-openjdk                      | Markdown Previewer                              | Make mume.js can render PlantUML content                     |
+| Package                        | Dependent                            | Description                                       |
+| :--------                      | :------                              | :------                                           |
+| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                             |
+| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine               |
+| wmctrl, xdotool                | Core                                 | Activate Emacs window input focus                 |
+| nodejs                         | Core                                 | Installs dependencies, and for app communications |
+| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                              |
+| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files            |
+| aria2                          | Browser                              | Download files from the web                       |
+| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                           |
+| filebrowser-bin                | File Browser                         | Share files between computer and smartphone       |
+| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                         |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
