@@ -126,6 +126,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 
 | Package                        | Dependent                            | Description                                       |
 | :--------                      | :------                              | :------                                           |
+| python-epc                     | Core                                 | EPC for Python                                    |
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                             |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine               |
 | wmctrl, xdotool                | Core                                 | Activate Emacs window input focus                 |
@@ -136,6 +137,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | libreoffice                    | Doc Viewer                           | Convert doc file to pdf                           |
 | filebrowser-bin                | File Browser                         | Share files between computer and smartphone       |
 | python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                         |
+| python-retrying                | Markdown Previewer                   | Provide @retry                                    |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |

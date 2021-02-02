@@ -126,6 +126,7 @@ node ./install-eaf-win32.js
 
 | 包名                           | 依赖                         | 解释                         |
 | :--------                      | :------                      | :------                      |
+| python-epc                     | 核心                         | EPC Python端                 |
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                    |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎     |
 | wmctrl, xdotool                | 核心                         | 激活Emacs窗口输入焦点        |
@@ -136,6 +137,7 @@ node ./install-eaf-win32.js
 | libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式         |
 | filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件 |
 | python-qtconsole               | jupyter                      | 提供RichJupyterWidget        |
+| python-retrying                | Markdown浏览器               | 提供@retry                   |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
