@@ -91,9 +91,17 @@ async function installCodecPack() {
     execSync(installCmd);
 }
 
-installNodeDep();
+try {
+    installPythonDep();
+} catch (err) {
+    console.error(err);
+}
 
-installPythonDep();
+try {
+    installNodeDep();
+} catch (err) {
+    console.error(err);
+}
 
 (async function() {
     try {
