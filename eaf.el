@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Jan 31 22:27:09 2021 (-0500)
+;; Last-Updated: Mon Feb  1 22:45:19 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -253,8 +253,13 @@ been initialized."
         mngr 'eval-in-emacs
         (lambda (&rest args)
           ;; Decode argument with Base64 format automatically.
-          (apply (read (first args)) (mapcar #'eaf--decode-string (rest args)))
-          ))))
+          (apply (read (first args))
+                 (mapcar
+                  (lambda (arg)
+                    (let ((arg (eaf--decode-string arg)))
+                      (cond ((string-prefix-p "'" arg)
+                             (read (substring arg 1)))
+                            (t arg)))) (rest args)))))))
    eaf-server-port))
 
 (when noninteractive
