@@ -28,7 +28,7 @@ elif dnf &> /dev/null; then
 elif type pacman &> /dev/null; then
     sudo pacman -Sy --noconfirm --needed "${ARCH_PACKAGES[@]}"
     if type yay &> /dev/null; then
-        yay -Sc --noconfirm filebrowser-bin
+        yay -S --noconfirm filebrowser-bin
     fi
 else
     echo "Unsupported distribution/package manager. Here are the packages that needs to be installed:"
