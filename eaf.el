@@ -690,6 +690,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("1" . "insert_or_save_screenshot")
     ("2" . "insert_or_save_file")
     ("3" . "insert_or_save_org_file")
+    ("4" . "insert_or_save_freemind_file")
     ("M-o" . "eval_js")
     ("M-p" . "eval_js_file")
     ("<f12>" . "open_devtools")
@@ -759,7 +760,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   :type 'cons)
 
 (defcustom eaf-mindmap-extension-list
-  '("emm")
+  '("emm" "mm")
   "The extension list of mindmap application."
   :type 'cons)
 

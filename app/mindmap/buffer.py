@@ -78,10 +78,12 @@ class AppBuffer(BrowserBuffer):
 
     def init_file(self):
         self.url = os.path.expanduser(self.url)
+        _, ext = os.path.splitext(self.url)
 
         if os.path.exists(self.url):
             with open(self.url, "r") as f:
-                self.buffer_widget.execute_js("open_file('{}');".format(string_to_base64(f.read())))
+                is_freemind = "true" if ext == ".mm" else "false"
+                self.buffer_widget.execute_js("open_file('{}', {});".format(string_to_base64(f.read()), is_freemind))
         else:
             self.buffer_widget.eval_js("init_root_node();")
 
@@ -258,7 +260,6 @@ class AppBuffer(BrowserBuffer):
     @interactive(insert_or_do=True)
     def save_file(self, notify=True):
         file_path = self.get_save_path("emm")
-        touch(file_path)
         with open(file_path, "w") as f:
             f.write(self.buffer_widget.execute_js("save_file();"))
 
@@ -271,3 +272,12 @@ class AppBuffer(BrowserBuffer):
         touch(file_path)
         self.export_org_json.emit(self.buffer_widget.execute_js("save_file();"), file_path)
         self.message_to_emacs.emit("Save org file: " + file_path)
+
+    @interactive(insert_or_do=True)
+    def save_freemind_file(self, notify=True):
+        file_path = self.get_save_path("mm")
+        with open(file_path, "w") as f:
+            f.write(self.buffer_widget.execute_js("save_freemind_file();"))
+
+        if notify:
+            self.message_to_emacs.emit("Save freemind file: " + file_path)
