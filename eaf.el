@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Feb  1 22:45:19 2021 (-0500)
+;; Last-Updated: Tue Feb  2 11:46:42 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1812,7 +1812,7 @@ In that way the corresponding function will be called to retrieve the HTML
   "Duplicate a new tab for the dedicated URL."
   (eaf-open (eaf-wrap-url url) "browser" nil t))
 
-(defun eaf-is-valid-url (url)
+(defun eaf-is-valid-web-url (url)
   "Return the same URL if it is valid."
   (when (and url
              ;; URL should not include blank char.
@@ -1881,10 +1881,10 @@ This function works best if paired with a fuzzy search package."
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
-         (history-url (eaf-is-valid-url (when (string-match "⇰\s\\(.+\\)$" history)
+         (history-url (eaf-is-valid-web-url (when (string-match "⇰\s\\(.+\\)$" history)
                                           (match-string 1 history)))))
     (cond (history-url (eaf-open-browser history-url))
-          ((eaf-is-valid-url history) (eaf-open-browser history))
+          ((eaf-is-valid-web-url history) (eaf-open-browser history))
           (t (eaf-search-it history)))))
 
 ;;;###autoload
