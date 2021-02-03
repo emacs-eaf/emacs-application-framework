@@ -61,7 +61,7 @@ class AppBuffer(BrowserBuffer):
         for method_name in ["zoom_in", "zoom_out", "zoom_reset", "remove_node",
                             "remove_middle_node", "add_middle_node", "refresh_page",
                             "select_up_node", "select_down_node", "select_left_node", "select_right_node",
-                            "toggle_node", "save_screenshot"]:
+                            "toggle_node", "toggle_node_selection", "save_screenshot"]:
             self.build_insert_or_do(method_name)
 
         self.build_all_methods(self)
