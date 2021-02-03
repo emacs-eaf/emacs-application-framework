@@ -265,11 +265,16 @@
           }
       }
 
-      function open_file(file_base64_content) {
+      function open_file(file_base64_content, is_freemind=false) {
           _jm = jsMind.show(options);
 
           var file_data = decodeURIComponent(escape(window.atob(file_base64_content)));
-          var mind = jsMind.util.json.string2json(file_data);
+          var mind = null;
+          if (is_freemind) {
+              mind = convert_freemind_to_jsmind(file_data);
+          } else {
+              mind = jsMind.util.json.string2json(file_data);
+          }
 
           if(!!mind){
               _jm.show(mind);
@@ -280,6 +285,23 @@
 
       function save_file() {
           return jsMind.util.json.json2string(_jm.get_data());
+      }
+
+      function save_freemind_file() {
+          var df = 'freemind';
+          return _jm.get_data(df).data;
+      }
+
+      function convert_freemind_to_jsmind(freemind) {
+          return {
+              "meta":{
+                  "name": _jm.mind.name,
+                  "author": _jm.mind.author,
+                  "version": _jm.mind.version
+              },
+              "format": "freemind",
+              "data": freemind
+          }
       }
 
       function change_node_background(image) {
