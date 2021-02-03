@@ -1,7 +1,11 @@
 English | [简体中文](./README.zh-CN.md)
 
-# Emacs Application Framework (EAF)
-EAF is a GUI application framework that revolutionizes Emacs graphical capabilities to ultimately *Live in Emacs*.
+<p align="center">
+  <img width="250" height="250" src="./EAF_Logo.png">
+</p>
+
+# Emacs Application Framework
+Emacs Application Framework (EAF) is a GUI application framework that revolutionizes Emacs graphical capabilities to ultimately *Live in Emacs*.
 
 ## EAF Application Overview
 EAF is an extensible framework, one can develop any Qt5 application and integrate it into Emacs.
