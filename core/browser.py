@@ -20,17 +20,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QUrl, Qt, QEvent, QPointF, QEventLoop, QVariant, QTimer, QRectF, QFile
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QVariant, QTimer, QFile
+from PyQt5.QtGui import QColor
 from PyQt5.QtNetwork import QNetworkCookie
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineContextMenuData, QWebEngineProfile, QWebEngineSettings
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch, is_port_in_use, string_to_base64, popen_and_call, call_and_check_code, interactive
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract
 from core.buffer import Buffer
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import os
-import subprocess
-import re
 import base64
 from functools import partial
 import sqlite3
@@ -47,13 +45,12 @@ class BrowserView(QWebEngineView):
     translate_selected_text = QtCore.pyqtSignal(str)
     trigger_focus_event = QtCore.pyqtSignal(str)
 
-    def __init__(self, buffer_id, config_dir, emacs_var_dict):
+    def __init__(self, buffer_id, config_dir):
         super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
         self.buffer_id = buffer_id
         self.config_dir = config_dir
-        self.emacs_var_dict = emacs_var_dict
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
@@ -106,9 +103,6 @@ class BrowserView(QWebEngineView):
         script.setWorldId(QWebEngineScript.ApplicationWorld)
         self.web_page.scripts().insert(script)
 
-    def load_adblocker(self):
-        self.load_css(os.path.join(os.path.dirname(__file__), "adblocker.css"),'adblocker')
-
     def remove_css(self, name, immediately):
         SCRIPT =  """
         (function() {
@@ -121,11 +115,6 @@ class BrowserView(QWebEngineView):
             self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
         script = self.web_page.scripts().findScript(name)
         self.web_page.scripts().remove(script)
-
-    def open_downloads_setting(self):
-        ''' Open aria2 download manage page. '''
-        index_file = os.path.join(os.path.dirname(__file__), "aria2-ng", "index.html")
-        self.open_url_new_buffer(QUrl.fromLocalFile(index_file).toString())
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
@@ -171,41 +160,6 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term)
 
     @interactive
-    def toggle_adblocker(self):
-        ''' Change adblocker status.'''
-        if self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "false", "true")
-            self.remove_css('adblocker',True)
-            self.buffer.message_to_emacs.emit("Successfully disabled adblocker!")
-        elif self.buffer.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-adblocker", "true", "true")
-            self.load_adblocker()
-            self.buffer.message_to_emacs.emit("Successfully enabled adblocker!")
-
-    @interactive
-    def save_page_password(self):
-        ''' Record form data.'''
-        if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
-            self.buffer.add_password_entry()
-        else:
-            self.buffer.message_to_emacs.emit("Password autofill is not enabled! Enable with `C-t` (default binding)")
-
-    @interactive
-    def toggle_password_autofill(self):
-        ''' Toggle Autofill status for password data'''
-        if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "false":
-            self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "true", "true")
-            self.buffer.pw_autofill_id = self.buffer.pw_autofill_gen_id(0)
-            self.buffer.message_to_emacs.emit("Successfully enabled autofill!")
-        else:
-            self.buffer.pw_autofill_id = self.buffer.pw_autofill_gen_id(self.buffer.pw_autofill_id)
-            if self.buffer.pw_autofill_id == 0:
-                self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "false", "true")
-                self.buffer.message_to_emacs.emit("Successfully disabled password autofill!")
-            else:
-                self.buffer.message_to_emacs.emit("Successfully changed password autofill id!")
-
-    @interactive
     def search_text_forward(self):
         ''' Forward Search Text.'''
         if self.search_term == "":
@@ -249,11 +203,6 @@ class BrowserView(QWebEngineView):
         ''' Load cookies.'''
         for cookie in self.cookie_storage.load_cookie():
             self.cookie_store.setCookie(cookie)
-
-    def _clear_cookies(self):
-        ''' Clear cookies.'''
-        self.cookie_storage.clear_cookies(self.cookie_store)
-        self.buffer.message_to_emacs.emit("Cleared all cookies.")
 
     def createWindow(self, window_type):
         ''' Create new browser window.'''
@@ -474,7 +423,7 @@ Otherwise, scroll page up.
         return self.url().toString().replace(" ", "%20")
 
     def load_marker_file(self):
-        self.eval_js(self.marker_js_raw.replace("%1", self.emacs_var_dict["eaf-marker-letters"]))
+        self.eval_js(self.marker_js_raw.replace("%1", self.buffer.emacs_var_dict["eaf-marker-letters"]))
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''
@@ -549,7 +498,6 @@ Otherwise, scroll page up.
         self.buffer.caret_toggle_mark()
         self.buffer.caret_next_word()
 
-
     def copy_code_content(self, marker):
         ''' Copy the code content according to marker.'''
         content = self.get_code_content(marker)
@@ -578,7 +526,7 @@ Otherwise, scroll page up.
         self.eval_js(self.clear_focus_js)
 
     @interactive(insert_or_do=True)
-    def dark_mode(self):
+    def enable_dark_mode(self):
         ''' Dark mode support.'''
         self.eval_js(self.dark_mode_js)
 
@@ -646,40 +594,17 @@ class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
     get_focus_text = QtCore.pyqtSignal(str, str)
-    open_dev_tools_tab = QtCore.pyqtSignal(object)
+    open_devtools_tab = QtCore.pyqtSignal(object)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view)
 
-        self.add_widget(BrowserView(buffer_id, config_dir, emacs_var_dict))
+        self.add_widget(BrowserView(buffer_id, config_dir))
 
         self.config_dir = config_dir
         self.page_closed = False
 
-        self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
-        self.pw_autofill_id = 0
-
         self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(config_dir), "browser", "zoom_data.db"))
-
-        self.history_list = []
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
-            self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
-
-            self.history_pattern = re.compile("^(.+)ᛝ(.+)ᛡ(.+)$")
-            self.noprefix_url_pattern = re.compile("^(https?|file)://(.+)")
-            self.nopostfix_url_pattern = re.compile("^[^#\?]*")
-            self.history_close_file_path = os.path.join(self.config_dir, "browser", "history", "close.txt")
-            touch(self.history_log_file_path)
-            with open(self.history_log_file_path, "r", encoding="utf-8") as f:
-                raw_list = f.readlines()
-                for raw_his in raw_list:
-                    his_line = re.match(self.history_pattern, raw_his)
-                    if his_line is None: # Obsolete Old history format
-                        old_his = re.match("(.*)\s((https?|file):[^\s]+)$", raw_his)
-                        if old_his is not None:
-                            self.history_list.append(HistoryPage(old_his.group(1), old_his.group(2), 1))
-                    else:
-                        self.history_list.append(HistoryPage(his_line.group(1), his_line.group(2), his_line.group(3)))
 
         # Set User Agent with Firefox's one to make EAF browser can login in Google account.
         self.pc_user_agent = "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/72.0"
@@ -688,8 +613,8 @@ class BrowserBuffer(Buffer):
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
         self.draw_progressbar = False
-        self.eval_dark_js = False
-        self.eval_caret_js = False
+        self.dark_mode_js_ready = False
+        self.caret_js_ready = False
         self.caret_browsing_mode = False
         self.caret_browsing_exit_flag = True
         self.caret_browsing_mark_activated = False
@@ -699,7 +624,7 @@ class BrowserBuffer(Buffer):
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
-        self.is_dark_mode_enabled = self.dark_mode_is_enable()
+        self.is_dark_mode_enabled = self.dark_mode_is_enabled()
 
         # Reverse background and foreground color, to help cursor recognition.
         self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
@@ -761,57 +686,6 @@ class BrowserBuffer(Buffer):
         self.reset_default_zoom()
         self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
 
-    def add_password_entry(self):
-        password, form_data = self.buffer_widget.execute_js("""
-        var password = "";
-        var form_data = {};
-        var input_list=document.getElementsByTagName("input");
-        for(var i=0;i<input_list.length && input_list[i];i++){
-            if(input_list[i].type === "password" && input_list[i].value != ""){
-                password = input_list[i].value;
-            }
-            else if(input_list[i].type != "hidden" && input_list[i].value != "" && input_list[i].id != ""){
-                form_data[input_list[i].id] = input_list[i].value;
-            }
-        }
-        [password, form_data]
-        """)
-        if password != "":
-            self.autofill.add_entry(urlparse(self.current_url).hostname, password, form_data)
-            self.message_to_emacs.emit("Successfully recorded this page's password!")
-            return True
-        else:
-            self.message_to_emacs.emit("There is no password present in this page!")
-            return False
-
-    def pw_autofill_gen_id(self, id):
-        result = self.autofill.get_entries(urlparse(self.url).hostname, id)
-        new_id = 0
-        for row in result:
-            new_id = row[0]
-            password = row[2]
-            form_data = row[3]
-            self.buffer_widget.execute_js(
-            """
-            var form_data = %s;
-            var input_list=document.getElementsByTagName("input");
-            for(var i=0;i<input_list.length && input_list[i];i++){
-                if(input_list[i].type === "password"){
-                    input_list[i].value = "%s";
-                }
-                else if(input_list[i].type != "hidden" && input_list[i].id != "" && form_data[input_list[i].id] != undefined){
-                    input_list[i].value = form_data[input_list[i].id];
-                }
-            }
-            """ % (form_data, password))
-            break
-        return new_id
-
-
-    def init_pw_autofill(self):
-        if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
-            self.pw_autofill_id = self.pw_autofill_gen_id(0)
-
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
         if success:
@@ -851,7 +725,7 @@ class BrowserBuffer(Buffer):
         This function include a white-list to control variable no_need_draw_background,
         we can add url to white-list if you found unnecessary loading at same page, such as, scroll to anchor.
         '''
-        if self.dark_mode_is_enable():
+        if self.dark_mode_is_enabled():
             current_urls = self.current_url.rsplit("/", 1)
             request_urls = self.request_url.rsplit("/", 1)
 
@@ -869,7 +743,7 @@ class BrowserBuffer(Buffer):
             elif self.current_url.startswith("https://vk.com"):
                 self.no_need_draw_background = True
 
-    def dark_mode_is_enable(self):
+    def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
         return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or \
@@ -879,28 +753,10 @@ class BrowserBuffer(Buffer):
 
     def init_background_color(self):
         ''' Initialize the background colour.'''
-        if self.dark_mode_is_enable():
+        if self.dark_mode_is_enabled():
             self.buffer_widget.web_page.setBackgroundColor(self.dark_mode_mask_color)
         else:
             self.buffer_widget.web_page.setBackgroundColor(self.light_mode_mask_color)
-
-    def drawForeground(self, painter, rect):
-        ''' Draw Foreground.'''
-        if self.draw_progressbar:
-            # Draw foreground over web page avoid white flash when eval dark_mode_js
-            if self.dark_mode_is_enable() and not self.no_need_draw_background:
-                painter.setBrush(self.dark_mode_mask_color)
-                painter.drawRect(0, 0, rect.width(), rect.height())
-
-            # Init progress bar brush.
-            painter.setBrush(self.progressbar_color)
-
-            if self.eval_dark_js:
-                # Draw 100% when after eval dark_mode_js, avoid flash progressbar.
-                painter.drawRect(0, 0, rect.width(), self.progressbar_height)
-            else:
-                # Draw progress bar.
-                painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
 
     @QtCore.pyqtSlot()
     def start_progress(self):
@@ -916,25 +772,39 @@ class BrowserBuffer(Buffer):
         self.no_need_draw_background = False
 
         self.draw_progressbar = False
-        self.eval_dark_js = False
+        self.dark_mode_js_ready = False
         self.update()
+
+    @abstract
+    def before_page_load_hook(self):
+        ''' Hook to run before update_progress hits 100. '''
+        pass
+
+    @abstract
+    def after_page_load_hook(self):
+        ''' Hook to run after update_progress hits 100. '''
+        pass
 
     @QtCore.pyqtSlot(int)
     def update_progress(self, progress):
         ''' Update the Progress Bar.'''
         if progress < 100:
-            # Update progres.
-            self.eval_caret_js = False
+            # Update progress.
+            self.caret_js_ready = False
             self.progressbar_progress = progress
+            self.before_page_load_hook() # Run before page load hook
             self.update()
         elif progress == 100 and self.draw_progressbar:
-            self.init_pw_autofill()
             self.buffer_widget.load_marker_file()
 
             cursor_foreground_color = ""
             cursor_background_color = ""
 
-            if self.dark_mode_is_enable():
+            self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", cursor_foreground_color).replace("%2", cursor_background_color)
+            self.buffer_widget.eval_js(self.caret_browsing_js)
+            self.caret_js_ready = True
+
+            if self.dark_mode_is_enabled():
                 if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
                     cursor_foreground_color = self.caret_background_color.name()
                     cursor_background_color = self.caret_foreground_color.name()
@@ -949,22 +819,17 @@ class BrowserBuffer(Buffer):
                     cursor_foreground_color = "#000"
                     cursor_background_color = "#FFF"
 
-            self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", cursor_foreground_color).replace("%2", cursor_background_color)
-            self.buffer_widget.eval_js(self.caret_browsing_js)
-            self.eval_caret_js = True
-
-            if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
-                self.buffer_widget.load_adblocker()
-            if self.dark_mode_is_enable():
-                if not self.eval_dark_js:
-                    self.dark_mode()
-                    self.eval_dark_js = True
-
+            if self.dark_mode_is_enabled():
+                if not self.dark_mode_js_ready:
+                    self.enable_dark_mode()
+                    self.dark_mode_js_ready = True
                     # We need show page some delay, avoid white flash when eval dark_mode_js
                     QtCore.QTimer.singleShot(1000, self.hide_progress)
             else:
                 # Hide progress bar immediately if not dark mode.
                 self.hide_progress()
+
+            self.after_page_load_hook() # Run after page load hook
 
     def handle_fullscreen_request(self, request):
         ''' Handle fullscreen request.'''
@@ -1107,12 +972,9 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.open_url(result_content)
         elif callback_tag == "copy_code":
             self.buffer_widget.copy_code_content(result_content.strip())
-        elif callback_tag == "clear_history":
-            self._clear_history()
-        elif callback_tag == "import_chrome_history":
-            self._import_chrome_history()
-        elif callback_tag == "clear_cookies":
-            self.buffer_widget._clear_cookies()
+        else:
+            return False
+        return True
 
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
@@ -1126,32 +988,9 @@ class BrowserBuffer(Buffer):
            callback_tag == "edit_url":
             self.buffer_widget.cleanup_links_dom()
 
-    def try_start_aria2_daemon(self):
-        ''' Try to start aria2 daemon.'''
-        if not is_port_in_use(6800):
-            with open(os.devnull, "w") as null_file:
-                aria2_args = ["aria2c"]
-
-                aria2_args.append("-d") # daemon
-                aria2_args.append("-c") # continue download
-                aria2_args.append("--auto-file-renaming=false") # not auto rename file
-                aria2_args.append("-d {}".format(os.path.expanduser(str(self.emacs_var_dict["eaf-browser-download-path"]))))
-
-                aria2_proxy_host = str(self.emacs_var_dict["eaf-browser-aria2-proxy-host"])
-                aria2_proxy_port = str(self.emacs_var_dict["eaf-browser-aria2-proxy-port"])
-
-                if aria2_proxy_host != "" and aria2_proxy_port != "":
-                    aria2_args.append("--all-proxy")
-                    aria2_args.append("http://{0}:{1}".format(aria2_proxy_host, aria2_proxy_port))
-
-                aria2_args.append("--enable-rpc")
-                aria2_args.append("--rpc-listen-all")
-
-                subprocess.Popen(aria2_args, stdout=null_file)
-
     def caret_toggle_browsing(self):
         ''' Init caret browsing.'''
-        if self.eval_caret_js:
+        if self.caret_js_ready:
             if self.caret_browsing_mode:
                 self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
                 self.message_to_emacs.emit("Caret browsing deactivated.")
@@ -1292,12 +1131,6 @@ class BrowserBuffer(Buffer):
         if self.buffer_widget.selectedText().strip() != "":
             self.buffer_widget.translate_selected_text.emit(self.buffer_widget.selectedText())
 
-    @interactive(insert_or_do=True)
-    def open_downloads_setting(self):
-        ''' Open download manage page.'''
-        self.try_start_aria2_daemon()
-        self.buffer_widget.open_downloads_setting()
-
     def copy_text(self):
         ''' Copy selected text.'''
         self.buffer_widget.copy_text()
@@ -1370,114 +1203,6 @@ class BrowserBuffer(Buffer):
         ''' Return bool of whether the buffer is focused.'''
         return self.buffer_widget.get_focus_text() != None or self.url == "devtools://devtools/bundled/devtools_app.html"
 
-    def _record_history(self, new_title, new_url):
-        # Throw traceback info if algorithm has bug and protection of historical record is not erased.
-        try:
-            noprefix_new_url_match = re.match(self.noprefix_url_pattern, new_url)
-            if noprefix_new_url_match is not None:
-                found = False
-                for history in self.history_list:
-                    noprefix_url_match = re.match(self.noprefix_url_pattern, history.url)
-                    if noprefix_url_match is not None:
-                        noprefix_url = noprefix_url_match.group(2)
-                        noprefix_new_url = noprefix_new_url_match.group(2)
-                        nopostfix_new_url_match = re.match(self.nopostfix_url_pattern, noprefix_new_url)
-
-                        if noprefix_url == noprefix_new_url: # found unique url
-                            history.title = new_title
-                            history.url = new_url
-                            history.hit += 0.5
-                            found = True
-                        elif nopostfix_new_url_match is not None and noprefix_url == nopostfix_new_url_match.group():
-                            # also increment parent
-                            history.hit += 0.25
-
-                if not found:
-                    self.history_list.append(HistoryPage(new_title, new_url, 1))
-
-            self.history_list.sort(key = lambda x: x.hit, reverse = True)
-
-            with open(self.history_log_file_path, "w", encoding="utf-8") as f:
-                f.writelines(map(lambda history: history.title + "ᛝ" + history.url + "ᛡ" + str(history.hit) + "\n", self.history_list))
-        except Exception:
-            import traceback
-            self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
-
-    def record_history(self, new_title):
-        ''' Record browser history.'''
-        new_url = self.buffer_widget.filter_url(self.buffer_widget.get_url())
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.buffer_widget.filter_title(new_title) != "" and \
-           self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
-            self._record_history(new_title, new_url)
-
-    @interactive(insert_or_do=True)
-    def new_blank_page(self):
-        ''' Open new blank page.'''
-        self.eval_in_emacs.emit('eaf-open', [self.emacs_var_dict["eaf-browser-blank-page-url"], "browser", "", 't'])
-
-    def _clear_history(self):
-        if os.path.exists(self.history_log_file_path):
-            os.remove(self.history_log_file_path)
-            self.message_to_emacs.emit("Cleared browsing history.")
-        else:
-            self.message_to_emacs.emit("There is no browsing history.")
-
-    @interactive
-    def clear_history(self):
-        ''' Clear browsing history.'''
-        self.send_input_message("Are you sure you want to clear all browsing history?", "clear_history", "yes-or-no")
-
-    def _import_chrome_history(self):
-        dbpath = os.path.expanduser(self.emacs_var_dict["eaf-browser-chrome-history-file"])
-        if not os.path.exists(dbpath):
-            self.message_to_emacs.emit("The chrome history file: '{}' not exist, please check your setting.".format(dbpath))
-            return
-
-        self.message_to_emacs.emit("Importing from {}...".format(dbpath))
-
-        conn = sqlite3.connect(dbpath)
-        # Keep lastest entry in dict by last_visit_time asc order.
-        sql = 'select title, url from urls order by last_visit_time asc'
-        # May fetch many by many not fetch all,
-        # but this should called only once, so not important now.
-        try:
-            chrome_histories = conn.execute(sql).fetchall()
-        except sqlite3.OperationalError as e:
-            if e.args[0] == 'database is locked':
-                self.message_to_emacs.emit("The chrome history file is locked, please close your chrome app first.")
-            else:
-                self.message_to_emacs.emit("Failed to read chrome history entries: {}.".format(e))
-            return
-
-        histories = dict(chrome_histories)  # Drop duplications with same title.
-        total = len(histories)
-        for i, (title, url) in enumerate(histories.items(), 1):
-            self._record_history(title, url)
-            self.message_to_emacs.emit("Importing {} / {} ...".format(i, total))
-        self.message_to_emacs.emit("{} chrome history entries imported.".format(total))
-
-    @interactive
-    def import_chrome_history(self):
-        ''' Import history entries from chrome history db.'''
-        self.send_input_message("Are you sure you want to import all history from chrome?", "import_chrome_history", "yes-or-no")
-
-    @interactive
-    def clear_cookies(self):
-        ''' Clear cookies.'''
-        self.send_input_message("Are you sure you want to clear all browsing cookies?", "clear_cookies", "yes-or-no")
-
-    def record_close_page(self, url):
-        ''' Record closing pages.'''
-        self.page_closed = True
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.arguments != "temp_html_file" and url != "about:blank":
-            touch(self.history_close_file_path)
-            with open(self.history_close_file_path, "r") as f:
-                close_urls = f.readlines()
-                close_urls.append("{0}\n".format(url))
-                if len(close_urls) > 30:
-                    del close_urls[:len(close_urls)-30]
-                open(self.history_close_file_path, "w").writelines(close_urls)
-
     @interactive(insert_or_do=True)
     def recover_prev_close_page(self):
         ''' Recover previous closed pages.'''
@@ -1512,17 +1237,20 @@ class BrowserBuffer(Buffer):
         else:
             self.buffer_widget.select_all()
 
+    @interactive()
     def eval_js_file(self):
         ''' Eval JS file.'''
         self.send_input_message("Eval JS file: ", "eval_js_file", "file")
 
+    @interactive()
     def eval_js(self):
         ''' Eval JS interactively.'''
         self.send_input_message("Eval JS: ", "eval_js")
 
+    @interactive()
     def open_devtools(self):
         ''' Open dev-tool page.'''
-        self.open_dev_tools_tab.emit(self.buffer_widget.web_page)
+        self.open_devtools_tab.emit(self.buffer_widget.web_page)
 
     @interactive(insert_or_do=True)
     def toggle_device(self):
@@ -1541,7 +1269,7 @@ class BrowserBuffer(Buffer):
     def toggle_dark_mode(self):
         self.is_dark_mode_enabled = not self.is_dark_mode_enabled
         if self.is_dark_mode_enabled:
-            self.dark_mode()
+            self.buffer_widget.enable_dark_mode()
         else:
             self.disable_dark_mode()
 
@@ -1584,38 +1312,6 @@ class BrowserBuffer(Buffer):
                 self.message_to_emacs.emit("Please install youtube-dl to use this feature.")
         else:
             self.message_to_emacs.emit("Only videos from YouTube can be downloaded for now.")
-
-class PasswordDb(object):
-    def __init__(self, dbpath):
-        self._conn = sqlite3.connect(dbpath)
-        self._conn.execute("""
-        CREATE TABLE IF NOT EXISTS autofill
-        (id INTEGER PRIMARY KEY AUTOINCREMENT, host TEXT,
-         password TEXT, form_data TEXT)
-        """)
-
-    def add_entry(self, host, password, form_data):
-        result = self._conn.execute("""
-        SELECT id, host, password, form_data FROM autofill
-        WHERE host=? AND form_data=? ORDER BY id
-        """, (host, str(form_data)))
-        if len(list(result))>0:
-            self._conn.execute("""
-            UPDATE autofill SET password=?
-            WHERE host=? and form_data=?
-            """, (password, host, str(form_data)))
-        else:
-            self._conn.execute("""
-            INSERT INTO autofill (host, password, form_data)
-            VALUES (?, ?, ?)
-            """, (host, password, str(form_data)))
-        self._conn.commit()
-
-    def get_entries(self, host, id):
-        return self._conn.execute("""
-        SELECT id, host, password, form_data FROM autofill
-        WHERE host=? and id>? ORDER BY id
-        """, (host, id))
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):

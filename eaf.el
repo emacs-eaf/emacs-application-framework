@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Feb  2 11:46:42 2021 (-0500)
+;; Last-Updated: Thu Feb  4 14:36:53 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1796,11 +1796,12 @@ In that way the corresponding function will be called to retrieve the HTML
       (insert html))
     (eaf-open file "browser" "temp_html_file")))
 
-(defun eaf-open-dev-tool-page ()
+(defun eaf-open-devtool-page ()
+  "Use EAF Browser to open the devtools page."
   (delete-other-windows)
   (split-window (selected-window) (/ (* (nth 3 (eaf-get-window-allocation (selected-window))) 2) 3) nil t)
   (other-window 1)
-  (eaf-open "about:blank" "browser" "dev_tools"))
+  (eaf-open "about:blank" "browser" "devtools"))
 
 ;;;###autoload
 (defun eaf-open-browser (url &optional args)

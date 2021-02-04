@@ -251,8 +251,8 @@ class EAF(object):
             app_buffer.export_org_json.connect(self.export_org_json)
 
         # Handle dev tools signal.
-        if getattr(app_buffer, "open_dev_tools_tab", False) and getattr(app_buffer.open_dev_tools_tab, "connect", False):
-            app_buffer.open_dev_tools_tab.connect(self.open_dev_tools_tab)
+        if getattr(app_buffer, "open_devtools_tab", False) and getattr(app_buffer.open_devtools_tab, "connect", False):
+            app_buffer.open_devtools_tab.connect(self.open_devtools_tab)
 
         # Handle fulllscreen signal.
         if getattr(app_buffer, "enter_fullscreen_request", False) and getattr(app_buffer.enter_fullscreen_request, "connect", False):
@@ -271,10 +271,10 @@ class EAF(object):
         if module_path == "app.browser.buffer":
             app_buffer.proxy_string = proxy_string
 
-        # If arguments is dev_tools, create dev tools page.
-        if module_path == "app.browser.buffer" and arguments == "dev_tools" and self.dev_tools_page:
-            self.dev_tools_page.setDevToolsPage(app_buffer.buffer_widget.web_page)
-            self.dev_tools_page = None
+        # If arguments is devtools, create devtools page.
+        if module_path == "app.browser.buffer" and arguments == "devtools" and self.devtools_page:
+            self.devtools_page.setDevToolsPage(app_buffer.buffer_widget.web_page)
+            self.devtools_page = None
 
         # Restore buffer session.
         self.restore_buffer_session(app_buffer)
@@ -503,8 +503,8 @@ class EAF(object):
     def duplicate_page_in_new_tab(self, url):
         self.eval_in_emacs('eaf-browser--duplicate-page-in-new-tab', [url])
 
-    def open_dev_tools_page(self):
-        self.eval_in_emacs('eaf-open-dev-tool-page', [])
+    def open_devtools_page(self):
+        self.eval_in_emacs('eaf-open-devtool-page', [])
 
     def open_url_in_background_tab(self, url):
         self.eval_in_emacs('eaf-open-browser-in-background', [url])
@@ -545,10 +545,10 @@ class EAF(object):
     def exit_fullscreen_request(self):
         self.eval_in_emacs('eaf--exit_fullscreen_request', [])
 
-    def open_dev_tools_tab(self, web_page):
-        ''' Open dev-tools tab'''
-        self.dev_tools_page = web_page
-        self.open_dev_tools_page()
+    def open_devtools_tab(self, web_page):
+        ''' Open devtools tab'''
+        self.devtools_page = web_page
+        self.open_devtools_page()
 
     def save_buffer_session(self, buf):
         ''' Save buffer session to file.'''
