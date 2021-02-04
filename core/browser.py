@@ -187,24 +187,23 @@ class BrowserView(QWebEngineView):
         ''' Record form data.'''
         if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
             self.buffer.add_password_entry()
-            self.buffer.message_to_emacs.emit("Successfully recorded current page's password!")
         else:
-            self.buffer.message_to_emacs.emit("Autofill is not enabled! Enable it with C-t")
+            self.buffer.message_to_emacs.emit("Password autofill is not enabled! Enable with `C-t` (default binding)")
 
     @interactive
     def toggle_password_autofill(self):
         ''' Toggle Autofill status for password data'''
         if self.buffer.emacs_var_dict["eaf-browser-enable-autofill"] == "false":
             self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "true", "true")
-            self.buffer.autofill_id = self.buffer.auto_fill(0)
+            self.buffer.pw_autofill_id = self.buffer.pw_autofill_gen_id(0)
             self.buffer.message_to_emacs.emit("Successfully enabled autofill!")
         else:
-            self.buffer.autofill_id = self.buffer.auto_fill(self.buffer.autofill_id)
-            if self.buffer.autofill_id == 0:
+            self.buffer.pw_autofill_id = self.buffer.pw_autofill_gen_id(self.buffer.pw_autofill_id)
+            if self.buffer.pw_autofill_id == 0:
                 self.buffer.set_emacs_var.emit("eaf-browser-enable-autofill", "false", "true")
-                self.buffer.message_to_emacs.emit("Successfully disabled autofill!")
+                self.buffer.message_to_emacs.emit("Successfully disabled password autofill!")
             else:
-                self.buffer.message_to_emacs.emit("Successfully changed autofill data!")
+                self.buffer.message_to_emacs.emit("Successfully changed password autofill id!")
 
     @interactive
     def search_text_forward(self):
@@ -658,7 +657,7 @@ class BrowserBuffer(Buffer):
         self.page_closed = False
 
         self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
-        self.autofill_id = 0
+        self.pw_autofill_id = 0
 
         self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(config_dir), "browser", "zoom_data.db"))
 
@@ -777,9 +776,15 @@ class BrowserBuffer(Buffer):
         }
         [password, form_data]
         """)
-        self.autofill.add_entry(urlparse(self.current_url).hostname, password, form_data)
+        if password != "":
+            self.autofill.add_entry(urlparse(self.current_url).hostname, password, form_data)
+            self.message_to_emacs.emit("Successfully recorded this page's password!")
+            return True
+        else:
+            self.message_to_emacs.emit("There is no password present in this page!")
+            return False
 
-    def auto_fill(self, id):
+    def pw_autofill_gen_id(self, id):
         result = self.autofill.get_entries(urlparse(self.url).hostname, id)
         new_id = 0
         for row in result:
@@ -794,18 +799,18 @@ class BrowserBuffer(Buffer):
                 if(input_list[i].type === "password"){
                     input_list[i].value = "%s";
                 }
-                else if(input_list[i].type != "hidden" && input_list[i].id != ""){
+                else if(input_list[i].type != "hidden" && input_list[i].id != "" && form_data[input_list[i].id] != undefined){
                     input_list[i].value = form_data[input_list[i].id];
                 }
             }
-            """ % (form_data,password))
+            """ % (form_data, password))
             break
         return new_id
 
 
-    def init_auto_fill(self):
+    def init_pw_autofill(self):
         if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
-            self.autofill_id = self.auto_fill(0)
+            self.pw_autofill_id = self.pw_autofill_gen_id(0)
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
@@ -923,7 +928,7 @@ class BrowserBuffer(Buffer):
             self.progressbar_progress = progress
             self.update()
         elif progress == 100 and self.draw_progressbar:
-            self.init_auto_fill()
+            self.init_pw_autofill()
             self.buffer_widget.load_marker_file()
 
             cursor_foreground_color = ""
