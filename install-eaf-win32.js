@@ -30,7 +30,8 @@ const pythonDeps = [
     "qrcode",
     "markdown",
     "epc",
-    "retrying"
+    "retrying",
+    "pygetwindow"
 ];
 
 function installPythonDep() {

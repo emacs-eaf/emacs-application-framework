@@ -41,6 +41,8 @@ import platform
 import socket
 import subprocess
 import threading
+if platform.system() == "Windows":
+    import pygetwindow as gw
 
 class EAF(object):
     def __init__(self, args):
@@ -405,6 +407,15 @@ class EAF(object):
                 traceback.print_exc()
                 self.message_to_emacs("Cannot call function: " + function_name)
                 return ""
+
+    def get_emacs_xid(self):
+        if platform.system() == "Windows":
+            return gw.getActiveWindow()._hWnd
+
+    def activate_emacs_wsl_window(self, frame_title):
+        if platform.system() == "Windows":
+            w = gw.getWindowsWithTitle(frame_title)
+            w[0].activate()
 
     @PostGui()
     def action_quit(self, buffer_id):
