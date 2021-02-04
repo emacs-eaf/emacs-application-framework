@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Feb  4 14:36:53 2021 (-0500)
+;; Last-Updated: Thu Feb  4 18:28:46 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -95,7 +95,7 @@
            (user-error "Unfortunately MacOS is not supported, see README for details")))))
 
 (require 'bookmark)
-(require 'cl)
+(require 'cl-lib)
 (require 'eaf-interleave)
 (require 'eaf-mindmap)
 (require 'epc)
@@ -219,7 +219,7 @@ been initialized."
 
 (defun epcs:server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
-  (lexical-let*
+  (let*
       ((connect-function connect-function)
        (name (format "EPC Server %s" (epc:uid)))
        (buf (epc:make-procbuf (format "*%s*" name)))
@@ -248,12 +248,12 @@ been initialized."
 (defvar eaf-server
   (epcs:server-start
    (lambda (mngr)
-     (lexical-let ((mngr mngr))
+     (let ((mngr mngr))
        (epc:define-method
         mngr 'eval-in-emacs
         (lambda (&rest args)
           ;; Decode argument with Base64 format automatically.
-          (apply (read (first args))
+          (apply (read (car args))
                  (mapcar
                   (lambda (arg)
                     (let ((arg (eaf--decode-string arg)))
