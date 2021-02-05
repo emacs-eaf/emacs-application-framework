@@ -7,19 +7,8 @@ const crypto = require("crypto");
 const os = require("os");
 const url = require("url");
 
-const nodeApps = ["js-video-player", "markdown-previewer", "terminal", "image-viewer"];
-
-function getAppPath(name) {
-    return path.join("app", name);
-}
-
 function installNodeDep() {
-    for (let i = 0; i < nodeApps.length; i++) {
-        execSync("npm install", {
-            cwd: getAppPath(nodeApps[i]),
-            stdio: [0, 1, 2],
-        });
-    }
+    execSync("npm install");
 }
 
 const pythonDeps = [
