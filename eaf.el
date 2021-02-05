@@ -1987,7 +1987,8 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
   (if (or (file-remote-p default-directory)
-          (not (file-exists-p default-directory)))
+          (not (file-exists-p default-directory))
+          (not (file-accessible-directory-p default-directory)))
       (getenv "HOME")
     default-directory))
 
