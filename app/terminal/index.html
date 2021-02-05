@@ -18,15 +18,6 @@
           padding: 0;
           margin: 0;
       }
-
-      .xterm-viewport {
-          display: none;
-      }
-
-      /* Hide scrollbar */
-      .xterm-viewport {
-          overflow: hidden !important;
-      }
     </style>
   </head>
   <body>
@@ -42,7 +33,8 @@
       const term = new Terminal({
           fontSize: "%4",
           cursorBlink: true,
-          theme: theme
+          theme: theme,
+          scrollback: 9999999
       });
       if ("%6") {
           term.setOption("fontFamily", "%6");
