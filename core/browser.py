@@ -767,7 +767,7 @@ class BrowserBuffer(Buffer):
     def drawForeground(self, painter, rect):
         if self.draw_progressbar:
             # Draw foreground over web page avoid white flash when eval dark_mode_js
-            if self.dark_mode_is_enabled():
+            if self.dark_mode_is_enabled() and not self.no_need_draw_background:
                 painter.setBrush(self.dark_mode_mask_color)
                 painter.drawRect(0, 0, rect.width(), rect.height())
 
