@@ -630,7 +630,7 @@ class BrowserBuffer(Buffer):
         self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
-        self.dark_mode_mask_color = QColor("#242525")
+        self.dark_mode_mask_color = QColor("#1E1E1E")
         self.is_dark_mode_enabled = self.dark_mode_is_enabled()
 
         # Reverse background and foreground color, to help cursor recognition.

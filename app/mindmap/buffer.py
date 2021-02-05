@@ -90,7 +90,7 @@ class AppBuffer(BrowserBuffer):
         color = "#FFFFFF"
         if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
            (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
-            color = "#242525"
+            color = "#1E1E1E"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 
         self.change_title(self.get_root_node_topic())
@@ -116,7 +116,7 @@ class AppBuffer(BrowserBuffer):
             color = "#FFFFFF"
             if self.emacs_var_dict["eaf-mindmap-dark-mode"] == "true" or \
                (self.emacs_var_dict["eaf-mindmap-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
-                color = "#242525"
+                color = "#1E1E1E"
             self.buffer_widget.eval_js("init_background('{}');".format(color))
 
             self.change_title(self.get_root_node_topic())

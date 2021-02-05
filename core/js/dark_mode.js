@@ -4,8 +4,8 @@
     Window.EAF_DARK_READER = DarkReader;
     DarkReader.enable({
         brightness: 100,
-        contrast: 90,
-        sepia: 10,
+        contrast: 100,
+        sepia: 0,
     });
 },{"./node_modules/darkreader/darkreader.js":2}],2:[function(require,module,exports){
 /**
