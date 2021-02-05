@@ -7,7 +7,7 @@ const crypto = require("crypto");
 const os = require("os");
 const url = require("url");
 
-const nodeApps = ["js-video-player", "markdown-previewer", "mermaid", "terminal"];
+const nodeApps = ["js-video-player", "markdown-previewer", "terminal", "image-viewer"];
 
 function getAppPath(name) {
     return path.join("app", name);
