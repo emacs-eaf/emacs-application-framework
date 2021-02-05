@@ -32,7 +32,6 @@ import os
 import base64
 from functools import partial
 import sqlite3
-import platform
 
 
 MOUSE_BACK_BUTTON = 8
@@ -264,20 +263,20 @@ class BrowserView(QWebEngineView):
     def open_url(self, url):
         ''' Configure current url.'''
         self.setUrl(QUrl(url))
-        if platform.system() == "Windows":
-            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+
+        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
 
     def open_url_new_buffer(self, url):
         ''' Open url in a new tab.'''
         self.open_url_in_new_tab.emit(url)
-        if platform.system() == "Windows":
-            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+
+        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
 
     def open_url_background_buffer(self, url):
         ''' Open url in background tab.'''
         self.open_url_in_background_tab.emit(url)
-        if platform.system() == "Windows":
-            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+
+        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
 
     @interactive(insert_or_do=True)
     def zoom_in(self):
