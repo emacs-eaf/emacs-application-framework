@@ -764,6 +764,23 @@ class BrowserBuffer(Buffer):
         else:
             self.buffer_widget.web_page.setBackgroundColor(self.light_mode_mask_color)
 
+    def drawForeground(self, painter, rect):
+        if self.draw_progressbar:
+            # Draw foreground over web page avoid white flash when eval dark_mode_js
+            if self.dark_mode_is_enabled():
+                painter.setBrush(self.dark_mode_mask_color)
+                painter.drawRect(0, 0, rect.width(), rect.height())
+
+            # Init progress bar brush.
+            painter.setBrush(self.progressbar_color)
+
+            if self.dark_mode_js_ready:
+                # Draw 100% when after eval dark_mode_js, avoid flash progressbar.
+                painter.drawRect(0, 0, rect.width(), self.progressbar_height)
+            else:
+                # Draw progress bar.
+                painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
+
     @QtCore.pyqtSlot()
     def start_progress(self):
         ''' Initialize the Progress Bar.'''
