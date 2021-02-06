@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Feb  4 18:28:46 2021 (-0500)
+;; Last-Updated: Fri Feb  5 19:58:24 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -259,7 +259,7 @@ been initialized."
                     (let ((arg (eaf--decode-string arg)))
                       (cond ((string-prefix-p "'" arg)
                              (read (substring arg 1)))
-                            (t arg)))) (rest args)))))))
+                            (t arg)))) (cdr args)))))))
    eaf-server-port))
 
 (when noninteractive
