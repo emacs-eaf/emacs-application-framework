@@ -688,9 +688,9 @@ class BrowserBuffer(Buffer):
         self.build_interactive_method(self.buffer_widget, "back", "history_backward", insert_or_do=True)
         self.build_interactive_method(self.buffer_widget, "forward", "history_forward", insert_or_do=True)
 
-        # Reset to default zoom when page init or page url changed.
+        # Reset to default zoom when page init or load finished.
         self.reset_default_zoom()
-        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+        self.buffer_widget.loadFinished.connect(lambda _: self.reset_default_zoom())
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
