@@ -65,9 +65,9 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
 
 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
 ```Emacs-lisp
-(quelpa '(eaf (:fetcher github
-               :repo  "manateelazycat/emacs-application-framework"
-               :files ("*"))))
+(quelpa '(eaf :fetcher github
+              :repo  "manateelazycat/emacs-application-framework"
+              :files ("*")))
 ```
 
 2. 通过`M-x eaf-install-dependencies`安装EAF依赖，
