@@ -24,7 +24,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QFileSystemWatcher, QTimer
 from retrying import retry
 from core.browser import BrowserBuffer
-from core.utils import get_free_port
+from core.utils import get_free_port, message_to_emacs
 from urllib.error import URLError
 from urllib.request import urlopen
 from urllib.parse import urlencode
@@ -78,4 +78,4 @@ class AppBuffer(BrowserBuffer):
             if resp == "ok":
                 self.buffer_widget.load(QUrl.fromLocalFile(self.preview_file))
             else:
-                self.message_to_emacs.emit("preview failed: {}".format(resp))
+                message_to_emacs("preview failed: {}".format(resp))

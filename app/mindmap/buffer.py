@@ -24,18 +24,13 @@ from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor, QMouseEvent
 from core.browser import BrowserBuffer
-from core.utils import touch, string_to_base64, interactive
+from core.utils import touch, string_to_base64, interactive, eval_in_emacs, message_to_emacs
 from html import escape, unescape
 import os
 import base64
 import time
 
 class AppBuffer(BrowserBuffer):
-
-    get_middle_node_id = QtCore.pyqtSignal(str)
-    get_brother_node_id = QtCore.pyqtSignal(str)
-    get_sub_node_id = QtCore.pyqtSignal(str)
-    export_org_json = QtCore.pyqtSignal(str, str)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
@@ -132,35 +127,35 @@ class AppBuffer(BrowserBuffer):
     @interactive(insert_or_do=True)
     def copy_node_topic(self):
         node_topic = self.buffer_widget.execute_js("get_node_topic();")
-        self.eval_in_emacs.emit('kill-new', [node_topic])
-        self.message_to_emacs.emit("Copy: {}".format(node_topic))
+        eval_in_emacs('kill-new', [node_topic])
+        message_to_emacs("Copy: {}".format(node_topic))
 
     @interactive(insert_or_do=True)
     def paste_node_topic(self):
         text = self.get_clipboard_text()
         if text.strip() != "":
             self.buffer_widget.eval_js("update_node_topic('{}');".format(text))
-            self.message_to_emacs.emit("Paste: {}".format(text))
+            message_to_emacs("Paste: {}".format(text))
 
             self.save_file(False)
         else:
-            self.message_to_emacs.emit("Nothing in clipboard, can't paste.")
+            message_to_emacs("Nothing in clipboard, can't paste.")
 
     @interactive(insert_or_do=True)
     def cut_node_tree(self):
         self.cut_node_id = self.buffer_widget.execute_js("get_selected_nodeid();")
         if self.cut_node_id:
             if self.cut_node_id != "root":
-                self.message_to_emacs.emit("Root node not allowed cut.")
+                message_to_emacs("Root node not allowed cut.")
             else:
-                self.message_to_emacs.emit("Cut node tree: {}".format(self.cut_node_id))
+                message_to_emacs("Cut node tree: {}".format(self.cut_node_id))
 
     @interactive(insert_or_do=True)
     def paste_node_tree(self):
         if self.cut_node_id:
             self.buffer_widget.eval_js("paste_node_tree('{}');".format(self.cut_node_id))
             self.save_file(False)
-            self.message_to_emacs.emit("Paste node tree: {}".format(self.cut_node_id))
+            message_to_emacs("Paste node tree: {}".format(self.cut_node_id))
 
     @interactive(insert_or_do=True)
     def change_node_background(self):
@@ -195,27 +190,27 @@ class AppBuffer(BrowserBuffer):
     def add_multiple_sub_nodes(self):
         node_id = self.buffer_widget.execute_js("_jm.get_selected_node();")
         if node_id != None:
-            self.get_sub_node_id.emit(self.buffer_id)
+            eval_in_emacs('eaf--add-multiple-sub-nodes', [self.buffer_id])
         else:
-            self.message_to_emacs.emit("No selected node.")
+            message_to_emacs("No selected node.")
 
     def add_multiple_brother_nodes(self):
         node_id = self.buffer_widget.execute_js("_jm.get_selected_node();")
         if node_id == None:
-            self.message_to_emacs.emit("No selected node.")
+            message_to_emacs("No selected node.")
         elif not self.buffer_widget.execute_js("_jm.get_selected_node().parent;"):
-            self.message_to_emacs.emit("No parent node for selected node.")
+            message_to_emacs("No parent node for selected node.")
         else:
-            self.get_brother_node_id.emit(self.buffer_id)
+            eval_in_emacs('eaf--add-multiple-brother-nodes', [self.buffer_id])
 
     def add_multiple_middle_nodes(self):
         node_id = self.buffer_widget.execute_js("_jm.get_selected_node();")
         if node_id == None:
-            self.message_to_emacs.emit("No selected node.")
+            message_to_emacs("No selected node.")
         elif not self.buffer_widget.execute_js("_jm.get_selected_node().parent;"):
-            self.message_to_emacs.emit("No parent node for selected node.")
+            message_to_emacs("No parent node for selected node.")
         else:
-            self.get_middle_node_id.emit(self.buffer_id)
+            eval_in_emacs('eaf--add-multiple-middle-nodes', [self.buffer_id])
 
     @interactive
     def add_texted_sub_node(self,text):
@@ -255,7 +250,7 @@ class AppBuffer(BrowserBuffer):
         with open(image_path, "wb") as f:
             f.write(base64.decodestring(download_data.split("data:image/png;base64,")[1].encode("utf-8")))
 
-        self.message_to_emacs.emit("Save image: " + image_path)
+        message_to_emacs("Save image: " + image_path)
 
     @interactive(insert_or_do=True)
     def save_file(self, notify=True):
@@ -264,14 +259,14 @@ class AppBuffer(BrowserBuffer):
             f.write(self.buffer_widget.execute_js("save_file();"))
 
         if notify:
-            self.message_to_emacs.emit("Save file: " + file_path)
+            message_to_emacs("Save file: " + file_path)
 
     @interactive(insert_or_do=True)
     def save_org_file(self):
         file_path = self.get_save_path("org")
         touch(file_path)
-        self.export_org_json.emit(self.buffer_widget.execute_js("save_file();"), file_path)
-        self.message_to_emacs.emit("Save org file: " + file_path)
+        eval_in_emacs('eaf--export-org-json', [self.buffer_widget.execute_js("save_file();"), file_path])
+        message_to_emacs("Save org file: " + file_path)
 
     @interactive(insert_or_do=True)
     def save_freemind_file(self, notify=True):
@@ -280,4 +275,4 @@ class AppBuffer(BrowserBuffer):
             f.write(self.buffer_widget.execute_js("save_freemind_file();"))
 
         if notify:
-            self.message_to_emacs.emit("Save freemind file: " + file_path)
+            message_to_emacs("Save freemind file: " + file_path)

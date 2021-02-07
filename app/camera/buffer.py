@@ -27,6 +27,7 @@ from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QFrame
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
+from core.utils import message_to_emacs
 from pathlib import Path
 import time
 import os
@@ -54,7 +55,7 @@ class AppBuffer(Buffer):
             location = "~/Downloads"
         result = self.buffer_widget.take_photo(location)
         if result:
-            self.message_to_emacs.emit("Captured Photo at " + location)
+            message_to_emacs("Captured Photo at " + location)
 
     def destroy_buffer(self):
         self.buffer_widget.stop_camera()

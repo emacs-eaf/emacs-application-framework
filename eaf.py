@@ -28,10 +28,9 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64
+from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, message_to_emacs
 from core.view import View
 from epc.server import ThreadingEPCServer
-from epc.client import EPCClient
 from sys import version_info
 import importlib
 import json
@@ -63,8 +62,8 @@ class EAF(object):
         # Update Emacs var dictionary.
         self.update_emacs_var_dict(var_dict_string)
 
-        # Build EPC client.
-        self.client = EPCClient(("localhost", int(emacs_server_port)), log_traceback=True)
+        # Init EPC client port.
+        init_epc_client(int(emacs_server_port))
 
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
@@ -201,57 +200,6 @@ class EAF(object):
         # view (QGraphicsView) will adjust visual area along with emacs window changed.
         app_buffer.buffer_widget.resize(emacs_width, emacs_height)
 
-        # Monitor buffer signals.
-        app_buffer.update_buffer_details.connect(self.update_buffer_details)
-        app_buffer.translate_text.connect(self.translate_text)
-        app_buffer.open_url_in_new_tab.connect(self.open_url_in_new_tab)
-        app_buffer.duplicate_page_in_new_tab.connect(self.duplicate_page_in_new_tab)
-        app_buffer.open_url_in_background_tab.connect(self.open_url_in_background_tab)
-        app_buffer.goto_left_tab.connect(self.goto_left_tab)
-        app_buffer.goto_right_tab.connect(self.goto_right_tab)
-
-        # Send message to emacs.
-        app_buffer.input_message.connect(self.input_message)
-
-        # Handle buffer close request.
-        app_buffer.request_close_buffer.connect(self.request_kill_buffer)
-
-        # Handle message to emacs.
-        app_buffer.message_to_emacs.connect(self.message_to_emacs)
-
-        # Handle set emacs var signal.
-        app_buffer.set_emacs_var.connect(self.set_emacs_var)
-
-        # Handle eval form in emacs.
-        app_buffer.eval_in_emacs.connect(self.eval_in_emacs)
-
-        # Handle get_focus_text signal.
-        if getattr(app_buffer, "get_focus_text", False) and getattr(app_buffer.get_focus_text, "connect", False):
-            app_buffer.get_focus_text.connect(self.atomic_edit)
-
-        if getattr(app_buffer.buffer_widget, "get_focus_text", False) and getattr(app_buffer.buffer_widget.get_focus_text, "connect", False):
-            app_buffer.buffer_widget.get_focus_text.connect(self.atomic_edit)
-
-        # Handle get_sub_node_id signal.
-        if getattr(app_buffer, "get_sub_node_id", False) and getattr(app_buffer.get_sub_node_id, "connect", False):
-            app_buffer.get_sub_node_id.connect(self.add_multiple_sub_nodes)
-
-        # Handle get_brother_node_id signal.
-        if getattr(app_buffer, "get_brother_node_id", False) and getattr(app_buffer.get_brother_node_id, "connect", False):
-            app_buffer.get_brother_node_id.connect(self.add_multiple_brother_nodes)
-
-        # Handle get_middle_node_id signal.
-        if getattr(app_buffer, "get_middle_node_id", False) and getattr(app_buffer.get_middle_node_id, "connect", False):
-            app_buffer.get_middle_node_id.connect(self.add_multiple_middle_nodes)
-
-        # Handle trigger_focus_event signal.
-        if getattr(app_buffer.buffer_widget, "trigger_focus_event", False) and getattr(app_buffer.buffer_widget.trigger_focus_event, "connect", False):
-            app_buffer.buffer_widget.trigger_focus_event.connect(self.focus_emacs_buffer)
-
-        # Handle export_org_json signal.
-        if getattr(app_buffer, "export_org_json", False) and getattr(app_buffer.export_org_json, "connect", False):
-            app_buffer.export_org_json.connect(self.export_org_json)
-
         # Handle dev tools signal.
         if getattr(app_buffer, "open_devtools_tab", False) and getattr(app_buffer.open_devtools_tab, "connect", False):
             app_buffer.open_devtools_tab.connect(self.open_devtools_tab)
@@ -316,8 +264,6 @@ class EAF(object):
                     (buffer_id, _, _, _, _, _) = view_info.split(":")
                     view = View(self.buffer_dict[buffer_id], view_info)
                     self.view_dict[view_info] = view
-
-                    view.trigger_focus_event.connect(self.focus_emacs_buffer)
 
         # Call some_view_show interface when buffer's view switch back.
         # Note, this must call after new view create, otherwise some buffer,
@@ -384,7 +330,7 @@ class EAF(object):
             except AttributeError:
                 import traceback
                 traceback.print_exc()
-                self.message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
+                message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
 
     def call_function(self, buffer_id, function_name):
         ''' Call function and return the result. '''
@@ -394,7 +340,7 @@ class EAF(object):
             except AttributeError:
                 import traceback
                 traceback.print_exc()
-                self.message_to_emacs("Cannot call function: " + function_name)
+                message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
     def call_function_with_args(self, buffer_id, function_name, *args, **kwargs):
@@ -405,7 +351,7 @@ class EAF(object):
             except AttributeError:
                 import traceback
                 traceback.print_exc()
-                self.message_to_emacs("Cannot call function: " + function_name)
+                message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
     def get_emacs_xid(self):
@@ -482,79 +428,20 @@ class EAF(object):
                 for line in str(new_text).split("\n"):
                     buffer.add_texted_middle_node(line)
 
-    def eval_in_emacs(self, method_name, args):
-        # Make argument encode with Base64, avoid string quote problem pass to elisp side.
-        args = list(map(string_to_base64, args))
-        args.insert(0, method_name)
-
-        # Call eval-in-emacs elisp function.
-        self.client.call("eval-in-emacs", args)
-
-    def add_multiple_sub_nodes(self, buffer_id):
-        self.eval_in_emacs('eaf--add-multiple-sub-nodes', [buffer_id])
-
-    def add_multiple_brother_nodes(self, buffer_id):
-        self.eval_in_emacs('eaf--add-multiple-brother-nodes', [buffer_id])
-
-    def add_multiple_middle_nodes(self, buffer_id):
-        self.eval_in_emacs('eaf--add-multiple-middle-nodes', [buffer_id])
-
-    def focus_emacs_buffer(self, message):
-        self.eval_in_emacs('eaf-focus-buffer', [message])
-
     def first_start(self, port, webengine_include_private_codec):
-        self.eval_in_emacs('eaf--first-start', [port, webengine_include_private_codec])
-
-    def update_buffer_details(self, buffer_id, title, url):
-        self.eval_in_emacs('eaf--update-buffer-details', [buffer_id, title, url])
-
-    def open_url_in_new_tab(self, url):
-        self.eval_in_emacs('eaf-open-browser', [url])
-
-    def duplicate_page_in_new_tab(self, url):
-        self.eval_in_emacs('eaf-browser--duplicate-page-in-new-tab', [url])
+        eval_in_emacs('eaf--first-start', [port, webengine_include_private_codec])
 
     def open_devtools_page(self):
-        self.eval_in_emacs('eaf-open-devtool-page', [])
-
-    def open_url_in_background_tab(self, url):
-        self.eval_in_emacs('eaf-open-browser-in-background', [url])
-
-    def goto_left_tab(self):
-        self.eval_in_emacs('eaf-goto-left-tab', [])
-
-    def goto_right_tab(self):
-        self.eval_in_emacs('eaf-goto-right-tab', [])
-
-    def translate_text(self, text):
-        self.eval_in_emacs('eaf-translate-text', [text])
-
-    def input_message(self, buffer_id, message, callback_tag, input_type, input_content):
-        self.eval_in_emacs('eaf--input-message', [buffer_id, message, callback_tag, input_type, input_content])
+        eval_in_emacs('eaf-open-devtool-page', [])
 
     def create_new_browser_buffer(self, buffer_id):
-        self.eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
-
-    def request_kill_buffer(self, buffer_id):
-        self.eval_in_emacs('eaf-request-kill-buffer', [buffer_id])
-
-    def message_to_emacs(self, message):
-        self.eval_in_emacs('eaf--show-message', [message])
-
-    def set_emacs_var(self, var_name, var_value, eaf_specific):
-        self.eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, eaf_specific])
-
-    def atomic_edit(self, buffer_id, focus_text):
-        self.eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
-
-    def export_org_json(self, org_json_content, org_file_path):
-        self.eval_in_emacs('eaf--export-org-json', [org_json_content, org_file_path])
+        eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
 
     def enter_fullscreen_request(self):
-        self.eval_in_emacs('eaf--enter-fullscreen-request', [])
+        eval_in_emacs('eaf--enter-fullscreen-request', [])
 
     def exit_fullscreen_request(self):
-        self.eval_in_emacs('eaf--exit_fullscreen_request', [])
+        eval_in_emacs('eaf--exit_fullscreen_request', [])
 
     def open_devtools_tab(self, web_page):
         ''' Open devtools tab'''

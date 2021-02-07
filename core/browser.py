@@ -26,7 +26,7 @@ from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -39,11 +39,7 @@ MOUSE_FORWARD_BUTTON = 16
 
 class BrowserView(QWebEngineView):
 
-    open_url_in_new_tab = QtCore.pyqtSignal(str)
-    duplicate_page_in_new_tab = QtCore.pyqtSignal(str)
-    open_url_in_background_tab = QtCore.pyqtSignal(str)
     translate_selected_text = QtCore.pyqtSignal(str)
-    trigger_focus_event = QtCore.pyqtSignal(str)
 
     def __init__(self, buffer_id, config_dir):
         super(QWebEngineView, self).__init__()
@@ -236,7 +232,7 @@ class BrowserView(QWebEngineView):
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseButtonDblClick, QEvent.Wheel]:
-            self.trigger_focus_event.emit(self.buffer_id)
+            focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
             if event.button() == MOUSE_FORWARD_BUTTON:
@@ -264,19 +260,19 @@ class BrowserView(QWebEngineView):
         ''' Configure current url.'''
         self.setUrl(QUrl(url))
 
-        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+        eval_in_emacs('eaf-activate-emacs-window', [])
 
     def open_url_new_buffer(self, url):
         ''' Open url in a new tab.'''
-        self.open_url_in_new_tab.emit(url)
+        open_url_in_new_tab(url)
 
-        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+        eval_in_emacs('eaf-activate-emacs-window', [])
 
     def open_url_background_buffer(self, url):
         ''' Open url in background tab.'''
-        self.open_url_in_background_tab.emit(url)
+        open_url_in_background_tab(url)
 
-        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+        eval_in_emacs('eaf-activate-emacs-window', [])
 
     @interactive(insert_or_do=True)
     def zoom_in(self):
@@ -478,7 +474,7 @@ Otherwise, scroll page up.
         link = self.get_marker_link(marker)
         if link:
             self.buffer.set_clipboard_text(link)
-            self.buffer.message_to_emacs.emit("Copied " + link)
+            message_to_emacs("Copied " + link)
 
     def get_code_markers(self):
         ''' Get the code markers.'''
@@ -500,7 +496,7 @@ Otherwise, scroll page up.
 
         self.eval_js("CaretBrowsing.setInitialCursor(true);")
         self.buffer.caret_browsing_mode = True
-        self.buffer.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["'t" if self.buffer.caret_browsing_mode else "'nil"])
+        eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.buffer.caret_browsing_mode else "'nil"])
         self.buffer.caret_toggle_mark()
         self.buffer.caret_next_word()
 
@@ -509,7 +505,7 @@ Otherwise, scroll page up.
         content = self.get_code_content(marker)
         if content != "":
             self.buffer.set_clipboard_text(content)
-            self.buffer.message_to_emacs.emit("Copied code block!")
+            message_to_emacs("Copied code block!")
 
     def get_focus_text(self):
         ''' Get the focus text.'''
@@ -599,7 +595,6 @@ class HistoryPage():
 class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
-    get_focus_text = QtCore.pyqtSignal(str, str)
     open_devtools_tab = QtCore.pyqtSignal(object)
 
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
@@ -698,11 +693,11 @@ class BrowserBuffer(Buffer):
             title_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(self.title))
             try:
                 os.rename(file_path, title_path)
-                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(title_path))
+                message_to_emacs("Successfully saved current webpage as '{}'.".format(title_path))
             except Exception:
-                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
+                message_to_emacs("Successfully saved current webpage as '{}'.".format(file_path))
         else:
-            self.message_to_emacs.emit("Failed to save current webpage as '{}'.".format(file_path))
+            message_to_emacs("Failed to save current webpage as '{}'.".format(file_path))
 
     def notify_monolith_message(self, download_path, file_path, title, retcode):
         ''' Notify the save as html message.'''
@@ -710,11 +705,11 @@ class BrowserBuffer(Buffer):
             title_path = os.path.join(os.path.expanduser(download_path), "{}.html".format(title))
             try:
                 os.rename(file_path, title_path)
-                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(title_path))
+                message_to_emacs("Successfully saved current webpage as '{}'.".format(title_path))
             except Exception:
-                self.message_to_emacs.emit("Successfully saved current webpage as '{}'.".format(file_path))
+                message_to_emacs("Successfully saved current webpage as '{}'.".format(file_path))
         else:
-            self.message_to_emacs.emit("Failed to save current page as single file.")
+            message_to_emacs("Failed to save current page as single file.")
 
     def record_url(self, url):
         ''' Record the url.'''
@@ -875,7 +870,7 @@ class BrowserBuffer(Buffer):
             with open(image_path, "wb") as f:
                 f.write(base64.decodestring(download_data.split(",")[1].encode("utf-8")))
 
-            self.message_to_emacs.emit("Save image: " + image_path)
+            message_to_emacs("Save image: " + image_path)
         else:
             self.try_start_aria2_daemon()
 
@@ -885,7 +880,7 @@ class BrowserBuffer(Buffer):
             jsonrpc = Jsonrpc('localhost', 6800)
             resp = jsonrpc.addUris(download_url)
 
-            self.message_to_emacs.emit("Downloading: " + download_url)
+            message_to_emacs("Downloading: " + download_url)
 
     def show_cursor(self):
         if self.try_hide_cursor_timer:
@@ -903,7 +898,7 @@ class BrowserBuffer(Buffer):
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
         pdf_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.pdf".format(parsed.netloc))
-        self.message_to_emacs.emit("Saving as pdf...")
+        message_to_emacs("Saving as pdf...")
         self.buffer_widget.web_page.printToPdf(pdf_path)
 
     @interactive(insert_or_do=True)
@@ -915,7 +910,7 @@ class BrowserBuffer(Buffer):
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
         file_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.html".format(parsed.netloc))
-        self.message_to_emacs.emit("Saving as single file...")
+        message_to_emacs("Saving as single file...")
         args = ["monolith", self.url, "-o", file_path]
         handler = partial(self.notify_monolith_message, self.emacs_var_dict["eaf-browser-download-path"], file_path, self.title)
         call_and_check_code(args, handler)
@@ -925,7 +920,7 @@ class BrowserBuffer(Buffer):
         ''' Request to save current webpage as single html file.'''
         import shutil
         if shutil.which("monolith") is None:
-            self.message_to_emacs.emit("Executable monolith not in PATH")
+            message_to_emacs("Executable monolith not in PATH")
         else:
             self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
 
@@ -1014,13 +1009,13 @@ class BrowserBuffer(Buffer):
         if self.caret_js_ready:
             if self.caret_browsing_mode:
                 self.buffer_widget.eval_js("CaretBrowsing.shutdown();")
-                self.message_to_emacs.emit("Caret browsing deactivated.")
+                message_to_emacs("Caret browsing deactivated.")
                 self.caret_browsing_mode = False
             else:
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
-                self.message_to_emacs.emit("Caret browsing activated.")
+                message_to_emacs("Caret browsing activated.")
                 self.caret_browsing_mode = True
-            self.eval_in_emacs.emit('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
+            eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
@@ -1104,10 +1099,10 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.eval_js("CaretBrowsing.toggleMark();")
             if self.buffer_widget.execute_js("CaretBrowsing.markEnabled"):
                 self.caret_browsing_mark_activated = True
-                self.message_to_emacs.emit("Caret Mark set")
+                message_to_emacs("Caret Mark set")
             else:
                 self.caret_browsing_mark_activated = False
-                self.message_to_emacs.emit("Caret Mark deactivated")
+                message_to_emacs("Caret Mark deactivated")
 
     @interactive
     def caret_clear_search(self):
@@ -1115,7 +1110,7 @@ class BrowserBuffer(Buffer):
         if self.caret_browsing_mode:
             if self.caret_browsing_mark_activated:
                 self.caret_browsing_search_text = ""
-                self.message_to_emacs.emit("Cleared caret search text.")
+                message_to_emacs("Cleared caret search text.")
 
     @interactive
     def caret_search_forward(self):
@@ -1142,10 +1137,10 @@ class BrowserBuffer(Buffer):
             self.caret_browsing_search_text = text
         if is_backward:
             if not self.buffer_widget.execute_js("window.find('"+text+"',false,true)"):
-                self.message_to_emacs.emit("Unable to find more, please try forward search.")
+                message_to_emacs("Unable to find more, please try forward search.")
         else:
             if not self.buffer_widget.execute_js("window.find('"+text+"')"):
-                self.message_to_emacs.emit("Unable to find more, please try backward search.")
+                message_to_emacs("Unable to find more, please try backward search.")
 
     @interactive
     def caret_translate_text(self):
@@ -1155,7 +1150,7 @@ class BrowserBuffer(Buffer):
     def copy_text(self):
         ''' Copy selected text.'''
         self.buffer_widget.copy_text()
-        self.message_to_emacs.emit("Copied selected text.")
+        message_to_emacs("Copied selected text.")
 
     @interactive
     def copy_code(self):
@@ -1216,9 +1211,9 @@ class BrowserBuffer(Buffer):
         ''' Edit the focus text.'''
         text = self.buffer_widget.get_focus_text()
         if text != None:
-            self.get_focus_text.emit(self.buffer_id, text)
+            atomic_edit(self.buffer_id, text)
         else:
-            self.message_to_emacs.emit("No active input element.")
+            message_to_emacs("No active input element.")
 
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
@@ -1233,23 +1228,23 @@ class BrowserBuffer(Buffer):
                 if len(close_urls) > 0:
                     # We need use rstrip remove \n char from url record.
                     prev_close_url = close_urls.pop().rstrip()
-                    self.open_url_in_new_tab.emit(prev_close_url)
+                    open_url_in_new_tab(prev_close_url)
                     open(self.history_close_file_path, "w").writelines(close_urls)
 
-                    self.message_to_emacs.emit("Recovery {0}".format(prev_close_url))
+                    message_to_emacs("Recovery {0}".format(prev_close_url))
                 else:
-                    self.message_to_emacs.emit("No page need recovery.")
+                    message_to_emacs("No page need recovery.")
         else:
-            self.message_to_emacs.emit("No page need recovery.")
+            message_to_emacs("No page need recovery.")
 
     @interactive(insert_or_do=True)
     def duplicate_page(self):
-        self.buffer_widget.duplicate_page_in_new_tab.emit(self.current_url)
+        duplicate_page_in_new_tab(self.current_url)
 
     @interactive(insert_or_do=True)
     def open_browser(self):
         ''' Open browser.'''
-        self.eval_in_emacs.emit('call-interactively', ['\'eaf-open-browser-with-history'])
+        eval_in_emacs('call-interactively', ['\'eaf-open-browser-with-history'])
 
     def select_all_or_input_text(self):
         ''' Select all or input text.'''
@@ -1299,14 +1294,14 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.history().forward()
 
         if platform.system() == "Windows":
-            self.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+            eval_in_emacs('eaf-activate-emacs-window', [])
 
     @interactive(insert_or_do=True)
     def history_backward(self):
         self.buffer_widget.history().back()
 
         if platform.system() == "Windows":
-            self.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+            eval_in_emacs('eaf-activate-emacs-window', [])
 
     @interactive(insert_or_do=True)
     def download_youtube_video(self):
@@ -1340,13 +1335,13 @@ class BrowserBuffer(Buffer):
                     file_type = "audio"
 
                 with open(os.devnull, "w") as null_file:
-                    popen_and_call(youtube_dl_args, lambda : self.message_to_emacs.emit("Downloaded: {0}".format(url)), null_file)
+                    popen_and_call(youtube_dl_args, lambda : message_to_emacs("Downloaded: {0}".format(url)), null_file)
 
-                self.message_to_emacs.emit("Downloading {0}: {1}".format(file_type, url))
+                message_to_emacs("Downloading {0}: {1}".format(file_type, url))
             else:
-                self.message_to_emacs.emit("Please install youtube-dl to use this feature.")
+                message_to_emacs("Please install youtube-dl to use this feature.")
         else:
-            self.message_to_emacs.emit("Only videos from YouTube can be downloaded for now.")
+            message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):

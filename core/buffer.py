@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QApplication
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message
 import abc
 import string
 
@@ -100,18 +100,6 @@ qt_text_dict = {
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
 
-    update_buffer_details = QtCore.pyqtSignal(str, str, str)
-    open_url_in_new_tab = QtCore.pyqtSignal(str)
-    duplicate_page_in_new_tab = QtCore.pyqtSignal(str)
-    open_url_in_background_tab = QtCore.pyqtSignal(str)
-    translate_text = QtCore.pyqtSignal(str)
-    input_message = QtCore.pyqtSignal(str, str, str, str, str)
-    request_close_buffer = QtCore.pyqtSignal(str)
-    message_to_emacs = QtCore.pyqtSignal(str)
-    set_emacs_var = QtCore.pyqtSignal(str, str, str)
-    eval_in_emacs = QtCore.pyqtSignal(str, list)
-    goto_left_tab = QtCore.pyqtSignal()
-    goto_right_tab = QtCore.pyqtSignal()
     aspect_ratio_change = QtCore.pyqtSignal()
     enter_fullscreen_request = QtCore.pyqtSignal()
     exit_fullscreen_request = QtCore.pyqtSignal()
@@ -154,7 +142,7 @@ class Buffer(QGraphicsScene):
         if (not hasattr(self, class_method_name)) or hasattr(getattr(self, class_method_name), "abstract"):
             self.__dict__.update({new_name: getattr(origin_class, class_method_name)})
         if msg_emacs is not None:
-            self.message_to_emacs.emit(msg_emacs)
+            message_to_emacs(msg_emacs)
         if insert_or_do:
             self.build_insert_or_do(new_name)
 
@@ -205,12 +193,12 @@ class Buffer(QGraphicsScene):
         ''' Change title.'''
         if new_title != "about:blank":
             self.title = new_title
-            self.update_buffer_details.emit(self.buffer_id, new_title, self.url)
+            eval_in_emacs('eaf--update-buffer-details', [self.buffer_id, new_title, self.url])
 
     @interactive(insert_or_do=True)
     def close_buffer(self):
         ''' Close buffer.'''
-        self.request_close_buffer.emit(self.buffer_id)
+        eval_in_emacs('eaf-request-kill-buffer', [self.buffer_id])
 
     @abstract
     def all_views_hide(self):
@@ -239,7 +227,7 @@ class Buffer(QGraphicsScene):
 
         INITIAL_CONTENT is the intial content of the user response, it is only useful when INPUT_TYPE is "string".
         '''
-        self.input_message.emit(self.buffer_id, message, callback_tag, input_type, initial_content)
+        input_message(self.buffer_id, message, callback_tag, input_type, initial_content)
 
     @abstract
     def handle_input_response(self, callback_tag, result_content):
@@ -354,17 +342,17 @@ class Buffer(QGraphicsScene):
     @interactive(insert_or_do=True)
     def save_as_bookmark(self):
         ''' Save as bookmark.'''
-        self.eval_in_emacs.emit('bookmark-set', [])
+        eval_in_emacs('bookmark-set', [])
 
     @interactive(insert_or_do=True)
     def select_left_tab(self):
         ''' Select left tab.'''
-        self.goto_left_tab.emit()
+        eval_in_emacs('eaf-goto-left-tab', [])
 
     @interactive(insert_or_do=True)
     def select_right_tab(self):
         ''' Select right tab.'''
-        self.goto_right_tab.emit()
+        eval_in_emacs('eaf-goto-right-tab', [])
 
     def focus_widget(self, event=None):
         '''Focus buffer widget.'''

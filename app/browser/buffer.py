@@ -22,7 +22,7 @@
 from PyQt5.QtCore import QUrl
 from core.browser import BrowserBuffer
 from urllib.parse import urlparse
-from core.utils import touch, interactive, is_port_in_use
+from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text
 import os
 import subprocess
 import sqlite3
@@ -73,11 +73,7 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.titleChanged.connect(self.record_history)
         self.buffer_widget.titleChanged.connect(self.change_title)
 
-        self.buffer_widget.translate_selected_text.connect(self.translate_text)
-
-        self.buffer_widget.open_url_in_new_tab.connect(self.open_url_in_new_tab)
-        self.buffer_widget.duplicate_page_in_new_tab.connect(self.duplicate_page_in_new_tab)
-        self.buffer_widget.open_url_in_background_tab.connect(self.open_url_in_background_tab)
+        self.buffer_widget.translate_selected_text.connect(translate_text)
 
         self.buffer_widget.urlChanged.connect(self.set_adblocker)
         self.buffer_widget.urlChanged.connect(self.caret_exit)
@@ -150,13 +146,13 @@ class AppBuffer(BrowserBuffer):
     def toggle_adblocker(self):
         ''' Change adblocker status.'''
         if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
-            self.set_emacs_var.emit("eaf-browser-enable-adblocker", "false", "true")
+            set_emacs_var("eaf-browser-enable-adblocker", "false", "true")
             self.buffer_widget.remove_css('adblocker',True)
-            self.message_to_emacs.emit("Successfully disabled adblocker!")
+            message_to_emacs("Successfully disabled adblocker!")
         elif self.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
-            self.set_emacs_var.emit("eaf-browser-enable-adblocker", "true", "true")
+            set_emacs_var("eaf-browser-enable-adblocker", "true", "true")
             self.load_adblocker()
-            self.message_to_emacs.emit("Successfully enabled adblocker!")
+            message_to_emacs("Successfully enabled adblocker!")
 
     def update_url(self, url):
         self.url = self.buffer_widget.url().toString()
@@ -170,10 +166,10 @@ class AppBuffer(BrowserBuffer):
         password, form_data = self.buffer_widget.execute_js("retrievePasswordFromPage();")
         if password != "":
             self.autofill.add_entry(urlparse(self.current_url).hostname, password, form_data)
-            self.message_to_emacs.emit("Successfully recorded this page's password!")
+            message_to_emacs("Successfully recorded this page's password!")
             return True
         else:
-            self.message_to_emacs.emit("There is no password present in this page!")
+            message_to_emacs("There is no password present in this page!")
             return False
 
     def pw_autofill_gen_id(self, id):
@@ -198,22 +194,22 @@ class AppBuffer(BrowserBuffer):
         if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
             self.add_password_entry()
         else:
-            self.message_to_emacs.emit("Password autofill is not enabled! Enable with `C-t` (default binding)")
+            message_to_emacs("Password autofill is not enabled! Enable with `C-t` (default binding)")
 
     @interactive
     def toggle_password_autofill(self):
         ''' Toggle Autofill status for password data'''
         if self.emacs_var_dict["eaf-browser-enable-autofill"] == "false":
-            self.set_emacs_var.emit("eaf-browser-enable-autofill", "true", "true")
+            set_emacs_var("eaf-browser-enable-autofill", "true", "true")
             self.pw_autofill_id = self.pw_autofill_gen_id(0)
-            self.message_to_emacs.emit("Successfully enabled autofill!")
+            message_to_emacs("Successfully enabled autofill!")
         else:
             self.pw_autofill_id = self.pw_autofill_gen_id(self.pw_autofill_id)
             if self.pw_autofill_id == 0:
-                self.set_emacs_var.emit("eaf-browser-enable-autofill", "false", "true")
-                self.message_to_emacs.emit("Successfully disabled password autofill!")
+                set_emacs_var("eaf-browser-enable-autofill", "false", "true")
+                message_to_emacs("Successfully disabled password autofill!")
             else:
-                self.message_to_emacs.emit("Successfully changed password autofill id!")
+                message_to_emacs("Successfully changed password autofill id!")
 
     def _record_history(self, new_title, new_url):
         # Throw traceback info if algorithm has bug and protection of historical record is not erased.
@@ -246,7 +242,7 @@ class AppBuffer(BrowserBuffer):
                 f.writelines(map(lambda history: history.title + "ᛝ" + history.url + "ᛡ" + str(history.hit) + "\n", self.history_list))
         except Exception:
             import traceback
-            self.message_to_emacs.emit("Error in record_history: " + str(traceback.print_exc()))
+            message_to_emacs("Error in record_history: " + str(traceback.print_exc()))
 
     def record_history(self, new_title):
         ''' Record browser history.'''
@@ -258,14 +254,14 @@ class AppBuffer(BrowserBuffer):
     @interactive(insert_or_do=True)
     def new_blank_page(self):
         ''' Open new blank page.'''
-        self.eval_in_emacs.emit('eaf-open', [self.emacs_var_dict["eaf-browser-blank-page-url"], "browser", "", 't'])
+        eval_in_emacs('eaf-open', [self.emacs_var_dict["eaf-browser-blank-page-url"], "browser", "", 't'])
 
     def _clear_history(self):
         if os.path.exists(self.history_log_file_path):
             os.remove(self.history_log_file_path)
-            self.message_to_emacs.emit("Cleared browsing history.")
+            message_to_emacs("Cleared browsing history.")
         else:
-            self.message_to_emacs.emit("There is no browsing history.")
+            message_to_emacs("There is no browsing history.")
 
     @interactive
     def clear_history(self):
@@ -275,10 +271,10 @@ class AppBuffer(BrowserBuffer):
     def _import_chrome_history(self):
         dbpath = os.path.expanduser(self.emacs_var_dict["eaf-browser-chrome-history-file"])
         if not os.path.exists(dbpath):
-            self.message_to_emacs.emit("The chrome history file: '{}' not exist, please check your setting.".format(dbpath))
+            message_to_emacs("The chrome history file: '{}' not exist, please check your setting.".format(dbpath))
             return
 
-        self.message_to_emacs.emit("Importing from {}...".format(dbpath))
+        message_to_emacs("Importing from {}...".format(dbpath))
 
         conn = sqlite3.connect(dbpath)
         # Keep lastest entry in dict by last_visit_time asc order.
@@ -289,17 +285,17 @@ class AppBuffer(BrowserBuffer):
             chrome_histories = conn.execute(sql).fetchall()
         except sqlite3.OperationalError as e:
             if e.args[0] == 'database is locked':
-                self.message_to_emacs.emit("The chrome history file is locked, please close your chrome app first.")
+                message_to_emacs("The chrome history file is locked, please close your chrome app first.")
             else:
-                self.message_to_emacs.emit("Failed to read chrome history entries: {}.".format(e))
+                message_to_emacs("Failed to read chrome history entries: {}.".format(e))
             return
 
         histories = dict(chrome_histories)  # Drop duplications with same title.
         total = len(histories)
         for i, (title, url) in enumerate(histories.items(), 1):
             self._record_history(title, url)
-            self.message_to_emacs.emit("Importing {} / {} ...".format(i, total))
-        self.message_to_emacs.emit("{} chrome history entries imported.".format(total))
+            message_to_emacs("Importing {} / {} ...".format(i, total))
+        message_to_emacs("{} chrome history entries imported.".format(total))
 
     @interactive
     def import_chrome_history(self):
@@ -309,7 +305,7 @@ class AppBuffer(BrowserBuffer):
     def _clear_cookies(self):
         ''' Clear cookies.'''
         self.buffer_widget.cookie_storage.clear_cookies(self.buffer_widget.cookie_store)
-        self.message_to_emacs.emit("Cleared all cookies.")
+        message_to_emacs("Cleared all cookies.")
 
     @interactive
     def clear_cookies(self):

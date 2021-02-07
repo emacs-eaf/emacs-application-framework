@@ -22,14 +22,15 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import QClipboard
 from PyQt5.QtWidgets import QApplication
+from epc.client import EPCClient
+from functools import wraps
+import base64
 import functools
 import os
 import socket
-import sys
-import base64
-import threading
 import subprocess
-from functools import wraps
+import sys
+import threading
 
 class PostGui(QtCore.QObject):
 
@@ -184,3 +185,51 @@ def abstract(f):
     def wrap(*args, **kwargs):
         return f(*args, **kwargs)
     return wrap
+
+epc_client = None
+
+def init_epc_client(emacs_server_port):
+    global epc_client
+
+    if epc_client == None:
+        epc_client = EPCClient(("localhost", emacs_server_port), log_traceback=True)
+
+def eval_in_emacs(method_name, args):
+    global epc_client
+
+    if epc_client == None:
+        print("Please call init_epc_client first before call eval_in_emacs.")
+    else:
+        # Make argument encode with Base64, avoid string quote problem pass to elisp side.
+        args = list(map(string_to_base64, args))
+        args.insert(0, method_name)
+
+        # Call eval-in-emacs elisp function.
+        epc_client.call("eval-in-emacs", args)
+
+def message_to_emacs(message):
+    eval_in_emacs('eaf--show-message', [message])
+
+def set_emacs_var(var_name, var_value, eaf_specific):
+    eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, eaf_specific])
+
+def open_url_in_background_tab(url):
+    eval_in_emacs('eaf-open-browser-in-background', [url])
+
+def duplicate_page_in_new_tab(url):
+    eval_in_emacs('eaf-browser--duplicate-page-in-new-tab', [url])
+
+def open_url_in_new_tab(url):
+    eval_in_emacs('eaf-open-browser', [url])
+
+def translate_text(text):
+    eval_in_emacs('eaf-translate-text', [text])
+
+def input_message(buffer_id, message, callback_tag, input_type, input_content):
+    eval_in_emacs('eaf--input-message', [buffer_id, message, callback_tag, input_type, input_content])
+
+def focus_emacs_buffer(message):
+    eval_in_emacs('eaf-focus-buffer', [message])
+
+def atomic_edit(buffer_id, focus_text):
+    eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])

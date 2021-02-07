@@ -26,7 +26,7 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QToolTip
 from core.buffer import Buffer
-from core.utils import touch, interactive
+from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit
 import fitz
 import time
 import random
@@ -41,7 +41,7 @@ class AppBuffer(Buffer):
 
         self.delete_temp_file = arguments == "temp_pdf_file"
         self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
-        self.buffer_widget.translate_double_click_word.connect(self.translate_text)
+        self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
 
@@ -143,11 +143,11 @@ class AppBuffer(Buffer):
     def copy_select(self):
         if self.buffer_widget.is_select_mode:
             content = self.buffer_widget.parse_select_char_list()
-            self.eval_in_emacs.emit('kill-new', [content])
-            self.message_to_emacs.emit(content)
+            eval_in_emacs('kill-new', [content])
+            message_to_emacs(content)
             self.buffer_widget.cleanup_select()
         else:
-            self.message_to_emacs.emit("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
+            message_to_emacs("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
     def page_total_number(self):
         return str(self.buffer_widget.page_total_number)
@@ -178,7 +178,7 @@ class AppBuffer(Buffer):
 
     def add_annot_text_or_edit_annot(self):
         if self.buffer_widget.is_select_mode:
-            self.buffer_widget.get_focus_text.emit(self.buffer_id, "")
+            atomic_edit(self.buffer_id, "")
         elif self.buffer_widget.is_hover_annot:
             self.buffer_widget.annot_handler("edit")
         else:
@@ -224,8 +224,8 @@ class AppBuffer(Buffer):
         return ""
 
 class PdfViewerWidget(QWidget):
+    
     translate_double_click_word = QtCore.pyqtSignal(str)
-    get_focus_text = QtCore.pyqtSignal(str, str)
 
     def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict):
         super(PdfViewerWidget, self).__init__()
@@ -376,7 +376,7 @@ class PdfViewerWidget(QWidget):
             except:
                 return
 
-            self.buffer.message_to_emacs.emit("Detected that %s has been changed. Refreshing buffer..." %path)
+            message_to_emacs("Detected that %s has been changed. Refreshing buffer..." %path)
             self.page_cache_pixmap_dict.clear()
             self.update()
             # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
@@ -402,9 +402,9 @@ class PdfViewerWidget(QWidget):
             self.zoom_reset("fit_to_height")
             self.jump_to_page(self.get_start_page_index() + 1)
 
-            self.buffer.message_to_emacs.emit("Presentation Mode.")
+            message_to_emacs("Presentation Mode.")
         else:
-            self.buffer.message_to_emacs.emit("Continuous Mode.")
+            message_to_emacs("Continuous Mode.")
 
     @property
     def scroll_step(self):
@@ -413,18 +413,18 @@ class PdfViewerWidget(QWidget):
     @interactive
     def save_current_pos(self):
         self.remember_offset = self.scroll_offset
-        self.buffer.message_to_emacs.emit("Saved current position.")
+        message_to_emacs("Saved current position.")
 
     @interactive
     def jump_to_saved_pos(self):
         if self.remember_offset is None:
-            self.buffer.message_to_emacs.emit("Cannot jump from this position.")
+            message_to_emacs("Cannot jump from this position.")
         else:
             current_scroll_offset = self.scroll_offset
             self.scroll_offset = self.remember_offset
             self.update()
             self.remember_offset = current_scroll_offset
-            self.buffer.message_to_emacs.emit("Jumped to saved position.")
+            message_to_emacs("Jumped to saved position.")
 
     def get_page_pixmap(self, index, scale, rotation=0):
         # Just return cache pixmap when found match index and scale in cache dict.
@@ -825,7 +825,7 @@ class PdfViewerWidget(QWidget):
             self.update_scale()
             self.update()
         else:
-            self.buffer.message_to_emacs.emit("Only support PDF!")
+            message_to_emacs("Only support PDF!")
 
     @interactive
     def rotate_counterclockwise(self):
@@ -838,7 +838,7 @@ class PdfViewerWidget(QWidget):
             self.update_scale()
             self.update()
         else:
-            self.buffer.message_to_emacs.emit("Only support PDF!")
+            message_to_emacs("Only support PDF!")
 
     def add_mark_link(self, index):
         annot_list = []
@@ -921,12 +921,12 @@ class PdfViewerWidget(QWidget):
             self.save_current_pos()
             self.jump_to_page(link["page"] + 1)
 
-            self.buffer.message_to_emacs.emit("Landed on Page " + str(link["page"] + 1))
+            message_to_emacs("Landed on Page " + str(link["page"] + 1))
         elif "uri" in link:
             self.cleanup_links()
 
-            self.buffer.open_url_in_new_tab.emit(link["uri"])
-            self.buffer.message_to_emacs.emit("Open " + link["uri"])
+            open_url_in_new_tab(link["uri"])
+            message_to_emacs("Open " + link["uri"])
 
     def cleanup_links(self):
         self.is_jump_link = False
@@ -966,26 +966,26 @@ class PdfViewerWidget(QWidget):
                     search_text_index += 1
         self.update()
         if(len(self.search_text_offset_list) == 0):
-            self.buffer.message_to_emacs.emit("No results found with \"" + text + "\".")
+            message_to_emacs("No results found with \"" + text + "\".")
             self.is_mark_search = False
         else:
             self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
-            self.buffer.message_to_emacs.emit("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
+            message_to_emacs("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
 
     def jump_next_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index + 1) % len(self.search_text_offset_list)
             self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
-            self.buffer.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
+            message_to_emacs("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def jump_last_match(self):
         if len(self.search_text_offset_list) > 0:
             self.search_text_index = (self.search_text_index - 1) % len(self.search_text_offset_list)
             self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
-            self.buffer.message_to_emacs.emit("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
+            message_to_emacs("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def cleanup_search(self):
-        self.buffer.message_to_emacs.emit("Unmarked all matched results.")
+        message_to_emacs("Unmarked all matched results.")
         if self.search_text_annot_cache_dict:
             for page_index in self.search_text_annot_cache_dict.keys():
                 page = self.document[page_index]
@@ -1194,11 +1194,11 @@ class PdfViewerWidget(QWidget):
             current_annot = None
             for annot in annots:
                 if fitz.Point(ex, ey) in annot.rect:
-                    # self.buffer.message_to_emacs.emit(annot.info["content"])
+                    # message_to_emacs(annot.info["content"])
                     is_hover_annot = True
                     current_annot = annot
                     opacity = 0.5
-                    self.buffer.message_to_emacs.emit("[d]Delete Annot [e]Edit Annot")
+                    message_to_emacs("[d]Delete Annot [e]Edit Annot")
                 else:
                     opacity = 1.0
                 if opacity != annot.opacity:
@@ -1237,7 +1237,7 @@ class PdfViewerWidget(QWidget):
                 self.save_annot()
             if action == "edit":
                 self.edited_page_annot = (page, annot)
-                self.get_focus_text.emit(self.buffer_id, annot.info["content"].replace("\r", "\n"))
+                atomic_edit(self.buffer_id, annot.info["content"].replace("\r", "\n"))
 
     def update_annot_text(self, annot_text):
         page, annot = self.edited_page_annot
@@ -1393,7 +1393,7 @@ class PdfViewerWidget(QWidget):
             ex, ey, page_index = self.get_cursor_absolute_position()
             self.free_text_annot_pos = (fitz.Point(ex, ey), page_index)
 
-            self.get_focus_text.emit(self.buffer_id, "")
+            atomic_edit(self.buffer_id, "")
 
     def handle_select_mode(self):
         self.is_select_mode = True

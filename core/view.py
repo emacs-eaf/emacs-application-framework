@@ -23,11 +23,10 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
+from core.utils import eval_in_emacs, focus_emacs_buffer
 import platform
 
 class View(QWidget):
-
-    trigger_focus_event = QtCore.pyqtSignal(str)
 
     def __init__(self, buffer, view_info):
         super(View, self).__init__()
@@ -110,12 +109,12 @@ class View(QWidget):
         # print(time.time(), event.type())
 
         if event.type() in [QEvent.ShortcutOverride]:
-            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+            eval_in_emacs('eaf-activate-emacs-window', [])
 
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
                             QEvent.MouseButtonDblClick, QEvent.Wheel]:
-            self.trigger_focus_event.emit(self.buffer_id)
+            focus_emacs_buffer(self.buffer_id)
             # Stop mouse event.
             return True
 
@@ -125,7 +124,7 @@ class View(QWidget):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
         if platform.system() == "Windows":
-            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+            eval_in_emacs('eaf-activate-emacs-window', [])
 
         # Make graphics view at left-top corner after show.
         self.graphics_view.verticalScrollBar().setValue(0)

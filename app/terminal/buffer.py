@@ -23,7 +23,7 @@ from PyQt5.QtCore import QUrl, QTimer, QPointF, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication
 from core.browser import BrowserBuffer
-from core.utils import PostGui, get_free_port, interactive, string_to_base64
+from core.utils import PostGui, get_free_port, interactive, string_to_base64, eval_in_emacs, message_to_emacs
 import os
 import subprocess
 import signal
@@ -112,7 +112,7 @@ class AppBuffer(BrowserBuffer):
         elif changed_executing_command == "" and self.executing_command != "" or not changed_directory == self.current_directory:
             self.change_title(changed_directory)
             if not changed_directory == self.current_directory:
-                self.eval_in_emacs.emit('eaf--change-default-directory', [changed_directory])
+                eval_in_emacs('eaf--change-default-directory', [changed_directory])
                 self.current_directory = changed_directory
             if self.executing_command != "":
                 self.executing_command = ""
@@ -128,10 +128,10 @@ class AppBuffer(BrowserBuffer):
     def copy_text(self):
         text = self.buffer_widget.execute_js("get_selection();")
         if text == "":
-            self.message_to_emacs.emit("Nothing selected")
+            message_to_emacs("Nothing selected")
         else:
             self.set_clipboard_text(text)
-            self.message_to_emacs.emit("Copy text")
+            message_to_emacs("Copy text")
 
     @interactive
     def yank_text(self):

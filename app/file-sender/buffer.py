@@ -24,7 +24,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from core.buffer import Buffer
-from core.utils import get_free_port, get_local_ip
+from core.utils import get_free_port, get_local_ip, message_to_emacs
 import http.server as BaseHTTPServer
 import os
 import qrcode
@@ -141,7 +141,7 @@ class FileTransferWidget(QWidget):
     def destroy_buffer(self):
         global local_file_path
 
-        self.message_to_emacs.emit("Stop file sender server: http://{0}:{1}/{2}".format(self.local_ip, self.port, local_file_path))
+        message_to_emacs("Stop file sender server: http://{0}:{1}/{2}".format(self.local_ip, self.port, local_file_path))
         self.sender_thread.stop()
 
         super().destroy_buffer()
