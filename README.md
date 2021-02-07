@@ -66,9 +66,9 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
 
 Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 ```Emacs-lisp
-(quelpa '(eaf (:fetcher github
-               :repo  "manateelazycat/emacs-application-framework"
-               :files ("*"))))
+(quelpa '(eaf :fetcher github
+              :repo  "manateelazycat/emacs-application-framework"
+              :files ("*")))
 ```
 
 2. Install EAF dependencies using `M-x eaf-install-dependencies`.
