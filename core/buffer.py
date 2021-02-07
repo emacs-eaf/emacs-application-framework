@@ -359,3 +359,6 @@ class Buffer(QGraphicsScene):
         if event is None:
             event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
         QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
+
+        # Activate emacs window when call focus widget, avoid first char is not 
+        eval_in_emacs('eaf-activate-emacs-window', [])
