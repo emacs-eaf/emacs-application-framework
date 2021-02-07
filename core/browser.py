@@ -25,14 +25,14 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract
 from core.buffer import Buffer
-from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
-import os
-import base64
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract
 from functools import partial
+from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
+import base64
+import os
+import platform
 import sqlite3
-
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
@@ -685,8 +685,6 @@ class BrowserBuffer(Buffer):
 
         self.build_all_methods(self.buffer_widget)
         self.build_all_methods(self)
-        self.build_interactive_method(self.buffer_widget, "back", "history_backward", insert_or_do=True)
-        self.build_interactive_method(self.buffer_widget, "forward", "history_forward", insert_or_do=True)
 
         # Reset to default zoom when page init or page url changed.
         self.reset_default_zoom()
@@ -1295,6 +1293,20 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.enable_dark_mode()
         else:
             self.disable_dark_mode()
+
+    @interactive(insert_or_do=True)
+    def history_forward(self):
+        self.buffer_widget.history().forward()
+
+        if platform.system() == "Windows":
+            self.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+
+    @interactive(insert_or_do=True)
+    def history_backward(self):
+        self.buffer_widget.history().back()
+
+        if platform.system() == "Windows":
+            self.eval_in_emacs.emit('eaf-activate-emacs-window', [])
 
     @interactive(insert_or_do=True)
     def download_youtube_video(self):
