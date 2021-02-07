@@ -354,7 +354,7 @@ class EAF(object):
                 message_to_emacs("Cannot call function: " + function_name)
                 return ""
 
-    def get_emacs_xid(self):
+    def get_emacs_wsl_window_id(self):
         if platform.system() == "Windows":
             return gw.getActiveWindow()._hWnd
 

@@ -1107,7 +1107,7 @@ A hashtable, key is url and value is title.")
 (defun eaf-get-emacs-xid (frame)
   "Get Emacs FRAME xid."
   (if (eaf--called-from-wsl-on-windows-p)
-      (eaf-call-sync "get_emacs_xid")
+      (eaf-call-sync "get_emacs_wsl_window_id")
     (frame-parameter frame 'window-id)))
 
 (defun eaf-serialization-var-list ()
