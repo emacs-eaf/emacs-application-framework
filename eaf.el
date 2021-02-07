@@ -1236,7 +1236,7 @@ We need calcuate render allocation to make sure no black border around render co
                    (window-header-line-height window)
                  (window-tab-line-height window))
                (if (and (require 'tab-line nil t)
-                        tab-line-mode) ; Support emacs 27 tab-line-mode
+                        tab-line-mode) ; Support Emacs 27 tab-line-mode
                    (window-tab-line-height window)
                  0)))
          (w (- (nth 2 window-edges) x))
@@ -2367,7 +2367,7 @@ The key is the annot id on PAGE."
     eaf-wm-name))
 
 (defun eaf--activate-emacs-win32-window()
-  "Use vbs activate emacs win32 window."
+  "Use vbs activate Emacs win32 window."
   (let* ((activate-window-file-path
           (concat eaf-config-location "activate-window.vbs"))
          (activate-window-file-exists (file-exists-p activate-window-file-path)))
@@ -2377,11 +2377,11 @@ The key is the annot id on PAGE."
     (shell-command-to-string (format "cscript %s %s" activate-window-file-path (emacs-pid)))))
 
 (defun eaf--activate-emacs-wsl-window()
-  "Activate emacs window running on Wsl."
+  "Activate Emacs window running on Wsl."
   (eaf-call-async "activate_emacs_wsl_window" (frame-parameter nil 'name)))
 
 (defun eaf--activate-emacs-linux-window ()
-  "Activate emacs window by `wmctrl'."
+  "Activate Emacs window by `wmctrl'."
   (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
       ;; When switch app focus in WM, such as, i3 or qtile.
       ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
@@ -2397,10 +2397,10 @@ The key is the annot id on PAGE."
     ;; So we use wmctrl activate on Emacs window after Alt + Tab operation.
     (if (executable-find "wmctrl")
         (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
-      (message "Please install wmctrl to active emacs window."))))
+      (message "Please install wmctrl to active Emacs window."))))
 
 (defun eaf-activate-emacs-window()
-  "Activate emacs window."
+  "Activate Emacs window."
   (cond
    ((eaf--called-from-wsl-on-windows-p)
     (eaf--activate-emacs-wsl-window))

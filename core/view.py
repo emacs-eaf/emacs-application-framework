@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-import os
+import platform
 
 class View(QWidget):
 
@@ -124,7 +124,8 @@ class View(QWidget):
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
-        self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
+        if platform.system() == "Windows":
+            self.buffer.eval_in_emacs.emit('eaf-activate-emacs-window', [])
 
         # Make graphics view at left-top corner after show.
         self.graphics_view.verticalScrollBar().setValue(0)
