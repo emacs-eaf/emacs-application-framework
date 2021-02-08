@@ -5,8 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "(cd app/js-video-player && npm install); (cd app/markdown-previewer && npm install); (cd app/terminal && npm install); (cd app/image-viewer && npm install)"
+    "postinstall": "node install-node-apps.js"
   },
+  "apps": [
+    "app/js-video-player",
+    "app/markdown-previewer",
+    "app/image-viewer",
+    "app/terminal"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/manateelazycat/emacs-application-framework.git"
