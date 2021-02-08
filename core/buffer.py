@@ -165,10 +165,12 @@ class Buffer(QGraphicsScene):
     def enable_fullscreen(self):
         ''' Enable full screen.'''
         self.is_fullscreen = True
+        eval_in_emacs('eaf--enter-fullscreen-request', [])
 
     def disable_fullscreen(self):
         ''' Disable full screen.'''
         self.is_fullscreen = False
+        eval_in_emacs('eaf--exit_fullscreen_request', [])
 
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''
@@ -360,5 +362,5 @@ class Buffer(QGraphicsScene):
             event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
         QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
 
-        # Activate emacs window when call focus widget, avoid first char is not 
+        # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])

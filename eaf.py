@@ -84,7 +84,7 @@ class EAF(object):
         self.server_thread.start()
 
         # Pass epc port and webengine codec information to Emacs when first start EAF.
-        self.first_start(self.server.server_address[1], self.webengine_include_private_codec())
+        eval_in_emacs('eaf--first-start', [self.server.server_address[1], self.webengine_include_private_codec()])
 
         # Set Network proxy.
         if proxy_host != "" and proxy_port != "":
@@ -169,7 +169,7 @@ class EAF(object):
         app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer", "")
 
         # Create emacs buffer with buffer id.
-        self.create_new_browser_buffer(buffer_id)
+        eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
 
         # Return new QWebEngineView for create new browser window.
         return app_buffer.buffer_widget
@@ -204,19 +204,9 @@ class EAF(object):
         if getattr(app_buffer, "open_devtools_tab", False) and getattr(app_buffer.open_devtools_tab, "connect", False):
             app_buffer.open_devtools_tab.connect(self.open_devtools_tab)
 
-        # Handle fulllscreen signal.
-        if getattr(app_buffer, "enter_fullscreen_request", False) and getattr(app_buffer.enter_fullscreen_request, "connect", False):
-            app_buffer.enter_fullscreen_request.connect(self.enter_fullscreen_request)
-
-        if getattr(app_buffer, "exit_fullscreen_request", False) and getattr(app_buffer.exit_fullscreen_request, "connect", False):
-            app_buffer.exit_fullscreen_request.connect(self.exit_fullscreen_request)
-
         # Add create new window when create_new_browser_window_callback is call.
-        if module_path == "app.browser.buffer" or module_path == "app.terminal.buffer":
+        if module_path in ["app.browser.buffer", "app.terminal.buffer", "app.rss-reader.buffer"]:
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
-
-        elif module_path == "app.rss-reader.buffer":
-            app_buffer.buffer_widget.browser.create_new_browser_window_callback = self.create_new_browser_window
 
         if module_path == "app.browser.buffer":
             app_buffer.proxy_string = proxy_string
@@ -428,25 +418,10 @@ class EAF(object):
                 for line in str(new_text).split("\n"):
                     buffer.add_texted_middle_node(line)
 
-    def first_start(self, port, webengine_include_private_codec):
-        eval_in_emacs('eaf--first-start', [port, webengine_include_private_codec])
-
-    def open_devtools_page(self):
-        eval_in_emacs('eaf-open-devtool-page', [])
-
-    def create_new_browser_buffer(self, buffer_id):
-        eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
-
-    def enter_fullscreen_request(self):
-        eval_in_emacs('eaf--enter-fullscreen-request', [])
-
-    def exit_fullscreen_request(self):
-        eval_in_emacs('eaf--exit_fullscreen_request', [])
-
     def open_devtools_tab(self, web_page):
         ''' Open devtools tab'''
         self.devtools_page = web_page
-        self.open_devtools_page()
+        eval_in_emacs('eaf-open-devtool-page', [])
 
     def save_buffer_session(self, buf):
         ''' Save buffer session to file.'''
