@@ -372,6 +372,9 @@ Otherwise, scroll page up.
         ''' Refresh the page.'''
         self.reload()
 
+        if platform.system() == "Windows":
+            eval_in_emacs('eaf-activate-emacs-window', [])
+
     @interactive(insert_or_do=True)
     def copy_text(self):
         ''' Copy selected text.'''
