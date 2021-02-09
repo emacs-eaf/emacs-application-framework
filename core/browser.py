@@ -610,9 +610,8 @@ class BrowserBuffer(Buffer):
 
         self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(config_dir), "browser", "zoom_data.db"))
 
-        # Set User Agent with Firefox's one to make EAF browser can login in Google account.
-        self.pc_user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"
-        self.phone_user_agent = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1"
+        self.pc_user_agent = self.emacs_var_dict["eaf-browser-pc-user-agent"]
+        self.phone_user_agent = self.emacs_var_dict["eaf-browser-phone-user-agent"]
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
