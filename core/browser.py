@@ -21,10 +21,10 @@
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QVariant, QTimer, QFile
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QCursor, QScreen
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication, QWidget, qApp
 from core.buffer import Buffer
 from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit
 from functools import partial
@@ -215,19 +215,10 @@ class BrowserView(QWebEngineView):
 
     def eventFilter(self, obj, event):
         ''' Handle event.'''
-        # Control mouse cursor.
+        # Debug event.
         # if event.type() != 1:
         #     import time
         #     print(time.time(), event.type(), self.rect())
-
-        if event.type() in [QEvent.MouseMove]:
-            # Hide cursor in fullscreen.
-            if self.buffer.is_fullscreen:
-                self.buffer.show_cursor()
-                self.buffer.try_hide_cursor()
-            # Show cursor if not in fullscreen.
-            else:
-                self.buffer.show_cursor()
 
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
@@ -336,11 +327,10 @@ class BrowserView(QWebEngineView):
 
     @interactive
     def insert_or_scroll_up_page(self):
-        '''
-If input is focus send space key to insert space.
-If browser is fullscreen, send space key to play/pause video.
+        '''If input is focus send space key to insert space.
+        If browser is fullscreen, send space key to play/pause video.
 
-Otherwise, scroll page up.
+        Otherwise, scroll page up.
         '''
         if self.buffer.is_focus() or self.buffer.is_fullscreen:
             self.buffer.fake_key_event(self.buffer.current_event_string)
@@ -636,7 +626,6 @@ class BrowserBuffer(Buffer):
         self.current_url = ""
         self.request_url = ""
         self.no_need_draw_background = False
-        self.try_hide_cursor_timer = None
 
         self.init_background_color()
 
@@ -854,13 +843,21 @@ class BrowserBuffer(Buffer):
         if request.toggleOn():
             self.enter_fullscreen_request.emit()
 
-            self.try_hide_cursor()
+            # Move cursor to bottom right corner when fullscreen.
+            self.move_cursor_to_corner()
         else:
             self.exit_fullscreen_request.emit()
 
-            self.show_cursor()
-
         request.accept()
+
+    def move_cursor_to_corner(self):
+        '''
+        Move cursor to bottom right corner of screen.
+        Usually call once when fullscreen state,
+        instead hide cursor, because hide cursor may cause bug that cursor is not show after exit fullscreen.
+        '''
+        screen = qApp.primaryScreen()
+        QCursor().setPos(screen, screen.size().width(), screen.size().height())
 
     def handle_download_request(self, download_item):
         ''' Handle download request.'''
@@ -883,18 +880,6 @@ class BrowserBuffer(Buffer):
             resp = jsonrpc.addUris(download_url)
 
             message_to_emacs("Downloading: " + download_url)
-
-    def show_cursor(self):
-        if self.try_hide_cursor_timer:
-            self.try_hide_cursor_timer.stop()
-
-        QtWidgets.qApp.restoreOverrideCursor()
-
-    def hide_cursor(self):
-        QtWidgets.qApp.setOverrideCursor(Qt.BlankCursor)
-
-    def try_hide_cursor(self):
-        self.try_hide_cursor_timer = QTimer.singleShot(5000, self.hide_cursor)
 
     def _save_as_pdf(self):
         parsed = urlparse(self.url)
