@@ -43,7 +43,7 @@
     (require 'org-docview)
   (require 'ol))
 
-(defcustom eaf-org-override-pdf-links nil
+(defcustom eaf-org-override-pdf-links-open nil
   "When enabled, this will override existing PDF file links's open function.
 
 So that every existing PDF org-link that's supposed to be opened
@@ -51,6 +51,12 @@ So that every existing PDF org-link that's supposed to be opened
 
 Enable this when the you want to ensure the PDF link in the org file can be
  opened without EAF enabled."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link)
+
+(defcustom eaf-org-override-pdf-links-store nil
+  "When enabled, PDF link types will store as eaf:pdfviewer: link type."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link)
@@ -82,7 +88,7 @@ Enable this when the you want to ensure the PDF link in the org file can be
   "A list of all PDF file link types which will be override by EAF open function.")
 
 (dolist (type eaf-org-override-pdf-links-list)
-  (when (and eaf-org-override-pdf-links
+  (when (and eaf-org-override-pdf-links-open
              (org-link-get-parameter type :follow)) ; if `nil' means `ol-<link>' not loaded.
       (org-link-set-parameters         ; store original `:follow' function
        type :orig-follow (org-link-get-parameter type :follow))
@@ -103,24 +109,29 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
                           (eaf-call-sync "call_function" eaf--buffer-id "current_page"))
                          ('js-video-player
                           (eaf-call-sync "call_function" eaf--buffer-id "save_session_data"))))
-           (link (if extra-args
-                     (concat "eaf:" app "::" url "::" extra-args)
-                   (concat "eaf:" app "::" url)))
+           (link (if eaf-org-override-pdf-links-store
+                     (if extra-args
+                         (concat "eaf:" app "::" url "::" extra-args)
+                       (concat "eaf:" app "::" url))
+                   (if extra-args
+                       (concat url "::" extra-args)
+                     (concat url))))
            (description (buffer-name)))
-      (cl-case app
-        ('pdf-viewer
-         (if (and eaf-org-override-pdf-links
-                  (or (equal (org-link-get-parameter "docview" :follow) 'eaf-org-open)
-                      (equal (org-link-get-parameter "pdfview" :follow) 'eaf-org-open)
-                      (equal (org-link-get-parameter "pdftools" :follow) 'eaf-org-open)))
-             (progn (require 'ol-docview) ; use `docview' for most wide compatible support.
-                    (org-link-store-props
-                     :type "docview"
-                     :link (concat "docview:" url)
-                     :description description))
+      (pcase app
+        ("pdf-viewer"
+         (when eaf-org-override-pdf-links-open
+           (or (equal (org-link-get-parameter "docview" :follow) 'eaf-org-open)
+               (equal (org-link-get-parameter "pdfview" :follow) 'eaf-org-open)
+               (equal (org-link-get-parameter "pdftools" :follow) 'eaf-org-open)))
+         (if eaf-org-override-pdf-links-store
+             (org-link-store-props
+              :type "eaf"
+              :link link
+              :description description)
+           (require 'ol-docview) ; use `docview' for most wide compatible support.
            (org-link-store-props
-            :type "eaf"
-            :link link
+            :type "docview"
+            :link (concat "docview:" link)
             :description description)))
         (t (org-link-store-props
             :type "eaf"
@@ -141,13 +152,13 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
           ('pdf-viewer
            (eaf-open url "pdf-viewer")
            (eaf-call-sync "call_function_with_args" eaf--buffer-id
-                     "jump_to_page_with_num" (format "%s" extra-args)))
+                          "jump_to_page_with_num" (format "%s" extra-args)))
           ('mindmap
            (eaf-open url "mindmap"))
           ('js-video-player
            (eaf-open url "js-video-player")
            (eaf-call-sync "call_function_with_args" eaf--buffer-id
-                     "restore_session_data" (format "%s" extra-args)))
+                          "restore_session_data" (format "%s" extra-args)))
           (t (eaf-open url))))
     ;; for other link types spec: "<link-type>:URL:(parameters)"
     ;; NOTE: currently only support override PDF link types.
@@ -156,13 +167,13 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
            (extra-args (cadr list)))
       (cl-case (intern (file-name-extension url))
         ('pdf
-         (if eaf-org-override-pdf-links
+         (if eaf-org-override-pdf-links-open
              (progn (eaf-open (expand-file-name url) "pdf-viewer")
                     (when extra-args
                       (eaf-call-sync "call_function_with_args" eaf--buffer-id
-                                "jump_to_page_with_num" (format "%s" extra-args))))
+                                     "jump_to_page_with_num" (format "%s" extra-args))))
            (dolist (type eaf-org-override-pdf-links-list)
-             ;; restore to original :follow function, since eaf-org-override-pdf-links is nil
+             ;; restore to original :follow function, since eaf-org-override-pdf-links-open is nil
              (org-link-set-parameters
               type :follow (org-link-get-parameter type :orig-follow))
              ;; re-open link with original :follow function
