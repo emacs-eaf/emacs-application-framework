@@ -1205,6 +1205,8 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
   (interactive)
+  (when (get-buffer "DevTools - file:///")
+    (kill-buffer "DevTools - file:///"))
   (setq eaf--active-buffers nil)
   (eaf-for-each-eaf-buffer
    (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers))
