@@ -9,7 +9,7 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "node-pty": "^0.9.0",
+    "node-pty-prebuilt-multiarch": "^0.10.0",
     "ws": "^7.2.3",
     "xterm": "^4.4.0",
     "xterm-addon-attach": "^0.5.0",

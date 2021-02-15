@@ -17,6 +17,7 @@ const pythonDeps = [
     "pyqtwebengine",
     "pymupdf",
     "qrcode",
+    "qtconsole",
     "markdown",
     "epc",
     "retrying",
