@@ -1928,9 +1928,6 @@ choose a search engine defined in `eaf-browser-search-engines'"
     (eaf-open search-url "browser")))
 
 ;;;###autoload
-(define-obsolete-function-alias 'eaf-open-url #'eaf-open-browser "20191224")
-
-;;;###autoload
 (defun eaf-open-demo ()
   "Open EAF demo screen to verify that EAF is working properly."
   (interactive)
@@ -2119,8 +2116,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (when (string-empty-p input-string)
       (setq input-string current-symbol))
     (eaf-open input-string "airshare")))
-
-(define-obsolete-function-alias 'eaf-file-transfer-airshare #'eaf-open-airshare "20191224")
 
 (defun eaf-file-sender-qrcode (file)
   "Open EAF File Sender application.
