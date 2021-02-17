@@ -1,19 +1,19 @@
-this.Pty = require("node-pty");
+this.Pty = require('node-pty-prebuilt-multiarch');
 this.Websocket = require("ws").Server;
 
 this.onclosed = () => {
-    process.exit()
+    process.exit();
 };
 this.onopened = () => {};
 this.onresize = () => {};
 this.ondisconnected = () => {};
 
 
-var port = process.argv.slice(2)[0]
-var dir = process.argv.slice(3)[0]
-var commands = process.argv.slice(4)[0].split(" ")
-var command = commands[0]
-var args = commands.slice(1)
+var port = process.argv.slice(2)[0];
+var dir = process.argv.slice(3)[0];
+var commands = process.argv.slice(4)[0].split(" ");
+var command = commands[0];
+var args = commands.slice(1);
 
 this.tty = this.Pty.spawn(command, args, {
     name: 'xterm-color',

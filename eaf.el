@@ -1947,15 +1947,24 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-ipython ()
   "Open ipython in terminal."
   (interactive)
-  (if (executable-find "ipython")
-      (eaf-terminal-run-command-in-dir "ipython" (eaf--non-remote-default-directory))
+  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
+                           "ipython.exe"
+                         "ipython"))
+      (eaf-terminal-run-command-in-dir (if (eaf--called-from-wsl-on-windows-p)
+                                           "ipython.exe"
+                                         "ipython")
+                                       (eaf--non-remote-default-directory))
     (message "[EAF/terminal] Please install ipython first.")))
 
 (defun eaf-open-jupyter ()
   "Open jupyter."
   (interactive)
-  (if (executable-find "jupyter-qtconsole")
-      (let* ((data (json-read-from-string (shell-command-to-string "jupyter kernelspec list --json")))
+  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
+                           "jupyter-qtconsole.exe"
+                         "jupyter-qtconsole"))
+      (let* ((data (json-read-from-string (shell-command-to-string (if (eaf--called-from-wsl-on-windows-p)
+                                                                       "jupyter.exe kernelspec list --json"
+                                                                     "jupyter kernelspec list --json"))))
              (kernel (completing-read "Jupyter Kernels: " (mapcar #'car (alist-get 'kernelspecs data))))
              (args (make-hash-table :test 'equal)))
         (puthash "kernel" kernel args)
@@ -1980,7 +1989,9 @@ To override and open a new terminal regardless, call interactively with prefix a
 If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
   (let ((args (make-hash-table :test 'equal)))
     (puthash "command" command args)
-    (puthash "directory" (expand-file-name dir) args)
+    (puthash "directory" (if (eaf--called-from-wsl-on-windows-p)
+                             (eaf--translate-wsl-url-to-windows (expand-file-name dir)))
+             args)
     (eaf-open dir "terminal" (json-encode-hash-table args) always-new)))
 
 (defun eaf--non-remote-default-directory ()
@@ -1991,7 +2002,9 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
     default-directory))
 
 (defun eaf--generate-terminal-command ()
-  (getenv "SHELL"))
+  (if (eaf--called-from-wsl-on-windows-p)
+      "powershell.exe"
+    (getenv "SHELL")))
 
 (defun eaf--get-app-for-extension (extension-name)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
