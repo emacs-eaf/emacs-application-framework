@@ -1944,16 +1944,18 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-camera" "camera"))
 
+(defun eaf-ipython-command ()
+  (if (eaf--called-from-wsl-on-windows-p)
+      "ipython.exe"
+    "ipython"))
+
 (defun eaf-open-ipython ()
   "Open ipython in terminal."
   (interactive)
-  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
-                           "ipython.exe"
-                         "ipython"))
-      (eaf-terminal-run-command-in-dir (if (eaf--called-from-wsl-on-windows-p)
-                                           "ipython.exe"
-                                         "ipython")
-                                       (eaf--non-remote-default-directory))
+  (if (executable-find (eaf-ipython-command))
+      (eaf-terminal-run-command-in-dir
+       (eaf-ipython-command)
+       (eaf--non-remote-default-directory))
     (message "[EAF/terminal] Please install ipython first.")))
 
 (defun eaf-open-jupyter ()
@@ -1987,12 +1989,13 @@ To override and open a new terminal regardless, call interactively with prefix a
   "Run COMMAND in terminal in directory DIR.
 
 If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
-  (let ((args (make-hash-table :test 'equal)))
+  (let* ((args (make-hash-table :test 'equal))
+         (expand-dir (expand-file-name dir)))
     (puthash "command" command args)
     (puthash "directory"
              (if (eaf--called-from-wsl-on-windows-p)
-                 (eaf--translate-wsl-url-to-windows (expand-file-name dir))
-               (expand-file-name dir))
+                 (eaf--translate-wsl-url-to-windows expand-dir)
+               expand-dir)
              args)
     (eaf-open dir "terminal" (json-encode-hash-table args) always-new)))
 
