@@ -1886,12 +1886,12 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
          (history-url (eaf-is-valid-web-url (when (string-match "⇰\s\\(.+\\)$" history)
-                                          (match-string 1 history)))))
+                                              (match-string 1 history)))))
     (cond (history-url (eaf-open-browser history-url))
           ((eaf-is-valid-web-url history) (eaf-open-browser history))
           (t (eaf-search-it history)))))
@@ -1989,8 +1989,10 @@ To override and open a new terminal regardless, call interactively with prefix a
 If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
   (let ((args (make-hash-table :test 'equal)))
     (puthash "command" command args)
-    (puthash "directory" (if (eaf--called-from-wsl-on-windows-p)
-                             (eaf--translate-wsl-url-to-windows (expand-file-name dir)))
+    (puthash "directory"
+             (if (eaf--called-from-wsl-on-windows-p)
+                 (eaf--translate-wsl-url-to-windows (expand-file-name dir))
+               (expand-file-name dir))
              args)
     (eaf-open dir "terminal" (json-encode-hash-table args) always-new)))
 
