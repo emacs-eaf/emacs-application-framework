@@ -5,7 +5,17 @@ English | [简体中文](./README.zh-CN.md)
 </p>
 
 # Emacs Application Framework
-Emacs Application Framework (EAF) is a GUI application framework that revolutionizes Emacs graphical capabilities to ultimately *Live in Emacs*.
+Emacs Application Framework (EAF) is a GUI application framework for Emacs that revolutionizes its multimedia and graphical capabilities to ultimately *Live in Emacs*.
+
+## Vision
+Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world had been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
+
+If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
+
+However, one of the greatest disadvantages of Emacs is how *old* it is. Emacs lacks performance as it doesn't have proper multithreading and modern graphical support that you can expect on many GUI applications today (such as IDEA or VSCode), resulting in the extensibility of Emacs to be limited when it shouldn't have to be.
+
+The vision of the EAF project is that, while retaining the culture and the ecosystem of Emacs, use Python, Qt5, and JavaScript to extend Emacs' graphical capabilities, with the hope to ultimately *Live in Emacs*.
+
 
 ## EAF Application Overview
 EAF is an extensible framework, one can develop any Qt5 application and integrate it into Emacs.
@@ -186,7 +196,7 @@ There also are some helpful tips to make EAF work with Docker, Helm, etc.
 EAF implements three major functionalities:
 1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
 2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via Python EPC.
-3. Create a window compositer to make a PyQt program window adapt Emacs's Window/Buffer design.
+3. Create a window compositer to make a PyQt program window adapt Emacs' Window/Buffer design.
 
 Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)!
 
