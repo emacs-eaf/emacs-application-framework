@@ -232,6 +232,8 @@ class AppBuffer(BrowserBuffer):
 
     def handle_download_request(self, download_item):
         download_data = download_item.url().toString()
+        if not download_data.startswith("data:image/"):
+            return
 
         # Note:
         # Set some delay to make get_root_node_topic works expect.
