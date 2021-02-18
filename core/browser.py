@@ -372,15 +372,17 @@ class BrowserView(QWebEngineView):
         if self.buffer.caret_browsing_mode and self.buffer.caret_browsing_mark_activated:
             self.buffer.caret_exit()
 
-    @interactive(msg_emacs="Yank selected text.")
+    @interactive()
     def yank_text(self):
         ''' Paste selected text.'''
         self.triggerPageAction(self.web_page.Paste)
+        self.message_to_emacs("Yank selected text.")
 
-    @interactive(msg_emacs="Kill selected text.")
+    @interactive()
     def kill_text(self):
         ''' Cut selected text.'''
         self.triggerPageAction(self.web_page.Cut)
+        self.message_to_emacs("Kill selected text.")
 
     @interactive
     def undo_action(self):

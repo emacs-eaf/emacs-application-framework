@@ -134,15 +134,17 @@ class Buffer(QGraphicsScene):
         for func_name in method_list:
             func_attr = getattr(origin_class, func_name)
             if hasattr(func_attr, "interactive"):
-                self.build_interactive_method(origin_class, func_name, getattr(func_attr, "new_name"), getattr(func_attr, "msg_emacs"), getattr(func_attr, "insert_or_do"))
+                self.build_interactive_method(
+                    origin_class,
+                    func_name,
+                    getattr(func_attr, "new_name"),
+                    getattr(func_attr, "insert_or_do"))
 
-    def build_interactive_method(self, origin_class, class_method_name, new_method_name=None, msg_emacs=None, insert_or_do=False):
+    def build_interactive_method(self, origin_class, class_method_name, new_method_name=None, insert_or_do=False):
         ''' Build interactive methods.'''
         new_name = class_method_name if new_method_name is None else new_method_name
         if (not hasattr(self, class_method_name)) or hasattr(getattr(self, class_method_name), "abstract"):
             self.__dict__.update({new_name: getattr(origin_class, class_method_name)})
-        if msg_emacs is not None:
-            message_to_emacs(msg_emacs)
         if insert_or_do:
             self.build_insert_or_do(new_name)
 
