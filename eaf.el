@@ -1193,8 +1193,10 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   "Kill EAF background python process."
   (interactive)
   (if (epc:live-p eaf-epc-process)
-      ;; Delete EAF server process.
       (progn
+        ;; Cleanup before exit EAF server process.
+        (eaf-call-async "cleanup")
+        ;; Delete EAF server process.
         (epc:stop-epc eaf-epc-process)
         ;; Kill *eaf* buffer.
         (when (get-buffer eaf-name)

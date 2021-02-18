@@ -194,6 +194,12 @@ def init_epc_client(emacs_server_port):
     if epc_client == None:
         epc_client = EPCClient(("localhost", emacs_server_port), log_traceback=True)
 
+def close_epc_client():
+    global epc_client
+
+    if epc_client != None:
+        epc_client.close()
+
 def eval_in_emacs(method_name, args):
     global epc_client
 

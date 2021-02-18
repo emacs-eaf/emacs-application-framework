@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, message_to_emacs
+from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -482,6 +482,10 @@ class EAF(object):
                     print("Session is not restored, as no data present in session file.")
         else:
             print("Session is not restored, as %s cannot be found." % (self.session_file))
+
+    def cleanup(self):
+        '''Do some cleanup before exit python process.'''
+        close_epc_client()
 
 if __name__ == "__main__":
     import sys
