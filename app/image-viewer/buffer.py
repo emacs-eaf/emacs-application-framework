@@ -35,8 +35,12 @@ class AppBuffer(BrowserBuffer):
         self.parent_dir = os.path.abspath(os.path.join(url, os.pardir))
         self.image_name = os.path.basename(url)
 
+        # Set background color.
+        self.background_color_str = "#7F7F7F"
+        self.buffer_widget.web_page.setBackgroundColor(QColor(self.background_color_str))
+
         with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", os.path.join(os.path.dirname(__file__))).replace("%2", os.path.join("file://", url))
+            html = f.read().replace("%1", os.path.join(os.path.dirname(__file__))).replace("%2", os.path.join("file://", url)).replace("%3", self.background_color_str)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
     def load_image(self, url):
@@ -44,7 +48,9 @@ class AppBuffer(BrowserBuffer):
         self.parent_dir = os.path.abspath(os.path.join(url, os.pardir))
         self.image_name = os.path.basename(url)
 
-        load_image_js = "document.getElementById('image').setAttribute('src', '{0}');viewer.update();".format(os.path.join("file://", self.url).replace("\\", "/"))
+        load_image_js = "document.getElementById('image').setAttribute('src', '{0}');viewer.update();".format(
+            os.path.join("file://", self.url).replace("\\", "/"))
+
         self.buffer_widget.eval_js(load_image_js)
 
     def is_image_file(self, f):
@@ -111,4 +117,3 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def flip_vertical(self):
         self.buffer_widget.eval_js("flip_vertical();")
-
