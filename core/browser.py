@@ -376,13 +376,13 @@ class BrowserView(QWebEngineView):
     def yank_text(self):
         ''' Paste selected text.'''
         self.triggerPageAction(self.web_page.Paste)
-        self.message_to_emacs("Yank selected text.")
+        message_to_emacs("Yank selected text.")
 
     @interactive()
     def kill_text(self):
         ''' Cut selected text.'''
         self.triggerPageAction(self.web_page.Cut)
-        self.message_to_emacs("Kill selected text.")
+        message_to_emacs("Kill selected text.")
 
     @interactive
     def undo_action(self):

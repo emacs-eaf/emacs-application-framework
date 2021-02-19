@@ -22,7 +22,7 @@
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor
 from core.browser import BrowserBuffer
-from core.utils import interactive
+from core.utils import interactive, message_to_emacs
 from pathlib import Path
 import os
 
@@ -127,6 +127,7 @@ class AppBuffer(BrowserBuffer):
             image = self.url
             self.load_next_image()
             os.remove(image)
+            message_to_emacs("Delete image {} success.".format(image))
 
     def cacel_input_message(self, result_type):
         if result_type == "delete_image":
