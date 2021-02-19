@@ -1658,6 +1658,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
+  (when (eaf--called-from-wsl-on-windows-p)
+    (eaf-monitor-configuration-change))
   (when (> (length title) 0)
     (catch 'found-eaf
       (dolist (window (window-list))
