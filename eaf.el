@@ -585,6 +585,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("i" . "rotate_right")
     ("y" . "flip_horizontal")
     ("o" . "flip_vertical")
+    ("D" . "delete_current_image")
     ("<f12>" . "open_devtools")
     )
   "The keybinding of EAF Image Viewer."

@@ -117,3 +117,17 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def flip_vertical(self):
         self.buffer_widget.eval_js("flip_vertical();")
+
+    @interactive
+    def delete_current_image(self):
+        self.send_input_message("Are you sure you want to delete {0}?".format(self.image_name), "delete_image",  "yes-or-no")
+
+    def handle_input_response(self, callback_tag, result_content):
+        if callback_tag == "delete_image":
+            image = self.url
+            self.load_next_image()
+            os.remove(image)
+
+    def cacel_input_message(self, result_type):
+        if result_type == "delete_image":
+            pass
