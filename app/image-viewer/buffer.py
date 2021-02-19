@@ -128,7 +128,3 @@ class AppBuffer(BrowserBuffer):
             self.load_next_image()
             os.remove(image)
             message_to_emacs("Delete image {} success.".format(image))
-
-    def cacel_input_message(self, result_type):
-        if result_type == "delete_image":
-            pass
