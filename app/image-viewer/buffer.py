@@ -119,10 +119,6 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js("flip_vertical();")
 
     @interactive
-    def flip_vertical(self):
-        self.buffer_widget.eval_js("flip_vertical();")
-
-    @interactive
     def move_up(self):
         self.buffer_widget.eval_js("move_up();")
 
