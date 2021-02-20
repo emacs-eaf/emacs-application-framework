@@ -119,6 +119,26 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.eval_js("flip_vertical();")
 
     @interactive
+    def flip_vertical(self):
+        self.buffer_widget.eval_js("flip_vertical();")
+
+    @interactive
+    def move_up(self):
+        self.buffer_widget.eval_js("move_up();")
+
+    @interactive
+    def move_down(self):
+        self.buffer_widget.eval_js("move_down();")
+
+    @interactive
+    def move_left(self):
+        self.buffer_widget.eval_js("move_left();")
+
+    @interactive
+    def move_right(self):
+        self.buffer_widget.eval_js("move_right();")
+
+    @interactive
     def delete_current_image(self):
         self.send_input_message("Are you sure you want to delete {0}?".format(self.image_name), "delete_image",  "yes-or-no")
 

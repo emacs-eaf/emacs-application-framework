@@ -83,6 +83,22 @@
          function flip_vertical() {
              viewer.scaleY(-viewer.imageData.scaleY || -1);
          }
+
+         function move_left() {
+             viewer.move(-10, 0);
+         }
+
+         function move_right() {
+             viewer.move(10, 0);
+         }
+
+         function move_up() {
+             viewer.move(0, -10);
+         }
+
+         function move_down() {
+             viewer.move(0, 10);
+         }
         </script>
     </body>
 </html>
