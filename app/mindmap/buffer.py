@@ -232,7 +232,7 @@ class AppBuffer(BrowserBuffer):
 
     def handle_download_request(self, download_item):
         download_data = download_item.url().toString()
-        if not download_data.startswith("data:image/"):
+        if self.should_skip_download_item(download_item) or not download_data.startswith("data:image/"):
             return
 
         # Note:
