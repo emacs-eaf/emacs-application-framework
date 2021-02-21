@@ -861,8 +861,14 @@ class BrowserBuffer(Buffer):
         screen = qApp.primaryScreen()
         QCursor().setPos(screen, screen.size().width(), screen.size().height())
 
+    def should_skip_download_item(self, download_item):
+        return download_item.page() != self.buffer_widget.web_page
+
     def handle_download_request(self, download_item):
         ''' Handle download request.'''
+        if self.should_skip_download_item(download_item):
+            return
+
         download_data = download_item.url().toString()
 
         if download_data.startswith("data:image/"):
