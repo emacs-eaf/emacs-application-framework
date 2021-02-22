@@ -84,17 +84,17 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
 如果你更喜欢手动执行安装脚本，
 
 - GNU/Linux用户：
-
-```Bash
-cd emacs-application-framework
-chmod +x ./install-eaf.sh
-./install-eaf.sh
-```
+    - Arch系用户：[AUR](https://aur.archlinux.org/packages/emacs-application-framework-git/)
+    - 其他：
+      ```Bash
+      cd emacs-application-framework
+      chmod +x ./install-eaf.sh
+      ./install-eaf.sh
+      ```
 
 - Windows用户：
 
 ```shell
->>>>>>> Update README and eaf-install-dependencies (need Windows testing)
 cd emacs-application-framework
 node ./install-eaf-win32.js
 ```
