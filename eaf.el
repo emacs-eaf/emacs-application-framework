@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Feb  7 22:49:09 2021 (-0500)
+;; Last-Updated: Mon Feb 22 03:25:17 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -2593,8 +2593,31 @@ The key is the annot id on PAGE."
     (other-window -1)
     (apply orig-fun direction line args)))
 
+(defun eaf--buffer-file-p ()
+  "Determine if the file opened at the current buffer be opened by EAF."
+  (let ((ext (when (and buffer-file-name
+                        (file-exists-p buffer-file-name))
+               (file-name-extension buffer-file-name))))
+    (and ext
+         (member (downcase ext) (append
+                                 eaf-pdf-extension-list
+                                 eaf-markdown-extension-list
+                                 eaf-image-extension-list
+                                 eaf-video-extension-list
+                                 eaf-music-extension-list
+                                 eaf-org-extension-list
+                                 eaf-mindmap-extension-list
+                                 eaf-office-extension-list)))))
+
+(defun eaf-open-this-buffer ()
+  "Try to open the current buffer using EAF, if possible."
+  (interactive)
+  (if (eaf--buffer-file-p)
+      (eaf-open buffer-file-name)
+    (user-error "[EAF] Current buffer is not supported by EAF!")))
+
 (defun eaf--find-file-ext-p (ext)
-  "Determine file extension EXT can be opened by EAF directly by `find-file'.
+  "Determine if file extension EXT can be opened by EAF directly by `find-file'.
 
 You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (and ext
