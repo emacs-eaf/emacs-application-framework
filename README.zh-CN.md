@@ -7,7 +7,7 @@
 # Emacs Application Framework
 Emacs Application Framework (EAF) 是新一代的Emacs图形应用框架，通过扩展Emacs的多媒体能力，最终达到 Live in Emacs 的终极目标。
 
-## 愿景
+## EAF 愿景
 Emacs距今已经有45年的发展历史，比现在人们用的操作系统都老。在这45年中，全世界最顶级的黑客在贡献自己的智慧和想象力，一起构建了Emacs这个伟大的开发者工具生态。
 
 当你是一个需要使用十几门编程语言的黑客和键盘流信仰者，Emacs绝对是你的不二之选。
@@ -16,8 +16,8 @@ Emacs的劣势也是因为它太古老了，导致在多线程和图形扩展能
 
 EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过EAF框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
 
-## EAF 应用展示
-EAF是一个可编程扩展的框架，你可以开发自己的Qt5应用并集成在Emacs中。
+## 应用展示
+EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你也可以开发自己的Qt5应用并集成在Emacs中。
 
 | 浏览器                                           | Markdown预览(支持Mermaid和PlantUML)                                    |
 | :--------:                                       | :----:                                                      |
@@ -120,9 +120,9 @@ node ./install-eaf-win32.js
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :init
-  (use-package epc :defer t)
-  (use-package ctable :defer t)
-  (use-package deferred :defer t)
+  (use-package epc :defer t :ensure t)
+  (use-package ctable :defer t :ensure t)
+  (use-package deferred :defer t :ensure t)
   (use-package s :defer t :ensure t)
   :custom
   (eaf-browser-continue-where-left-off t)

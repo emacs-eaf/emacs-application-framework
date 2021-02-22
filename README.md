@@ -7,7 +7,7 @@ English | [简体中文](./README.zh-CN.md)
 # Emacs Application Framework
 Emacs Application Framework (EAF) is a GUI application framework for Emacs that revolutionizes its multimedia and graphical capabilities to ultimately *Live in Emacs*.
 
-## Vision
+## EAF Vision
 Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world had been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
 
 If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
@@ -17,8 +17,8 @@ However, one of the greatest disadvantages of Emacs is how *old* it is. Emacs la
 The vision of the EAF project is that, while retaining the culture and the ecosystem of Emacs, use Python, Qt5, and JavaScript to extend Emacs' graphical capabilities, with the hope to ultimately *Live in Emacs*.
 
 
-## EAF Application Overview
-EAF is an extensible framework, one can develop any Qt5 application and integrate it into Emacs.
+## Application Showcase
+EAF is an extensible framework, it comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
 
 | Browser                                          | Markdown Previewer (support Mermaid and PlantUML)                                          |
 | :--------:                                       | :----:                                                      |
@@ -120,9 +120,9 @@ or, if you use [use-package](https://github.com/jwiegley/use-package), you can u
 (use-package eaf
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :init
-  (use-package epc :defer t)
-  (use-package ctable :defer t)
-  (use-package deferred :defer t)
+  (use-package epc :defer t :ensure t)
+  (use-package ctable :defer t :ensure t)
+  (use-package deferred :defer t :ensure t)
   (use-package s :defer t :ensure t)
   :custom
   (eaf-browser-continue-where-left-off t)
