@@ -88,7 +88,7 @@ class AppBuffer(BrowserBuffer):
             color = "#242525"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 
-        self.change_title(self.get_root_node_topic())
+        self.change_title(self.get_title())
 
     def build_js_method(self, method_name, auto_save=False, js_kwargs=None):
         js_kwargs = js_kwargs or {}
@@ -114,7 +114,7 @@ class AppBuffer(BrowserBuffer):
                 color = "#242525"
             self.buffer_widget.eval_js("init_background('{}');".format(color))
 
-            self.change_title(self.get_root_node_topic())
+            self.change_title(self.get_title())
 
     @interactive(insert_or_do=True)
     def change_background_color(self):
@@ -172,7 +172,7 @@ class AppBuffer(BrowserBuffer):
     def handle_update_node_topic(self, topic):
         self.buffer_widget.eval_js("update_node_topic('{}');".format(escape(topic)))
 
-        self.change_title(self.get_root_node_topic())
+        self.change_title(self.get_title())
 
         self.save_file(False)
 
@@ -226,6 +226,9 @@ class AppBuffer(BrowserBuffer):
 
     def is_focus(self):
         return self.buffer_widget.execute_js("node_is_focus();")
+
+    def get_title(self):
+        return os.path.basename(self.url) or self.get_root_node_topic()
 
     def get_root_node_topic(self):
         return self.buffer_widget.execute_js("get_root_node_topic();")

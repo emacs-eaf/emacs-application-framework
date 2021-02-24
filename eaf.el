@@ -2215,14 +2215,11 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
     (eaf--edit-set-header-line)))
 
-(defun eaf-create-mindmap ()
-  "Create a new Mindmap file."
-  (interactive)
-  (eaf-open " " "mindmap"))
+(defalias 'eaf-create-mindmap 'eaf-open-mindmap)  ;; compatible
 
 (defun eaf-open-mindmap (file)
   "Open a given Mindmap FILE."
-  (interactive "f[EAF/mindmap] Select Mindmap file: ")
+  (interactive "F[EAF/mindmap] Select Mindmap file: ")
   (eaf-open file "mindmap"))
 
 (defun eaf-get-file-md5 (file)
