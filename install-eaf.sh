@@ -40,11 +40,8 @@ else
     exit 1
 fi
 
-branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-if [[ $branch == "master" ]]; then
-    echo "Installing npm dependencies..."
-    npm install
-fi
+echo "Installing npm dependencies..."
+npm install
 
 # Python dependencies
 if type pip3 &>/dev/null; then
