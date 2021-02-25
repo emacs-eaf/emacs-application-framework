@@ -607,14 +607,12 @@ class BrowserBuffer(Buffer):
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
-        self.draw_progressbar = False
         self.dark_mode_js_ready = False
         self.caret_js_ready = False
         self.caret_browsing_mode = False
         self.caret_browsing_exit_flag = True
         self.caret_browsing_mark_activated = False
         self.caret_browsing_search_text = ""
-        self.progressbar_progress = 0
         self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
         self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
@@ -627,13 +625,9 @@ class BrowserBuffer(Buffer):
 
         self.current_url = ""
         self.request_url = ""
-        self.no_need_draw_background = False
 
         self.init_background_color()
 
-        self.buffer_widget.loadStarted.connect(self.start_progress)
-        self.buffer_widget.loadProgress.connect(self.update_progress)
-        self.buffer_widget.urlChanged.connect(self.record_url)
         self.buffer_widget.web_page.windowCloseRequested.connect(self.close_buffer)
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
@@ -704,37 +698,6 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("Failed to save current page as single file.")
 
-    def record_url(self, url):
-        ''' Record the url.'''
-        self.request_url = url.toString()
-
-        self.draw_background_filter()
-
-    def draw_background_filter(self):
-        '''Because Qt WebEngine will draw light background before loading new page.
-        We draw dark background to avoid page flash when dark mode.
-
-        This function include a white-list to control variable no_need_draw_background,
-        we can add url to white-list if you found unnecessary loading at same page, such as, scroll to anchor.
-        '''
-        if self.dark_mode_is_enabled():
-            current_urls = self.current_url.rsplit("/", 1)
-            request_urls = self.request_url.rsplit("/", 1)
-
-            if self.request_url == "https://emacs-china.org/":
-                self.no_need_draw_background = False
-
-            if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
-                self.no_need_draw_background = current_urls[0] == request_urls[0] or self.request_url == current_urls[0]
-            elif self.current_url.startswith("https://livebook.manning.com/book/") and self.request_url.startswith("https://livebook.manning.com/book/"):
-                self.no_need_draw_background = current_urls[0] == request_urls[0]
-            elif self.current_url.startswith("https://web.telegram.org") and self.request_url.startswith("https://web.telegram.org"):
-                self.no_need_draw_background = True
-            elif self.current_url.startswith("https://www.wikiwand.com/"):
-                self.no_need_draw_background = True
-            elif self.current_url.startswith("https://vk.com"):
-                self.no_need_draw_background = True
-
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
@@ -749,96 +712,6 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.web_page.setBackgroundColor(self.dark_mode_mask_color)
         else:
             self.buffer_widget.web_page.setBackgroundColor(self.light_mode_mask_color)
-
-    def drawForeground(self, painter, rect):
-        if self.draw_progressbar:
-            # Draw foreground over web page avoid white flash when eval dark_mode_js
-            if self.dark_mode_is_enabled() and not self.no_need_draw_background:
-                painter.setBrush(self.dark_mode_mask_color)
-                painter.drawRect(0, 0, rect.width(), rect.height())
-
-            # Init progress bar brush.
-            painter.setBrush(self.progressbar_color)
-
-            if self.dark_mode_js_ready:
-                # Draw 100% when after eval dark_mode_js, avoid flash progressbar.
-                painter.drawRect(0, 0, rect.width(), self.progressbar_height)
-            else:
-                # Draw progress bar.
-                painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
-
-    @QtCore.pyqtSlot()
-    def start_progress(self):
-        ''' Initialize the Progress Bar.'''
-        self.progressbar_progress = 0
-        self.draw_progressbar = True
-        self.update()
-
-    @QtCore.pyqtSlot()
-    def hide_progress(self):
-        ''' Hide the Progress Bar.'''
-        self.current_url = self.url
-        self.no_need_draw_background = False
-
-        self.draw_progressbar = False
-        self.dark_mode_js_ready = False
-        self.update()
-
-    @abstract
-    def before_page_load_hook(self):
-        ''' Hook to run before update_progress hits 100. '''
-        pass
-
-    @abstract
-    def after_page_load_hook(self):
-        ''' Hook to run after update_progress hits 100. '''
-        pass
-
-    @QtCore.pyqtSlot(int)
-    def update_progress(self, progress):
-        ''' Update the Progress Bar.'''
-        if progress < 100:
-            # Update progress.
-            self.caret_js_ready = False
-            self.progressbar_progress = progress
-            self.before_page_load_hook() # Run before page load hook
-            self.update()
-        elif progress == 100 and self.draw_progressbar:
-            self.buffer_widget.load_marker_file()
-
-            cursor_foreground_color = ""
-            cursor_background_color = ""
-
-            self.caret_browsing_js = self.buffer_widget.caret_browsing_js_raw.replace("%1", cursor_foreground_color).replace("%2", cursor_background_color)
-            self.buffer_widget.eval_js(self.caret_browsing_js)
-            self.caret_js_ready = True
-
-            if self.dark_mode_is_enabled():
-                if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
-                    cursor_foreground_color = self.caret_background_color.name()
-                    cursor_background_color = self.caret_foreground_color.name()
-                else:
-                    cursor_foreground_color = "#FFF"
-                    cursor_background_color = "#000"
-            else:
-                if self.emacs_var_dict["eaf-browser-dark-mode"] == "follow":
-                    cursor_foreground_color = self.caret_background_color.name()
-                    cursor_background_color = self.caret_foreground_color.name()
-                else:
-                    cursor_foreground_color = "#000"
-                    cursor_background_color = "#FFF"
-
-            if self.dark_mode_is_enabled():
-                if not self.dark_mode_js_ready:
-                    self.enable_dark_mode()
-                    self.dark_mode_js_ready = True
-                    # We need show page some delay, avoid white flash when eval dark_mode_js
-                    QtCore.QTimer.singleShot(1000, self.hide_progress)
-            else:
-                # Hide progress bar immediately if not dark mode.
-                self.hide_progress()
-
-            self.after_page_load_hook() # Run after page load hook
 
     def handle_fullscreen_request(self, request):
         ''' Handle fullscreen request.'''
