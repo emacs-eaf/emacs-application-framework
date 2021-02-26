@@ -26,5 +26,8 @@
   "bugs": {
     "url": "https://github.com/manateelazycat/emacs-application-framework/issues"
   },
-  "homepage": "https://github.com/manateelazycat/emacs-application-framework#readme"
+  "homepage": "https://github.com/manateelazycat/emacs-application-framework#readme",
+  "dependencies": {
+    "darkreader": "^4.9.27"
+  }
 }

@@ -68,7 +68,10 @@ class BrowserView(QWebEngineView):
         self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
-        self.dark_mode_js = self.read_js_content("dark_mode.js")
+        self.dark_mode_js = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                              "node_modules",
+                                              "darkreader",
+                                              "darkreader.js")).read()
         self.caret_browsing_js_raw = self.read_js_content("caret_browsing.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
@@ -522,10 +525,14 @@ class BrowserView(QWebEngineView):
         ''' Clear the focus.'''
         self.eval_js(self.clear_focus_js)
 
+    @interactive
+    def load_dark_mode_js(self):
+        self.eval_js(self.dark_mode_js)
+
     @interactive(insert_or_do=True)
     def enable_dark_mode(self):
         ''' Dark mode support.'''
-        self.eval_js(self.dark_mode_js)
+        self.eval_js("""DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});""")
 
     @interactive(insert_or_do=True)
     def disable_dark_mode(self):
@@ -607,7 +614,6 @@ class BrowserBuffer(Buffer):
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
-        self.dark_mode_js_ready = False
         self.caret_js_ready = False
         self.caret_browsing_mode = False
         self.caret_browsing_exit_flag = True

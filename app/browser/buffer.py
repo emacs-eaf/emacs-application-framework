@@ -21,6 +21,7 @@
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.browser import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text
 from urllib.parse import urlparse
@@ -84,84 +85,36 @@ class AppBuffer(BrowserBuffer):
 
         # Draw progressbar.
         self.progressbar_progress = 0
-        self.draw_progressbar = False
-        self.no_need_draw_background = False
-
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
-        self.buffer_widget.urlChanged.connect(self.draw_background_filter)
-
-    def draw_background_filter(self, url):
-        '''Because Qt WebEngine will draw light background before loading new page.
-        We draw dark background to avoid page flash when dark mode.
-
-        This function include a white-list to control variable no_need_draw_background,
-        we can add url to white-list if you found unnecessary loading at same page, such as, scroll to anchor.
-        '''
-        self.request_url = url.toString()
-
-        if self.dark_mode_is_enabled():
-            current_urls = self.current_url.rsplit("/", 1)
-            request_urls = self.request_url.rsplit("/", 1)
-
-            if self.request_url == "https://emacs-china.org/":
-                self.no_need_draw_background = False
-
-            if self.current_url.startswith("https://emacs-china.org/t/") and self.request_url.startswith("https://emacs-china.org/t/"):
-                self.no_need_draw_background = current_urls[0] == request_urls[0] or self.request_url == current_urls[0]
-            elif self.current_url.startswith("https://livebook.manning.com/book/") and self.request_url.startswith("https://livebook.manning.com/book/"):
-                self.no_need_draw_background = current_urls[0] == request_urls[0]
-            elif self.current_url.startswith("https://web.telegram.org") and self.request_url.startswith("https://web.telegram.org"):
-                self.no_need_draw_background = True
-            elif self.current_url.startswith("https://www.wikiwand.com/"):
-                self.no_need_draw_background = True
-            elif self.current_url.startswith("https://vk.com"):
-                self.no_need_draw_background = True
 
     def drawForeground(self, painter, rect):
-        if self.draw_progressbar:
-            # Draw foreground over web page avoid white flash when eval dark_mode_js
-            if self.dark_mode_is_enabled() and not self.no_need_draw_background:
-                painter.setBrush(self.dark_mode_mask_color)
-                painter.drawRect(0, 0, rect.width(), rect.height())
-
-            # Init progress bar brush.
+        # Draw progress bar.
+        if self.progressbar_progress > 0 and self.progressbar_progress < 100:
             painter.setBrush(self.progressbar_color)
-
-            if self.dark_mode_js_ready:
-                # Draw 100% when after eval dark_mode_js, avoid flash progressbar.
-                painter.drawRect(0, 0, rect.width(), self.progressbar_height)
-            else:
-                # Draw progress bar.
-                painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
+            painter.drawRect(0, 0, rect.width() * self.progressbar_progress * 1.0 / 100, self.progressbar_height)
 
     @QtCore.pyqtSlot()
     def start_progress(self):
         ''' Initialize the Progress Bar.'''
         self.progressbar_progress = 0
-        self.draw_progressbar = True
-        self.update()
-
-    @QtCore.pyqtSlot()
-    def hide_progress(self):
-        ''' Hide the Progress Bar.'''
-        self.current_url = self.url
-        self.no_need_draw_background = False
-
-        self.draw_progressbar = False
-        self.dark_mode_js_ready = False
         self.update()
 
     @QtCore.pyqtSlot(int)
     def update_progress(self, progress):
         ''' Update the Progress Bar.'''
+
+        # We need load dark mode js always, otherwise will white flash when loading page.
+        if self.is_dark_mode_enabled:
+            self.buffer_widget.load_dark_mode_js()
+            self.buffer_widget.enable_dark_mode()
+
         if progress < 100:
             # Update progress.
             self.caret_js_ready = False
             self.progressbar_progress = progress
-            self.before_page_load_hook() # Run before page load hook
             self.update()
-        elif progress == 100 and self.draw_progressbar:
+        elif progress == 100:
             self.buffer_widget.load_marker_file()
 
             cursor_foreground_color = ""
@@ -186,21 +139,7 @@ class AppBuffer(BrowserBuffer):
                     cursor_foreground_color = "#000"
                     cursor_background_color = "#FFF"
 
-            if self.dark_mode_is_enabled():
-                if not self.dark_mode_js_ready:
-                    self.enable_dark_mode()
-                    self.dark_mode_js_ready = True
-                    # We need show page some delay, avoid white flash when eval dark_mode_js
-                    QtCore.QTimer.singleShot(1000, self.hide_progress)
-            else:
-                # Hide progress bar immediately if not dark mode.
-                self.hide_progress()
-
             self.after_page_load_hook() # Run after page load hook
-
-    def before_page_load_hook(self):
-        ''' Hook to run before update_progress hits 100. '''
-        pass
 
     def after_page_load_hook(self):
         ''' Hook to run after update_progress hits 100. '''
@@ -258,7 +197,7 @@ class AppBuffer(BrowserBuffer):
                 close_urls.append("{0}\n".format(url))
                 if len(close_urls) > 30:
                     del close_urls[:len(close_urls)-30]
-                open(self.history_close_file_path, "w").writelines(close_urls)
+                    open(self.history_close_file_path, "w").writelines(close_urls)
 
     def load_adblocker(self):
         self.buffer_widget.load_css(os.path.join(os.path.dirname(__file__), "adblocker.css"),'adblocker')
@@ -416,7 +355,7 @@ class AppBuffer(BrowserBuffer):
         for i, (title, url) in enumerate(histories.items(), 1):
             self._record_history(title, url)
             message_to_emacs("Importing {} / {} ...".format(i, total))
-        message_to_emacs("{} chrome history entries imported.".format(total))
+            message_to_emacs("{} chrome history entries imported.".format(total))
 
     @interactive
     def import_chrome_history(self):
@@ -464,7 +403,7 @@ class PasswordDb(object):
             INSERT INTO autofill (host, password, form_data)
             VALUES (?, ?, ?)
             """, (host, password, str(form_data)))
-        self._conn.commit()
+            self._conn.commit()
 
     def get_entries(self, host, id):
         return self._conn.execute("""
