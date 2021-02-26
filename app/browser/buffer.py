@@ -103,6 +103,7 @@ class AppBuffer(BrowserBuffer):
     @QtCore.pyqtSlot(int)
     def update_progress(self, progress):
         ''' Update the Progress Bar.'''
+        self.progressbar_progress = progress
 
         # We need load dark mode js always, otherwise will white flash when loading page.
         if self.is_dark_mode_enabled:
@@ -112,7 +113,6 @@ class AppBuffer(BrowserBuffer):
         if progress < 100:
             # Update progress.
             self.caret_js_ready = False
-            self.progressbar_progress = progress
             self.update()
         elif progress == 100:
             self.buffer_widget.load_marker_file()
