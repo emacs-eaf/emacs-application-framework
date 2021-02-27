@@ -2,13 +2,13 @@
 
 set -eu
 
-ARCH_PACKAGES=(git nodejs)
+ARCH_PACKAGES=(git nodejs npm)
 ARCH_PACKAGES+=(python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl xdotool)
 ARCH_PACKAGES+=(python-qrcode aria2 python-qtconsole)
 
 # System dependencies
 if apt -v &> /dev/null; then
-    sudo apt -y install git nodejs aria2 wmctrl xdotool
+    sudo apt -y install git nodejs npm aria2 wmctrl xdotool
     sudo apt -y install libglib2.0-dev
     # Missing in Ubuntu: filebrowser-bin
 
@@ -17,7 +17,7 @@ if apt -v &> /dev/null; then
          python3-markdown python3-qtconsole python3-pygit2
 
 elif dnf &> /dev/null; then
-    sudo dnf -y install git nodejs aria2 wmctrl xdotool
+    sudo dnf -y install git nodejs npm aria2 wmctrl xdotool
     sudo dnf -y install glib2-devel
     # TODO: please add filebrowser-bin if it exists in Fedora repo.
 
