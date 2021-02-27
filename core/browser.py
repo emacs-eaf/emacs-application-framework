@@ -527,7 +527,7 @@ class BrowserView(QWebEngineView):
 
     @interactive
     def load_dark_mode_js(self):
-        self.eval_js(self.dark_mode_js)
+        self.eval_js('''if (typeof DarkReader === 'undefined') {{ {} }} '''.format(self.dark_mode_js))
 
     @interactive(insert_or_do=True)
     def enable_dark_mode(self):
@@ -537,7 +537,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def disable_dark_mode(self):
         ''' Remove dark mode support.'''
-        self.eval_js("""Window.EAF_DARK_READER && Window.EAF_DARK_READER.disable();""")
+        self.eval_js("""DarkReader.disable();""")
 
 
 class BrowserPage(QWebEnginePage):
@@ -1158,10 +1158,11 @@ class BrowserBuffer(Buffer):
     @interactive
     def toggle_dark_mode(self):
         self.is_dark_mode_enabled = not self.is_dark_mode_enabled
+        self.buffer_widget.load_dark_mode_js()
         if self.is_dark_mode_enabled:
             self.buffer_widget.enable_dark_mode()
         else:
-            self.disable_dark_mode()
+            self.buffer_widget.disable_dark_mode()
 
     @interactive(insert_or_do=True)
     def history_forward(self):
