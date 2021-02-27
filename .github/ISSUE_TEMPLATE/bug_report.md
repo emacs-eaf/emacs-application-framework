@@ -7,6 +7,9 @@ assignees: ''
 
 ---
 
+- If EAF was working correctly until a recent `git pull`, please refer to [Mandatory Procedures to Keep Your EAF Up-to-Date](https://github.com/manateelazycat/emacs-application-framework/discussions/527?sort=new) first.
+- Please add a corresponding GitHub Label so future people can find this issue easier.
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
@@ -20,8 +23,6 @@ A clear and concise description of what you expected to happen.
  - Distro and DE/WM:
  - Versions of Dependencies:
  - M-x emacs-version:
-
-Notes: please add a corresponding GitHub Label so future people can find this issue easier.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
