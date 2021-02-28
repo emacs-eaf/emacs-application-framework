@@ -1139,9 +1139,15 @@ A hashtable, key is url and value is title.")
          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
          (process-environment (cl-copy-list process-environment)))
 
+    ;; We need manually set scale factor when at Gnome/Wayland environment.
+    ;; Note:
+    ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
+    ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
     (let ((wayland-display (getenv "WAYLAND_DISPLAY")))
       (when (and wayland-display (not (string= wayland-display "")))
-        (setenv "QT_QPA_PLATFORM" "xcb")))
+        (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
+        (setenv "QT_SCALE_FACTOR" "1")
+        ))
 
     ;; Start python process.
     (if eaf-enable-debug
@@ -1897,7 +1903,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2215,7 +2221,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
     (eaf--edit-set-header-line)))
 
-(defalias 'eaf-create-mindmap 'eaf-open-mindmap)  ;; compatible
+(defalias 'eaf-create-mindmap 'eaf-open-mindmap) ;; compatible
 
 (defun eaf-open-mindmap (file)
   "Open a given Mindmap FILE."
