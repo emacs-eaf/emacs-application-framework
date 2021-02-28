@@ -88,6 +88,9 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
 
+        # Init zoom factor.
+        self.buffer_widget.zoom_reset()
+
     def drawForeground(self, painter, rect):
         # Draw progress bar.
         if self.progressbar_progress > 0 and self.progressbar_progress < 100:
