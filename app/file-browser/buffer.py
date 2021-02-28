@@ -36,7 +36,11 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, argument, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, argument, emacs_var_dict, module_path, False)
 
-        self.add_widget(FileUploaderWidget(url, QColor(0, 0, 0, 255)))
+        self.background_color = QColor(emacs_var_dict["eaf-emacs-theme-background-color"])
+
+        self.add_widget(FileUploaderWidget(url,
+                                           emacs_var_dict["eaf-emacs-theme-background-color"],
+                                           emacs_var_dict["eaf-emacs-theme-foreground-color"]))
 
     def destroy_buffer(self):
         os.kill(self.buffer_widget.background_process.pid, signal.SIGKILL)
@@ -67,30 +71,31 @@ class Image(qrcode.image.base.BaseImage):
         pass
 
 class FileUploaderWidget(QWidget):
-    def __init__(self, url, color):
+    def __init__(self, url, background_color, foreground_color):
         QWidget.__init__(self)
-        url = os.path.expanduser(url)
 
-        self.setStyleSheet("background-color: black")
+        self.setStyleSheet("background-color: transparent;")
+
+        url = os.path.expanduser(url)
 
         self.file_name_font = QFont()
         self.file_name_font.setPointSize(24)
 
-        self.file_name_label = QLabel(self)
+        self.file_name_label = QLabel()
         self.file_name_label.setText("Your smartphone file will be shared at\n{0}".format(url))
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
-        self.file_name_label.setStyleSheet("color: #eee")
+        self.file_name_label.setStyleSheet("color: {}".format(foreground_color))
 
-        self.qrcode_label = QLabel(self)
+        self.qrcode_label = QLabel()
 
         self.notify_font = QFont()
         self.notify_font.setPointSize(12)
-        self.notify_label = QLabel(self)
+        self.notify_label = QLabel()
         self.notify_label.setText("Scan the QR code above to upload a file from your smartphone.\nMake sure the smartphone is connected to the same WiFi network as this computer.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
-        self.notify_label.setStyleSheet("color: #eee")
+        self.notify_label.setStyleSheet("color: {}".format(foreground_color))
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
