@@ -229,6 +229,7 @@ class BrowserView(QWebEngineView):
             focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
+            os.system("open -a emacs")
             if event.button() == MOUSE_FORWARD_BUTTON:
                 self.forward()
 
@@ -519,11 +520,13 @@ class BrowserView(QWebEngineView):
     def focus_input(self):
         ''' input in focus.'''
         self.execute_js(self.focus_input_js)
+        eval_in_emacs('eaf-browser-focus-input-function', [])
 
     @interactive
     def clear_focus(self):
         ''' Clear the focus.'''
         self.eval_js(self.clear_focus_js)
+        eval_in_emacs('eaf-browser-clear-focus-function', [])
 
     @interactive
     def load_dark_mode_js(self):

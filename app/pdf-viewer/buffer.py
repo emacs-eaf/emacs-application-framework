@@ -34,6 +34,7 @@ import math
 import os
 import hashlib
 import json
+import platform
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -594,11 +595,15 @@ class PdfViewerWidget(QWidget):
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
                 # Get page image.
-                qpixmap = self.get_page_pixmap(index, self.scale, self.rotation)
+                if platform.system() == "Darwin":
+                    hidpi_scale_factor = self.devicePixelRatioF()
+                else:
+                    hidpi_scale_factor = 1
+                qpixmap = self.get_page_pixmap(index, self.scale * hidpi_scale_factor, self.rotation)
 
                 # Init render rect.
-                render_width = qpixmap.width()
-                render_height = qpixmap.height()
+                render_width = qpixmap.width() / hidpi_scale_factor
+                render_height = qpixmap.height() / hidpi_scale_factor
                 render_x = (self.rect().width() - render_width) / 2
 
                 # Add padding between pages.
@@ -1370,6 +1375,9 @@ class PdfViewerWidget(QWidget):
             self.releaseMouse()
             if not self.free_text_annot_timer.isActive():
                 self.free_text_annot_timer.start()
+
+            if platform.system() == "Darwin":
+                os.system("open -a emacs")
 
         elif event.type() == QEvent.MouseButtonDblClick:
             self.disable_free_text_annot_mode()

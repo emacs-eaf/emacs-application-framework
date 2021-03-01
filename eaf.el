@@ -932,10 +932,18 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
                                 (split-string (buffer-string) "\n" t))))
         (if (epc:live-p eaf-epc-process)
             (dolist (url browser-url-list)
-              (eaf-open-browser url))
+              (if (string-prefix-p "http" url)
+                  (eaf-open-browser url)
+                (eaf-open url)))
           (dolist (url browser-url-list)
-            (push `(,url "browser" "") eaf--active-buffers))
-          (when eaf--active-buffers (eaf-open-browser (nth 0 (car eaf--active-buffers))))))
+            (if (string-prefix-p "http" url)
+                (push `(,url "browser" "") eaf--active-buffers)
+              (push `(,url "pdf-viewer" "") eaf--active-buffers)))
+          (when eaf--active-buffers
+            (let ((url (nth 0 (car eaf--active-buffers))))
+              (if (string-prefix-p "http" url)
+                  (eaf-open-browser url)
+                (eaf-open url))))))
     (user-error "Please set `eaf-browser-continue-where-left-off' to t first!")))
 
 
@@ -1097,7 +1105,7 @@ A hashtable, key is url and value is title.")
     (cond ((memq system-type '(cygwin windows-nt ms-dos))
            (w32-shell-execute "open" path-or-url))
           ((eq system-type 'darwin)
-           (concat "open " (shell-quote-argument path-or-url)))
+           (shell-command (concat "open " (shell-quote-argument path-or-url))))
           ((eq system-type 'gnu/linux)
            (let ((process-connection-type nil))
              (start-process "" nil "xdg-open" path-or-url))))))
@@ -1392,6 +1400,23 @@ keybinding variable to eaf-app-binding-alist."
                (equal (frame-pixel-height frame) eaf-last-frame-height))
     (eaf-monitor-configuration-change)))
 
+(defun eaf--frame-left (frame)
+  "Return outer left position"
+  (let ((left (frame-parameter frame 'left)))
+    (if (listp left) (nth 1 left) left)))
+
+(defun eaf--frame-top (frame)
+  "Return outer top position."
+  (let ((top (frame-parameter frame 'top)))
+    (if (listp top) (nth 1 top) top)))
+
+(defun eaf--frame-internal-height (frame)
+  "Height of internal objects.
+Including title-bar, menu-bar, offset depends on window system, and border."
+  (let ((geometry (frame-geometry frame)))
+        (+ (cdr (alist-get 'title-bar-size geometry))
+           (cdr (alist-get 'tool-bar-size geometry)))))
+
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
@@ -1410,8 +1435,8 @@ keybinding variable to eaf-app-binding-alist."
                                   0 0 (frame-pixel-width frame) (frame-pixel-height frame))
                           view-infos)
                   (let* ((window-allocation (eaf-get-window-allocation window))
-                         (x (nth 0 window-allocation))
-                         (y (nth 1 window-allocation))
+                         (x (+ (eaf--frame-left frame) (nth 0 window-allocation)))
+                         (y (+ (eaf--frame-top frame) (nth 1 window-allocation) (eaf--frame-internal-height frame)))
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation)))
                     (push (format "%s:%s:%s:%s:%s:%s"
@@ -1458,11 +1483,9 @@ keybinding variable to eaf-app-binding-alist."
        (eaf--kill-python-process))
      )))
 
-(defun eaf--monitor-emacs-kill ()
-  "Function monitoring when Emacs is killed."
-  (ignore-errors
-    (when eaf-browser-continue-where-left-off
-      (let* ((browser-restore-file-path
+(defun eaf--save-session ()
+  "Save opening eaf browser tabs and pdf files"
+  (let* ((browser-restore-file-path
               (concat eaf-config-location
                       (file-name-as-directory "browser")
                       (file-name-as-directory "history")
@@ -1471,9 +1494,17 @@ keybinding variable to eaf-app-binding-alist."
         (write-region
          (dolist (buffer (eaf--get-eaf-buffers) browser-urls)
            (with-current-buffer buffer
-             (when (equal eaf--buffer-app-name "browser")
+             (when (or (equal eaf--buffer-app-name "browser") (equal eaf--buffer-app-name "pdf-viewer"))
                (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
          nil browser-restore-file-path)))
+
+(when eaf-browser-continue-where-left-off
+  (run-with-idle-timer 60 t #'eaf--save-session))
+
+(defun eaf--monitor-emacs-kill ()
+  "Function monitoring when Emacs is killed."
+  (ignore-errors
+    (eaf--save-session)
     (eaf-call-async "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
@@ -1665,7 +1696,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf--open-internal first-start-url first-start-app-name first-start-args))
 
   (dolist (buffer-info eaf--active-buffers)
-    (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info))))
+    (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info)))
+  (setq eaf--active-buffers nil))
 
 (defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
@@ -1873,6 +1905,16 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-forward-tab)))
+
+(defvar eaf-browser-focus-input-hook nil)
+
+(defvar eaf-browser-clear-focus-hook nil)
+
+(defun eaf-browser-focus-input-function ()
+  (run-hooks 'eaf-browser-focus-input-hook))
+
+(defun eaf-browser-clear-focus-function ()
+  (run-hooks 'eaf-browser-clear-focus-hook))
 
 ;;;###autoload
 (defun eaf-open-browser-in-background (url &optional args)
@@ -2428,6 +2470,10 @@ The key is the annot id on PAGE."
         (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
       (message "Please install wmctrl to active Emacs window."))))
 
+(defun eaf--activate-emacs-mac-window()
+  "Activate Emacs mac window"
+  (shell-command "open -a emacs"))
+
 (defun eaf-activate-emacs-window()
   "Activate Emacs window."
   (cond
@@ -2435,6 +2481,8 @@ The key is the annot id on PAGE."
     (eaf--activate-emacs-wsl-window))
    ((memq system-type '(cygwin windows-nt ms-dos))
     (eaf--activate-emacs-win32-window))
+   ((eq system-type 'darwin)
+    (eaf--activate-emacs-mac-window))
    ((eq system-type 'gnu/linux)
     (eaf--activate-emacs-linux-window))))
 
@@ -2664,6 +2712,47 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
         (funcall-interactively orig-fn)))))
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
+
+(with-eval-after-load "ibuffer"
+
+  (require 'ibuf-ext)
+
+  (define-ibuffer-filter eaf-buffers
+      "Limit current view to eaf buffers"
+    (:description "EAF"
+     :reader nil)
+    (with-current-buffer buf
+      (string-match "EAF" (format-mode-line mode-name nil nil buf))))
+
+  (define-ibuffer-filter eaf-browser-buffers
+      "Limit current view to eaf browser buffers"
+    (:description "EAF/browser"
+     :reader nil)
+    (with-current-buffer buf
+      (string-match "EAF/browser" (format-mode-line mode-name nil nil buf))))
+
+  (define-ibuffer-filter eaf-pdf-buffers
+      "Limit current view to eaf pdf-viewer buffers"
+    (:description "EAF/pdf-viewer "
+     :reader nil)
+    (with-current-buffer buf
+      (string-match "EAF/pdf-viewer" (format-mode-line mode-name nil nil buf))))
+
+  (defun eaf-ibuffer ()
+    (interactive)
+    (ibuffer nil "EAF buffers")
+    (call-interactively #'ibuffer-filter-by-eaf-buffers)
+    (switch-to-buffer "EAF buffers"))
+
+  (defun eaf-browser-ibuffer ()
+    (interactive)
+    (ibuffer nil "EAF/browser")
+    (call-interactively #'ibuffer-filter-by-eaf-browser-buffers))
+
+  (defun eaf-pdf-ibuffer ()
+    (interactive)
+    (ibuffer nil "EAF/pdf-viewer")
+    (call-interactively #'ibuffer-filter-by-eaf-pdf-buffers)))
 
 (provide 'eaf)
 

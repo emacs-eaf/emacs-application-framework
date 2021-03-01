@@ -25,6 +25,7 @@ from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 from core.utils import eval_in_emacs, focus_emacs_buffer
 import platform
+import os
 
 class View(QWidget):
 
@@ -34,7 +35,11 @@ class View(QWidget):
         self.buffer = buffer
 
         # Init widget attributes.
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        if platform.system() == "Darwin":
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        else:
+            self.setWindowFlags(Qt.FramelessWindowHint)
+
         self.setAttribute(Qt.WA_X11DoNotAcceptFocus, True)
         self.setContentsMargins(0, 0, 0, 0)
         self.installEventFilter(self)
@@ -126,14 +131,22 @@ class View(QWidget):
         if platform.system() == "Windows":
             eval_in_emacs('eaf-activate-emacs-window', [])
 
+        if platform.system() == "Darwin":
+            os.system("open -a emacs")
+
         # Make graphics view at left-top corner after show.
         self.graphics_view.verticalScrollBar().setValue(0)
         self.graphics_view.horizontalScrollBar().setValue(0)
 
     def reparent(self):
         qwindow = self.windowHandle()
-        qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
-        qwindow.setPosition(QPoint(self.x, self.y))
+
+        if platform.system() == "Darwin":
+            qwindow.setPosition(QPoint(self.x, self.y))
+
+        else:
+            qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
+            qwindow.setPosition(QPoint(self.x, self.y))
 
     def destroy_view(self):
         self.destroy()
