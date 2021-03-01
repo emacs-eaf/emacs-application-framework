@@ -496,7 +496,14 @@ if __name__ == "__main__":
     emacs_width = emacs_height = 0
     eaf_config_dir = ""
 
-    app = QApplication(sys.argv + ["--disable-web-security"])
+    app = QApplication(sys.argv + [
+        # Allow access local html file.
+        "--disable-web-security",
+        # Browser hardware acceleration.
+        "--ignore-gpu-blacklist",
+        "--enable-gpu-rasterization",
+        "--enable-native-gpu-memory-buffers",
+    ])
 
     eaf = EAF(sys.argv[1:])
 
