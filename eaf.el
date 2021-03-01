@@ -917,8 +917,7 @@ Within BODY, `buffer' can be used to"
        ,@body)))
 
 (defun eaf-browser-restore-buffers ()
-  "EAF restore all opened EAF Browser buffers in the previous Emacs session.
-
+  "EAF restore all opened EAF Browser buffers and pdf files in the previous Emacs session.
 This should be used after setting `eaf-browser-continue-where-left-off' to t."
   (interactive)
   (if eaf-browser-continue-where-left-off
@@ -932,12 +931,19 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
                                 (split-string (buffer-string) "\n" t))))
         (if (epc:live-p eaf-epc-process)
             (dolist (url browser-url-list)
-              (eaf-open-browser url))
+              (if (string-prefix-p "http" url)
+                  (eaf-open-browser url)
+                (eaf-open url)))
           (dolist (url browser-url-list)
-            (push `(,url "browser" "") eaf--active-buffers))
-          (when eaf--active-buffers (eaf-open-browser (nth 0 (car eaf--active-buffers))))))
+            (if (string-prefix-p "http" url)
+                (push `(,url "browser" "") eaf--active-buffers)
+              (push `(,url "pdf-viewer" "") eaf--active-buffers)))
+          (when eaf--active-buffers
+            (let ((url (nth 0 (car eaf--active-buffers))))
+              (if (string-prefix-p "http" url)
+                  (eaf-open-browser url)
+                (eaf-open url))))))
     (user-error "Please set `eaf-browser-continue-where-left-off' to t first!")))
-
 
 (defun eaf--bookmark-make-record ()
   "Create a EAF bookmark.
@@ -1458,22 +1464,24 @@ keybinding variable to eaf-app-binding-alist."
        (eaf--kill-python-process))
      )))
 
-(defun eaf--monitor-emacs-kill ()
-  "Function monitoring when Emacs is killed."
-  (ignore-errors
-    (when eaf-browser-continue-where-left-off
-      (let* ((browser-restore-file-path
+(defun eaf--save-session ()
+  "Save opening eaf browser tabs and pdf files"
+  (let* ((browser-restore-file-path
               (concat eaf-config-location
                       (file-name-as-directory "browser")
                       (file-name-as-directory "history")
-                      "restore.txt"))
-             (browser-urls ""))
         (write-region
          (dolist (buffer (eaf--get-eaf-buffers) browser-urls)
            (with-current-buffer buffer
              (when (equal eaf--buffer-app-name "browser")
+             (when (or (equal eaf--buffer-app-name "browser") (equal eaf--buffer-app-name "pdf-viewer"))
                (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
          nil browser-restore-file-path)))
+
+(defun eaf--monitor-emacs-kill ()
+  "Function monitoring when Emacs is killed."
+  (ignore-errors
+    (eaf--save-session)
     (eaf-call-async "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
