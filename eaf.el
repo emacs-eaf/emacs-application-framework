@@ -1410,6 +1410,8 @@ keybinding variable to eaf-app-binding-alist."
                                   0 0 (frame-pixel-width frame) (frame-pixel-height frame))
                           view-infos)
                   (let* ((window-allocation (eaf-get-window-allocation window))
+                         (window-divider-right-padding (if window-divider-mode window-divider-default-right-width 0))
+                         (window-divider-bottom-padding (if window-divider-mode window-divider-default-bottom-width 0))
                          (x (nth 0 window-allocation))
                          (y (nth 1 window-allocation))
                          (w (nth 2 window-allocation))
@@ -1417,7 +1419,10 @@ keybinding variable to eaf-app-binding-alist."
                     (push (format "%s:%s:%s:%s:%s:%s"
                                   eaf--buffer-id
                                   (eaf-get-emacs-xid frame)
-                                  x y w h)
+                                  x
+                                  y
+                                  (- w window-divider-right-padding)
+                                  (- h window-divider-bottom-padding))
                           view-infos)))))))
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
 
@@ -1903,7 +1908,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
