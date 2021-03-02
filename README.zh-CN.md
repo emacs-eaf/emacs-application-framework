@@ -209,8 +209,7 @@ EAF主要实现这几个功能：
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
 ### 为什么EAF无法在MacOS下工作？
-1. Qt5的QGraphicsScene技术无法在MacOS下正常工作，也就无法实现Qt5应用的镜像窗口以支持Emacs的Buffer/Window模型
-2. QWindow Reparent技术无法在MacOS下正常工作，也就无法实现Qt应用进程的窗口粘贴到Emacs对应的Buffer区域
+1. QWindow Reparent技术无法在MacOS下正常工作，也就无法实现Qt应用进程的窗口粘贴到Emacs对应的Buffer区域
 
 ### 为什么EAF的js-video-player在Windows下无法播放视频文件？
 `js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.
