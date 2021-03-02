@@ -496,7 +496,14 @@ if __name__ == "__main__":
     emacs_width = emacs_height = 0
     eaf_config_dir = ""
 
-    app = QApplication(sys.argv + ["--disable-web-security"])
+    hardware_acceleration_args = []
+    if platform.system() != "Windows":
+        hardware_acceleration_args += [
+            "--ignore-gpu-blacklist",
+            "--enable-gpu-rasterization",
+            "--enable-native-gpu-memory-buffers"]
+
+    app = QApplication(sys.argv + ["--disable-web-security"] + hardware_acceleration_args)
 
     eaf = EAF(sys.argv[1:])
 
