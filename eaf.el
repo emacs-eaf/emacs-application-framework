@@ -2722,47 +2722,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
-(with-eval-after-load "ibuffer"
-
-  (require 'ibuf-ext)
-
-  (define-ibuffer-filter eaf-buffers
-      "Limit current view to eaf buffers"
-    (:description "EAF"
-     :reader nil)
-    (with-current-buffer buf
-      (string-match "EAF" (format-mode-line mode-name nil nil buf))))
-
-  (define-ibuffer-filter eaf-browser-buffers
-      "Limit current view to eaf browser buffers"
-    (:description "EAF/browser"
-     :reader nil)
-    (with-current-buffer buf
-      (string-match "EAF/browser" (format-mode-line mode-name nil nil buf))))
-
-  (define-ibuffer-filter eaf-pdf-buffers
-      "Limit current view to eaf pdf-viewer buffers"
-    (:description "EAF/pdf-viewer "
-     :reader nil)
-    (with-current-buffer buf
-      (string-match "EAF/pdf-viewer" (format-mode-line mode-name nil nil buf))))
-
-  (defun eaf-ibuffer ()
-    (interactive)
-    (ibuffer nil "EAF buffers")
-    (call-interactively #'ibuffer-filter-by-eaf-buffers)
-    (switch-to-buffer "EAF buffers"))
-
-  (defun eaf-browser-ibuffer ()
-    (interactive)
-    (ibuffer nil "EAF/browser")
-    (call-interactively #'ibuffer-filter-by-eaf-browser-buffers))
-
-  (defun eaf-pdf-ibuffer ()
-    (interactive)
-    (ibuffer nil "EAF/pdf-viewer")
-    (call-interactively #'ibuffer-filter-by-eaf-pdf-buffers)))
-
 (provide 'eaf)
 
 ;;; eaf.el ends here
