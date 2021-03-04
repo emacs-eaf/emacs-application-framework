@@ -23,7 +23,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.browser import BrowserBuffer
-from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text
+from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
 from urllib.parse import urlparse
 import os
 import re
@@ -198,9 +198,25 @@ class AppBuffer(BrowserBuffer):
             with open(self.history_close_file_path, "r") as f:
                 close_urls = f.readlines()
                 close_urls.append("{0}\n".format(url))
-                if len(close_urls) > 30:
-                    del close_urls[:len(close_urls)-30]
+                open(self.history_close_file_path, "w").writelines(close_urls)
+
+    @interactive(insert_or_do=True)
+    def recover_prev_close_page(self):
+        ''' Recover previous closed pages.'''
+        if os.path.exists(self.history_close_file_path):
+            with open(self.history_close_file_path, "r") as f:
+                close_urls = f.readlines()
+                if len(close_urls) > 0:
+                    # We need use rstrip remove \n char from url record.
+                    prev_close_url = close_urls.pop().rstrip()
+                    open_url_in_new_tab(prev_close_url)
                     open(self.history_close_file_path, "w").writelines(close_urls)
+
+                    message_to_emacs("Recovery {0}".format(prev_close_url))
+                else:
+                    message_to_emacs("No page need recovery.")
+        else:
+            message_to_emacs("No page need recovery.")
 
     def load_adblocker(self):
         self.buffer_widget.load_css(os.path.join(os.path.dirname(__file__), "adblocker.css"),'adblocker')

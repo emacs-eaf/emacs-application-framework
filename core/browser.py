@@ -1021,6 +1021,10 @@ class BrowserBuffer(Buffer):
 
     @interactive
     def caret_translate_text(self):
+        self.translate_text()
+
+    @interactive(insert_or_do=True)
+    def translate_text(self):
         if self.buffer_widget.selectedText().strip() != "":
             self.buffer_widget.translate_selected_text.emit(self.buffer_widget.selectedText())
 
@@ -1095,24 +1099,6 @@ class BrowserBuffer(Buffer):
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
         return self.buffer_widget.get_focus_text() != None or self.url == "devtools://devtools/bundled/devtools_app.html"
-
-    @interactive(insert_or_do=True)
-    def recover_prev_close_page(self):
-        ''' Recover previous closed pages.'''
-        if os.path.exists(self.history_close_file_path):
-            with open(self.history_close_file_path, "r") as f:
-                close_urls = f.readlines()
-                if len(close_urls) > 0:
-                    # We need use rstrip remove \n char from url record.
-                    prev_close_url = close_urls.pop().rstrip()
-                    open_url_in_new_tab(prev_close_url)
-                    open(self.history_close_file_path, "w").writelines(close_urls)
-
-                    message_to_emacs("Recovery {0}".format(prev_close_url))
-                else:
-                    message_to_emacs("No page need recovery.")
-        else:
-            message_to_emacs("No page need recovery.")
 
     @interactive(insert_or_do=True)
     def duplicate_page(self):
