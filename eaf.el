@@ -475,6 +475,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("2" . "insert_or_save_as_single_file")
     ("v" . "insert_or_view_source")
     ("e" . "insert_or_edit_url")
+    ("." . "insert_or_translate_text")
     ("C-M-c" . "copy_code")
     ("C-M-l" . "copy_link")
     ("C-a" . "select_all_or_input_text")

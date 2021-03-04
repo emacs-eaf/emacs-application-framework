@@ -1018,6 +1018,10 @@ class BrowserBuffer(Buffer):
 
     @interactive
     def caret_translate_text(self):
+        self.translate_text()
+
+    @interactive(insert_or_do=True)
+    def translate_text(self):
         if self.buffer_widget.selectedText().strip() != "":
             self.buffer_widget.translate_selected_text.emit(self.buffer_widget.selectedText())
 
