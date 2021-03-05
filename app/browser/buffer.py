@@ -404,12 +404,18 @@ class AppBuffer(BrowserBuffer):
         html = self.buffer_widget.execute_js("new Readability(document).parse().content;")
         self.buffer_widget.setHtml("<style> #readability-page-1 { width: 60%; margin: auto; } </style>" + html)
 
+    @interactive(insert_or_do=True)
+    def export_text(self):
+        self.buffer_widget.eval_js(self.readability_js)
+        text = self.buffer_widget.execute_js("new Readability(document).parse().textContent;")
+        self.refresh_page()
+        eval_in_emacs('eaf--browser-export-text', ["EAF-BROWSER-TEXT-" + self.url, text])
+
 class HistoryPage():
     def __init__(self, title, url, hit):
         self.title = title
         self.url = url
         self.hit = float(hit)
-
 
 class PasswordDb(object):
     def __init__(self, dbpath):

@@ -475,8 +475,9 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("2" . "insert_or_save_as_single_file")
     ("v" . "insert_or_view_source")
     ("e" . "insert_or_edit_url")
-    ("." . "insert_or_translate_text")
+    ("n" . "insert_or_export_text")
     ("," . "insert_or_switch_to_reader_mode")
+    ("." . "insert_or_translate_text")
     ("C-M-c" . "copy_code")
     ("C-M-l" . "copy_link")
     ("C-a" . "select_all_or_input_text")
@@ -1914,7 +1915,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2561,6 +2562,17 @@ The key is the annot id on PAGE."
       (dolist (element (eval (car (get var 'standard-value))))
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
       (insert "\n"))))
+
+(defun eaf--browser-export-text (buffer-name html-text)
+  (let ((eaf-export-text-buffer (get-buffer-create buffer-name)))
+    (with-current-buffer eaf-export-text-buffer
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert html-text)
+      (beginning-of-buffer)
+      (read-only-mode 1))
+    (switch-to-buffer eaf-export-text-buffer)
+    ))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
