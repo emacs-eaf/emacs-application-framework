@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.browser import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
@@ -69,6 +69,13 @@ class AppBuffer(BrowserBuffer):
         self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
         self.pw_autofill_id = 0
         self.pw_autofill_raw = self.buffer_widget.read_js_content("pw_autofill.js")
+
+        self.readability_js = open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                                                "node_modules",
+                                                "@mozilla",
+                                                "readability",
+                                                "Readability.js"
+                                                )).read()
 
         self.close_page.connect(self.record_close_page)
 
@@ -390,6 +397,12 @@ class AppBuffer(BrowserBuffer):
     def clear_cookies(self):
         ''' Clear cookies.'''
         self.send_input_message("Are you sure you want to clear all browsing cookies?", "clear_cookies", "yes-or-no")
+
+    @interactive(insert_or_do=True)
+    def switch_to_reader_mode(self):
+        self.buffer_widget.eval_js(self.readability_js)
+        html = self.buffer_widget.execute_js("new Readability(document).parse().content;")
+        self.buffer_widget.setHtml("<style> #readability-page-1 { width: 60%; margin: auto; } </style>" + html)
 
 class HistoryPage():
     def __init__(self, title, url, hit):
