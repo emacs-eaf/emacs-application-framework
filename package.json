@@ -11,7 +11,9 @@
     "app/js-video-player",
     "app/markdown-previewer",
     "app/image-viewer",
-    "app/terminal",
+    "app/terminal"
+  ],
+  "vueApps": [
     "app/vue-demo"
   ],
   "repository": {
