@@ -17,7 +17,14 @@ const vueApps = pkg.vuewApps || [];
 
 function installVueApps() {
     for (let i = 0; i < vueApps.length; i++) {
-        execSync("npm install && npm run build", {
+        execSync("npm install", {
+            cwd: path.join(__dirname, vueApps[i]),
+            stdio: "inherit",
+        });
+    }
+
+    for (let i = 0; i < vueApps.length; i++) {
+        execSync("npm run build", {
             cwd: path.join(__dirname, vueApps[i]),
             stdio: "inherit",
         });
