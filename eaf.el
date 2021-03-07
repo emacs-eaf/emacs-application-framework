@@ -2041,7 +2041,8 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
     default-directory))
 
 (defun eaf--generate-terminal-command ()
-  (if (eaf--called-from-wsl-on-windows-p)
+  (if (or (eaf--called-from-wsl-on-windows-p)
+          (eq system-type 'windows-nt))
       "powershell.exe"
     (getenv "SHELL")))
 
