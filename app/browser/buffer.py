@@ -75,7 +75,7 @@ class AppBuffer(BrowserBuffer):
                                                 "@mozilla",
                                                 "readability",
                                                 "Readability.js"
-                                                )).read()
+                                                ), encoding="utf-8").read()
 
         self.close_page.connect(self.record_close_page)
 
