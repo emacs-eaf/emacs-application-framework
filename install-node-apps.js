@@ -13,7 +13,7 @@ function installNodeApps() {
     }
 }
 
-const vueApps = pkg.vuewApps || [];
+const vueApps = pkg.vueApps || [];
 
 function installVueApps() {
     for (let i = 0; i < vueApps.length; i++) {
