@@ -11,7 +11,8 @@
     "app/js-video-player",
     "app/markdown-previewer",
     "app/image-viewer",
-    "app/terminal"
+    "app/terminal",
+    "app/vue-demo"
   ],
   "repository": {
     "type": "git",

@@ -1962,6 +1962,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-demo" "demo"))
 
+(defun eaf-open-vue-demo ()
+  "Open EAF vue demo"
+  (interactive)
+  (eaf-open "eaf-vue-demo" "vue-demo"))
+
 (defun eaf-open-music (file)
   "Open EAF music player."
   (interactive "F[EAF] Play Music: ")
