@@ -10,6 +10,15 @@
  * links when the link HREF contans certain substrings.
  */
 
+/* EAF additional */
+
+*[ID=iSlider],
+*[ID=couplet],
+*[class=topAd],
+*[ID=google_ads] { display: none ! important }
+
+/* Original */
+
 A:link[HREF*="addata"]  IMG,
 A:link[HREF*="ad."]  IMG,
 A:link[HREF*="ads."]  IMG,
@@ -111,7 +120,3 @@ embed[src$=".swf"]
 /*
  * For more examples see http://www.mozilla.org/unix/customizing.html
  */
-
-/* EAF additional */
-
-[id*='google_ads'] { display: none ! important }
