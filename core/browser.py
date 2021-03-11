@@ -225,7 +225,7 @@ class BrowserView(QWebEngineView):
 
         # Focus emacs buffer when user click view.
         if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                            QEvent.MouseButtonDblClick, QEvent.Wheel]:
+                            QEvent.MouseButtonDblClick]:  # QEvent.Wheel
             focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
@@ -241,13 +241,13 @@ class BrowserView(QWebEngineView):
                 event.accept()
                 return True
 
-        if event.type() == QEvent.Wheel:
-            modifiers = QApplication.keyboardModifiers()
-            if modifiers == Qt.ControlModifier:
-                if event.angleDelta().y() > 0:
-                    self.zoom_in()
-                else:
-                    self.zoom_out()
+        # if event.type() == QEvent.Wheel:
+        #     modifiers = QApplication.keyboardModifiers()
+        #     if modifiers == Qt.ControlModifier:
+        #         if event.angleDelta().y() > 0:
+        #             self.zoom_in()
+        #         else:
+        #             self.zoom_out()
 
         return super(QWebEngineView, self).eventFilter(obj, event)
 
