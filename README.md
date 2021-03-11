@@ -220,7 +220,7 @@ If you've figure them out, PRs are always welcome!
 `js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.
 
 ### Why doesn't EAF receive input events on WM?
-EAF confirms that the desktop environment or window manager you can work includes: KDE, GNOME2, GNOME3, Mate, Xfce, LXDE, I3, QTILE, Xpra.
+EAF confirms that the desktop environment or window manager you can work includes: KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra.
 
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
