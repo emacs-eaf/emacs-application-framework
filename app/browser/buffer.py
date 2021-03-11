@@ -402,7 +402,11 @@ class AppBuffer(BrowserBuffer):
     def switch_to_reader_mode(self):
         self.buffer_widget.eval_js(self.readability_js)
         html = self.buffer_widget.execute_js("new Readability(document).parse().content;")
-        self.buffer_widget.setHtml("<style> #readability-page-1 { width: 60%; margin: auto; } </style>" + html)
+        if html == None:
+            self.refresh_page()
+            message_to_emacs("Cannot parse text content of current page, failed to switch reader mode.")
+        else:
+            self.buffer_widget.setHtml("<style> #readability-page-1 { width: 60%; margin: auto; } </style>" + html)
 
     @interactive(insert_or_do=True)
     def export_text(self):
