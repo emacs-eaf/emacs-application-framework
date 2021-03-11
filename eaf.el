@@ -1153,6 +1153,7 @@ A hashtable, key is url and value is title.")
       (when (and wayland-display (not (string= wayland-display "")))
         (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
         (setenv "QT_SCALE_FACTOR" "1")
+        (setenv "QT_QPA_PLATFORM" "xcb")
         ))
 
     ;; Start python process.
