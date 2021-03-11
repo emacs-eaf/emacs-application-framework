@@ -1846,6 +1846,11 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive "M[EAF/browser] URL: ")
   (eaf-open (eaf-wrap-url url) "browser" args))
 
+(defun eaf-open-url-at-point ()
+  "Open URL at current point by EAF browser."
+  (interactive)
+  (eaf-open-browser (browse-url-url-at-point)))
+
 (defun eaf-browser--duplicate-page-in-new-tab (url)
   "Duplicate a new tab for the dedicated URL."
   (eaf-open (eaf-wrap-url url) "browser" nil t))
@@ -1915,7 +1920,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
