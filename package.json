@@ -13,6 +13,9 @@
     "app/image-viewer",
     "app/terminal"
   ],
+  "vueApps": [
+    "app/vue-demo"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/manateelazycat/emacs-application-framework.git"
@@ -28,6 +31,7 @@
   },
   "homepage": "https://github.com/manateelazycat/emacs-application-framework#readme",
   "dependencies": {
+    "@mozilla/readability": "^0.4.1",
     "darkreader": "^4.9.27"
   }
 }

@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.browser import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
@@ -69,6 +69,13 @@ class AppBuffer(BrowserBuffer):
         self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
         self.pw_autofill_id = 0
         self.pw_autofill_raw = self.buffer_widget.read_js_content("pw_autofill.js")
+
+        self.readability_js = open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                                                "node_modules",
+                                                "@mozilla",
+                                                "readability",
+                                                "Readability.js"
+                                                ), encoding="utf-8").read()
 
         self.close_page.connect(self.record_close_page)
 
@@ -391,12 +398,28 @@ class AppBuffer(BrowserBuffer):
         ''' Clear cookies.'''
         self.send_input_message("Are you sure you want to clear all browsing cookies?", "clear_cookies", "yes-or-no")
 
+    @interactive(insert_or_do=True)
+    def switch_to_reader_mode(self):
+        self.buffer_widget.eval_js(self.readability_js)
+        html = self.buffer_widget.execute_js("new Readability(document).parse().content;")
+        if html == None:
+            self.refresh_page()
+            message_to_emacs("Cannot parse text content of current page, failed to switch reader mode.")
+        else:
+            self.buffer_widget.setHtml("<style> #readability-page-1 { width: 60%; margin: auto; } </style>" + html)
+
+    @interactive(insert_or_do=True)
+    def export_text(self):
+        self.buffer_widget.eval_js(self.readability_js)
+        text = self.buffer_widget.execute_js("new Readability(document).parse().textContent;")
+        self.refresh_page()
+        eval_in_emacs('eaf--browser-export-text', ["EAF-BROWSER-TEXT-" + self.url, text])
+
 class HistoryPage():
     def __init__(self, title, url, hit):
         self.title = title
         self.url = url
         self.hit = float(hit)
-
 
 class PasswordDb(object):
     def __init__(self, dbpath):

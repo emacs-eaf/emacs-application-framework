@@ -24,8 +24,8 @@ html, body {
     overflow: auto;
     width: 100%;
     height: 100%;
-}
-.jsmind-inner {
+    overflow: hidden !important;
+
     moz-user-select: -moz-none;
     -moz-user-select: none;
     -o-user-select: none;
@@ -44,14 +44,9 @@ canvas {
 input {
     outline-style: none;
     border: blue;
-    font-size: 24px;
+    font-size: 12px;
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    min-width: 100px;
 }
 
 /* z-index: 2 */
@@ -63,9 +58,7 @@ jmnodes {
 jmnode {
     position: absolute;
     cursor: default;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 200px;
 }
 jmexpander {
     position: absolute;
@@ -108,7 +101,12 @@ jmnode.root {
     background-color:  #3598DB;
     color:  #FFF;
     font-size: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: none;
 }
+
 jmnode.root.selected  {
     background-color:  #F56B85;
 }

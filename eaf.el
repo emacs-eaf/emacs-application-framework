@@ -475,6 +475,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("2" . "insert_or_save_as_single_file")
     ("v" . "insert_or_view_source")
     ("e" . "insert_or_edit_url")
+    ("n" . "insert_or_export_text")
+    ("," . "insert_or_switch_to_reader_mode")
     ("." . "insert_or_translate_text")
     ("C-M-c" . "copy_code")
     ("C-M-l" . "copy_link")
@@ -1159,6 +1161,7 @@ A hashtable, key is url and value is title.")
       (when (and wayland-display (not (string= wayland-display "")))
         (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
         (setenv "QT_SCALE_FACTOR" "1")
+        (setenv "QT_QPA_PLATFORM" "xcb")
         ))
 
     ;; Start python process.
@@ -1875,6 +1878,11 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive "M[EAF/browser] URL: ")
   (eaf-open (eaf-wrap-url url) "browser" args))
 
+(defun eaf-open-url-at-point ()
+  "Open URL at current point by EAF browser."
+  (interactive)
+  (eaf-open-browser (browse-url-url-at-point)))
+
 (defun eaf-browser--duplicate-page-in-new-tab (url)
   "Duplicate a new tab for the dedicated URL."
   (eaf-open (eaf-wrap-url url) "browser" nil t))
@@ -2001,6 +2009,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-demo" "demo"))
 
+(defun eaf-open-vue-demo ()
+  "Open EAF vue demo"
+  (interactive)
+  (eaf-open "eaf-vue-demo" "vue-demo"))
+
 (defun eaf-open-music (file)
   "Open EAF music player."
   (interactive "F[EAF] Play Music: ")
@@ -2075,7 +2088,8 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
     default-directory))
 
 (defun eaf--generate-terminal-command ()
-  (if (eaf--called-from-wsl-on-windows-p)
+  (if (or (eaf--called-from-wsl-on-windows-p)
+          (eq system-type 'windows-nt))
       "powershell.exe"
     (getenv "SHELL")))
 
@@ -2607,6 +2621,17 @@ The key is the annot id on PAGE."
       (dolist (element (eval (car (get var 'standard-value))))
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
       (insert "\n"))))
+
+(defun eaf--browser-export-text (buffer-name html-text)
+  (let ((eaf-export-text-buffer (get-buffer-create buffer-name)))
+    (with-current-buffer eaf-export-text-buffer
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert html-text)
+      (beginning-of-buffer)
+      (read-only-mode 1))
+    (switch-to-buffer eaf-export-text-buffer)
+    ))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

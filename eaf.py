@@ -205,9 +205,10 @@ class EAF(object):
             app_buffer.open_devtools_tab.connect(self.open_devtools_tab)
 
         # Add create new window when create_new_browser_window_callback is call.
-        if module_path in ["app.browser.buffer", "app.terminal.buffer", "app.rss-reader.buffer"]:
+        if (app_buffer.__class__.__bases__[0].__name__ == "BrowserBuffer"):
             app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
 
+        # Set proxy for browser.
         if module_path == "app.browser.buffer":
             app_buffer.proxy_string = proxy_string
 

@@ -7,3 +7,4 @@
 /app/image-viewer/node_modules/
 /app/markdown-previewer/node_modules/
 node_modules/
+dist/
