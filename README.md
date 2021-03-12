@@ -139,21 +139,22 @@ Alternatively, if you use [use-package](https://github.com/jwiegley/use-package)
 
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package                        | Dependent                            | Description                                       |
-| :--------                      | :------                              | :------                                           |
-| python-epc                     | Core                                 | EPC for Python                                    |
-| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                             |
-| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine               |
-| wmctrl, xdotool                | Core                                 | Activate Emacs window input focus                 |
+| Package                        | Dependent                            | Description                                           |
+| :--------                      | :------                              | :------                                               |
+| python-epc                     | Core                                 | EPC for Python                                        |
+| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                 |
+| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                   |
+| wmctrl, xdotool                | Core                                 | Activate Emacs window input focus                     |
 | pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows |
-| nodejs                         | Core                                 | Installs dependencies, and for app communications |
-| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                              |
-| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files            |
-| aria2                          | Browser                              | Download files from the web                       |
-| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                           |
-| filebrowser-bin                | File Browser                         | Share files between computer and smartphone       |
-| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                         |
-| python-retrying                | Markdown Previewer                   | Provide @retry                                    |
+| nodejs                         | Core                                 | Installs dependencies, and for app communications     |
+| mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                        |
+| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                                  |
+| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files                |
+| aria2                          | Browser                              | Download files from the web                           |
+| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                               |
+| filebrowser-bin                | File Browser                         | Share files between computer and smartphone           |
+| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                             |
+| python-retrying                | Markdown Previewer                   | Provide @retry                                        |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -211,10 +212,8 @@ Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-f
 
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
-### EAF can't works on MacOS. Why?
-1. QWindow Reparent technology need use the original API of Mac platform for replacement.
-
-If you've figure them out, PRs are always welcome!
+### macOS
+See [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS).
 
 ### EAF js-video-player can't play some video on Windows. Why?
 `js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.

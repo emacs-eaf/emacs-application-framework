@@ -224,11 +224,15 @@ class BrowserView(QWebEngineView):
         #     print(time.time(), event.type(), self.rect())
 
         # Focus emacs buffer when user click view.
-        if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                            QEvent.MouseButtonDblClick, QEvent.Wheel]:
+        event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
+        if platform.system() != "Darwin":
+            event_type += [QEvent.Wheel]
+
+        if event.type() in event_type:
             focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
+            os.system("open -a emacs")
             if event.button() == MOUSE_FORWARD_BUTTON:
                 self.forward()
 

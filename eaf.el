@@ -286,6 +286,13 @@ been initialized."
 
 (defvar eaf-last-frame-height 0)
 
+(when (eq system-type 'darwin)
+  (defvar eaf--switch-to-python t
+    "Record if Emacs switchs to Python process")
+
+  (defvar eaf--selected-window nil
+    "Record the selected window when focus-out"))
+
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
   :type 'string)
@@ -1103,7 +1110,7 @@ A hashtable, key is url and value is title.")
     (cond ((memq system-type '(cygwin windows-nt ms-dos))
            (w32-shell-execute "open" path-or-url))
           ((eq system-type 'darwin)
-           (concat "open " (shell-quote-argument path-or-url)))
+           (shell-command (concat "open " (shell-quote-argument path-or-url))))
           ((eq system-type 'gnu/linux)
            (let ((process-connection-type nil))
              (start-process "" nil "xdg-open" path-or-url))))))
@@ -1399,6 +1406,59 @@ keybinding variable to eaf-app-binding-alist."
                (equal (frame-pixel-height frame) eaf-last-frame-height))
     (eaf-monitor-configuration-change)))
 
+(defun eaf--frame-left (frame)
+  "Return outer left position"
+  (let ((left (frame-parameter frame 'left)))
+    (if (listp left) (nth 1 left) left)))
+
+(defun eaf--frame-top (frame)
+  "Return outer top position."
+  (let ((top (frame-parameter frame 'top)))
+    (if (listp top) (nth 1 top) top)))
+
+(defun eaf--frame-internal-height (frame)
+  "Height of internal objects.
+Including title-bar, menu-bar, offset depends on window system, and border."
+  (let ((geometry (frame-geometry frame)))
+        (+ (cdr (alist-get 'title-bar-size geometry))
+           (cdr (alist-get 'tool-bar-size geometry)))))
+
+(defun eaf--buffer-x-position-adjust (frame)
+  "Adjust the x position of EAF buffers for macOS"
+  (if (eq system-type 'darwin)
+      (eaf--frame-left frame)
+    0))
+
+(defun eaf--buffer-y-postion-adjust (frame)
+  "Adjust the y position of EAF buffers for macOS"
+  (if (eq system-type 'darwin)
+      (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
+    0))
+
+(when (eq system-type 'darwin)
+  (defun eaf--mac-temp-state ()
+    "Create a temporary buffer to replace EAF buffers when focus-out"
+    (interactive)
+    (if (string-equal "Python\n" (shell-command-to-string "app-frontmost --name"))
+        (setq eaf--switch-to-python t)
+      (setq eaf--switch-to-python nil)
+      (setq eaf--selected-window (selected-window))
+      (get-buffer-create "*eaf temp*")
+      (dolist (window (window-list))
+        (select-window window)
+        (when (eq major-mode 'eaf-mode)
+          (switch-to-buffer "*eaf temp*")))))
+
+  (defun eaf--mac-temp-restore ()
+    "Restore the previous state when focus-in"
+    (interactive)
+    (unless eaf--switch-to-python
+      (kill-buffer "*eaf temp*")
+      (select-window eaf--selected-window)))
+
+  (add-hook 'focus-in-hook #'eaf--mac-temp-restore)
+  (add-hook 'focus-out-hook #'eaf--mac-temp-state))
+
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
@@ -1419,8 +1479,8 @@ keybinding variable to eaf-app-binding-alist."
                   (let* ((window-allocation (eaf-get-window-allocation window))
                          (window-divider-right-padding (if window-divider-mode window-divider-default-right-width 0))
                          (window-divider-bottom-padding (if window-divider-mode window-divider-default-bottom-width 0))
-                         (x (nth 0 window-allocation))
-                         (y (nth 1 window-allocation))
+                         (x (+ (eaf--buffer-x-position-adjust frame) (nth 0 window-allocation)))
+                         (y (+ (eaf--buffer-y-postion-adjust frame) (nth 1 window-allocation)))
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation)))
                     (push (format "%s:%s:%s:%s:%s:%s"
@@ -2452,6 +2512,10 @@ The key is the annot id on PAGE."
         (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
       (message "Please install wmctrl to active Emacs window."))))
 
+(defun eaf--activate-emacs-mac-window()
+  "Activate Emacs mac window"
+  (call-process "/bin/bash" nil t nil "-c" "open -a emacs"))
+
 (defun eaf-activate-emacs-window()
   "Activate Emacs window."
   (cond
@@ -2459,6 +2523,8 @@ The key is the annot id on PAGE."
     (eaf--activate-emacs-wsl-window))
    ((memq system-type '(cygwin windows-nt ms-dos))
     (eaf--activate-emacs-win32-window))
+   ((eq system-type 'darwin)
+    (eaf--activate-emacs-mac-window))
    ((eq system-type 'gnu/linux)
     (eaf--activate-emacs-linux-window))))
 

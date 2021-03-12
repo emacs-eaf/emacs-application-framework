@@ -137,21 +137,22 @@ node ./install-eaf-win32.js
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
 
-| 包名                           | 依赖                         | 解释                         |
-| :--------                      | :------                      | :------                      |
-| python-epc                     | 核心                         | EPC Python端                 |
-| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                    |
-| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎     |
-| wmctrl, xdotool                | 核心                         | 激活Emacs窗口输入焦点        |
+| 包名                           | 依赖                         | 解释                                     |
+| :--------                      | :------                      | :------                                  |
+| python-epc                     | 核心                         | EPC Python端                             |
+| python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                |
+| python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
+| wmctrl, xdotool                | 核心                         | 激活Emacs窗口输入焦点                    |
 | pygetwindow                    | 核心                         | 从Windows中eaf激活WSL中Emacs窗口输入焦点 |
-| nodejs                         | 核心                         | 下载依赖与应用交互           |
-| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                  |
-| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码       |
-| aria2                          | 浏览器                       | 下载网络文件                 |
-| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式         |
-| filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件 |
-| python-qtconsole               | jupyter                      | 提供RichJupyterWidget        |
-| python-retrying                | Markdown浏览器               | 提供@retry                   |
+| nodejs                         | 核心                         | 下载依赖与应用交互                       |
+| mac-app-frontmost              | 核心                         | 获取macOS当前app名称                     |
+| python-pymupdf                 | PDF阅读器                    | 解析PDF文件                              |
+| python-qrcode                  | 文件上传，文件下载，文字传输 | 根据文件信息生成二维码                   |
+| aria2                          | 浏览器                       | 下载网络文件                             |
+| libreoffice                    | 办公文档阅读器               | 转换doc文件为pdf格式                     |
+| filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
+| python-qtconsole               | jupyter                      | 提供RichJupyterWidget                    |
+| python-retrying                | Markdown浏览器               | 提供@retry                               |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
@@ -209,8 +210,8 @@ EAF主要实现这几个功能：
 
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
-### 为什么EAF无法在MacOS下工作？
-1. QWindow Reparent技术无法在MacOS下正常工作，也就无法实现Qt应用进程的窗口粘贴到Emacs对应的Buffer区域
+### macOS
+请先阅读[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS)。
 
 ### 为什么EAF的js-video-player在Windows下无法播放视频文件？
 `js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.
