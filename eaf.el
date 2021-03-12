@@ -286,6 +286,13 @@ been initialized."
 
 (defvar eaf-last-frame-height 0)
 
+(when (eq system-type 'darwin)
+  (defvar eaf--switch-to-python t
+    "Record if Emacs switchs to Python process")
+
+  (defvar eaf--selected-window nil
+    "Record the selected window when focus-out"))
+
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
   :type 'string)
@@ -1424,6 +1431,42 @@ Including title-bar, menu-bar, offset depends on window system, and border."
         (+ (cdr (alist-get 'title-bar-size geometry))
            (cdr (alist-get 'tool-bar-size geometry)))))
 
+(defun eaf--buffer-x-position-adjust (frame)
+  "Adjust the x position of EAF buffers for macOS"
+  (if (eq system-type 'darwin)
+      (eaf--frame-left frame)
+    0))
+
+(defun eaf--buffer-y-postion-adjust (frame)
+  "Adjust the y position of EAF buffers for macOS"
+  (if (eq system-type 'darwin)
+      (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
+    0))
+
+(when (eq system-type 'darwin)
+  (defun eaf--mac-temp-state ()
+    "Create a temporary buffer to replace EAF buffers when focus-out"
+    (interactive)
+    (if (string-equal "Python\n" (shell-command-to-string "app-frontmost --name"))
+        (setq eaf--switch-to-python t)
+      (setq eaf--switch-to-python nil)
+      (setq eaf--selected-window (selected-window))
+      (get-buffer-create "*eaf temp*")
+      (dolist (window (window-list))
+        (select-window window)
+        (when (eq major-mode 'eaf-mode)
+          (switch-to-buffer "*eaf temp*")))))
+
+  (defun eaf--mac-temp-restore ()
+    "Restore the previous state when focus-in"
+    (interactive)
+    (unless eaf--switch-to-python
+      (kill-buffer "*eaf temp*")
+      (select-window eaf--selected-window)))
+
+  (add-hook 'focus-in-hook #'eaf--mac-temp-restore)
+  (add-hook 'focus-out-hook #'eaf--mac-temp-state))
+
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
@@ -1444,8 +1487,8 @@ Including title-bar, menu-bar, offset depends on window system, and border."
                   (let* ((window-allocation (eaf-get-window-allocation window))
                          (window-divider-right-padding (if window-divider-mode window-divider-default-right-width 0))
                          (window-divider-bottom-padding (if window-divider-mode window-divider-default-bottom-width 0))
-                         (x (+ (eaf--frame-left frame) (nth 0 window-allocation)))
-                         (y (+ (eaf--frame-top frame) (nth 1 window-allocation) (eaf--frame-internal-height frame)))
+                         (x (+ (eaf--buffer-x-position-adjust frame) (nth 0 window-allocation)))
+                         (y (+ (eaf--buffer-y-postion-adjust frame) (nth 1 window-allocation)))
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation)))
                     (push (format "%s:%s:%s:%s:%s:%s"
@@ -1922,16 +1965,6 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-forward-tab)))
-
-(defvar eaf-browser-focus-input-hook nil)
-
-(defvar eaf-browser-clear-focus-hook nil)
-
-(defun eaf-browser-focus-input-function ()
-  (run-hooks 'eaf-browser-focus-input-hook))
-
-(defun eaf-browser-clear-focus-function ()
-  (run-hooks 'eaf-browser-clear-focus-hook))
 
 ;;;###autoload
 (defun eaf-open-browser-in-background (url &optional args)
@@ -2495,7 +2528,7 @@ The key is the annot id on PAGE."
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs mac window"
-  (shell-command "open -a emacs"))
+  (call-process "/bin/bash" nil t nil "-c" "open -a emacs"))
 
 (defun eaf-activate-emacs-window()
   "Activate Emacs window."

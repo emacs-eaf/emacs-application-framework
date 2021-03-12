@@ -117,8 +117,11 @@ class View(QWidget):
             eval_in_emacs('eaf-activate-emacs-window', [])
 
         # Focus emacs buffer when user click view.
-        if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                            QEvent.MouseButtonDblClick]: # QEvent.Wheel
+        event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
+        if platform.system() != "Darwin":
+            event_type += [QEvent.Wheel]
+
+        if event.type() in event_type:
             focus_emacs_buffer(self.buffer_id)
             # Stop mouse event.
             return True
@@ -141,12 +144,10 @@ class View(QWidget):
     def reparent(self):
         qwindow = self.windowHandle()
 
-        if platform.system() == "Darwin":
-            qwindow.setPosition(QPoint(self.x, self.y))
-
-        else:
+        if platform.system() != "Darwin":
             qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
-            qwindow.setPosition(QPoint(self.x, self.y))
+
+        qwindow.setPosition(QPoint(self.x, self.y))
 
     def destroy_view(self):
         self.destroy()

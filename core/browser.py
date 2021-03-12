@@ -224,8 +224,11 @@ class BrowserView(QWebEngineView):
         #     print(time.time(), event.type(), self.rect())
 
         # Focus emacs buffer when user click view.
-        if event.type() in [QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                            QEvent.MouseButtonDblClick]:  # QEvent.Wheel
+        event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
+        if platform.system() != "Darwin":
+            event_type += [QEvent.Wheel]
+
+        if event.type() in event_type:
             focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
@@ -241,13 +244,13 @@ class BrowserView(QWebEngineView):
                 event.accept()
                 return True
 
-        # if event.type() == QEvent.Wheel:
-        #     modifiers = QApplication.keyboardModifiers()
-        #     if modifiers == Qt.ControlModifier:
-        #         if event.angleDelta().y() > 0:
-        #             self.zoom_in()
-        #         else:
-        #             self.zoom_out()
+        if event.type() == QEvent.Wheel:
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers == Qt.ControlModifier:
+                if event.angleDelta().y() > 0:
+                    self.zoom_in()
+                else:
+                    self.zoom_out()
 
         return super(QWebEngineView, self).eventFilter(obj, event)
 
@@ -520,13 +523,11 @@ class BrowserView(QWebEngineView):
     def focus_input(self):
         ''' input in focus.'''
         self.execute_js(self.focus_input_js)
-        eval_in_emacs('eaf-browser-focus-input-function', [])
 
     @interactive
     def clear_focus(self):
         ''' Clear the focus.'''
         self.eval_js(self.clear_focus_js)
-        eval_in_emacs('eaf-browser-clear-focus-function', [])
 
     @interactive
     def load_dark_mode_js(self):
