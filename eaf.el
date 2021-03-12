@@ -945,18 +945,10 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
                                 (split-string (buffer-string) "\n" t))))
         (if (epc:live-p eaf-epc-process)
             (dolist (url browser-url-list)
-              (if (eaf-is-valid-web-url url)
-                  (eaf-open-browser url)
-                (eaf-open url)))
+              (eaf-open-browser url))
           (dolist (url browser-url-list)
-            (if (eaf-is-valid-web-url url)
-                (push `(,url "browser" "") eaf--active-buffers)
-              (push `(,url "pdf-viewer" "") eaf--active-buffers)))
-          (when eaf--active-buffers
-            (let ((url (nth 0 (car eaf--active-buffers))))
-              (if (eaf-is-valid-web-url url)
-                  (eaf-open-browser url)
-                (eaf-open url))))))
+            (push `(,url "browser" "") eaf--active-buffers))
+          (when eaf--active-buffers (eaf-open-browser (nth 0 (car eaf--active-buffers))))))
     (user-error "Please set `eaf-browser-continue-where-left-off' to t first!")))
 
 
@@ -1538,9 +1530,11 @@ Including title-bar, menu-bar, offset depends on window system, and border."
        (eaf--kill-python-process))
      )))
 
-(defun eaf--save-session ()
-  "Save opening eaf browser tabs and pdf files"
-  (let* ((browser-restore-file-path
+(defun eaf--monitor-emacs-kill ()
+  "Function monitoring when Emacs is killed."
+  (ignore-errors
+    (when eaf-browser-continue-where-left-off
+      (let* ((browser-restore-file-path
               (concat eaf-config-location
                       (file-name-as-directory "browser")
                       (file-name-as-directory "history")
@@ -1549,17 +1543,9 @@ Including title-bar, menu-bar, offset depends on window system, and border."
         (write-region
          (dolist (buffer (eaf--get-eaf-buffers) browser-urls)
            (with-current-buffer buffer
-             (when (or (equal eaf--buffer-app-name "browser") (equal eaf--buffer-app-name "pdf-viewer"))
+             (when (equal eaf--buffer-app-name "browser")
                (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
          nil browser-restore-file-path)))
-
-(when eaf-browser-continue-where-left-off
-  (run-with-idle-timer 60 t #'eaf--save-session))
-
-(defun eaf--monitor-emacs-kill ()
-  "Function monitoring when Emacs is killed."
-  (ignore-errors
-    (eaf--save-session)
     (eaf-call-async "kill_emacs")))
 
 (defun eaf--org-preview-monitor-kill ()
