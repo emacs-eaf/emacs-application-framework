@@ -58,9 +58,7 @@ jmnodes {
 jmnode {
     position: absolute;
     cursor: default;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 200px;
 }
 jmexpander {
     position: absolute;
@@ -103,7 +101,12 @@ jmnode.root {
     background-color:  #3598DB;
     color:  #FFF;
     font-size: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: none;
 }
+
 jmnode.root.selected  {
     background-color:  #F56B85;
 }
