@@ -131,11 +131,9 @@ class View(QWidget):
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
-        if platform.system() == "Windows":
+        
+        if platform.system() in ["Windows", "Darwin"]:
             eval_in_emacs('eaf-activate-emacs-window', [])
-
-        if platform.system() == "Darwin":
-            os.system("open -a emacs")
 
         # Make graphics view at left-top corner after show.
         self.graphics_view.verticalScrollBar().setValue(0)

@@ -232,7 +232,10 @@ class BrowserView(QWebEngineView):
             focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
-            os.system("open -a emacs")
+
+            if platform.system() == "Darwin":
+                eval_in_emacs('eaf-activate-emacs-window', [])
+
             if event.button() == MOUSE_FORWARD_BUTTON:
                 self.forward()
 

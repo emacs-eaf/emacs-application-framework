@@ -2514,7 +2514,7 @@ The key is the annot id on PAGE."
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs mac window"
-  (call-process "/bin/bash" nil t nil "-c" "open -a emacs"))
+  (shell-command-to-string "open -a emacs"))
 
 (defun eaf-activate-emacs-window()
   "Activate Emacs window."

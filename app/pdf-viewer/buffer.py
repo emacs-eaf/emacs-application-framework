@@ -225,7 +225,7 @@ class AppBuffer(Buffer):
         return ""
 
 class PdfViewerWidget(QWidget):
-    
+
     translate_double_click_word = QtCore.pyqtSignal(str)
 
     def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict):
@@ -1377,7 +1377,7 @@ class PdfViewerWidget(QWidget):
                 self.free_text_annot_timer.start()
 
             if platform.system() == "Darwin":
-                os.system("open -a emacs")
+                eval_in_emacs('eaf-activate-emacs-window', [])
 
         elif event.type() == QEvent.MouseButtonDblClick:
             self.disable_free_text_annot_mode()
