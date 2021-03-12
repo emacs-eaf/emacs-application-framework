@@ -61,7 +61,7 @@ class AppBuffer(BrowserBuffer):
 
         self.build_all_methods(self)
 
-        QTimer.singleShot(500, self.initialize)
+        self.buffer_widget.loadFinished.connect(lambda _: self.initialize())
 
     def resize_view(self):
         self.buffer_widget.eval_js("relayout();")
