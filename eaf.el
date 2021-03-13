@@ -2513,7 +2513,7 @@ The key is the annot id on PAGE."
       (message "Please install wmctrl to active Emacs window."))))
 
 (defun eaf--activate-emacs-mac-window()
-  "Activate Emacs mac window"
+  "Activate Emacs MacOS window."
   (shell-command-to-string "open -a emacs"))
 
 (defun eaf-activate-emacs-window()
