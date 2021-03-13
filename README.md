@@ -213,7 +213,7 @@ Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-f
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
 ### macOS
-See [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS).
+Currently only partially supports Mac, not all functions work properlyThe function of EAF can only partially support MacOS, not all functions can work normally, please check the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS) for details.
 
 ### EAF js-video-player can't play some video on Windows. Why?
 `js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.
