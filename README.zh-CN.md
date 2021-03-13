@@ -211,7 +211,7 @@ EAF主要实现这几个功能：
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
 ### macOS
-EAF当前只能部分支持MacOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS)。
+EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS)。
 
 ### 为什么EAF的js-video-player在Windows下无法播放视频文件？
 `js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.

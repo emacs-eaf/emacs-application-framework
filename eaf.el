@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Mon Feb 22 03:25:17 2021 (-0500)
+;; Last-Updated: Fri Mar 12 19:19:31 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -92,7 +92,7 @@
           ((memq system-type '(cygwin windows-nt ms-dos))
            (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
           ((eq system-type 'darwin)
-           (user-error "Unfortunately MacOS is not supported, see README for details")))))
+           (user-error "Unfortunately macOS is not supported, see README for details")))))
 
 (require 'bookmark)
 (require 'cl-lib)
@@ -2513,7 +2513,7 @@ The key is the annot id on PAGE."
       (message "Please install wmctrl to active Emacs window."))))
 
 (defun eaf--activate-emacs-mac-window()
-  "Activate Emacs MacOS window."
+  "Activate Emacs macOS window."
   (shell-command-to-string "open -a emacs"))
 
 (defun eaf-activate-emacs-window()
