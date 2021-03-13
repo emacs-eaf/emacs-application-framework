@@ -83,15 +83,30 @@ function installCoreDeps() {
     execSync("pip install -r requirements.txt", { stdio: "inherit" });
 }
 
-const kliteCodecPackURL = "https://files3.codecguide.com/K-Lite_Codec_Pack_1605_Basic.exe";
-const kliteCodecPackHash = "1f2b2593c6de1f4f3724df673c2cf1d31c4a416355b4a64f532a52a825e4694a";
+
+function checkCodecPack() {
+    try {
+        execSync("REG QUERY HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\KLiteCodecPack_is1",
+            { stdio: "ignore" });
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 async function installCodecPack() {
+    const kliteCodecPackURL = "https://files3.codecguide.com/K-Lite_Codec_Pack_1605_Basic.exe";
+    const kliteCodecPackHash = "1f2b2593c6de1f4f3724df673c2cf1d31c4a416355b4a64f532a52a825e4694a";
+
+    if (checkCodecPack()) {
+        console.info("k-lite-codec-pack is installed!");
+        return;
+    }
+
     const installer = await downloadFile(kliteCodecPackURL, kliteCodecPackHash);
     console.info("installing k-lite-codec-pack basic ...");
     execSync(installer, { stdio: "inherit" });
     console.info("install k-lite-codec-pack basic finished");
-
 }
 
 try {
