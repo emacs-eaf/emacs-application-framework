@@ -1756,6 +1756,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
               (setq-local eaf--bookmark-title title)
               (setq-local eaf--buffer-url url)
               (rename-buffer (format eaf-buffer-title-format title) t)
+              (eaf--update-modeline-icon)
               (throw 'found-eaf t))))))))
 
 (defun eaf-translate-text (text)
