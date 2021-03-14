@@ -1804,7 +1804,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
-  (when (ignore-errors (featurep 'eaf-all-the-icons))
+  (when (and (ignore-errors (require 'all-the-icons) (featurep 'eaf-all-the-icons)))
     (eaf-all-the-icons-update-icon)))
 
 (defun eaf--markdown-preview-display (buf)
