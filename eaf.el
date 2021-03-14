@@ -1756,6 +1756,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
               (setq-local eaf--bookmark-title title)
               (setq-local eaf--buffer-url url)
               (rename-buffer (format eaf-buffer-title-format title) t)
+              (eaf--update-modeline-icon)
               (throw 'found-eaf t))))))))
 
 (defun eaf-translate-text (text)
@@ -1789,7 +1790,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                       (if (eaf--called-from-wsl-on-windows-p)
                           (eaf--translate-wsl-url-to-windows url)
                         url)
-                      app-name args))
+                      app-name args)
+      (eaf--update-modeline-icon))
     (eaf--display-app-buffer app-name buffer))
   (eaf--post-open-actions url app-name args))
 
@@ -1800,6 +1802,11 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
            (when office-pdf
              (with-current-buffer (file-name-nondirectory url)
                (rename-buffer (concat "[Converted] " (substring args 0 (- office-pdf 1))) t)))))))
+
+(defun eaf--update-modeline-icon ()
+  "Update modeline icon if used"
+  (when (and (ignore-errors (require 'all-the-icons) (featurep 'eaf-all-the-icons)))
+    (eaf-all-the-icons-update-icon)))
 
 (defun eaf--markdown-preview-display (buf)
   "Given BUF, split window to show file and previewer."
