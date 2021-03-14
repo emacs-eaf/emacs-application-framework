@@ -47,6 +47,10 @@ input {
     font-size: 12px;
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 5px;
+    min-width: 150px;
+    min-height: 24px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 /* z-index: 2 */
@@ -75,18 +79,15 @@ jmexpander {
     cursor: pointer;
 }
 
-@media screen and (max-device-width:  1024px)  {
-    jmnode {padding: 5px;border-radius: 3px;font-size: 14px;}
-    jmnode.root {font-size: 21px;}
-}
-
 jmnode {
-    padding: 10px;
     background-color:  #30A3C0;
     color:  #FFF;
     border-radius: 5px;
-    padding-left:  30px;
-    padding-right:  30px;
+    font-size: 18px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left:  20px;
+    padding-right:  20px;
 }
 jmnode:hover {
     background-color:  #F3C250;
@@ -105,6 +106,10 @@ jmnode.root {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left:  30px;
+    padding-right:  30px;
 }
 
 jmnode.root.selected  {
