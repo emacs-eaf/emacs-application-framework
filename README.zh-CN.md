@@ -213,10 +213,10 @@ EAF主要实现这几个功能：
 ### macOS
 EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS)。
 
-### 为什么EAF的js-video-player在Windows下无法播放视频文件？
+### 为什么EAF的js-video-player在Windows和Mac下无法播放视频文件？
 `js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.
 
-### 为什么通过窗口管理器使用EAF无法接收输入信息？
+### 为什么通过Linux窗口管理器使用EAF无法接收输入信息？
 EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、Xfce、LXDE、Sway、i3、QTile、Xpra.
 
 我们认为不同的窗口管理器对于X11协议的支持不够完善才导致这样的问题。
