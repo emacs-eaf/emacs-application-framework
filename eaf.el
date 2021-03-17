@@ -106,13 +106,6 @@
 (require 'seq)
 (require 'subr-x)
 
-;; Remove the relevant environment variables from the process-environment to disable QT scaling,
-;; let EAF qt program follow the system scale.
-(setq process-environment (seq-filter
-                           (lambda(var)
-                             (and (not (string-match-p "QT_SCALE_FACTOR" var))
-                                  (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var)))) process-environment))
-
 (defgroup eaf nil
   "Emacs Application Framework."
   :group 'applications)
@@ -1149,17 +1142,17 @@ A hashtable, key is url and value is title.")
                     (list (number-to-string eaf-server-port))
                     (list (eaf-serialization-var-list))
                     ))
-         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command))
-         (process-environment (cl-copy-list process-environment)))
+         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
 
     ;; We need manually set scale factor when at Gnome/Wayland environment.
-    ;; Note:
-    ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
-    ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
     (let ((wayland-display (getenv "WAYLAND_DISPLAY")))
       (when (and wayland-display (not (string= wayland-display "")))
+        ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
+        ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
         (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
+        ;; Set EAF application scale factor.
         (setenv "QT_SCALE_FACTOR" "1")
+        ;; Force xwayland to ensure SWay works.
         (setenv "QT_QPA_PLATFORM" "xcb")
         ))
 
@@ -1420,8 +1413,8 @@ keybinding variable to eaf-app-binding-alist."
   "Height of internal objects.
 Including title-bar, menu-bar, offset depends on window system, and border."
   (let ((geometry (frame-geometry frame)))
-        (+ (cdr (alist-get 'title-bar-size geometry))
-           (cdr (alist-get 'tool-bar-size geometry)))))
+    (+ (cdr (alist-get 'title-bar-size geometry))
+       (cdr (alist-get 'tool-bar-size geometry)))))
 
 (defun eaf--buffer-x-position-adjust (frame)
   "Adjust the x position of EAF buffers for macOS"
@@ -1988,7 +1981,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
