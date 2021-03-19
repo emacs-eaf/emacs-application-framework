@@ -290,6 +290,14 @@ been initialized."
   "Name of EAF buffer."
   :type 'string)
 
+(defcustom eaf-scaling-factor
+  (/ (max 96
+	  (string-to-number
+	   (shell-command-to-string "xrdb -query | grep dpi | cut -d\":\" -f2 | tr -d \"[:space:]\"")))
+     96)
+  "Scaling factor of the Display for HiDPI displays."
+  :type 'integer)
+
 (defcustom eaf-browser-search-engines `(("google" . "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
                                         ("duckduckgo" . "https://duckduckgo.com/?q=%s"))
   "The default search engines offered by EAF.
@@ -1249,6 +1257,9 @@ We need calcuate render allocation to make sure no black border around render co
          (width (frame-pixel-width))
          ;; Render height should minus mode-line height, minibuffer height, header height.
          (height (- (frame-pixel-height) (window-mode-line-height) (window-pixel-height (minibuffer-window)) window-header-height)))
+    (if (> eaf-scaling-factor 1)
+	(setq width (/ width eaf-scaling-factor)
+	      height (/ height eaf-scaling-factor)))
     (mapcar (lambda (x) (format "%s" x)) (list width height))))
 
 (defun eaf-get-window-allocation (&optional window)
@@ -1265,6 +1276,11 @@ We need calcuate render allocation to make sure no black border around render co
                  0)))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
+    (if (> eaf-scaling-factor 1)
+	(setq x (/ x eaf-scaling-factor)
+	      y (/ y eaf-scaling-factor)
+	      w (/ w eaf-scaling-factor)
+	      h (/ h eaf-scaling-factor)))
     (list x y w h)))
 
 (defun eaf--generate-id ()
