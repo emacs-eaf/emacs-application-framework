@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Mar 12 19:19:31 2021 (-0500)
+;; Last-Updated: Fri Mar 19 19:49:34 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1140,22 +1140,24 @@ A hashtable, key is url and value is title.")
                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
                     (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
-                    (list (eaf-serialization-var-list))
-                    ))
+                    (list (eaf-serialization-var-list))))
          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
-
-    ;; We need manually set scale factor when at Gnome/Wayland environment.
-    (let ((wayland-display (getenv "WAYLAND_DISPLAY")))
-      (when (and wayland-display (not (string= wayland-display "")))
-        ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
-        ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
-        (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
-        ;; Set EAF application scale factor.
-        (setenv "QT_SCALE_FACTOR" "1")
-        ;; Force xwayland to ensure SWay works.
-        (setenv "QT_QPA_PLATFORM" "xcb")
-        ))
-
+    (if (and (getenv "WAYLAND_DISPLAY") (not (string= (getenv "WAYLAND_DISPLAY") "")))
+        (progn
+          ;; We need manually set scale factor when at Gnome/Wayland environment.
+          ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
+          ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
+          (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
+          ;; Set EAF application scale factor.
+          (setenv "QT_SCALE_FACTOR" "1")
+          ;; Force xwayland to ensure SWay works.
+          (setenv "QT_QPA_PLATFORM" "xcb"))
+      (setq process-environment
+            (seq-filter
+             (lambda (var)
+               (and (not (string-match-p "QT_SCALE_FACTOR" var))
+                    (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
+             process-environment)))
     ;; Start python process.
     (if eaf-enable-debug
         (progn
