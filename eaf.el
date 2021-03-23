@@ -280,11 +280,11 @@ been initialized."
 (defvar eaf-last-frame-height 0)
 
 (when (eq system-type 'darwin)
-  (defvar eaf--switch-to-python t
+  (defvar eaf--mac-switch-to-python nil
     "Record if Emacs switchs to Python process")
 
-  (defvar eaf--selected-window nil
-    "Record the selected window when focus-out"))
+  (defvar eaf--mac-has-focus t
+    "Record if Emacs has focus"))
 
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
@@ -1431,28 +1431,45 @@ Including title-bar, menu-bar, offset depends on window system, and border."
     0))
 
 (when (eq system-type 'darwin)
-  (defun eaf--mac-temp-state ()
-    "Create a temporary buffer to replace EAF buffers when focus-out"
-    (interactive)
-    (if (string-equal "Python\n" (shell-command-to-string "app-frontmost --name"))
-        (setq eaf--switch-to-python t)
-      (setq eaf--switch-to-python nil)
-      (setq eaf--selected-window (selected-window))
-      (get-buffer-create "*eaf temp*")
-      (dolist (window (window-list))
-        (select-window window)
-        (when (eq major-mode 'eaf-mode)
-          (switch-to-buffer "*eaf temp*")))))
+  (defun eaf--mac-focus-change ()
+    "Manage Emacs's focus change"
+    (cond
+     ((string= "Python\n" (shell-command-to-string "app-frontmost --name"))
+      (setq eaf--mac-switch-to-python t))
 
-  (defun eaf--mac-temp-restore ()
-    "Restore the previous state when focus-in"
-    (interactive)
-    (unless eaf--switch-to-python
-      (kill-buffer "*eaf temp*")
-      (select-window eaf--selected-window)))
+     ((string= "Emacs\n" (shell-command-to-string "app-frontmost --name"))
+      (cond
+       (eaf--mac-switch-to-python
+        (setq eaf--mac-switch-to-python nil))
+       ((not eaf--mac-has-focus)
+        (run-with-timer 0.1 nil #'eaf--mac-focus-in)
+        )
+       (eaf--mac-has-focus
+        (eaf--mac-focus-out))))
+     (t (eaf--mac-focus-out))))
 
-  (add-hook 'focus-in-hook #'eaf--mac-temp-restore)
-  (add-hook 'focus-out-hook #'eaf--mac-temp-state))
+  (defun eaf--mac-replace-eaf-buffers ()
+    (dolist (window (window-list))
+            (select-window window)
+            (when (eq major-mode 'eaf-mode)
+              (get-buffer-create "*eaf temp*")
+              (switch-to-buffer "*eaf temp*" t))))
+
+  (defun eaf--mac-focus-in ()
+    (setq eaf--mac-has-focus t)
+    (ignore-errors
+      (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame))
+      (bury-buffer "*eaf temp*"))
+    )
+
+  (defun eaf--mac-focus-out (&optional frame)
+    (setq eaf--mac-has-focus nil)
+    (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
+    (eaf--mac-replace-eaf-buffers))
+
+  (add-function :after after-focus-change-function #'eaf--mac-focus-change)
+  (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)
+  )
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
