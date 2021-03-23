@@ -627,9 +627,15 @@ class PdfViewerWidget(QWidget):
         painter.setFont(self.font)
 
         if self.inverted_mode:
-            painter.setPen(self.page_annotate_dark_color)
+            if self.rect().width() - render_width < self.rect().width() * 0.1:
+                painter.setPen(self.page_annotate_light_color)
+            else:
+                painter.setPen(self.page_annotate_dark_color)
         else:
-            painter.setPen(self.page_annotate_light_color)
+            if self.rect().width() - render_width < self.rect().width() * 0.1:
+                painter.setPen(self.page_annotate_dark_color)
+            else:
+                painter.setPen(self.page_annotate_light_color)
 
         # Draw progress.
         progress_percent = int((start_page_index + 1) * 100 / self.page_total_number)
