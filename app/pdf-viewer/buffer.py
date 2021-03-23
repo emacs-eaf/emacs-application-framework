@@ -627,10 +627,7 @@ class PdfViewerWidget(QWidget):
         painter.setFont(self.font)
 
         if self.inverted_mode:
-            if self.rect().width() - render_width < self.rect().width() * 0.1:
-                painter.setPen(self.page_annotate_light_color)
-            else:
-                painter.setPen(self.page_annotate_dark_color)
+            painter.setPen(self.page_annotate_light_color)
         else:
             if self.rect().width() - render_width < self.rect().width() * 0.1:
                 painter.setPen(self.page_annotate_dark_color)
