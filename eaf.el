@@ -208,7 +208,7 @@ been initialized."
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
-(defvar eaf-server-port 9999)
+(defvar eaf-server-port nil)
 
 (defun epcs:server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
@@ -239,21 +239,27 @@ been initialized."
     main-process))
 
 (defvar eaf-server
-  (epcs:server-start
-   (lambda (mngr)
-     (let ((mngr mngr))
-       (epc:define-method
-        mngr 'eval-in-emacs
-        (lambda (&rest args)
-          ;; Decode argument with Base64 format automatically.
-          (apply (read (car args))
-                 (mapcar
-                  (lambda (arg)
-                    (let ((arg (eaf--decode-string arg)))
-                      (cond ((string-prefix-p "'" arg)
-                             (read (substring arg 1)))
-                            (t arg)))) (cdr args)))))))
-   eaf-server-port))
+  (let (server)
+    (setq server (epcs:server-start
+                  (lambda (mngr)
+                    (let ((mngr mngr))
+                      (epc:define-method
+                       mngr 'eval-in-emacs
+                       (lambda (&rest args)
+                         ;; Decode argument with Base64 format automatically.
+                         (apply (read (car args))
+                                (mapcar
+                                 (lambda (arg)
+                                   (let ((arg (eaf--decode-string arg)))
+                                     (cond ((string-prefix-p "'" arg)
+                                            (read (substring arg 1)))
+                                           (t arg)))) (cdr args)))))))
+                  ))
+    (if server
+        (setq eaf-server-port (process-contact server :service))
+      (message "eaf-server fails to start.")
+      )
+    server))
 
 (when noninteractive
   ;; Start "event loop".
