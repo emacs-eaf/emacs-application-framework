@@ -69,7 +69,9 @@ class AppBuffer(BrowserBuffer):
     def initialize(self):
         self.init_file()
 
-        self.focus_widget(QMouseEvent(QEvent.MouseButtonPress, QPointF(0, 0), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier))
+        # The .jsmind-inner element is move right and bottom 30px,
+        # so we must use a point greater than (30, 30), ex (100, 100).
+        self.focus_widget(QMouseEvent(QEvent.MouseButtonPress, QPointF(100, 100), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier))
 
     def init_file(self):
         self.url = os.path.expanduser(self.url)
