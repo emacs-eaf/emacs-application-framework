@@ -192,7 +192,11 @@ def init_epc_client(emacs_server_port):
     global epc_client
 
     if epc_client == None:
-        epc_client = EPCClient(("localhost", emacs_server_port), log_traceback=True)
+        try:
+            epc_client = EPCClient(("localhost", emacs_server_port), log_traceback=True)
+        except ConnectionRefusedError:
+            import traceback
+            traceback.print_exc()
 
 def close_epc_client():
     global epc_client
