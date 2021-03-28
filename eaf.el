@@ -208,8 +208,6 @@ been initialized."
 
 (defvar eaf-python-file (expand-file-name "eaf.py" (file-name-directory load-file-name)))
 
-(defvar eaf-server-port 9999)
-
 (defun epcs:server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
   (let*
@@ -237,23 +235,6 @@ been initialized."
                  :connect-function connect-function))
           epcs:server-processes)
     main-process))
-
-(defvar eaf-server
-  (epcs:server-start
-   (lambda (mngr)
-     (let ((mngr mngr))
-       (epc:define-method
-        mngr 'eval-in-emacs
-        (lambda (&rest args)
-          ;; Decode argument with Base64 format automatically.
-          (apply (read (car args))
-                 (mapcar
-                  (lambda (arg)
-                    (let ((arg (eaf--decode-string arg)))
-                      (cond ((string-prefix-p "'" arg)
-                             (read (substring arg 1)))
-                            (t arg)))) (cdr args)))))))
-   eaf-server-port))
 
 (when noninteractive
   ;; Start "event loop".
@@ -836,6 +817,30 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 Add NAME of command `wmctrl -m' to this list."
   :type 'list)
+
+(defvar eaf-server-port
+  (string-to-number (car (split-string (shell-command-to-string
+                                        (format "%s %s"
+                                                eaf-python-command
+                                                (expand-file-name "find_free_port.py" (file-name-directory load-file-name))
+                                                ))))))
+
+(defvar eaf-server
+  (epcs:server-start
+   (lambda (mngr)
+     (let ((mngr mngr))
+       (epc:define-method
+        mngr 'eval-in-emacs
+        (lambda (&rest args)
+          ;; Decode argument with Base64 format automatically.
+          (apply (read (car args))
+                 (mapcar
+                  (lambda (arg)
+                    (let ((arg (eaf--decode-string arg)))
+                      (cond ((string-prefix-p "'" arg)
+                             (read (substring arg 1)))
+                            (t arg)))) (cdr args)))))))
+   eaf-server-port))
 
 (defvar eaf-app-binding-alist
   '(("browser" . eaf-browser-keybinding)
@@ -1451,10 +1456,10 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 
   (defun eaf--mac-replace-eaf-buffers ()
     (dolist (window (window-list))
-            (select-window window)
-            (when (eq major-mode 'eaf-mode)
-              (get-buffer-create "*eaf temp*")
-              (switch-to-buffer "*eaf temp*" t))))
+      (select-window window)
+      (when (eq major-mode 'eaf-mode)
+        (get-buffer-create "*eaf temp*")
+        (switch-to-buffer "*eaf temp*" t))))
 
   (defun eaf--mac-focus-in ()
     (setq eaf--mac-has-focus t)
