@@ -837,6 +837,7 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
     "i3"                                ;i3
     "LG3D"                              ;qtile
     "Xpra"
+    "EXWM"
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 Add NAME of command `wmctrl -m' to this list."
@@ -1456,10 +1457,10 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 
   (defun eaf--mac-replace-eaf-buffers ()
     (dolist (window (window-list))
-            (select-window window)
-            (when (eq major-mode 'eaf-mode)
-              (get-buffer-create "*eaf temp*")
-              (switch-to-buffer "*eaf temp*" t))))
+      (select-window window)
+      (when (eq major-mode 'eaf-mode)
+        (get-buffer-create "*eaf temp*")
+        (switch-to-buffer "*eaf temp*" t))))
 
   (defun eaf--mac-focus-in ()
     (setq eaf--mac-has-focus t)
