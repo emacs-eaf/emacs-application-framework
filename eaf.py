@@ -500,7 +500,7 @@ if __name__ == "__main__":
     hardware_acceleration_args = []
     if platform.system() != "Windows":
         hardware_acceleration_args += [
-            "--ignore-gpu-blacklist",
+            "--ignore-gpu-blocklist",
             "--enable-gpu-rasterization",
             "--enable-native-gpu-memory-buffers"]
 
