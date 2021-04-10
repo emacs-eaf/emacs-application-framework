@@ -539,7 +539,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def enable_dark_mode(self):
         ''' Dark mode support.'''
-        self.eval_js("""DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});""")
+        self.eval_js("""DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});""")
 
     @interactive(insert_or_do=True)
     def disable_dark_mode(self):
