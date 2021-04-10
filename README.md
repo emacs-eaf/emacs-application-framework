@@ -7,6 +7,8 @@ English | [简体中文](./README.zh-CN.md)
 # Emacs Application Framework
 Emacs Application Framework (EAF) is a GUI application framework for Emacs that revolutionizes its multimedia and graphical capabilities to ultimately *Live in Emacs*.
 
+EAF support Linux, Windows, and MacOS.
+
 ## EAF Vision
 Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world had been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
 
