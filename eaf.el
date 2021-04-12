@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Apr 11 23:27:25 2021 (-0400)
+;; Last-Updated: Sun Apr 11 23:51:46 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -2400,14 +2400,12 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (defun eaf--enter-fullscreen-request ()
   "Entering EAF browser fullscreen use Emacs frame's size."
-  (if (= (length (window-list)) 1)
-      (progn (setq-local eaf-fullscreen-p t)
-             (eaf-monitor-configuration-change)
-             (when (and eaf-browser-fullscreen-move-cursor-corner
-                        (or (string= eaf--buffer-app-name "browser")
-                            (string= eaf--buffer-app-name "js-video-player")))
-               (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
-    (eaf-call-async "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")))
+  (setq-local eaf-fullscreen-p t)
+  (eaf-monitor-configuration-change)
+  (when (and eaf-browser-fullscreen-move-cursor-corner
+             (or (string= eaf--buffer-app-name "browser")
+                 (string= eaf--buffer-app-name "js-video-player")))
+    (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
 (defun eaf--exit_fullscreen_request ()
   "Exit EAF browser fullscreen."
