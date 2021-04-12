@@ -146,7 +146,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-epc                     | Core                                 | EPC for Python                                        |
 | python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                 |
 | python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                   |
-| wmctrl, xdotool                | Core                                 | Activate Emacs window input focus                     |
+| wmctrl                         | Core                                 | Activate Emacs window input focus                     |
 | pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows |
 | nodejs                         | Core                                 | Installs dependencies, and for app communications     |
 | mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                        |

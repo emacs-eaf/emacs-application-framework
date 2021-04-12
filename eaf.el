@@ -2537,9 +2537,7 @@ The key is the annot id on PAGE."
       ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
       ;;
       ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-      (if (executable-find "xdotool")
-          (shell-command-to-string (format "xdotool mousemove %d %d" (car (frame-edges)) (nth 3 (frame-edges))))
-        (message "Please install xdotool to make mouse to frame bottom automatically."))
+      (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))
 
     ;; When press Alt + Tab in DE, such as KDE.
     ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.

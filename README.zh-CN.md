@@ -144,7 +144,7 @@ node ./install-eaf-win32.js
 | python-epc                     | 核心                         | EPC Python端                             |
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
-| wmctrl, xdotool                | 核心                         | 激活Emacs窗口输入焦点                    |
+| wmctrl                         | 核心                         | 激活Emacs窗口输入焦点                    |
 | pygetwindow                    | 核心                         | 从Windows中eaf激活WSL中Emacs窗口输入焦点 |
 | nodejs                         | 核心                         | 下载依赖与应用交互                       |
 | mac-app-frontmost              | 核心                         | 获取macOS当前app名称                     |
