@@ -21,10 +21,10 @@
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QVariant, QTimer, QFile
-from PyQt5.QtGui import QColor, QCursor, QScreen
+from PyQt5.QtGui import QColor, QScreen
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
-from PyQt5.QtWidgets import QApplication, QWidget, qApp
+from PyQt5.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
 from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit
 from functools import partial
@@ -730,22 +730,10 @@ class BrowserBuffer(Buffer):
         ''' Handle fullscreen request.'''
         if request.toggleOn():
             self.enter_fullscreen_request.emit()
-
-            # Move cursor to bottom right corner when fullscreen.
-            self.move_cursor_to_corner()
         else:
             self.exit_fullscreen_request.emit()
 
         request.accept()
-
-    def move_cursor_to_corner(self):
-        '''
-        Move cursor to bottom right corner of screen.
-        Usually call once when fullscreen state,
-        instead hide cursor, because hide cursor may cause bug that cursor is not show after exit fullscreen.
-        '''
-        screen = qApp.primaryScreen()
-        QCursor().setPos(screen, screen.size().width(), screen.size().height())
 
     def should_skip_download_item(self, download_item):
         return download_item.page() != self.buffer_widget.web_page

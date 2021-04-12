@@ -20,12 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtGui import QCursor
 from PyQt5.QtGui import QFocusEvent
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, qApp
 from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message
 import abc
 import string
@@ -173,6 +173,13 @@ class Buffer(QGraphicsScene):
         ''' Disable full screen.'''
         self.is_fullscreen = False
         eval_in_emacs('eaf--exit_fullscreen_request', [])
+
+    def move_cursor_to_corner(self):
+        '''
+        Move cursor to bottom right corner of screen.
+        '''
+        screen = qApp.primaryScreen()
+        QCursor().setPos(screen, screen.size().width(), screen.size().height())
 
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''

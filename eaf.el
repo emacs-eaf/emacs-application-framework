@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Mar 19 19:49:34 2021 (-0400)
+;; Last-Updated: Sun Apr 11 23:27:25 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -569,6 +569,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-g" . "exit_fullscreen")
     ("<f12>" . "open_devtools")
     ("h" . "backward")
+    ("f" . "toggle_fullscreen")
     ("l" . "forward")
     ("r" . "restart")
     ("j" . "decrease_volume")
@@ -804,6 +805,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 If non-nil, all active EAF Browser buffers will be saved before Emacs is killed,
 and will re-open them when calling `eaf-browser-restore-buffers' in the future session."
+  :type 'boolean)
+
+(defcustom eaf-browser-fullscreen-move-cursor-corner nil
+  "If non-nil, move the mouse cursor to the corner when fullscreen in the browser."
   :type 'boolean)
 
 (defcustom eaf-proxy-host ""
@@ -2395,8 +2400,14 @@ Make sure that your smartphone is connected to the same WiFi network as this com
 
 (defun eaf--enter-fullscreen-request ()
   "Entering EAF browser fullscreen use Emacs frame's size."
-  (setq-local eaf-fullscreen-p t)
-  (eaf-monitor-configuration-change))
+  (if (= (length (window-list)) 1)
+      (progn (setq-local eaf-fullscreen-p t)
+             (eaf-monitor-configuration-change)
+             (when (and eaf-browser-fullscreen-move-cursor-corner
+                        (or (string= eaf--buffer-app-name "browser")
+                            (string= eaf--buffer-app-name "js-video-player")))
+               (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
+    (eaf-call-async "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")))
 
 (defun eaf--exit_fullscreen_request ()
   "Exit EAF browser fullscreen."
