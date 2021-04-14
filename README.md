@@ -72,11 +72,13 @@ EAF is an extensible framework, it comes with a number of useful applications, a
 
 ## Install
 1. Download EAF
+
     ```Bash
     git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
     ```
 
 Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
+
     ```Emacs-lisp
     (quelpa '(eaf :fetcher github
                   :repo  "manateelazycat/emacs-application-framework"
@@ -88,6 +90,7 @@ Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 If you prefer to manually call the installation script in the terminal,
 
 - If you use GNU/Linux,
+
     ```Bash
     cd emacs-application-framework
     chmod +x ./install-eaf.sh

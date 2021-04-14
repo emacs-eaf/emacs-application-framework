@@ -70,11 +70,13 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 
 ## 安装
 1. 下载EAF:
+
     ```Bash
     git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
     ```
 
 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
+
     ```Emacs-lisp
     (quelpa '(eaf :fetcher github
                   :repo  "manateelazycat/emacs-application-framework"
@@ -86,6 +88,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 如果你更喜欢手动执行安装脚本，
 
 - GNU/Linux用户：
+
     ```Bash
     cd emacs-application-framework
     chmod +x ./install-eaf.sh
