@@ -72,16 +72,16 @@ EAF is an extensible framework, it comes with a number of useful applications, a
 
 ## Install
 1. Download EAF
-```Bash
-git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
-```
+    ```Bash
+    git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+    ```
 
 Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
-```Emacs-lisp
-(quelpa '(eaf :fetcher github
-              :repo  "manateelazycat/emacs-application-framework"
-              :files ("*")))
-```
+    ```Emacs-lisp
+    (quelpa '(eaf :fetcher github
+                  :repo  "manateelazycat/emacs-application-framework"
+                  :files ("*")))
+    ```
 
 2. Install EAF dependencies using `M-x eaf-install-dependencies`.
 
@@ -119,29 +119,29 @@ Feel free to inspect the install script yourself. An explanation of each depende
 
 4. From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
-```Elisp
-(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-(require 'eaf)
-```
+    ```Elisp
+    (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+    (require 'eaf)
+    ```
 Alternatively, if you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
 
-```Elisp
-(use-package eaf
-  :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
-  :init
-  (use-package epc :defer t :ensure t)
-  (use-package ctable :defer t :ensure t)
-  (use-package deferred :defer t :ensure t)
-  (use-package s :defer t :ensure t)
-  :custom
-  (eaf-browser-continue-where-left-off t)
-  :config
-  (eaf-setq eaf-browser-enable-adblocker "true")
-  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
-  (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
-```
+    ```Elisp
+    (use-package eaf
+      :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+      :init
+      (use-package epc :defer t :ensure t)
+      (use-package ctable :defer t :ensure t)
+      (use-package deferred :defer t :ensure t)
+      (use-package s :defer t :ensure t)
+      :custom
+      (eaf-browser-continue-where-left-off t)
+      :config
+      (eaf-setq eaf-browser-enable-adblocker "true")
+      (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+      (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+      (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+      (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
+    ```
 
 ### Dependency List
 
@@ -236,17 +236,17 @@ One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus
 ### Proxy
 If you need to use proxy to access internet, one can configure the proxy settings.
 
-```Elisp
-(setq eaf-proxy-type "http")
-(setq eaf-proxy-host "127.0.0.1")
-(setq eaf-proxy-port "1080")
-```
+    ```Elisp
+    (setq eaf-proxy-type "http")
+    (setq eaf-proxy-host "127.0.0.1")
+    (setq eaf-proxy-port "1080")
+    ```
 
 If you use Socks5 as local proxy, one can set proxy type with:
 
-```Elisp
-(setq eaf-proxy-type "socks5")
-```
+    ```Elisp
+    (setq eaf-proxy-type "socks5")
+    ```
 
 ## EAF in the community
 

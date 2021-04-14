@@ -70,16 +70,16 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 
 ## 安装
 1. 下载EAF:
-```Bash
-git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
-```
+    ```Bash
+    git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+    ```
 
 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
-```Emacs-lisp
-(quelpa '(eaf :fetcher github
-              :repo  "manateelazycat/emacs-application-framework"
-              :files ("*")))
-```
+    ```Emacs-lisp
+    (quelpa '(eaf :fetcher github
+                  :repo  "manateelazycat/emacs-application-framework"
+                  :files ("*")))
+    ```
 
 2. 通过`M-x eaf-install-dependencies`安装EAF依赖，
 
@@ -106,7 +106,7 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
     chmod +x ./install-eaf-mac.sh
     ./install-eaf-mac.sh
     ```
-    
+
 脚本里安装的每一个依赖的解释可以在[依赖列表](#依赖列表)找到。
 
 3. 安装Elisp依赖包:
@@ -117,30 +117,30 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
 
 4. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
-```Elisp
-(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-(require 'eaf)
-```
+    ```Elisp
+    (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+    (require 'eaf)
+    ```
 
 或者，如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
-```Elisp
-(use-package eaf
-  :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
-  :init
-  (use-package epc :defer t :ensure t)
-  (use-package ctable :defer t :ensure t)
-  (use-package deferred :defer t :ensure t)
-  (use-package s :defer t :ensure t)
-  :custom
-  (eaf-browser-continue-where-left-off t)
-  :config
-  (eaf-setq eaf-browser-enable-adblocker "true")
-  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
-  (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
-```
+    ```Elisp
+    (use-package eaf
+      :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+      :init
+      (use-package epc :defer t :ensure t)
+      (use-package ctable :defer t :ensure t)
+      (use-package deferred :defer t :ensure t)
+      (use-package s :defer t :ensure t)
+      :custom
+      (eaf-browser-continue-where-left-off t)
+      :config
+      (eaf-setq eaf-browser-enable-adblocker "true")
+      (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+      (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+      (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+      (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
+    ```
 
 ### 依赖列表
 **核心** 分类代表必备依赖，这些包必须安装好EAF才能工作。其余依赖都可选，若想其使用对应的应用时，你才需要安装这些依赖。当然我们推荐先把所有依赖都安装好，等到真正使用的时候就不用再次折腾。
@@ -234,17 +234,17 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 ### 代理
 可以通过下面设置来通过代理访问互联网：
 
-```Elisp
-(setq eaf-proxy-type "http")
-(setq eaf-proxy-host "127.0.0.1")
-(setq eaf-proxy-port "1080")
-```
+    ```Elisp
+    (setq eaf-proxy-type "http")
+    (setq eaf-proxy-host "127.0.0.1")
+    (setq eaf-proxy-port "1080")
+    ```
 
 如果你使用Socks5代理，你可以设置代理类型为：
 
-```Elisp
-(setq eaf-proxy-type "socks5")
-```
+    ```Elisp
+    (setq eaf-proxy-type "socks5")
+    ```
 
 ## EAF社区
 
