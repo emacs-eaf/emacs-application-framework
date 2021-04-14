@@ -551,8 +551,8 @@ class PdfViewerWidget(QWidget):
 
     def clean_unused_page_cache_pixmap(self):
         # We need expand render index bound that avoid clean cache around current index.
-        start_page_index = max(0, self.get_start_page_index() - 1)
-        last_page_index = min(self.page_total_number, self.get_last_page_index() + 1)
+        start_page_index = self.get_start_page_index()
+        last_page_index = self.get_last_page_index()
         index_list = list(range(start_page_index, last_page_index))
 
         # Try to clean unused cache.
@@ -584,6 +584,9 @@ class PdfViewerWidget(QWidget):
         # Get start/last render index.
         start_page_index = self.get_start_page_index()
         last_page_index = self.get_last_page_index()
+
+        if self.scroll_offset > self.max_scroll_offset():
+            self.update_vertical_offset(self.max_scroll_offset())
 
         # Translate painter at y coordinate.
         translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
@@ -690,18 +693,20 @@ class PdfViewerWidget(QWidget):
                 self.update_horizontal_offset(max(min(new_pos , max_pos), -max_pos))
 
     def get_start_page_index(self):
-        return int(self.scroll_offset * 1.0 / self.scale / self.page_height)
+        return min(int(self.scroll_offset * 1.0 / self.scale / self.page_height),
+                   self.page_total_number - 1)
 
     def get_last_page_index(self):
-        return int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1
+        return min(int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1,
+                   self.page_total_number)
 
     def build_context_cache(self):
         # Just build context cache when action duration longer than delay
         # Don't build contexnt cache when is_page_just_changed is True, avoid flickr when user change page.
         last_action_duration = (time.time() - self.last_action_time) * 1000
         if last_action_duration > self.page_cache_context_delay and not self.is_page_just_changed:
-            start_page_index = max(0, self.get_start_page_index() - 1)
-            last_page_index = min(self.page_total_number, self.get_last_page_index() + 1)
+            start_page_index = self.get_start_page_index()
+            last_page_index = self.get_last_page_index()
 
             for index in list(range(start_page_index, last_page_index)):
                 self.get_page_pixmap(index, self.scale, self.rotation)
@@ -1280,7 +1285,7 @@ class PdfViewerWidget(QWidget):
 
     def get_cursor_absolute_position(self):
         start_page_index = self.get_start_page_index()
-        last_page_index = min(self.page_total_number - 1, self.get_last_page_index())
+        last_page_index = self.get_last_page_index()
         pos = self.mapFromGlobal(QCursor.pos()) # map global coordinate to widget coordinate.
         ex, ey = pos.x(), pos.y()
 
