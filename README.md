@@ -88,20 +88,26 @@ Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 If you prefer to manually call the installation script in the terminal,
 
 - If you use GNU/Linux,
-    - Arch-based systems: [AUR](https://aur.archlinux.org/packages/emacs-application-framework-git/)
-    - Others:
-      ```Bash
-      cd emacs-application-framework
-      chmod +x ./install-eaf.sh
-      ./install-eaf.sh
-      ```
+    ```Bash
+    cd emacs-application-framework
+    chmod +x ./install-eaf.sh
+    ./install-eaf.sh
+    ```
 
 - If you use Windows,
 
-```shell
-cd emacs-application-framework
-node ./install-eaf-win32.js
-```
+    ```Bash
+    cd emacs-application-framework
+    node ./install-eaf-win32.js
+    ```
+
+- If you use macOS,
+
+    ```Bash
+    cd emacs-application-framework
+    chmod +x ./install-eaf-mac.sh
+    ./install-eaf-mac.sh
+    ```
 
 Feel free to inspect the install script yourself. An explanation of each dependency can be found at [Dependency List](#dependency-list).
 

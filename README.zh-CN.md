@@ -86,21 +86,27 @@ git clone --depth=1 -b master https://github.com/manateelazycat/emacs-applicatio
 如果你更喜欢手动执行安装脚本，
 
 - GNU/Linux用户：
-    - Arch系用户：[AUR](https://aur.archlinux.org/packages/emacs-application-framework-git/)
-    - 其他：
-      ```Bash
-      cd emacs-application-framework
-      chmod +x ./install-eaf.sh
-      ./install-eaf.sh
-      ```
+    ```Bash
+    cd emacs-application-framework
+    chmod +x ./install-eaf.sh
+    ./install-eaf.sh
+    ```
 
 - Windows用户：
 
-```shell
-cd emacs-application-framework
-node ./install-eaf-win32.js
-```
+    ```Bash
+    cd emacs-application-framework
+    node ./install-eaf-win32.js
+    ```
 
+- Mac用户:
+
+    ```Bash
+    cd emacs-application-framework
+    chmod +x ./install-eaf-mac.sh
+    ./install-eaf-mac.sh
+    ```
+    
 脚本里安装的每一个依赖的解释可以在[依赖列表](#依赖列表)找到。
 
 3. 安装Elisp依赖包:
