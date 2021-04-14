@@ -83,7 +83,7 @@
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
-  "An interactive function that run install-eaf.sh or install-eaf-win32.js for Linux or Windows respectively."
+  "An interactive function that run install-eaf.sh or install-eaf-win32.js or install-eaf-mac.sh for Linux or Windows or macOS respectively."
   (interactive)
   (let ((eaf-dir (file-name-directory (locate-library "eaf"))))
     (cond ((eq system-type 'gnu/linux)
@@ -92,7 +92,7 @@
           ((memq system-type '(cygwin windows-nt ms-dos))
            (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
           ((eq system-type 'darwin)
-           (user-error "Unfortunately macOS is not supported, see README for details")))))
+           (shell-command (concat eaf-dir "install-eaf-mac.sh" "&"))))))
 
 (require 'bookmark)
 (require 'cl-lib)
