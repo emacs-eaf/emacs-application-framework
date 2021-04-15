@@ -33,8 +33,7 @@
 (require 'all-the-icons)
 
 (defvar eaf-all-the-icons-alist
-  '(
-    ("EAF/browser" all-the-icons-faicon "firefox" :v-adjust -0.1 :face all-the-icons-red)
+  '(("EAF/browser" all-the-icons-faicon "chrome" :v-adjust -0.1 :face all-the-icons-lblue)
     ("EAF/pdf-viewer" all-the-icons-octicon "file-pdf" :v-adjust 0.0 :face all-the-icons-dred)
     ("EAF/image-viewer" all-the-icons-octicon "file-media" :v-adjust 0.0 :face all-the-icons-orange)
     ("EAF/markdown-previewer" all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)
