@@ -44,6 +44,11 @@
     ("EAF/terminal" all-the-icons-faicon "terminal" :v-adjust 0.2)
     ("EAF/org-previewer" all-the-icons-fileicon "org" :face all-the-icons-lgreen)
     ("EAF/mindmap" all-the-icons-alltheicon "html5" :face all-the-icons-orange)
+    ("EAF/demo" all-the-icons-alltheicon "html5" :face all-the-icons-orange)
+    ("EAF/vue-demo" all-the-icons-alltheicon "html5" :face all-the-icons-orange)
+    ("EAF/file-sender" all-the-icons-octicon "file-directory"   :v-adjust 0.0)
+    ("EAF/file-receiver" all-the-icons-octicon "file-directory" :v-adjust 0.0)
+    ("EAF/airshare" all-the-icons-octicon "file-directory" :v-adjust 0.0)
     ("EAF/jupyter" all-the-icons-fileicon "jupyter" :height 1.0 :face all-the-icons-dorange)))
 
 (defun eaf-all-the-icons-icon (mode-name &rest arg-overrides)
