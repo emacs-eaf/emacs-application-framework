@@ -57,43 +57,43 @@
     (when arg-overrides (setq args (append `(,(car args)) arg-overrides (cdr args))))
     (apply (car icon) args)))
 
-(when all-the-icons-ibuffer-mode
+(when (require 'all-the-icons-ibuffer nil 'noerror)
   (define-ibuffer-column icon
-  (:name "  " :inline t)
-  (let ((icon (cond ((and (buffer-file-name) (all-the-icons-auto-mode-match?))
-                     (all-the-icons-icon-for-file (file-name-nondirectory (buffer-file-name))
+    (:name "  " :inline t)
+    (let ((icon (cond ((and (buffer-file-name) (all-the-icons-auto-mode-match?))
+                       (all-the-icons-icon-for-file (file-name-nondirectory (buffer-file-name))
+                                                    :height all-the-icons-ibuffer-icon-size
+                                                    :v-adjust all-the-icons-ibuffer-icon-v-adjust))
+                      ((eq major-mode 'eaf-mode)
+                       (eaf-all-the-icons-icon mode-name
                                                :height all-the-icons-ibuffer-icon-size
                                                :v-adjust all-the-icons-ibuffer-icon-v-adjust))
-                   ((eq major-mode 'eaf-mode)
-                     (eaf-all-the-icons-icon mode-name
-                                                 :height all-the-icons-ibuffer-icon-size
-                                                 :v-adjust all-the-icons-ibuffer-icon-v-adjust))
-                    (t
-                     (all-the-icons-icon-for-mode major-mode
-                                             :height all-the-icons-ibuffer-icon-size
-                                             :v-adjust all-the-icons-ibuffer-icon-v-adjust)))))
-    (if (or (null icon) (symbolp icon))
-        (setq icon (all-the-icons-faicon "file-o"
-                                         :face (if all-the-icons-ibuffer-color-icon
-                                                   'all-the-icons-dsilver
-                                                 'all-the-icons-ibuffer-icon-face)
-                                         :height (* 0.9 all-the-icons-ibuffer-icon-size)
-                                         :v-adjust all-the-icons-ibuffer-icon-v-adjust))
-      (let* ((props (get-text-property 0 'face icon))
-             (family (plist-get props :family))
-             (face (if all-the-icons-ibuffer-color-icon
-                       (or (plist-get props :inherit) props)
-                     'all-the-icons-ibuffer-icon-face))
-             (new-face `(:inherit ,face
-                         :family ,family
-                         :height ,all-the-icons-ibuffer-icon-size)))
-        (propertize icon 'face new-face))))))
+                      (t
+                       (all-the-icons-icon-for-mode major-mode
+                                                    :height all-the-icons-ibuffer-icon-size
+                                                    :v-adjust all-the-icons-ibuffer-icon-v-adjust)))))
+      (if (or (null icon) (symbolp icon))
+          (setq icon (all-the-icons-faicon "file-o"
+                                           :face (if all-the-icons-ibuffer-color-icon
+                                                     'all-the-icons-dsilver
+                                                   'all-the-icons-ibuffer-icon-face)
+                                           :height (* 0.9 all-the-icons-ibuffer-icon-size)
+                                           :v-adjust all-the-icons-ibuffer-icon-v-adjust))
+        (let* ((props (get-text-property 0 'face icon))
+               (family (plist-get props :family))
+               (face (if all-the-icons-ibuffer-color-icon
+                         (or (plist-get props :inherit) props)
+                       'all-the-icons-ibuffer-icon-face))
+               (new-face `(:inherit ,face
+                                    :family ,family
+                                    :height ,all-the-icons-ibuffer-icon-size)))
+          (propertize icon 'face new-face))))))
 
 (defun eaf-all-the-icons-update-icon ()
   (when (and doom-modeline-mode doom-modeline-icon doom-modeline-major-mode-icon)
     (setq-local doom-modeline--buffer-file-icon (eaf-all-the-icons-icon mode-name))))
 
-(when all-the-icons-ivy-rich-mode
+(when (require 'all-the-icons-ivy-rich nil 'noerror)
   (defun eaf-all-the-icons-ivy-rich (candidate)
     "Add EAF buffer icon for `ivy-rich'."
     (let* ((buffer (get-buffer candidate))
