@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Apr 11 23:51:46 2021 (-0400)
+;; Last-Updated: Tue Apr 20 18:47:41 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -2319,7 +2319,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
         (t
          (eaf-call-async "update_focus_text"
                          eaf--buffer-id
-                         (eaf--encode-string (buffer-string)))))
+                         (eaf--encode-string (kill-new (buffer-string))))))
   (kill-buffer)
   (delete-window))
 
