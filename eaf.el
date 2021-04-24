@@ -2529,14 +2529,14 @@ The key is the annot id on PAGE."
   "Activate Emacs window running on Wsl."
   (eaf-call-async "activate_emacs_wsl_window" (frame-parameter nil 'name)))
 
-(defun eaf--activate-emacs-linux-window ()
+(defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
   (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
       ;; When switch app focus in WM, such as, i3 or qtile.
       ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
       ;;
       ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-      (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))
+      (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
 
     ;; When press Alt + Tab in DE, such as KDE.
     ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
@@ -2550,7 +2550,7 @@ The key is the annot id on PAGE."
   "Activate Emacs macOS window."
   (shell-command-to-string "open -a emacs"))
 
-(defun eaf-activate-emacs-window()
+(defun eaf-activate-emacs-window(&optional buffer_id)
   "Activate Emacs window."
   (cond
    ((eaf--called-from-wsl-on-windows-p)
@@ -2560,7 +2560,7 @@ The key is the annot id on PAGE."
    ((eq system-type 'darwin)
     (eaf--activate-emacs-mac-window))
    ((eq system-type 'gnu/linux)
-    (eaf--activate-emacs-linux-window))))
+    (eaf--activate-emacs-linux-window buffer_id))))
 
 (defun eaf-elfeed-open-url ()
   "Display the currently selected item in an eaf buffer."
