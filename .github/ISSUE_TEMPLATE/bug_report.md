@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 - If EAF was working correctly until a recent `git pull`, please refer to [Mandatory Procedures to Keep Your EAF Up-to-Date](https://github.com/manateelazycat/emacs-application-framework/discussions/527?sort=new) first.
-- Please add a corresponding GitHub Label so future people can find this issue easier.
+- Please check the `*eaf*` buffer, if there is any error shown in the `*eaf*` buffer, paste it here.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
