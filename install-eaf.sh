@@ -21,8 +21,8 @@ elif dnf &> /dev/null; then
     sudo dnf -y install glib2-devel
     # TODO: please add filebrowser-bin if it exists in Fedora repo.
 
-    sudo dnf -y install python3-pyqt5-sip pyqtwebengine-devel python3-qrcode \
-         python3-feedparser python3-markdown \
+    sudo dnf -y install python-pyqt5 python3-pyqt5-sip pyqtwebengine-devel \
+         python3-qrcode python3-feedparser python3-markdown \
          python3-qtconsole python3-pygit2
 
 elif type pacman &> /dev/null; then
@@ -52,3 +52,5 @@ else
     echo "Cannot find pip. Please install it before launching the script again."
     exit 1
 fi
+
+echo "eaf-install.sh finished."
