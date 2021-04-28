@@ -71,17 +71,16 @@ Enable this when the you want to ensure the PDF link in the org file can be
              (pdf-name-with-ext (concat pdf-name ".pdf"))
              (eaf-pdf-buffer (get-buffer pdf-name-with-ext))
              (pdf-full-path (concat (file-name-directory (buffer-file-name)) pdf-name-with-ext)))
-        (let ((exported (org-latex-export-to-pdf)))
-          (message (concat "Trying to open " pdf-name-with-ext))
-          (delete-file (concat pdf-name ".tex"))
-          (delete-other-windows)
-          (split-window-right)
-          (other-window 1)
-          (if (and eaf-pdf-buffer
-                   (with-current-buffer eaf-pdf-buffer
-                     (derived-mode-p 'eaf-mode)))
-              (switch-to-buffer eaf-pdf-buffer)
-            (eaf-open pdf-full-path)))))))
+        (message (concat "Trying to open " pdf-name-with-ext))
+        (delete-file (concat pdf-name ".tex"))
+        (delete-other-windows)
+        (split-window-right)
+        (other-window 1)
+        (if (and eaf-pdf-buffer
+                 (with-current-buffer eaf-pdf-buffer
+                   (derived-mode-p 'eaf-mode)))
+            (switch-to-buffer eaf-pdf-buffer)
+          (eaf-open pdf-full-path))))))
 
 (defvar eaf-org-override-pdf-links-list
   '("docview" "pdfview" "pdftools")
@@ -90,9 +89,9 @@ Enable this when the you want to ensure the PDF link in the org file can be
 (dolist (type eaf-org-override-pdf-links-list)
   (when (and eaf-org-override-pdf-links-open
              (org-link-get-parameter type :follow)) ; if `nil' means `ol-<link>' not loaded.
-      (org-link-set-parameters         ; store original `:follow' function
-       type :orig-follow (org-link-get-parameter type :follow))
-      (org-link-set-parameters type :follow #'eaf-org-open)))
+    (org-link-set-parameters       ; store original `:follow' function
+     type :orig-follow (org-link-get-parameter type :follow))
+    (org-link-set-parameters type :follow #'eaf-org-open)))
 
 (defun eaf-org-store-link ()
   "Store the page of PDF as link support for `org-store-link'.
@@ -133,7 +132,7 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
             :type "docview"
             :link (concat "docview:" link)
             :description description)))
-        (t (org-link-store-props
+        (_ (org-link-store-props
             :type "eaf"
             :link link
             :description description))))))
@@ -180,8 +179,8 @@ The raw link looks like this: [[eaf:<app>::<path>::<extra-args>][description]]"
              (apply (org-link-get-parameter type :follow) link))))))))
 
 (org-link-set-parameters "eaf"
-			             :follow #'eaf-org-open
-			             :store #'eaf-org-store-link)
+                         :follow #'eaf-org-open
+                         :store #'eaf-org-store-link)
 
 
 (provide 'eaf-org)

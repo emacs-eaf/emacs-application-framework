@@ -92,20 +92,21 @@
   (when (and doom-modeline-mode doom-modeline-icon doom-modeline-major-mode-icon)
     (setq-local doom-modeline--buffer-file-icon (eaf-all-the-icons-icon mode-name))))
 
-(when (require 'all-the-icons-ivy-rich nil 'noerror)
-  (defun eaf-all-the-icons-ivy-rich (candidate)
-    "Add EAF buffer icon for `ivy-rich'."
-    (let* ((buffer (get-buffer candidate))
-           (buffer-file-name (buffer-file-name buffer))
-           (major-mode (buffer-local-value 'major-mode buffer))
-           (icon (with-current-buffer buffer (if (eq major-mode 'eaf-mode)
-                                                 (eaf-all-the-icons-icon mode-name)
-                                               (all-the-icons-icon-for-buffer)))))
-      (all-the-icons-ivy-rich--format-icon
-       (if (or (null icon) (symbolp icon))
-           (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.9 :v-adjust 0.0)
-         (propertize icon 'display '(raise 0.0))))))
-  (advice-add #'all-the-icons-ivy-rich-buffer-icon :override #'eaf-all-the-icons-ivy-rich))
+(eval-when-compile
+  (when (require 'all-the-icons-ivy-rich nil 'noerror)
+    (defun eaf-all-the-icons-ivy-rich (candidate)
+      "Add EAF buffer icon for `ivy-rich'."
+      (let* ((buffer (get-buffer candidate))
+             (buffer-file-name (buffer-file-name buffer))
+             (major-mode (buffer-local-value 'major-mode buffer))
+             (icon (with-current-buffer buffer (if (eq major-mode 'eaf-mode)
+                                                   (eaf-all-the-icons-icon mode-name)
+                                                 (all-the-icons-icon-for-buffer)))))
+        (all-the-icons-ivy-rich--format-icon
+         (if (or (null icon) (symbolp icon))
+             (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.9 :v-adjust 0.0)
+           (propertize icon 'display '(raise 0.0))))))
+    (advice-add #'all-the-icons-ivy-rich-buffer-icon :override #'eaf-all-the-icons-ivy-rich)))
 
 (provide 'eaf-all-the-icons)
 

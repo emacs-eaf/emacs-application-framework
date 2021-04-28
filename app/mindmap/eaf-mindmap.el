@@ -88,13 +88,13 @@
   (let (org-parse-data)
     (with-temp-buffer
       (insert org-json-content)
-      (beginning-of-buffer)
+      (goto-char (point-min))
       (let* ((json (json-read))
              (root-node-name (cdr (assoc 'topic (assoc 'data json))))
              (children-node (cdr (assoc 'children (assoc 'data json)))))
         ;; (message "%s" (org-json-decode (cdr (assoc 'data json))))
         (insert (org-json-decode (cdr (assoc 'data json))))
-        (beginning-of-buffer)
+        (goto-char (point-min))
         (while (search-forward-regexp "\\*\\s-topic\\s-\"" nil t)
           (let ((header-string (buffer-substring (save-excursion
                                                    (beginning-of-line)
@@ -110,9 +110,9 @@
                                                     (backward-char 1)
                                                     (point)))))
             (let ((loop-times (/ (- (length header-string) 1) 2)))
-            (while (> loop-times 0)
-              (setq loop-times (- loop-times 1))
-              (setq header-string (string-remove-prefix "*" header-string))))
+              (while (> loop-times 0)
+                (setq loop-times (- loop-times 1))
+                (setq header-string (string-remove-prefix "*" header-string))))
             (setq org-parse-data (concat org-parse-data (format "%s%s\n" header-string content-string)))))
 
         (with-temp-file org-file-path
@@ -310,17 +310,17 @@ actural call `org-json-gen-alist1' to work."
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "sub")
     (setq header-line-format
-	  (substitute-command-keys
-	   (concat
-	    "\\<eaf-edit-mode-map>"
-	    " EAF/" eaf--buffer-app-name " EDIT: "
-	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
-	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
-	    "Separate diffrent nodes with 'RET'. "
-	    )))
+          (substitute-command-keys
+           (concat
+            "\\<eaf-edit-mode-map>"
+            " EAF/" eaf--buffer-app-name " EDIT: "
+            "Confirm with `\\[eaf-edit-buffer-confirm]', "
+            "Cancel with `\\[eaf-edit-buffer-cancel]', "
+            "Separate diffrent nodes with 'RET'. "
+            )))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
-      (beginning-of-buffer))
+      (goto-char (point-min)))
     ))
 
 (defun eaf--add-multiple-brother-nodes (buffer-id)
@@ -334,17 +334,17 @@ actural call `org-json-gen-alist1' to work."
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "brother")
     (setq header-line-format
-	  (substitute-command-keys
-	   (concat
-	    "\\<eaf-edit-mode-map>"
-	    " EAF/" eaf--buffer-app-name " EDIT: "
-	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
-	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
-	    "Separate diffrent nodes with 'RET'. "
-	    )))
+          (substitute-command-keys
+           (concat
+            "\\<eaf-edit-mode-map>"
+            " EAF/" eaf--buffer-app-name " EDIT: "
+            "Confirm with `\\[eaf-edit-buffer-confirm]', "
+            "Cancel with `\\[eaf-edit-buffer-cancel]', "
+            "Separate diffrent nodes with 'RET'. "
+            )))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
-      (beginning-of-buffer))
+      (goto-char (point-min)))
     ))
 
 (defun eaf--add-multiple-middle-nodes (buffer-id)
@@ -358,17 +358,17 @@ actural call `org-json-gen-alist1' to work."
     (switch-to-buffer edit-text-buffer)
     (setq-local eaf-mindmap--current-add-mode "middle")
     (setq header-line-format
-	  (substitute-command-keys
-	   (concat
-	    "\\<eaf-edit-mode-map>"
-	    " EAF/" eaf--buffer-app-name " EDIT: "
-	    "Confirm with `\\[eaf-edit-buffer-confirm]', "
-	    "Cancel with `\\[eaf-edit-buffer-cancel]', "
-	    "Separate diffrent nodes with 'RET'. "
-	    )))
+          (substitute-command-keys
+           (concat
+            "\\<eaf-edit-mode-map>"
+            " EAF/" eaf--buffer-app-name " EDIT: "
+            "Confirm with `\\[eaf-edit-buffer-confirm]', "
+            "Cancel with `\\[eaf-edit-buffer-cancel]', "
+            "Separate diffrent nodes with 'RET'. "
+            )))
     ;; When text line number above
     (when (> (line-number-at-pos) 30)
-      (beginning-of-buffer))
+      (goto-char (point-min)))
     ))
 
 (provide 'eaf-mindmap)

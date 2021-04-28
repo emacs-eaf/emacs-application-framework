@@ -62,12 +62,14 @@ If a list element is \".\" or begins with \"./\", that portion is
 replaced with the pdf directory name.  e.g. \".\" is interpreted
 as \"/pdf/file/dir/\", \"./notes\" is interpreted as
 \"/pdf/file/dir/notes/\"."
-  :type '(repeat directory))
+  :type '(repeat directory)
+  :group 'eaf)
 
 (defcustom eaf-interleave-split-direction 'vertical
   "Specify how to split the notes buffer."
   :type '(choice (const vertical)
-                 (const horizontal)))
+                 (const horizontal))
+  :group 'eaf)
 
 (defcustom eaf-interleave-split-lines nil
   "Specify the number of lines the PDF buffer should be increased or decreased.
@@ -79,11 +81,13 @@ shrunken.
 If `eaf-interleave-split-direction' is 'vertical then the number is
 taken as columns."
   :type '(choice integer
-                 (const nil)))
+                 (const nil))
+  :group 'eaf)
 
 (defcustom eaf-interleave-disable-narrowing nil
   "Disable narrowing in notes/org buffer."
-  :type 'boolean)
+  :type 'boolean
+  :group 'eaf)
 
 ;; variables
 (defvar eaf-interleave-org-buffer nil
@@ -252,8 +256,7 @@ org file will have the exact sam base name as the url domain."
 (defun eaf-interleave--open-notes-file-for-app (org-file)
   "Open the notes org file for the current url if it exists.
 Else create it."
-  (let ((default-dir (nth 0 eaf-interleave-org-notes-dir-list))
-        (org-file-path (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url))
+  (let ((org-file-path (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url))
         (buffer (eaf-interleave--find-buffer eaf--buffer-url)))
     ;; Create the notes org file if it does not exist
     (unless org-file-path
@@ -293,8 +296,7 @@ re-centered to the page heading.
 
 It (possibly) narrows the subtree when found."
   (with-current-buffer eaf-interleave-org-buffer
-    (let ((window (get-buffer-window (current-buffer) 'visible))
-          (property-list (org-map-entries (lambda ()
+    (let ((property-list (org-map-entries (lambda ()
                                         (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop))
                                               (page (org-entry-get-with-inheritance eaf-interleave--page-note-prop)))
                                           (cons url page)))))
@@ -349,7 +351,7 @@ If POSITION is non-nil move point to it."
     (when (not (looking-back "^ *" (line-beginning-position)))
       (org-return))))
 
-(defun eaf-interleave--insert-heading-respect-content (parent-headline)
+(defun eaf-interleave--insert-heading-respect-content ()
   "Create a new heading in the notes buffer.
 
 Adjust the level of the new headline according to the
@@ -373,8 +375,7 @@ Return the position of the newly inserted heading."
     (with-current-buffer eaf-interleave-org-buffer
       (save-excursion
         (widen)
-        (let ((position (goto-char (point-max))))
-          (setq new-note-position (eaf-interleave--insert-heading-respect-content position)))
+        (setq new-note-position (eaf-interleave--insert-heading-respect-content))
         (org-set-property eaf-interleave--url-prop url)
         (when title
           (insert (format "Notes for %s" title)))

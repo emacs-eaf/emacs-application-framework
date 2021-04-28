@@ -72,6 +72,7 @@
 ;;
 
 ;;; Code:
+(require 'cl-lib)
 
 (defun add-subdirs-to-load-path (dir)
   "Recursive add directory DIR to `load-path'."
@@ -87,7 +88,7 @@
   (interactive)
   (let ((eaf-dir (file-name-directory (locate-library "eaf"))))
     (cond ((eq system-type 'gnu/linux)
-             (shell-command (concat eaf-dir "install-eaf.sh" "&")))
+           (shell-command (concat eaf-dir "install-eaf.sh" "&")))
           ((memq system-type '(cygwin windows-nt ms-dos))
            (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
           ((eq system-type 'darwin)
@@ -262,8 +263,8 @@ been initialized."
 
 (when noninteractive
   ;; Start "event loop".
-  (loop repeat 600
-        do (sleep-for 0.1)))
+  (cl-loop repeat 600
+           do (sleep-for 0.1)))
 
 (defvar eaf-epc-process nil)
 
@@ -1272,11 +1273,7 @@ We need calcuate render allocation to make sure no black border around render co
          (y (+ (nth 1 window-edges)
                (if (version< emacs-version "27.0")
                    (window-header-line-height window)
-                 (window-tab-line-height window))
-               (if (and (require 'tab-line nil t)
-                        tab-line-mode) ; Support Emacs 27 tab-line-mode
-                   (window-tab-line-height window)
-                 0)))
+                 (window-tab-line-height window))))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
     (list x y w h)))
@@ -1442,46 +1439,47 @@ Including title-bar, menu-bar, offset depends on window system, and border."
       (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
     0))
 
-(when (eq system-type 'darwin)
-  (defun eaf--mac-focus-change ()
-    "Manage Emacs's focus change"
-    (cond
-     ((string= "Python\n" (shell-command-to-string "app-frontmost --name"))
-      (setq eaf--mac-switch-to-python t))
-
-     ((string= "Emacs\n" (shell-command-to-string "app-frontmost --name"))
+(eval-when-compile
+  (when (eq system-type 'darwin)
+    (defun eaf--mac-focus-change ()
+      "Manage Emacs's focus change"
       (cond
-       (eaf--mac-switch-to-python
-        (setq eaf--mac-switch-to-python nil))
-       ((not eaf--mac-has-focus)
-        (run-with-timer 0.1 nil #'eaf--mac-focus-in)
-        )
-       (eaf--mac-has-focus
-        (eaf--mac-focus-out))))
-     (t (eaf--mac-focus-out))))
+       ((string= "Python\n" (shell-command-to-string "app-frontmost --name"))
+        (setq eaf--mac-switch-to-python t))
 
-  (defun eaf--mac-replace-eaf-buffers ()
-    (dolist (window (window-list))
-      (select-window window)
-      (when (eq major-mode 'eaf-mode)
-        (get-buffer-create "*eaf temp*")
-        (switch-to-buffer "*eaf temp*" t))))
+       ((string= "Emacs\n" (shell-command-to-string "app-frontmost --name"))
+        (cond
+         (eaf--mac-switch-to-python
+          (setq eaf--mac-switch-to-python nil))
+         ((not eaf--mac-has-focus)
+          (run-with-timer 0.1 nil #'eaf--mac-focus-in)
+          )
+         (eaf--mac-has-focus
+          (eaf--mac-focus-out))))
+       (t (eaf--mac-focus-out))))
 
-  (defun eaf--mac-focus-in ()
-    (setq eaf--mac-has-focus t)
-    (ignore-errors
-      (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame))
-      (bury-buffer "*eaf temp*"))
-    )
+    (defun eaf--mac-replace-eaf-buffers ()
+      (dolist (window (window-list))
+        (select-window window)
+        (when (eq major-mode 'eaf-mode)
+          (get-buffer-create "*eaf temp*")
+          (switch-to-buffer "*eaf temp*" t))))
 
-  (defun eaf--mac-focus-out (&optional frame)
-    (setq eaf--mac-has-focus nil)
-    (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
-    (eaf--mac-replace-eaf-buffers))
+    (defun eaf--mac-focus-in ()
+      (setq eaf--mac-has-focus t)
+      (ignore-errors
+        (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame))
+        (bury-buffer "*eaf temp*"))
+      )
 
-  (add-function :after after-focus-change-function #'eaf--mac-focus-change)
-  (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)
-  )
+    (defun eaf--mac-focus-out (&optional frame)
+      (setq eaf--mac-has-focus nil)
+      (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
+      (eaf--mac-replace-eaf-buffers))
+
+    (add-function :after after-focus-change-function #'eaf--mac-focus-change)
+    (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)
+    ))
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
@@ -1830,6 +1828,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
   (when (and (ignore-errors (require 'all-the-icons) (featurep 'eaf-all-the-icons)))
+    (declare-function eaf-all-the-icons-update-icon "eaf-all-the-icons.el")
     (eaf-all-the-icons-update-icon)))
 
 (defun eaf--markdown-preview-display (buf)
@@ -2042,7 +2041,9 @@ choose a search engine defined in `eaf-browser-search-engines'"
                    (error (format "[EAF/browser] Search engine %s is unknown to EAF!" real-search-engine))))
          (current-symbol (if mark-active
                              (if (eq major-mode 'pdf-view-mode)
-                                 (car (pdf-view-active-region-text))
+                                 (progn
+                                   (declare-function pdf-view-active-region-text "pdf-view.el")
+                                   (car (pdf-view-active-region-text)))
                                (buffer-substring (region-beginning) (region-end)))
                            (symbol-at-point)))
          (search-url (if search-string
@@ -2331,7 +2332,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
     (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
     (set (make-local-variable 'eaf--buffer-id) buffer-id)
     (outline-show-all)
-    (beginning-of-buffer)
+    (goto-char (point-min))
     (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
     (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
     (eaf--edit-set-header-line)))
@@ -2362,7 +2363,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
            :name ""
            :buffer " *eaf-open-office*"
            :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
-           :sentinel (lambda (process event)
+           :sentinel (lambda (_ event)
                        (when (string= (substring event 0 -1) "finished")
                          (rename-file convert-file pdf-file)
                          (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf")))))))
@@ -2593,7 +2594,7 @@ The key is the annot id on PAGE."
 (defun eaf--select-window-by-direction (direction)
   "Select the most on the side according to the direction."
   (ignore-errors
-    (dotimes (i 50)
+    (dotimes (_ 50)
       (pcase direction
         ("left" (windmove-left))
         ("right" (windmove-right))
@@ -2680,7 +2681,7 @@ The key is the annot id on PAGE."
       (read-only-mode -1)
       (erase-buffer)
       (insert html-text)
-      (beginning-of-buffer)
+      (goto-char (point-min))
       (read-only-mode 1))
     (switch-to-buffer eaf-export-text-buffer)
     ))
