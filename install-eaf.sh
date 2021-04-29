@@ -22,7 +22,7 @@ elif [ "$(command -v dnf)" ]; then
     # shellcheck disable=SC2015
     sudo dnf -y install git nodejs npm aria2 wmctrl &&
         sudo dnf -y install glib2-devel &&
-        sudo dnf -y install python-pyqt5 python3-pyqt5-sip pyqtwebengine-devel \
+        sudo dnf -y install python3-qt5 python3-pyqt5-sip pyqtwebengine-devel \
              python3-qrcode python3-feedparser python3-markdown \
              python3-qtconsole python3-pygit2 ||
             { echo "Failed to install dependencies with dnf."; exit 1; }
