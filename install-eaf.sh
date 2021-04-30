@@ -2,8 +2,8 @@
 
 set -eu
 
-ARCH_PACKAGES=(git nodejs npm)
-ARCH_PACKAGES="$ARCH_PACKAGES python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl \
+ARCH_PACKAGES="git nodejs npm \
+python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl \
 python-qrcode aria2 python-qtconsole"
 
 # System dependencies
