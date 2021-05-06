@@ -428,6 +428,9 @@ class AppBuffer(BrowserBuffer):
         self.refresh_page()
         eval_in_emacs('eaf--browser-export-text', ["EAF-BROWSER-TEXT-" + self.url, text])
 
+    def page_is_loading(self):
+        return self.is_loading
+
 class HistoryPage():
     def __init__(self, title, url, hit):
         self.title = title
