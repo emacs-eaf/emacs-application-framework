@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 from core.utils import touch, string_to_base64
 import os
 import base64

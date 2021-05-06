@@ -22,7 +22,7 @@
 from PyQt5.QtCore import QUrl, QTimer, QPointF, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 from core.utils import PostGui, get_free_port, interactive, string_to_base64, eval_in_emacs, message_to_emacs
 import os
 import subprocess

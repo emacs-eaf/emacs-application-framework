@@ -23,7 +23,7 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QFileSystemWatcher, QTimer
 from retrying import retry
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 from core.utils import get_free_port, message_to_emacs, eval_in_emacs
 from urllib.error import URLError
 from urllib.request import urlopen

@@ -22,7 +22,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor, QCursor, QScreen
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
 from urllib.parse import urlparse
 import os

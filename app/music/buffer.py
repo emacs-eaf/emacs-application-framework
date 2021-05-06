@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import QUrl
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 import os
 
 class AppBuffer(BrowserBuffer):
