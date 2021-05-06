@@ -2421,6 +2421,12 @@ Otherwise send key 'esc' to browser."
       (eaf-call-async "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")
     (eaf-call-async "send_key" eaf--buffer-id "<escape>")))
 
+(defun eaf-browser-is-loading ()
+  "Return non-nil if current page is loading."
+  (interactive)
+  (when (and (string= eaf--buffer-app-name "browser")
+             (string= (eaf-call-sync "call_function" eaf--buffer-id "page_is_loading") "True"))))
+
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
   (format "%s"(frame-parameter nil 'background-mode)))
