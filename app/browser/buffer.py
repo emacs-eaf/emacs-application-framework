@@ -96,6 +96,7 @@ class AppBuffer(BrowserBuffer):
         self.progressbar_height = 2
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
+        self.is_loading = False
 
         # Reverse background and foreground color, to help cursor recognition.
         self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
@@ -114,6 +115,8 @@ class AppBuffer(BrowserBuffer):
     @QtCore.pyqtSlot()
     def start_progress(self):
         ''' Initialize the Progress Bar.'''
+        self.is_loading = True
+
         self.progressbar_progress = 0
         self.update()
 
@@ -132,6 +135,9 @@ class AppBuffer(BrowserBuffer):
             self.caret_js_ready = False
             self.update()
         elif progress == 100:
+            if self.is_loading:
+                self.is_loading = False
+
             self.buffer_widget.load_marker_file()
 
             cursor_foreground_color = ""
