@@ -16,6 +16,9 @@
   "vueApps": [
     "app/vue-demo"
   ],
+  "rebuildApps": [
+    "app/terminal"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/manateelazycat/emacs-application-framework.git"
