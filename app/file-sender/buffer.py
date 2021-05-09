@@ -32,6 +32,7 @@ import shutil
 import sys
 import threading
 import socket
+from urllib.parse import quote
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -49,7 +50,7 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             with open(local_file_path, 'rb') as f:
                 self.send_response(200)
                 self.send_header("Content-Type", 'application/octet-stream')
-                self.send_header("Content-Disposition", 'attachment; filename="{}"'.format(os.path.basename(local_file_path)))
+                self.send_header("Content-Disposition", 'attachment; filename="{}"'.format(quote(os.path.basename(local_file_path))))
                 fs = os.fstat(f.fileno())
                 self.send_header("Content-Length", str(fs.st_size))
                 self.end_headers()
