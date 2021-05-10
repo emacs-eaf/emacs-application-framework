@@ -63,6 +63,11 @@ EAF is an extensible framework, it comes with a number of useful applications, a
 | <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
+| Music Player                                              |
+| :--------:                                                |
+| <img src="./screenshot/music_player.png.png" width="400"> |
+|                                                           |
+
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 - EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
 - Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
