@@ -5,7 +5,7 @@
       v-for="(item, index) in fileInfos"
       @click="playItem(item)"
       :key="item.path"
-      :style="{ color: foregroundColor }">
+      :style="{ 'background': itemBackgroundColor(item), 'color': itemForegroundColor(item) }">
       <div class="item-index">
         {{ padNumber(index, numberWidth) }}
       </div>
@@ -34,8 +34,11 @@
        currentTrack: "",
        numberWidth: 0,
        backgroundColor: "",
-       foregroundColor: ""
+       foregroundColor: "",
      }
+   },
+   computed: {
+
    },
    props: {
    },
@@ -48,6 +51,7 @@
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
      },
+
      addFiles(files) {
        this.fileInfos = files;
 
@@ -58,16 +62,34 @@
        this.$refs.player.load();
        this.$refs.player.play();
      },
+
      playItem(item) {
        this.currentTrack = item.path;
        this.$refs.player.load();
        this.$refs.player.play();
      },
+
      padNumber(num, size) {
        var s = num+"";
        while (s.length < size) s = "0" + s;
 
        return s;
+     },
+
+     itemBackgroundColor(item) {
+       if (item.path == this.currentTrack) {
+         return this.foregroundColor;
+       } else {
+         return this.backgroundColor;
+       }
+     },
+
+     itemForegroundColor(item) {
+       if (item.path == this.currentTrack) {
+         return this.backgroundColor;
+       } else {
+         return this.foregroundColor;
+       }
      }
    }
  }
@@ -88,6 +110,8 @@
    display: flex;
    flex-direction: row;
    align-items: center;
+
+   user-select: none;
  }
 
  .item-index {
@@ -96,7 +120,7 @@
 
  .item-name {
    margin-right: 10px;
-   width: 40%;
+   width: 30%;
  }
 
  .item-artist {
@@ -105,6 +129,6 @@
  }
 
  .item-album {
-   width: 20%;
+   width: 30%;
  }
 </style>
