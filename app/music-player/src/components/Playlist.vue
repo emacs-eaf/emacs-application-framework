@@ -2,11 +2,16 @@
   <div class="playlist">
     <div
       class="item"
-      v-for="item in fileInfos"
+      v-for="(item, index) in fileInfos"
       @click="playItem(item)"
       :key="item.path"
       :style="{ color: foregroundColor }">
-      {{ item.name }}
+      <div class="item-index">
+        {{ padNumber(index, numberWidth) }}
+      </div>
+      <div class="item-name">
+        {{ item.name }}
+      </div>
     </div>
     <audio ref="player">
       <source :src="currentTrack">
@@ -21,6 +26,7 @@
      return {
        fileInfos: [],
        currentTrack: "",
+       numberWidth: 0,
        backgroundColor: "",
        foregroundColor: ""
      }
@@ -44,6 +50,8 @@
          })
        }
 
+       this.numberWidth = files.length.toString().length;
+
        this.currentTrack = files[0];
 
        this.$refs.player.load();
@@ -53,6 +61,12 @@
        this.currentTrack = item.path;
        this.$refs.player.load();
        this.$refs.player.play();
+     },
+     padNumber(num, size) {
+       var s = num+"";
+       while (s.length < size) s = "0" + s;
+
+       return s;
      }
    }
  }
@@ -65,9 +79,21 @@
  }
 
  .item {
-   padding-left: 10px;
-   padding-right: 10px;
+   padding-left: 20px;
+   padding-right: 20px;
    padding-top: 5px;
    padding-bottom: 5px;
+
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+ }
+
+ .item-index {
+   margin-right: 10px;
+ }
+
+ .item-name {
+
  }
 </style>
