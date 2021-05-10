@@ -11,6 +11,7 @@
     "app/js-video-player",
     "app/markdown-previewer",
     "app/image-viewer",
+    "app/music-player",
     "app/terminal"
   ],
   "vueApps": [

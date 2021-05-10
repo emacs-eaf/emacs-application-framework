@@ -609,12 +609,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
-(defcustom eaf-music-keybinding
-  '(("<f12>" . "open_devtools")
-    )
-  "The keybinding of EAF Music."
-  :type 'cons)
-
 (defcustom eaf-terminal-keybinding
   '(("M-n" . "scroll_up")
     ("M-p" . "scroll_down")
@@ -745,6 +739,12 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Jupyter."
   :type 'cons)
 
+(defcustom eaf-music-player-keybinding
+  '(("<f12>" . "open_devtools")
+    )
+  "The keybinding of EAF Music Player."
+  :type 'cons)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
   "The extension list of pdf application."
@@ -763,11 +763,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 (defcustom eaf-video-extension-list
   '("avi" "webm" "rmvb" "ogg" "mp4" "mkv" "m4v")
   "The extension list of video player application."
-  :type 'cons)
-
-(defcustom eaf-music-extension-list
-  '("mp3")
-  "The extension list of music player application."
   :type 'cons)
 
 (defcustom eaf-browser-extension-list
@@ -855,7 +850,7 @@ Add NAME of command `wmctrl -m' to this list."
     ("video-player" . eaf-video-player-keybinding)
     ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
-    ("music" . eaf-music-keybinding)
+    ("music-player" . eaf-music-player-keybinding)
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
     ("markdown-previewer" . eaf-browser-keybinding)
@@ -893,7 +888,6 @@ A bookmark handler function is used as
     ("markdown-previewer" . eaf-markdown-extension-list)
     ("image-viewer" . eaf-image-extension-list)
     ("video-player" . eaf-video-extension-list)
-    ("music" . eaf-music-extension-list)
     ("browser" . eaf-browser-extension-list)
     ("org-previewer" . eaf-org-extension-list)
     ("mindmap" . eaf-mindmap-extension-list)
@@ -2065,10 +2059,10 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-vue-demo" "vue-demo"))
 
-(defun eaf-open-music (file)
+(defun eaf-open-music-player (music-file)
   "Open EAF music player."
-  (interactive "F[EAF] Play Music: ")
-  (eaf-open file "music"))
+  (interactive "fOpen music: ")
+  (eaf-open "eaf-music-player" "music-player" music-file))
 
 ;;;###autoload
 (defun eaf-open-camera ()
@@ -2631,7 +2625,7 @@ The key is the annot id on PAGE."
                     'eaf-video-player-keybinding
                     'eaf-js-video-player-keybinding
                     'eaf-image-viewer-keybinding
-                    'eaf-music-keybinding
+                    'eaf-music-player-keybinding
                     'eaf-terminal-keybinding
                     'eaf-camera-keybinding
                     'eaf-mindmap-keybinding
@@ -2748,7 +2742,6 @@ The key is the annot id on PAGE."
                                  eaf-markdown-extension-list
                                  eaf-image-extension-list
                                  eaf-video-extension-list
-                                 eaf-music-extension-list
                                  eaf-org-extension-list
                                  eaf-mindmap-extension-list
                                  eaf-office-extension-list)))))
@@ -2768,7 +2761,6 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
        (member (downcase ext) (append
                                eaf-pdf-extension-list
                                eaf-video-extension-list
-                               eaf-music-extension-list
                                eaf-image-extension-list
                                eaf-mindmap-extension-list))
        (not (member ext eaf-find-file-ext-blacklist))))

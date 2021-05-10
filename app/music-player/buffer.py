@@ -22,14 +22,39 @@
 from PyQt5.QtCore import QUrl
 from core.webengine import BrowserBuffer
 import os
+import glob
+import json
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
 
-        self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
+        self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
+        self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
+        self.first_file = arguments
+
+        self.buffer_widget.loadFinished.connect(self.load_first_file)
 
         with open(self.index_file, "r") as f:
-            html = f.read().replace("%1", os.path.join(os.path.dirname(__file__))).replace("%2", self.url)
+            html = f.read().replace('''href="''', '''href="''' + self.index_file_dir).replace('''<script src="''', '''<script src="''' + self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
+
+    def load_first_file(self):
+        print("#### ",
+              self.emacs_var_dict["eaf-emacs-theme-background-color"],
+              self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+
+        self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\")'''.format(
+            self.emacs_var_dict["eaf-emacs-theme-background-color"],
+            self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+        ))
+
+        files = []
+
+        if os.path.isdir(self.first_file):
+            files = list(filter(lambda f : os.path.isfile(f), glob.glob(os.path.join(self.first_file, "**"), recursive=True)))
+        elif os.path.isfile(self.first_file):
+            files.append(self.first_file)
+
+        self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(files)))

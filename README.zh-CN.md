@@ -184,7 +184,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软Office阅读器 | `M-x eaf-open-office`                                                       |
 | jupyter          | `M-x eaf-open-jupyter`                                                      |
-| 音乐          | `M-x eaf-open-music`                                                      |
+| 音乐          | `M-x eaf-open-music-player`                                                      |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
 | Vue.js演示程序         | `M-x eaf-open-vue-demo`                                                         |
 
