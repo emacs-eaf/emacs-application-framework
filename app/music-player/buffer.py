@@ -61,4 +61,16 @@ class AppBuffer(BrowserBuffer):
         elif os.path.isfile(self.first_file):
             files.append(self.first_file)
 
-        self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(files)))
+        self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(self.pick_music_info(files))))
+
+    def pick_music_info(self, files):
+        infos = []
+
+        for file in files:
+            info = {
+                "name": os.path.splitext(os.path.basename(file))[0],
+                "path": file
+            }
+            infos.append(info)
+
+        return infos

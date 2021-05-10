@@ -43,16 +43,11 @@
        this.foregroundColor = foregroundColor;
      },
      addFiles(files) {
-       for (var i = 0; i < files.length; i++) {
-         this.fileInfos.push({
-           name: files[i].split(/(\\|\/)/g).pop().split('.').slice(0, -1).join('.'),
-           path: files[i]
-         })
-       }
+       this.fileInfos = files;
 
        this.numberWidth = files.length.toString().length;
 
-       this.currentTrack = files[0];
+       this.currentTrack = files[0].path;
 
        this.$refs.player.load();
        this.$refs.player.play();
