@@ -45,6 +45,15 @@
    mounted() {
      window.initColors = this.initColors;
      window.addFiles = this.addFiles;
+     window.playNextItem = this.playNextItem;
+     window.playPrevItem = this.playPrevItem;
+
+     let that = this;
+     this.$refs.player.addEventListener("ended", function(){
+       that.playNextItem();
+
+       console.log("Got it");
+     });
    },
    methods: {
      initColors(backgroundColor, foregroundColor) {
@@ -57,14 +66,41 @@
 
        this.numberWidth = files.length.toString().length;
 
-       this.currentTrack = files[0].path;
-
-       this.$refs.player.load();
-       this.$refs.player.play();
+       this.playFile(files[0].path);
      },
 
      playItem(item) {
-       this.currentTrack = item.path;
+       this.playFile(item.path);
+     },
+
+     playPrevItem() {
+       var tracks = this.fileInfos.map(function (track) { return track.path });
+       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+
+       if (currentTrackIndex > 0) {
+         currentTrackIndex -= 1;
+       } else {
+         currentTrackIndex = tracks.length - 1;
+       }
+
+       this.playFile(tracks[currentTrackIndex]);
+     },
+
+     playNextItem() {
+       var tracks = this.fileInfos.map(function (track) { return track.path });
+       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+
+       if (currentTrackIndex < tracks.length - 1) {
+         currentTrackIndex += 1;
+       } else {
+         currentTrackIndex = 0;
+       }
+
+       this.playFile(tracks[currentTrackIndex]);
+     },
+
+     playFile(file) {
+       this.currentTrack = file;
        this.$refs.player.load();
        this.$refs.player.play();
      },
@@ -120,12 +156,12 @@
 
  .item-name {
    margin-right: 10px;
-   width: 30%;
+   width: 40%;
  }
 
  .item-artist {
    margin-left: 30px;
-   width: 30%;
+   width: 20%;
  }
 
  .item-album {

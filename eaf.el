@@ -741,6 +741,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-music-player-keybinding
   '(("<f12>" . "open_devtools")
+    ("j" . "play_next")
+    ("k" . "play_prev")
     )
   "The keybinding of EAF Music Player."
   :type 'cons)

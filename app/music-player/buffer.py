@@ -21,6 +21,7 @@
 
 from PyQt5.QtCore import QUrl
 from core.webengine import BrowserBuffer
+from core.utils import interactive
 import os
 import glob
 import json
@@ -78,3 +79,11 @@ class AppBuffer(BrowserBuffer):
                 infos.append(info)
 
         return infos
+
+    @interactive(insert_or_do=True)
+    def play_next(self):
+        self.buffer_widget.execute_js('''playNextItem()''')
+
+    @interactive(insert_or_do=True)
+    def play_prev(self):
+        self.buffer_widget.execute_js('''playPrevItem()''')
