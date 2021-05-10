@@ -12,6 +12,12 @@
       <div class="item-name">
         {{ item.name }}
       </div>
+      <div class="item-artist">
+        {{ item.artist }}
+      </div>
+      <div class="item-album">
+        {{ item.album }}
+      </div>
     </div>
     <audio ref="player">
       <source :src="currentTrack">
@@ -89,6 +95,16 @@
  }
 
  .item-name {
+   margin-right: 10px;
+   width: 40%;
+ }
 
+ .item-artist {
+   margin-left: 30px;
+   width: 30%;
+ }
+
+ .item-album {
+   width: 20%;
  }
 </style>

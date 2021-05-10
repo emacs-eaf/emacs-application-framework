@@ -24,6 +24,8 @@ from core.webengine import BrowserBuffer
 import os
 import glob
 import json
+import mimetypes
+import taglib
 
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
@@ -45,10 +47,6 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
     def load_first_file(self):
-        print("#### ",
-              self.emacs_var_dict["eaf-emacs-theme-background-color"],
-              self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
-
         self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\")'''.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],
             self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
@@ -67,10 +65,16 @@ class AppBuffer(BrowserBuffer):
         infos = []
 
         for file in files:
-            info = {
-                "name": os.path.splitext(os.path.basename(file))[0],
-                "path": file
-            }
-            infos.append(info)
+            file_type = mimetypes.guess_type(file)[0]
+            if file_type and file_type.startswith("audio/"):
+                tags = taglib.File(file).tags
+
+                info = {
+                    "name": os.path.splitext(os.path.basename(file))[0],
+                    "path": file,
+                    "artist": tags["ARTIST"][0].strip() if "ARTIST" in tags and len(tags["ARTIST"]) > 0 else "",
+                    "album": tags["ALBUM"][0].strip() if "ALBUM" in tags and len(tags["ALBUM"]) > 0 else ""
+                }
+                infos.append(info)
 
         return infos
