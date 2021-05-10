@@ -7,7 +7,7 @@
       :key="item.path"
       :style="{ 'background': itemBackgroundColor(item), 'color': itemForegroundColor(item) }">
       <div class="item-index">
-        {{ padNumber(index, numberWidth) }}
+        {{ padNumber(index + 1, numberWidth) }}
       </div>
       <div class="item-name">
         {{ item.name }}
