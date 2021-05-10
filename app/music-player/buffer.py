@@ -87,3 +87,15 @@ class AppBuffer(BrowserBuffer):
     @interactive(insert_or_do=True)
     def play_prev(self):
         self.buffer_widget.execute_js('''playPrevItem()''')
+
+    @interactive(insert_or_do=True)
+    def forward(self):
+        self.buffer_widget.execute_js('''forward()''')
+
+    @interactive(insert_or_do=True)
+    def backward(self):
+        self.buffer_widget.execute_js('''backward()''')
+
+    @interactive(insert_or_do=True)
+    def toggle(self):
+        self.buffer_widget.execute_js('''toggle()''')

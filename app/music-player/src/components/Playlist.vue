@@ -47,6 +47,9 @@
      window.addFiles = this.addFiles;
      window.playNextItem = this.playNextItem;
      window.playPrevItem = this.playPrevItem;
+     window.forward = this.forward;
+     window.backward = this.backward;
+     window.toggle = this.toggle;
 
      let that = this;
      this.$refs.player.addEventListener("ended", function(){
@@ -103,6 +106,22 @@
        this.currentTrack = file;
        this.$refs.player.load();
        this.$refs.player.play();
+     },
+
+     forward() {
+       this.$refs.player.currentTime += 10;
+     },
+
+     backward() {
+       this.$refs.player.currentTime -= 10;
+     },
+
+     toggle() {
+       if (this.$refs.player.paused) {
+         this.$refs.player.play();
+       } else {
+         this.$refs.player.pause()
+       }
      },
 
      padNumber(num, size) {
