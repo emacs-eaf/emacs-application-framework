@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="playlist"
-    :style="{ background: backgroundColor }">
+  <div class="playlist">
     <div
       class="item"
       v-for="item in fileInfos"
@@ -35,8 +33,6 @@
    },
    methods: {
      initColors(backgroundColor, foregroundColor) {
-       console.log(backgroundColor, foregroundColor);
-
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
      },
@@ -65,6 +61,7 @@
 <style scoped>
  .playlist {
    width: 100%;
+   height: 100%;
  }
 
  .item {
