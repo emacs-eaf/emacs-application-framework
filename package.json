@@ -12,10 +12,12 @@
     "app/markdown-previewer",
     "app/image-viewer",
     "app/music-player",
+    "app/vue-demo",
     "app/terminal"
   ],
   "vueApps": [
-    "app/vue-demo"
+    "app/vue-demo",
+    "app/music-player"
   ],
   "rebuildApps": [
     "app/terminal"
