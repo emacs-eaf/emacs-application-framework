@@ -1193,6 +1193,12 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
+    def build_js_bridge_method(self, python_method_name, js_method_name):
+        def _do():
+            self.buffer_widget.execute_js('''{}()'''.format(js_method_name))
+
+        setattr(self, python_method_name, _do)
+
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         self._conn = sqlite3.connect(dbpath)

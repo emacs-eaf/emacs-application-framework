@@ -47,6 +47,13 @@ class AppBuffer(BrowserBuffer):
                     )
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
+        for (python_method_name, js_method_name) in [("play_next", "playNextItem"),
+                                                     ("play_prev", "playPrevItem"),
+                                                     ("forward", "forward"),
+                                                     ("backward", "backward"),
+                                                     ("toggle", "toggle")]:
+            self.build_js_bridge_method(python_method_name, js_method_name)
+
     def load_first_file(self):
         self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\")'''.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],
@@ -79,23 +86,3 @@ class AppBuffer(BrowserBuffer):
                 infos.append(info)
 
         return infos
-
-    @interactive(insert_or_do=True)
-    def play_next(self):
-        self.buffer_widget.execute_js('''playNextItem()''')
-
-    @interactive(insert_or_do=True)
-    def play_prev(self):
-        self.buffer_widget.execute_js('''playPrevItem()''')
-
-    @interactive(insert_or_do=True)
-    def forward(self):
-        self.buffer_widget.execute_js('''forward()''')
-
-    @interactive(insert_or_do=True)
-    def backward(self):
-        self.buffer_widget.execute_js('''backward()''')
-
-    @interactive(insert_or_do=True)
-    def toggle(self):
-        self.buffer_widget.execute_js('''toggle()''')
