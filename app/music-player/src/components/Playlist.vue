@@ -19,9 +19,6 @@
         {{ item.album }}
       </div>
     </div>
-    <audio ref="player">
-      <source :src="currentTrack">
-    </audio>
   </div>
 </template>
 
@@ -45,17 +42,9 @@
    mounted() {
      window.initPlaylistColor = this.initPlaylistColor;
      window.addFiles = this.addFiles;
-     window.playNextItem = this.playNextItem;
-     window.playPrevItem = this.playPrevItem;
-     window.forward = this.forward;
-     window.backward = this.backward;
-     window.toggle = this.toggle;
 
-     let that = this;
-     this.$refs.player.addEventListener("ended", function(){
-       that.playNextItem();
-
-       console.log("Got it");
+     this.$root.$on("changeCurrentTrack", currentTrack => {
+       this.currentTrack = currentTrack;
      });
    },
    methods: {
@@ -66,60 +55,13 @@
 
      addFiles(files) {
        this.fileInfos = files;
+       this.$root.$emit("addFiles", files);
 
        this.numberWidth = files.length.toString().length;
-
-       this.playItem(files[0]);
-     },
-
-     playPrevItem() {
-       var tracks = this.fileInfos.map(function (track) { return track.path });
-       var currentTrackIndex = tracks.indexOf(this.currentTrack);
-
-       if (currentTrackIndex > 0) {
-         currentTrackIndex -= 1;
-       } else {
-         currentTrackIndex = tracks.length - 1;
-       }
-
-       this.playItem(this.fileInfos[currentTrackIndex]);
-     },
-
-     playNextItem() {
-       var tracks = this.fileInfos.map(function (track) { return track.path });
-       var currentTrackIndex = tracks.indexOf(this.currentTrack);
-
-       if (currentTrackIndex < tracks.length - 1) {
-         currentTrackIndex += 1;
-       } else {
-         currentTrackIndex = 0;
-       }
-
-       this.playItem(this.fileInfos[currentTrackIndex]);
      },
 
      playItem(item) {
-       this.currentTrack = item.path;
-       this.$refs.player.load();
-       this.$refs.player.play();
-
        this.$root.$emit("playItem", item);
-     },
-
-     forward() {
-       this.$refs.player.currentTime += 10;
-     },
-
-     backward() {
-       this.$refs.player.currentTime -= 10;
-     },
-
-     toggle() {
-       if (this.$refs.player.paused) {
-         this.$refs.player.play();
-       } else {
-         this.$refs.player.pause()
-       }
      },
 
      padNumber(num, size) {

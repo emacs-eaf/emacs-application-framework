@@ -4,7 +4,7 @@
     :style="{ 'background': backgroundColor }">
     <div
       class="info"
-    :style="{ 'color': foregroundColor }">
+      :style="{ 'color': foregroundColor }">
       <div>
         {{ name }}
       </div>
@@ -16,18 +16,27 @@
       <font-awesome-icon
         class="backward"
         :style="{ 'color': foregroundColor }"
-        icon="backward" />
+        icon="backward"
+        @click="playPrevItem"
+      />
       <font-awesome-icon
         class="play"
         :style="{ 'color': foregroundColor }"
-        icon="play-circle" />
+        :icon="playIcon"
+        @click="toggle"
+      />
       <font-awesome-icon
         class="forward"
         :style="{ 'color': foregroundColor }"
-        icon="forward" />
+        icon="forward"
+        @click="playNextItem"
+      />
     </div>
     <div class="visual">
     </div>
+    <audio ref="player">
+      <source :src="currentTrack">
+    </audio>
   </div>
 </template>
 
@@ -36,10 +45,13 @@
    name: 'Panel',
    data() {
      return {
+       currentTrack: "",
+       fileInfos: [],
        name: "",
        artist: "",
        backgroundColor: "",
-       foregroundColor: ""
+       foregroundColor: "",
+       playIcon: "play-circle"
      }
    },
    computed: {
@@ -48,17 +60,86 @@
    },
    mounted() {
      window.initPanelColor = this.initPanelColor;
+     window.forward = this.forward;
+     window.backward = this.backward;
+     window.toggle = this.toggle;
+     window.playNextItem = this.playNextItem;
+     window.playPrevItem = this.playPrevItem;
 
-     this.$root.$on("playItem", item => {
-       this.name = item.name;
-       this.artist = item.artist;
+     this.$root.$on("playItem", this.playItem);
+
+     this.$root.$on("addFiles", files => {
+       this.fileInfos = files;
+       this.playItem(files[0]);
+     });
+
+     let that = this;
+     this.$refs.player.addEventListener("ended", function(){
+       that.playNextItem();
      });
    },
    methods: {
+     playItem(item) {
+       this.currentTrack = item.path;
+       this.playIcon = "pause-circle";
+
+       this.$root.$emit("changeCurrentTrack", this.currentTrack);
+
+       this.name = item.name;
+       this.artist = item.artist;
+
+       this.$refs.player.load();
+       this.$refs.player.play();
+     },
+
      initPanelColor(backgroundColor, foregroundColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
-     }
+     },
+
+     forward() {
+       this.$refs.player.currentTime += 10;
+     },
+
+     backward() {
+       this.$refs.player.currentTime -= 10;
+     },
+
+     toggle() {
+       if (this.$refs.player.paused) {
+         this.$refs.player.play();
+         this.playIcon = "pause-circle";
+       } else {
+         this.$refs.player.pause();
+         this.playIcon = "play-circle";
+       }
+     },
+
+     playPrevItem() {
+       var tracks = this.fileInfos.map(function (track) { return track.path });
+       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+
+       if (currentTrackIndex > 0) {
+         currentTrackIndex -= 1;
+       } else {
+         currentTrackIndex = tracks.length - 1;
+       }
+
+       this.playItem(this.fileInfos[currentTrackIndex]);
+     },
+
+     playNextItem() {
+       var tracks = this.fileInfos.map(function (track) { return track.path });
+       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+
+       if (currentTrackIndex < tracks.length - 1) {
+         currentTrackIndex += 1;
+       } else {
+         currentTrackIndex = 0;
+       }
+
+       this.playItem(this.fileInfos[currentTrackIndex]);
+     },
    }
  }
 </script>
@@ -81,6 +162,7 @@
 
  .info {
    width: 30%;
+   user-select: none;
  }
 
  .control {
@@ -97,15 +179,18 @@
 
  .backward {
    font-size: 24px;
+   cursor: pointer;
  }
 
  .forward {
    font-size: 24px;
+   cursor: pointer;
  }
 
  .play {
    font-size: 40px;
    margin-left: 10px;
    margin-right: 10px;
+   cursor: pointer;
  }
 </style>
