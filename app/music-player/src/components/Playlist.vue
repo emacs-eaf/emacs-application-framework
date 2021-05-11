@@ -43,7 +43,7 @@
    props: {
    },
    mounted() {
-     window.initColors = this.initColors;
+     window.initPlaylistColor = this.initPlaylistColor;
      window.addFiles = this.addFiles;
      window.playNextItem = this.playNextItem;
      window.playPrevItem = this.playPrevItem;
@@ -59,7 +59,7 @@
      });
    },
    methods: {
-     initColors(backgroundColor, foregroundColor) {
+     initPlaylistColor(backgroundColor, foregroundColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
      },
@@ -69,11 +69,7 @@
 
        this.numberWidth = files.length.toString().length;
 
-       this.playFile(files[0].path);
-     },
-
-     playItem(item) {
-       this.playFile(item.path);
+       this.playItem(files[0]);
      },
 
      playPrevItem() {
@@ -86,7 +82,7 @@
          currentTrackIndex = tracks.length - 1;
        }
 
-       this.playFile(tracks[currentTrackIndex]);
+       this.playItem(this.fileInfos[currentTrackIndex]);
      },
 
      playNextItem() {
@@ -99,13 +95,15 @@
          currentTrackIndex = 0;
        }
 
-       this.playFile(tracks[currentTrackIndex]);
+       this.playItem(this.fileInfos[currentTrackIndex]);
      },
 
-     playFile(file) {
-       this.currentTrack = file;
+     playItem(item) {
+       this.currentTrack = item.path;
        this.$refs.player.load();
        this.$refs.player.play();
+
+       this.$root.$emit("playItem", item);
      },
 
      forward() {
