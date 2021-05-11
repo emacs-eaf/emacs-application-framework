@@ -33,10 +33,17 @@
       />
     </div>
     <div class="visual">
+      <audio ref="player">
+        <source :src="currentTrack">
+      </audio>
+      <av-bars
+        class="visual-bar"
+        ref-link="player"
+        caps-color="#FFF"
+        :bar-color="['#f00', '#ff0', '#0f0']"
+        :caps-height="2"
+      />
     </div>
-    <audio ref="player">
-      <source :src="currentTrack">
-    </audio>
   </div>
 </template>
 
@@ -156,13 +163,12 @@
    display: flex;
    flex-direction: row;
    align-items: center;
-
-   padding-left: 60px;
  }
 
  .info {
    width: 30%;
    user-select: none;
+   padding-left: 30px;
  }
 
  .control {
@@ -175,6 +181,12 @@
 
  .visual {
    width: 30%;
+   padding-right: 30px;
+ }
+
+ .visual-bar {
+   display: flex;
+   justify-content: flex-end;
  }
 
  .backward {
