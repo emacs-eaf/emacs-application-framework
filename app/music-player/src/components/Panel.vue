@@ -12,7 +12,12 @@
         {{ artist }}
       </div>
     </div>
-    <div class="control">
+    <div
+      class="control"
+      :style="{ 'color': foregroundColor }">
+      <div class="current-time">
+        {{ currentTime }}
+      </div>
       <font-awesome-icon
         class="backward"
         :style="{ 'color': foregroundColor }"
@@ -31,6 +36,9 @@
         icon="step-forward"
         @click="playNextItem"
       />
+      <div class="duration">
+        {{ duration }}
+      </div>
     </div>
     <div class="visual">
       <audio ref="player">
@@ -53,6 +61,8 @@
    data() {
      return {
        currentTrack: "",
+       currentTime: "",
+       duration: "",
        fileInfos: [],
        name: "",
        artist: "",
@@ -84,6 +94,11 @@
      this.$refs.player.addEventListener("ended", function(){
        that.playNextItem();
      });
+
+     this.$refs.player.addEventListener('timeupdate', () => {
+       that.currentTime = that.formatTime(that.$refs.player.currentTime);
+       that.duration = that.formatTime(that.$refs.player.duration);
+     });
    },
    methods: {
      playItem(item) {
@@ -102,6 +117,18 @@
      initPanelColor(backgroundColor, foregroundColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
+     },
+
+     formatTime(seconds) {
+       if (isNaN(seconds)) {
+         return "00:00"
+       } else {
+         var minutes = Math.floor(seconds / 60);
+         minutes = (minutes >= 10) ? minutes : "0" + minutes;
+         seconds = Math.floor(seconds % 60);
+         seconds = (seconds >= 10) ? seconds : "0" + seconds;
+         return minutes + ":" + seconds;
+       }
      },
 
      forward() {
@@ -204,5 +231,13 @@
    margin-left: 10px;
    margin-right: 10px;
    cursor: pointer;
+ }
+
+ .current-time {
+   margin-right: 20px;
+ }
+
+ .duration {
+   margin-left: 20px;
  }
 </style>
