@@ -16,7 +16,7 @@
       <font-awesome-icon
         class="backward"
         :style="{ 'color': foregroundColor }"
-        icon="backward"
+        icon="step-backward"
         @click="playPrevItem"
       />
       <font-awesome-icon
@@ -28,7 +28,7 @@
       <font-awesome-icon
         class="forward"
         :style="{ 'color': foregroundColor }"
-        icon="forward"
+        icon="step-forward"
         @click="playNextItem"
       />
     </div>
