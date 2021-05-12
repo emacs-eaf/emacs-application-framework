@@ -53,6 +53,11 @@
 
      this.$root.$on("changeCurrentTrack", currentTrack => {
        this.currentTrack = currentTrack;
+
+       /* Scroll playlist if current track out of visible area. */
+       var tracks = this.fileInfos.map(function (track) { return track.path });
+       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+       this.$refs.playlist.children[currentTrackIndex].scrollIntoViewIfNeeded(false);
      });
    },
    methods: {
