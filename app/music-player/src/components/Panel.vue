@@ -216,6 +216,10 @@
    width: 30%;
    user-select: none;
    padding-left: 30px;
+
+   overflow: hidden;
+   white-space: nowrap;
+   text-overflow: ellipsis;
  }
 
  .control {

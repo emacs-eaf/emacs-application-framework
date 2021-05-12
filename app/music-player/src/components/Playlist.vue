@@ -94,6 +94,10 @@
  .playlist {
    width: 100%;
    height: 100%;
+
+   overflow: hidden;
+   white-space: nowrap;
+   text-overflow: ellipsis;
  }
 
  .item {
@@ -114,12 +118,10 @@
  }
 
  .item-name {
-   margin-right: 10px;
    width: 40%;
  }
 
  .item-artist {
-   margin-left: 30px;
    width: 20%;
  }
 
