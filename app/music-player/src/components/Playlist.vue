@@ -25,19 +25,26 @@
 </template>
 
 <script>
+ import { mapState } from "vuex";
+
  export default {
    name: 'Playlist',
    data() {
      return {
-       fileInfos: [],
-       currentTrack: "",
-       numberWidth: 0,
        backgroundColor: "",
        foregroundColor: "",
      }
    },
-   computed: {
-
+   computed: mapState([
+     "currentTrack",
+     "currentTrackIndex",
+     "numberWidth",
+     "fileInfos"
+   ]),
+   watch: {
+     "currentTrack": function() {
+       this.$refs.playlist.children[this.currentTrackIndex].scrollIntoViewIfNeeded(false);
+     }
    },
    props: {
    },
@@ -50,15 +57,6 @@
      window.scrollDownPage = this.scrollDownPage;
      window.scrollToBegin = this.scrollToBegin;
      window.scrollToBottom = this.scrollToBottom;
-
-     this.$root.$on("changeCurrentTrack", currentTrack => {
-       this.currentTrack = currentTrack;
-
-       /* Scroll playlist if current track out of visible area. */
-       var tracks = this.fileInfos.map(function (track) { return track.path });
-       var currentTrackIndex = tracks.indexOf(this.currentTrack);
-       this.$refs.playlist.children[currentTrackIndex].scrollIntoViewIfNeeded(false);
-     });
    },
    methods: {
      initPlaylistColor(backgroundColor, foregroundColor) {
@@ -67,10 +65,7 @@
      },
 
      addFiles(files) {
-       this.fileInfos = files;
-       this.$root.$emit("addFiles", files);
-
-       this.numberWidth = files.length.toString().length;
+       this.$store.commit("updateFileInfos", files);
      },
 
      playItem(item) {

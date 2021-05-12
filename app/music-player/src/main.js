@@ -7,13 +7,16 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import AudioVisual from 'vue-audio-visual'
 
+import store from "./store/index.js"
+
 library.add(faPlayCircle, faPauseCircle, faStepForward, faStepBackward)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
-Vue.config.productionTip = false
-
 Vue.use(AudioVisual)
+
+Vue.config.productionTip = false
 
 new Vue({
   render: h => h(App),
+  store
 }).$mount('#app')

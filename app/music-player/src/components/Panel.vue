@@ -60,17 +60,16 @@
 </template>
 
 <script>
+ import { mapState } from "vuex";
  import albumArt from "album-art"
 
  export default {
    name: 'Panel',
    data() {
      return {
-       currentTrack: "",
        currentTime: "",
        currentCover: "",
        duration: "",
-       fileInfos: [],
        name: "",
        artist: "",
        backgroundColor: "",
@@ -78,7 +77,15 @@
        playIcon: "play-circle"
      }
    },
-   computed: {
+   computed: mapState([
+     "currentTrack",
+     "currentTrackIndex",
+     "fileInfos"
+   ]),
+   watch: {
+     "fileInfos": function() {
+       this.playItem(this.fileInfos[0]);
+     }
    },
    props: {
    },
@@ -92,11 +99,6 @@
 
      this.$root.$on("playItem", this.playItem);
 
-     this.$root.$on("addFiles", files => {
-       this.fileInfos = files;
-       this.playItem(files[0]);
-     });
-
      let that = this;
      this.$refs.player.addEventListener("ended", function(){
        that.playNextItem();
@@ -109,10 +111,9 @@
    },
    methods: {
      playItem(item) {
-       this.currentTrack = item.path;
-       this.playIcon = "pause-circle";
+       this.$store.commit("updateCurrentTrack", item.path);
 
-       this.$root.$emit("changeCurrentTrack", this.currentTrack);
+       this.playIcon = "pause-circle";
 
        this.name = item.name;
        this.artist = item.artist;
@@ -165,23 +166,21 @@
      },
 
      playPrevItem() {
-       var tracks = this.fileInfos.map(function (track) { return track.path });
-       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+       var currentTrackIndex = this.currentTrackIndex;
 
        if (currentTrackIndex > 0) {
          currentTrackIndex -= 1;
        } else {
-         currentTrackIndex = tracks.length - 1;
+         currentTrackIndex = this.fileInfos.length - 1;
        }
 
        this.playItem(this.fileInfos[currentTrackIndex]);
      },
 
      playNextItem() {
-       var tracks = this.fileInfos.map(function (track) { return track.path });
-       var currentTrackIndex = tracks.indexOf(this.currentTrack);
+       var currentTrackIndex = this.currentTrackIndex;
 
-       if (currentTrackIndex < tracks.length - 1) {
+       if (currentTrackIndex < this.fileInfos.length - 1) {
          currentTrackIndex += 1;
        } else {
          currentTrackIndex = 0;
