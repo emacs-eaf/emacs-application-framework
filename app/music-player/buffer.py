@@ -86,7 +86,7 @@ class AppBuffer(BrowserBuffer):
                 tags = taglib.File(file).tags
 
                 info = {
-                    "name": os.path.splitext(os.path.basename(file))[0],
+                    "name": tags["TITLE"][0].strip() if "TITLE" in tags and len(tags["TITLE"]) > 0 else os.path.splitext(os.path.basename(file))[0],
                     "path": file,
                     "artist": tags["ARTIST"][0].strip() if "ARTIST" in tags and len(tags["ARTIST"]) > 0 else "",
                     "album": tags["ALBUM"][0].strip() if "ALBUM" in tags and len(tags["ALBUM"]) > 0 else ""
