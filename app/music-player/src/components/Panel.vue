@@ -2,6 +2,10 @@
   <div
     class="panel"
     :style="{ 'background': backgroundColor }">
+    <img
+      v-if="currentCover"
+      class="cover"
+      :src="currentCover"/>
     <div
       class="info"
       :style="{ 'color': foregroundColor }">
@@ -56,12 +60,15 @@
 </template>
 
 <script>
+ import albumArt from "album-art"
+
  export default {
    name: 'Panel',
    data() {
      return {
        currentTrack: "",
        currentTime: "",
+       currentCover: "",
        duration: "",
        fileInfos: [],
        name: "",
@@ -112,6 +119,14 @@
 
        this.$refs.player.load();
        this.$refs.player.play();
+
+       albumArt(item.artist, (error, response) => {
+         if (error) {
+           this.currentCover = "";
+         } else {
+           this.currentCover = response;
+         }
+       })
      },
 
      initPanelColor(backgroundColor, foregroundColor) {
@@ -190,6 +205,11 @@
    display: flex;
    flex-direction: row;
    align-items: center;
+ }
+
+ .cover {
+   height: 80%;
+   margin-left: 30px;
  }
 
  .info {
