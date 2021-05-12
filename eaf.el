@@ -748,8 +748,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("SPC" . "toggle")
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
-    ("C-f" . "scroll_right")
-    ("C-b" . "scroll_left")
     ("C-v" . "scroll_up_page")
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")

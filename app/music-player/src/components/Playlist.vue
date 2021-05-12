@@ -1,5 +1,7 @@
 <template>
-  <div class="playlist">
+  <div
+    ref="playlist"
+    class="playlist">
     <div
       class="item"
       v-for="(item, index) in fileInfos"
@@ -42,6 +44,12 @@
    mounted() {
      window.initPlaylistColor = this.initPlaylistColor;
      window.addFiles = this.addFiles;
+     window.scrollUp = this.scrollUp;
+     window.scrollDown = this.scrollDown;
+     window.scrollUpPage = this.scrollUpPage;
+     window.scrollDownPage = this.scrollDownPage;
+     window.scrollToBegin = this.scrollToBegin;
+     window.scrollToBottom = this.scrollToBottom;
 
      this.$root.$on("changeCurrentTrack", currentTrack => {
        this.currentTrack = currentTrack;
@@ -85,7 +93,31 @@
        } else {
          return this.foregroundColor;
        }
-     }
+     },
+
+     scrollUp() {
+       this.$refs.playlist.scrollTop += 30;
+     },
+
+     scrollDown() {
+       this.$refs.playlist.scrollTop -= 30;
+     },
+
+     scrollUpPage() {
+       this.$refs.playlist.scrollTop += this.$refs.playlist.offsetHeight;
+     },
+
+     scrollDownPage() {
+       this.$refs.playlist.scrollTop -= this.$refs.playlist.offsetHeight;
+     },
+
+     scrollToBegin() {
+       this.$refs.playlist.scrollTop = 0;
+     },
+
+     scrollToBottom() {
+       this.$refs.playlist.scrollTop = this.$refs.playlist.scrollHeight;
+     },
    }
  }
 </script>
