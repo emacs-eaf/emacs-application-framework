@@ -66,6 +66,16 @@ class AppBuffer(BrowserBuffer):
             stderr=subprocess.STDOUT,
             shell=False)
 
+        # The background process (server.js) might take time to start.
+        # If we open the terminal page before it's up and running, we'll get a
+        # "connection refused" error when connecting to the websocket port.
+        # User will have to reload the page to get a terminal.
+        # Adding this extra step seems to solve this timing problem.
+        try:
+            outs, errs = self.background_process.communicate(timeout=1)
+        except Exception:
+            print("Terminal: timed out when communicating with server.js.")
+
         self.open_terminal_page()
 
         QTimer.singleShot(250, self.focus_widget)
