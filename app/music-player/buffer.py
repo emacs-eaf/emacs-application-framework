@@ -36,7 +36,7 @@ class AppBuffer(BrowserBuffer):
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
-        self.first_file = arguments
+        self.first_file = os.path.expanduser(arguments)
 
         self.panel_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]).darker(110).name()
 
