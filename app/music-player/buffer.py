@@ -24,7 +24,6 @@ from PyQt5.QtCore import QUrl
 from core.webengine import BrowserBuffer
 from core.utils import interactive
 import os
-import glob
 import json
 import mimetypes
 import taglib
@@ -78,9 +77,11 @@ class AppBuffer(BrowserBuffer):
         files = []
 
         if os.path.isdir(self.first_file):
-            files = list(filter(lambda f : os.path.isfile(f), glob.glob(os.path.join(self.first_file, "**"), recursive=True)))
+            files = list(filter(lambda f : os.path.isfile(f), [os.path.join(dp, f) for dp, dn, filenames in os.walk(self.first_file) for f in filenames]))
         elif os.path.isfile(self.first_file):
             files.append(self.first_file)
+
+        print(self.first_file, files)
 
         self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(self.pick_music_info(files))))
 
