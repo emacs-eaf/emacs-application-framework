@@ -155,22 +155,24 @@ Alternatively, if you use [use-package](https://github.com/jwiegley/use-package)
 
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package                        | Dependent                            | Description                                           |
-| :--------                      | :------                              | :------                                               |
-| python-epc                     | Core                                 | EPC for Python                                        |
-| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                 |
-| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                   |
-| wmctrl                         | Core                                 | Activate Emacs window input focus                     |
-| pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows |
-| nodejs                         | Core                                 | Installs dependencies, and for app communications     |
-| mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                        |
-| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                                  |
-| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files                |
-| aria2                          | Browser                              | Download files from the web                           |
-| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                               |
-| filebrowser-bin                | File Browser                         | Share files between computer and smartphone           |
-| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                             |
-| python-retrying                | Markdown Previewer                   | Provide @retry                                        |
+| Package                        | Dependent                            | Description                                                        |
+| :--------                      | :------                              | :------                                                            |
+| python-epc                     | Core                                 | EPC for Python                                                     |
+| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                              |
+| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                                |
+| wmctrl                         | Core                                 | Activate Emacs window input focus                                  |
+| pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows              |
+| nodejs                         | Core                                 | Installs dependencies, and for app communications                  |
+| mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                                     |
+| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                                               |
+| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files                             |
+| aria2                          | Browser                              | Download files from the web                                        |
+| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                                            |
+| filebrowser-bin                | File Browser                         | Share files between computer and smartphone                        |
+| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                                          |
+| python-retrying                | Markdown Previewer                   | Provide @retry                                                     |
+| python-pytaglib                | Music Player                         | Parse ID3 tag                                                      |
+| python-psutil                  | System Monitor                       | Retrieving information on running processes and system utilization |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |

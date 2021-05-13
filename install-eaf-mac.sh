@@ -4,7 +4,7 @@ set -e
 
 echo "Installing python dependencies..."
 brew install python3 taglib
-pip3 install epc PyQt5 PyQt5-sip PyQtWebEngine PyMuPDF qrcode qtconsole retrying mac-app-frontmost pytaglib
+pip3 install epc PyQt5 PyQt5-sip PyQtWebEngine PyMuPDF qrcode qtconsole retrying mac-app-frontmost pytaglib 
 
 echo "Installing npm dependencies..."
 brew install node
