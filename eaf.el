@@ -756,6 +756,18 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Music Player."
   :type 'cons)
 
+(defcustom eaf-system-monitor-keybinding
+  '(("<f12>" . "open_devtools")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
+    ("C-v" . "scroll_up_page")
+    ("M-v" . "scroll_down_page")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom")
+    )
+  "The keybinding of EAF System Monitor."
+  :type 'cons)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
   "The extension list of pdf application."
@@ -862,6 +874,7 @@ Add NAME of command `wmctrl -m' to this list."
     ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
     ("music-player" . eaf-music-player-keybinding)
+    ("system-monitor" . eaf-system-monitor-keybinding)
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
     ("markdown-previewer" . eaf-browser-keybinding)
@@ -2075,6 +2088,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive "fOpen music: ")
   (eaf-open "eaf-music-player" "music-player" music-file))
 
+(defun eaf-open-system-monitor ()
+  "Open EAF system monitor."
+  (interactive)
+  (eaf-open "eaf-system-monitor" "system-monitor"))
+
 ;;;###autoload
 (defun eaf-open-camera ()
   "Open EAF camera application."
@@ -2637,6 +2655,7 @@ The key is the annot id on PAGE."
                     'eaf-js-video-player-keybinding
                     'eaf-image-viewer-keybinding
                     'eaf-music-player-keybinding
+                    'eaf-system-monitor-keybinding
                     'eaf-terminal-keybinding
                     'eaf-camera-keybinding
                     'eaf-mindmap-keybinding

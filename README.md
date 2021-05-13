@@ -192,6 +192,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | MS Office Viewer    | `M-x eaf-open-office`                                                  |
 | Jupyter             | `M-x eaf-open-jupyter`                                                 |
 | Music               | `M-x eaf-open-music-player`                                            |
+| System Monitor      | `M-x eaf-open-system-monitor`                                          |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 | Vue Demo            | `M-x eaf-open-vue-demo` to verify vue.js functionality                 |
 
