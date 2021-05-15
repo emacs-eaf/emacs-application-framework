@@ -22,7 +22,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor, QCursor, QScreen
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
 from urllib.parse import urlparse
 import os
@@ -92,8 +92,15 @@ class AppBuffer(BrowserBuffer):
 
         # Draw progressbar.
         self.progressbar_progress = 0
+        self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.progressbar_height = 2
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
+        self.is_loading = False
+
+        # Reverse background and foreground color, to help cursor recognition.
+        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
+        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
 
         # Reset zoom after page loading finish.
         # Otherwise page won't zoom if we call setUrl api in current page.
@@ -108,6 +115,8 @@ class AppBuffer(BrowserBuffer):
     @QtCore.pyqtSlot()
     def start_progress(self):
         ''' Initialize the Progress Bar.'''
+        self.is_loading = True
+
         self.progressbar_progress = 0
         self.update()
 
@@ -126,6 +135,9 @@ class AppBuffer(BrowserBuffer):
             self.caret_js_ready = False
             self.update()
         elif progress == 100:
+            if self.is_loading:
+                self.is_loading = False
+
             self.buffer_widget.load_marker_file()
 
             cursor_foreground_color = ""
@@ -415,6 +427,9 @@ class AppBuffer(BrowserBuffer):
         text = self.buffer_widget.execute_js("new Readability(document).parse().textContent;")
         self.refresh_page()
         eval_in_emacs('eaf--browser-export-text', ["EAF-BROWSER-TEXT-" + self.url, text])
+
+    def page_is_loading(self):
+        return self.is_loading
 
 class HistoryPage():
     def __init__(self, title, url, hit):

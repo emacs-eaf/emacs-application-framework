@@ -278,7 +278,7 @@ z-index: 2140000001;\
         }
     };
 
-    // this is callback function which call by core/browser.py get_mark_link
+    // this is callback function which call by core.webengine.py get_mark_link
     Marker.getMarkerAction = (node) => {
         action = "";
         if(node.nodeName.toLowerCase() === 'select'){

@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor, QMouseEvent
-from core.browser import BrowserBuffer
+from core.webengine import BrowserBuffer
 from core.utils import touch, string_to_base64, interactive, eval_in_emacs, message_to_emacs
 from html import escape, unescape
 import os

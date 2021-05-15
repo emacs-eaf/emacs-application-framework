@@ -48,9 +48,9 @@ npm install || { echo "Failed to install dependency with npm."; exit 1;}
 
 # Python dependencies
 if [ "$(command -v pip3)" ]; then
-    pip3 install --user pymupdf epc retrying || { echo "Failed to install dependency with pip3."; exit 1;}
+    pip3 install --user pymupdf epc retrying pytaglib psutil || { echo "Failed to install dependency with pip3."; exit 1;}
 elif [ "$(command -v pip)" ]; then
-    pip install --user pymupdf epc retrying || { echo "Failed to install dependency with pip."; exit 1;}
+    pip install --user pymupdf epc retrying pytaglib psutil || { echo "Failed to install dependency with pip."; exit 1;}
 else
     echo "Cannot find pip. Please install it before launching the script again."
     exit 1

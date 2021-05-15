@@ -3,6 +3,7 @@ const path = require("path");
 const pkg = require("./package.json");
 
 const nodeApps = pkg.apps || [];
+const rebuildApps = pkg.rebuildApps || [];
 
 function installNodeApps() {
     for (let i = 0; i < nodeApps.length; i++) {
@@ -31,5 +32,15 @@ function installVueApps() {
     }
 }
 
+function rebuildNodeApps() {
+    for (let i = 0; i < rebuildApps.length; i++) {
+        execSync("npm rebuild", {
+            cwd: path.join(__dirname, rebuildApps[i]),
+            stdio: "inherit",
+        });
+    }
+}
+
 installNodeApps();
 installVueApps();
+rebuildNodeApps();

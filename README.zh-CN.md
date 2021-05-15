@@ -61,6 +61,10 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
+| 音乐播放器                                                |
+| :--------:                                                |
+| <img src="./screenshot/music_player.png" width="400"> |
+|                                                           |
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
 - 由[MatthewZMD](https://github.com/MatthewZMD)在EmacsConf2020的演讲和demo。
 - 官网（内附Q&A）: https://emacsconf.org/2020/talks/34/
@@ -164,6 +168,8 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | filebrowser-bin                | 文件浏览器                   | 在电脑和手机之间快速共享文件             |
 | python-qtconsole               | jupyter                      | 提供RichJupyterWidget                    |
 | python-retrying                | Markdown浏览器               | 提供@retry                               |
+| python-pytaglib                | 音乐播放器                   | 提取音乐ID3信息                          |
+| python-psutil                  | 系统监视器                   | 获取西欧童年给进程信息                   |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
@@ -184,9 +190,10 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软Office阅读器 | `M-x eaf-open-office`                                                       |
 | jupyter          | `M-x eaf-open-jupyter`                                                      |
-| 音乐          | `M-x eaf-open-music`                                                      |
+| 音乐             | `M-x eaf-open-music-player`                                                 |
+| 系统监视器       | `M-x eaf-open-system-monitor`                                        |
 | 演示程序         | `M-x eaf-open-demo`                                                         |
-| Vue.js演示程序         | `M-x eaf-open-vue-demo`                                                         |
+| Vue.js演示程序   | `M-x eaf-open-vue-demo`                                                     |
 
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 

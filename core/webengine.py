@@ -626,15 +626,9 @@ class BrowserBuffer(Buffer):
         self.caret_browsing_exit_flag = True
         self.caret_browsing_mark_activated = False
         self.caret_browsing_search_text = ""
-        self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
-        self.progressbar_height = 2
         self.light_mode_mask_color = QColor("#FFFFFF")
         self.dark_mode_mask_color = QColor("#242525")
         self.is_dark_mode_enabled = self.dark_mode_is_enabled()
-
-        # Reverse background and foreground color, to help cursor recognition.
-        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
-        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
 
         self.current_url = ""
         self.request_url = ""
@@ -1198,6 +1192,12 @@ class BrowserBuffer(Buffer):
                 message_to_emacs("Please install youtube-dl to use this feature.")
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
+
+    def build_js_bridge_method(self, python_method_name, js_method_name):
+        def _do():
+            self.buffer_widget.execute_js('''{}()'''.format(js_method_name))
+
+        setattr(self, python_method_name, _do)
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):

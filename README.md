@@ -63,6 +63,11 @@ EAF is an extensible framework, it comes with a number of useful applications, a
 | <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
+| Music Player                                              |
+| :--------:                                                |
+| <img src="./screenshot/music_player.png" width="400"> |
+|                                                           |
+
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 - EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
 - Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
@@ -150,22 +155,24 @@ Alternatively, if you use [use-package](https://github.com/jwiegley/use-package)
 
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package                        | Dependent                            | Description                                           |
-| :--------                      | :------                              | :------                                               |
-| python-epc                     | Core                                 | EPC for Python                                        |
-| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                 |
-| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                   |
-| wmctrl                         | Core                                 | Activate Emacs window input focus                     |
-| pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows |
-| nodejs                         | Core                                 | Installs dependencies, and for app communications     |
-| mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                        |
-| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                                  |
-| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files                |
-| aria2                          | Browser                              | Download files from the web                           |
-| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                               |
-| filebrowser-bin                | File Browser                         | Share files between computer and smartphone           |
-| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                             |
-| python-retrying                | Markdown Previewer                   | Provide @retry                                        |
+| Package                        | Dependent                            | Description                                                        |
+| :--------                      | :------                              | :------                                                            |
+| python-epc                     | Core                                 | EPC for Python                                                     |
+| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                              |
+| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                                |
+| wmctrl                         | Core                                 | Activate Emacs window input focus                                  |
+| pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows              |
+| nodejs                         | Core                                 | Installs dependencies, and for app communications                  |
+| mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                                     |
+| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                                               |
+| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files                             |
+| aria2                          | Browser                              | Download files from the web                                        |
+| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                                            |
+| filebrowser-bin                | File Browser                         | Share files between computer and smartphone                        |
+| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                                          |
+| python-retrying                | Markdown Previewer                   | Provide @retry                                                     |
+| python-pytaglib                | Music Player                         | Parse ID3 tag                                                      |
+| python-psutil                  | System Monitor                       | Retrieving information on running processes and system utilization |
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -186,7 +193,8 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
 | MS Office Viewer    | `M-x eaf-open-office`                                                  |
 | Jupyter             | `M-x eaf-open-jupyter`                                                 |
-| Music               | `M-x eaf-open-music`                                                   |
+| Music               | `M-x eaf-open-music-player`                                            |
+| System Monitor      | `M-x eaf-open-system-monitor`                                          |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 | Vue Demo            | `M-x eaf-open-vue-demo` to verify vue.js functionality                 |
 

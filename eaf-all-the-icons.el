@@ -39,7 +39,7 @@
     ("EAF/markdown-previewer" all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)
     ("EAF/js-video-player" all-the-icons-faicon "film" :face all-the-icons-blue)
     ("EAF/camera" all-the-icons-faicon "camera-retro" :height 1.0 :v-adjust -0.1)
-    ("EAF/music" all-the-icons-faicon "music" :height 1.0 :v-adjust -0.1)
+    ("EAF/music-player" all-the-icons-faicon "music" :height 1.0 :v-adjust -0.1)
     ("EAF/terminal" all-the-icons-faicon "terminal" :v-adjust 0.2)
     ("EAF/org-previewer" all-the-icons-fileicon "org" :face all-the-icons-lgreen)
     ("EAF/mindmap" all-the-icons-alltheicon "html5" :face all-the-icons-orange)
