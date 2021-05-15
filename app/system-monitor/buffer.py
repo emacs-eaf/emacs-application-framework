@@ -63,9 +63,9 @@ class AppBuffer(BrowserBuffer):
 
         self.update_process_info()
 
-        timer = QTimer(self)
-        timer.timeout.connect(self.update_process_info)
-        timer.start(2000)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_process_info)
+        self.timer.start(2000)
 
     def update_process_info(self):
         infos = []
@@ -87,3 +87,7 @@ class AppBuffer(BrowserBuffer):
             return "{:.1f}".format(memory / 1024 / 1024) + "MB"
         else:
             return "{:.1f}".format(memory / 1024) + "KB"
+
+    def destroy_buffer(self):
+        self.close_buffer()
+        self.timer.stop()
