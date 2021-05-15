@@ -10,6 +10,9 @@
         return "";
     } else if (activeElement && inputs.indexOf(tagName) !== -1) {
         return activeElement.value;
+    } else if (activeElement.isContentEditable) {
+        // For the Rich Text Editor
+        return activeElement.textContent;
     } else {
         if (pageUrl.startsWith("https://web.telegram.org/") && activeElement.hasAttribute("placeholder")) {
             return activeElement.textContent;

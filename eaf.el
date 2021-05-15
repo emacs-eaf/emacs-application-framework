@@ -215,7 +215,7 @@ been initialized."
   (let*
       ((connect-function connect-function)
        (name (format "EPC Server %s" (epc:uid)))
-       (buf (epc:make-procbuf (format "*%s*" name)))
+       (buf (epc:make-procbuf (format " *%s*" name)))
        (main-process
         (make-network-process
          :name name
