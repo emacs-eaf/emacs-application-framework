@@ -4,7 +4,7 @@ set -eu
 
 ARCH_PACKAGES="git nodejs npm \
 python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl \
-python-qrcode aria2 python-qtconsole"
+python-qrcode aria2 python-qtconsole taglib"
 
 # System dependencies
 if [ "$(command -v apt)" ]; then
@@ -14,7 +14,7 @@ if [ "$(command -v apt)" ]; then
         sudo apt -y install libglib2.0-dev &&
         sudo apt -y install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
              python3-qrcode python3-feedparser \
-             python3-markdown python3-qtconsole python3-pygit2 ||
+             python3-markdown python3-qtconsole python3-pygit2 libtag1-dev ||
             { echo "Failed to install dependency with apt."; exit 1;}
 
 elif [ "$(command -v dnf)" ]; then
@@ -24,7 +24,7 @@ elif [ "$(command -v dnf)" ]; then
         sudo dnf -y install glib2-devel &&
         sudo dnf -y install python3-qt5 python3-pyqt5-sip pyqtwebengine-devel \
              python3-qrcode python3-feedparser python3-markdown \
-             python3-qtconsole python3-pygit2 ||
+             python3-qtconsole python3-pygit2 taglib-devel ||
             { echo "Failed to install dependencies with dnf."; exit 1; }
 
 elif [ "$(command -v pacman)" ]; then
