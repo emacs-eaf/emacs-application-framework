@@ -859,13 +859,20 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
 (defcustom eaf-wm-focus-fix-wms
   `(
     "i3"                                ;i3
-    "LG3D"                              ;qtile
-    "Xpra"
-    "EXWM"
-    "Xfwm4"
+    "LG3D"                              ;QTile
+    "Xpra"                              ;Windows WSL
+    "EXWM"                              ;EXWM
+    "Xfwm4"                             ;Xfce4
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
-Add NAME of command `wmctrl -m' to this list."
+
+EAF confirms that the desktop environment or window manager you can work includes:
+KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
+
+If your window manager can't receive input event, you can try add `NAME' of command `wmctrl -m' to this list.
+
+Please send PR if it works.
+Please fill an issue if it still doesn't work."
   :type 'list)
 
 (defvar eaf-app-binding-alist
