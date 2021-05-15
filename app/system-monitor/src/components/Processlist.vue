@@ -156,7 +156,7 @@
  }
 
  .item-username {
-   width: 10%;
+   width: 5%;
    margin-left: 10px;
    margin-right: 10px;
  }
