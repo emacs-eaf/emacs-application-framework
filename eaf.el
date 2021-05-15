@@ -862,6 +862,7 @@ Then EAF will start by gdb, please send new issue with `*eaf*' buffer content wh
     "LG3D"                              ;qtile
     "Xpra"
     "EXWM"
+    "Xfwm4"
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 Add NAME of command `wmctrl -m' to this list."
