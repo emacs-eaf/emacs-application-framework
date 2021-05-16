@@ -91,7 +91,7 @@
     (cond ((eq system-type 'gnu/linux)
            (shell-command (concat "./install-eaf.sh" "&")))
           ((memq system-type '(cygwin windows-nt ms-dos))
-           (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
+           (shell-command (format "node %s" (concat "install-eaf-win32.js" "&"))))
           ((eq system-type 'darwin)
            (shell-command (concat "./install-eaf-mac.sh" "&"))))))
 
