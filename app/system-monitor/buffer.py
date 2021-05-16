@@ -78,9 +78,9 @@ class AppBuffer(BrowserBuffer):
     def update_process_info(self):
         infos = []
 
-        for proc in psutil.process_iter(['cpu_percent', 'pid', 'name', 'username', 'cmdline']):
+        for proc in psutil.process_iter(['cpu_percent', 'memory_info', 'pid', 'name', 'username', 'cmdline']):
             info = proc.info
-            memory_number = psutil.Process(info["pid"]).memory_info().rss
+            memory_number = info["memory_info"].rss
             info["memory_number"] = memory_number
             info["memory"] = self.format_memory(memory_number)
             info["cmdline"] = " ".join(info["cmdline"])
