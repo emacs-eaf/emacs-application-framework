@@ -91,9 +91,11 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''updateProcessInfo({});'''.format(json.dumps(infos)))
 
         mem = psutil.virtual_memory()
+        cpu_percent = psutil.cpu_percent()
         cpu_percents = psutil.cpu_percent(percpu=True)
         panel_info = {
             "cpu": {
+                "percent": cpu_percent,
                 "percents": cpu_percents
             },
             "memory": {

@@ -2,6 +2,7 @@
   <div
     class="panel"
     :style="{ 'background': backgroundColor }">
+
     <div :style="{ 'color': foregroundColor }">
       <vue-ellipse-progress
         class="memory-info"
@@ -29,7 +30,7 @@
         </span>
       </vue-ellipse-progress>
       <div class="memory-number">
-        {{ info.memory.used }} / {{ info.memory.total }}
+        MEM: {{ info.memory.used }} / {{ info.memory.total }}
       </div>
     </div>
 
@@ -40,6 +41,10 @@
         type="line"
         :options="chartOptions">
       </apexchart>
+    </div>
+
+    <div :style="{ 'color': foregroundColor }">
+      CPU: {{ info.cpu.percent }} %
     </div>
   </div>
 </template>
