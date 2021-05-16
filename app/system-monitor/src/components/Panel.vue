@@ -44,7 +44,7 @@
     </div>
 
     <div :style="{ 'color': foregroundColor }">
-      CPU: {{ info.cpu.percent }} %
+      CPU: {{ info.cpu.percent }}% ( {{ info.cpu.count }} cores )
     </div>
   </div>
 </template>

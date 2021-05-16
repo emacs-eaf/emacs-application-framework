@@ -93,8 +93,10 @@ class AppBuffer(BrowserBuffer):
         mem = psutil.virtual_memory()
         cpu_percent = psutil.cpu_percent()
         cpu_percents = psutil.cpu_percent(percpu=True)
+        cpu_count = psutil.cpu_count()
         panel_info = {
             "cpu": {
+                "count": cpu_count,
                 "percent": cpu_percent,
                 "percents": cpu_percents
             },
