@@ -9,6 +9,11 @@ import store from "./store/index.js"
 
 import VueEllipseProgress from 'vue-ellipse-progress';
 
+import VueApexCharts from 'vue-apexcharts'
+Vue.use(VueApexCharts)
+
+Vue.component('apexchart', VueApexCharts)
+
 library.add(faPlayCircle, faPauseCircle, faStepForward, faStepBackward)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 

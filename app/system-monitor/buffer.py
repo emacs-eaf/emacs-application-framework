@@ -73,7 +73,7 @@ class AppBuffer(BrowserBuffer):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_process_info)
-        self.timer.start(2000)
+        self.timer.start(1000)
 
     def update_process_info(self):
         infos = []
@@ -91,7 +91,11 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''updateProcessInfo({});'''.format(json.dumps(infos)))
 
         mem = psutil.virtual_memory()
+        cpu_percents = psutil.cpu_percent(percpu=True)
         panel_info = {
+            "cpu": {
+                "percents": cpu_percents
+            },
             "memory": {
                 "total": self.format_memory(mem.total),
                 "used": self.format_memory(mem.used),
