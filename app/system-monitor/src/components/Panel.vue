@@ -311,7 +311,7 @@
          }
        },
 
-       cpuSampling: 10,
+       cpuSampling: 20,
 
        series: []
      }
