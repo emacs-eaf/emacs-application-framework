@@ -23,6 +23,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl, QTimer
 from core.webengine import BrowserBuffer
 from core.utils import interactive
+from functools import cmp_to_key
 import os
 import json
 import psutil
@@ -79,11 +80,13 @@ class AppBuffer(BrowserBuffer):
 
         for proc in psutil.process_iter(['cpu_percent', 'pid', 'name', 'username', 'cmdline']):
             info = proc.info
-            info["memory"] = self.format_memory(psutil.Process(info["pid"]).memory_info().rss)
+            memory_number = psutil.Process(info["pid"]).memory_info().rss
+            info["memory_number"] = memory_number
+            info["memory"] = self.format_memory(memory_number)
             info["cmdline"] = " ".join(info["cmdline"])
             infos.append(proc.info)
 
-        infos.sort(key=lambda info: info["cpu_percent"], reverse=True)
+        infos.sort(key=cmp_to_key(self.process_compare), reverse=True)
 
         self.buffer_widget.execute_js('''updateProcessInfo({});'''.format(json.dumps(infos)))
 
@@ -95,9 +98,21 @@ class AppBuffer(BrowserBuffer):
                 "percent": mem.percent
             }
         }
-        print(mem)
 
         self.buffer_widget.execute_js('''updatePanelInfo({});'''.format(json.dumps(panel_info)))
+
+    def process_compare(self, a, b):
+        if a["cpu_percent"] < b["cpu_percent"]:
+            return -1
+        elif a["cpu_percent"] > b["cpu_percent"]:
+            return 1
+        else:
+            if a["memory_number"] < b["memory_number"]:
+                return -1
+            elif a["memory_number"] > b["memory_number"]:
+                return 1
+            else:
+                return 0
 
     def format_memory(self, memory):
         if memory < 1024:
