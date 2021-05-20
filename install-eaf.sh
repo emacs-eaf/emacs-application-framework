@@ -10,7 +10,17 @@ python-qrcode aria2 python-qtconsole taglib"
 if [ "$(command -v apt)" ]; then
     # Missing in Ubuntu: filebrowser-bin
     # shellcheck disable=SC2015
-    sudo apt -y install git nodejs npm aria2 wmctrl &&
+    DEPS=("git" "aria2" "wmctrl")
+
+    if ! command -v node &> /dev/null; then
+        DEPS+=("nodejs")
+    fi
+
+    if ! command -v npm &> /dev/null; then
+        DEPS+=("npm")
+    fi
+
+    sudo apt -y install "${DEPS[@]}" &&
         sudo apt -y install libglib2.0-dev &&
         sudo apt -y install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
              python3-qrcode python3-feedparser \
