@@ -39,7 +39,6 @@
   },
   "homepage": "https://github.com/manateelazycat/emacs-application-framework#readme",
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@mozilla/readability": "^0.4.1",
     "darkreader": "^4.9.32"
   }
