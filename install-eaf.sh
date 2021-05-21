@@ -20,9 +20,9 @@ if [ "$(command -v apt)" ]; then
         DEPS="${DEPS} npm"
     fi
 
-    sudo apt -y install ${DEPS} &&
-        sudo apt -y install libglib2.0-dev &&
-        sudo apt -y install python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
+    sudo apt install -y ${DEPS} &&
+        sudo apt install -y libglib2.0-dev &&
+        sudo apt install -y python3-pyqt5 python3-sip python3-pyqt5.qtwebengine \
              python3-qrcode python3-feedparser \
              python3-markdown python3-qtconsole python3-pygit2 libtag1-dev ||
             { echo "Failed to install dependency with apt."; exit 1;}
