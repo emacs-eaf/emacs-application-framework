@@ -90,6 +90,8 @@ class AppBuffer(BrowserBuffer):
         # Record url when url changed.
         self.buffer_widget.urlChanged.connect(self.update_url)
 
+        self.buffer_widget.urlChanged.connect(self.skip_youtube_ads)
+
         # Draw progressbar.
         self.progressbar_progress = 0
         self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
@@ -259,6 +261,18 @@ class AppBuffer(BrowserBuffer):
     def set_adblocker(self, url):
         if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true" and not self.page_closed:
             self.load_adblocker()
+
+    def skip_youtube_ads(self, url):
+        url = self.buffer_widget.url().toString()
+
+        if (url.startswith("https://www.youtube.com/")) and url != "https://www.youtube.com/":
+            # Trick: add dot after 'com' to get free ad url.
+            urls = url.split("https://www.youtube.com")
+            free_ad_url = "https://www.youtube.com." + urls[1]
+
+            # Use stop and load methods instead setUrl, avoid trigger "urlChanged" signal recursively.
+            self.buffer_widget.stop()
+            self.buffer_widget.load(QUrl(free_ad_url))
 
     def add_password_entry(self):
         self.buffer_widget.eval_js(self.pw_autofill_raw.replace("%1", "''"))
