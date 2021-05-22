@@ -23,6 +23,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl
 from core.webengine import BrowserBuffer
 from core.utils import interactive
+from functools import cmp_to_key
 import os
 import json
 import mimetypes
@@ -81,8 +82,6 @@ class AppBuffer(BrowserBuffer):
         elif os.path.isfile(self.first_file):
             files.append(self.first_file)
 
-        print(self.first_file, files)
-
         self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(self.pick_music_info(files))))
 
     def pick_music_info(self, files):
@@ -101,4 +100,19 @@ class AppBuffer(BrowserBuffer):
                 }
                 infos.append(info)
 
+        infos.sort(key=cmp_to_key(self.music_compare))
+
         return infos
+
+    def music_compare(self, a, b):
+        if a["artist"] < b["artist"]:
+            return -1
+        elif a["artist"] > b["artist"]:
+            return 1
+        else:
+            if a["album"] < b["album"]:
+                return -1
+            elif a["album"] > b["album"]:
+                return 1
+            else:
+                return 0
