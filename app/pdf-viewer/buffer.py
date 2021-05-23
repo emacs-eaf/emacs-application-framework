@@ -592,8 +592,7 @@ class PdfViewerWidget(QWidget):
         painter.translate(0, translate_y)
 
         # Render pages in visible area.
-        render_x = 0
-        render_y = 0
+        (render_x, render_y, render_width, render_height) = 0, 0, 0, 0
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
                 # Get page image.
@@ -627,11 +626,10 @@ class PdfViewerWidget(QWidget):
 
         if self.inverted_mode:
             painter.setPen(self.page_annotate_light_color)
+        elif self.rect().width() <= render_width:
+            painter.setPen(self.page_annotate_dark_color)
         else:
-            if self.rect().width() - render_width < self.rect().width() * 0.1:
-                painter.setPen(self.page_annotate_dark_color)
-            else:
-                painter.setPen(self.page_annotate_light_color)
+            painter.setPen(self.page_annotate_light_color)
 
         # Draw progress.
         progress_percent = int((start_page_index + 1) * 100 / self.page_total_number)
