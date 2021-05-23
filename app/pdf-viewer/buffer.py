@@ -224,6 +224,120 @@ class AppBuffer(Buffer):
         self.buffer_widget.jump_to_rect(int(page_index), rect)
         return ""
 
+class PdfDocument(fitz.Document):
+    def __init__(self, document):
+        self.document = document
+
+    def __getattr__(self, attr):
+        return getattr(self.document, attr)
+
+    def __getitem__(self, index):
+        return PdfPage(self.document[index])
+
+    def watch_file(self, path, callback):
+        '''
+        Refresh content with PDF file changed.
+        '''
+        self.watch_file_path = path
+        self.watch_callback = callback
+        self.file_changed_wacher = QFileSystemWatcher()
+        if self.file_changed_wacher.addPath(path):
+            self.file_changed_wacher.fileChanged.connect(self.handle_file_changed)
+
+    def handle_file_changed(self, path):
+        '''
+        Use the QFileSystemWatcher watch file changed. If the watch file have been remove or rename,
+        this watch will auto remove.
+        '''
+        if path == self.watch_file_path:
+            try:
+                # Some program will generate `middle` file, but file already changed, fitz try to
+                # open the `middle` file caused error.
+                time.sleep(0.1)
+                self.document = fitz.open(path)
+            except:
+                return
+
+            message_to_emacs("Detected that %s has been changed. Refreshing buffer..." %path)
+            self.watch_callback()
+            # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
+            if len(self.file_changed_wacher.files()) == 0 :
+                self.file_changed_wacher.addPath(path)
+
+class PdfPage(fitz.Page):
+    def __init__(self, page):
+        self.page = page
+
+    def __getattr__(self, attr):
+        return getattr(self.page, attr)
+
+    def set_rotation(self, rotation):
+        self.page.setRotation(rotation)
+        if rotation % 180 != 0:
+            self.page_width = self.page.CropBox.height
+            self.page_height = self.page.CropBox.width
+        else:
+            self.page_width = self.page.CropBox.width
+            self.page_height = self.page.CropBox.height
+
+    def get_width(self):
+        return self.page_width or self.page.CropBox.width
+
+    def get_height(self):
+        return self.page_height or self.page.CropBox.height
+
+    def get_qpixmap(self, scale, *args):
+        pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
+        for fn in args:
+            fn(self.page, pixmap, scale)
+
+        img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
+        qpixmap = QPixmap.fromImage(img)
+        return qpixmap
+
+    def with_invert(self, invert, exclude_image=True):
+        if not invert:
+            return lambda page, pixmap, scale: None
+        # steps:
+        # First, make page all content is invert, include image and text
+        # if exclude image is True, will find the page all image, then get
+        # each image rect. Finally, again invert all image rect.
+        def fn(page, pixmap, scale):
+            pixmap.invertIRect(pixmap.irect)
+            if not exclude_image:
+                return pixmap
+
+            # exclude image only support PDF document
+            imagelist = None
+            try:
+                imagelist = page.getImageList(full=True)
+            except Exception:
+                # PyMupdf 1.14 not include argument 'full'.
+                imagelist = page.getImageList()
+
+            imagebboxlist = []
+            for image in imagelist:
+                try:
+                    imagerect = page.getImageBbox(image)
+                    if imagerect.isInfinite or imagerect.isEmpty:
+                        continue
+                    else:
+                        imagebboxlist.append(imagerect)
+                except Exception:
+                    pass
+
+            for bbox in imagebboxlist:
+                pixmap.invertIRect(bbox * page.rotationMatrix * scale)
+
+        return fn
+
+class PdfAnnotate(fitz.Annot):
+    def __init__(self, annot):
+        self.annot = annot
+
+    def __getattr__(self, attr):
+        return getattr(self.annot, attr)
+
 class PdfViewerWidget(QWidget):
 
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -240,14 +354,12 @@ class PdfViewerWidget(QWidget):
         self.emacs_var_dict = emacs_var_dict
 
         # Load document first.
-        self.document = fitz.open(url)
+        self.document = PdfDocument(fitz.open(url))
+        self.document.watch_file(url, lambda: (self.page_cache_pixmap_dict.clear(), self.update()))
 
         # Get document's page information.
-        self.first_pixmap = self.document.getPagePixmap(0)
-        self.page_width = self.first_pixmap.width
-        self.page_height = self.first_pixmap.height
-        self.original_page_width = self.page_width
-        self.original_page_height = self.page_height
+        self.page_width = self.document.pageCropBox(0).width
+        self.page_height = self.document.pageCropBox(0).height
         self.page_total_number = self.document.pageCount
 
         # Init scale and scale mode.
@@ -262,6 +374,11 @@ class PdfViewerWidget(QWidget):
             self.scale = float(self.emacs_var_dict["eaf-pdf-default-zoom"])
         self.horizontal_offset = 0
 
+        # To avoid 'PDF only' method errors
+        self.inpdf = True
+        if os.path.splitext(self.url)[-1] != ".pdf":
+            self.inpdf = False
+
         # Inverted mode.
         self.inverted_mode = False
         if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or \
@@ -269,8 +386,8 @@ class PdfViewerWidget(QWidget):
              self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
             self.inverted_mode = True
 
-        # Inverted mode exclude image.
-        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true"
+        # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
+        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true" and self.inpdf
 
         # mark link
         self.is_mark_link = False
@@ -343,13 +460,6 @@ class PdfViewerWidget(QWidget):
 
         self.last_hover_annot_id = None
 
-        # To avoid 'PDF only' method errors
-        self.inpdf = True
-        if os.path.splitext(self.url)[-1] != ".pdf":
-            self.inpdf = False
-
-        self.refresh_file()
-
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
@@ -362,35 +472,6 @@ class PdfViewerWidget(QWidget):
 
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
-
-    def handle_file_changed(self, path):
-        '''
-        Use the QFileSystemWatcher watch file changed. If the watch file have been remove or rename,
-        this watch will auto remove.
-        '''
-        if path == self.url:
-            try:
-                # Some program will generate `middle` file, but file already changed, fitz try to
-                # open the `middle` file caused error.
-                time.sleep(0.1)
-                self.document = fitz.open(path)
-            except:
-                return
-
-            message_to_emacs("Detected that %s has been changed. Refreshing buffer..." %path)
-            self.page_cache_pixmap_dict.clear()
-            self.update()
-            # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
-            if len(self.file_changed_wacher.files()) == 0 :
-                self.file_changed_wacher.addPath(self.url)
-
-    def refresh_file(self):
-        '''
-        Refresh content with PDF file changed.
-        '''
-        self.file_changed_wacher = QFileSystemWatcher()
-        if self.file_changed_wacher.addPath(self.url):
-            self.file_changed_wacher.fileChanged.connect(self.handle_file_changed)
 
     @interactive
     def toggle_presentation_mode(self):
@@ -439,22 +520,18 @@ class PdfViewerWidget(QWidget):
 
         page = self.document[index]
         if self.inpdf:
-            page.setRotation(rotation)
+            page.set_rotation(rotation)
+
         if self.is_mark_link:
-            page = self.add_mark_link(index)
+            self.add_mark_link(page)
 
-        if rotation % 180 != 0:
-            self.page_width = self.original_page_height
-            self.page_height = self.original_page_width
-        else:
-            self.page_width = self.original_page_width
-            self.page_height = self.original_page_height
-
-        scale = scale * self.page_width / page.rect.width
+        self.page_width = page.get_width()
+        self.page_height = page.get_height()
+        scale = scale * page.get_width() / page.rect.width
 
         # follow page search text
         if self.is_mark_search:
-            page = self.add_mark_search_text(page, index)
+            self.add_mark_search_text(page, index)
 
         # cache page char_dict
         if self.char_dict[index] is None:
@@ -465,85 +542,7 @@ class PdfViewerWidget(QWidget):
             col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
-        pixmap = page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
-
-        if self.inverted_mode:
-            pixmap.invertIRect(pixmap.irect)
-
-            if self.inverted_mode_exclude_image:
-                # Exclude images
-                imagelist = None
-                try:
-                    imagelist = page.getImageList(full=True)
-                except Exception:
-                    # PyMupdf 1.14 not include argument 'full'.
-                    imagelist = page.getImageList()
-
-                imagebboxlist = []
-                for image in imagelist:
-                    try:
-                        imagerect = page.getImageBbox(image)
-                        if imagerect.isInfinite or imagerect.isEmpty:
-                            continue
-                        else:
-                            imagebboxlist.append(imagerect)
-                    except Exception:
-                        pass
-
-                newly_added_overlapbboxlist = imagebboxlist
-
-                # Nth time of loop represents N+1 rectanges' intesects' overlaps
-                time = 0
-                while len(newly_added_overlapbboxlist) > 1:
-                    temp_overlapbboxlist = []
-                    time += 1
-                    # calculate overlap
-                    for i in range(len(newly_added_overlapbboxlist)):
-                        for j in range(i+1,len(newly_added_overlapbboxlist)):
-                            x0a = newly_added_overlapbboxlist[i].x0
-                            y0a = newly_added_overlapbboxlist[i].y0
-                            x1a = newly_added_overlapbboxlist[i].x1
-                            y1a = newly_added_overlapbboxlist[i].y1
-                            x0b = newly_added_overlapbboxlist[j].x0
-                            y0b = newly_added_overlapbboxlist[j].y0
-                            x1b = newly_added_overlapbboxlist[j].x1
-                            y1b = newly_added_overlapbboxlist[j].y1
-                            x0c = max(x0a,x0b)
-                            y0c = max(y0a,y0b)
-                            x1c = min(x1a,x1b)
-                            y1c = min(y1a,y1b)
-                            if x0c < x1c and y0c < y1c:
-                                temp_overlapbboxlist.append(fitz.Rect(x0c,y0c,x1c,y1c))
-                    # remove duplicate overlaps for one time
-                    for item in set(temp_overlapbboxlist):
-                        if temp_overlapbboxlist.count(item) % 2 == 0:
-                            while item in temp_overlapbboxlist:
-                                temp_overlapbboxlist.remove(item)
-                        else:
-                            while temp_overlapbboxlist.count(item) > 1:
-                                temp_overlapbboxlist.remove(item)
-                    newly_added_overlapbboxlist = temp_overlapbboxlist
-                    imagebboxlist.extend(newly_added_overlapbboxlist)
-                    if time%2 == 1 and time//2 > 0:
-                        imagebboxlist.extend(newly_added_overlapbboxlist)
-
-                if len(imagebboxlist) != len(set(imagebboxlist)):
-                    # remove duplicate to make it run faster
-                    for item in set(imagebboxlist):
-                        if imagebboxlist.count(item) % 2 == 0:
-                            while item in imagebboxlist:
-                                imagebboxlist.remove(item)
-                        else:
-                            while imagebboxlist.count(item) > 1:
-                                imagebboxlist.remove(item)
-                for bbox in imagebboxlist:
-                    if self.inpdf:
-                        pixmap.invertIRect(bbox * page.rotationMatrix * scale)
-                    else:
-                        pixmap.invertIRect(bbox * scale)
-
-        img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
-        qpixmap = QPixmap.fromImage(img)
+        qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
 
         self.page_cache_pixmap_dict[index] = qpixmap
 
@@ -853,9 +852,8 @@ class PdfViewerWidget(QWidget):
         else:
             message_to_emacs("Only support PDF!")
 
-    def add_mark_link(self, index):
+    def add_mark_link(self, page):
         annot_list = []
-        page = self.document[index]
         if page.firstLink:
             for link in page.getLinks():
                 annot = page.addUnderlineAnnot(link["from"])
