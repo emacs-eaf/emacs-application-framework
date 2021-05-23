@@ -224,6 +224,60 @@ class AppBuffer(Buffer):
         self.buffer_widget.jump_to_rect(int(page_index), rect)
         return ""
 
+class PdfDocument(fitz.Document):
+    def __init__(self, document):
+        self.document = document
+
+    def __getattr__(self, attr):
+        return getattr(self.document, attr)
+
+    def watch_file(self, path, callback):
+        '''
+        Refresh content with PDF file changed.
+        '''
+        self.watch_file_path = path
+        self.watch_callback = callback
+        self.file_changed_wacher = QFileSystemWatcher()
+        if self.file_changed_wacher.addPath(path):
+            self.file_changed_wacher.fileChanged.connect(self.handle_file_changed)
+
+    def handle_file_changed(self, path):
+        '''
+        Use the QFileSystemWatcher watch file changed. If the watch file have been remove or rename,
+        this watch will auto remove.
+        '''
+        if path == self.watch_file_path:
+            try:
+                # Some program will generate `middle` file, but file already changed, fitz try to
+                # open the `middle` file caused error.
+                time.sleep(0.1)
+                self.document = fitz.open(path)
+            except:
+                return
+
+            message_to_emacs("Detected that %s has been changed. Refreshing buffer..." %path)
+            self.watch_callback()
+            # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
+            if len(self.file_changed_wacher.files()) == 0 :
+                self.file_changed_wacher.addPath(path)
+
+    def get_page(self, index):
+        return PdfPage(self.document[index])
+
+class PdfPage(fitz.Page):
+    def __init__(self, page):
+        self.page = page
+
+    def __getattr__(self, attr):
+        return getattr(self.page, attr)
+
+class PdfAnnotate(fitz.Annot):
+    def __init__(self, annot):
+        self.annot = annot
+
+    def __getattr__(self, attr):
+        return getattr(self.annot, attr)
+
 class PdfViewerWidget(QWidget):
 
     translate_double_click_word = QtCore.pyqtSignal(str)
@@ -240,7 +294,8 @@ class PdfViewerWidget(QWidget):
         self.emacs_var_dict = emacs_var_dict
 
         # Load document first.
-        self.document = fitz.open(url)
+        self.document = PdfDocument(fitz.open(url))
+        self.document.watch_file(url, lambda: (self.page_cache_pixmap_dict.clear(), self.update()))
 
         # Get document's page information.
         self.first_pixmap = self.document.getPagePixmap(0)
@@ -348,8 +403,6 @@ class PdfViewerWidget(QWidget):
         if os.path.splitext(self.url)[-1] != ".pdf":
             self.inpdf = False
 
-        self.refresh_file()
-
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
@@ -362,35 +415,6 @@ class PdfViewerWidget(QWidget):
 
     def repeat_to_length(self, string_to_expand, length):
         return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
-
-    def handle_file_changed(self, path):
-        '''
-        Use the QFileSystemWatcher watch file changed. If the watch file have been remove or rename,
-        this watch will auto remove.
-        '''
-        if path == self.url:
-            try:
-                # Some program will generate `middle` file, but file already changed, fitz try to
-                # open the `middle` file caused error.
-                time.sleep(0.1)
-                self.document = fitz.open(path)
-            except:
-                return
-
-            message_to_emacs("Detected that %s has been changed. Refreshing buffer..." %path)
-            self.page_cache_pixmap_dict.clear()
-            self.update()
-            # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
-            if len(self.file_changed_wacher.files()) == 0 :
-                self.file_changed_wacher.addPath(self.url)
-
-    def refresh_file(self):
-        '''
-        Refresh content with PDF file changed.
-        '''
-        self.file_changed_wacher = QFileSystemWatcher()
-        if self.file_changed_wacher.addPath(self.url):
-            self.file_changed_wacher.fileChanged.connect(self.handle_file_changed)
 
     @interactive
     def toggle_presentation_mode(self):
