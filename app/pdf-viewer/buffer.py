@@ -286,12 +286,14 @@ class PdfPage(fitz.Page):
     def get_height(self):
         return self.page_height or self.page.CropBox.height
 
-    def get_pixmap(self, scale, *args):
+    def get_qpixmap(self, scale, *args):
         pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
 
-        return pixmap
+        img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
+        qpixmap = QPixmap.fromImage(img)
+        return qpixmap
 
     def with_invert(self, invert, exclude_image=True):
         if not invert:
@@ -540,9 +542,7 @@ class PdfViewerWidget(QWidget):
             col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
-        pixmap = page.get_pixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
-        img = QImage(pixmap.samples, pixmap.width, pixmap.height, pixmap.stride, QImage.Format_RGB888)
-        qpixmap = QPixmap.fromImage(img)
+        qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
 
         self.page_cache_pixmap_dict[index] = qpixmap
 
