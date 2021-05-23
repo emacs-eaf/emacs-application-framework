@@ -231,6 +231,9 @@ class PdfDocument(fitz.Document):
     def __getattr__(self, attr):
         return getattr(self.document, attr)
 
+    def __getitem__(self, index):
+        return PdfPage(self.document[index])
+
     def watch_file(self, path, callback):
         '''
         Refresh content with PDF file changed.
@@ -260,9 +263,6 @@ class PdfDocument(fitz.Document):
             # if the file have been renew save, file_changed_watcher will remove the path form monitor list.
             if len(self.file_changed_wacher.files()) == 0 :
                 self.file_changed_wacher.addPath(path)
-
-    def get_page(self, index):
-        return PdfPage(self.document[index])
 
 class PdfPage(fitz.Page):
     def __init__(self, page):
