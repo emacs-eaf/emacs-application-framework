@@ -271,6 +271,21 @@ class PdfPage(fitz.Page):
     def __getattr__(self, attr):
         return getattr(self.page, attr)
 
+    def set_rotation(self, rotation):
+        self.page.setRotation(rotation)
+        if rotation % 180 != 0:
+            self.page_width = self.page.CropBox.height
+            self.page_height = self.page.CropBox.width
+        else:
+            self.page_width = self.page.CropBox.width
+            self.page_height = self.page.CropBox.height
+
+    def get_width(self):
+        return self.page_width or self.page.CropBox.width
+
+    def get_height(self):
+        return self.page_height or self.page.CropBox.height
+
 class PdfAnnotate(fitz.Annot):
     def __init__(self, annot):
         self.annot = annot
@@ -298,11 +313,8 @@ class PdfViewerWidget(QWidget):
         self.document.watch_file(url, lambda: (self.page_cache_pixmap_dict.clear(), self.update()))
 
         # Get document's page information.
-        self.first_pixmap = self.document.getPagePixmap(0)
-        self.page_width = self.first_pixmap.width
-        self.page_height = self.first_pixmap.height
-        self.original_page_width = self.page_width
-        self.original_page_height = self.page_height
+        self.page_width = self.document.pageCropBox(0).width
+        self.page_height = self.document.pageCropBox(0).height
         self.page_total_number = self.document.pageCount
 
         # Init scale and scale mode.
@@ -463,18 +475,13 @@ class PdfViewerWidget(QWidget):
 
         page = self.document[index]
         if self.inpdf:
-            page.setRotation(rotation)
+            page.set_rotation(rotation)
         if self.is_mark_link:
             page = self.add_mark_link(index)
 
-        if rotation % 180 != 0:
-            self.page_width = self.original_page_height
-            self.page_height = self.original_page_width
-        else:
-            self.page_width = self.original_page_width
-            self.page_height = self.original_page_height
-
-        scale = scale * self.page_width / page.rect.width
+        self.page_width = page.get_width()
+        self.page_height = page.get_height()
+        scale = scale * page.get_width() / page.rect.width
 
         # follow page search text
         if self.is_mark_search:
