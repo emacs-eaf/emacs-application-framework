@@ -597,11 +597,8 @@ class PdfViewerWidget(QWidget):
         for index in list(range(start_page_index, last_page_index)):
             if index < self.page_total_number:
                 # Get page image.
-                if platform.system() == "Darwin":
-                    hidpi_scale_factor = self.devicePixelRatioF()
-                else:
-                    hidpi_scale_factor = 1
-                qpixmap = self.get_page_pixmap(index, self.scale * hidpi_scale_factor, self.rotation)
+                hidpi_scale_factor = self.devicePixelRatioF()
+                qpixmap = self.get_page_pixmap(index, self.scale * self.devicePixelRatioF(), self.rotation)
 
                 # Init render rect.
                 render_width = qpixmap.width() / hidpi_scale_factor
