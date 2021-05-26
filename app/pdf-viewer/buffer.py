@@ -227,12 +227,22 @@ class AppBuffer(Buffer):
 class PdfDocument(fitz.Document):
     def __init__(self, document):
         self.document = document
+        self._page_cache_dict = {}
 
     def __getattr__(self, attr):
         return getattr(self.document, attr)
 
     def __getitem__(self, index):
+        if index in self._page_cache_dict:
+            return self._page_cache_dict[index]
         return PdfPage(self.document[index])
+
+    def _reload_document(self, url):
+        self._page_cache_dict = {}
+        self.document = fitz.open(url)
+
+    def cache_page(self, index, page):
+        self._page_cache_dict[index] = page
 
     def watch_file(self, path, callback):
         '''
@@ -254,7 +264,7 @@ class PdfDocument(fitz.Document):
                 # Some program will generate `middle` file, but file already changed, fitz try to
                 # open the `middle` file caused error.
                 time.sleep(0.1)
-                self.document = fitz.open(path)
+                self._reload_document(path)
             except:
                 return
 
@@ -267,6 +277,8 @@ class PdfDocument(fitz.Document):
 class PdfPage(fitz.Page):
     def __init__(self, page):
         self.page = page
+
+        self._mark_link_annot_list = []
 
     def __getattr__(self, attr):
         return getattr(self.page, attr)
@@ -330,6 +342,19 @@ class PdfPage(fitz.Page):
                 pixmap.invertIRect(bbox * page.rotationMatrix * scale)
 
         return fn
+
+    def add_mark_link(self):
+        if self.page.firstLink:
+            for link in self.page.getLinks():
+                annot = self.page.addUnderlineAnnot(link["from"])
+                annot.parent = self.page # Must assign annot parent, else deleteAnnot cause parent is None problem.
+                self._mark_link_annot_list.append(annot)
+
+    def cleanup_mark_link(self):
+        if self._mark_link_annot_list:
+            for annot in self._mark_link_annot_list:
+                self.page.deleteAnnot(annot)
+            self._mark_link_annot_list = []
 
 class PdfAnnotate(fitz.Annot):
     def __init__(self, annot):
@@ -523,7 +548,9 @@ class PdfViewerWidget(QWidget):
             page.set_rotation(rotation)
 
         if self.is_mark_link:
-            self.add_mark_link(page)
+            page.add_mark_link()
+        else:
+            page.cleanup_mark_link()
 
         self.page_width = page.get_width()
         self.page_height = page.get_height()
@@ -545,6 +572,7 @@ class PdfViewerWidget(QWidget):
         qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
 
         self.page_cache_pixmap_dict[index] = qpixmap
+        self.document.cache_page(index, page)
 
         return qpixmap
 
@@ -813,11 +841,7 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
-        if self.is_mark_link:
-            self.cleanup_mark_link()
-        else:
-            self.is_mark_link = True
-
+        self.is_mark_link = not self.is_mark_link
         self.page_cache_pixmap_dict.clear()
         self.update()
 
@@ -846,25 +870,6 @@ class PdfViewerWidget(QWidget):
             self.update()
         else:
             message_to_emacs("Only support PDF!")
-
-    def add_mark_link(self, page):
-        annot_list = []
-        if page.firstLink:
-            for link in page.getLinks():
-                annot = page.addUnderlineAnnot(link["from"])
-                annot.parent = page # Must assign annot parent, else deleteAnnot cause parent is None problem.
-                annot_list.append(annot)
-            self.mark_link_annot_cache_dict[index] = annot_list
-        return page
-
-    def cleanup_mark_link(self):
-        if self.mark_link_annot_cache_dict:
-            for index in self.mark_link_annot_cache_dict.keys():
-                page = self.document[index]
-                for annot in self.mark_link_annot_cache_dict[index]:
-                    page.deleteAnnot(annot)
-        self.is_mark_link = False
-        self.mark_link_annot_cache_dict.clear()
 
     def generate_random_key(self, count):
         letters = self.emacs_var_dict["eaf-marker-letters"]
