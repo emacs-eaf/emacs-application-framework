@@ -1971,6 +1971,7 @@ In that way the corresponding function will be called to retrieve the HTML
   (eaf-open-browser (browse-url-url-at-point)))
 
 (defun eaf-toggle-proxy()
+  "Toggle proxy to none or default proxy."
   (interactive)
   (eaf-call-sync "toggle_proxy"))
 
