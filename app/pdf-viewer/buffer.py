@@ -279,6 +279,7 @@ class PdfPage(fitz.Page):
         self.page = page
 
         self._mark_link_annot_list = []
+        self._mark_search_annot_list = []
 
     def __getattr__(self, attr):
         return getattr(self.page, attr)
@@ -356,6 +357,19 @@ class PdfPage(fitz.Page):
                 self.page.deleteAnnot(annot)
             self._mark_link_annot_list = []
 
+    def mark_search_text(self, keyword):
+        quads_list = self.page.searchFor(keyword, hit_max=999, quads=True)
+        if quads_list:
+            for quads in quads_list:
+                annot = self.page.addHighlightAnnot(quads)
+                annot.parent = self.page
+                self._mark_search_annot_list.append(annot)
+
+    def cleanup_search_text(self):
+        message_to_emacs("Unmarked all matched results.")
+        for annot in self._mark_search_annot_list:
+            self.page.deleteAnnot(annot)
+
 class PdfAnnotate(fitz.Annot):
     def __init__(self, annot):
         self.annot = annot
@@ -426,7 +440,6 @@ class PdfViewerWidget(QWidget):
         #global search text
         self.is_mark_search = False
         self.search_text_offset_list = []
-        self.search_text_annot_cache_dict = {}
 
         # select text
         self.is_select_mode = False
@@ -558,7 +571,9 @@ class PdfViewerWidget(QWidget):
 
         # follow page search text
         if self.is_mark_search:
-            self.add_mark_search_text(page, index)
+            page.mark_search_text(self.search_term)
+        else:
+            page.cleanup_search_text()
 
         # cache page char_dict
         if self.char_dict[index] is None:
@@ -800,16 +815,12 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def zoom_in(self):
-        if self.is_mark_search:
-            self.cleanup_search()
         self.read_mode = "fit_to_customize"
         self.scale_to(min(10, self.scale + 0.2))
         self.update()
 
     @interactive
     def zoom_out(self):
-        if self.is_mark_search:
-            self.cleanup_search()
         self.read_mode = "fit_to_customize"
         self.scale_to(max(1, self.scale - 0.2))
         self.update()
@@ -943,20 +954,7 @@ class PdfViewerWidget(QWidget):
         self.is_jump_link = False
         self.delete_all_mark_jump_link_tips()
         self.page_cache_pixmap_dict.clear()
-
         self.update()
-
-    def add_mark_search_text(self, page, page_index):
-        quads_list = page.searchFor(self.search_term, hit_max=999, quads=True)
-        annot_list = []
-        if quads_list:
-            for quads in quads_list:
-                annot = page.addHighlightAnnot(quads)
-                annot.parent = page
-                annot_list.append(annot)
-        self.search_text_annot_cache_dict[page_index] = annot_list
-
-        return page
 
     def search_text(self, text):
         self.is_mark_search = True
@@ -996,15 +994,8 @@ class PdfViewerWidget(QWidget):
             message_to_emacs("Match " + str(self.search_text_index + 1) + "/" + str(len(self.search_text_offset_list)))
 
     def cleanup_search(self):
-        message_to_emacs("Unmarked all matched results.")
-        if self.search_text_annot_cache_dict:
-            for page_index in self.search_text_annot_cache_dict.keys():
-                page = self.document[page_index]
-                for annot in self.search_text_annot_cache_dict[page_index]:
-                    page.deleteAnnot(annot)
         self.is_mark_search = False
         self.search_term = None
-        self.search_text_annot_cache_dict.clear()
         self.page_cache_pixmap_dict.clear()
         self.search_text_offset_list.clear()
         self.update()
@@ -1387,8 +1378,6 @@ class PdfViewerWidget(QWidget):
 
         elif event.type() == QEvent.MouseButtonDblClick:
             self.disable_free_text_annot_mode()
-            if self.is_mark_search:
-                self.cleanup_search()
             if event.button() == Qt.RightButton:
                 self.handle_translate_word()
 
