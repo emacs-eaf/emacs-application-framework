@@ -959,25 +959,24 @@ class PdfViewerWidget(QWidget):
     def search_text(self, text):
         self.is_mark_search = True
         self.search_term = text
-        self.page_cache_pixmap_dict.clear()
 
-        search_text_index = 0
         self.search_text_index = 0
         for page_index in range(self.page_total_number):
             quads_list = self.document.searchPageFor(page_index, text, hit_max=999, quads=True)
             if quads_list:
-                for quad in quads_list:
+                for index, quad in enumerate(quads_list):
                     search_text_offset = (page_index * self.page_height + quad.ul.y) * self.scale
 
                     self.search_text_offset_list.append(search_text_offset)
                     if search_text_offset > self.scroll_offset and search_text_offset < (self.scroll_offset + self.rect().height()):
-                        self.search_text_index = search_text_index
-                    search_text_index += 1
-        self.update()
+                        self.search_text_index = index
+
         if(len(self.search_text_offset_list) == 0):
             message_to_emacs("No results found with \"" + text + "\".")
             self.is_mark_search = False
         else:
+            self.page_cache_pixmap_dict.clear()
+            self.update()
             self.update_vertical_offset(self.search_text_offset_list[self.search_text_index])
             message_to_emacs("Found " + str(len(self.search_text_offset_list)) + " results with \"" + text + "\".")
 
