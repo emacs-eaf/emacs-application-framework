@@ -370,6 +370,7 @@ class PdfPage(fitz.Page):
         message_to_emacs("Unmarked all matched results.")
         for annot in self._mark_search_annot_list:
             self.page.deleteAnnot(annot)
+        self._mark_search_annot_list = []
 
     def generate_random_key(self, count, letters):
         key_list = []
