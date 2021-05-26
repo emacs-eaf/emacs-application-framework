@@ -280,6 +280,7 @@ class PdfPage(fitz.Page):
 
         self._mark_link_annot_list = []
         self._mark_search_annot_list = []
+        self._mark_jump_annot_list = []
 
     def __getattr__(self, attr):
         return getattr(self.page, attr)
@@ -369,6 +370,39 @@ class PdfPage(fitz.Page):
         message_to_emacs("Unmarked all matched results.")
         for annot in self._mark_search_annot_list:
             self.page.deleteAnnot(annot)
+
+    def generate_random_key(self, count, letters):
+        key_list = []
+        key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
+        while count > 0:
+            key = ''.join(random.choices(letters, k=key_len))
+            if key not in key_list:
+                key_list.append(key)
+                count -= 1
+        return key_list
+
+    def mark_jump_link_tips(self, letters):
+        tips_size = 4
+        cache_dict = {}
+        if self.page.firstLink:
+            links = self.page.getLinks()
+            key_list = self.generate_random_key(len(links), letters)
+            for index, link in enumerate(links):
+                key = key_list[index]
+                link_rect = link["from"]
+                annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + (tips_size * len(key)), link_rect.y0 + 7)
+                annot = self.page.addFreetextAnnot(annot_rect, str(key), fontsize=6, fontname="Cour", \
+                                              text_color=[0.0, 0.0, 0.0], fill_color=[255/255.0, 197/255.0, 36/255.0])
+                annot.parent = self.page
+                self._mark_jump_annot_list.append(annot)
+                cache_dict[key] = link
+        return cache_dict
+
+    def cleanup_jump_link_tips(self):
+        for annot in self._mark_jump_annot_list:
+            self.page.deleteAnnot(annot)
+        self._mark_jump_annot_list = []
+
 
 class PdfAnnotate(fitz.Annot):
     def __init__(self, annot):
@@ -574,6 +608,11 @@ class PdfViewerWidget(QWidget):
             page.mark_search_text(self.search_term)
         else:
             page.cleanup_search_text()
+
+        if self.is_jump_link:
+            self.jump_link_key_cache_dict = page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"])
+        else:
+            page.cleanup_jump_link_tips()
 
         # cache page char_dict
         if self.char_dict[index] is None:
@@ -882,56 +921,12 @@ class PdfViewerWidget(QWidget):
         else:
             message_to_emacs("Only support PDF!")
 
-    def generate_random_key(self, count):
-        letters = self.emacs_var_dict["eaf-marker-letters"]
-        key_list = []
-        key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
-        while count > 0:
-            key = ''.join(random.choices(letters, k=key_len))
-            if key not in key_list:
-                key_list.append(key)
-                count -= 1
-        return key_list
-
     def add_mark_jump_link_tips(self):
-        # Only mark display page
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-        tips_size = 4
-        annot_list = []
-
-        for page_index in range(start_page_index, last_page_index):
-            page = self.document[page_index]
-            annot_list = []
-            if page.firstLink:
-                links = page.getLinks()
-                key_list = self.generate_random_key(len(links))
-                for index, link in enumerate(links):
-                    key = key_list[index]
-                    link_rect = link["from"]
-                    annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + (tips_size * len(key)), link_rect.y0 + 7)
-                    annot = page.addFreetextAnnot(annot_rect, str(key), fontsize=6, fontname="Cour", \
-                                                  text_color=[0.0, 0.0, 0.0], fill_color=[255/255.0, 197/255.0, 36/255.0])
-                    annot.parent = page
-                    annot_list.append(annot)
-                    self.jump_link_key_cache_dict[key] = link
-
-            self.jump_link_annot_cache_dict[page_index] = annot_list
-
+        self.is_jump_link = True
         self.page_cache_pixmap_dict.clear()
         self.update()
 
-    def delete_all_mark_jump_link_tips(self):
-        if self.jump_link_annot_cache_dict:
-            for index in self.jump_link_annot_cache_dict.keys():
-                page = self.document[index]
-                for annot in self.jump_link_annot_cache_dict[index]:
-                    page.deleteAnnot(annot)
-        self.jump_link_key_cache_dict.clear()
-        self.jump_link_annot_cache_dict.clear()
-
     def jump_to_link(self, key):
-        self.is_jump_link = True
         key = key.upper()
         if key in self.jump_link_key_cache_dict:
             self.handle_jump_to_link(self.jump_link_key_cache_dict[key])
@@ -952,7 +947,6 @@ class PdfViewerWidget(QWidget):
 
     def cleanup_links(self):
         self.is_jump_link = False
-        self.delete_all_mark_jump_link_tips()
         self.page_cache_pixmap_dict.clear()
         self.update()
 
