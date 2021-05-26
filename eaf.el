@@ -1496,14 +1496,14 @@ Including title-bar, menu-bar, offset depends on window system, and border."
     (defun eaf--mac-focus-in ()
       (setq eaf--mac-has-focus t)
       (ignore-errors
-        (bury-buffer "*eaf temp*")
-        (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame)))
-      )
+        (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame))
+        (bury-buffer "*eaf temp*")))
 
     (defun eaf--mac-focus-out (&optional frame)
-      (setq eaf--mac-has-focus nil)
-      (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
-      (eaf--mac-replace-eaf-buffers))
+      (when eaf--mac-has-focus
+        (setq eaf--mac-has-focus nil)
+        (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
+        (eaf--mac-replace-eaf-buffers)))
 
     (add-function :after after-focus-change-function #'eaf--mac-focus-change)
     (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)
