@@ -1970,6 +1970,11 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive)
   (eaf-open-browser (browse-url-url-at-point)))
 
+(defun eaf-toggle-proxy()
+  "Toggle proxy to none or default proxy."
+  (interactive)
+  (eaf-call-sync "toggle_proxy"))
+
 (defun eaf-browser--duplicate-page-in-new-tab (url)
   "Duplicate a new tab for the dedicated URL."
   (eaf-open (eaf-wrap-url url) "browser" nil t))

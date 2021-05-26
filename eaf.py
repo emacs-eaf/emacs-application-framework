@@ -87,18 +87,30 @@ class EAF(object):
         eval_in_emacs('eaf--first-start', [self.server.server_address[1], self.webengine_include_private_codec()])
 
         # Set Network proxy.
-        if proxy_host != "" and proxy_port != "":
-            proxy_string = "{0}://{1}:{2}".format(proxy_type, proxy_host, proxy_port)
+        self.proxy = (proxy_type, proxy_host, proxy_port)
+        self.is_proxy = False
+        self.toggle_proxy()
 
-            proxy = QNetworkProxy()
-            if proxy_type == "socks5":
+    def toggle_proxy(self):
+        proxy = QNetworkProxy()
+
+        if self.is_proxy:
+            proxy.setType(QNetworkProxy.NoProxy)
+            proxy_string = ""
+        else:
+            proxy_string = "{0}://{1}:{2}".format(self.proxy[0], self.proxy[1], self.proxy[2])
+
+            if self.proxy[0] == "socks5":
                 proxy.setType(QNetworkProxy.Socks5Proxy)
-            elif proxy_type == "http":
+            elif self.proxy[0] == "http":
                 proxy.setType(QNetworkProxy.HttpProxy)
 
-            proxy.setHostName(proxy_host)
-            proxy.setPort(int(proxy_port))
-            QNetworkProxy.setApplicationProxy(proxy)
+            proxy.setHostName(self.proxy[1])
+            proxy.setPort(int(self.proxy[2]))
+
+        self.is_proxy = not self.is_proxy
+
+        QNetworkProxy.setApplicationProxy(proxy)
 
     def build_emacs_server_connect(self, port):
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
