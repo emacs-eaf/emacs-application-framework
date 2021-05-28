@@ -678,27 +678,26 @@ class PdfViewerWidget(QWidget):
         # Render pages in visible area.
         (render_x, render_y, render_width, render_height) = 0, 0, 0, 0
         for index in list(range(self.start_page_index, self.last_page_index)):
-            if index < self.page_total_number:
-                # Get page image.
-                hidpi_scale_factor = self.devicePixelRatioF()
-                qpixmap = self.get_page_pixmap(index, self.scale * self.devicePixelRatioF(), self.rotation)
+            # Get page image.
+            hidpi_scale_factor = self.devicePixelRatioF()
+            qpixmap = self.get_page_pixmap(index, self.scale * self.devicePixelRatioF(), self.rotation)
 
-                # Init render rect.
-                render_width = qpixmap.width() / hidpi_scale_factor
-                render_height = qpixmap.height() / hidpi_scale_factor
-                render_x = (self.rect().width() - render_width) / 2
+            # Init render rect.
+            render_width = qpixmap.width() / hidpi_scale_factor
+            render_height = qpixmap.height() / hidpi_scale_factor
+            render_x = (self.rect().width() - render_width) / 2
 
-                # Add padding between pages.
-                if (index - self.start_page_index) > 0:
-                    painter.translate(0, self.page_padding)
+            # Add padding between pages.
+            if (index - self.start_page_index) > 0:
+                painter.translate(0, self.page_padding)
 
-                # Draw page image.
-                if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
-                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
+            # Draw page image.
+            if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
+                render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
 
-                painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
+            painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
-                render_y += render_height
+            render_y += render_height
 
         # Clean unused pixmap cache that avoid use too much memory.
         self.clean_unused_page_cache_pixmap()
@@ -1267,35 +1266,34 @@ class PdfViewerWidget(QWidget):
         ex, ey = pos.x(), pos.y()
 
         for index in list(range(self.start_page_index, self.last_page_index)):
-            if index < self.page_total_number:
-                render_width = self.page_width * self.scale
-                render_x = int((self.rect().width() - render_width) / 2)
-                if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
-                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
+            render_width = self.page_width * self.scale
+            render_x = int((self.rect().width() - render_width) / 2)
+            if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
+                render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
 
-                # computer absolute coordinate of page
-                x = (ex - render_x) * 1.0 / self.scale
-                if ey + self.scroll_offset < (self.start_page_index + 1) * self.scale * self.page_height:
-                    page_offset = self.scroll_offset - self.start_page_index * self.scale * self.page_height
-                    page_index = index
-                else:
-                    # if display two pages, pos.y() will add page_padding
-                    page_offset = self.scroll_offset - (self.start_page_index + 1) * self.scale * self.page_height - self.page_padding
-                    page_index = index + 1
-                y = (ey + page_offset) * 1.0 / self.scale
+            # computer absolute coordinate of page
+            x = (ex - render_x) * 1.0 / self.scale
+            if ey + self.scroll_offset < (self.start_page_index + 1) * self.scale * self.page_height:
+                page_offset = self.scroll_offset - self.start_page_index * self.scale * self.page_height
+                page_index = index
+            else:
+                # if display two pages, pos.y() will add page_padding
+                page_offset = self.scroll_offset - (self.start_page_index + 1) * self.scale * self.page_height - self.page_padding
+                page_index = index + 1
+            y = (ey + page_offset) * 1.0 / self.scale
 
-                temp = x
-                if self.rotation == 90:
-                    x = y
-                    y = self.page_width - temp
-                elif self.rotation == 180:
-                    x = self.page_width - x
-                    y = self.page_height - y
-                elif self.rotation == 270:
-                    x = self.page_height - y
-                    y = temp
+            temp = x
+            if self.rotation == 90:
+                x = y
+                y = self.page_width - temp
+            elif self.rotation == 180:
+                x = self.page_width - x
+                y = self.page_height - y
+            elif self.rotation == 270:
+                x = self.page_height - y
+                y = temp
 
-                return x, y, page_index
+            return x, y, page_index
         return None, None, None
 
     def get_event_link(self):
