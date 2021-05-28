@@ -1265,36 +1265,35 @@ class PdfViewerWidget(QWidget):
         pos = self.mapFromGlobal(QCursor.pos()) # map global coordinate to widget coordinate.
         ex, ey = pos.x(), pos.y()
 
-        for index in list(range(self.start_page_index, self.last_page_index)):
-            render_width = self.page_width * self.scale
-            render_x = int((self.rect().width() - render_width) / 2)
-            if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
-                render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
+        # set page coordinate
+        render_width = self.page_width * self.scale
+        render_x = int((self.rect().width() - render_width) / 2)
+        if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
+            render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
 
-            # computer absolute coordinate of page
-            x = (ex - render_x) * 1.0 / self.scale
-            if ey + self.scroll_offset < (self.start_page_index + 1) * self.scale * self.page_height:
-                page_offset = self.scroll_offset - self.start_page_index * self.scale * self.page_height
-                page_index = index
-            else:
-                # if display two pages, pos.y() will add page_padding
-                page_offset = self.scroll_offset - (self.start_page_index + 1) * self.scale * self.page_height - self.page_padding
-                page_index = index + 1
-            y = (ey + page_offset) * 1.0 / self.scale
+        # computer absolute coordinate of page
+        x = (ex - render_x) * 1.0 / self.scale
+        if ey + self.scroll_offset < (self.start_page_index + 1) * self.scale * self.page_height:
+            page_offset = self.scroll_offset - self.start_page_index * self.scale * self.page_height
+            page_index = self.start_page_index
+        else:
+            # if display two pages, pos.y() will add page_padding
+            page_offset = self.scroll_offset - (self.start_page_index + 1) * self.scale * self.page_height - self.page_padding
+            page_index = self.start_page_index + 1
+        y = (ey + page_offset) * 1.0 / self.scale
 
-            temp = x
-            if self.rotation == 90:
-                x = y
-                y = self.page_width - temp
-            elif self.rotation == 180:
-                x = self.page_width - x
-                y = self.page_height - y
-            elif self.rotation == 270:
-                x = self.page_height - y
-                y = temp
+        temp = x
+        if self.rotation == 90:
+            x = y
+            y = self.page_width - temp
+        elif self.rotation == 180:
+            x = self.page_width - x
+            y = self.page_height - y
+        elif self.rotation == 270:
+            x = self.page_height - y
+            y = temp
 
-            return x, y, page_index
-        return None, None, None
+        return x, y, page_index
 
     def get_event_link(self):
         ex, ey, page_index = self.get_cursor_absolute_position()
