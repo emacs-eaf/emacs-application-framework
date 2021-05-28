@@ -154,7 +154,7 @@ class AppBuffer(Buffer):
         return str(self.buffer_widget.page_total_number)
 
     def current_page(self):
-        return str(self.buffer_widget.get_start_page_index() + 1)
+        return str(self.buffer_widget.start_page_index + 1)
 
     def current_percent(self):
         return str(self.buffer_widget.current_percent())
@@ -534,6 +534,9 @@ class PdfViewerWidget(QWidget):
 
         self.last_hover_annot_id = None
 
+        self.start_page_index = 0
+        self.last_page_index = 0
+
     def handle_color(self,color,inverted=False):
         r = float(color.redF())
         g = float(color.greenF())
@@ -556,7 +559,7 @@ class PdfViewerWidget(QWidget):
         if self.presentation_mode:
             # Make current page fill the view.
             self.zoom_reset("fit_to_height")
-            self.jump_to_page(self.get_start_page_index() + 1)
+            self.jump_to_page(self.start_page_index + 1)
 
             message_to_emacs("Presentation Mode.")
         else:
@@ -635,9 +638,7 @@ class PdfViewerWidget(QWidget):
 
     def clean_unused_page_cache_pixmap(self):
         # We need expand render index bound that avoid clean cache around current index.
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-        index_list = list(range(start_page_index, last_page_index))
+        index_list = list(range(self.start_page_index, self.last_page_index))
 
         # Try to clean unused cache.
         cache_index_list = list(self.page_cache_pixmap_dict.keys())
@@ -653,6 +654,8 @@ class PdfViewerWidget(QWidget):
         QWidget.resizeEvent(self, event)
 
     def paintEvent(self, event):
+        self.update_page_index()
+
         # Init painter.
         painter = QPainter(self)
         painter.save()
@@ -665,20 +668,16 @@ class PdfViewerWidget(QWidget):
         painter.setPen(background_color)
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
-        # Get start/last render index.
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-
         if self.scroll_offset > self.max_scroll_offset():
             self.update_vertical_offset(self.max_scroll_offset())
 
         # Translate painter at y coordinate.
-        translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
+        translate_y = (self.start_page_index * self.scale * self.page_height) - self.scroll_offset
         painter.translate(0, translate_y)
 
         # Render pages in visible area.
         (render_x, render_y, render_width, render_height) = 0, 0, 0, 0
-        for index in list(range(start_page_index, last_page_index)):
+        for index in list(range(self.start_page_index, self.last_page_index)):
             if index < self.page_total_number:
                 # Get page image.
                 hidpi_scale_factor = self.devicePixelRatioF()
@@ -690,7 +689,7 @@ class PdfViewerWidget(QWidget):
                 render_x = (self.rect().width() - render_width) / 2
 
                 # Add padding between pages.
-                if (index - start_page_index) > 0:
+                if (index - self.start_page_index) > 0:
                     painter.translate(0, self.page_padding)
 
                 # Draw page image.
@@ -717,8 +716,8 @@ class PdfViewerWidget(QWidget):
             painter.setPen(self.page_annotate_light_color)
 
         # Draw progress.
-        progress_percent = int((start_page_index + 1) * 100 / self.page_total_number)
-        current_page = start_page_index + 1
+        progress_percent = int((self.start_page_index + 1) * 100 / self.page_total_number)
+        current_page = self.start_page_index + 1
         painter.drawText(QRect(self.rect().x(),
                                self.rect().y(),
                                self.rect().width() - self.page_annotate_padding_right,
@@ -732,13 +731,13 @@ class PdfViewerWidget(QWidget):
             self_obj = args[0]
 
             # Record page before action.
-            page_before_action = self_obj.get_start_page_index()
+            page_before_action = self_obj.start_page_index
 
             # Do action.
             ret = f(*args)
 
             # Record page after action.
-            page_after_action = self_obj.get_start_page_index()
+            page_after_action = self_obj.start_page_index
             self_obj.is_page_just_changed = (page_before_action != page_after_action)
 
             # Start build context timer.
@@ -771,23 +770,18 @@ class PdfViewerWidget(QWidget):
                 max_pos = (self.page_width * self.scale - self.rect().width())
                 self.update_horizontal_offset(max(min(new_pos , max_pos), -max_pos))
 
-    def get_start_page_index(self):
-        return min(int(self.scroll_offset * 1.0 / self.scale / self.page_height),
-                   self.page_total_number - 1)
-
-    def get_last_page_index(self):
-        return min(int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1,
-                   self.page_total_number)
+    def update_page_index(self):
+        self.start_page_index = min(int(self.scroll_offset * 1.0 / self.scale / self.page_height),
+                                    self.page_total_number - 1)
+        self.last_page_index = min(int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1,
+                                   self.page_total_number)
 
     def build_context_cache(self):
         # Just build context cache when action duration longer than delay
         # Don't build contexnt cache when is_page_just_changed is True, avoid flickr when user change page.
         last_action_duration = (time.time() - self.last_action_time) * 1000
         if last_action_duration > self.page_cache_context_delay and not self.is_page_just_changed:
-            start_page_index = self.get_start_page_index()
-            last_page_index = self.get_last_page_index()
-
-            for index in list(range(start_page_index, last_page_index)):
+            for index in list(range(self.start_page_index, self.last_page_index)):
                 self.get_page_pixmap(index, self.scale, self.rotation)
 
     def scale_to(self, new_scale):
@@ -1269,12 +1263,10 @@ class PdfViewerWidget(QWidget):
             self.update()
 
     def get_cursor_absolute_position(self):
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
         pos = self.mapFromGlobal(QCursor.pos()) # map global coordinate to widget coordinate.
         ex, ey = pos.x(), pos.y()
 
-        for index in list(range(start_page_index, last_page_index)):
+        for index in list(range(self.start_page_index, self.last_page_index)):
             if index < self.page_total_number:
                 render_width = self.page_width * self.scale
                 render_x = int((self.rect().width() - render_width) / 2)
@@ -1283,12 +1275,12 @@ class PdfViewerWidget(QWidget):
 
                 # computer absolute coordinate of page
                 x = (ex - render_x) * 1.0 / self.scale
-                if ey + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
-                    page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
+                if ey + self.scroll_offset < (self.start_page_index + 1) * self.scale * self.page_height:
+                    page_offset = self.scroll_offset - self.start_page_index * self.scale * self.page_height
                     page_index = index
                 else:
                     # if display two pages, pos.y() will add page_padding
-                    page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
+                    page_offset = self.scroll_offset - (self.start_page_index + 1) * self.scale * self.page_height - self.page_padding
                     page_index = index + 1
                 y = (ey + page_offset) * 1.0 / self.scale
 
