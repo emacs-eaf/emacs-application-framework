@@ -611,9 +611,10 @@ class PdfViewerWidget(QWidget):
             page.cleanup_search_text()
 
         if self.is_jump_link:
-            self.jump_link_key_cache_dict = page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"])
+            self.jump_link_key_cache_dict.update(page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"]))
         else:
             page.cleanup_jump_link_tips()
+            self.jump_link_key_cache_dict.clear()
 
         # cache page char_dict
         if self.char_dict[index] is None:
