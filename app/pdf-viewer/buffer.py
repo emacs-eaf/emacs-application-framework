@@ -282,8 +282,34 @@ class PdfPage(fitz.Page):
         self._mark_search_annot_list = []
         self._mark_jump_annot_list = []
 
+        self._page_char_rect_list = self._init_page_char_rect_list()
+
     def __getattr__(self, attr):
         return getattr(self.page, attr)
+
+    def _init_page_char_rect_list(self):
+        '''Collection page char rect list when page init'''
+        lines_list = []
+        spans_list = []
+        chars_list = []
+
+        page_rawdict = self.page.getText("rawdict")
+        for block in page_rawdict["blocks"]:
+            if "lines" in block:
+                lines_list += block["lines"]
+
+        for line in lines_list:
+            if "spans" in line:
+                spans_list += line["spans"]
+
+        for span in spans_list:
+            if "chars" in span:
+                chars_list += span["chars"]
+
+        return chars_list
+
+    def get_page_char_rect_list(self):
+        return self._page_char_rect_list
 
     def set_rotation(self, rotation):
         self.page.setRotation(rotation)
@@ -476,9 +502,8 @@ class PdfViewerWidget(QWidget):
         self.start_char_page_index = None
         self.last_char_rect_index = None
         self.last_char_page_index = None
-        self.select_area_annot_cache_dict = {}
+        self.select_area_annot_cache_dict = {k:None for k in range(self.page_total_number)}
         self.select_area_annot_quad_cache_dict = {}
-        self.char_dict = {k:None for k in range(self.page_total_number)}
 
         # annot
         self.is_hover_annot = False
@@ -612,11 +637,6 @@ class PdfViewerWidget(QWidget):
         else:
             page.cleanup_jump_link_tips()
             self.jump_link_key_cache_dict.clear()
-
-        # cache page char_dict
-        if self.char_dict[index] is None:
-            self.char_dict[index] = self.get_page_char_rect_list(index)
-            self.select_area_annot_cache_dict[index] = None
 
         if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.document.isPDF:
             col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
@@ -987,32 +1007,12 @@ class PdfViewerWidget(QWidget):
         self.search_text_offset_list.clear()
         self.update()
 
-    def get_page_char_rect_list(self, page_index):
-        lines_list = []
-        spans_list = []
-        chars_list = []
-
-        page_rawdict = self.document[page_index].getText("rawdict")
-        for block in page_rawdict["blocks"]:
-            if "lines" in block:
-                lines_list += block["lines"]
-
-        for line in lines_list:
-            if "spans" in line:
-                spans_list += line["spans"]
-
-        for span in spans_list:
-            if "chars" in span:
-                chars_list += span["chars"]
-
-        return chars_list
-
     def get_char_rect_index(self):
         offset = 15
         ex, ey, page_index = self.get_cursor_absolute_position()
         if ex and ey and page_index is not None:
             rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
-            for char_index, char in enumerate(self.char_dict[page_index]):
+            for char_index, char in enumerate(self.document[page_index].get_page_char_rect_list()):
                 if fitz.Rect(char["bbox"]).intersect(rect):
                     return char_index, page_index
         return None, None
@@ -1024,7 +1024,7 @@ class PdfViewerWidget(QWidget):
             sp_index = min(self.start_char_page_index, self.last_char_page_index)
             lp_index = max(self.start_char_page_index, self.last_char_page_index)
             for page_index in range(sp_index, lp_index + 1):
-                page_char_list = self.char_dict[page_index]
+                page_char_list = self.document[page_index].get_page_char_rect_list()
 
                 if page_char_list:
                 # handle forward select and backward select on multi page.
