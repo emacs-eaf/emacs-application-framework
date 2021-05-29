@@ -86,13 +86,15 @@
 (defun eaf-install-dependencies ()
   "An interactive function that run install-eaf.sh or install-eaf-win32.js or install-eaf-mac.sh for Linux or Windows or macOS respectively."
   (interactive)
-  (let ((eaf-dir (file-name-directory (locate-library "eaf"))))
+  (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
+         (default-directory eaf-dir))
     (cond ((eq system-type 'gnu/linux)
-           (shell-command (concat eaf-dir "install-eaf.sh" "&")))
+           (shell-command (concat "./install-eaf.sh" "&")))
           ((memq system-type '(cygwin windows-nt ms-dos))
-           (shell-command (format "node %s" (concat eaf-dir "install-eaf-win32.js" "&"))))
+           (shell-command (format "node %s" (concat "install-eaf-win32.js" "&"))))
           ((eq system-type 'darwin)
-           (shell-command (concat eaf-dir "install-eaf-mac.sh" "&"))))))
+           (shell-command (concat "./install-eaf-mac.sh" "&"))))))
+
 
 (require 'bookmark)
 (require 'cl-lib)
@@ -1495,13 +1497,13 @@ Including title-bar, menu-bar, offset depends on window system, and border."
       (setq eaf--mac-has-focus t)
       (ignore-errors
         (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame))
-        (bury-buffer "*eaf temp*"))
-      )
+        (bury-buffer "*eaf temp*")))
 
     (defun eaf--mac-focus-out (&optional frame)
-      (setq eaf--mac-has-focus nil)
-      (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
-      (eaf--mac-replace-eaf-buffers))
+      (when eaf--mac-has-focus
+        (setq eaf--mac-has-focus nil)
+        (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
+        (eaf--mac-replace-eaf-buffers)))
 
     (add-function :after after-focus-change-function #'eaf--mac-focus-change)
     (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)
@@ -1967,6 +1969,11 @@ In that way the corresponding function will be called to retrieve the HTML
   "Open URL at current point by EAF browser."
   (interactive)
   (eaf-open-browser (browse-url-url-at-point)))
+
+(defun eaf-toggle-proxy()
+  "Toggle proxy to none or default proxy."
+  (interactive)
+  (eaf-call-sync "toggle_proxy"))
 
 (defun eaf-browser--duplicate-page-in-new-tab (url)
   "Duplicate a new tab for the dedicated URL."

@@ -23,6 +23,7 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl, QTimer
 from core.webengine import BrowserBuffer
 from core.utils import interactive
+from functools import cmp_to_key
 import os
 import json
 import psutil
@@ -72,32 +73,54 @@ class AppBuffer(BrowserBuffer):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_process_info)
-        self.timer.start(2000)
+        self.timer.start(1000)
 
     def update_process_info(self):
         infos = []
 
-        for proc in psutil.process_iter(['cpu_percent', 'pid', 'name', 'username', 'cmdline']):
+        for proc in psutil.process_iter(['cpu_percent', 'memory_info', 'pid', 'name', 'username', 'cmdline']):
             info = proc.info
-            info["memory"] = self.format_memory(psutil.Process(info["pid"]).memory_info().rss)
+            memory_number = info["memory_info"].rss
+            info["memory_number"] = memory_number
+            info["memory"] = self.format_memory(memory_number)
             info["cmdline"] = " ".join(info["cmdline"])
             infos.append(proc.info)
 
-        infos.sort(key=lambda info: info["cpu_percent"], reverse=True)
+        infos.sort(key=cmp_to_key(self.process_compare), reverse=True)
 
         self.buffer_widget.execute_js('''updateProcessInfo({});'''.format(json.dumps(infos)))
 
         mem = psutil.virtual_memory()
+        cpu_percent = psutil.cpu_percent()
+        cpu_percents = psutil.cpu_percent(percpu=True)
+        cpu_count = psutil.cpu_count()
         panel_info = {
+            "cpu": {
+                "count": cpu_count,
+                "percent": cpu_percent,
+                "percents": cpu_percents
+            },
             "memory": {
                 "total": self.format_memory(mem.total),
                 "used": self.format_memory(mem.used),
                 "percent": mem.percent
             }
         }
-        print(mem)
 
         self.buffer_widget.execute_js('''updatePanelInfo({});'''.format(json.dumps(panel_info)))
+
+    def process_compare(self, a, b):
+        if a["cpu_percent"] < b["cpu_percent"]:
+            return -1
+        elif a["cpu_percent"] > b["cpu_percent"]:
+            return 1
+        else:
+            if a["memory_number"] < b["memory_number"]:
+                return -1
+            elif a["memory_number"] > b["memory_number"]:
+                return 1
+            else:
+                return 0
 
     def format_memory(self, memory):
         if memory < 1024:

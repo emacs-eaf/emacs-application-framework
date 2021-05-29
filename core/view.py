@@ -36,7 +36,7 @@ class View(QWidget):
 
         # Init widget attributes.
         if platform.system() == "Darwin":
-            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         else:
             self.setWindowFlags(Qt.FramelessWindowHint)
 

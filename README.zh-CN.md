@@ -61,10 +61,11 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
 |                                                  |                                                         |
 
-| 音乐播放器                                                |
-| :--------:                                                |
-| <img src="./screenshot/music_player.png" width="400"> |
-|                                                           |
+| 音乐播放器                                            | 系统监视器                                                   |
+| :--------:                                            | :--------:                                              |
+| <img src="./screenshot/music_player.png" width="400"> | <img src="./screenshot/system_monitor.png" width="400"> |
+|                                                       |                                                         |
+
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
 - 由[MatthewZMD](https://github.com/MatthewZMD)在EmacsConf2020的演讲和demo。
 - 官网（内附Q&A）: https://emacsconf.org/2020/talks/34/
@@ -169,7 +170,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | python-qtconsole               | jupyter                      | 提供RichJupyterWidget                    |
 | python-retrying                | Markdown浏览器               | 提供@retry                               |
 | python-pytaglib                | 音乐播放器                   | 提取音乐ID3信息                          |
-| python-psutil                  | 系统监视器                   | 获取西欧童年给进程信息                   |
+| python-psutil                  | 系统监视器                   | 获取系统进程信息                   |
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
