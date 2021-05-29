@@ -449,11 +449,6 @@ class PdfViewerWidget(QWidget):
             self.scale = float(self.emacs_var_dict["eaf-pdf-default-zoom"])
         self.horizontal_offset = 0
 
-        # To avoid 'PDF only' method errors
-        self.inpdf = True
-        if os.path.splitext(self.url)[-1] != ".pdf":
-            self.inpdf = False
-
         # Inverted mode.
         self.inverted_mode = False
         if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or \
@@ -462,11 +457,10 @@ class PdfViewerWidget(QWidget):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true" and self.inpdf
+        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true" and self.document.isPDF
 
         # mark link
         self.is_mark_link = False
-        self.mark_link_annot_cache_dict = {}
 
         #jump link
         self.is_jump_link = False
@@ -596,7 +590,7 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
 
         page = self.document[index]
-        if self.inpdf:
+        if self.document.isPDF:
             page.set_rotation(rotation)
 
         if self.is_mark_link:
@@ -625,7 +619,7 @@ class PdfViewerWidget(QWidget):
             self.char_dict[index] = self.get_page_char_rect_list(index)
             self.select_area_annot_cache_dict[index] = None
 
-        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.inpdf:
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.document.isPDF:
             col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
@@ -893,7 +887,7 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def rotate_clockwise(self):
-        if self.inpdf:
+        if self.document.isPDF:
             self.rotation = (self.rotation + 90) % 360
 
             # Need clear page cache first, otherwise current page will not inverted until next page.
@@ -906,7 +900,7 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def rotate_counterclockwise(self):
-        if self.inpdf:
+        if self.document.isPDF:
             self.rotation = (self.rotation - 90) % 360
 
             # Need clear page cache first, otherwise current page will not inverted until next page.
