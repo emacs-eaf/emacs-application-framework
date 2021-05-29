@@ -311,6 +311,18 @@ class PdfPage(fitz.Page):
     def get_page_char_rect_list(self):
         return self._page_char_rect_list
 
+    def get_page_char_rect_index(self, x, y):
+        '''According X and Y coordinate return index of char in char rect list.'''
+        if x and y is None:
+            return None
+
+        offset = 15
+        rect = fitz.Rect(x, y, x + offset, y + offset)
+        for char_index, char in enumerate(self._page_char_rect_list):
+            if fitz.Rect(char["bbox"]).intersect(rect):
+                return char_index
+        return None
+
     def set_rotation(self, rotation):
         self.page.setRotation(rotation)
         if rotation % 180 != 0:
@@ -1007,16 +1019,6 @@ class PdfViewerWidget(QWidget):
         self.search_text_offset_list.clear()
         self.update()
 
-    def get_char_rect_index(self):
-        offset = 15
-        ex, ey, page_index = self.get_cursor_absolute_position()
-        if ex and ey and page_index is not None:
-            rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
-            for char_index, char in enumerate(self.document[page_index].get_page_char_rect_list()):
-                if fitz.Rect(char["bbox"]).intersect(rect):
-                    return char_index, page_index
-        return None, None
-
     def get_select_char_list(self):
         page_dict = {}
         if self.start_char_rect_index and self.last_char_rect_index:
@@ -1383,7 +1385,8 @@ class PdfViewerWidget(QWidget):
 
     def handle_select_mode(self):
         self.is_select_mode = True
-        rect_index, page_index = self.get_char_rect_index()
+        ex, ey, page_index = self.get_cursor_absolute_position()
+        rect_index = self.document[page_index].get_page_char_rect_index(ex, ey)
         if rect_index and page_index is not None:
             if self.start_char_rect_index is None or self.start_char_page_index is None:
                 self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
