@@ -465,7 +465,6 @@ class PdfViewerWidget(QWidget):
         #jump link
         self.is_jump_link = False
         self.jump_link_key_cache_dict = {}
-        self.jump_link_annot_cache_dict = {}
 
         #global search text
         self.is_mark_search = False
@@ -868,7 +867,12 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
 
         # Toggle inverted status.
-        if self.inverted_mode and self.inverted_mode_exclude_image:
+        if not self.document.isPDF:
+            self.inverted_mode = not self.inverted_mode
+            self.update()
+            return
+
+        if self.inverted_mode_exclude_image:
             self.inverted_mode_exclude_image = False
         elif self.inverted_mode:
             self.inverted_mode = False
