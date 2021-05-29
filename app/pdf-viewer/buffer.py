@@ -411,22 +411,12 @@ class PdfPage(fitz.Page):
                 self.page.deleteAnnot(annot)
             self._mark_search_annot_list = []
 
-    def generate_random_key(self, count, letters):
-        key_list = []
-        key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
-        while count > 0:
-            key = ''.join(random.choices(letters, k=key_len))
-            if key not in key_list:
-                key_list.append(key)
-                count -= 1
-        return key_list
-
     def mark_jump_link_tips(self, letters):
         tips_size = 4
         cache_dict = {}
         if self.page.firstLink:
             links = self.page.getLinks()
-            key_list = self.generate_random_key(len(links), letters)
+            key_list = generate_random_key(len(links), letters)
             for index, link in enumerate(links):
                 key = key_list[index]
                 link_rect = link["from"]
@@ -443,13 +433,6 @@ class PdfPage(fitz.Page):
             self.page.deleteAnnot(annot)
         self._mark_jump_annot_list = []
 
-
-class PdfAnnotate(fitz.Annot):
-    def __init__(self, annot):
-        self.annot = annot
-
-    def __getattr__(self, attr):
-        return getattr(self.annot, attr)
 
 class PdfViewerWidget(QWidget):
 
@@ -544,9 +527,7 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
         self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
-        self.page_annotate_dark_color = QColor(1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).redF(),\
-                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).greenF(),\
-                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).blueF())
+
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -566,19 +547,6 @@ class PdfViewerWidget(QWidget):
 
         self.start_page_index = 0
         self.last_page_index = 0
-
-    def handle_color(self,color,inverted=False):
-        r = float(color.redF())
-        g = float(color.greenF())
-        b = float(color.blueF())
-        if inverted:
-            r = 1.0-r
-            g = 1.0-g
-            b = 1.0-b
-        return (r,g,b)
-
-    def repeat_to_length(self, string_to_expand, length):
-        return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
 
     @interactive
     def toggle_presentation_mode(self):
@@ -651,7 +619,8 @@ class PdfViewerWidget(QWidget):
             self.jump_link_key_cache_dict.clear()
 
         if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.document.isPDF:
-            col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
+            color = inverted_color(self.emacs_var_dict["eaf-emacs-theme-background-color"], self.inverted_mode)
+            col = (color.redF(), color.greenF(), color.blueF())
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
         qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
@@ -732,12 +701,10 @@ class PdfViewerWidget(QWidget):
         # Render current page.
         painter.setFont(self.font)
 
-        if self.inverted_mode:
-            painter.setPen(self.page_annotate_light_color)
-        elif self.rect().width() <= render_width:
-            painter.setPen(self.page_annotate_dark_color)
+        if self.rect().width() <= render_width and not self.inverted_mode:
+            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"]), True))
         else:
-            painter.setPen(self.page_annotate_light_color)
+            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"])))
 
         # Draw progress.
         progress_percent = int((self.start_page_index + 1) * 100 / self.page_total_number)
@@ -1403,3 +1370,28 @@ class PdfViewerWidget(QWidget):
         double_click_word = self.get_double_click_word()
         if double_click_word:
             self.translate_double_click_word.emit(double_click_word)
+
+
+# utils function
+def inverted_color(color, inverted=False):
+    color = QColor(color)
+    if not inverted:
+        return color
+
+    r = 1.0 - float(color.redF())
+    g = 1.0 - float(color.greenF())
+    b = 1.0 - float(color.blueF())
+
+    col = QColor()
+    col.setRgbF(r, g, b)
+    return col
+
+def generate_random_key(count, letters):
+    key_list = []
+    key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
+    while count > 0:
+        key = ''.join(random.choices(letters, k=key_len))
+        if key not in key_list:
+            key_list.append(key)
+            count -= 1
+    return key_list
