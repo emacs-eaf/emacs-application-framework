@@ -1116,11 +1116,13 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     def delete_all_mark_select_area(self):
+        sp_index = min(self.start_char_page_index, self.last_char_page_index)
+        lp_index = max(self.start_char_page_index, self.last_char_page_index)
         if self.select_area_annot_cache_dict:
-            for page_index, annot in self.select_area_annot_cache_dict.items():
-                page = self.document[page_index]
+            for page_index in range(sp_index, lp_index+1):
+                annot = self.select_area_annot_cache_dict[page_index]
                 if annot and annot.parent:
-                        page.deleteAnnot(annot)
+                        annot.parent.deleteAnnot(annot)
                 self.select_area_annot_cache_dict[page_index] = None # restore cache
         self.last_char_page_index = None
         self.last_char_rect_index = None
