@@ -150,6 +150,14 @@ class AppBuffer(Buffer):
         else:
             message_to_emacs("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
+    def get_select(self):
+        if self.buffer_widget.is_select_mode:
+            content = self.buffer_widget.parse_select_char_list()
+            self.buffer_widget.cleanup_select()
+            return content
+        else:
+            return ""
+
     def page_total_number(self):
         return str(self.buffer_widget.page_total_number)
 
