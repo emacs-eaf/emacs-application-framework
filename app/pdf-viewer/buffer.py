@@ -293,7 +293,7 @@ class PdfDocument(fitz.Document):
                 # Some program will generate `middle` file, but file already changed, fitz try to
                 # open the `middle` file caused error.
                 time.sleep(0.1)
-                self.reload_document(path)
+                self.reload_document(path, self._page_clip)
             except:
                 return
 
