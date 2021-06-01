@@ -2207,6 +2207,52 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
   "Translate from a WSL path to a Windows path'"
   (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" path))
 
+(defun eaf-store-pdf-history (url)
+  "A wrapper around `eaf-open' that store pdf history candidates."
+  (let* ( found-history-result (pdf-history-file-path
+                                (concat eaf-config-location
+                                        (file-name-as-directory "pdf")
+                                        (file-name-as-directory "history")
+                                        "log.txt")))
+    (if (not (file-exists-p pdf-history-file-path))
+        (progn
+          ;; If it does not exist, create a folder to store the log and create a log file
+          (make-directory (file-name-directory pdf-history-file-path) t)
+          (f-write-text "" 'utf-8 pdf-history-file-path)))
+    (when (string-match "^\\(.+\\).pdf$" url)
+      (find-file pdf-history-file-path)
+      (goto-char (point-min))
+      (if (search-forward url nil t) ;; search with no error
+          (kill-whole-line))  ;; Delete this record
+      (goto-char (point-min))
+      (insert (concat url "\n"))
+      (basic-save-buffer)
+      (kill-current-buffer))))
+
+(defun eaf-open-pdf-with-history ()
+  "A wrapper around `eaf-open' that provides pdf history candidates.
+This function works best if paired with a fuzzy search package."
+  (interactive)
+  (let* ((pdf-history-file-path
+          (concat eaf-config-location
+                  (file-name-as-directory "pdf")
+                  (file-name-as-directory "history")
+                  "log.txt"))
+         (history-pattern "^\\(.+\\).pdf$")
+         (history-file-exists (file-exists-p pdf-history-file-path))
+         (history-pdf (completing-read
+                   "[EAF/pdf] Search || History: "
+                   (if history-file-exists
+                       (mapcar
+                        (lambda (h) (when (string-match history-pattern h)
+                                 (if (file-exists-p h)
+                                     (format "%s" h))))
+                        (with-temp-buffer (insert-file-contents pdf-history-file-path)
+                                          (split-string (buffer-string) "\n" t)))
+                     (make-directory (file-name-directory pdf-history-file-path) t)
+                     (f-write-text "" 'utf-8 pdf-history-file-path)))))
+    (if history-pdf (eaf-open history-pdf))))
+
 ;;;###autoload
 (defun eaf-open (url &optional app-name args always-new)
   "Open an EAF application with URL, optional APP-NAME and ARGS.
@@ -2221,6 +2267,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "F[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
+    (eaf-store-pdf-history url)
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
