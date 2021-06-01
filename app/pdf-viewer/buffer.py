@@ -366,6 +366,8 @@ class PdfPage(fitz.Page):
             x1 = max(x1, r.x1)
             y1 = max(y1, r.y1)
             r = fitz.Rect(x0, y0, x1, y1)
+        if r is None:
+            return self.page.CropBox
         return r
 
     def get_tight_margin_rect(self):
