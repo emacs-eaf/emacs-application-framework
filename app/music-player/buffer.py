@@ -19,11 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtCore
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl
+from PyQt5.QtWebChannel import QWebChannel
 from core.webengine import BrowserBuffer
 from core.utils import interactive
 from functools import cmp_to_key
+from core.utils import eval_in_emacs
 import os
 import json
 import mimetypes
@@ -60,9 +63,18 @@ class AppBuffer(BrowserBuffer):
                                                      ("scroll_up_page", "scrollUpPage"),
                                                      ("scroll_down_page", "scrollDownPage"),
                                                      ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom")
+                                                     ("scroll_to_bottom", "scrollToBottom"),
+                                                     ("jump_to_file", "jumpToFile")
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
+
+        self.channel = QWebChannel()
+        self.channel.registerObject("pyobject", self)
+        self.buffer_widget.web_page.setWebChannel(self.channel)
+
+    @QtCore.pyqtSlot(str)
+    def open_in_dired(self, path):
+        eval_in_emacs('dired', [path])
 
     def load_first_file(self):
         self.buffer_widget.execute_js('''initPlaylistColor(\"{}\", \"{}\")'''.format(
