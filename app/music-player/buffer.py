@@ -22,7 +22,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl
-from PyQt5.QtWebChannel import QWebChannel
 from core.webengine import BrowserBuffer
 from core.utils import interactive
 from functools import cmp_to_key
@@ -67,10 +66,6 @@ class AppBuffer(BrowserBuffer):
                                                      ("jump_to_file", "jumpToFile")
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
-
-        self.channel = QWebChannel()
-        self.channel.registerObject("pyobject", self)
-        self.buffer_widget.web_page.setWebChannel(self.channel)
 
     @QtCore.pyqtSlot(str)
     def open_in_dired(self, path):

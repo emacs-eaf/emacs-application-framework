@@ -25,6 +25,7 @@ from PyQt5.QtGui import QColor, QScreen
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
 from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit
 from functools import partial
@@ -678,6 +679,11 @@ class BrowserBuffer(Buffer):
         # Reset to default zoom when page init or page url changed.
         self.reset_default_zoom()
         self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+
+        # Build webchannel object.
+        self.channel = QWebChannel()
+        self.channel.registerObject("pyobject", self)
+        self.buffer_widget.web_page.setWebChannel(self.channel)
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
