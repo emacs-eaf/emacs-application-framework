@@ -776,6 +776,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The extension list of pdf application."
   :type 'cons)
 
+(defcustom eaf-pdf-store-history t
+  "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
+  :type 'boolean)
+
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
@@ -2220,17 +2224,16 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
           ;; If it does not exist, create a folder to store the log and create a log file
           (make-directory (file-name-directory pdf-history-file-path) t)
           (f-write-text "" 'utf-8 pdf-history-file-path)))
-    (when (string-match "^\\(.+\\).pdf$" url)
-      (find-file pdf-history-file-path)
-      (goto-char (point-min))
-      (if (search-forward url nil t) ;; search with no error
-          (kill-whole-line))  ;; Delete this record
-      (goto-char (point-min))
-      (insert (concat url "\n"))
-      (basic-save-buffer)
-      (kill-current-buffer))))
+    (find-file pdf-history-file-path)
+    (goto-char (point-min))
+    (if (search-forward url nil t) ;; search with no error
+        (kill-whole-line))  ;; Delete this record
+    (goto-char (point-min))
+    (insert (concat url "\n"))
+    (basic-save-buffer)
+    (kill-current-buffer)))
 
-(defun eaf-open-pdf-with-history ()
+(defun eaf-open-pdf-from-history ()
   "A wrapper around `eaf-open' that provides pdf history candidates.
 This function works best if paired with a fuzzy search package."
   (interactive)
@@ -2239,7 +2242,7 @@ This function works best if paired with a fuzzy search package."
                   (file-name-as-directory "pdf")
                   (file-name-as-directory "history")
                   "log.txt"))
-         (history-pattern "^\\(.+\\).pdf$")
+         (history-pattern "^\\(.+\\)\\.pdf$")
          (history-file-exists (file-exists-p pdf-history-file-path))
          (history-pdf (completing-read
                    "[EAF/pdf] Search || History: "
@@ -2268,7 +2271,9 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "F[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
-    (eaf-store-pdf-history url)
+    (when (and eaf-pdf-store-history (string-match "^\\(.+\\)\\.pdf$" url))
+      (message "store pdf history")
+        (eaf-store-pdf-history url))
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
