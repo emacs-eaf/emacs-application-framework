@@ -235,29 +235,41 @@ class AppBuffer(Buffer):
 class PdfDocument(fitz.Document):
     def __init__(self, document):
         self.document = document
+        self._is_trim_margin = False
         self._page_cache_dict = {}
-        self._page_clip = None
+        self._document_page_clip = None
+        self._document_page_change = lambda rect: None
 
     def __getattr__(self, attr):
         return getattr(self.document, attr)
 
     def __getitem__(self, index):
         if index in self._page_cache_dict:
-            return self._page_cache_dict[index]
-        page = self.document[index]
-        if self._page_clip is not None:
-            return PdfPage(page, self._page_clip)
-        return PdfPage(page)
+            page = self._page_cache_dict[index]
+            if not self._is_trim_margin:
+                return page
 
-    def reload_document(self, url, clip=None):
-        self._page_cache_dict = {}
-        self._page_clip = clip
-        self.document = fitz.open(url)
+            if page.CropBox == self._document_page_clip:
+                return page
 
-    def get_doc_tight_margin_rect(self):
+        page = PdfPage(self.document[index])
+
+        # udpate the page clip
+        new_rect_clip = self.computer_page_clip(page.get_tight_margin_rect(), self._document_page_clip)
+        if new_rect_clip != self._document_page_clip:
+            self._document_page_clip = new_rect_clip
+            if self._is_trim_margin:
+                self._document_page_change(new_rect_clip)
+
+        if self._is_trim_margin:
+            return PdfPage(self.document[index], self._document_page_clip)
+
+        return page
+
+    def computer_page_clip(self, *args):
+        '''Update the bestest max page clip.'''
         dr = None
-        for index, page in enumerate(self):
-            r = page.get_tight_margin_rect()
+        for r in args:
             if r is None:
                 continue
             if dr is None:
@@ -269,6 +281,10 @@ class PdfDocument(fitz.Document):
             y1 = max(r.y1, dr.y1)
             dr = fitz.Rect(x0, y0, x1, y1)
         return dr
+
+    def reload_document(self, url):
+        self._page_cache_dict = {}
+        self.document = fitz.open(url)
 
     def cache_page(self, index, page):
         self._page_cache_dict[index] = page
@@ -293,7 +309,7 @@ class PdfDocument(fitz.Document):
                 # Some program will generate `middle` file, but file already changed, fitz try to
                 # open the `middle` file caused error.
                 time.sleep(0.1)
-                self.reload_document(path, self._page_clip)
+                self.reload_document(path)
             except:
                 return
 
@@ -303,10 +319,26 @@ class PdfDocument(fitz.Document):
             if len(self.file_changed_wacher.files()) == 0 :
                 self.file_changed_wacher.addPath(path)
 
+    def toggle_trim_margin(self):
+        self._is_trim_margin = not self._is_trim_margin
+
+    def get_page_width(self):
+        if self._is_trim_margin:
+            return self._document_page_clip.width
+        return self.document.pageCropBox(0).width
+
+    def get_page_height(self):
+        if self._is_trim_margin:
+            return self._document_page_clip.height
+        return self.document.pageCropBox(0).height
+
+    def watch_page_size_change(self, callback):
+        self._document_page_change = callback
+
 class PdfPage(fitz.Page):
     def __init__(self, page, clip=None):
         self.page = page
-        self.clip = clip
+        self.clip = clip or page.CropBox
 
         self._mark_link_annot_list = []
         self._mark_search_annot_list = []
@@ -320,11 +352,10 @@ class PdfPage(fitz.Page):
         return getattr(self.page, attr)
 
     def _init_page_rawdict(self):
-        if self.clip is not None:
-            # Must set CropBox before get page rawdict , if no,
-            # the rawdict bbox coordinate is wrong
-            # cause the select text failed
-            self.page.setCropBox(self.clip)
+        # Must set CropBox before get page rawdict , if no,
+        # the rawdict bbox coordinate is wrong
+        # cause the select text failed
+        self.page.setCropBox(self.clip)
         d = self.page.getText("rawdict")
         # cancel the cropbox, if not, will cause the pixmap set cropbox
         # don't begin on top-left(0, 0), page display black margin
@@ -354,6 +385,7 @@ class PdfPage(fitz.Page):
     def _init_tight_margin(self):
         r = None
         for block in self._page_rawdict["blocks"]:
+            # ignore image bbox
             if block["type"] != 0:
                 continue
 
@@ -371,6 +403,10 @@ class PdfPage(fitz.Page):
         return r
 
     def get_tight_margin_rect(self):
+        # if current page don't computer tight rect
+        # return None
+        if self._tight_margin_rect == self.page.MediaBox:
+            return None
         return self._tight_margin_rect
 
     def get_page_char_rect_list(self):
@@ -397,15 +433,8 @@ class PdfPage(fitz.Page):
             self.page_width = self.page.CropBox.width
             self.page_height = self.page.CropBox.height
 
-    def get_width(self):
-        return self.page_width or self.page.CropBox.width
-
-    def get_height(self):
-        return self.page_height or self.page.CropBox.height
-
     def get_qpixmap(self, scale, *args):
-        if self.clip is not None:
-            self.page.setCropBox(self.clip)
+        self.page.setCropBox(self.clip)
         pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
@@ -520,18 +549,10 @@ class PdfViewerWidget(QWidget):
         self.document = PdfDocument(fitz.open(url))
         self.document.watch_file(url, lambda: (self.page_cache_pixmap_dict.clear(), self.update()))
 
-        # if enable pdf trima white margin, will first load the docuemnt, then
-        # loop all page so that geting the `tight_rect`.
-        # Second, with the `tight_rect` reload the docuemnt
-        if (self.emacs_var_dict["eaf-pdf-enable-trim-white-margin"] == "true"):
-            doc_tight_rect = self.document.get_doc_tight_margin_rect()
-            self.document.reload_document(self.url, doc_tight_rect)
-        else:
-            doc_tight_rect = self.document.pageCropBox(0)
-
         # Get document's page information.
-        self.page_width = doc_tight_rect.width
-        self.page_height = doc_tight_rect.height
+        self.document.watch_page_size_change(self.update_page_size)
+        self.page_width = self.document.get_page_width()
+        self.page_height = self.document.get_page_height()
         self.page_total_number = self.document.pageCount
 
         # Init scale and scale mode.
@@ -720,6 +741,7 @@ class PdfViewerWidget(QWidget):
         QWidget.resizeEvent(self, event)
 
     def paintEvent(self, event):
+        # update page base information
         self.update_page_index()
 
         # Init painter.
@@ -838,6 +860,11 @@ class PdfViewerWidget(QWidget):
                                     self.page_total_number - 1)
         self.last_page_index = min(int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1,
                                    self.page_total_number)
+    def update_page_size(self, rect):
+        current_page_index = self.start_page_index
+        self.page_width = rect.width
+        self.page_height = rect.height
+        self.jump_to_page(current_page_index)
 
     def build_context_cache(self):
         # Just build context cache when action duration longer than delay
@@ -931,6 +958,14 @@ class PdfViewerWidget(QWidget):
         self.read_mode = read_mode
         self.update_scale()
         self.update()
+
+    @interactive
+    def toggle_trim_white_margin(self):
+        current_page_index = self.start_page_index
+        self.document.toggle_trim_margin()
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+        self.jump_to_page(current_page_index)
 
     @interactive
     def toggle_inverted_mode(self):

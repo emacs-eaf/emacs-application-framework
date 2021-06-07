@@ -556,7 +556,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-p" . "toggle_presentation_mode")
     ("J" . "select_left_tab")
     ("K" . "select_right_tab")
-    ("o" . "eaf-pdf-outline"))
+    ("o" . "eaf-pdf-outline")
+    ("T" . "toggle_trim_white_margin"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
