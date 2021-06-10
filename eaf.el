@@ -352,6 +352,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-pdf-default-zoom . "1.0")
     (eaf-pdf-dark-exclude-image . "true")
     (eaf-pdf-scroll-ratio . "0.05")
+    (eaf-pdf-enable-trim-white-margin . "false")
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
     (eaf-terminal-font-family . "")
@@ -555,7 +556,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-p" . "toggle_presentation_mode")
     ("J" . "select_left_tab")
     ("K" . "select_right_tab")
-    ("o" . "eaf-pdf-outline"))
+    ("o" . "eaf-pdf-outline")
+    ("T" . "toggle_trim_white_margin"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
