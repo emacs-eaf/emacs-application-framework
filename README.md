@@ -10,7 +10,7 @@ Emacs Application Framework (EAF) is a GUI application framework for Emacs that 
 EAF supports Linux, Windows, and MacOS.
 
 ## EAF Vision
-Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world had been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
+Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world have been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
 
 If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
 
@@ -20,7 +20,7 @@ The vision of the EAF project is that, while retaining the culture and the ecosy
 
 
 ## Application Showcase
-EAF is an extensible framework, it comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
+EAF is an extensible framework. It comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
 
 | Browser                                          | Markdown Previewer (support Mermaid and PlantUML)                                          |
 | :--------:                                       | :----:                                                      |
