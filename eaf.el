@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Apr 20 18:47:41 2021 (-0400)
+;; Last-Updated: Sat Jun 12 21:45:41 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -315,7 +315,7 @@ Each element has the form (NAME . URL).
 It must defined at `eaf-browser-search-engines'."
   :type 'string)
 
-(defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python3.exe" "python3")
+(defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python.exe" "python3")
   "The Python interpreter used to run eaf.py."
   :type 'string)
 
@@ -2216,16 +2216,16 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
 
 (defun eaf-store-pdf-history (url)
   "A wrapper around `eaf-open' that store pdf history candidates."
-  (let* ( found-history-result (pdf-history-file-path
-                                (concat eaf-config-location
-                                        (file-name-as-directory "pdf")
-                                        (file-name-as-directory "history")
-                                        "log.txt")))
+  (let* (found-history-result (pdf-history-file-path
+                               (concat eaf-config-location
+                                       (file-name-as-directory "pdf")
+                                       (file-name-as-directory "history")
+                                       "log.txt")))
     (if (not (file-exists-p pdf-history-file-path))
         (progn
           ;; If it does not exist, create a folder to store the log and create a log file
           (make-directory (file-name-directory pdf-history-file-path) t)
-          (f-write-text "" 'utf-8 pdf-history-file-path)))
+          (with-temp-file pdf-history-file-path "")))
     (find-file pdf-history-file-path)
     (goto-char (point-min))
     (if (search-forward url nil t) ;; search with no error
@@ -2256,7 +2256,7 @@ This function works best if paired with a fuzzy search package."
                         (with-temp-buffer (insert-file-contents pdf-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      (make-directory (file-name-directory pdf-history-file-path) t)
-                     (f-write-text "" 'utf-8 pdf-history-file-path)))))
+                     (with-temp-file pdf-history-file-path "")))))
     (if history-pdf (eaf-open history-pdf))))
 
 ;;;###autoload
