@@ -234,6 +234,9 @@ Both projects are similar in terms of interface, but they are two completely dif
 ### macOS
 Currently, macOS is only partially supported and needs a lot of testing, not all functions can work normally, please check the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS) for details.
 
+### Browser crashes
+Please DO NOT install PyQt5 through pip, pip version has bug, please install PyQt5 from the OS software repository.
+
 ### EAF js-video-player can't play some video on Windows and Mac. Why?
 `js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.
 
