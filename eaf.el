@@ -240,7 +240,7 @@ been initialized."
           epcs:server-processes)
     main-process))
 
-(defvar eaf-server
+(defun eaf--start-epc-server ()
   (let (server)
     (setq server (epcs:server-start
                   (lambda (mngr)
@@ -259,9 +259,10 @@ been initialized."
                   ))
     (if server
         (setq eaf-server-port (process-contact server :service))
-      (message "eaf-server fails to start.")
+      (error "eaf-server fails to start.")
       )
-    server))
+    server)
+  )
 
 (when noninteractive
   ;; Start "event loop".
@@ -1182,6 +1183,8 @@ A hashtable, key is url and value is title.")
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((epc:live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
+  ;; start epc server and set `eaf-server-port'
+  (eaf--start-epc-server)
   (let* ((eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
