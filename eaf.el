@@ -240,9 +240,10 @@ been initialized."
           epcs:server-processes)
     main-process))
 
+(defvar eaf-server nil)
 (defun eaf--start-epc-server ()
-  (let (server)
-    (setq server (epcs:server-start
+  (unless eaf-server
+    (setq eaf-server (epcs:server-start
                   (lambda (mngr)
                     (let ((mngr mngr))
                       (epc:define-method
@@ -257,11 +258,12 @@ been initialized."
                                             (read (substring arg 1)))
                                            (t arg)))) (cdr args)))))))
                   ))
-    (if server
-        (setq eaf-server-port (process-contact server :service))
+    (if eaf-server
+        (setq eaf-server-port (process-contact eaf-server :service))
       (error "eaf-server fails to start.")
       )
-    server)
+    )
+  eaf-server
   )
 
 (when noninteractive
