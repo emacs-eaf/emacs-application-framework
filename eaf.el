@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jun 12 21:45:41 2021 (-0400)
+;; Last-Updated: Thu Jun 17 12:20:42 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1265,17 +1265,16 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf--kill-python-process ()
   "Kill EAF background python process."
   (interactive)
-  (if (epc:live-p eaf-epc-process)
-      (progn
-        ;; Cleanup before exit EAF server process.
-        (eaf-call-async "cleanup")
-        ;; Delete EAF server process.
-        (epc:stop-epc eaf-epc-process)
-        ;; Kill *eaf* buffer.
-        (when (get-buffer eaf-name)
-          (kill-buffer eaf-name))
-        (message "[EAF] Process terminated."))
-    (message "[EAF] Process already terminated.")))
+  (when (epc:live-p eaf-epc-process)
+    (progn
+      ;; Cleanup before exit EAF server process.
+      (eaf-call-async "cleanup")
+      ;; Delete EAF server process.
+      (epc:stop-epc eaf-epc-process)
+      ;; Kill *eaf* buffer.
+      (when (get-buffer eaf-name)
+        (kill-buffer eaf-name))
+      (message "[EAF] Process terminated."))))
 
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
