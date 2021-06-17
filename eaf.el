@@ -240,28 +240,30 @@ been initialized."
           epcs:server-processes)
     main-process))
 
+(defvar eaf-server nil)
 (defun eaf--start-epc-server ()
-  (let (server)
-    (setq server (epcs:server-start
-                  (lambda (mngr)
-                    (let ((mngr mngr))
-                      (epc:define-method
-                       mngr 'eval-in-emacs
-                       (lambda (&rest args)
-                         ;; Decode argument with Base64 format automatically.
-                         (apply (read (car args))
-                                (mapcar
-                                 (lambda (arg)
-                                   (let ((arg (eaf--decode-string arg)))
-                                     (cond ((string-prefix-p "'" arg)
-                                            (read (substring arg 1)))
-                                           (t arg)))) (cdr args)))))))
-                  ))
-    (if server
-        (setq eaf-server-port (process-contact server :service))
+  (unless eaf-server
+    (setq eaf-server (epcs:server-start
+                      (lambda (mngr)
+                        (let ((mngr mngr))
+                          (epc:define-method
+                           mngr 'eval-in-emacs
+                           (lambda (&rest args)
+                             ;; Decode argument with Base64 format automatically.
+                             (apply (read (car args))
+                                    (mapcar
+                                     (lambda (arg)
+                                       (let ((arg (eaf--decode-string arg)))
+                                         (cond ((string-prefix-p "'" arg)
+                                                (read (substring arg 1)))
+                                               (t arg)))) (cdr args)))))))
+                      ))
+    (if eaf-server
+        (setq eaf-server-port (process-contact eaf-server :service))
       (error "eaf-server fails to start.")
       )
-    server)
+    )
+  eaf-server
   )
 
 (when noninteractive
