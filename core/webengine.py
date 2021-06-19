@@ -113,8 +113,8 @@ class BrowserView(QWebEngineView):
          """ % (name)
         if immediately:
             self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
-        script = self.web_page.scripts().findScript(name)
-        self.web_page.scripts().remove(script)
+            script = self.web_page.scripts().findScript(name)
+            self.web_page.scripts().remove(script)
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
@@ -660,14 +660,14 @@ class BrowserBuffer(Buffer):
             font_family = self.emacs_var_dict[ 'eaf-browser-font-family']
             if font_family:
                 for ff in (
-                    self.settings.StandardFont,
-                    self.settings.FixedFont,
-                    self.settings.SerifFont,
-                    self.settings.SansSerifFont,
-                    # What's these font families?
-                    # self.settings.CursiveFont,
-                    # self.settings.FantasyFont,
-                    # self.settings.PictographFont
+                        self.settings.StandardFont,
+                        self.settings.FixedFont,
+                        self.settings.SerifFont,
+                        self.settings.SansSerifFont,
+                        # What's these font families?
+                        # self.settings.CursiveFont,
+                        # self.settings.FantasyFont,
+                        # self.settings.PictographFont
                 ):
                     self.settings.setFontFamily(ff, font_family)
         except Exception:
@@ -676,9 +676,8 @@ class BrowserBuffer(Buffer):
         self.build_all_methods(self.buffer_widget)
         self.build_all_methods(self)
 
-        # Reset to default zoom when page init or page url changed.
-        self.reset_default_zoom()
-        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+        # Reset with HiDPI.
+        self.buffer_widget.zoom_reset()
 
         # Build webchannel object.
         self.channel = QWebChannel()
@@ -884,7 +883,7 @@ class BrowserBuffer(Buffer):
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
                 message_to_emacs("Caret browsing activated.")
                 self.caret_browsing_mode = True
-            eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
+                eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
@@ -1078,7 +1077,7 @@ class BrowserBuffer(Buffer):
             zoom_factor = float(self.emacs_var_dict["eaf-browser-default-zoom"])
             for row in result:
                 zoom_factor = float(row[0])
-            self.buffer_widget.setZoomFactor(zoom_factor)
+                self.buffer_widget.setZoomFactor(zoom_factor)
 
     def atomic_edit(self):
         ''' Edit the focus text.'''
@@ -1205,6 +1204,18 @@ class BrowserBuffer(Buffer):
 
         setattr(self, python_method_name, _do)
 
+    def convert_index_html(self, index_file_content, dist_dir):
+        '''
+        Convert path to absolute path and change body background.
+        '''
+        return index_file_content.replace(
+            '''<link href=''', '''<link href=''' + dist_dir).replace(
+                '''<script src=''', '''<script src=''' + dist_dir).replace(
+                    '''<body>''', '''<body style="background: {}; color: {}">'''.format(
+                        self.emacs_var_dict["eaf-emacs-theme-background-color"],
+                        self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+                    ))
+
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         self._conn = sqlite3.connect(dbpath)
@@ -1228,7 +1239,7 @@ class ZoomSizeDb(object):
             INSERT INTO ZoomSize (Host, ZoomScale)
             VALUES (?, ?)
             """, (host, zoom_scale))
-        self._conn.commit()
+            self._conn.commit()
 
     def get_entry(self, host):
         return self._conn.execute("""

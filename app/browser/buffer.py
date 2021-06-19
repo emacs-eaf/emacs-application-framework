@@ -104,6 +104,10 @@ class AppBuffer(BrowserBuffer):
         self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
         self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
 
+        # Reset to default zoom when page init or page url changed.
+        self.reset_default_zoom()
+        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+
         # Reset zoom after page loading finish.
         # Otherwise page won't zoom if we call setUrl api in current page.
         self.buffer_widget.loadFinished.connect(lambda : self.buffer_widget.zoom_reset())
