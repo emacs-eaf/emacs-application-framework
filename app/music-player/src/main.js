@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlayCircle, faPauseCircle, faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons'
+import { faPlayCircle, faPauseCircle, faStepForward, faStepBackward} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import AudioVisual from 'vue-audio-visual'

@@ -19,8 +19,8 @@
     <div
       class="control"
       :style="{ 'color': foregroundColor }">
-      <div class="current-time">
-        {{ currentTime }}
+      <div class="play-order">
+        {{ playOrderStatus() }}
       </div>
       <font-awesome-icon
         class="backward"
@@ -40,6 +40,10 @@
         icon="step-forward"
         @click="playNextItem"
       />
+      <div class="current-time">
+        {{ currentTime }}
+      </div>
+      /
       <div class="duration">
         {{ duration }}
       </div>
@@ -74,7 +78,8 @@
        artist: "",
        backgroundColor: "",
        foregroundColor: "",
-       playIcon: "play-circle"
+       playIcon: "play-circle",
+       playOrder: "list"
      }
    },
    computed: mapState([
@@ -91,18 +96,19 @@
    },
    mounted() {
      window.initPanelColor = this.initPanelColor;
+     window.initPlayOrder = this.initPlayOrder;
      window.forward = this.forward;
      window.backward = this.backward;
      window.toggle = this.toggle;
      window.playNextItem = this.playNextItem;
      window.playPrevItem = this.playPrevItem;
+     window.togglePlayOrder = this.togglePlayOrder;
+
+     let that = this;
 
      this.$root.$on("playItem", this.playItem);
 
-     let that = this;
-     this.$refs.player.addEventListener("ended", function(){
-       that.playNextItem();
-     });
+     this.$refs.player.addEventListener("ended", this.handlePlayFinish);
 
      this.$refs.player.addEventListener('timeupdate', () => {
        that.currentTime = that.formatTime(that.$refs.player.currentTime);
@@ -130,9 +136,43 @@
        })
      },
 
+     playOrderStatus() {
+       if (this.playOrder === "list") {
+         return "LIST";
+       } else if (this.playOrder === "random") {
+         return "RANDOM";
+       } else if (this.playOrder === "repeat") {
+         return "REPEAT";
+       }
+     },
+
+     togglePlayOrder() {
+       if (this.playOrder === "list") {
+         this.playOrder = "random";
+       } else if (this.playOrder === "random") {
+         this.playOrder = "repeat";
+       } else if (this.playOrder === "repeat") {
+         this.playOrder = "list";
+       }
+     },
+
+     handlePlayFinish() {
+       if (this.playOrder === "list") {
+         this.playNextItem();
+       } else if (this.playOrder === "random") {
+         this.playRandom();
+       } else if (this.playOrder === "repeat") {
+         this.playAgain();
+       }
+     },
+
      initPanelColor(backgroundColor, foregroundColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
+     },
+
+     initPlayOrder(playOrder) {
+       this.playOrder = playOrder;
      },
 
      formatTime(seconds) {
@@ -188,6 +228,18 @@
 
        this.playItem(this.fileInfos[currentTrackIndex]);
      },
+
+     playRandom() {
+       var min = 0;
+       var max = this.fileInfos.length;
+       var randomIndex = Math.floor(Math.random() * (max - min + 1)) + min;
+
+       this.playItem(this.fileInfos[randomIndex]);
+     },
+
+     playAgain() {
+       this.playItem(this.fileInfos[this.currentTrackIndex]);
+     }
    }
  }
 </script>
@@ -256,11 +308,16 @@
    cursor: pointer;
  }
 
- .current-time {
+ .play-order {
    margin-right: 20px;
  }
 
- .duration {
+ .current-time {
    margin-left: 20px;
+   margin-right: 5px;
+ }
+
+ .duration {
+   margin-left: 5px;
  }
 </style>

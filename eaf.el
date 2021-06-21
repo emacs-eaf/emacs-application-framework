@@ -367,6 +367,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-jupyter-font-family . "")
     (eaf-jupyter-dark-mode . "follow")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
+    (eaf-music-play-order . "list")
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . ""))
@@ -760,6 +761,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
     ("g" . "jump_to_file")
+    ("t" . "toggle_play_order")
     )
   "The keybinding of EAF Music Player."
   :type 'cons)

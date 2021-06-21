@@ -59,7 +59,8 @@ class AppBuffer(BrowserBuffer):
                                                      ("scroll_down_page", "scrollDownPage"),
                                                      ("scroll_to_begin", "scrollToBegin"),
                                                      ("scroll_to_bottom", "scrollToBottom"),
-                                                     ("jump_to_file", "jumpToFile")
+                                                     ("jump_to_file", "jumpToFile"),
+                                                     ("toggle_play_order", "togglePlayOrder")
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
 
@@ -76,6 +77,10 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''initPanelColor(\"{}\", \"{}\")'''.format(
             self.panel_background_color,
             self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+        ))
+
+        self.buffer_widget.execute_js('''initPlayOrder(\"{}\")'''.format(
+            self.emacs_var_dict["eaf-music-play-order"]
         ))
 
         files = []
