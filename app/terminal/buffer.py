@@ -45,7 +45,7 @@ class AppBuffer(BrowserBuffer):
 
         arguments_dict = json.loads(arguments)
         self.command = arguments_dict["command"]
-        self.start_directory = arguments_dict["directory"]
+        self.start_directory = arguments_dict["directory"].rstrip('/')
         self.current_directory = self.start_directory
         self.executing_command = ""
         self.index_file = "{0}/index.html".format(self.http_url)
