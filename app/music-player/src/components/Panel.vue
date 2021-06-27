@@ -19,27 +19,34 @@
     <div
       class="control"
       :style="{ 'color': foregroundColor }">
-      <div class="play-order">
-        {{ playOrderStatus() }}
-      </div>
-      <font-awesome-icon
+      <icon
+        class="repeat"
+        :style="{ 'color': foregroundColor }"
+        :name="playOrder"
+        :scale="2.5"
+        @click.native="togglePlayOrder"
+      ></icon>
+      <icon
         class="backward"
         :style="{ 'color': foregroundColor }"
-        icon="step-backward"
-        @click="playPrevItem"
-      />
-      <font-awesome-icon
+        name="step-backward"
+        :scale="4"
+        @click.native="playPrevItem"
+      ></icon>
+      <icon
         class="play"
         :style="{ 'color': foregroundColor }"
-        :icon="playIcon"
-        @click="toggle"
-      />
-      <font-awesome-icon
+        :name="playIcon"
+        :scale="6"
+        @click.native="toggle"
+      ></icon>
+      <icon
         class="forward"
         :style="{ 'color': foregroundColor }"
-        icon="step-forward"
-        @click="playNextItem"
-      />
+        name="step-forward"
+        :scale="4"
+        @click.native="playNextItem"
+      ></icon>
       <div class="current-time">
         {{ currentTime }}
       </div>
@@ -134,16 +141,6 @@
            this.currentCover = response;
          }
        })
-     },
-
-     playOrderStatus() {
-       if (this.playOrder === "list") {
-         return "LIST";
-       } else if (this.playOrder === "random") {
-         return "RANDOM";
-       } else if (this.playOrder === "repeat") {
-         return "REPEAT";
-       }
      },
 
      togglePlayOrder() {
@@ -292,23 +289,24 @@
  }
 
  .backward {
-   font-size: 24px;
    cursor: pointer;
  }
 
  .forward {
-   font-size: 24px;
    cursor: pointer;
  }
 
  .play {
-   font-size: 40px;
    margin-left: 10px;
    margin-right: 10px;
    cursor: pointer;
  }
 
  .play-order {
+   margin-right: 20px;
+ }
+
+ .repeat {
    margin-right: 20px;
  }
 
