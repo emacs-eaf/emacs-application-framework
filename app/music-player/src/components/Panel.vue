@@ -135,12 +135,10 @@
        this.$refs.player.load();
        this.$refs.player.play();
 
-       albumArt(item.artist, (error, response) => {
-         if (error) {
-           this.currentCover = "";
-         } else {
-           this.currentCover = response;
-         }
+       albumArt(item.artist, item.album, "medium", (error, url) => {
+         console.log(error, url);
+
+         this.currentCover = url;
        })
      },
 
