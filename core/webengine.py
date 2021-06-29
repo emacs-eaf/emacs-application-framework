@@ -883,7 +883,7 @@ class BrowserBuffer(Buffer):
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
                 message_to_emacs("Caret browsing activated.")
                 self.caret_browsing_mode = True
-                eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
+            eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
