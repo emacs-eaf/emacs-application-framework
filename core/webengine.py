@@ -113,8 +113,9 @@ class BrowserView(QWebEngineView):
          """ % (name)
         if immediately:
             self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
-            script = self.web_page.scripts().findScript(name)
-            self.web_page.scripts().remove(script)
+
+        script = self.web_page.scripts().findScript(name)
+        self.web_page.scripts().remove(script)
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
@@ -883,7 +884,8 @@ class BrowserBuffer(Buffer):
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
                 message_to_emacs("Caret browsing activated.")
                 self.caret_browsing_mode = True
-            eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
+
+        eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
@@ -1077,7 +1079,8 @@ class BrowserBuffer(Buffer):
             zoom_factor = float(self.emacs_var_dict["eaf-browser-default-zoom"])
             for row in result:
                 zoom_factor = float(row[0])
-                self.buffer_widget.setZoomFactor(zoom_factor)
+
+            self.buffer_widget.setZoomFactor(zoom_factor)
 
     def atomic_edit(self):
         ''' Edit the focus text.'''
@@ -1239,7 +1242,8 @@ class ZoomSizeDb(object):
             INSERT INTO ZoomSize (Host, ZoomScale)
             VALUES (?, ?)
             """, (host, zoom_scale))
-            self._conn.commit()
+            
+        self._conn.commit()
 
     def get_entry(self, host):
         return self._conn.execute("""
