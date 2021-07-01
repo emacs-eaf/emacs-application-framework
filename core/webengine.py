@@ -548,7 +548,6 @@ class BrowserView(QWebEngineView):
         ''' Remove dark mode support.'''
         self.eval_js("""DarkReader.disable();""")
 
-
 class BrowserPage(QWebEnginePage):
     def __init__(self):
         QWebEnginePage.__init__(self)
@@ -650,6 +649,7 @@ class BrowserBuffer(Buffer):
             self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, False)
 
             if self.emacs_var_dict["eaf-browser-unknown-url-scheme-policy"] == "DisallowUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
@@ -793,6 +793,16 @@ class BrowserBuffer(Buffer):
         else:
             self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
 
+    def _save_as_screenshot(self):
+        screenshot_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.png".format(self.title))
+        message_to_emacs("Save as screenshot at {}".format(screenshot_path))
+        self.buffer_widget.grab().save(screenshot_path, b'PNG')
+
+    @interactive(insert_or_do=True)
+    def save_as_screenshot(self):
+        ''' Request to save current webpage as screenshot.'''
+        self.send_input_message("Save current webpage as screenshot?", "save_as_screenshot", "yes-or-no")
+
     def destroy_buffer(self):
         ''' Destroy the buffer.'''
         # Record close page.
@@ -853,6 +863,8 @@ class BrowserBuffer(Buffer):
             self._save_as_pdf()
         elif callback_tag == "save_as_single_file":
             self._save_as_single_file()
+        elif callback_tag == "save_as_screenshot":
+            self._save_as_screenshot()
         elif callback_tag == "edit_url":
             self.buffer_widget.open_url(result_content)
         elif callback_tag == "copy_code":
@@ -1242,7 +1254,7 @@ class ZoomSizeDb(object):
             INSERT INTO ZoomSize (Host, ZoomScale)
             VALUES (?, ?)
             """, (host, zoom_scale))
-            
+
         self._conn.commit()
 
     def get_entry(self, host):

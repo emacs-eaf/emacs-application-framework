@@ -487,6 +487,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("P" . "insert_or_duplicate_page")
     ("1" . "insert_or_save_as_pdf")
     ("2" . "insert_or_save_as_single_file")
+    ("3" . "insert_or_save_as_screenshot")
     ("v" . "insert_or_view_source")
     ("e" . "insert_or_edit_url")
     ("n" . "insert_or_export_text")
