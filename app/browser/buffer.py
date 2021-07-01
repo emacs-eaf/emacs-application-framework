@@ -452,10 +452,14 @@ class AppBuffer(BrowserBuffer):
 
     @interactive(insert_or_do=True)
     def translate_page(self):
+        import locale
+        system_language = locale.getdefaultlocale()[0].replace("_", "-")
+        translate_language = self.emacs_var_dict["eaf-browser-translate-language"]
+        language = system_language if translate_language == "" else translate_language
+
         url = urllib.parse.quote(self.buffer_widget.url().toString(), safe='')
-        open_url_in_new_tab("https://translate.google.com/translate?hl=en&sl=auto&tl={}&u={}".format(
-            self.emacs_var_dict["eaf-browser-translate-language"],
-            url))
+
+        open_url_in_new_tab("https://translate.google.com/translate?hl=en&sl=auto&tl={}&u={}".format(language, url))
         message_to_emacs("Translating page...")
 
 class HistoryPage():
