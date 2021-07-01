@@ -336,6 +336,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-enable-adblocker . "false")
     (eaf-browser-enable-autofill . "false")
     (eaf-browser-enable-javascript . "true")
+    (eaf-browser-enable-scrollbar . "false")
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
     (eaf-browser-font-family . "")

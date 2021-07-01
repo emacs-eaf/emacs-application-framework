@@ -645,11 +645,11 @@ class BrowserBuffer(Buffer):
         try:
             self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
             self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, self.emacs_var_dict["eaf-browser-enable-scrollbar"] == "true")
             self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
-            self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
-            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, False)
+            self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
 
             if self.emacs_var_dict["eaf-browser-unknown-url-scheme-policy"] == "DisallowUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
