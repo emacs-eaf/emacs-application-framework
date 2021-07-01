@@ -25,6 +25,7 @@ from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.webengine import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
 from urllib.parse import urlparse
+import urllib
 import os
 import re
 import sqlite3
@@ -448,6 +449,14 @@ class AppBuffer(BrowserBuffer):
 
     def page_is_loading(self):
         return self.is_loading
+
+    @interactive(insert_or_do=True)
+    def translate_page(self):
+        url = urllib.parse.quote(self.buffer_widget.url().toString(), safe='')
+        open_url_in_new_tab("https://translate.google.com/translate?hl=en&sl=auto&tl={}&u={}".format(
+            self.emacs_var_dict["eaf-browser-translate-language"],
+            url))
+        message_to_emacs("Translating page...")
 
 class HistoryPage():
     def __init__(self, title, url, hit):

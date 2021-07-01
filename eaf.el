@@ -350,6 +350,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-pc-user-agent . "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
     (eaf-browser-phone-user-agent . "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1")
     (eaf-browser-chrome-history-file . "~/.config/google-chrome/Default/History")
+    (eaf-browser-translate-language . "zh-CN")
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
     (eaf-pdf-dark-mode . "follow")
@@ -494,6 +495,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("n" . "insert_or_export_text")
     ("," . "insert_or_switch_to_reader_mode")
     ("." . "insert_or_translate_text")
+    (";" . "insert_or_translate_page")
     ("C-M-c" . "copy_code")
     ("C-M-l" . "copy_link")
     ("C-a" . "select_all_or_input_text")
