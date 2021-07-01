@@ -751,6 +751,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   '(("<f12>" . "open_devtools")
     ("j" . "play_next")
     ("k" . "play_prev")
+    ("h" . "play_random")
     ("," . "backward")
     ("." . "forward")
     ("SPC" . "toggle")

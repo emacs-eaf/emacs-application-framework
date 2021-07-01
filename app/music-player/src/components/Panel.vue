@@ -31,7 +31,7 @@
         :style="{ 'color': foregroundColor }"
         name="step-backward"
         :scale="4"
-        @click.native="playPrevItem"
+        @click.native="playPrev"
       ></icon>
       <icon
         class="play"
@@ -45,7 +45,7 @@
         :style="{ 'color': foregroundColor }"
         name="step-forward"
         :scale="4"
-        @click.native="playNextItem"
+        @click.native="playNext"
       ></icon>
       <div class="current-time">
         {{ currentTime }}
@@ -112,8 +112,9 @@
      window.forward = this.forward;
      window.backward = this.backward;
      window.toggle = this.toggle;
-     window.playNextItem = this.playNextItem;
-     window.playPrevItem = this.playPrevItem;
+     window.playNext = this.playNext;
+     window.playPrev = this.playPrev;
+     window.playRandom = this.playRandom;
      window.togglePlayOrder = this.togglePlayOrder;
 
      let that = this;
@@ -140,8 +141,6 @@
        this.$refs.player.play();
 
        albumArt(item.artist, item.album, "medium", (error, url) => {
-         console.log(error, url);
-
          this.currentCover = url;
        })
      },
@@ -158,7 +157,7 @@
 
      handlePlayFinish() {
        if (this.playOrder === "list") {
-         this.playNextItem();
+         this.playNext();
        } else if (this.playOrder === "random") {
          this.playRandom();
        } else if (this.playOrder === "repeat") {
@@ -205,7 +204,7 @@
        }
      },
 
-     playPrevItem() {
+     playPrev() {
        var currentTrackIndex = this.currentTrackIndex;
 
        if (currentTrackIndex > 0) {
@@ -217,7 +216,7 @@
        this.playItem(this.fileInfos[currentTrackIndex]);
      },
 
-     playNextItem() {
+     playNext() {
        var currentTrackIndex = this.currentTrackIndex;
 
        if (currentTrackIndex < this.fileInfos.length - 1) {

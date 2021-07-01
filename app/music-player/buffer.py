@@ -48,8 +48,9 @@ class AppBuffer(BrowserBuffer):
             html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
-        for (python_method_name, js_method_name) in [("play_next", "playNextItem"),
-                                                     ("play_prev", "playPrevItem"),
+        for (python_method_name, js_method_name) in [("play_next", "playNext"),
+                                                     ("play_prev", "playPrev"),
+                                                     ("play_random", "playRandom"),
                                                      ("forward", "forward"),
                                                      ("backward", "backward"),
                                                      ("toggle", "toggle"),
