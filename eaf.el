@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Apr 20 18:47:41 2021 (-0400)
+;; Last-Updated: Fri Jun 18 00:33:02 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -240,9 +240,10 @@ been initialized."
           epcs:server-processes)
     main-process))
 
-(defvar eaf-server
-  (let (server)
-    (setq server (epcs:server-start
+(defvar eaf-server nil)
+(defun eaf--start-epc-server ()
+  (unless eaf-server
+    (setq eaf-server (epcs:server-start
                   (lambda (mngr)
                     (let ((mngr mngr))
                       (epc:define-method
@@ -257,11 +258,13 @@ been initialized."
                                             (read (substring arg 1)))
                                            (t arg)))) (cdr args)))))))
                   ))
-    (if server
-        (setq eaf-server-port (process-contact server :service))
-      (message "eaf-server fails to start.")
+    (if eaf-server
+        (setq eaf-server-port (process-contact eaf-server :service))
+      (error "eaf-server fails to start.")
       )
-    server))
+    )
+  eaf-server
+  )
 
 (when noninteractive
   ;; Start "event loop".
@@ -315,7 +318,7 @@ Each element has the form (NAME . URL).
 It must defined at `eaf-browser-search-engines'."
   :type 'string)
 
-(defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python3.exe" "python3")
+(defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python.exe" "python3")
   "The Python interpreter used to run eaf.py."
   :type 'string)
 
@@ -333,6 +336,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-enable-adblocker . "false")
     (eaf-browser-enable-autofill . "false")
     (eaf-browser-enable-javascript . "true")
+    (eaf-browser-enable-scrollbar . "false")
     (eaf-browser-remember-history . "true")
     (eaf-browser-default-zoom . "1.0")
     (eaf-browser-font-family . "")
@@ -346,12 +350,14 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-browser-pc-user-agent . "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
     (eaf-browser-phone-user-agent . "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1")
     (eaf-browser-chrome-history-file . "~/.config/google-chrome/Default/History")
+    (eaf-browser-translate-language . "") ; EAF browser will use current system locale if this option is empty
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
     (eaf-pdf-dark-mode . "follow")
     (eaf-pdf-default-zoom . "1.0")
     (eaf-pdf-dark-exclude-image . "true")
     (eaf-pdf-scroll-ratio . "0.05")
+    (eaf-pdf-enable-trim-white-margin . "false")
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . "13")
     (eaf-terminal-font-family . "")
@@ -363,6 +369,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-jupyter-font-family . "")
     (eaf-jupyter-dark-mode . "follow")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
+    (eaf-music-play-order . "list")
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . ""))
@@ -482,11 +489,13 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("P" . "insert_or_duplicate_page")
     ("1" . "insert_or_save_as_pdf")
     ("2" . "insert_or_save_as_single_file")
+    ("3" . "insert_or_save_as_screenshot")
     ("v" . "insert_or_view_source")
     ("e" . "insert_or_edit_url")
     ("n" . "insert_or_export_text")
     ("," . "insert_or_switch_to_reader_mode")
     ("." . "insert_or_translate_text")
+    (";" . "insert_or_translate_page")
     ("C-M-c" . "copy_code")
     ("C-M-l" . "copy_link")
     ("C-a" . "select_all_or_input_text")
@@ -555,7 +564,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-p" . "toggle_presentation_mode")
     ("J" . "select_left_tab")
     ("K" . "select_right_tab")
-    ("o" . "eaf-pdf-outline"))
+    ("o" . "eaf-pdf-outline")
+    ("T" . "toggle_trim_white_margin"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
@@ -745,6 +755,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   '(("<f12>" . "open_devtools")
     ("j" . "play_next")
     ("k" . "play_prev")
+    ("h" . "play_random")
     ("," . "backward")
     ("." . "forward")
     ("SPC" . "toggle")
@@ -754,6 +765,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M-v" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
+    ("g" . "jump_to_file")
+    ("t" . "toggle_play_order")
     )
   "The keybinding of EAF Music Player."
   :type 'cons)
@@ -774,6 +787,10 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
   "The extension list of pdf application."
   :type 'cons)
+
+(defcustom eaf-pdf-store-history t
+  "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
+  :type 'boolean)
 
 (defcustom eaf-markdown-extension-list
   '("md")
@@ -1175,6 +1192,8 @@ A hashtable, key is url and value is title.")
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((epc:live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
+  ;; start epc server and set `eaf-server-port'
+  (eaf--start-epc-server)
   (let* ((eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
@@ -1253,17 +1272,15 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf--kill-python-process ()
   "Kill EAF background python process."
   (interactive)
-  (if (epc:live-p eaf-epc-process)
-      (progn
-        ;; Cleanup before exit EAF server process.
-        (eaf-call-async "cleanup")
-        ;; Delete EAF server process.
-        (epc:stop-epc eaf-epc-process)
-        ;; Kill *eaf* buffer.
-        (when (get-buffer eaf-name)
-          (kill-buffer eaf-name))
-        (message "[EAF] Process terminated."))
-    (message "[EAF] Process already terminated.")))
+  (when (epc:live-p eaf-epc-process)
+    ;; Cleanup before exit EAF server process.
+    (eaf-call-async "cleanup")
+    ;; Delete EAF server process.
+    (epc:stop-epc eaf-epc-process)
+    ;; Kill *eaf* buffer.
+    (when (get-buffer eaf-name)
+      (kill-buffer eaf-name))
+    (message "[EAF] Process terminated.")))
 
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
@@ -2207,6 +2224,51 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
   "Translate from a WSL path to a Windows path'"
   (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" path))
 
+(defun eaf-store-pdf-history (url)
+  "A wrapper around `eaf-open' that store pdf history candidates."
+  (let* (found-history-result (pdf-history-file-path
+                               (concat eaf-config-location
+                                       (file-name-as-directory "pdf")
+                                       (file-name-as-directory "history")
+                                       "log.txt")))
+    (if (not (file-exists-p pdf-history-file-path))
+        (progn
+          ;; If it does not exist, create a folder to store the log and create a log file
+          (make-directory (file-name-directory pdf-history-file-path) t)
+          (with-temp-file pdf-history-file-path "")))
+    (find-file pdf-history-file-path)
+    (goto-char (point-min))
+    (if (search-forward url nil t) ;; search with no error
+        (kill-whole-line))  ;; Delete this record
+    (goto-char (point-min))
+    (insert (concat url "\n"))
+    (basic-save-buffer)
+    (kill-current-buffer)))
+
+(defun eaf-open-pdf-from-history ()
+  "A wrapper around `eaf-open' that provides pdf history candidates.
+This function works best if paired with a fuzzy search package."
+  (interactive)
+  (let* ((pdf-history-file-path
+          (concat eaf-config-location
+                  (file-name-as-directory "pdf")
+                  (file-name-as-directory "history")
+                  "log.txt"))
+         (history-pattern "^\\(.+\\)\\.pdf$")
+         (history-file-exists (file-exists-p pdf-history-file-path))
+         (history-pdf (completing-read
+                   "[EAF/pdf] Search || History: "
+                   (if history-file-exists
+                       (mapcar
+                        (lambda (h) (when (string-match history-pattern h)
+                                 (if (file-exists-p h)
+                                     (format "%s" h))))
+                        (with-temp-buffer (insert-file-contents pdf-history-file-path)
+                                          (split-string (buffer-string) "\n" t)))
+                     (make-directory (file-name-directory pdf-history-file-path) t)
+                     (with-temp-file pdf-history-file-path "")))))
+    (if history-pdf (eaf-open history-pdf))))
+
 ;;;###autoload
 (defun eaf-open (url &optional app-name args always-new)
   "Open an EAF application with URL, optional APP-NAME and ARGS.
@@ -2221,6 +2283,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "F[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
+    (when (and eaf-pdf-store-history (string-match "^\\(.+\\)\\.pdf$" url))
+      (eaf-store-pdf-history url))
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))

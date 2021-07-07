@@ -25,6 +25,7 @@ from PyQt5.QtGui import QColor, QScreen
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
 from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit
 from functools import partial
@@ -112,6 +113,7 @@ class BrowserView(QWebEngineView):
          """ % (name)
         if immediately:
             self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+
         script = self.web_page.scripts().findScript(name)
         self.web_page.scripts().remove(script)
 
@@ -546,7 +548,6 @@ class BrowserView(QWebEngineView):
         ''' Remove dark mode support.'''
         self.eval_js("""DarkReader.disable();""")
 
-
 class BrowserPage(QWebEnginePage):
     def __init__(self):
         QWebEnginePage.__init__(self)
@@ -644,10 +645,11 @@ class BrowserBuffer(Buffer):
         try:
             self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
             self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, self.emacs_var_dict["eaf-browser-enable-scrollbar"] == "true")
             self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
-            self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
 
             if self.emacs_var_dict["eaf-browser-unknown-url-scheme-policy"] == "DisallowUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
@@ -659,14 +661,14 @@ class BrowserBuffer(Buffer):
             font_family = self.emacs_var_dict[ 'eaf-browser-font-family']
             if font_family:
                 for ff in (
-                    self.settings.StandardFont,
-                    self.settings.FixedFont,
-                    self.settings.SerifFont,
-                    self.settings.SansSerifFont,
-                    # What's these font families?
-                    # self.settings.CursiveFont,
-                    # self.settings.FantasyFont,
-                    # self.settings.PictographFont
+                        self.settings.StandardFont,
+                        self.settings.FixedFont,
+                        self.settings.SerifFont,
+                        self.settings.SansSerifFont,
+                        # What's these font families?
+                        # self.settings.CursiveFont,
+                        # self.settings.FantasyFont,
+                        # self.settings.PictographFont
                 ):
                     self.settings.setFontFamily(ff, font_family)
         except Exception:
@@ -675,9 +677,13 @@ class BrowserBuffer(Buffer):
         self.build_all_methods(self.buffer_widget)
         self.build_all_methods(self)
 
-        # Reset to default zoom when page init or page url changed.
-        self.reset_default_zoom()
-        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
+        # Reset with HiDPI.
+        self.buffer_widget.zoom_reset()
+
+        # Build webchannel object.
+        self.channel = QWebChannel()
+        self.channel.registerObject("pyobject", self)
+        self.buffer_widget.web_page.setWebChannel(self.channel)
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
@@ -787,6 +793,16 @@ class BrowserBuffer(Buffer):
         else:
             self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
 
+    def _save_as_screenshot(self):
+        screenshot_path = os.path.join(os.path.expanduser(self.emacs_var_dict["eaf-browser-download-path"]), "{}.png".format(self.title))
+        message_to_emacs("Save as screenshot at {}".format(screenshot_path))
+        self.buffer_widget.grab().save(screenshot_path, b'PNG')
+
+    @interactive(insert_or_do=True)
+    def save_as_screenshot(self):
+        ''' Request to save current webpage as screenshot.'''
+        self.send_input_message("Save current webpage as screenshot?", "save_as_screenshot", "yes-or-no")
+
     def destroy_buffer(self):
         ''' Destroy the buffer.'''
         # Record close page.
@@ -847,6 +863,8 @@ class BrowserBuffer(Buffer):
             self._save_as_pdf()
         elif callback_tag == "save_as_single_file":
             self._save_as_single_file()
+        elif callback_tag == "save_as_screenshot":
+            self._save_as_screenshot()
         elif callback_tag == "edit_url":
             self.buffer_widget.open_url(result_content)
         elif callback_tag == "copy_code":
@@ -878,7 +896,8 @@ class BrowserBuffer(Buffer):
                 self.buffer_widget.eval_js("CaretBrowsing.setInitialCursor();")
                 message_to_emacs("Caret browsing activated.")
                 self.caret_browsing_mode = True
-            eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
+
+        eval_in_emacs('eaf--toggle-caret-browsing', ["'t" if self.caret_browsing_mode else "'nil"])
 
     def caret_exit(self):
         ''' Exit caret browsing.'''
@@ -1072,6 +1091,7 @@ class BrowserBuffer(Buffer):
             zoom_factor = float(self.emacs_var_dict["eaf-browser-default-zoom"])
             for row in result:
                 zoom_factor = float(row[0])
+
             self.buffer_widget.setZoomFactor(zoom_factor)
 
     def atomic_edit(self):
@@ -1199,6 +1219,18 @@ class BrowserBuffer(Buffer):
 
         setattr(self, python_method_name, _do)
 
+    def convert_index_html(self, index_file_content, dist_dir):
+        '''
+        Convert path to absolute path and change body background.
+        '''
+        return index_file_content.replace(
+            '''<link href=''', '''<link href=''' + dist_dir).replace(
+                '''<script src=''', '''<script src=''' + dist_dir).replace(
+                    '''<body>''', '''<body style="background: {}; color: {}">'''.format(
+                        self.emacs_var_dict["eaf-emacs-theme-background-color"],
+                        self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+                    ))
+
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         self._conn = sqlite3.connect(dbpath)
@@ -1222,6 +1254,7 @@ class ZoomSizeDb(object):
             INSERT INTO ZoomSize (Host, ZoomScale)
             VALUES (?, ?)
             """, (host, zoom_scale))
+
         self._conn.commit()
 
     def get_entry(self, host):

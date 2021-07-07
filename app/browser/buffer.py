@@ -25,6 +25,7 @@ from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.webengine import BrowserBuffer
 from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab
 from urllib.parse import urlparse
+import urllib
 import os
 import re
 import sqlite3
@@ -103,6 +104,10 @@ class AppBuffer(BrowserBuffer):
         # Reverse background and foreground color, to help cursor recognition.
         self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
         self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+
+        # Reset to default zoom when page init or page url changed.
+        self.reset_default_zoom()
+        self.buffer_widget.urlChanged.connect(lambda url: self.reset_default_zoom())
 
         # Reset zoom after page loading finish.
         # Otherwise page won't zoom if we call setUrl api in current page.
@@ -444,6 +449,18 @@ class AppBuffer(BrowserBuffer):
 
     def page_is_loading(self):
         return self.is_loading
+
+    @interactive(insert_or_do=True)
+    def translate_page(self):
+        import locale
+        system_language = locale.getdefaultlocale()[0].replace("_", "-")
+        translate_language = self.emacs_var_dict["eaf-browser-translate-language"]
+        language = system_language if translate_language == "" else translate_language
+
+        url = urllib.parse.quote(self.buffer_widget.url().toString(), safe='')
+
+        open_url_in_new_tab("https://translate.google.com/translate?hl=en&sl=auto&tl={}&u={}".format(language, url))
+        message_to_emacs("Translating page...")
 
 class HistoryPage():
     def __init__(self, title, url, hit):

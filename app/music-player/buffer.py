@@ -19,11 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from PyQt5 import QtCore
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl
 from core.webengine import BrowserBuffer
 from core.utils import interactive
 from functools import cmp_to_key
+from core.utils import eval_in_emacs
 import os
 import json
 import mimetypes
@@ -43,15 +45,12 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.loadFinished.connect(self.load_first_file)
 
         with open(self.index_file, "r") as f:
-            html = f.read().replace(
-                '''href="''', '''href="''' + self.index_file_dir).replace(
-                    '''<script src="''', '''<script src="''' + self.index_file_dir).replace(
-                        '''<body>''', '''<body style="background: {}">'''.format(self.emacs_var_dict["eaf-emacs-theme-background-color"])
-                    )
+            html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
-        for (python_method_name, js_method_name) in [("play_next", "playNextItem"),
-                                                     ("play_prev", "playPrevItem"),
+        for (python_method_name, js_method_name) in [("play_next", "playNext"),
+                                                     ("play_prev", "playPrev"),
+                                                     ("play_random", "playRandom"),
                                                      ("forward", "forward"),
                                                      ("backward", "backward"),
                                                      ("toggle", "toggle"),
@@ -60,9 +59,15 @@ class AppBuffer(BrowserBuffer):
                                                      ("scroll_up_page", "scrollUpPage"),
                                                      ("scroll_down_page", "scrollDownPage"),
                                                      ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom")
+                                                     ("scroll_to_bottom", "scrollToBottom"),
+                                                     ("jump_to_file", "jumpToFile"),
+                                                     ("toggle_play_order", "togglePlayOrder")
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
+
+    @QtCore.pyqtSlot(str)
+    def open_in_dired(self, path):
+        eval_in_emacs('dired', [path])
 
     def load_first_file(self):
         self.buffer_widget.execute_js('''initPlaylistColor(\"{}\", \"{}\")'''.format(
@@ -73,6 +78,10 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''initPanelColor(\"{}\", \"{}\")'''.format(
             self.panel_background_color,
             self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+        ))
+
+        self.buffer_widget.execute_js('''initPlayOrder(\"{}\")'''.format(
+            self.emacs_var_dict["eaf-music-play-order"]
         ))
 
         files = []

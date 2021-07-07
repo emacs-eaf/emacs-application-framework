@@ -7,10 +7,10 @@ English | [简体中文](./README.zh-CN.md)
 # Emacs Application Framework
 Emacs Application Framework (EAF) is a GUI application framework for Emacs that revolutionizes its multimedia and graphical capabilities to ultimately *Live in Emacs*.
 
-EAF support Linux, Windows, and MacOS.
+EAF supports Linux, Windows, and MacOS.
 
 ## EAF Vision
-Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world had been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
+Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world have been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
 
 If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
 
@@ -20,7 +20,7 @@ The vision of the EAF project is that, while retaining the culture and the ecosy
 
 
 ## Application Showcase
-EAF is an extensible framework, it comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
+EAF is an extensible framework. It comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
 
 | Browser                                          | Markdown Previewer (support Mermaid and PlantUML)                                          |
 | :--------:                                       | :----:                                                      |
@@ -233,6 +233,9 @@ Both projects are similar in terms of interface, but they are two completely dif
 
 ### macOS
 Currently, macOS is only partially supported and needs a lot of testing, not all functions can work normally, please check the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS) for details.
+
+### Browser crashes
+Please DO NOT install PyQt5 through pip, pip version has bug, please install PyQt5 from the OS software repository.
 
 ### EAF js-video-player can't play some video on Windows and Mac. Why?
 `js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.

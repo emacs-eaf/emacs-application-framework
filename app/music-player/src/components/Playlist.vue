@@ -26,6 +26,7 @@
 
 <script>
  import { mapState } from "vuex";
+ import { QWebChannel } from "qwebchannel";
 
  export default {
    name: 'Playlist',
@@ -57,6 +58,14 @@
      window.scrollDownPage = this.scrollDownPage;
      window.scrollToBegin = this.scrollToBegin;
      window.scrollToBottom = this.scrollToBottom;
+     window.jumpToFile = this.jumpToFile;
+
+   },
+   created() {
+     // eslint-disable-next-line no-undef
+     new QWebChannel(qt.webChannelTransport, channel => {
+       window.pyobject = channel.objects.pyobject;
+     });
    },
    methods: {
      initPlaylistColor(backgroundColor, foregroundColor) {
@@ -118,6 +127,10 @@
      scrollToBottom() {
        this.$refs.playlist.scrollTop = this.$refs.playlist.scrollHeight;
      },
+
+     jumpToFile() {
+       window.pyobject.open_in_dired(this.currentTrack);
+     }
    }
  }
 </script>

@@ -232,6 +232,9 @@ EAF主要实现这几个功能：
 ### macOS
 EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS)。
 
+### 浏览器崩溃
+请不要用pip安装PyQt5, pip的版本有bug，请从操作系统软件仓库安装PyQt5。
+
 ### 为什么EAF的js-video-player在Windows和Mac下无法播放视频文件？
 `js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.
 

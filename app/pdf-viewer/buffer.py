@@ -150,11 +150,19 @@ class AppBuffer(Buffer):
         else:
             message_to_emacs("Cannot copy, you should double click your mouse and hover through the text on the PDF. Don't click and drag!")
 
+    def get_select(self):
+        if self.buffer_widget.is_select_mode:
+            content = self.buffer_widget.parse_select_char_list()
+            self.buffer_widget.cleanup_select()
+            return content
+        else:
+            return ""
+
     def page_total_number(self):
         return str(self.buffer_widget.page_total_number)
 
     def current_page(self):
-        return str(self.buffer_widget.get_start_page_index() + 1)
+        return str(self.buffer_widget.start_page_index + 1)
 
     def current_percent(self):
         return str(self.buffer_widget.current_percent())
@@ -227,17 +235,54 @@ class AppBuffer(Buffer):
 class PdfDocument(fitz.Document):
     def __init__(self, document):
         self.document = document
+        self._is_trim_margin = False
         self._page_cache_dict = {}
+        self._document_page_clip = None
+        self._document_page_change = lambda rect: None
 
     def __getattr__(self, attr):
         return getattr(self.document, attr)
 
     def __getitem__(self, index):
         if index in self._page_cache_dict:
-            return self._page_cache_dict[index]
-        return PdfPage(self.document[index])
+            page = self._page_cache_dict[index]
+            if not self._is_trim_margin:
+                return page
 
-    def _reload_document(self, url):
+            if page.CropBox == self._document_page_clip:
+                return page
+
+        page = PdfPage(self.document[index])
+
+        # udpate the page clip
+        new_rect_clip = self.computer_page_clip(page.get_tight_margin_rect(), self._document_page_clip)
+        if new_rect_clip != self._document_page_clip:
+            self._document_page_clip = new_rect_clip
+            if self._is_trim_margin:
+                self._document_page_change(new_rect_clip)
+
+        if self._is_trim_margin:
+            return PdfPage(self.document[index], self._document_page_clip)
+
+        return page
+
+    def computer_page_clip(self, *args):
+        '''Update the bestest max page clip.'''
+        dr = None
+        for r in args:
+            if r is None:
+                continue
+            if dr is None:
+                dr = r
+                continue
+            x0 = min(r.x0, dr.x0)
+            y0 = min(r.y0, dr.y0)
+            x1 = max(r.x1, dr.x1)
+            y1 = max(r.y1, dr.y1)
+            dr = fitz.Rect(x0, y0, x1, y1)
+        return dr
+
+    def reload_document(self, url):
         self._page_cache_dict = {}
         self.document = fitz.open(url)
 
@@ -264,7 +309,7 @@ class PdfDocument(fitz.Document):
                 # Some program will generate `middle` file, but file already changed, fitz try to
                 # open the `middle` file caused error.
                 time.sleep(0.1)
-                self._reload_document(path)
+                self.reload_document(path)
             except:
                 return
 
@@ -274,16 +319,110 @@ class PdfDocument(fitz.Document):
             if len(self.file_changed_wacher.files()) == 0 :
                 self.file_changed_wacher.addPath(path)
 
+    def toggle_trim_margin(self):
+        self._is_trim_margin = not self._is_trim_margin
+
+    def get_page_width(self):
+        if self._is_trim_margin:
+            return self._document_page_clip.width
+        return self.document.pageCropBox(0).width
+
+    def get_page_height(self):
+        if self._is_trim_margin:
+            return self._document_page_clip.height
+        return self.document.pageCropBox(0).height
+
+    def watch_page_size_change(self, callback):
+        self._document_page_change = callback
+
 class PdfPage(fitz.Page):
-    def __init__(self, page):
+    def __init__(self, page, clip=None):
         self.page = page
+        self.clip = clip or page.CropBox
 
         self._mark_link_annot_list = []
         self._mark_search_annot_list = []
         self._mark_jump_annot_list = []
 
+        self._page_rawdict = self._init_page_rawdict()
+        self._page_char_rect_list = self._init_page_char_rect_list()
+        self._tight_margin_rect = self._init_tight_margin()
+
     def __getattr__(self, attr):
         return getattr(self.page, attr)
+
+    def _init_page_rawdict(self):
+        # Must set CropBox before get page rawdict , if no,
+        # the rawdict bbox coordinate is wrong
+        # cause the select text failed
+        self.page.setCropBox(self.clip)
+        d = self.page.getText("rawdict")
+        # cancel the cropbox, if not, will cause the pixmap set cropbox
+        # don't begin on top-left(0, 0), page display black margin
+        self.page.setCropBox(self.page.MediaBox)
+        return d
+
+    def _init_page_char_rect_list(self):
+        '''Collection page char rect list when page init'''
+        lines_list = []
+        spans_list = []
+        chars_list = []
+
+        for block in self._page_rawdict["blocks"]:
+            if "lines" in block:
+                lines_list += block["lines"]
+
+        for line in lines_list:
+            if "spans" in line:
+                spans_list += line["spans"]
+
+        for span in spans_list:
+            if "chars" in span:
+                chars_list += span["chars"]
+
+        return chars_list
+
+    def _init_tight_margin(self):
+        r = None
+        for block in self._page_rawdict["blocks"]:
+            # ignore image bbox
+            if block["type"] != 0:
+                continue
+
+            x0, y0, x1, y1 = block["bbox"]
+            if r is None:
+                r = fitz.Rect(x0, y0, x1, y1)
+                continue
+            x0 = min(x0, r.x0)
+            y0 = min(y0, r.y0)
+            x1 = max(x1, r.x1)
+            y1 = max(y1, r.y1)
+            r = fitz.Rect(x0, y0, x1, y1)
+        if r is None:
+            return self.page.CropBox
+        return r
+
+    def get_tight_margin_rect(self):
+        # if current page don't computer tight rect
+        # return None
+        if self._tight_margin_rect == self.page.MediaBox:
+            return None
+        return self._tight_margin_rect
+
+    def get_page_char_rect_list(self):
+        return self._page_char_rect_list
+
+    def get_page_char_rect_index(self, x, y):
+        '''According X and Y coordinate return index of char in char rect list.'''
+        if x and y is None:
+            return None
+
+        offset = 15
+        rect = fitz.Rect(x, y, x + offset, y + offset)
+        for char_index, char in enumerate(self._page_char_rect_list):
+            if fitz.Rect(char["bbox"]).intersect(rect):
+                return char_index
+        return None
 
     def set_rotation(self, rotation):
         self.page.setRotation(rotation)
@@ -294,13 +433,8 @@ class PdfPage(fitz.Page):
             self.page_width = self.page.CropBox.width
             self.page_height = self.page.CropBox.height
 
-    def get_width(self):
-        return self.page_width or self.page.CropBox.width
-
-    def get_height(self):
-        return self.page_height or self.page.CropBox.height
-
     def get_qpixmap(self, scale, *args):
+        self.page.setCropBox(self.clip)
         pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
@@ -367,27 +501,18 @@ class PdfPage(fitz.Page):
                 self._mark_search_annot_list.append(annot)
 
     def cleanup_search_text(self):
-        message_to_emacs("Unmarked all matched results.")
-        for annot in self._mark_search_annot_list:
-            self.page.deleteAnnot(annot)
-        self._mark_search_annot_list = []
-
-    def generate_random_key(self, count, letters):
-        key_list = []
-        key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
-        while count > 0:
-            key = ''.join(random.choices(letters, k=key_len))
-            if key not in key_list:
-                key_list.append(key)
-                count -= 1
-        return key_list
+        if self._mark_search_annot_list:
+            message_to_emacs("Unmarked all matched results.")
+            for annot in self._mark_search_annot_list:
+                self.page.deleteAnnot(annot)
+            self._mark_search_annot_list = []
 
     def mark_jump_link_tips(self, letters):
         tips_size = 4
         cache_dict = {}
         if self.page.firstLink:
             links = self.page.getLinks()
-            key_list = self.generate_random_key(len(links), letters)
+            key_list = generate_random_key(len(links), letters)
             for index, link in enumerate(links):
                 key = key_list[index]
                 link_rect = link["from"]
@@ -404,13 +529,6 @@ class PdfPage(fitz.Page):
             self.page.deleteAnnot(annot)
         self._mark_jump_annot_list = []
 
-
-class PdfAnnotate(fitz.Annot):
-    def __init__(self, annot):
-        self.annot = annot
-
-    def __getattr__(self, attr):
-        return getattr(self.annot, attr)
 
 class PdfViewerWidget(QWidget):
 
@@ -432,8 +550,9 @@ class PdfViewerWidget(QWidget):
         self.document.watch_file(url, lambda: (self.page_cache_pixmap_dict.clear(), self.update()))
 
         # Get document's page information.
-        self.page_width = self.document.pageCropBox(0).width
-        self.page_height = self.document.pageCropBox(0).height
+        self.document.watch_page_size_change(self.update_page_size)
+        self.page_width = self.document.get_page_width()
+        self.page_height = self.document.get_page_height()
         self.page_total_number = self.document.pageCount
 
         # Init scale and scale mode.
@@ -448,11 +567,6 @@ class PdfViewerWidget(QWidget):
             self.scale = float(self.emacs_var_dict["eaf-pdf-default-zoom"])
         self.horizontal_offset = 0
 
-        # To avoid 'PDF only' method errors
-        self.inpdf = True
-        if os.path.splitext(self.url)[-1] != ".pdf":
-            self.inpdf = False
-
         # Inverted mode.
         self.inverted_mode = False
         if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or \
@@ -461,16 +575,14 @@ class PdfViewerWidget(QWidget):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true" and self.inpdf
+        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true" and self.document.isPDF
 
         # mark link
         self.is_mark_link = False
-        self.mark_link_annot_cache_dict = {}
 
         #jump link
         self.is_jump_link = False
         self.jump_link_key_cache_dict = {}
-        self.jump_link_annot_cache_dict = {}
 
         #global search text
         self.is_mark_search = False
@@ -482,9 +594,8 @@ class PdfViewerWidget(QWidget):
         self.start_char_page_index = None
         self.last_char_rect_index = None
         self.last_char_page_index = None
-        self.select_area_annot_cache_dict = {}
+        self.select_area_annot_cache_dict = {k:None for k in range(self.page_total_number)}
         self.select_area_annot_quad_cache_dict = {}
-        self.char_dict = {k:None for k in range(self.page_total_number)}
 
         # annot
         self.is_hover_annot = False
@@ -513,9 +624,7 @@ class PdfViewerWidget(QWidget):
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
         self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
-        self.page_annotate_dark_color = QColor(1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).redF(),\
-                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).greenF(),\
-                                               1-QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"]).blueF())
+
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -533,18 +642,8 @@ class PdfViewerWidget(QWidget):
 
         self.last_hover_annot_id = None
 
-    def handle_color(self,color,inverted=False):
-        r = float(color.redF())
-        g = float(color.greenF())
-        b = float(color.blueF())
-        if inverted:
-            r = 1.0-r
-            g = 1.0-g
-            b = 1.0-b
-        return (r,g,b)
-
-    def repeat_to_length(self, string_to_expand, length):
-        return (string_to_expand * (int(length/len(string_to_expand))+1))[:length]
+        self.start_page_index = 0
+        self.last_page_index = 0
 
     @interactive
     def toggle_presentation_mode(self):
@@ -555,7 +654,7 @@ class PdfViewerWidget(QWidget):
         if self.presentation_mode:
             # Make current page fill the view.
             self.zoom_reset("fit_to_height")
-            self.jump_to_page(self.get_start_page_index() + 1)
+            self.jump_to_page(self.start_page_index + 1)
 
             message_to_emacs("Presentation Mode.")
         else:
@@ -592,17 +691,13 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
 
         page = self.document[index]
-        if self.inpdf:
+        if self.document.isPDF:
             page.set_rotation(rotation)
 
         if self.is_mark_link:
             page.add_mark_link()
         else:
             page.cleanup_mark_link()
-
-        self.page_width = page.get_width()
-        self.page_height = page.get_height()
-        scale = scale * page.get_width() / page.rect.width
 
         # follow page search text
         if self.is_mark_search:
@@ -611,17 +706,14 @@ class PdfViewerWidget(QWidget):
             page.cleanup_search_text()
 
         if self.is_jump_link:
-            self.jump_link_key_cache_dict = page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"])
+            self.jump_link_key_cache_dict.update(page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"]))
         else:
             page.cleanup_jump_link_tips()
+            self.jump_link_key_cache_dict.clear()
 
-        # cache page char_dict
-        if self.char_dict[index] is None:
-            self.char_dict[index] = self.get_page_char_rect_list(index)
-            self.select_area_annot_cache_dict[index] = None
-
-        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.inpdf:
-            col = self.handle_color(QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]), self.inverted_mode)
+        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.document.isPDF:
+            color = inverted_color(self.emacs_var_dict["eaf-emacs-theme-background-color"], self.inverted_mode)
+            col = (color.redF(), color.greenF(), color.blueF())
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
         qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
@@ -633,9 +725,7 @@ class PdfViewerWidget(QWidget):
 
     def clean_unused_page_cache_pixmap(self):
         # We need expand render index bound that avoid clean cache around current index.
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-        index_list = list(range(start_page_index, last_page_index))
+        index_list = list(range(self.start_page_index, self.last_page_index))
 
         # Try to clean unused cache.
         cache_index_list = list(self.page_cache_pixmap_dict.keys())
@@ -651,6 +741,9 @@ class PdfViewerWidget(QWidget):
         QWidget.resizeEvent(self, event)
 
     def paintEvent(self, event):
+        # update page base information
+        self.update_page_index()
+
         # Init painter.
         painter = QPainter(self)
         painter.save()
@@ -663,41 +756,36 @@ class PdfViewerWidget(QWidget):
         painter.setPen(background_color)
         painter.drawRect(0, 0, self.rect().width(), self.rect().height())
 
-        # Get start/last render index.
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
-
         if self.scroll_offset > self.max_scroll_offset():
             self.update_vertical_offset(self.max_scroll_offset())
 
         # Translate painter at y coordinate.
-        translate_y = (start_page_index * self.scale * self.page_height) - self.scroll_offset
+        translate_y = (self.start_page_index * self.scale * self.page_height) - self.scroll_offset
         painter.translate(0, translate_y)
 
         # Render pages in visible area.
         (render_x, render_y, render_width, render_height) = 0, 0, 0, 0
-        for index in list(range(start_page_index, last_page_index)):
-            if index < self.page_total_number:
-                # Get page image.
-                hidpi_scale_factor = self.devicePixelRatioF()
-                qpixmap = self.get_page_pixmap(index, self.scale * self.devicePixelRatioF(), self.rotation)
+        for index in list(range(self.start_page_index, self.last_page_index)):
+            # Get page image.
+            hidpi_scale_factor = self.devicePixelRatioF()
+            qpixmap = self.get_page_pixmap(index, self.scale * hidpi_scale_factor, self.rotation)
 
-                # Init render rect.
-                render_width = qpixmap.width() / hidpi_scale_factor
-                render_height = qpixmap.height() / hidpi_scale_factor
-                render_x = (self.rect().width() - render_width) / 2
+            # Init render rect.
+            render_width = qpixmap.width() / hidpi_scale_factor
+            render_height = qpixmap.height() / hidpi_scale_factor
+            render_x = (self.rect().width() - render_width) / 2
 
-                # Add padding between pages.
-                if (index - start_page_index) > 0:
-                    painter.translate(0, self.page_padding)
+            # Add padding between pages.
+            if (index - self.start_page_index) > 0:
+                painter.translate(0, self.page_padding)
 
-                # Draw page image.
-                if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
-                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
+            # Draw page image.
+            if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
+                render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width) # limit the visiable area size
 
-                painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
+            painter.drawPixmap(QRect(render_x, render_y, render_width, render_height), qpixmap)
 
-                render_y += render_height
+            render_y += render_height
 
         # Clean unused pixmap cache that avoid use too much memory.
         self.clean_unused_page_cache_pixmap()
@@ -707,16 +795,14 @@ class PdfViewerWidget(QWidget):
         # Render current page.
         painter.setFont(self.font)
 
-        if self.inverted_mode:
-            painter.setPen(self.page_annotate_light_color)
-        elif self.rect().width() <= render_width:
-            painter.setPen(self.page_annotate_dark_color)
+        if self.rect().width() <= render_width and not self.inverted_mode:
+            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"]), True))
         else:
-            painter.setPen(self.page_annotate_light_color)
+            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"])))
 
         # Draw progress.
-        progress_percent = int((start_page_index + 1) * 100 / self.page_total_number)
-        current_page = start_page_index + 1
+        progress_percent = int((self.start_page_index + 1) * 100 / self.page_total_number)
+        current_page = self.start_page_index + 1
         painter.drawText(QRect(self.rect().x(),
                                self.rect().y(),
                                self.rect().width() - self.page_annotate_padding_right,
@@ -730,13 +816,13 @@ class PdfViewerWidget(QWidget):
             self_obj = args[0]
 
             # Record page before action.
-            page_before_action = self_obj.get_start_page_index()
+            page_before_action = self_obj.start_page_index
 
             # Do action.
             ret = f(*args)
 
             # Record page after action.
-            page_after_action = self_obj.get_start_page_index()
+            page_after_action = self_obj.start_page_index
             self_obj.is_page_just_changed = (page_before_action != page_after_action)
 
             # Start build context timer.
@@ -769,23 +855,23 @@ class PdfViewerWidget(QWidget):
                 max_pos = (self.page_width * self.scale - self.rect().width())
                 self.update_horizontal_offset(max(min(new_pos , max_pos), -max_pos))
 
-    def get_start_page_index(self):
-        return min(int(self.scroll_offset * 1.0 / self.scale / self.page_height),
-                   self.page_total_number - 1)
-
-    def get_last_page_index(self):
-        return min(int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1,
-                   self.page_total_number)
+    def update_page_index(self):
+        self.start_page_index = min(int(self.scroll_offset * 1.0 / self.scale / self.page_height),
+                                    self.page_total_number - 1)
+        self.last_page_index = min(int((self.scroll_offset + self.rect().height()) * 1.0 / self.scale / self.page_height) + 1,
+                                   self.page_total_number)
+    def update_page_size(self, rect):
+        current_page_index = self.start_page_index
+        self.page_width = rect.width
+        self.page_height = rect.height
+        self.jump_to_page(current_page_index)
 
     def build_context_cache(self):
         # Just build context cache when action duration longer than delay
         # Don't build contexnt cache when is_page_just_changed is True, avoid flickr when user change page.
         last_action_duration = (time.time() - self.last_action_time) * 1000
         if last_action_duration > self.page_cache_context_delay and not self.is_page_just_changed:
-            start_page_index = self.get_start_page_index()
-            last_page_index = self.get_last_page_index()
-
-            for index in list(range(start_page_index, last_page_index)):
+            for index in list(range(self.start_page_index, self.last_page_index)):
                 self.get_page_pixmap(index, self.scale, self.rotation)
 
     def scale_to(self, new_scale):
@@ -874,12 +960,25 @@ class PdfViewerWidget(QWidget):
         self.update()
 
     @interactive
+    def toggle_trim_white_margin(self):
+        current_page_index = self.start_page_index
+        self.document.toggle_trim_margin()
+        self.page_cache_pixmap_dict.clear()
+        self.update()
+        self.jump_to_page(current_page_index)
+
+    @interactive
     def toggle_inverted_mode(self):
         # Need clear page cache first, otherwise current page will not inverted until next page.
         self.page_cache_pixmap_dict.clear()
 
         # Toggle inverted status.
-        if self.inverted_mode and self.inverted_mode_exclude_image:
+        if not self.document.isPDF:
+            self.inverted_mode = not self.inverted_mode
+            self.update()
+            return
+
+        if self.inverted_mode_exclude_image:
             self.inverted_mode_exclude_image = False
         elif self.inverted_mode:
             self.inverted_mode = False
@@ -896,31 +995,27 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
         self.update()
 
-    @interactive
-    def rotate_clockwise(self):
-        if self.inpdf:
-            self.rotation = (self.rotation + 90) % 360
+    def update_rotate(self, rotate):
+        if self.document.isPDF:
+            current_page_index = self.start_page_index
+            self.rotation = rotate
+            self.page_width, self.page_height = self.page_height, self.page_width
 
             # Need clear page cache first, otherwise current page will not inverted until next page.
             self.page_cache_pixmap_dict.clear()
-
             self.update_scale()
             self.update()
+            self.jump_to_page(current_page_index)
         else:
             message_to_emacs("Only support PDF!")
+
+    @interactive
+    def rotate_clockwise(self):
+        self.update_rotate((self.rotation + 90) % 360)
 
     @interactive
     def rotate_counterclockwise(self):
-        if self.inpdf:
-            self.rotation = (self.rotation - 90) % 360
-
-            # Need clear page cache first, otherwise current page will not inverted until next page.
-            self.page_cache_pixmap_dict.clear()
-
-            self.update_scale()
-            self.update()
-        else:
-            message_to_emacs("Only support PDF!")
+        self.update_rotate((self.rotation - 90) % 360)
 
     def add_mark_jump_link_tips(self):
         self.is_jump_link = True
@@ -994,36 +1089,6 @@ class PdfViewerWidget(QWidget):
         self.search_text_offset_list.clear()
         self.update()
 
-    def get_page_char_rect_list(self, page_index):
-        lines_list = []
-        spans_list = []
-        chars_list = []
-
-        page_rawdict = self.document[page_index].getText("rawdict")
-        for block in page_rawdict["blocks"]:
-            if "lines" in block:
-                lines_list += block["lines"]
-
-        for line in lines_list:
-            if "spans" in line:
-                spans_list += line["spans"]
-
-        for span in spans_list:
-            if "chars" in span:
-                chars_list += span["chars"]
-
-        return chars_list
-
-    def get_char_rect_index(self):
-        offset = 15
-        ex, ey, page_index = self.get_cursor_absolute_position()
-        if ex and ey and page_index is not None:
-            rect = fitz.Rect(ex, ey, ex + offset, ey + offset)
-            for char_index, char in enumerate(self.char_dict[page_index]):
-                if fitz.Rect(char["bbox"]).intersect(rect):
-                    return char_index, page_index
-        return None, None
-
     def get_select_char_list(self):
         page_dict = {}
         if self.start_char_rect_index and self.last_char_rect_index:
@@ -1031,7 +1096,7 @@ class PdfViewerWidget(QWidget):
             sp_index = min(self.start_char_page_index, self.last_char_page_index)
             lp_index = max(self.start_char_page_index, self.last_char_page_index)
             for page_index in range(sp_index, lp_index + 1):
-                page_char_list = self.char_dict[page_index]
+                page_char_list = self.document[page_index].get_page_char_rect_list()
 
                 if page_char_list:
                 # handle forward select and backward select on multi page.
@@ -1156,9 +1221,8 @@ class PdfViewerWidget(QWidget):
     def delete_all_mark_select_area(self):
         if self.select_area_annot_cache_dict:
             for page_index, annot in self.select_area_annot_cache_dict.items():
-                page = self.document[page_index]
                 if annot and annot.parent:
-                        page.deleteAnnot(annot)
+                        annot.parent.deleteAnnot(annot)
                 self.select_area_annot_cache_dict[page_index] = None # restore cache
         self.last_char_page_index = None
         self.last_char_rect_index = None
@@ -1267,42 +1331,38 @@ class PdfViewerWidget(QWidget):
             self.update()
 
     def get_cursor_absolute_position(self):
-        start_page_index = self.get_start_page_index()
-        last_page_index = self.get_last_page_index()
         pos = self.mapFromGlobal(QCursor.pos()) # map global coordinate to widget coordinate.
         ex, ey = pos.x(), pos.y()
 
-        for index in list(range(start_page_index, last_page_index)):
-            if index < self.page_total_number:
-                render_width = self.page_width * self.scale
-                render_x = int((self.rect().width() - render_width) / 2)
-                if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
-                    render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
+        # set page coordinate
+        render_width = self.page_width * self.scale
+        render_x = int((self.rect().width() - render_width) / 2)
+        if self.read_mode == "fit_to_customize" and render_width >= self.rect().width():
+            render_x = max(min(render_x + self.horizontal_offset, 0), self.rect().width() - render_width)
 
-                # computer absolute coordinate of page
-                x = (ex - render_x) * 1.0 / self.scale
-                if ey + self.scroll_offset < (start_page_index + 1) * self.scale * self.page_height:
-                    page_offset = self.scroll_offset - start_page_index * self.scale * self.page_height
-                    page_index = index
-                else:
-                    # if display two pages, pos.y() will add page_padding
-                    page_offset = self.scroll_offset - (start_page_index + 1) * self.scale * self.page_height - self.page_padding
-                    page_index = index + 1
-                y = (ey + page_offset) * 1.0 / self.scale
+        # computer absolute coordinate of page
+        x = (ex - render_x) * 1.0 / self.scale
+        if ey + self.scroll_offset < (self.start_page_index + 1) * self.scale * self.page_height:
+            page_offset = self.scroll_offset - self.start_page_index * self.scale * self.page_height
+            page_index = self.start_page_index
+        else:
+            # if display two pages, pos.y() will add page_padding
+            page_offset = self.scroll_offset - (self.start_page_index + 1) * self.scale * self.page_height - self.page_padding
+            page_index = self.start_page_index + 1
+        y = (ey + page_offset) * 1.0 / self.scale
 
-                temp = x
-                if self.rotation == 90:
-                    x = y
-                    y = self.page_width - temp
-                elif self.rotation == 180:
-                    x = self.page_width - x
-                    y = self.page_height - y
-                elif self.rotation == 270:
-                    x = self.page_height - y
-                    y = temp
+        temp = x
+        if self.rotation == 90:
+            x = y
+            y = self.page_width - temp
+        elif self.rotation == 180:
+            x = self.page_width - x
+            y = self.page_height - y
+        elif self.rotation == 270:
+            x = self.page_height - y
+            y = temp
 
-                return x, y, page_index
-        return None, None, None
+        return x, y, page_index
 
     def get_event_link(self):
         ex, ey, page_index = self.get_cursor_absolute_position()
@@ -1394,7 +1454,8 @@ class PdfViewerWidget(QWidget):
 
     def handle_select_mode(self):
         self.is_select_mode = True
-        rect_index, page_index = self.get_char_rect_index()
+        ex, ey, page_index = self.get_cursor_absolute_position()
+        rect_index = self.document[page_index].get_page_char_rect_index(ex, ey)
         if rect_index and page_index is not None:
             if self.start_char_rect_index is None or self.start_char_page_index is None:
                 self.start_char_rect_index, self.start_char_page_index = rect_index, page_index
@@ -1411,3 +1472,28 @@ class PdfViewerWidget(QWidget):
         double_click_word = self.get_double_click_word()
         if double_click_word:
             self.translate_double_click_word.emit(double_click_word)
+
+
+# utils function
+def inverted_color(color, inverted=False):
+    color = QColor(color)
+    if not inverted:
+        return color
+
+    r = 1.0 - float(color.redF())
+    g = 1.0 - float(color.greenF())
+    b = 1.0 - float(color.blueF())
+
+    col = QColor()
+    col.setRgbF(r, g, b)
+    return col
+
+def generate_random_key(count, letters):
+    key_list = []
+    key_len = 1 if count == 1 else math.ceil(math.log(count) / math.log(len(letters)))
+    while count > 0:
+        key = ''.join(random.choices(letters, k=key_len))
+        if key not in key_list:
+            key_list.append(key)
+            count -= 1
+    return key_list

@@ -19,27 +19,38 @@
     <div
       class="control"
       :style="{ 'color': foregroundColor }">
+      <icon
+        class="repeat"
+        :style="{ 'color': foregroundColor }"
+        :name="playOrder"
+        :scale="2.5"
+        @click.native="togglePlayOrder"
+      ></icon>
+      <icon
+        class="backward"
+        :style="{ 'color': foregroundColor }"
+        name="step-backward"
+        :scale="4"
+        @click.native="playPrev"
+      ></icon>
+      <icon
+        class="play"
+        :style="{ 'color': foregroundColor }"
+        :name="playIcon"
+        :scale="6"
+        @click.native="toggle"
+      ></icon>
+      <icon
+        class="forward"
+        :style="{ 'color': foregroundColor }"
+        name="step-forward"
+        :scale="4"
+        @click.native="playNext"
+      ></icon>
       <div class="current-time">
         {{ currentTime }}
       </div>
-      <font-awesome-icon
-        class="backward"
-        :style="{ 'color': foregroundColor }"
-        icon="step-backward"
-        @click="playPrevItem"
-      />
-      <font-awesome-icon
-        class="play"
-        :style="{ 'color': foregroundColor }"
-        :icon="playIcon"
-        @click="toggle"
-      />
-      <font-awesome-icon
-        class="forward"
-        :style="{ 'color': foregroundColor }"
-        icon="step-forward"
-        @click="playNextItem"
-      />
+      /
       <div class="duration">
         {{ duration }}
       </div>
@@ -74,7 +85,9 @@
        artist: "",
        backgroundColor: "",
        foregroundColor: "",
-       playIcon: "play-circle"
+       /* Download icon from https://www.iconfont.cn/collections/detail?spm=a313x.7781069.0.da5a778a4&cid=18739 */
+       playIcon: "play-circle",
+       playOrder: "list"
      }
    },
    computed: mapState([
@@ -84,25 +97,31 @@
    ]),
    watch: {
      "fileInfos": function() {
-       this.playItem(this.fileInfos[0]);
+       if (this.playOrder === "random") {
+         this.playRandom();
+       } else {
+         this.playItem(this.fileInfos[0]);
+       }
      }
    },
    props: {
    },
    mounted() {
      window.initPanelColor = this.initPanelColor;
+     window.initPlayOrder = this.initPlayOrder;
      window.forward = this.forward;
      window.backward = this.backward;
      window.toggle = this.toggle;
-     window.playNextItem = this.playNextItem;
-     window.playPrevItem = this.playPrevItem;
+     window.playNext = this.playNext;
+     window.playPrev = this.playPrev;
+     window.playRandom = this.playRandom;
+     window.togglePlayOrder = this.togglePlayOrder;
+
+     let that = this;
 
      this.$root.$on("playItem", this.playItem);
 
-     let that = this;
-     this.$refs.player.addEventListener("ended", function(){
-       that.playNextItem();
-     });
+     this.$refs.player.addEventListener("ended", this.handlePlayFinish);
 
      this.$refs.player.addEventListener('timeupdate', () => {
        that.currentTime = that.formatTime(that.$refs.player.currentTime);
@@ -121,18 +140,38 @@
        this.$refs.player.load();
        this.$refs.player.play();
 
-       albumArt(item.artist, (error, response) => {
-         if (error) {
-           this.currentCover = "";
-         } else {
-           this.currentCover = response;
-         }
+       albumArt(item.artist, item.album, "medium", (error, url) => {
+         this.currentCover = url;
        })
+     },
+
+     togglePlayOrder() {
+       if (this.playOrder === "list") {
+         this.playOrder = "random";
+       } else if (this.playOrder === "random") {
+         this.playOrder = "repeat";
+       } else if (this.playOrder === "repeat") {
+         this.playOrder = "list";
+       }
+     },
+
+     handlePlayFinish() {
+       if (this.playOrder === "list") {
+         this.playNext();
+       } else if (this.playOrder === "random") {
+         this.playRandom();
+       } else if (this.playOrder === "repeat") {
+         this.playAgain();
+       }
      },
 
      initPanelColor(backgroundColor, foregroundColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
+     },
+
+     initPlayOrder(playOrder) {
+       this.playOrder = playOrder;
      },
 
      formatTime(seconds) {
@@ -165,7 +204,7 @@
        }
      },
 
-     playPrevItem() {
+     playPrev() {
        var currentTrackIndex = this.currentTrackIndex;
 
        if (currentTrackIndex > 0) {
@@ -177,7 +216,7 @@
        this.playItem(this.fileInfos[currentTrackIndex]);
      },
 
-     playNextItem() {
+     playNext() {
        var currentTrackIndex = this.currentTrackIndex;
 
        if (currentTrackIndex < this.fileInfos.length - 1) {
@@ -188,6 +227,18 @@
 
        this.playItem(this.fileInfos[currentTrackIndex]);
      },
+
+     playRandom() {
+       var min = 0;
+       var max = this.fileInfos.length;
+       var randomIndex = Math.floor(Math.random() * (max - min + 1)) + min;
+
+       this.playItem(this.fileInfos[randomIndex]);
+     },
+
+     playAgain() {
+       this.playItem(this.fileInfos[this.currentTrackIndex]);
+     }
    }
  }
 </script>
@@ -240,27 +291,33 @@
  }
 
  .backward {
-   font-size: 24px;
    cursor: pointer;
  }
 
  .forward {
-   font-size: 24px;
    cursor: pointer;
  }
 
  .play {
-   font-size: 40px;
    margin-left: 10px;
    margin-right: 10px;
    cursor: pointer;
  }
 
- .current-time {
+ .play-order {
    margin-right: 20px;
  }
 
- .duration {
+ .repeat {
+   margin-right: 20px;
+ }
+
+ .current-time {
    margin-left: 20px;
+   margin-right: 5px;
+ }
+
+ .duration {
+   margin-left: 5px;
  }
 </style>

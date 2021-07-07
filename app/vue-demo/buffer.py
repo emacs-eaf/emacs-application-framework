@@ -32,5 +32,5 @@ class AppBuffer(BrowserBuffer):
         self.url = url
 
         with open(self.index_file, "r") as f:
-            html = f.read().replace('''href="''', '''href="''' + self.index_file_dir).replace('''<script src="''', '''<script src="''' + self.index_file_dir)
+            html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
