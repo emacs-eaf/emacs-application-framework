@@ -252,7 +252,7 @@ class PdfDocument(fitz.Document):
             if page.CropBox == self._document_page_clip:
                 return page
 
-        page = PdfPage(self.document[index])
+        page = PdfPage(self.document[index], self.document.isPDF)
 
         # udpate the page clip
         new_rect_clip = self.computer_page_clip(page.get_tight_margin_rect(), self._document_page_clip)
@@ -262,7 +262,7 @@ class PdfDocument(fitz.Document):
                 self._document_page_change(new_rect_clip)
 
         if self._is_trim_margin:
-            return PdfPage(self.document[index], self._document_page_clip)
+            return PdfPage(self.document[index], self.document.isPDF, self._document_page_clip)
 
         return page
 
@@ -323,21 +323,28 @@ class PdfDocument(fitz.Document):
         self._is_trim_margin = not self._is_trim_margin
 
     def get_page_width(self):
-        if self._is_trim_margin:
-            return self._document_page_clip.width
-        return self.document.pageCropBox(0).width
+        if self.isPDF:
+            if self._is_trim_margin:
+                return self._document_page_clip.width
+            return self.document.pageCropBox(0).width
+        else:
+            return self[0].clip.width
 
     def get_page_height(self):
-        if self._is_trim_margin:
-            return self._document_page_clip.height
-        return self.document.pageCropBox(0).height
+        if self.isPDF:
+            if self._is_trim_margin:
+                return self._document_page_clip.height
+            return self.document.pageCropBox(0).height
+        else:
+            return self[0].clip.height
 
     def watch_page_size_change(self, callback):
         self._document_page_change = callback
 
 class PdfPage(fitz.Page):
-    def __init__(self, page, clip=None):
+    def __init__(self, page, isPDF, clip=None):
         self.page = page
+        self.isPDF = isPDF
         self.clip = clip or page.CropBox
 
         self._mark_link_annot_list = []
@@ -352,15 +359,18 @@ class PdfPage(fitz.Page):
         return getattr(self.page, attr)
 
     def _init_page_rawdict(self):
-        # Must set CropBox before get page rawdict , if no,
-        # the rawdict bbox coordinate is wrong
-        # cause the select text failed
-        self.page.setCropBox(self.clip)
-        d = self.page.getText("rawdict")
-        # cancel the cropbox, if not, will cause the pixmap set cropbox
-        # don't begin on top-left(0, 0), page display black margin
-        self.page.setCropBox(self.page.MediaBox)
-        return d
+        if self.isPDF:
+            # Must set CropBox before get page rawdict , if no,
+            # the rawdict bbox coordinate is wrong
+            # cause the select text failed
+            self.page.setCropBox(self.clip)
+            d = self.page.getText("rawdict")
+            # cancel the cropbox, if not, will cause the pixmap set cropbox
+            # don't begin on top-left(0, 0), page display black margin
+            self.page.setCropBox(self.page.MediaBox)
+            return d
+        else:
+            return self.page.getText("rawdict")
 
     def _init_page_char_rect_list(self):
         '''Collection page char rect list when page init'''
@@ -434,7 +444,8 @@ class PdfPage(fitz.Page):
             self.page_height = self.page.CropBox.height
 
     def get_qpixmap(self, scale, *args):
-        self.page.setCropBox(self.clip)
+        if self.isPDF:
+            self.page.setCropBox(self.clip)
         pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
