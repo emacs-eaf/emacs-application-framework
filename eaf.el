@@ -771,6 +771,18 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Music Player."
   :type 'cons)
 
+(defcustom eaf-netease-cloud-music-keybinding
+  '(("<f12>" . "open_devtools")
+    ("n" . "play_next")
+    ("p" . "play_prev")
+    ("C-n" . "scroll_up")
+    ("C-p" . "scroll_down")
+    ("M-<" . "scroll_to_begin")
+    ("M->" . "scroll_to_bottom")
+    )
+  "The keybinding of EAF Netease Cloud Music."
+  :type 'cons)
+
 (defcustom eaf-system-monitor-keybinding
   '(("<f12>" . "open_devtools")
     ("C-n" . "scroll_up")
@@ -901,6 +913,7 @@ Please fill an issue if it still doesn't work."
     ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
     ("music-player" . eaf-music-player-keybinding)
+    ("netease-cloud-music" . eaf-netease-cloud-music-keybinding)
     ("system-monitor" . eaf-system-monitor-keybinding)
     ("camera" . eaf-camera-keybinding)
     ("terminal" . eaf-terminal-keybinding)
@@ -2120,6 +2133,13 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive "fOpen music: ")
   (eaf-open "eaf-music-player" "music-player" music-file))
 
+(defun eaf-open-netease-cloud-music ()
+  "Open EAF netease cloud music."
+  (interactive)
+  (if (featurep 'netease-cloud-music)
+      (eaf-open "eaf-netease-cloud-music" "netease-cloud-music")
+    (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")))
+
 (defun eaf-open-system-monitor ()
   "Open EAF system monitor."
   (interactive)
@@ -2734,6 +2754,7 @@ The key is the annot id on PAGE."
                     'eaf-js-video-player-keybinding
                     'eaf-image-viewer-keybinding
                     'eaf-music-player-keybinding
+                    'eaf-netease-cloud-music-keybinding
                     'eaf-system-monitor-keybinding
                     'eaf-terminal-keybinding
                     'eaf-camera-keybinding
