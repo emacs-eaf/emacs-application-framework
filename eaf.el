@@ -372,7 +372,14 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-music-play-order . "list")
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
-    (eaf-emacs-theme-foreground-color . ""))
+    (eaf-emacs-theme-foreground-color . "")
+    (eaf-netease-cloud-music-playlist . "")
+    (eaf-netease-cloud-music-repeat-mode . "")
+    (eaf-netease-cloud-music-playlists . "")
+    (eaf-netease-cloud-music-playlists-songs . "")
+    (eaf-netease-cloud-music-playlist-id . 0)
+    (eaf-netease-cloud-music-user . ""))
+  ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
 
 Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
@@ -2815,6 +2822,30 @@ The key is the annot id on PAGE."
       (read-only-mode 1))
     (switch-to-buffer eaf-export-text-buffer)
     ))
+
+(defun eaf--netease-cloud-music-change-playlist (pid)
+  "Change the current playlist to PID."
+  (when (featurep 'netease-cloud-music)
+    (cond ((= pid 0)
+           (setq netease-cloud-music-use-local-playlist t
+                 netease-cloud-music-playlists-songs nil
+                 netease-cloud-music-playlist-id nil)
+           (when netease-cloud-music-playlist-refresh-timer
+             (cancel-timer netease-cloud-music-playlist-refresh-timer)
+             (setq netease-cloud-music-playlist-refresh-timer nil)))
+          ((and netease-cloud-music-playlists
+                (netease-cloud-music-alist-cdr
+                 pid netease-cloud-music-playlists))
+           (setq netease-cloud-music-use-local-playlist nil
+                 netease-cloud-music-playlist-id
+                 (alist-get playlist netease-cloud-music-playlists
+                            nil nil 'string-equal)
+                 netease-cloud-music-playlists-songs
+                 (netease-cloud-music-get-playlist-songs
+                  netease-cloud-music-playlist-id))
+           (t (na-error "The pid cannot be found!"))))
+    (when netease-cloud-music-process
+      (netease-cloud-music-kill-current-song))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

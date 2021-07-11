@@ -20,8 +20,8 @@
   "vueApps": [
     "app/vue-demo",
     "app/system-monitor",
-    "app/netease-cloud-music",
-    "app/music-player"
+    "app/music-player",
+    "app/netease-cloud-music"
   ],
   "rebuildApps": [
     "app/terminal"

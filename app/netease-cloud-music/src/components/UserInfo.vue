@@ -38,7 +38,7 @@
 
    methods: {
      selectPlaylist(pid) {
-       /* .. */
+       window.pyobject.change_playlist(pid);
      },
 
      changePlaylistStyle(index, isCurrent) {

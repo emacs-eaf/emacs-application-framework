@@ -57,7 +57,7 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs("netease-cloud-music-play", song)
 
     def init_app(self):
-        self.buffer_widget.execute_js('''initColor(\"{}\", \"{}\")'''.format(
+        self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],
             self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
         ))
@@ -70,3 +70,8 @@ class AppBuffer(BrowserBuffer):
             play_function = "netease-cloud-music-play-next-song"
 
         eval_in_emacs(play_function, [])
+
+    @QtCore.pyqtSlot(int)
+    def change_playlist(pid):
+        eval_in_emacs('''(eaf--netease-cloud-music-change-playlist \"{}\")'''
+                      .format(str(pid)))

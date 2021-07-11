@@ -1,5 +1,5 @@
 <template>
-  <div id="app" :style="{ 'background-color': backgroundColor }">
+  <div id="app">
     <UserInfo :borderColor="foregroundColor" />
     <Playlist :backgroundColor="backgroundColor" :foregroundColor="foregroundColor" />
     <Panel :borderColor="foregroundColor" />
