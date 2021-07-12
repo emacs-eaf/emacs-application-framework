@@ -26,7 +26,9 @@ from core.webengine import BrowserBuffer
 from core.utils import interactive
 from core.utils import eval_in_emacs
 from core.utils import message_to_emacs
+from core.utils import list_string_to_list
 import os
+
 class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
@@ -72,6 +74,6 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs(play_function, [])
 
     @QtCore.pyqtSlot(int)
-    def change_playlist(pid):
-        eval_in_emacs('''(eaf--netease-cloud-music-change-playlist \"{}\")'''
+    def change_playlist(self, pid):
+        eval_in_emacs('''(eaf--netease-cloud-music-change-playlist {})'''
                       .format(str(pid)))

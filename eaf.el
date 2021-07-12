@@ -373,12 +373,12 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . "")
-    (eaf-netease-cloud-music-playlist . "")
+    (eaf-netease-cloud-music-playlist . "()")
     (eaf-netease-cloud-music-repeat-mode . "")
-    (eaf-netease-cloud-music-playlists . "")
-    (eaf-netease-cloud-music-playlists-songs . "")
-    (eaf-netease-cloud-music-playlist-id . 0)
-    (eaf-netease-cloud-music-user . ""))
+    (eaf-netease-cloud-music-playlists . "()")
+    (eaf-netease-cloud-music-playlists-songs . "()")
+    (eaf-netease-cloud-music-playlist-id . "0")
+    (eaf-netease-cloud-music-user . "()"))
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -1722,6 +1722,12 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
 
 For convenience, use the Lisp macro `eaf-setq' instead."
+  ;; Convert the list value to string
+  (when (listp val)
+    (setq val (if (eq val '())
+                  "()"
+                (format "%S" val))))
+
   (setf (map-elt eaf-var-list sym) val)
   (when (epc:live-p eaf-epc-process)
     ;; Update python side variable dynamically.
@@ -2832,7 +2838,9 @@ The key is the annot id on PAGE."
                  netease-cloud-music-playlist-id nil)
            (when netease-cloud-music-playlist-refresh-timer
              (cancel-timer netease-cloud-music-playlist-refresh-timer)
-             (setq netease-cloud-music-playlist-refresh-timer nil)))
+             (setq netease-cloud-music-playlist-refresh-timer nil))
+           (eaf-setq eaf-netease-cloud-music-playlist netease-cloud-music-playlist)
+           (eaf-setq eaf-netease-cloud-music-playlist-id "0"))
           ((and netease-cloud-music-playlists
                 (netease-cloud-music-alist-cdr
                  pid netease-cloud-music-playlists))
@@ -2843,7 +2851,9 @@ The key is the annot id on PAGE."
                  netease-cloud-music-playlists-songs
                  (netease-cloud-music-get-playlist-songs
                   netease-cloud-music-playlist-id))
-           (t (na-error "The pid cannot be found!"))))
+           (eaf-setq eaf-netease-cloud-music-playlist-id
+                     (number-to-string netease-playlist netease-cloud-music-playlist-id)))
+           (t (na-error "The pid cannot be found!")))
     (when netease-cloud-music-process
       (netease-cloud-music-kill-current-song))))
 
