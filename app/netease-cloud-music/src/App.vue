@@ -1,8 +1,15 @@
 <template>
   <div id="app">
-    <UserInfo :borderColor="foregroundColor" />
-    <Playlist :backgroundColor="backgroundColor" :foregroundColor="foregroundColor" />
-    <Panel :borderColor="foregroundColor" />
+    <UserInfo
+      :borderColor="foregroundColor"
+      :style="{ 'z-index': '300', 'background-color': backgroundColor }" />
+    <Playlist
+      :backgroundColor="backgroundColor"
+      :foregroundColor="foregroundColor"
+      style="z-index: 350;"/>
+    <Panel
+      :borderColor="foregroundColor"
+      :style="{ 'z-index': '500', 'background-color': backgroundColor }" />
   </div>
 </template>
 
@@ -18,11 +25,23 @@
      UserInfo,
      Panel
    },
+
    data() {
      return {
-       backgroundColor: '#EEF0F3',
-       foregroundColor: '#5A5E65'
+       backgroundColor: '',
+       foregroundColor: ''
      }
+   },
+
+   mounted() {
+     window.initColor = this.initColor;
+   },
+
+   methods: {
+     initColor(backgroundColor, foregroundColor) {
+       this.backgroundColor = backgroundColor;
+       this.foregroundColor = foregroundColor;
+     },
    }
  }
 </script>

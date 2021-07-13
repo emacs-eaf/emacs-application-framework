@@ -1,20 +1,19 @@
 <template>
   <div
     id="playlist-section"
-    ref="playlists"
-    :style="{ 'border-bottom': '2px solid ' + foregroundColor }">
+    ref="playlists">
     <div
       class="playlist"
       v-for="song in playlists"
-      :key="song[0]"
+      :key="playlists.indexOf(song)"
       @click="playSong(song)"
       :style="{ 'color': foregroundColor }">
       <p>
-        <span class="song-id">{{ song[0] + 1 }}</span>
+        <span class="song-index">{{ playlists.indexOf(song) + 1 }}</span>
         .
         <span class="song">{{ song[1] }}</span>
         &nbsp;-&nbsp;
-        <span class="artist">{{ song[2] }}</span>
+        <span class="artist">{{ song[3] }}</span>
       </p>
     </div>
   </div>
@@ -27,8 +26,7 @@
    name: 'Playlist',
    data() {
      return {
-       playlists: [[0, "Lemon", "Kenshi Yorezi", 10923],
-                   [1, "Loser", "Kenshi Yorezi", 921038]],
+       playlists: [],
        // TODO: Debug
      }
    },
@@ -38,11 +36,10 @@
    },
 
    mounted() {
-     window.initColor = this.initColor;
-     window.addSong = this.addSong;
      window.setPlaylist = this.setPlaylist;
      window.changeSongStyle = this.changeSongStyle;
-     window.playNextOrPrevSong = this.playNextOrPrevSong;
+     window.playSong = this.playSong;
+     window.AllPlaylists = this.playlists;
    },
 
    created() {
@@ -52,25 +49,12 @@
    },
 
    methods: {
-     initColor(backgroundColor, foregroundColor) {
-       this.backgroundColor = backgroundColor;
-       this.foregroundColor = foregroundColor;
-     },
-
-     addSong(name, artist) {
-       this.playlists.push([this.playlists.length, name, artist]);
-     },
-
      setPlaylist(songs) {
        this.playlists = songs;
      },
 
      playSong(songInfo) {
-       window.pyobject.play_song([songInfo[3], songInfo[1], songInfo[2]]);
-     },
-
-     playNextOrPrevSong(prev) {
-       window.pyobject.play_next_or_prev(prev);
+       window.pyobject.play_song([Number(songInfo[0]), songInfo[1], songInfo[3]]);
      },
 
      changeSongStyle(index, isPlay) {

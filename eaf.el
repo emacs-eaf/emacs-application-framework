@@ -378,6 +378,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-netease-cloud-music-playlists . "()")
     (eaf-netease-cloud-music-playlists-songs . "()")
     (eaf-netease-cloud-music-playlist-id . "0")
+    (eaf-netease-cloud-music-play-status . "")
     (eaf-netease-cloud-music-user . "()"))
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
@@ -2832,6 +2833,8 @@ The key is the annot id on PAGE."
 (defun eaf--netease-cloud-music-change-playlist (pid)
   "Change the current playlist to PID."
   (when (featurep 'netease-cloud-music)
+    (when (stringp pid)
+      (setq pid (string-to-number pid)))
     (cond ((= pid 0)
            (setq netease-cloud-music-use-local-playlist t
                  netease-cloud-music-playlists-songs nil
@@ -2841,19 +2844,27 @@ The key is the annot id on PAGE."
              (setq netease-cloud-music-playlist-refresh-timer nil))
            (eaf-setq eaf-netease-cloud-music-playlist netease-cloud-music-playlist)
            (eaf-setq eaf-netease-cloud-music-playlist-id "0"))
+
           ((and netease-cloud-music-playlists
                 (netease-cloud-music-alist-cdr
                  pid netease-cloud-music-playlists))
            (setq netease-cloud-music-use-local-playlist nil
-                 netease-cloud-music-playlist-id
-                 (alist-get playlist netease-cloud-music-playlists
-                            nil nil 'string-equal)
+                 netease-cloud-music-playlist-id pid
                  netease-cloud-music-playlists-songs
                  (netease-cloud-music-get-playlist-songs
                   netease-cloud-music-playlist-id))
            (eaf-setq eaf-netease-cloud-music-playlist-id
-                     (number-to-string netease-playlist netease-cloud-music-playlist-id)))
+                     (number-to-string
+                      (1+
+                       (cl-position
+                        (netease-cloud-music-alist-cdr pid netease-cloud-music-playlists)
+                        netease-cloud-music-playlists))))
+           (eaf-setq eaf-netease-cloud-music-playlists-songs
+                     netease-cloud-music-playlists-songs))
            (t (na-error "The pid cannot be found!")))
+
+    (eaf-call-sync "call_function" eaf--buffer-id "update_playlist_style")
+    (eaf-call-sync "call_function" eaf--buffer-id "set_playlist")
     (when netease-cloud-music-process
       (netease-cloud-music-kill-current-song))))
 

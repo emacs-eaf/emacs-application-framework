@@ -1,7 +1,7 @@
 <template>
   <div
     id="panel"
-    :style="{ 'border-bottom': '2px solid ' + borderColor, 'border-right': '2px solid ' + borderColor }">
+    :style="{ 'border-top': '2px solid ' + borderColor }">
     <div id="song-info">
       <h1 v-if="song">
         {{ song }}
@@ -14,25 +14,25 @@
         :style="{ 'color': borderColor }"
         name="step-backward"
         scale="6"
-        @click="playNextOrPrevSong(true)"></icon>
+        @click.native="playPrev"></icon>
       <icon
         id="play-pause-icon"
         :style="{ 'color': borderColor }"
         :name="playIcon"
         scale="8"
-        @click="window.pyobject.play_or_pause()"></icon>
+        @click.native="pauseOrContinue"></icon>
       <icon
         id="play-next-icon"
         :style="{ 'color': borderColor }"
         name="step-forward"
         scale="6"
-        @click="playNextOrPrevSong(false)"></icon>
+        @click.native="playNext"></icon>
       <icon
         id="repeat-icon"
         :style="{ 'color': borderColor }"
         :name="repeatMode"
         scale="4"
-        @click="changeRepeatMode()"></icon>
+        @click.native="changeRepeatMode"></icon>
     </div>
   </div>
 </template>
@@ -43,9 +43,9 @@
    data() {
      return {
        playIcon: 'play-circle',
-       song: 'Lemon',
-       artist: 'Kenshi Yorezi',
-       repeatMode: 'repeat'
+       song: '',
+       artist: '',
+       repeatMode: 'song'
      }
    },
 
@@ -55,15 +55,43 @@
 
    mounted() {
      window.setRepeatMode = this.setRepeatMode;
+     window.playNextOrPrevSong = this.playNextOrPrevSong;
+     window.setPanelSongInfo = this.setPanelSongInfo;
+     window.setPlayIconStatus = this.setPlayIconStatus;
    },
 
    methods: {
      changeRepeatMode() {
-       window.pyobject.changeRepeatMode();
+       window.pyobject.change_repeat_mode();
+     },
+
+     playNextOrPrevSong(prev) {
+       window.pyobject.play_next_or_prev(prev);
+     },
+
+     playPrev() {
+       this.playNextOrPrevSong(true);
+     },
+
+     playPrev() {
+       this.playNextOrPrevSong(false);
      },
 
      setRepeatMode(mode) {
        this.repeatMode = mode;
+     },
+
+     setPanelSongInfo(info) {
+       this.song = info[0];
+       this.artist = info[1];
+     },
+
+     pauseOrContinue() {
+       window.pyobject.play_or_pause();
+     },
+
+     setPlayIconStatus(status) {
+       this.playIcon = status;
      }
    }
  }
@@ -71,7 +99,7 @@
 
 <style scoped>
  #panel {
-   position: absolute;
+   position: fixed;
    width: 100%;
    height: 18%;
    bottom: 0;

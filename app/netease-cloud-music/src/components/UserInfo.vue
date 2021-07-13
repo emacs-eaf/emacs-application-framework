@@ -7,10 +7,10 @@
     <div id="playlists" ref="allplaylists">
       <div class="playlist"
            v-for="playlist in userPlaylists"
-           :key="playlist[0]"
-           @click="selectPlaylist(playlist[2])"
+           :key="userPlaylists.indexOf(playlist)"
+           @click="selectPlaylist(playlist[1])"
            :style="{ 'color': borderColor }">
-        <p>{{ playlist[1] }}</p>
+        <p>{{ playlist[0] }}</p>
       </div>
     </div>
   </div>
@@ -21,10 +21,10 @@
    name: 'UserInfo',
    data() {
      return {
-       /* <!-- NOTE: DEBUG--> */
-       avatarUrl: "http://p1.music.126.net/cxHXzOcY-wKq72WF5-HSdg==/109951165429433434.jpg",
-       username: 'SpringHan',
-       userPlaylists: [[0, "Like", 209103]]
+       avatarUrl: '',
+       username: '',
+       userPlaylists: [["Local Playlist", 0]],
+       currentPlaylistId: 0
      }
    },
 
@@ -34,32 +34,51 @@
 
    mounted() {
      window.changePlaylistStyle = this.changePlaylistStyle;
+     window.setUserPlaylists = this.setUserPlaylists;
+     window.updateUserInfo = this.updateUserInfo;
+     window.selectPlaylist = this.selectPlaylist;
    },
 
    methods: {
      selectPlaylist(pid) {
-       window.pyobject.change_playlist(pid);
+       window.pyobject.change_playlist([Number(pid)]);
      },
 
-     changePlaylistStyle(index, isCurrent) {
+     changePlaylistStyle(index, init) {
        /* Change the song's style to show that the song is playing */
-       var target = this.$refs.allplaylists.getElementsByClassName('playlist')[index];
-       var backgroundColor = document.getElementById("app").style.backgroundColor;
-       if (isCurrent) {
+       if (index != this.currentPlaylistId || init) {
+         var target = this.$refs.allplaylists.getElementsByClassName('playlist')[index];
+         var prev = this.$refs.allplaylists.getElementsByClassName('playlist')[this.currentPlaylistId]
+         var backgroundColor = document.body.style.backgroundColor;
+
          target.style.backgroundColor = this.borderColor;
          target.style.color = backgroundColor;
-       } else {
-         target.style.backgroundColor = backgroundColor;
-         target.style.color = this.borderColor;
+         if (!init) {
+           prev.style.backgroundColor = backgroundColor;
+           prev.style.color = this.borderColor;
+         }
+         this.currentPlaylistId = index;
        }
+     },
+
+     setUserPlaylists(playlists) {
+       this.userPlaylists = [["Local Playlist", 0]];
+       for (var i = 0; i < playlists.length; i++) {
+         this.userPlaylists.push(playlists[i]);
+       }
+     },
+
+     updateUserInfo(info) {
+       this.username = info[0];
+       this.avatarUrl = info[1];
      }
-   }
+   },
  }
 </script>
 
 <style scoped>
  #user-info {
-   position: absolute;
+   position: fixed;
    width: 20%;
    height: 82%;
    top: 0;

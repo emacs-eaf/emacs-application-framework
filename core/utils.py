@@ -266,6 +266,9 @@ def list_string_to_list(list_string):
         elif (list_var[x] == ' ') and (quote == 0):
             list_var = list_var[:x] + '{split}' + list_var[x + 1:]
             extra_char_num += 6
+        elif (list_var[x] == '.') and (quote == 0):
+            list_var = list_var[:x] + '' + list_var[x + 2:]
+            extra_char_num -= 2
 
     list_var = str(list_var.split('{split}')).replace("', '[", "', ['").replace("]'", "']").replace("'[", "['").replace("'\"", "'").replace("\"'", "'")
     
