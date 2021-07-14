@@ -379,6 +379,7 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-netease-cloud-music-playlists-songs . "()")
     (eaf-netease-cloud-music-playlist-id . "0")
     (eaf-netease-cloud-music-play-status . "")
+    (eaf-netease-cloud-music-current-song . "(\"\" \"\")")
     (eaf-netease-cloud-music-user . "()"))
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
@@ -787,6 +788,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("C-p" . "scroll_down")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
+    ("q" . "back_to_last_buffer")
+    ("Q" . "quit")
     )
   "The keybinding of EAF Netease Cloud Music."
   :type 'cons)
@@ -2150,9 +2153,12 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-netease-cloud-music ()
   "Open EAF netease cloud music."
   (interactive)
-  (if (featurep 'netease-cloud-music)
-      (eaf-open "eaf-netease-cloud-music" "netease-cloud-music")
-    (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")))
+  (if (not (featurep 'netease-cloud-music))
+      (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")
+    (setq netease-cloud-music-last-buffer (current-buffer))
+    (if (get-buffer "eaf-netease-cloud-music")
+        (switch-to-buffer "eaf-netease-cloud-music")
+      (eaf-open "eaf-netease-cloud-music" "netease-cloud-music"))))
 
 (defun eaf-open-system-monitor ()
   "Open EAF system monitor."
@@ -2867,6 +2873,40 @@ The key is the annot id on PAGE."
     (eaf-call-sync "call_function" eaf--buffer-id "set_playlist")
     (when netease-cloud-music-process
       (netease-cloud-music-kill-current-song))))
+
+(defun eaf--netease-cloud-music-init ()
+  "Init the netease-cloud-music."
+  (netease-cloud-music-get-playlist)
+  (unless (file-exists-p netease-cloud-music-cache-directory)
+    (make-directory netease-cloud-music-cache-directory))
+  (when (and (netease-cloud-music--api-downloaded)
+             (not (netease-cloud-music-api-process-live-p)))
+    (netease-cloud-music-start-api))
+
+  (when (file-exists-p netease-cloud-music-user-loginfo-file)
+    (let ((loginfo (netease-cloud-music-get-loginfo)))
+      (when loginfo
+        (setq netease-cloud-music-phone (car loginfo)
+              netease-cloud-music-user-password (cdr loginfo)
+              netease-cloud-music-login-timer
+              (run-with-timer
+               1 2
+               (lambda ()
+                 (if (and netease-cloud-music-user-id
+                          netease-cloud-music-username)
+                     (progn
+                       (cancel-timer netease-cloud-music-login-timer)
+                       (setq netease-cloud-music-login-timer nil))
+                   (netease-cloud-music--get-user-info)
+                   (ignore-errors
+                     (setq netease-cloud-music-playlists
+                           (netease-cloud-music-get-user-playlist
+                            netease-cloud-music-user-id))
+                     (eaf-setq eaf-netease-cloud-music-playlists
+                               (format "%S" netease-cloud-music-playlists))
+                     (with-current-buffer "eaf-netease-cloud-music"
+                       (eaf-call-sync "call_function" eaf--buffer-id
+                                      "refresh_user_playlist")))))))))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

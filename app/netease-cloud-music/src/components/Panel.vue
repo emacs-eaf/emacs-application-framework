@@ -73,12 +73,14 @@
        this.playNextOrPrevSong(true);
      },
 
-     playPrev() {
+     playNext() {
        this.playNextOrPrevSong(false);
      },
 
      setRepeatMode(mode) {
-       this.repeatMode = mode;
+       if (mode != '') {
+         this.repeatMode = mode;
+       }
      },
 
      setPanelSongInfo(info) {

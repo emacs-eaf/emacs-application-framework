@@ -56,6 +56,7 @@
          if (!init) {
            prev.style.backgroundColor = backgroundColor;
            prev.style.color = this.borderColor;
+           window.resetPrevIndex();
          }
          this.currentPlaylistId = index;
        }

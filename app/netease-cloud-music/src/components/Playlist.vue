@@ -27,6 +27,7 @@
    data() {
      return {
        playlists: [],
+       prevIndex: -1
        // TODO: Debug
      }
    },
@@ -40,6 +41,8 @@
      window.changeSongStyle = this.changeSongStyle;
      window.playSong = this.playSong;
      window.AllPlaylists = this.playlists;
+     window.resetSongStyle = this.resetSongStyle;
+     window.resetPrevIndex = this.resetPrevIndex;
    },
 
    created() {
@@ -57,16 +60,31 @@
        window.pyobject.play_song([Number(songInfo[0]), songInfo[1], songInfo[3]]);
      },
 
-     changeSongStyle(index, isPlay) {
+     changeSongStyle(index) {
        /* Change the song's style to show that the song is playing */
        var target = this.$refs.playlists.getElementsByClassName('playlist')[index];
-       if (isPlay) {
-         target.style.backgroundColor = this.foregroundColor;
-         target.style.color = this.backgroundColor;
-       } else {
-         target.style.backgroundColor = this.backgroundColor;
-         target.style.color = this.foregroundColor;
+       if (this.prevIndex != -1) {
+         var prevTarget = this.$refs.playlists.getElementsByClassName('playlist')[this.prevIndex];
+
+         if (prevTarget.style.backgroundColor != this.backgroundColor) {
+           prevTarget.style.backgroundColor = this.backgroundColor;
+           prevTarget.style.color = this.foregroundColor;
+         }
        }
+
+       target.style.backgroundColor = this.foregroundColor;
+       target.style.color = this.backgroundColor;
+       this.prevIndex = index;
+     },
+
+     resetSongStyle(index) {
+       var target = this.$refs.playlists.getElementsByClassName('playlist')[this.prevIndex];
+       target.style.backgroundColor = this.backgroundColor;
+       target.style.color = this.foregroundColor;
+     },
+
+     resetPrevIndex() {
+       this.prevIndex = -1;
      }
    }
  }

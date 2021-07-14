@@ -2,11 +2,11 @@
   <div id="app">
     <UserInfo
       :borderColor="foregroundColor"
-      :style="{ 'z-index': '300', 'background-color': backgroundColor }" />
+      :style="{ 'z-index': '350', 'background-color': backgroundColor }" />
     <Playlist
       :backgroundColor="backgroundColor"
       :foregroundColor="foregroundColor"
-      style="z-index: 350;"/>
+      style="z-index: 300;"/>
     <Panel
       :borderColor="foregroundColor"
       :style="{ 'z-index': '500', 'background-color': backgroundColor }" />
