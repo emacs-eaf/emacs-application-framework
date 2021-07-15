@@ -807,6 +807,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     (">" . "seek_forward")
     ("k" . "clear_playlist")
     ("w" . "write_mode_enter")
+    ("f" . "search_song")
+    ("F" . "search_playlist")
     )
   "The keybinding of EAF Netease Cloud Music."
   :type 'cons)
@@ -2949,6 +2951,14 @@ The key is the annot id on PAGE."
   (interactive)
   (let ((index (read-number "Enter the song's index: ")))
     (netease-cloud-music-delete-song-from-playlist (1- index))))
+
+(defun eaf--netease-cloud-music-move-song (up)
+  "Move the song read from Minibuffer up or down.
+If Up is not non-nil, move the song up.Otherwise move it down."
+  (let ((index (read-number "Enter the song's index: ")))
+    (if (string= up "True")
+        (netease-cloud-music-move-up (1- index))
+      (netease-cloud-music-move-down (1- index)))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

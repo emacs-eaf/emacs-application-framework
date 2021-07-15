@@ -153,6 +153,18 @@ class AppBuffer(BrowserBuffer):
     def delete_playing_song(self):
         eval_in_emacs('''netease-cloud-music-delete-playing-song''', [])
 
+    @interactive(insert_or_do=True)
+    def move_song_up(self):
+        eval_in_emacs('''eaf--netease-cloud-music-move-song''', [True])
+
+    @interactive(insert_or_do=True)
+    def move_song_down(self):
+        eval_in_emacs('''eaf--netease-cloud-music-move-song''', [False])
+
+    @interactive(insert_or_do=True)
+    def clear_playlist(self):
+        eval_in_emacs('''netease-cloud-music-clear-playlist''', [])
+
     def init_app(self):
         self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],
