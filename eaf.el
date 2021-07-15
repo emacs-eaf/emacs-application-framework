@@ -782,14 +782,31 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-netease-cloud-music-keybinding
   '(("<f12>" . "open_devtools")
-    ("n" . "play_next")
-    ("p" . "play_prev")
+    ("<up>" . "move_song_up")
+    ("<down>" . "move_song_down")
+    ("SPC" . "play_or_pause")
     ("C-n" . "scroll_up")
     ("C-p" . "scroll_down")
+    ("M-v" . "scroll_up_page")
+    ("M-V" . "scroll_down_page")
     ("M-<" . "scroll_to_begin")
     ("M->" . "scroll_to_bottom")
     ("q" . "back_to_last_buffer")
     ("Q" . "quit")
+    ("r" . "change_repeat_mode")
+    ("x" . "kill_current_song")
+    ("/" . "play_with_index")
+    ("n" . "play_next")
+    ("N" . "play_randomly")
+    ("p" . "play_prev")
+    ("P" . "playlist_play")
+    ("c" . "change_lyric_type")
+    ("d" . "delete_song_from_playlist")
+    ("D" . "delete_playing_song")
+    ("<" . "seek_backward")
+    (">" . "seek_forward")
+    ("k" . "clear_playlist")
+    ("w" . "write_mode_enter")
     )
   "The keybinding of EAF Netease Cloud Music."
   :type 'cons)
@@ -2907,6 +2924,31 @@ The key is the annot id on PAGE."
                      (with-current-buffer "eaf-netease-cloud-music"
                        (eaf-call-sync "call_function" eaf--buffer-id
                                       "refresh_user_playlist")))))))))))
+
+(defun eaf--netease-cloud-music--update-song-style ()
+  "Update song style."
+  (when (string= "playing" netease-cloud-music-process-status)
+    (eaf-call-sync "call_function_with_args" eaf--buffer-id
+                   "change_song_style" netease-cloud-music-playlist-song-index)))
+
+(defun eaf--netease-cloud-music-play-with-index ()
+  "Read index from Minibuffer."
+  (interactive)
+  (let* ((index (read-number "Enter the song's index: "))
+         (song (nth (1- index)
+                   (if netease-cloud-music-use-local-playlist
+                       netease-cloud-music-playlist
+                     netease-cloud-music-playlists-songs))))
+    (if (null song)
+        (user-error "[EAF/Netease-Cloud-Music]: The index is error!")
+      (netease-cloud-music-play
+       (car song) (nth 1 song) (nth 3 song)))))
+
+(defun eaf--netease-cloud-music-delete-song-from-playlist ()
+  "Delete song from playlist read from Minibuffer."
+  (interactive)
+  (let ((index (read-number "Enter the song's index: ")))
+    (netease-cloud-music-delete-song-from-playlist (1- index))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

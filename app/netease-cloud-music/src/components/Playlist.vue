@@ -43,6 +43,12 @@
      window.AllPlaylists = this.playlists;
      window.resetSongStyle = this.resetSongStyle;
      window.resetPrevIndex = this.resetPrevIndex;
+     window.scrollUp = this.scrollUp;
+     window.scrollDown = this.scrollDown;
+     window.scrollUpPage = this.scrollUpPage;
+     window.scrollDownPage = this.scrollDownPage;
+     window.scrollToBegin = this.scrollToBegin;
+     window.scrollToBottom = this.scrollToBottom;
    },
 
    created() {
@@ -74,17 +80,45 @@
 
        target.style.backgroundColor = this.foregroundColor;
        target.style.color = this.backgroundColor;
+       target.scrollIntoView({block: 'center'});
        this.prevIndex = index;
      },
 
-     resetSongStyle(index) {
+     resetSongStyle() {
        var target = this.$refs.playlists.getElementsByClassName('playlist')[this.prevIndex];
-       target.style.backgroundColor = this.backgroundColor;
-       target.style.color = this.foregroundColor;
+       if (target != undefined) {
+         target.style.backgroundColor = this.backgroundColor;
+         target.style.color = this.foregroundColor;
+       }
      },
 
      resetPrevIndex() {
+       this.resetSongStyle();
        this.prevIndex = -1;
+     },
+
+     scrollUp() {
+       this.$refs.playlists.scrollTop += 30;
+     },
+
+     scrollDown() {
+       this.$refs.playlists.scrollTop -= 30;
+     },
+
+     scrollUpPage() {
+       this.$refs.playlists.scrollTop += this.$refs.playlists.offsetHeight;
+     },
+
+     scrollDownPage() {
+       this.$refs.playlists.scrollTop -= this.$refs.playlists.offsetHeight;
+     },
+
+     scrollToBegin() {
+       this.$refs.playlists.scrollTop = 0;
+     },
+
+     scrollToBottom() {
+       this.$refs.playlists.scrollTop = this.$refs.playlists.scrollHeight;
      }
    }
  }
@@ -97,6 +131,7 @@
    height: 82%;
    top: 0;
    right: 0;
+   overflow-y: scroll;
  }
 
  .playlist {

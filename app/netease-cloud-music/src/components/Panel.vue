@@ -58,6 +58,8 @@
      window.playNextOrPrevSong = this.playNextOrPrevSong;
      window.setPanelSongInfo = this.setPanelSongInfo;
      window.setPlayIconStatus = this.setPlayIconStatus;
+     window.playNext = this.playNext;
+     window.playPrev = this.playPrev;
    },
 
    methods: {

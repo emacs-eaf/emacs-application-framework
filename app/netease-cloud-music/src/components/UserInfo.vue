@@ -73,7 +73,7 @@
        this.username = info[0];
        this.avatarUrl = info[1];
      }
-   },
+   }
  }
 </script>
 
@@ -85,7 +85,8 @@
    top: 0;
    left: 0;
    text-align: center;
-   text-overflow: ellipsis;
+   /* text-overflow: ellipsis; */
+   overflow-y: scroll;
  }
 
  #user-status {

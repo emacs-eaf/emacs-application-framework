@@ -49,6 +49,8 @@ class AppBuffer(BrowserBuffer):
                                                      ("play_prev", "playPrev"),
                                                      ("scroll_up", "scrollUp"),
                                                      ("scroll_down", "scrollDown"),
+                                                     ("scroll_up_page", "scrollUpPage"),
+                                                     ("scroll_down_page", "scrollDownPage"),
                                                      ("scroll_to_begin", "scrollToBegin"),
                                                      ("scroll_to_bottom", "scrollToBottom")
                                                      ]:
@@ -85,10 +87,12 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''setPlaylist({})'''.format(
                 list_string_to_list(self.emacs_var_dict[playlist_var])))
 
+    @interactive(insert_or_do=True)
     @QtCore.pyqtSlot()
     def change_repeat_mode(self):
         eval_in_emacs("netease-cloud-music-change-repeat-mode", [])
 
+    @interactive(insert_or_do=True)
     @QtCore.pyqtSlot()
     def play_or_pause(self):
         if self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "":
@@ -113,6 +117,42 @@ class AppBuffer(BrowserBuffer):
     def quit(self):
         eval_in_emacs('''netease-cloud-music-quit''', [])
 
+    @interactive(insert_or_do=True)
+    def kill_current_song(self):
+        eval_in_emacs('''netease-cloud-music-kill-current-song''', [])
+
+    @interactive(insert_or_do=True)
+    def play_randomly(self):
+        eval_in_emacs('''netease-cloud-music-random-play''', [])
+
+    @interactive(insert_or_do=True)
+    def play_with_index(self):
+        eval_in_emacs('''eaf--netease-cloud-music-play-with-index''', [])
+
+    @interactive(insert_or_do=True)
+    def playlist_play(self):
+        eval_in_emacs('''netease-cloud-music-playlist-play''', [])
+
+    @interactive(insert_or_do=True)
+    def seek_forward(self):
+        eval_in_emacs('''netease-cloud-music-seek-forward''', [])
+
+    @interactive(insert_or_do=True)
+    def seek_backward(self):
+        eval_in_emacs('''netease-cloud-music-seek-backward''', [])
+
+    @interactive(insert_or_do=True)
+    def change_lyric_type(self):
+        eval_in_emacs('''netease-cloud-music-change-lyric-type''', [])
+
+    @interactive(insert_or_do=True)
+    def delete_song_from_playlist(self):
+        eval_in_emacs('''eaf--netease-cloud-music-delete-song-from-playlist''', [])
+
+    @interactive(insert_or_do=True)
+    def delete_playing_song(self):
+        eval_in_emacs('''netease-cloud-music-delete-playing-song''', [])
+
     def init_app(self):
         self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],
@@ -128,6 +168,7 @@ class AppBuffer(BrowserBuffer):
         # Init
         eval_in_emacs('''eaf--netease-cloud-music-init''', [])
         self.set_playlist()
+        eval_in_emacs('''eaf--netease-cloud-music--update-song-style''', [])
 
     def update_user_info(self):
         self.buffer_widget.execute_js('''updateUserInfo({})'''.format(
@@ -148,7 +189,6 @@ class AppBuffer(BrowserBuffer):
             self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]))
 
     def set_panel_song(self):
-        '''For ELisp to call'''
         self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format(
             list_string_to_list(self.emacs_var_dict["eaf-netease-cloud-music-current-song"])))
 
