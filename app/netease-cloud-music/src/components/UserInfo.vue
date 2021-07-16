@@ -10,6 +10,7 @@
            :key="userPlaylists.indexOf(playlist)"
            @click="selectPlaylist(playlist[1])"
            :style="{ 'color': borderColor }">
+        <span v-if="showIndex">{{ userPlaylists.indexOf(playlist) + 1 }}.</span>
         <p>{{ playlist[0] }}</p>
       </div>
     </div>
@@ -24,7 +25,8 @@
        avatarUrl: '',
        username: '',
        userPlaylists: [["Local Playlist", 0]],
-       currentPlaylistId: 0
+       currentPlaylistId: 0,
+       showIndex: false
      }
    },
 
@@ -37,6 +39,9 @@
      window.setUserPlaylists = this.setUserPlaylists;
      window.updateUserInfo = this.updateUserInfo;
      window.selectPlaylist = this.selectPlaylist;
+     window.setIndexStyle = this.setIndexStyle;
+     window.scrollPlaylistUp = this.scrollPlaylistUp;
+     window.scrollPlaylistDown = this.scrollPlaylistDown;
    },
 
    methods: {
@@ -72,6 +77,18 @@
      updateUserInfo(info) {
        this.username = info[0];
        this.avatarUrl = info[1];
+     },
+
+     setIndexStyle(show) {
+       this.showIndex = show;
+     },
+
+     scrollPlaylistUp() {
+       this.$refs.allplaylists.scrollTop += 30;
+     },
+
+     scrollPlaylistDown() {
+       this.$refs.allplaylists.scrollTop -= 30;
      }
    }
  }

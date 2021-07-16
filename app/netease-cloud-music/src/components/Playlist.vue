@@ -12,7 +12,7 @@
         <span class="song-index">{{ playlists.indexOf(song) + 1 }}</span>
         .
         <span class="song">{{ song[1] }}</span>
-        &nbsp;-&nbsp;
+        <spac v-if="song[3] != ''">&nbsp;-&nbsp;</spac>
         <span class="artist">{{ song[3] }}</span>
       </p>
     </div>
@@ -27,8 +27,8 @@
    data() {
      return {
        playlists: [],
-       prevIndex: -1
-       // TODO: Debug
+       prevIndex: -1,
+       searchMode: false
      }
    },
    props: {
@@ -49,6 +49,7 @@
      window.scrollDownPage = this.scrollDownPage;
      window.scrollToBegin = this.scrollToBegin;
      window.scrollToBottom = this.scrollToBottom;
+     window.changePlaylistMode = this.changePlaylistMode;
    },
 
    created() {
@@ -59,29 +60,38 @@
 
    methods: {
      setPlaylist(songs) {
-       this.playlists = songs;
+       if (!this.searchMode) {
+         this.playlists = songs;
+       }
      },
 
      playSong(songInfo) {
-       window.pyobject.play_song([Number(songInfo[0]), songInfo[1], songInfo[3]]);
+       if (!this.searchMode) {
+         window.pyobject.play_song([Number(songInfo[0]), songInfo[1], songInfo[3]]);
+       } else {
+         window.pyobject.switch_enter([this.playlists.indexOf(songInfo)]);
+         this.searchMode = false;
+       }
      },
 
      changeSongStyle(index) {
        /* Change the song's style to show that the song is playing */
-       var target = this.$refs.playlists.getElementsByClassName('playlist')[index];
-       if (this.prevIndex != -1) {
-         var prevTarget = this.$refs.playlists.getElementsByClassName('playlist')[this.prevIndex];
+       if (!this.searchMode) {
+         var target = this.$refs.playlists.getElementsByClassName('playlist')[index];
+         if (this.prevIndex != -1) {
+           var prevTarget = this.$refs.playlists.getElementsByClassName('playlist')[this.prevIndex];
 
-         if (prevTarget.style.backgroundColor != this.backgroundColor) {
-           prevTarget.style.backgroundColor = this.backgroundColor;
-           prevTarget.style.color = this.foregroundColor;
+           if (prevTarget != undefined && prevTarget.style.backgroundColor != this.backgroundColor) {
+             prevTarget.style.backgroundColor = this.backgroundColor;
+             prevTarget.style.color = this.foregroundColor;
+           }
          }
-       }
 
-       target.style.backgroundColor = this.foregroundColor;
-       target.style.color = this.backgroundColor;
-       target.scrollIntoView({block: 'center'});
-       this.prevIndex = index;
+         target.style.backgroundColor = this.foregroundColor;
+         target.style.color = this.backgroundColor;
+         target.scrollIntoView({block: 'center'});
+         this.prevIndex = index;
+       }
      },
 
      resetSongStyle() {
@@ -119,6 +129,10 @@
 
      scrollToBottom() {
        this.$refs.playlists.scrollTop = this.$refs.playlists.scrollHeight;
+     },
+
+     changePlaylistMode(mode) {
+       this.searchMode = mode;
      }
    }
  }

@@ -52,7 +52,9 @@ class AppBuffer(BrowserBuffer):
                                                      ("scroll_up_page", "scrollUpPage"),
                                                      ("scroll_down_page", "scrollDownPage"),
                                                      ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom")
+                                                     ("scroll_to_bottom", "scrollToBottom"),
+                                                     ("scroll_playlist_up", "scrollPlaylistUp"),
+                                                     ("scroll_playlist_down", "scrollPlaylistDown"),
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
 
@@ -108,6 +110,10 @@ class AppBuffer(BrowserBuffer):
             icon = 'pause-circle'
             
         self.buffer_widget.execute_js('''setPlayIconStatus(\"{}\")'''.format(icon))
+
+    @QtCore.pyqtSlot(list)
+    def switch_enter(self, index):
+        eval_in_emacs('''eaf--netease-cloud-music-switch-enter''', index)
 
     @interactive(insert_or_do=True)
     def back_to_last_buffer(self):
@@ -165,6 +171,62 @@ class AppBuffer(BrowserBuffer):
     def clear_playlist(self):
         eval_in_emacs('''netease-cloud-music-clear-playlist''', [])
 
+    @interactive(insert_or_do=True)
+    def write_mode_enter(self):
+        eval_in_emacs('''eaf--netease-cloud-music-write-mode-enter''', [])
+
+    @interactive(insert_or_do=True)
+    def search_song(self):
+        self.buffer_widget.execute_js('''resetSongStyle()''')
+        eval_in_emacs('''netease-cloud-music-search-song''', [])
+
+    @interactive(insert_or_do=True)
+    def search_playlist(self):
+        self.buffer_widget.execute_js('''resetSongStyle()''')
+        eval_in_emacs('''netease-cloud-music-search-playlist''', [])
+
+    @interactive(insert_or_do=True)
+    def search_next_page(self):
+        eval_in_emacs('''netease-cloud-music-switch-next-page''', [])
+
+    @interactive(insert_or_do=True)
+    def search_prev_page(self):
+        eval_in_emacs('''netease-cloud-music-switch-prev-page''', [])
+
+    @interactive(insert_or_do=True)
+    def search_add_to_playlist(self):
+        eval_in_emacs('''eaf--netease-cloud-music-add-to-playlist''', [])
+
+    @interactive(insert_or_do=True)
+    def search_add_page(self):
+        eval_in_emacs('''netease-cloud-music-switch-add-page''', [])
+
+    @interactive(insert_or_do=True)
+    def switch_enter_with_index(self):
+        eval_in_emacs('''eaf--netease-cloud-music-switch-enter''', [])
+
+    @interactive(insert_or_do=True)
+    def cancel_search(self):
+        self.buffer_widget.execute_js('''changePlaylistMode(false)''')
+        self.set_playlist()
+        eval_in_emacs('''netease-cloud-music-adjust-song-index''', [])
+
+    @interactive(insert_or_do=True)
+    def switch_playlist(self):
+        eval_in_emacs('''eaf--netease-cloud-music-switch-playlist''', [])
+
+    @interactive(insert_or_do=True)
+    def create_playlist(self):
+        eval_in_emacs('''netease-cloud-music-create-playlist''', [])
+
+    @interactive(insert_or_do=True)
+    def change_playlist_name(self):
+        eval_in_emacs('''netease-cloud-music-change-playlist-name''', [])
+
+    @interactive(insert_or_do=True)
+    def delete_playlist(self):
+        eval_in_emacs('''netease-cloud-music-delete-playlist''', [])
+
     def init_app(self):
         self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],
@@ -186,10 +248,14 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''updateUserInfo({})'''.format(
             list_string_to_list(self.emacs_var_dict["eaf-netease-cloud-music-user"])))
 
-    def refresh_user_playlist(self):
+    def refresh_user_playlist(self, playlists=None):
         '''Only refresh the value.'''
-        self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(
-            list_string_to_list(self.emacs_var_dict["eaf-netease-cloud-music-playlists"])))
+        if playlists:
+            self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(
+                list_string_to_list(playlists)))
+        else:
+            self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(
+                list_string_to_list(self.emacs_var_dict["eaf-netease-cloud-music-playlists"])))
 
     def update_playlist_style(self, init=False):
         if init:
@@ -200,9 +266,12 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js(func_string.format(
             self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]))
 
-    def set_panel_song(self):
-        self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format(
-            list_string_to_list(self.emacs_var_dict["eaf-netease-cloud-music-current-song"])))
+    def set_panel_song(self, name=None, artist=None):
+        if name and artist:
+            self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format([name, artist]))
+        else:
+            self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format(
+                list_string_to_list(self.emacs_var_dict["eaf-netease-cloud-music-current-song"])))
 
     def set_repeat_mode(self):
         self.buffer_widget.execute_js('''setRepeatMode(\"{}\")'''.format(
@@ -213,3 +282,9 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''resetSongStyle()''')
         else:
             self.buffer_widget.execute_js('''changeSongStyle({})'''.format(index))
+
+    def change_playlist_mode(self, mode):
+        self.buffer_widget.execute_js('''changePlaylistMode({})'''.format(mode))
+
+    def set_index_style(self, show):
+        self.buffer_widget.execute_js('''setIndexStyle({})'''.format(show))
