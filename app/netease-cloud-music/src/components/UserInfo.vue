@@ -1,5 +1,8 @@
 <template>
-  <div id="user-info" :style="{ 'border-bottom': '2px solid ' + borderColor, 'border-right': '2px solid ' + borderColor }">
+  <div
+    id="user-info"
+    :style="{ 'border-bottom': '2px solid ' + borderColor, 'border-right': '2px solid ' + borderColor }"
+    ref="userinfo">
     <div id="user-status">
       <img alt="No user" :src="avatarUrl" v-if="avatarUrl" />
       <h1>{{ username }}</h1>
@@ -84,11 +87,11 @@
      },
 
      scrollPlaylistUp() {
-       this.$refs.allplaylists.scrollTop += 30;
+       this.$refs.userinfo.scrollTop += 30;
      },
 
      scrollPlaylistDown() {
-       this.$refs.allplaylists.scrollTop -= 30;
+       this.$refs.userinfo.scrollTop -= 30;
      }
    }
  }
