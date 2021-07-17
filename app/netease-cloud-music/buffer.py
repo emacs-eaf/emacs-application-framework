@@ -120,66 +120,6 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs('''eaf--netease-cloud-music-switch-enter''', index)
 
     @interactive(insert_or_do=True)
-    def back_to_last_buffer(self):
-        eval_in_emacs('''netease-cloud-music-back''', [])
-
-    @interactive(insert_or_do=True)
-    def quit(self):
-        eval_in_emacs('''netease-cloud-music-quit''', [])
-
-    @interactive(insert_or_do=True)
-    def kill_current_song(self):
-        eval_in_emacs('''netease-cloud-music-kill-current-song''', [])
-
-    @interactive(insert_or_do=True)
-    def play_randomly(self):
-        eval_in_emacs('''netease-cloud-music-random-play''', [])
-
-    @interactive(insert_or_do=True)
-    def play_with_index(self):
-        eval_in_emacs('''eaf--netease-cloud-music-play-with-index''', [])
-
-    @interactive(insert_or_do=True)
-    def playlist_play(self):
-        eval_in_emacs('''netease-cloud-music-playlist-play''', [])
-
-    @interactive(insert_or_do=True)
-    def seek_forward(self):
-        eval_in_emacs('''netease-cloud-music-seek-forward''', [])
-
-    @interactive(insert_or_do=True)
-    def seek_backward(self):
-        eval_in_emacs('''netease-cloud-music-seek-backward''', [])
-
-    @interactive(insert_or_do=True)
-    def change_lyric_type(self):
-        eval_in_emacs('''netease-cloud-music-change-lyric-type''', [])
-
-    @interactive(insert_or_do=True)
-    def delete_song_from_playlist(self):
-        eval_in_emacs('''eaf--netease-cloud-music-delete-song-from-playlist''', [])
-
-    @interactive(insert_or_do=True)
-    def delete_playing_song(self):
-        eval_in_emacs('''netease-cloud-music-delete-playing-song''', [])
-
-    @interactive(insert_or_do=True)
-    def move_song_up(self):
-        eval_in_emacs('''eaf--netease-cloud-music-move-song''', [True])
-
-    @interactive(insert_or_do=True)
-    def move_song_down(self):
-        eval_in_emacs('''eaf--netease-cloud-music-move-song''', [False])
-
-    @interactive(insert_or_do=True)
-    def clear_playlist(self):
-        eval_in_emacs('''netease-cloud-music-clear-playlist''', [])
-
-    @interactive(insert_or_do=True)
-    def write_mode_enter(self):
-        eval_in_emacs('''eaf--netease-cloud-music-write-mode-enter''', [])
-
-    @interactive(insert_or_do=True)
     def search_song(self):
         self.buffer_widget.execute_js('''resetSongStyle()''')
         eval_in_emacs('''netease-cloud-music-search-song''', [])
@@ -190,50 +130,10 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs('''netease-cloud-music-search-playlist''', [])
 
     @interactive(insert_or_do=True)
-    def search_next_page(self):
-        eval_in_emacs('''netease-cloud-music-switch-next-page''', [])
-
-    @interactive(insert_or_do=True)
-    def search_prev_page(self):
-        eval_in_emacs('''netease-cloud-music-switch-prev-page''', [])
-
-    @interactive(insert_or_do=True)
-    def search_add_to_playlist(self):
-        eval_in_emacs('''eaf--netease-cloud-music-add-to-playlist''', [])
-
-    @interactive(insert_or_do=True)
-    def search_add_page(self):
-        eval_in_emacs('''netease-cloud-music-switch-add-page''', [])
-
-    @interactive(insert_or_do=True)
-    def switch_enter_with_index(self):
-        eval_in_emacs('''eaf--netease-cloud-music-switch-enter''', [])
-
-    @interactive(insert_or_do=True)
     def cancel_search(self):
         self.buffer_widget.execute_js('''changePlaylistMode(false)''')
         self.set_playlist()
         eval_in_emacs('''netease-cloud-music-adjust-song-index''', [])
-
-    @interactive(insert_or_do=True)
-    def switch_playlist(self):
-        eval_in_emacs('''eaf--netease-cloud-music-switch-playlist''', [])
-
-    @interactive(insert_or_do=True)
-    def create_playlist(self):
-        eval_in_emacs('''netease-cloud-music-create-playlist''', [])
-
-    @interactive(insert_or_do=True)
-    def change_playlist_name(self):
-        eval_in_emacs('''netease-cloud-music-change-playlist-name''', [])
-
-    @interactive(insert_or_do=True)
-    def delete_playlist(self):
-        eval_in_emacs('''netease-cloud-music-delete-playlist''', [])
-
-    @interactive(insert_or_do=True)
-    def login(self):
-        eval_in_emacs('''netease-cloud-music-login''', [])
 
     def init_app(self):
         self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
