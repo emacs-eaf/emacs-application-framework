@@ -103,8 +103,12 @@ class AppBuffer(BrowserBuffer):
         eval_in_emacs("netease-cloud-music-pause-or-continue", [])
 
     @QtCore.pyqtSlot()
-    def update_play_status(self):
-        if (self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "") or (self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "paused"):
+    def update_play_status(self, status=None):
+        if status == "playing":
+            icon = 'pause-circle'
+        elif status == "paused":
+            icon = 'play-circle'
+        elif (self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "") or (self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "paused"):
             icon = 'play-circle'
         else:
             icon = 'pause-circle'
