@@ -12,6 +12,7 @@
     "app/markdown-previewer",
     "app/image-viewer",
     "app/music-player",
+    "app/netease-cloud-music",
     "app/system-monitor",
     "app/vue-demo",
     "app/terminal"
@@ -19,7 +20,8 @@
   "vueApps": [
     "app/vue-demo",
     "app/system-monitor",
-    "app/music-player"
+    "app/music-player",
+    "app/netease-cloud-music"
   ],
   "rebuildApps": [
     "app/terminal"
