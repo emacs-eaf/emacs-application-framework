@@ -231,6 +231,10 @@ class AppBuffer(BrowserBuffer):
     def delete_playlist(self):
         eval_in_emacs('''netease-cloud-music-delete-playlist''', [])
 
+    @interactive(insert_or_do=True)
+    def login(self):
+        eval_in_emacs('''netease-cloud-music-login''', [])
+
     def init_app(self):
         self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
             self.emacs_var_dict["eaf-emacs-theme-background-color"],

@@ -822,6 +822,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("m" . "change_playlist_name")
     ("M" . "delete_playlist")
     ("g" . "cancel_search")
+    ("l" . "login")
     )
   "The keybinding of EAF Netease Cloud Music."
   :type 'cons)
