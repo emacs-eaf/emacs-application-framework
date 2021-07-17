@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jun 18 00:33:02 2021 (-0400)
+;; Last-Updated: Fri Jul  9 12:18:52 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -77,8 +77,9 @@
 (defun add-subdirs-to-load-path (dir)
   "Recursive add directory DIR to `load-path'."
   (mapcar
-   (lambda (path) (add-to-list 'load-path path))
-   (delete-dups (mapcar 'file-name-directory (directory-files-recursively dir "\.el$")))))
+   (lambda (path)
+     (add-to-list 'load-path path))
+   (delete-dups (mapcar 'file-name-directory (directory-files-recursively dir "\\.el$")))))
 
 (add-subdirs-to-load-path (expand-file-name "app" (file-name-directory (locate-library "eaf"))))
 
