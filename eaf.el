@@ -2186,12 +2186,14 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-netease-cloud-music ()
   "Open EAF netease cloud music."
   (interactive)
-  (if (not (featurep 'netease-cloud-music))
-      (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")
-    (setq netease-cloud-music-last-buffer (current-buffer))
-    (if (get-buffer "eaf-netease-cloud-music")
-        (switch-to-buffer "eaf-netease-cloud-music")
-      (eaf-open "eaf-netease-cloud-music" "netease-cloud-music"))))
+  (if (ignore-errors (load-library "netease-cloud-music"))
+      (progn
+        (setq netease-cloud-music-last-buffer (current-buffer))
+        (if (get-buffer "eaf-netease-cloud-music")
+            (switch-to-buffer "eaf-netease-cloud-music")
+          (eaf-open "eaf-netease-cloud-music" "netease-cloud-music")))
+    (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")
+    ))
 
 (defun eaf-open-system-monitor ()
   "Open EAF system monitor."
