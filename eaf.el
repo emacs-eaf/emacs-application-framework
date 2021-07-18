@@ -783,8 +783,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-netease-cloud-music-keybinding
   '(("<f12>" . "open_devtools")
-    ("<up>" . "eaf--netease-cloud-music-move-song")
-    ("<down>" . "eaf--netease-cloud-music-move-song")
+    ("<up>" . "eaf--netease-cloud-music-move-song-up")
+    ("<down>" . "eaf--netease-cloud-music-move-song-down")
     ("SPC" . "play_or_pause")
     ("<return>" . "eaf--netease-cloud-music-switch-enter")
     ("C-n" . "scroll_up")
@@ -2186,7 +2186,8 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-netease-cloud-music ()
   "Open EAF netease cloud music."
   (interactive)
-  (if (ignore-errors (load-library "netease-cloud-music"))
+  (if (ignore-errors (or (featurep 'netease-cloud-music)
+                         (load-library "netease-cloud-music")))
       (progn
         (setq netease-cloud-music-last-buffer (current-buffer))
         (if (get-buffer "eaf-netease-cloud-music")
@@ -2976,23 +2977,33 @@ If Up is not non-nil, move the song up.Otherwise move it down."
         (netease-cloud-music-move-up (1- index))
       (netease-cloud-music-move-down (1- index)))))
 
+(defun eaf--netease-cloud-music-move-song-up ()
+  "Move song up."
+  (interactive)
+  (eaf--netease-cloud-music-move-song t))
+
+(defun eaf--netease-cloud-music-move-song-down ()
+  "Move song down."
+  (interactive)
+  (eaf--netease-cloud-music-move-song nil))
+
 (defun eaf--netease-cloud-music-write-mode-enter ()
   "Enter the write mode."
   (switch-to-buffer (get-buffer-create "eaf-netease-cloud-music-write"))
   (netease-cloud-music-write-mode))
 
-(defun eaf--netease-cloud-music-switch-enter (&optional index)
+(defun eaf--netease-cloud-music-switch-enter (index)
   "Add current song or playlist into current playlist."
-  (cond ((null index)
-         (setq index (1- (read-number "Enter the item's index: "))))
-        ((stringp index)
-         (setq index (string-to-number index))))
+  (interactive "dEnter the item's index: ")
+  (when (stringp index)
+    (setq index (string-to-number index)))
   (if (eq netease-cloud-music-search-type 'song)
       (netease-cloud-music-switch-enter index)
     (netease-cloud-music-playlist-enter index)))
 
 (defun eaf--netease-cloud-music-switch-playlist ()
   "Switch playlist by getting index."
+  (interactive)
   (with-current-buffer "eaf-netease-cloud-music"
     (eaf-call-sync "call_function_with_args" eaf--buffer-id
                    "set_index_style" "true")
@@ -3006,6 +3017,7 @@ If Up is not non-nil, move the song up.Otherwise move it down."
 
 (defun eaf--netease-cloud-music-add-to-playlist ()
   "Add the search songs or playlists to current playlist."
+  (interactive)
   (if (eq netease-cloud-music-search-type 'song)
       (netease-cloud-music-switch-add-to-playlist)
     (netease-cloud-music-playlist-add-all)))
