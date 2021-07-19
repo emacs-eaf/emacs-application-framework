@@ -940,6 +940,12 @@ Default is `below', you can chang it with `right'."
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
+(defcustom eaf-kill-process-after-last-buffer-closed t
+  "Kill eaf process when last eaf buffer closed, default is non-nil.
+
+Improve EAF new page creation speed if this option is nil."
+  :type 'boolean)
+
 (defcustom eaf-wm-name ""
   "The desktop name, set by function `eaf--get-current-desktop-name'."
   :type 'string)
@@ -1661,12 +1667,13 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 
   ;; Kill eaf process when last eaf buffer closed.
   ;; We need add timer to avoid the last web page kill when terminal is exited.
-  (run-at-time
-   5 nil
-   (lambda ()
-     (when (equal (length (eaf--get-eaf-buffers)) 0)
-       (eaf--kill-python-process))
-     )))
+  (when eaf-kill-process-after-last-buffer-closed
+    (run-at-time
+     5 nil
+     (lambda ()
+       (when (equal (length (eaf--get-eaf-buffers)) 0)
+         (eaf--kill-python-process))
+       ))))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
