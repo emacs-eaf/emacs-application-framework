@@ -823,6 +823,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("M" . "netease-cloud-music-delete-playlist")
     ("g" . "cancel_search")
     ("l" . "netease-cloud-music-login")
+    ("e" . "netease-cloud-music-get-recommend-songs")
+    ("E" . "netease-cloud-music-get-recommend-playlists")
     )
   "The keybinding of EAF Netease Cloud Music."
   :type 'cons)
@@ -2989,14 +2991,17 @@ If Up is not non-nil, move the song up.Otherwise move it down."
 
 (defun eaf--netease-cloud-music-write-mode-enter ()
   "Enter the write mode."
+  (interactive)
   (switch-to-buffer (get-buffer-create "eaf-netease-cloud-music-write"))
   (netease-cloud-music-write-mode))
 
-(defun eaf--netease-cloud-music-switch-enter (index)
+(defun eaf--netease-cloud-music-switch-enter (&optional index)
   "Add current song or playlist into current playlist."
-  (interactive "dEnter the item's index: ")
-  (when (stringp index)
-    (setq index (string-to-number index)))
+  (interactive)
+  (cond ((null index)
+         (setq index (1- (read-number "Enter the item's index: "))))
+        ((stringp index)
+         (setq index (string-to-number index))))
   (if (eq netease-cloud-music-search-type 'song)
       (netease-cloud-music-switch-enter index)
     (netease-cloud-music-playlist-enter index)))
