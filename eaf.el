@@ -825,6 +825,7 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
     ("j" . "netease-cloud-music-storage-song")
     ("J" . "netease-cloud-music-add-storage-to-current-playlist")
     ("o" . "netease-cloud-music-show-storage")
+    ("O" . "netease-cloud-music-delete-song-from-storage")
     ("K" . "netease-cloud-music-clear-storage")
     )
   "The keybinding of EAF Netease Cloud Music."
