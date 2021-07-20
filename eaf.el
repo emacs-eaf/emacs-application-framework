@@ -246,20 +246,20 @@ been initialized."
 (defun eaf--start-epc-server ()
   (unless eaf-server
     (setq eaf-server (epcs:server-start
-                  (lambda (mngr)
-                    (let ((mngr mngr))
-                      (epc:define-method
-                       mngr 'eval-in-emacs
-                       (lambda (&rest args)
-                         ;; Decode argument with Base64 format automatically.
-                         (apply (read (car args))
-                                (mapcar
-                                 (lambda (arg)
-                                   (let ((arg (eaf--decode-string arg)))
-                                     (cond ((string-prefix-p "'" arg)
-                                            (read (substring arg 1)))
-                                           (t arg)))) (cdr args)))))))
-                  ))
+                      (lambda (mngr)
+                        (let ((mngr mngr))
+                          (epc:define-method
+                           mngr 'eval-in-emacs
+                           (lambda (&rest args)
+                             ;; Decode argument with Base64 format automatically.
+                             (apply (read (car args))
+                                    (mapcar
+                                     (lambda (arg)
+                                       (let ((arg (eaf--decode-string arg)))
+                                         (cond ((string-prefix-p "'" arg)
+                                                (read (substring arg 1)))
+                                               (t arg)))) (cdr args)))))))
+                      ))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
       (error "eaf-server fails to start.")
@@ -782,6 +782,12 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF Music Player."
   :type 'cons)
 
+(defcustom eaf-file-manager-keybinding
+  '(("<f12>" . "open_devtools")
+    )
+  "The keybinding of EAF File Manager."
+  :type 'cons)
+
 (defcustom eaf-netease-cloud-music-keybinding
   '(("<f12>" . "open_devtools")
     ("<up>" . "eaf--netease-cloud-music-move-song-up")
@@ -934,6 +940,12 @@ Default is `below', you can chang it with `right'."
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
+(defcustom eaf-kill-process-after-last-buffer-closed t
+  "Kill eaf process when last eaf buffer closed, default is non-nil.
+
+Improve EAF new page creation speed if this option is nil."
+  :type 'boolean)
+
 (defcustom eaf-wm-name ""
   "The desktop name, set by function `eaf--get-current-desktop-name'."
   :type 'string)
@@ -964,6 +976,7 @@ Please fill an issue if it still doesn't work."
     ("js-video-player" . eaf-js-video-player-keybinding)
     ("image-viewer" . eaf-image-viewer-keybinding)
     ("music-player" . eaf-music-player-keybinding)
+    ("file-manager" . eaf-file-manager-keybinding)
     ("netease-cloud-music" . eaf-netease-cloud-music-keybinding)
     ("system-monitor" . eaf-system-monitor-keybinding)
     ("camera" . eaf-camera-keybinding)
@@ -1654,12 +1667,13 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 
   ;; Kill eaf process when last eaf buffer closed.
   ;; We need add timer to avoid the last web page kill when terminal is exited.
-  (run-at-time
-   5 nil
-   (lambda ()
-     (when (equal (length (eaf--get-eaf-buffers)) 0)
-       (eaf--kill-python-process))
-     )))
+  (when eaf-kill-process-after-last-buffer-closed
+    (run-at-time
+     5 nil
+     (lambda ()
+       (when (equal (length (eaf--get-eaf-buffers)) 0)
+         (eaf--kill-python-process))
+       ))))
 
 (defun eaf--monitor-emacs-kill ()
   "Function monitoring when Emacs is killed."
@@ -2185,6 +2199,11 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-vue-demo" "vue-demo"))
 
+(defun eaf-open-file-manager ()
+  "Open EAF file manager."
+  (interactive)
+  (eaf-open "eaf-file-manager" "file-manager"))
+
 (defun eaf-open-music-player (music-file)
   "Open EAF music player."
   (interactive "fOpen music: ")
@@ -2322,7 +2341,7 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
     (find-file pdf-history-file-path)
     (goto-char (point-min))
     (if (search-forward url nil t) ;; search with no error
-        (kill-whole-line))  ;; Delete this record
+        (kill-whole-line))         ;; Delete this record
     (goto-char (point-min))
     (insert (concat url "\n"))
     (basic-save-buffer)
@@ -2340,16 +2359,16 @@ This function works best if paired with a fuzzy search package."
          (history-pattern "^\\(.+\\)\\.pdf$")
          (history-file-exists (file-exists-p pdf-history-file-path))
          (history-pdf (completing-read
-                   "[EAF/pdf] Search || History: "
-                   (if history-file-exists
-                       (mapcar
-                        (lambda (h) (when (string-match history-pattern h)
-                                 (if (file-exists-p h)
-                                     (format "%s" h))))
-                        (with-temp-buffer (insert-file-contents pdf-history-file-path)
-                                          (split-string (buffer-string) "\n" t)))
-                     (make-directory (file-name-directory pdf-history-file-path) t)
-                     (with-temp-file pdf-history-file-path "")))))
+                       "[EAF/pdf] Search || History: "
+                       (if history-file-exists
+                           (mapcar
+                            (lambda (h) (when (string-match history-pattern h)
+                                          (if (file-exists-p h)
+                                              (format "%s" h))))
+                            (with-temp-buffer (insert-file-contents pdf-history-file-path)
+                                              (split-string (buffer-string) "\n" t)))
+                         (make-directory (file-name-directory pdf-history-file-path) t)
+                         (with-temp-file pdf-history-file-path "")))))
     (if history-pdf (eaf-open history-pdf))))
 
 ;;;###autoload
