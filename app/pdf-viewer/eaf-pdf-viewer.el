@@ -158,6 +158,58 @@ The key is the annot id on PAGE."
         (page (gethash "page" annot)))
     (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_rect" (format "%s" page) rect)))
 
+(defun eaf--pdf-viewer-bookmark ()
+  "Restore EAF buffer according to pdf bookmark from the current file path or web URL."
+  `((handler . eaf--bookmark-restore)
+    (eaf-app . "pdf-viewer")
+    (defaults . ,(list eaf--bookmark-title))
+    (filename . ,(eaf-get-path-or-url))))
+
+(defun eaf-store-pdf-history (url)
+  "A wrapper around `eaf-open' that store pdf history candidates."
+  (let* (found-history-result (pdf-history-file-path
+                               (concat eaf-config-location
+                                       (file-name-as-directory "pdf")
+                                       (file-name-as-directory "history")
+                                       "log.txt")))
+    (if (not (file-exists-p pdf-history-file-path))
+        (progn
+          ;; If it does not exist, create a folder to store the log and create a log file
+          (make-directory (file-name-directory pdf-history-file-path) t)
+          (with-temp-file pdf-history-file-path "")))
+    (find-file pdf-history-file-path)
+    (goto-char (point-min))
+    (if (search-forward url nil t) ;; search with no error
+        (kill-whole-line))         ;; Delete this record
+    (goto-char (point-min))
+    (insert (concat url "\n"))
+    (basic-save-buffer)
+    (kill-current-buffer)))
+
+(defun eaf-open-pdf-from-history ()
+  "A wrapper around `eaf-open' that provides pdf history candidates.
+This function works best if paired with a fuzzy search package."
+  (interactive)
+  (let* ((pdf-history-file-path
+          (concat eaf-config-location
+                  (file-name-as-directory "pdf")
+                  (file-name-as-directory "history")
+                  "log.txt"))
+         (history-pattern "^\\(.+\\)\\.pdf$")
+         (history-file-exists (file-exists-p pdf-history-file-path))
+         (history-pdf (completing-read
+                       "[EAF/pdf] Search || History: "
+                       (if history-file-exists
+                           (mapcar
+                            (lambda (h) (when (string-match history-pattern h)
+                                      (if (file-exists-p h)
+                                          (format "%s" h))))
+                            (with-temp-buffer (insert-file-contents pdf-history-file-path)
+                                              (split-string (buffer-string) "\n" t)))
+                         (make-directory (file-name-directory pdf-history-file-path) t)
+                         (with-temp-file pdf-history-file-path "")))))
+    (if history-pdf (eaf-open history-pdf))))
+
 (provide 'eaf-pdf-viewer)
 
 ;;; eaf-pdf-viewer.el ends here
