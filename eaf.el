@@ -106,6 +106,7 @@
 (require 'eaf-elfeed)
 (require 'eaf-mail)
 (require 'eaf-browser)
+(require 'eaf-terminal)
 (require 'epc)
 (require 'epcs)
 (require 'json)
@@ -1584,13 +1585,6 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (interactive)
   (eaf-call-async "send_key_sequence" eaf--buffer-id "S-RET"))
 
-(defun eaf-send-second-key-sequence ()
-  "Send second part of key sequence to terminal."
-  (interactive)
-  (eaf-call-async "send_key_sequence"
-                  eaf--buffer-id
-                  (nth 1 (split-string (key-description (this-command-keys-vector))))))
-
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
 
@@ -1871,35 +1865,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   (interactive)
   (eaf-open "eaf-camera" "camera"))
 
-(defun eaf-ipython-command ()
-  (if (eaf--called-from-wsl-on-windows-p)
-      "ipython.exe"
-    "ipython"))
-
-(defun eaf-open-ipython ()
-  "Open ipython in terminal."
-  (interactive)
-  (if (executable-find (eaf-ipython-command))
-      (eaf-terminal-run-command-in-dir
-       (eaf-ipython-command)
-       (eaf--non-remote-default-directory))
-    (message "[EAF/terminal] Please install ipython first.")))
-
-(defun eaf-open-jupyter ()
-  "Open jupyter."
-  (interactive)
-  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
-                           "jupyter-qtconsole.exe"
-                         "jupyter-qtconsole"))
-      (let* ((data (json-read-from-string (shell-command-to-string (if (eaf--called-from-wsl-on-windows-p)
-                                                                       "jupyter.exe kernelspec list --json"
-                                                                     "jupyter kernelspec list --json"))))
-             (kernel (completing-read "Jupyter Kernels: " (mapcar #'car (alist-get 'kernelspecs data))))
-             (args (make-hash-table :test 'equal)))
-        (puthash "kernel" kernel args)
-        (eaf-open (format "eaf-jupyter-%s" kernel) "jupyter" (json-encode-hash-table args) t))
-    (message "[EAF/jupyter] Please install qtconsole first.")))
-
 ;;;###autoload
 (defun eaf-open-terminal ()
   "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
@@ -1912,32 +1877,12 @@ To override and open a new terminal regardless, call interactively with prefix a
   (interactive)
   (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
 
-(defun eaf-terminal-run-command-in-dir (command dir &optional always-new)
-  "Run COMMAND in terminal in directory DIR.
-
-If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
-  (let* ((args (make-hash-table :test 'equal))
-         (expand-dir (expand-file-name dir)))
-    (puthash "command" command args)
-    (puthash "directory"
-             (if (eaf--called-from-wsl-on-windows-p)
-                 (eaf--translate-wsl-url-to-windows expand-dir)
-               expand-dir)
-             args)
-    (eaf-open dir "terminal" (json-encode-hash-table args) always-new)))
-
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
   (if (or (file-remote-p default-directory)
           (not (file-accessible-directory-p default-directory)))
       (getenv "HOME")
     default-directory))
-
-(defun eaf--generate-terminal-command ()
-  (if (or (eaf--called-from-wsl-on-windows-p)
-          (eq system-type 'windows-nt))
-      "powershell.exe"
-    (getenv "SHELL")))
 
 (defun eaf--get-app-for-extension (extension-name)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
