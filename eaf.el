@@ -101,6 +101,7 @@
 (require 'cl-lib)
 (require 'eaf-interleave)
 (require 'eaf-mindmap)
+(require 'eaf-pdf-viewer)
 (require 'eaf-netease-cloud-music)
 (require 'epc)
 (require 'epcs)
@@ -854,15 +855,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF System Monitor."
   :type 'cons)
 
-(defcustom eaf-pdf-extension-list
-  '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
-  "The extension list of pdf application."
-  :type 'cons)
-
-(defcustom eaf-pdf-store-history t
-  "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
-  :type 'boolean)
-
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
@@ -1040,12 +1032,6 @@ Python process only create application view when Emacs window or buffer state ch
   "When non-nil, EAF will intelligently hide modeline as necessray.")
 
 (defvar eaf-buffer-title-format "%s")
-
-(defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
-  "The name of pdf-outline-buffer.")
-
-(defvar eaf-pdf-outline-window-configuration nil
-  "Save window configure before popup outline buffer.")
 
 (defvar-local eaf--bookmark-title nil)
 
@@ -2662,65 +2648,6 @@ Otherwise send key 'esc' to browser."
   (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
   (eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
   (eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
-
-(define-minor-mode eaf-pdf-outline-mode
-  "EAF pdf outline mode."
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
-            (define-key map (kbd "q") 'quit-window)
-            map))
-
-(defun eaf-pdf-outline ()
-  "Create PDF outline."
-  (interactive)
-  (let ((buffer-name (buffer-name (current-buffer)))
-        (toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc"))
-        (page-number (string-to-number (eaf-call-sync "call_function" eaf--buffer-id "current_page"))))
-    ;; Save window configuration before outline.
-    (setq eaf-pdf-outline-window-configuration (current-window-configuration))
-
-    ;; Insert outline content.
-    (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
-      (setq buffer-read-only nil)
-      (erase-buffer)
-      (insert toc)
-      (setq toc (mapcar (lambda (line)
-                          (string-to-number (car (last (split-string line " ")))))
-                        (butlast (split-string (buffer-string) "\n"))))
-      (goto-line (seq-count (apply-partially #'>= page-number) toc))
-      (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
-      (let ((view-read-only nil))
-        (read-only-mode 1))
-      (eaf-pdf-outline-mode 1))
-
-    ;; Popup ouline buffer.
-    (pop-to-buffer eaf-pdf-outline-buffer-name)))
-
-(defun eaf-pdf-outline-jump ()
-  "Jump into specific page."
-  (interactive)
-  (let* ((line (thing-at-point 'line))
-         (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
-    ;; Jump to page.
-    (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
-    (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
-
-    ;; Restore window configuration before outline operation.
-    (when eaf-pdf-outline-window-configuration
-      (set-window-configuration eaf-pdf-outline-window-configuration)
-      (setq eaf-pdf-outline-window-configuration nil))))
-
-(defun eaf-pdf-get-annots (page)
-  "Return a map of annotations on PAGE.
-
-The key is the annot id on PAGE."
-  (eaf-call-sync "call_function_with_args" eaf--buffer-id "get_annots" (format "%s" page)))
-
-(defun eaf-pdf-jump-to-annot (annot)
-  "Jump to specifical pdf annot."
-  (let ((rect (gethash "rect" annot))
-        (page (gethash "page" annot)))
-    (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_rect" (format "%s" page) rect)))
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."
