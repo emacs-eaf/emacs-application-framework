@@ -103,6 +103,8 @@
 (require 'eaf-mindmap)
 (require 'eaf-pdf-viewer)
 (require 'eaf-netease-cloud-music)
+(require 'eaf-elfeed)
+(require 'eaf-mail)
 (require 'epc)
 (require 'epcs)
 (require 'json)
@@ -893,13 +895,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 (defcustom eaf-find-file-ext-blacklist '()
   "A blacklist of extensions to avoid when opening `find-file' file using EAF."
   :type 'cons)
-
-(defcustom eaf-mua-get-html
-  '(("^gnus-" . eaf-gnus-get-html)
-    ("^mu4e-" . eaf-mu4e-get-html)
-    ("^notmuch-" . eaf-notmuch-get-html))
-  "An alist regex mapping a MUA `major-mode' to a function to retrieve HTML part of a mail."
-  :type 'alist)
 
 (defcustom eaf-browser-continue-where-left-off nil
   "Similar to Chromium's Setting -> On start-up -> Continue where you left off.
@@ -1962,72 +1957,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     ;; Switch to new buffer if buffer create successful.
     (switch-to-buffer buf)
     (other-window +1)))
-
-(defun eaf--gnus-htmlp (part)
-  "Determine whether the gnus mail PART is HTML."
-  (when-let ((type (mm-handle-type part)))
-    (string= "text/html" (car type))))
-
-(defun eaf--notmuch-htmlp (part)
-  "Determine whether the notmuch mail PART is HTML."
-  (when-let ((type (plist-get part :content-type)))
-    (string= "text/html" type)))
-
-(defun eaf--get-html-func ()
-  "The function returning a function used to extract HTML of different MUAs."
-  (catch 'get-html
-    (cl-loop for (regex . func) in eaf-mua-get-html
-             do (when (string-match regex (symbol-name major-mode))
-                  (throw 'get-html func))
-             finally return (error "[EAF] You are either not in a MUA buffer or your MUA is not supported!"))))
-
-(defun eaf-gnus-get-html ()
-  "Retrieve HTML part of a gnus mail."
-  (with-current-buffer gnus-original-article-buffer
-    (when-let* ((dissect (mm-dissect-buffer t t))
-                (buffer (if (bufferp (car dissect))
-                            (when (eaf--gnus-htmlp dissect)
-                              (car dissect))
-                          (car (cl-find-if #'eaf--gnus-htmlp (cdr dissect))))))
-      (with-current-buffer buffer
-        (buffer-string)))))
-
-(defun eaf-mu4e-get-html ()
-  "Retrieve HTML part of a mu4e mail."
-  (let ((msg mu4e~view-message))
-    (mu4e-message-field msg :body-html)))
-
-(defun eaf-notmuch-get-html ()
-  "Retrieve HTML part of a notmuch mail."
-  (when-let* ((msg (cond ((derived-mode-p 'notmuch-show-mode)
-                          (notmuch-show-get-message-properties))
-                         ((derived-mode-p 'notmuch-tree-mode)
-                          (notmuch-tree-get-message-properties))
-                         (t nil)))
-              (body (plist-get msg :body))
-              (parts (car body))
-              (content (plist-get parts :content))
-              (part (if (listp content)
-                        (cl-find-if #'eaf--notmuch-htmlp content)
-                      (when (eaf--notmuch-htmlp parts)
-                        parts))))
-    (notmuch-get-bodypart-text msg part notmuch-show-process-crypto)))
-
-;;;###autoload
-(defun eaf-open-mail-as-html ()
-  "Open the html mail in EAF Browser.
-
-The value of `mail-user-agent' must be a KEY of the alist `eaf-mua-get-html'.
-
-In that way the corresponding function will be called to retrieve the HTML
- part of the current mail."
-  (interactive)
-  (when-let* ((html (funcall (eaf--get-html-func)))
-              (default-directory (eaf--non-remote-default-directory))
-              (file (concat (temporary-file-directory) (make-temp-name "eaf-mail-") ".html")))
-    (with-temp-file file
-      (insert html))
-    (eaf-open file "browser" "temp_html_file")))
 
 (defun eaf-open-devtool-page ()
   "Use EAF Browser to open the devtools page."
