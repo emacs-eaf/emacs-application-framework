@@ -924,11 +924,6 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
   "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
   :type 'string)
 
-(defcustom eaf-elfeed-split-direction "below"
-  "Elfeed browser page display location.
-Default is `below', you can chang it with `right'."
-  :type 'string)
-
 (defcustom eaf-enable-debug nil
   "If you got segfault error, please turn this option.
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
@@ -2654,35 +2649,6 @@ Otherwise send key 'esc' to browser."
     (eaf--activate-emacs-mac-window))
    ((eq system-type 'gnu/linux)
     (eaf--activate-emacs-linux-window buffer_id))))
-
-(defun eaf-elfeed-open-url ()
-  "Display the currently selected item in an eaf buffer."
-  (interactive)
-  (if (featurep 'elfeed)
-      (let ((entry (elfeed-search-selected :ignore-region)))
-        (require 'elfeed-show)
-        (when (elfeed-entry-p entry)
-          ;; Move to next feed item.
-          (elfeed-untag entry 'unread)
-          (elfeed-search-update-entry entry)
-          (unless elfeed-search-remain-on-entry (forward-line))
-
-          ;; Open elfeed item in other window,
-          ;; and scroll EAF browser content by command `scroll-other-window'.
-          (delete-other-windows)
-          (pcase eaf-elfeed-split-direction
-            ("below"
-             (split-window-no-error nil 30 'up)
-             (eaf--select-window-by-direction "down")
-             (eaf-open-browser (elfeed-entry-link entry))
-             (eaf--select-window-by-direction "up"))
-            ("right"
-             (split-window-no-error nil 60 'right)
-             (eaf--select-window-by-direction "right")
-             (eaf-open-browser (elfeed-entry-link entry))
-             (eaf--select-window-by-direction "left")))
-          ))
-    (message "Please install elfeed first.")))
 
 (defun eaf--select-window-by-direction (direction)
   "Select the most on the side according to the direction."
