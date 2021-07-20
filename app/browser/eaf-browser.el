@@ -356,6 +356,96 @@ Otherwise send key 'esc' to browser."
     (switch-to-buffer eaf-export-text-buffer)
     ))
 
+(defun eaf--atomic-edit (buffer-id focus-text)
+  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
+  (split-window-below -10)
+  (other-window 1)
+  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-atomic-edit" eaf--buffer-app-name)))
+        (buffer-app-name eaf--buffer-app-name))
+    (with-current-buffer edit-text-buffer
+      (eaf-edit-mode)
+      (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
+      (set (make-local-variable 'eaf--buffer-id) buffer-id))
+    (switch-to-buffer edit-text-buffer)
+    (setq-local eaf-mindmap--current-add-mode "")
+    (eaf--edit-set-header-line)
+    (insert focus-text)
+    ;; When text line number above
+    (when (> (line-number-at-pos) 30)
+      (goto-char (point-min)))))
+
+(defun eaf-edit-buffer-cancel ()
+  "Cancel EAF Browser focus text input and closes the buffer."
+  (interactive)
+  (kill-buffer)
+  (delete-window)
+  (message "[EAF/%s] Edit cancelled!" eaf--buffer-app-name))
+
+(defun eaf-edit-buffer-switch-to-org-mode ()
+  "Switch to `org-mode' to edit table handily."
+  (interactive)
+  (let ((buffer-app-name eaf--buffer-app-name)
+        (buffer-id eaf--buffer-id))
+    (org-mode)
+    (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
+    (set (make-local-variable 'eaf--buffer-id) buffer-id)
+    (outline-show-all)
+    (goto-char (point-min))
+    (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
+    (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
+    (eaf--edit-set-header-line)))
+
+(defun eaf--edit-set-header-line ()
+  "Set header line."
+  (setq header-line-format
+        (substitute-command-keys
+         (concat
+          "\\<eaf-edit-mode-map>"
+          " EAF/" eaf--buffer-app-name " EDIT: "
+          "Confirm with `\\[eaf-edit-buffer-confirm]', "
+          "Cancel with `\\[eaf-edit-buffer-cancel]'. "
+          "Switch to org-mode with `\\[eaf-edit-buffer-switch-to-org-mode]'. "
+          ))))
+
+(defun eaf-open-devtool-page ()
+  "Use EAF Browser to open the devtools page."
+  (delete-other-windows)
+  (split-window (selected-window) (/ (* (nth 3 (eaf-get-window-allocation (selected-window))) 2) 3) nil t)
+  (other-window 1)
+  (eaf-open "about:blank" "browser" "devtools"))
+
+(defun eaf--toggle-caret-browsing (caret-status)
+  "Toggle caret browsing given CARET-STATUS."
+  (if caret-status
+      (eaf--gen-keybinding-map eaf-browser-caret-mode-keybinding t)
+    (eaf--gen-keybinding-map eaf-browser-keybinding))
+  (setq eaf--buffer-map-alist (list (cons t eaf-mode-map))))
+
+(defun eaf-import-chrome-bookmarks ()
+  "Command to import chrome bookmarks."
+  (interactive)
+  (when (eaf-read-input "Are you sure to import chrome bookmarks to EAF" "yes-or-no" "")
+    (if (not (file-exists-p eaf-chrome-bookmark-file))
+        (message "Chrome bookmark file: '%s' is not exist, check `eaf-chrome-bookmark-file` setting." eaf-chrome-bookmark-file)
+      (let ((orig-bookmark-record-fn bookmark-make-record-function)
+            (data (json-read-file eaf-chrome-bookmark-file)))
+        (cl-labels ((fn (item)
+                        (pcase (alist-get 'type item)
+                          ("url"
+                           (let ((name (alist-get 'name item))
+                                 (url (alist-get 'url item)))
+                             (if (not (equal "chrome://bookmarks/" url))
+                                 (progn
+                                   (setq-local bookmark-make-record-function
+                                               #'(lambda () (eaf--browser-chrome-bookmark name url)))
+                                   (bookmark-set name)))))
+                          ("folder"
+                           (mapc #'fn (alist-get 'children item))))))
+          (fn (alist-get 'bookmark_bar (alist-get 'roots data)))
+          (setq-local bookmark-make-record-function orig-bookmark-record-fn)
+          (bookmark-save)
+          (message "Import success."))))))
+
 (provide 'eaf-browser)
 
 ;;; eaf-browser.el ends here
