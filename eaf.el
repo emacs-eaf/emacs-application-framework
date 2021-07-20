@@ -784,6 +784,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
+    ("j" . "select_next_file")
+    ("k" . "select_prev_file")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)
@@ -2145,7 +2147,7 @@ This function works best if paired with a fuzzy search package."
                    (if history-file-exists
                        (mapcar
                         (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
+                                  (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
                         (with-temp-buffer (insert-file-contents browser-history-file-path)
                                           (split-string (buffer-string) "\n" t)))
                      nil)))
@@ -2202,7 +2204,13 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-file-manager ()
   "Open EAF file manager."
   (interactive)
-  (eaf-open "eaf-file-manager" "file-manager"))
+  (let* ((args (make-hash-table :test 'equal)))
+    (puthash "header-color" (eaf-color-name-to-hex (face-attribute dired-header-face :foreground)) args)
+    (puthash "directory-color" (eaf-color-name-to-hex (face-attribute dired-directory-face :foreground)) args)
+    (puthash "symlink-color" (eaf-color-name-to-hex (face-attribute dired-symlink-face :foreground)) args)
+    (puthash "select-color" (eaf-color-name-to-hex (face-attribute hl-line-face :background)) args)
+    (eaf-open "~" "file-manager" (json-encode-hash-table args))
+    ))
 
 (defun eaf-open-music-player (music-file)
   "Open EAF music player."
@@ -2363,8 +2371,8 @@ This function works best if paired with a fuzzy search package."
                        (if history-file-exists
                            (mapcar
                             (lambda (h) (when (string-match history-pattern h)
-                                          (if (file-exists-p h)
-                                              (format "%s" h))))
+                                      (if (file-exists-p h)
+                                          (format "%s" h))))
                             (with-temp-buffer (insert-file-contents pdf-history-file-path)
                                               (split-string (buffer-string) "\n" t)))
                          (make-directory (file-name-directory pdf-history-file-path) t)
@@ -2897,6 +2905,16 @@ The key is the annot id on PAGE."
       (read-only-mode 1))
     (switch-to-buffer eaf-export-text-buffer)
     ))
+
+(defun eaf-color-int-to-hex (int)
+  (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
+
+(defun eaf-color-name-to-hex (color)
+  (let ((components (x-color-values color)))
+    (concat "#"
+            (eaf-color-int-to-hex (nth 0 components))
+            (eaf-color-int-to-hex (nth 1 components))
+            (eaf-color-int-to-hex (nth 2 components)))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
