@@ -148,28 +148,34 @@ split horizontally."
 (define-minor-mode eaf-interleave-app-mode
   "Interleave view for the EAF app."
   :keymap eaf-interleave-app-mode-map
-  (eaf-interleave-open-notes-file))
+  (when eaf-interleave-app-mode
+    (setq interleave-pdf-buffer (current-buffer))))
 
 ;;; functions
 ;; interactive
 (defun eaf-interleave-sync-current-note ()
   "Sync EAF buffer on current note"
   (interactive)
-  (with-current-buffer eaf-interleave-org-buffer
-    (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
-      (when (listp (read url))
-        (setq url (eval url)))
-      (require 'browse-url)
-      (cond ((string-match-p browse-url-button-regexp url)
-             (eaf-interleave-sync-browser-url-current))
-            ((file-regular-p url)
-             (if (string-match-p (mapconcat #'identity
-                                            eaf-pdf-extension-list "\\|")
-                                 (flatten-list url))
-                 (eaf-interleave-sync-pdf-page-current)
-               (message "The file %s is not supported." url)))
-            (t
-             (message "The file %s doesn't exist!" url))))))
+  (let ((page-pdf (eaf-interleave--pdf-viewer-current-page eaf--buffer-url))
+        (org-window))
+    (unless (buffer-live-p eaf-interleave-org-buffer)
+      (eaf-interleave-open-notes-file))
+    (setq org-window (get-buffer-window eaf-interleave-org-buffer))
+    (with-current-buffer eaf-interleave-org-buffer
+      (when-let* ((page-list (mapcar #'string-to-number
+                                     (org-property-values eaf-interleave--page-note-prop)))
+                  (note-on-this-page (cdar (sort
+                                            (mapcar #'(lambda (value)
+                                                        (cons (abs (- page-pdf value)) value))
+                                                    page-list)
+                                            #'(lambda (cons another-cons)
+                                                (< (car cons) (car another-cons))))))
+                  (point (org-find-property eaf-interleave--page-note-prop
+                                            (number-to-string note-on-this-page))))
+        (widen)
+        (goto-char point)
+        (set-window-point org-window point)))
+    (eaf-interleave-open-notes-file)))
 
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
@@ -177,6 +183,9 @@ split horizontally."
   (let* ((pdf-page (org-entry-get-with-inheritance eaf-interleave--page-note-prop))
          (pdf-url (org-entry-get-with-inheritance eaf-interleave--url-prop))
          (buffer (eaf-interleave--find-buffer pdf-url)))
+    (when (listp (read pdf-url))
+      (setq pdf-url (eval pdf-url)))
+    (require 'browse-url)
     (if buffer
         (progn
           (eaf-interleave--display-buffer buffer)
@@ -184,20 +193,26 @@ split horizontally."
             (with-current-buffer buffer
               (eaf-interleave--pdf-viewer-goto-page pdf-url pdf-page))))
       (eaf-interleave--select-split-function)
-      (eaf-interleave--open-pdf pdf-url)
-      )))
+      (if (file-regular-p pdf-url)
+          (if (string-match-p (mapconcat #'identity
+                                         (flatten-list eaf-pdf-extension-list) "\\|")
+                              (file-name-extension pdf-url))
+              (eaf-interleave--open-pdf pdf-url)
+            (message "The file %s is not supported." pdf-url))
+        (message "The file %s doesn't exist!" pdf-url)))))
 
 (defun eaf-interleave-sync-next-note ()
   "Move to the next set of notes.
 This shows the next notes and synchronizes the PDF to the right page number."
   (interactive)
-  (eaf-interleave--switch-to-org-buffer)
-  (widen)
-  (org-forward-heading-same-level 1)
-  (eaf-interleave--narrow-to-subtree)
-  (org-show-subtree)
-  (org-cycle-hide-drawers t)
-  (eaf-interleave-sync-current-note))
+  (with-current-buffer eaf-interleave-org-buffer 
+    (eaf-interleave--switch-to-org-buffer)
+    (widen)
+    (org-forward-heading-same-level 1)
+    (eaf-interleave--narrow-to-subtree)
+    (org-show-subtree)
+    (org-cycle-hide-drawers t)
+    (eaf-interleave-sync-current-note)))
 
 (defun eaf-interleave-add-note ()
   "Add note for the EAF buffer.
@@ -221,14 +236,14 @@ buffer."
   "Move to the previous set of notes.
 This show the previous notes and synchronizes the PDF to the right page number."
   (interactive)
-  (eaf-interleave--switch-to-org-buffer)
-  (widen)
-  (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
-  (org-backward-heading-same-level 1)
-  (eaf-interleave--narrow-to-subtree)
-  (org-show-subtree)
-  (org-cycle-hide-drawers t)
-  (eaf-interleave-sync-current-note))
+  (with-current-buffer eaf-interleave-org-buffer 
+    (widen)
+    (eaf-interleave--goto-parent-headline eaf-interleave--page-note-prop)
+    (org-backward-heading-same-level 1)
+    (eaf-interleave--narrow-to-subtree)
+    (org-show-subtree)
+    (org-cycle-hide-drawers t)
+    (eaf-interleave-sync-current-note)))
 
 (defun eaf-interleave-open-notes-file ()
   "Find current EAF url corresponding note files if it exists."
@@ -274,7 +289,8 @@ org file will have the exact sam base name as the url domain."
 (defun eaf-interleave--open-notes-file-for-app (org-file)
   "Open the notes org file for the current url if it exists.
 Else create it."
-  (let ((org-file-path (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url))
+  (let ((org-file-path
+         (or org-file (eaf-interleave--find-match-org eaf-interleave-org-notes-dir-list eaf--buffer-url)))
         (buffer (eaf-interleave--find-buffer eaf--buffer-url)))
     ;; Create the notes org file if it does not exist
     (unless org-file-path
@@ -283,7 +299,8 @@ Else create it."
     (setq eaf-interleave-org-buffer (find-file org-file-path))
     (eaf-interleave-mode)
     (eaf-interleave--select-split-function)
-    (switch-to-buffer buffer)))
+    (switch-to-buffer buffer)
+    buffer))
 
 (defun eaf-interleave--select-split-function ()
   "Determine which split function to use.
