@@ -43,6 +43,7 @@
 
 (require 'org)
 (require 'org-element)
+(require 'eaf-pdf-viewer)
 
 (defcustom eaf-interleave-org-notes-dir-list '("~/org/interleave_notes" ".")
   "List of directories to look into when opening notes org from a pdf file.
@@ -146,7 +147,8 @@ split horizontally."
 ;;;###autoload
 (define-minor-mode eaf-interleave-app-mode
   "Interleave view for the EAF app."
-  :keymap eaf-interleave-app-mode-map)
+  :keymap eaf-interleave-app-mode-map
+  (eaf-interleave-open-notes-file))
 
 ;;; functions
 ;; interactive
@@ -155,10 +157,19 @@ split horizontally."
   (interactive)
   (with-current-buffer eaf-interleave-org-buffer
     (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
-      (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
-             (eaf-interleave-sync-pdf-page-current))
-            ((string-prefix-p "http" url)
-             (eaf-interleave-sync-browser-url-current))))))
+      (when (listp (read url))
+        (setq url (eval url)))
+      (require 'browse-url)
+      (cond ((string-match-p browse-url-button-regexp url)
+             (eaf-interleave-sync-browser-url-current))
+            ((file-regular-p url)
+             (if (string-match-p (mapconcat #'identity
+                                            eaf-pdf-extension-list "\\|")
+                                 (flatten-list url))
+                 (eaf-interleave-sync-pdf-page-current)
+               (message "The file %s is not supported." url)))
+            (t
+             (message "The file %s doesn't exist!" url))))))
 
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
@@ -426,15 +437,18 @@ Consider a headline with property PROPERTY as parent headline."
          (toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc"))
          (position (eaf-interleave--go-to-page-note eaf--buffer-url page))
          chap-head)
-    (when position
-      (eaf-interleave--switch-to-org-buffer t position))
     (unless (string= toc "")
       (setq toc (mapcar #'(lambda (line)
                             (let ((line-split (split-string line " ")))
-                              (cons (string-to-number (car (last line-split))) (string-trim (string-join (butlast line-split) " ")))))
+                              (cons (string-to-number (car (last line-split)))
+                                    (string-trim (string-join (butlast line-split) " ")))))
                         (split-string toc "\n")))
       (setq chap-head (cdr (assoc page toc #'>=))))
-    (eaf-interleave--create-new-note eaf--buffer-url (or chap-head eaf--buffer-app-name) page)))
+        (if position
+            (eaf-interleave--switch-to-org-buffer t position)
+          (eaf-interleave--create-new-note eaf--buffer-url
+                                           (or chap-head eaf--buffer-app-name)
+                                           page))))
 
 (defun eaf-interleave--browser-add-note ()
   "EAF browser add note"
