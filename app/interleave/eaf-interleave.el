@@ -89,6 +89,11 @@ taken as columns."
   :type 'boolean
   :group 'eaf)
 
+(defcustom eaf-interleave--find-note-path-function 'eaf-interleave--find-note-path-default
+  "TODO"
+  :type 'function
+  :group 'eaf)
+
 ;; variables
 (defvar eaf-interleave-org-buffer nil
   "Org notes buffer name.")
@@ -148,12 +153,12 @@ split horizontally."
 (defun eaf-interleave-sync-current-note ()
   "Sync EAF buffer on current note"
   (interactive)
-  (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
-    (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
-           (eaf-interleave-sync-pdf-page-current))
-          ((string-prefix-p "http" url)
-           (eaf-interleave-sync-browser-url-current))))
-  )
+  (with-current-buffer eaf-interleave-org-buffer
+    (let ((url (org-entry-get-with-inheritance eaf-interleave--url-prop)))
+      (cond ((and (string-prefix-p "/" url) (string-suffix-p "pdf" url t))
+             (eaf-interleave-sync-pdf-page-current))
+            ((string-prefix-p "http" url)
+             (eaf-interleave-sync-browser-url-current))))))
 
 (defun eaf-interleave-sync-pdf-page-current ()
   "Open PDF page for currently visible notes."
@@ -193,8 +198,7 @@ buffer."
       (cond ((equal eaf--buffer-app-name "pdf-viewer")
              (eaf-interleave--pdf-add-note))
             ((equal eaf--buffer-app-name "browser")
-             (eaf-interleave--browser-add-note)))
-    ))
+             (eaf-interleave--browser-add-note)))))
 
 (defun eaf-interleave-add-file-url ()
   "Add a new url on note if the property is none, else modify current url."
@@ -222,8 +226,7 @@ This show the previous notes and synchronizes the PDF to the right page number."
       (cond ((equal eaf--buffer-app-name "pdf-viewer")
              (eaf-interleave--open-notes-file-for-pdf))
             ((equal eaf--buffer-app-name "browser")
-             (eaf-interleave--open-notes-file-for-browser))))
-  )
+             (eaf-interleave--open-notes-file-for-browser)))))
 
 (defun eaf-interleave-quit ()
   "Quit interleave mode."
@@ -235,14 +238,18 @@ This show the previous notes and synchronizes the PDF to the right page number."
       (org-overview))
     (eaf-interleave-mode 0)))
 
+(defun eaf-interleave--find-note-path-default (url)
+  (concat (file-name-base url) ".org"))
+
 ;;;###autoload
 (defun eaf-interleave--open-notes-file-for-pdf ()
   "Open the notes org file for the current pdf file if it exists.
 Else create it. It is assumed that the notes org file will have
 the exact same base name as the pdf file (just that the notes
 file will have a .org extension instead of .pdf)."
-  (let ((org-file (concat (file-name-base eaf--buffer-url) ".org")))
-    (eaf-interleave--open-notes-file-for-app org-file)))
+  (eaf-interleave--open-notes-file-for-app
+   (funcall (or eaf-interleave--find-note-path-function eaf-interleave--find-note-path-default) eaf--buffer-url)))
+
 
 (defun eaf-interleave--open-notes-file-for-browser ()
   "Find current open interleave-mode org file, if exists, else
@@ -262,11 +269,10 @@ Else create it."
     (unless org-file-path
       (setq org-file-path (eaf-interleave--ensure-org-file-exist eaf-interleave-org-notes-dir-list org-file)))
     ;; Open the notes org file and enable `eaf-interleave-mode'
-    (find-file org-file-path)
+    (setq eaf-interleave-org-buffer (find-file org-file-path))
     (eaf-interleave-mode)
     (eaf-interleave--select-split-function)
-    (switch-to-buffer buffer)
-    ))
+    (switch-to-buffer buffer)))
 
 (defun eaf-interleave--select-split-function ()
   "Determine which split function to use.
@@ -417,11 +423,18 @@ Consider a headline with property PROPERTY as parent headline."
 (defun eaf-interleave--pdf-add-note ()
   "EAF pdf-viewer-mode add note"
   (let* ((page (eaf-interleave--pdf-viewer-current-page eaf--buffer-url))
-         (position (eaf-interleave--go-to-page-note eaf--buffer-url page)))
-    (if position
-        (eaf-interleave--switch-to-org-buffer t position)
-      (eaf-interleave--create-new-note eaf--buffer-url eaf--buffer-app-name page)))
-  )
+         (toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc"))
+         (position (eaf-interleave--go-to-page-note eaf--buffer-url page))
+         chap-head)
+    (when position
+      (eaf-interleave--switch-to-org-buffer t position))
+    (unless (string= toc "")
+      (setq toc (mapcar #'(lambda (line)
+                            (let ((line-split (split-string line " ")))
+                              (cons (string-to-number (car (last line-split))) (string-trim (string-join (butlast line-split) " ")))))
+                        (split-string toc "\n")))
+      (setq chap-head (cdr (assoc page toc #'>=))))
+    (eaf-interleave--create-new-note eaf--buffer-url (or chap-head eaf--buffer-app-name) page)))
 
 (defun eaf-interleave--browser-add-note ()
   "EAF browser add note"
