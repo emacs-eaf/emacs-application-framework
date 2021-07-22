@@ -80,7 +80,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''setPlaylist({})'''.format(playlist))
         else:
             if float(self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]) == 0:
-                playlist_var = 'eaf-netease-cloud-music-playlist+list'
+                playlist_var = 'eaf-netease-cloud-music-local-playlist+list'
             else:
                 playlist_var = 'eaf-netease-cloud-music-playlists-songs+list'
 
@@ -160,7 +160,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(playlists))
         else:
             self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(
-                self.emacs_var_dict["eaf-netease-cloud-music-playlists+list"]))
+                self.emacs_var_dict["eaf-netease-cloud-music-user-playlists+list"]))
 
     def update_playlist_style(self, init=False):
         if init:

@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jul 22 00:06:52 2021 (-0400)
+;; Last-Updated: Thu Jul 22 00:14:37 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -371,9 +371,9 @@ been initialized."
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . "")
-    (eaf-netease-cloud-music-playlist+list . ())
+    (eaf-netease-cloud-music-local-playlist+list . ())
     (eaf-netease-cloud-music-repeat-mode . "")
-    (eaf-netease-cloud-music-playlists+list . ())
+    (eaf-netease-cloud-music-user-playlists+list . ())
     (eaf-netease-cloud-music-playlists-songs+list . ())
     (eaf-netease-cloud-music-playlist-id . "0")
     (eaf-netease-cloud-music-play-status . "")

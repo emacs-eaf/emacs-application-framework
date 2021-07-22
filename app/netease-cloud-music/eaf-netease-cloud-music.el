@@ -37,7 +37,7 @@
            (when netease-cloud-music-playlist-refresh-timer
              (cancel-timer netease-cloud-music-playlist-refresh-timer)
              (setq netease-cloud-music-playlist-refresh-timer nil))
-           (eaf-setq eaf-netease-cloud-music-playlist+list netease-cloud-music-playlist)
+           (eaf-setq eaf-netease-cloud-music-local-playlist+list netease-cloud-music-playlist)
            (eaf-setq eaf-netease-cloud-music-playlist-id 0))
 
           ((and netease-cloud-music-playlists
@@ -91,7 +91,7 @@
                      (setq netease-cloud-music-playlists
                            (netease-cloud-music-get-user-playlist
                             netease-cloud-music-user-id))
-                     (eaf-setq eaf-netease-cloud-music-playlists+list
+                     (eaf-setq eaf-netease-cloud-music-user-playlists+list
                                (format "%S" netease-cloud-music-playlists))
                      (with-current-buffer "eaf-netease-cloud-music"
                        (eaf-call-sync "call_function" eaf--buffer-id
