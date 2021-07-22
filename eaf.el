@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Jul 21 23:15:13 2021 (-0400)
+;; Last-Updated: Thu Jul 22 00:06:52 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -267,8 +267,13 @@ been initialized."
                          (mapcar
                           (lambda (arg)
                             (let ((arg (eaf--decode-string arg)))
-                              (cond ((string-prefix-p "'" arg)
+                              (cond ((string-prefix-p "'" arg) ;; single quote
                                      (read (substring arg 1)))
+                                    ((string= arg "TRUE") 't)
+                                    ((string= arg "FALSE") 'nil)
+                                    ((and (string-prefix-p "(" arg)
+                                          (string-suffix-p ")" arg)) ;; list
+                                     (split-string (substring arg 1 -1) " "))
                                     (t arg))))
                           (cdr args)))))))))
     (if eaf-server
@@ -325,20 +330,20 @@ been initialized."
 
 (defcustom eaf-var-list
   '((eaf-camera-save-path . "~/Downloads")
-    (eaf-browser-enable-plugin . "true")
-    (eaf-browser-enable-adblocker . "false")
-    (eaf-browser-enable-autofill . "false")
-    (eaf-browser-enable-javascript . "true")
-    (eaf-browser-enable-scrollbar . "false")
-    (eaf-browser-remember-history . "true")
-    (eaf-browser-default-zoom . "1.0")
+    (eaf-browser-enable-plugin . t)
+    (eaf-browser-enable-adblocker . nil)
+    (eaf-browser-enable-autofill . nil)
+    (eaf-browser-enable-javascript . t)
+    (eaf-browser-enable-scrollbar . nil)
+    (eaf-browser-remember-history . t)
+    (eaf-browser-default-zoom . 1.0)
     (eaf-browser-font-family . "")
     (eaf-browser-blank-page-url . "https://www.google.com")
     (eaf-browser-scroll-behavior . "auto")
     (eaf-browser-download-path . "~/Downloads")
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
-    (eaf-browser-aria2-auto-file-renaming . "false")
+    (eaf-browser-aria2-auto-file-renaming . nil)
     (eaf-browser-dark-mode . "follow")
     (eaf-browser-pc-user-agent . "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
     (eaf-browser-phone-user-agent . "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1")
@@ -347,18 +352,18 @@ been initialized."
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
     (eaf-pdf-dark-mode . "follow")
-    (eaf-pdf-default-zoom . "1.0")
-    (eaf-pdf-dark-exclude-image . "true")
-    (eaf-pdf-scroll-ratio . "0.05")
-    (eaf-pdf-enable-trim-white-margin . "false")
+    (eaf-pdf-default-zoom . 1.0)
+    (eaf-pdf-dark-exclude-image . t)
+    (eaf-pdf-scroll-ratio . 0.05)
+    (eaf-pdf-enable-trim-white-margin . nil)
     (eaf-terminal-dark-mode . "follow")
-    (eaf-terminal-font-size . "13")
+    (eaf-terminal-font-size . 13)
     (eaf-terminal-font-family . "")
     (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
-    (eaf-mindmap-edit-mode . "false")
-    (eaf-jupyter-font-size . "13")
+    (eaf-mindmap-edit-mode . nil)
+    (eaf-jupyter-font-size . 13)
     (eaf-jupyter-font-family . "")
     (eaf-jupyter-dark-mode . "follow")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
@@ -366,14 +371,14 @@ been initialized."
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . "")
-    (eaf-netease-cloud-music-playlist . "()")
+    (eaf-netease-cloud-music-playlist+list . ())
     (eaf-netease-cloud-music-repeat-mode . "")
-    (eaf-netease-cloud-music-playlists . "()")
-    (eaf-netease-cloud-music-playlists-songs . "()")
+    (eaf-netease-cloud-music-playlists+list . ())
+    (eaf-netease-cloud-music-playlists-songs+list . ())
     (eaf-netease-cloud-music-playlist-id . "0")
     (eaf-netease-cloud-music-play-status . "")
-    (eaf-netease-cloud-music-current-song . "(\"\" \"\")")
-    (eaf-netease-cloud-music-user . "()"))
+    (eaf-netease-cloud-music-current-song+list . ("" ""))
+    (eaf-netease-cloud-music-user+list . ()))
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -1593,12 +1598,10 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
 
 For convenience, use the Lisp macro `eaf-setq' instead."
-  ;; Convert the list value to string
-  (when (listp val)
-    (setq val (if (eq val '())
-                  "()"
-                (format "%S" val))))
-
+  (cond ((and (stringp val) (string= (upcase val) "TRUE"))
+         (setq val t))
+        ((and (stringp val) (string= (upcase val) "FALSE"))
+         (setq val nil)))
   (setf (map-elt eaf-var-list sym) val)
   ;; Update python side variable dynamically.
   (when (epc:live-p eaf-epc-process)
@@ -1645,11 +1648,11 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
-(defun eaf--set-emacs-var (name value eaf-specific)
+(defun eaf--set-emacs-var (name value in-eaf-var-list)
   "Set Lisp variable NAME with VALUE on the Emacs side.
 
-If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
-  (if (string= eaf-specific "true")
+If IN-EAF-VAR-LIST is true, we assume the variable is in `eaf-var-list'"
+  (if in-eaf-var-list
       (eaf-set (intern name) value)
     (set (intern name) value)))
 
@@ -1682,7 +1685,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
          (first-start-app-name (nth 1 first-buffer-info))
          (first-start-args (nth 2 first-buffer-info)))
     (when (and (string-equal first-start-app-name "video-player")
-               (string-equal eaf--webengine-include-private-codec "True"))
+               eaf--webengine-include-private-codec)
       (setq first-start-app-name "js-video-player"))
     ;; Start first app.
     (eaf--open-internal first-start-url first-start-app-name first-start-args))
@@ -1893,7 +1896,9 @@ To override and open a new terminal regardless, call interactively with prefix a
                   return app)))
     (if (string-equal app-name "video-player")
         ;; Use Browser play video if QWebEngine include private codec.
-        (if (string-equal eaf--webengine-include-private-codec "True") "js-video-player" "video-player")
+        (if eaf--webengine-include-private-codec
+            "js-video-player"
+          "video-player")
       app-name)))
 
 ;;;###autoload

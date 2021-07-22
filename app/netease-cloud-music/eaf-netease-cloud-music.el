@@ -37,8 +37,8 @@
            (when netease-cloud-music-playlist-refresh-timer
              (cancel-timer netease-cloud-music-playlist-refresh-timer)
              (setq netease-cloud-music-playlist-refresh-timer nil))
-           (eaf-setq eaf-netease-cloud-music-playlist netease-cloud-music-playlist)
-           (eaf-setq eaf-netease-cloud-music-playlist-id "0"))
+           (eaf-setq eaf-netease-cloud-music-playlist+list netease-cloud-music-playlist)
+           (eaf-setq eaf-netease-cloud-music-playlist-id 0))
 
           ((and netease-cloud-music-playlists
                 (netease-cloud-music-alist-cdr
@@ -54,7 +54,7 @@
                        (cl-position
                         (netease-cloud-music-alist-cdr pid netease-cloud-music-playlists)
                         netease-cloud-music-playlists))))
-           (eaf-setq eaf-netease-cloud-music-playlists-songs
+           (eaf-setq eaf-netease-cloud-music-playlists-songs+list
                      netease-cloud-music-playlists-songs))
           (t (na-error "The pid cannot be found!")))
 
@@ -91,7 +91,7 @@
                      (setq netease-cloud-music-playlists
                            (netease-cloud-music-get-user-playlist
                             netease-cloud-music-user-id))
-                     (eaf-setq eaf-netease-cloud-music-playlists
+                     (eaf-setq eaf-netease-cloud-music-playlists+list
                                (format "%S" netease-cloud-music-playlists))
                      (with-current-buffer "eaf-netease-cloud-music"
                        (eaf-call-sync "call_function" eaf--buffer-id

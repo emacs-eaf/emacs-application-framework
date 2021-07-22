@@ -141,14 +141,21 @@ class EAF(object):
     def webengine_include_private_codec(self):
         ''' Return bool of whether the QtWebEngineProcess include private codec. '''
         if platform.system() in ["Windows", "Darwin"]:
-            return "False"
+            return False
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
     @PostGui()
     def update_emacs_var_dict(self, var_dict_string):
-        ''' Update Python side emacs_var_dict.(Fix issue #206) '''
+        ''' Update Python side emacs_var_dict.'''
         self.emacs_var_dict = json.loads(var_dict_string)
+        for key, value in self.emacs_var_dict.items():
+            if key.endswith("+list") and value == None:
+                self.emacs_var_dict[key] = []
+            elif self.emacs_var_dict[key] == None or str(value).upper() == "FALSE":
+                self.emacs_var_dict[key] = False
+            elif str(value).upper() == "TRUE":
+                self.emacs_var_dict[key] = True
 
         for buffer in list(self.buffer_dict.values()):
             buffer.emacs_var_dict = self.emacs_var_dict
