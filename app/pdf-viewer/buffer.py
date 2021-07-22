@@ -919,36 +919,44 @@ class PdfViewerWidget(QWidget):
     @interactive
     def scroll_up(self):
         self.update_vertical_offset(min(self.scroll_offset + self.scroll_step, self.max_scroll_offset()))
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-up-hook'])
 
     @interactive
     def scroll_down(self):
         self.update_vertical_offset(max(self.scroll_offset - self.scroll_step, 0))
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-down-hook'])
 
     @interactive
     def scroll_right(self):
         self.update_horizontal_offset(max(self.horizontal_offset - self.scroll_step, (self.rect().width() - self.page_width * self.scale) / 2))
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-right-hook'])
 
     @interactive
     def scroll_left(self):
         self.update_horizontal_offset(min(self.horizontal_offset + self.scroll_step, (self.page_width * self.scale - self.rect().width()) / 2))
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-left-hook'])
 
     @interactive
     def scroll_up_page(self):
         # Adjust scroll step to make users continue reading fluently.
         self.update_vertical_offset(min(self.scroll_offset + self.rect().height() - self.scroll_step, self.max_scroll_offset()))
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-up-hook)'])
 
     @interactive
     def scroll_down_page(self):
         # Adjust scroll step to make users continue reading fluently.
         self.update_vertical_offset(max(self.scroll_offset - self.rect().height() + self.scroll_step, 0))
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-down-hook)'])
 
     @interactive
     def scroll_to_begin(self):
         self.update_vertical_offset(0)
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-up-hook)'])
 
     @interactive
     def scroll_to_end(self):
         self.update_vertical_offset(self.max_scroll_offset())
+        eval_in_emacs('run-hooks', ['\'eaf-pdf-scroll-down-hook)'])
 
     @interactive
     def zoom_in(self):
