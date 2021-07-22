@@ -48,7 +48,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setUrl(QUrl(url))
 
         self.history_list = []
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true":
+        if self.emacs_var_dict["eaf-browser-remember-history"]:
             self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
 
             self.history_pattern = re.compile("^(.+)ᛝ(.+)ᛡ(.+)$")
@@ -174,7 +174,7 @@ class AppBuffer(BrowserBuffer):
     def after_page_load_hook(self):
         ''' Hook to run after update_progress hits 100. '''
         self.init_pw_autofill()
-        if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
+        if self.emacs_var_dict["eaf-browser-enable-adblocker"]:
             self.load_adblocker()
 
     def handle_input_response(self, callback_tag, result_content):
@@ -220,7 +220,7 @@ class AppBuffer(BrowserBuffer):
     def record_close_page(self, url):
         ''' Record closing pages.'''
         self.page_closed = True
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.arguments != "temp_html_file" and url != "about:blank":
+        if self.emacs_var_dict["eaf-browser-remember-history"] and self.arguments != "temp_html_file" and url != "about:blank":
             touch(self.history_close_file_path)
             with open(self.history_close_file_path, "r") as f:
                 close_urls = f.readlines()
@@ -251,12 +251,12 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def toggle_adblocker(self):
         ''' Change adblocker status.'''
-        if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true":
-            set_emacs_var("eaf-browser-enable-adblocker", "false", "true")
-            self.buffer_widget.remove_css('adblocker',True)
+        if self.emacs_var_dict["eaf-browser-enable-adblocker"]:
+            set_emacs_var("eaf-browser-enable-adblocker", False, True)
+            self.buffer_widget.remove_css('adblocker', True)
             message_to_emacs("Successfully disabled adblocker!")
-        elif self.emacs_var_dict["eaf-browser-enable-adblocker"] == "false":
-            set_emacs_var("eaf-browser-enable-adblocker", "true", "true")
+        elif not self.emacs_var_dict["eaf-browser-enable-adblocker"]:
+            set_emacs_var("eaf-browser-enable-adblocker", True, True)
             self.load_adblocker()
             message_to_emacs("Successfully enabled adblocker!")
 
@@ -264,7 +264,7 @@ class AppBuffer(BrowserBuffer):
         self.url = self.buffer_widget.url().toString()
 
     def set_adblocker(self, url):
-        if self.emacs_var_dict["eaf-browser-enable-adblocker"] == "true" and not self.page_closed:
+        if self.emacs_var_dict["eaf-browser-enable-adblocker"] and not self.page_closed:
             self.load_adblocker()
 
     def skip_youtube_ads(self, url):
@@ -303,13 +303,13 @@ class AppBuffer(BrowserBuffer):
         return new_id
 
     def init_pw_autofill(self):
-        if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
+        if self.emacs_var_dict["eaf-browser-enable-autofill"]:
             self.pw_autofill_id = self.pw_autofill_gen_id(0)
 
     @interactive
     def save_page_password(self):
         ''' Record form data.'''
-        if self.emacs_var_dict["eaf-browser-enable-autofill"] == "true":
+        if self.emacs_var_dict["eaf-browser-enable-autofill"]:
             self.add_password_entry()
         else:
             message_to_emacs("Password autofill is not enabled! Enable with `C-t` (default binding)")
@@ -317,14 +317,14 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def toggle_password_autofill(self):
         ''' Toggle Autofill status for password data'''
-        if self.emacs_var_dict["eaf-browser-enable-autofill"] == "false":
-            set_emacs_var("eaf-browser-enable-autofill", "true", "true")
+        if not self.emacs_var_dict["eaf-browser-enable-autofill"]:
+            set_emacs_var("eaf-browser-enable-autofill", True, True)
             self.pw_autofill_id = self.pw_autofill_gen_id(0)
             message_to_emacs("Successfully enabled autofill!")
         else:
             self.pw_autofill_id = self.pw_autofill_gen_id(self.pw_autofill_id)
             if self.pw_autofill_id == 0:
-                set_emacs_var("eaf-browser-enable-autofill", "false", "true")
+                set_emacs_var("eaf-browser-enable-autofill", False, True)
                 message_to_emacs("Successfully disabled password autofill!")
             else:
                 message_to_emacs("Successfully changed password autofill id!")
@@ -365,7 +365,7 @@ class AppBuffer(BrowserBuffer):
     def record_history(self, new_title):
         ''' Record browser history.'''
         new_url = self.buffer_widget.filter_url(self.buffer_widget.get_url())
-        if self.emacs_var_dict["eaf-browser-remember-history"] == "true" and self.buffer_widget.filter_title(new_title) != "" and \
+        if self.emacs_var_dict["eaf-browser-remember-history"] and self.buffer_widget.filter_title(new_title) != "" and \
            self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
             self._record_history(new_title, new_url)
 

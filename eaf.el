@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul  9 12:18:52 2021 (-0400)
+;; Last-Updated: Thu Jul 22 00:14:37 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -96,12 +96,14 @@
           ((eq system-type 'darwin)
            (shell-command (concat "./install-eaf-mac.sh" "&"))))))
 
-
 (require 'bookmark)
 (require 'cl-lib)
 (require 'eaf-interleave)
 (require 'eaf-mindmap)
-(require 'eaf-netease-cloud-music)
+(require 'eaf-pdf-viewer)
+(require 'eaf-mail)
+(require 'eaf-browser)
+(require 'eaf-terminal)
 (require 'epc)
 (require 'epcs)
 (require 'json)
@@ -109,6 +111,11 @@
 (require 's)
 (require 'seq)
 (require 'subr-x)
+(when (featurep 'elfeed)
+  (require 'eaf-elfeed))
+(when (featurep 'netease-cloud-music)
+  (require 'eaf-netease-cloud-music))
+
 
 (defgroup eaf nil
   "Emacs Application Framework."
@@ -141,6 +148,9 @@
 Don't modify this map directly.  To bind keys for all apps use
 `eaf-mode-map*' and to bind keys for individual apps use
 `eaf-bind-key'.")
+
+(defvar eaf-server nil
+  "The EAF Server.")
 
 (defvar eaf-edit-mode-map
   (let ((map (make-sparse-keymap)))
@@ -242,31 +252,34 @@ been initialized."
           epcs:server-processes)
     main-process))
 
-(defvar eaf-server nil)
 (defun eaf--start-epc-server ()
+  "Function to start the EPC server."
   (unless eaf-server
-    (setq eaf-server (epcs:server-start
-                      (lambda (mngr)
-                        (let ((mngr mngr))
-                          (epc:define-method
-                           mngr 'eval-in-emacs
-                           (lambda (&rest args)
-                             ;; Decode argument with Base64 format automatically.
-                             (apply (read (car args))
-                                    (mapcar
-                                     (lambda (arg)
-                                       (let ((arg (eaf--decode-string arg)))
-                                         (cond ((string-prefix-p "'" arg)
-                                                (read (substring arg 1)))
-                                               (t arg)))) (cdr args)))))))
-                      ))
+    (setq eaf-server
+          (epcs:server-start
+           (lambda (mngr)
+             (let ((mngr mngr))
+               (epc:define-method
+                mngr 'eval-in-emacs
+                (lambda (&rest args)
+                  ;; Decode argument with Base64 format automatically.
+                  (apply (read (car args))
+                         (mapcar
+                          (lambda (arg)
+                            (let ((arg (eaf--decode-string arg)))
+                              (cond ((string-prefix-p "'" arg) ;; single quote
+                                     (read (substring arg 1)))
+                                    ((string= arg "TRUE") 't)
+                                    ((string= arg "FALSE") 'nil)
+                                    ((and (string-prefix-p "(" arg)
+                                          (string-suffix-p ")" arg)) ;; list
+                                     (split-string (substring arg 1 -1) " "))
+                                    (t arg))))
+                          (cdr args)))))))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
-      (error "eaf-server fails to start.")
-      )
-    )
-  eaf-server
-  )
+      (error "[EAF] eaf-server failed to start")))
+  eaf-server)
 
 (when noninteractive
   ;; Start "event loop".
@@ -303,23 +316,6 @@ been initialized."
   "Name of EAF buffer."
   :type 'string)
 
-(defcustom eaf-browser-search-engines `(("google" . "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
-                                        ("duckduckgo" . "https://duckduckgo.com/?q=%s"))
-  "The default search engines offered by EAF.
-
-Each element has the form (NAME . URL).
- NAME is a search engine name, as a string.
- URL pecifies the url format for the search engine.
-  It should have a %s as placeholder for search string."
-  :type '(alist :key-type (string :tag "Search engine name")
-                :value-type (string :tag "Search engine url")))
-
-(defcustom eaf-browser-default-search-engine "google"
-  "The default search engine used by `eaf-open-browser' and `eaf-search-it'.
-
-It must defined at `eaf-browser-search-engines'."
-  :type 'string)
-
 (defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python.exe" "python3")
   "The Python interpreter used to run eaf.py."
   :type 'string)
@@ -334,20 +330,20 @@ It must defined at `eaf-browser-search-engines'."
 
 (defcustom eaf-var-list
   '((eaf-camera-save-path . "~/Downloads")
-    (eaf-browser-enable-plugin . "true")
-    (eaf-browser-enable-adblocker . "false")
-    (eaf-browser-enable-autofill . "false")
-    (eaf-browser-enable-javascript . "true")
-    (eaf-browser-enable-scrollbar . "false")
-    (eaf-browser-remember-history . "true")
-    (eaf-browser-default-zoom . "1.0")
+    (eaf-browser-enable-plugin . t)
+    (eaf-browser-enable-adblocker . nil)
+    (eaf-browser-enable-autofill . nil)
+    (eaf-browser-enable-javascript . t)
+    (eaf-browser-enable-scrollbar . nil)
+    (eaf-browser-remember-history . t)
+    (eaf-browser-default-zoom . 1.0)
     (eaf-browser-font-family . "")
     (eaf-browser-blank-page-url . "https://www.google.com")
     (eaf-browser-scroll-behavior . "auto")
     (eaf-browser-download-path . "~/Downloads")
     (eaf-browser-aria2-proxy-host . "")
     (eaf-browser-aria2-proxy-port . "")
-    (eaf-browser-aria2-auto-file-renaming . "false")
+    (eaf-browser-aria2-auto-file-renaming . nil)
     (eaf-browser-dark-mode . "follow")
     (eaf-browser-pc-user-agent . "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
     (eaf-browser-phone-user-agent . "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1")
@@ -356,18 +352,18 @@ It must defined at `eaf-browser-search-engines'."
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
     (eaf-pdf-dark-mode . "follow")
-    (eaf-pdf-default-zoom . "1.0")
-    (eaf-pdf-dark-exclude-image . "true")
-    (eaf-pdf-scroll-ratio . "0.05")
-    (eaf-pdf-enable-trim-white-margin . "false")
+    (eaf-pdf-default-zoom . 1.0)
+    (eaf-pdf-dark-exclude-image . t)
+    (eaf-pdf-scroll-ratio . 0.05)
+    (eaf-pdf-enable-trim-white-margin . nil)
     (eaf-terminal-dark-mode . "follow")
-    (eaf-terminal-font-size . "13")
+    (eaf-terminal-font-size . 13)
     (eaf-terminal-font-family . "")
     (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
-    (eaf-mindmap-edit-mode . "false")
-    (eaf-jupyter-font-size . "13")
+    (eaf-mindmap-edit-mode . nil)
+    (eaf-jupyter-font-size . 13)
     (eaf-jupyter-font-family . "")
     (eaf-jupyter-dark-mode . "follow")
     (eaf-marker-letters . "ASDFHJKLWEOPCNM")
@@ -375,14 +371,14 @@ It must defined at `eaf-browser-search-engines'."
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . "")
-    (eaf-netease-cloud-music-playlist . "()")
+    (eaf-netease-cloud-music-local-playlist+list . ())
     (eaf-netease-cloud-music-repeat-mode . "")
-    (eaf-netease-cloud-music-playlists . "()")
-    (eaf-netease-cloud-music-playlists-songs . "()")
+    (eaf-netease-cloud-music-user-playlists+list . ())
+    (eaf-netease-cloud-music-playlists-songs+list . ())
     (eaf-netease-cloud-music-playlist-id . "0")
     (eaf-netease-cloud-music-play-status . "")
-    (eaf-netease-cloud-music-current-song . "(\"\" \"\")")
-    (eaf-netease-cloud-music-user . "()"))
+    (eaf-netease-cloud-music-current-song+list . ("" ""))
+    (eaf-netease-cloud-music-user+list . ()))
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -784,6 +780,8 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 
 (defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
+    ("j" . "select_next_file")
+    ("k" . "select_prev_file")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)
@@ -853,15 +851,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "The keybinding of EAF System Monitor."
   :type 'cons)
 
-(defcustom eaf-pdf-extension-list
-  '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
-  "The extension list of pdf application."
-  :type 'cons)
-
-(defcustom eaf-pdf-store-history t
-  "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
-  :type 'boolean)
-
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
@@ -875,11 +864,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
 (defcustom eaf-video-extension-list
   '("avi" "webm" "rmvb" "ogg" "mp4" "mkv" "m4v")
   "The extension list of video player application."
-  :type 'cons)
-
-(defcustom eaf-browser-extension-list
-  '("html" "htm")
-  "The extension list of browser application."
   :type 'cons)
 
 (defcustom eaf-org-extension-list
@@ -901,24 +885,6 @@ Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
   "A blacklist of extensions to avoid when opening `find-file' file using EAF."
   :type 'cons)
 
-(defcustom eaf-mua-get-html
-  '(("^gnus-" . eaf-gnus-get-html)
-    ("^mu4e-" . eaf-mu4e-get-html)
-    ("^notmuch-" . eaf-notmuch-get-html))
-  "An alist regex mapping a MUA `major-mode' to a function to retrieve HTML part of a mail."
-  :type 'alist)
-
-(defcustom eaf-browser-continue-where-left-off nil
-  "Similar to Chromium's Setting -> On start-up -> Continue where you left off.
-
-If non-nil, all active EAF Browser buffers will be saved before Emacs is killed,
-and will re-open them when calling `eaf-browser-restore-buffers' in the future session."
-  :type 'boolean)
-
-(defcustom eaf-browser-fullscreen-move-cursor-corner nil
-  "If non-nil, move the mouse cursor to the corner when fullscreen in the browser."
-  :type 'boolean)
-
 (defcustom eaf-proxy-host ""
   "Proxy Host used by EAF Browser."
   :type 'string)
@@ -929,11 +895,6 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 
 (defcustom eaf-proxy-type ""
   "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
-  :type 'string)
-
-(defcustom eaf-elfeed-split-direction "below"
-  "Elfeed browser page display location.
-Default is `below', you can chang it with `right'."
   :type 'string)
 
 (defcustom eaf-enable-debug nil
@@ -1040,12 +1001,6 @@ Python process only create application view when Emacs window or buffer state ch
 
 (defvar eaf-buffer-title-format "%s")
 
-(defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
-  "The name of pdf-outline-buffer.")
-
-(defvar eaf-pdf-outline-window-configuration nil
-  "Save window configure before popup outline buffer.")
-
 (defvar-local eaf--bookmark-title nil)
 
 (defvar-local eaf-mindmap--current-add-mode nil)
@@ -1058,29 +1013,6 @@ Within BODY, `buffer' can be used to"
      (with-current-buffer buffer
        ,@body)))
 
-(defun eaf-browser-restore-buffers ()
-  "EAF restore all opened EAF Browser buffers in the previous Emacs session.
-
-This should be used after setting `eaf-browser-continue-where-left-off' to t."
-  (interactive)
-  (if eaf-browser-continue-where-left-off
-      (let* ((browser-restore-file-path
-              (concat eaf-config-location
-                      (file-name-as-directory "browser")
-                      (file-name-as-directory "history")
-                      "restore.txt"))
-             (browser-url-list
-              (with-temp-buffer (insert-file-contents browser-restore-file-path)
-                                (split-string (buffer-string) "\n" t))))
-        (if (epc:live-p eaf-epc-process)
-            (dolist (url browser-url-list)
-              (eaf-open-browser url))
-          (dolist (url browser-url-list)
-            (push `(,url "browser" "") eaf--active-buffers))
-          (when eaf--active-buffers (eaf-open-browser (nth 0 (car eaf--active-buffers))))))
-    (user-error "Please set `eaf-browser-continue-where-left-off' to t first!")))
-
-
 (defun eaf--bookmark-make-record ()
   "Create a EAF bookmark.
 
@@ -1091,27 +1023,6 @@ For now only EAF browser app is supported."
                          eaf-app-bookmark-handlers-alist))))
     (when handler
       (funcall handler))))
-
-(defun eaf--browser-bookmark ()
-  "Restore EAF buffer according to browser bookmark from the current file path or web URL."
-  `((handler . eaf--bookmark-restore)
-    (eaf-app . "browser")
-    (defaults . ,(list eaf--bookmark-title))
-    (filename . ,(eaf-get-path-or-url))))
-
-(defun eaf--browser-chrome-bookmark (name url)
-  "Restore EAF buffer according to chrome bookmark of given title and web URL."
-  `((handler . eaf--bookmark-restore)
-    (eaf-app . "browser")
-    (defaults . ,(list name))
-    (filename . ,url)))
-
-(defun eaf--pdf-viewer-bookmark ()
-  "Restore EAF buffer according to pdf bookmark from the current file path or web URL."
-  `((handler . eaf--bookmark-restore)
-    (eaf-app . "pdf-viewer")
-    (defaults . ,(list eaf--bookmark-title))
-    (filename . ,(eaf-get-path-or-url))))
 
 (defun eaf--bookmark-restore (bookmark)
   "Restore EAF buffer according to BOOKMARK."
@@ -1140,39 +1051,9 @@ For now only EAF browser app is supported."
            ;; create new one for current buffer with provided name
            (bookmark-set cand)))))
 
-(defun eaf-import-chrome-bookmarks ()
-  "Command to import chrome bookmarks."
-  (interactive)
-  (when (eaf-read-input "Are you sure to import chrome bookmarks to EAF" "yes-or-no" "")
-    (if (not (file-exists-p eaf-chrome-bookmark-file))
-        (message "Chrome bookmark file: '%s' is not exist, check `eaf-chrome-bookmark-file` setting." eaf-chrome-bookmark-file)
-      (let ((orig-bookmark-record-fn bookmark-make-record-function)
-            (data (json-read-file eaf-chrome-bookmark-file)))
-        (cl-labels ((fn (item)
-                        (pcase (alist-get 'type item)
-                          ("url"
-                           (let ((name (alist-get 'name item))
-                                 (url (alist-get 'url item)))
-                             (if (not (equal "chrome://bookmarks/" url))
-                                 (progn
-                                   (setq-local bookmark-make-record-function
-                                               #'(lambda () (eaf--browser-chrome-bookmark name url)))
-                                   (bookmark-set name)))))
-                          ("folder"
-                           (mapc #'fn (alist-get 'children item))))))
-          (fn (alist-get 'bookmark_bar (alist-get 'roots data)))
-          (setq-local bookmark-make-record-function orig-bookmark-record-fn)
-          (bookmark-save)
-          (message "Import success."))))))
-
-(defalias 'eaf--browser-firefox-bookmark 'eaf--browser-chrome-bookmark)
-
 (defvar eaf--existing-bookmarks nil
   "Existing bookmarks in Emacs.
 A hashtable, key is url and value is title.")
-
-(defvar eaf--firefox-bookmarks nil
-  "Bookmarks that should be imported from firefox.")
 
 (defun eaf--load-existing-bookmarks()
   "Load existing bookmarks."
@@ -1182,55 +1063,6 @@ A hashtable, key is url and value is title.")
              (file (bookmark-get-filename name)))
         (puthash file name bookmarks)))
     bookmarks))
-
-(defun eaf--useful-firefox-bookmark? (uri)
-  "Check whether uri is a website url."
-  (or (string-prefix-p "http://" uri)
-      (string-prefix-p "https://" uri)))
-
-(defun eaf--firefox-bookmark-to-import? (title uri)
-  "Check whether uri should be imported."
-  (when (eaf--useful-firefox-bookmark? uri)
-    (let ((old (gethash uri eaf--existing-bookmarks)))
-      (when (or
-             (not old)
-             (and (string-equal old "") (not (string-equal title ""))))
-        t))))
-
-(defun eaf--firefox-bookmark-to-import (title uri)
-  (puthash uri title eaf--existing-bookmarks)
-  (add-to-list 'eaf--firefox-bookmarks (cons uri title)))
-
-(defun eaf-import-firefox-bookmarks ()
-  "Command to import firefox bookmarks."
-  (interactive)
-  (when (eaf-read-input "In order to import, you should first backup firefox's bookmarks to a json file. Continue?" "yes-or-no" "")
-    (let ((fx-bookmark-file (read-file-name "Choose firefox bookmark file:")))
-      (if (not (file-exists-p fx-bookmark-file))
-          (message "Firefox bookmark file: '%s' is not exist." fx-bookmark-file)
-        (setq eaf--firefox-bookmarks nil)
-        (setq eaf--existing-bookmarks (eaf--load-existing-bookmarks))
-        (let ((orig-bookmark-record-fn bookmark-make-record-function)
-              (data (json-read-file fx-bookmark-file)))
-          (cl-labels ((fn (item)
-                          (pcase (alist-get 'typeCode item)
-                            (1
-                             (let ((title (alist-get 'title item ""))
-                                   (uri (alist-get 'uri item)))
-                               (when (eaf--firefox-bookmark-to-import? title uri)
-                                 (eaf--firefox-bookmark-to-import title uri))))
-                            (2
-                             (mapc #'fn (alist-get 'children item))))))
-            (fn data)
-            (dolist (bm eaf--firefox-bookmarks)
-              (let ((uri (car bm))
-                    (title (cdr bm)))
-                (setq-local bookmark-make-record-function
-                            #'(lambda () (eaf--browser-firefox-bookmark title uri)))
-                (bookmark-set title)))
-            (setq-local bookmark-make-record-function orig-bookmark-record-fn)
-            (bookmark-save)
-            (message "Import success.")))))))
 
 (defun eaf-open-external ()
   "Command to open current path or url with external application."
@@ -1482,15 +1314,7 @@ to edit EAF keybindings!" fun fun)))
                          (t
                           (eaf--make-proxy-function fun))
                          ))
-                   finally return map)))
-  )
-
-(defun eaf--toggle-caret-browsing (caret-status)
-  "Toggle caret browsing given CARET-STATUS."
-  (if caret-status
-      (eaf--gen-keybinding-map eaf-browser-caret-mode-keybinding t)
-    (eaf--gen-keybinding-map eaf-browser-keybinding))
-  (setq eaf--buffer-map-alist (list (cons t eaf-mode-map))))
+                   finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
   "Get the specified APP-NAME keybinding.
@@ -1770,26 +1594,17 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (interactive)
   (eaf-call-async "send_key_sequence" eaf--buffer-id "S-RET"))
 
-(defun eaf-send-second-key-sequence ()
-  "Send second part of key sequence to terminal."
-  (interactive)
-  (eaf-call-async "send_key_sequence"
-                  eaf--buffer-id
-                  (nth 1 (split-string (key-description (this-command-keys-vector))))))
-
 (defun eaf-set (sym val)
   "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
 
 For convenience, use the Lisp macro `eaf-setq' instead."
-  ;; Convert the list value to string
-  (when (listp val)
-    (setq val (if (eq val '())
-                  "()"
-                (format "%S" val))))
-
+  (cond ((and (stringp val) (string= (upcase val) "TRUE"))
+         (setq val t))
+        ((and (stringp val) (string= (upcase val) "FALSE"))
+         (setq val nil)))
   (setf (map-elt eaf-var-list sym) val)
+  ;; Update python side variable dynamically.
   (when (epc:live-p eaf-epc-process)
-    ;; Update python side variable dynamically.
     (eaf-call-async "update_emacs_var_dict" (eaf-serialization-var-list)))
   val)
 
@@ -1831,28 +1646,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
-  (message "[EAF/%s] %s"
-           eaf--buffer-app-name
-           format-string
-           ))
+  (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
-(defun eaf--set-emacs-var (name value eaf-specific)
+(defun eaf--set-emacs-var (name value in-eaf-var-list)
   "Set Lisp variable NAME with VALUE on the Emacs side.
 
-If EAF-SPECIFIC is true, this is modifying variables in `eaf-var-list'"
-  (if (string= eaf-specific "true")
+If IN-EAF-VAR-LIST is true, we assume the variable is in `eaf-var-list'"
+  (if in-eaf-var-list
       (eaf-set (intern name) value)
     (set (intern name) value)))
-
-(defun eaf--create-new-browser-buffer (new-window-buffer-id)
-  "Function for creating a new browser buffer with the specified NEW-WINDOW-BUFFER-ID."
-  (let ((eaf-buffer (generate-new-buffer (concat "Browser Popup Window " new-window-buffer-id))))
-    (with-current-buffer eaf-buffer
-      (eaf-mode)
-      (set (make-local-variable 'eaf--buffer-id) new-window-buffer-id)
-      (set (make-local-variable 'eaf--buffer-url) "")
-      (set (make-local-variable 'eaf--buffer-app-name) "browser"))
-    (switch-to-buffer eaf-buffer)))
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
   "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
@@ -1883,7 +1685,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
          (first-start-app-name (nth 1 first-buffer-info))
          (first-start-args (nth 2 first-buffer-info)))
     (when (and (string-equal first-start-app-name "video-player")
-               (string-equal eaf--webengine-include-private-codec "True"))
+               eaf--webengine-include-private-codec)
       (setq first-start-app-name "js-video-player"))
     ;; Start first app.
     (eaf--open-internal first-start-url first-start-app-name first-start-args))
@@ -1988,79 +1790,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (switch-to-buffer buf)
     (other-window +1)))
 
-(defun eaf--gnus-htmlp (part)
-  "Determine whether the gnus mail PART is HTML."
-  (when-let ((type (mm-handle-type part)))
-    (string= "text/html" (car type))))
-
-(defun eaf--notmuch-htmlp (part)
-  "Determine whether the notmuch mail PART is HTML."
-  (when-let ((type (plist-get part :content-type)))
-    (string= "text/html" type)))
-
-(defun eaf--get-html-func ()
-  "The function returning a function used to extract HTML of different MUAs."
-  (catch 'get-html
-    (cl-loop for (regex . func) in eaf-mua-get-html
-             do (when (string-match regex (symbol-name major-mode))
-                  (throw 'get-html func))
-             finally return (error "[EAF] You are either not in a MUA buffer or your MUA is not supported!"))))
-
-(defun eaf-gnus-get-html ()
-  "Retrieve HTML part of a gnus mail."
-  (with-current-buffer gnus-original-article-buffer
-    (when-let* ((dissect (mm-dissect-buffer t t))
-                (buffer (if (bufferp (car dissect))
-                            (when (eaf--gnus-htmlp dissect)
-                              (car dissect))
-                          (car (cl-find-if #'eaf--gnus-htmlp (cdr dissect))))))
-      (with-current-buffer buffer
-        (buffer-string)))))
-
-(defun eaf-mu4e-get-html ()
-  "Retrieve HTML part of a mu4e mail."
-  (let ((msg mu4e~view-message))
-    (mu4e-message-field msg :body-html)))
-
-(defun eaf-notmuch-get-html ()
-  "Retrieve HTML part of a notmuch mail."
-  (when-let* ((msg (cond ((derived-mode-p 'notmuch-show-mode)
-                          (notmuch-show-get-message-properties))
-                         ((derived-mode-p 'notmuch-tree-mode)
-                          (notmuch-tree-get-message-properties))
-                         (t nil)))
-              (body (plist-get msg :body))
-              (parts (car body))
-              (content (plist-get parts :content))
-              (part (if (listp content)
-                        (cl-find-if #'eaf--notmuch-htmlp content)
-                      (when (eaf--notmuch-htmlp parts)
-                        parts))))
-    (notmuch-get-bodypart-text msg part notmuch-show-process-crypto)))
-
-;;;###autoload
-(defun eaf-open-mail-as-html ()
-  "Open the html mail in EAF Browser.
-
-The value of `mail-user-agent' must be a KEY of the alist `eaf-mua-get-html'.
-
-In that way the corresponding function will be called to retrieve the HTML
- part of the current mail."
-  (interactive)
-  (when-let* ((html (funcall (eaf--get-html-func)))
-              (default-directory (eaf--non-remote-default-directory))
-              (file (concat (temporary-file-directory) (make-temp-name "eaf-mail-") ".html")))
-    (with-temp-file file
-      (insert html))
-    (eaf-open file "browser" "temp_html_file")))
-
-(defun eaf-open-devtool-page ()
-  "Use EAF Browser to open the devtools page."
-  (delete-other-windows)
-  (split-window (selected-window) (/ (* (nth 3 (eaf-get-window-allocation (selected-window))) 2) 3) nil t)
-  (other-window 1)
-  (eaf-open "about:blank" "browser" "devtools"))
-
 ;;;###autoload
 (defun eaf-open-browser (url &optional args)
   "Open EAF browser application given a URL and ARGS."
@@ -2077,34 +1806,6 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive)
   (eaf-call-sync "toggle_proxy"))
 
-(defun eaf-browser--duplicate-page-in-new-tab (url)
-  "Duplicate a new tab for the dedicated URL."
-  (eaf-open (eaf-wrap-url url) "browser" nil t))
-
-(defun eaf-is-valid-web-url (url)
-  "Return the same URL if it is valid."
-  (when (and url
-             ;; URL should not include blank char.
-             (< (length (split-string url)) 2)
-             ;; Use regexp matching URL.
-             (or (and
-                  (string-prefix-p "file://" url)
-                  (string-suffix-p ".html" url))
-                 ;; Normal url address.
-                 (string-match "^\\(https?://\\)?[a-z0-9]+\\([-.][a-z0-9]+\\)*.+\\..+[a-z0-9.]\\{1,6\\}\\(:[0-9]{1,5}\\)?\\(/.*\\)?$" url)
-                 ;; Localhost url.
-                 (string-match "^\\(https?://\\)?\\(localhost\\|127.0.0.1\\):[0-9]+/?" url)))
-    url))
-
-(defun eaf-wrap-url (url)
-  "Wraps URL with prefix http:// if URL does not include it."
-  (if (or (string-prefix-p "http://" url)
-          (string-prefix-p "https://" url)
-          (string-prefix-p "file://" url)
-          (string-prefix-p "chrome://" url))
-      url
-    (concat "http://" url)))
-
 (defun eaf-goto-left-tab ()
   "Go to left tab when awesome-tab exists."
   (interactive)
@@ -2116,78 +1817,6 @@ In that way the corresponding function will be called to retrieve the HTML
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-forward-tab)))
-
-;;;###autoload
-(defun eaf-open-browser-in-background (url &optional args)
-  "Open browser with the specified URL and optional ARGS in background."
-  (setq eaf--monitor-configuration-p nil)
-  (let ((save-buffer (current-buffer)))
-    (eaf-open-browser url args)
-    (switch-to-buffer save-buffer))
-  (setq eaf--monitor-configuration-p t))
-
-;;;###autoload
-(defun eaf-open-browser-with-history ()
-  "A wrapper around `eaf-open-browser' that provides browser history candidates.
-
-If URL is an invalid URL, it will use `eaf-browser-default-search-engine' to search URL as string literal.
-
-This function works best if paired with a fuzzy search package."
-  (interactive)
-  (let* ((browser-history-file-path
-          (concat eaf-config-location
-                  (file-name-as-directory "browser")
-                  (file-name-as-directory "history")
-                  "log.txt"))
-         (history-pattern "^\\(.+\\)ᛝ\\(.+\\)ᛡ\\(.+\\)$")
-         (history-file-exists (file-exists-p browser-history-file-path))
-         (history (completing-read
-                   "[EAF/browser] Search || URL || History: "
-                   (if history-file-exists
-                       (mapcar
-                        (lambda (h) (when (string-match history-pattern h)
-                                      (format "[%s] ⇰ %s" (match-string 1 h) (match-string 2 h))))
-                        (with-temp-buffer (insert-file-contents browser-history-file-path)
-                                          (split-string (buffer-string) "\n" t)))
-                     nil)))
-         (history-url (eaf-is-valid-web-url (when (string-match "⇰\s\\(.+\\)$" history)
-                                              (match-string 1 history)))))
-    (cond (history-url (eaf-open-browser history-url))
-          ((eaf-is-valid-web-url history) (eaf-open-browser history))
-          (t (eaf-search-it history)))))
-
-;;;###autoload
-(defun eaf-search-it (&optional search-string search-engine)
-  "Use SEARCH-ENGINE search SEARCH-STRING.
-
-If called interactively, SEARCH-STRING is defaulted to symbol or region string.
-The user can enter a customized SEARCH-STRING.  SEARCH-ENGINE is defaulted
-to `eaf-browser-default-search-engine' with a prefix arg, the user is able to
-choose a search engine defined in `eaf-browser-search-engines'"
-  (interactive)
-  (let* ((real-search-engine (if current-prefix-arg
-                                 (let ((all-search-engine (mapcar #'car eaf-browser-search-engines)))
-                                   (completing-read
-                                    (format "[EAF/browser] Select search engine (default %s): " eaf-browser-default-search-engine)
-                                    all-search-engine nil t nil nil eaf-browser-default-search-engine))
-                               (or search-engine eaf-browser-default-search-engine)))
-         (link (or (cdr (assoc real-search-engine
-                               eaf-browser-search-engines))
-                   (error (format "[EAF/browser] Search engine %s is unknown to EAF!" real-search-engine))))
-         (current-symbol (if mark-active
-                             (if (eq major-mode 'pdf-view-mode)
-                                 (progn
-                                   (declare-function pdf-view-active-region-text "pdf-view.el")
-                                   (car (pdf-view-active-region-text)))
-                               (buffer-substring (region-beginning) (region-end)))
-                           (symbol-at-point)))
-         (search-url (if search-string
-                         (format link search-string)
-                       (let ((search-string (read-string (format "[EAF/browser] Search (%s): " current-symbol))))
-                         (if (string-blank-p search-string)
-                             (format link current-symbol)
-                           (format link search-string))))))
-    (eaf-open search-url "browser")))
 
 ;;;###autoload
 (defun eaf-open-demo ()
@@ -2203,7 +1832,13 @@ choose a search engine defined in `eaf-browser-search-engines'"
 (defun eaf-open-file-manager ()
   "Open EAF file manager."
   (interactive)
-  (eaf-open "eaf-file-manager" "file-manager"))
+  (let* ((args (make-hash-table :test 'equal)))
+    (puthash "header-color" (eaf-color-name-to-hex (face-attribute dired-header-face :foreground)) args)
+    (puthash "directory-color" (eaf-color-name-to-hex (face-attribute dired-directory-face :foreground)) args)
+    (puthash "symlink-color" (eaf-color-name-to-hex (face-attribute dired-symlink-face :foreground)) args)
+    (puthash "select-color" (eaf-color-name-to-hex (face-attribute hl-line-face :background)) args)
+    (eaf-open "~" "file-manager" (json-encode-hash-table args))
+    ))
 
 (defun eaf-open-music-player (music-file)
   "Open EAF music player."
@@ -2234,35 +1869,6 @@ choose a search engine defined in `eaf-browser-search-engines'"
   (interactive)
   (eaf-open "eaf-camera" "camera"))
 
-(defun eaf-ipython-command ()
-  (if (eaf--called-from-wsl-on-windows-p)
-      "ipython.exe"
-    "ipython"))
-
-(defun eaf-open-ipython ()
-  "Open ipython in terminal."
-  (interactive)
-  (if (executable-find (eaf-ipython-command))
-      (eaf-terminal-run-command-in-dir
-       (eaf-ipython-command)
-       (eaf--non-remote-default-directory))
-    (message "[EAF/terminal] Please install ipython first.")))
-
-(defun eaf-open-jupyter ()
-  "Open jupyter."
-  (interactive)
-  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
-                           "jupyter-qtconsole.exe"
-                         "jupyter-qtconsole"))
-      (let* ((data (json-read-from-string (shell-command-to-string (if (eaf--called-from-wsl-on-windows-p)
-                                                                       "jupyter.exe kernelspec list --json"
-                                                                     "jupyter kernelspec list --json"))))
-             (kernel (completing-read "Jupyter Kernels: " (mapcar #'car (alist-get 'kernelspecs data))))
-             (args (make-hash-table :test 'equal)))
-        (puthash "kernel" kernel args)
-        (eaf-open (format "eaf-jupyter-%s" kernel) "jupyter" (json-encode-hash-table args) t))
-    (message "[EAF/jupyter] Please install qtconsole first.")))
-
 ;;;###autoload
 (defun eaf-open-terminal ()
   "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
@@ -2275,32 +1881,12 @@ To override and open a new terminal regardless, call interactively with prefix a
   (interactive)
   (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
 
-(defun eaf-terminal-run-command-in-dir (command dir &optional always-new)
-  "Run COMMAND in terminal in directory DIR.
-
-If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
-  (let* ((args (make-hash-table :test 'equal))
-         (expand-dir (expand-file-name dir)))
-    (puthash "command" command args)
-    (puthash "directory"
-             (if (eaf--called-from-wsl-on-windows-p)
-                 (eaf--translate-wsl-url-to-windows expand-dir)
-               expand-dir)
-             args)
-    (eaf-open dir "terminal" (json-encode-hash-table args) always-new)))
-
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
   (if (or (file-remote-p default-directory)
           (not (file-accessible-directory-p default-directory)))
       (getenv "HOME")
     default-directory))
-
-(defun eaf--generate-terminal-command ()
-  (if (or (eaf--called-from-wsl-on-windows-p)
-          (eq system-type 'windows-nt))
-      "powershell.exe"
-    (getenv "SHELL")))
 
 (defun eaf--get-app-for-extension (extension-name)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
@@ -2310,7 +1896,9 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
                   return app)))
     (if (string-equal app-name "video-player")
         ;; Use Browser play video if QWebEngine include private codec.
-        (if (string-equal eaf--webengine-include-private-codec "True") "js-video-player" "video-player")
+        (if eaf--webengine-include-private-codec
+            "js-video-player"
+          "video-player")
       app-name)))
 
 ;;;###autoload
@@ -2324,53 +1912,8 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
        (string-match-p ".exe" eaf-python-command)))
 
 (defun eaf--translate-wsl-url-to-windows (path)
-  "Translate from a WSL path to a Windows path'"
+  "Translate from a WSL PATH to a Windows path."
   (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" path))
-
-(defun eaf-store-pdf-history (url)
-  "A wrapper around `eaf-open' that store pdf history candidates."
-  (let* (found-history-result (pdf-history-file-path
-                               (concat eaf-config-location
-                                       (file-name-as-directory "pdf")
-                                       (file-name-as-directory "history")
-                                       "log.txt")))
-    (if (not (file-exists-p pdf-history-file-path))
-        (progn
-          ;; If it does not exist, create a folder to store the log and create a log file
-          (make-directory (file-name-directory pdf-history-file-path) t)
-          (with-temp-file pdf-history-file-path "")))
-    (find-file pdf-history-file-path)
-    (goto-char (point-min))
-    (if (search-forward url nil t) ;; search with no error
-        (kill-whole-line))         ;; Delete this record
-    (goto-char (point-min))
-    (insert (concat url "\n"))
-    (basic-save-buffer)
-    (kill-current-buffer)))
-
-(defun eaf-open-pdf-from-history ()
-  "A wrapper around `eaf-open' that provides pdf history candidates.
-This function works best if paired with a fuzzy search package."
-  (interactive)
-  (let* ((pdf-history-file-path
-          (concat eaf-config-location
-                  (file-name-as-directory "pdf")
-                  (file-name-as-directory "history")
-                  "log.txt"))
-         (history-pattern "^\\(.+\\)\\.pdf$")
-         (history-file-exists (file-exists-p pdf-history-file-path))
-         (history-pdf (completing-read
-                       "[EAF/pdf] Search || History: "
-                       (if history-file-exists
-                           (mapcar
-                            (lambda (h) (when (string-match history-pattern h)
-                                          (if (file-exists-p h)
-                                              (format "%s" h))))
-                            (with-temp-buffer (insert-file-contents pdf-history-file-path)
-                                              (split-string (buffer-string) "\n" t)))
-                         (make-directory (file-name-directory pdf-history-file-path) t)
-                         (with-temp-file pdf-history-file-path "")))))
-    (if history-pdf (eaf-open history-pdf))))
 
 ;;;###autoload
 (defun eaf-open (url &optional app-name args always-new)
@@ -2488,22 +2031,6 @@ the file at current cursor position in dired."
   (interactive)
   (eaf-file-sender-qrcode (dired-get-filename)))
 
-(defun eaf-file-browser-qrcode (dir)
-  "Open EAF File Browser application.
-
-Select directory DIR to share file from the smartphone.
-
-Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "D[EAF/file-browser] Specify Destination: ")
-  (eaf-open dir "file-browser"))
-
-(defun eaf-edit-buffer-cancel ()
-  "Cancel EAF Browser focus text input and closes the buffer."
-  (interactive)
-  (kill-buffer)
-  (delete-window)
-  (message "[EAF/%s] Edit cancelled!" eaf--buffer-app-name))
-
 (defun eaf-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
@@ -2528,20 +2055,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
   (kill-buffer)
   (delete-window))
 
-(defun eaf-edit-buffer-switch-to-org-mode ()
-  "Switch to `org-mode' to edit table handily."
-  (interactive)
-  (let ((buffer-app-name eaf--buffer-app-name)
-        (buffer-id eaf--buffer-id))
-    (org-mode)
-    (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
-    (set (make-local-variable 'eaf--buffer-id) buffer-id)
-    (outline-show-all)
-    (goto-char (point-min))
-    (local-set-key (kbd "C-c C-c") 'eaf-edit-buffer-confirm)
-    (local-set-key (kbd "C-c C-k") 'eaf-edit-buffer-cancel)
-    (eaf--edit-set-header-line)))
-
 (defalias 'eaf-create-mindmap 'eaf-open-mindmap) ;; compatible
 
 (defun eaf-open-mindmap (file)
@@ -2563,7 +2076,7 @@ Make sure that your smartphone is connected to the same WiFi network as this com
              (pdf-file (format "/tmp/%s.pdf" file-md5)))
         (if (file-exists-p pdf-file)
             (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf"))
-          (message "Converting %s to PDF format, EAF will start after convert finish." file)
+          (message "Converting %s to PDF, EAF will start shortly..." file)
           (make-process
            :name ""
            :buffer " *eaf-open-office*"
@@ -2574,36 +2087,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
                          (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf")))))))
     (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
-(defun eaf--atomic-edit (buffer-id focus-text)
-  "EAF Browser: edit FOCUS-TEXT with Emacs's BUFFER-ID."
-  (split-window-below -10)
-  (other-window 1)
-  (let ((edit-text-buffer (generate-new-buffer (format "eaf-%s-atomic-edit" eaf--buffer-app-name)))
-        (buffer-app-name eaf--buffer-app-name))
-    (with-current-buffer edit-text-buffer
-      (eaf-edit-mode)
-      (set (make-local-variable 'eaf--buffer-app-name) buffer-app-name)
-      (set (make-local-variable 'eaf--buffer-id) buffer-id))
-    (switch-to-buffer edit-text-buffer)
-    (setq-local eaf-mindmap--current-add-mode "")
-    (eaf--edit-set-header-line)
-    (insert focus-text)
-    ;; When text line number above
-    (when (> (line-number-at-pos) 30)
-      (goto-char (point-min)))))
-
-(defun eaf--edit-set-header-line ()
-  "Set header line."
-  (setq header-line-format
-        (substitute-command-keys
-         (concat
-          "\\<eaf-edit-mode-map>"
-          " EAF/" eaf--buffer-app-name " EDIT: "
-          "Confirm with `\\[eaf-edit-buffer-confirm]', "
-          "Cancel with `\\[eaf-edit-buffer-cancel]'. "
-          "Switch to org-mode with `\\[eaf-edit-buffer-switch-to-org-mode]'. "
-          ))))
-
 (defun eaf--enter-fullscreen-request ()
   "Entering EAF browser fullscreen use Emacs frame's size."
   (setq-local eaf-fullscreen-p t)
@@ -2612,25 +2095,6 @@ Make sure that your smartphone is connected to the same WiFi network as this com
              (or (string= eaf--buffer-app-name "browser")
                  (string= eaf--buffer-app-name "js-video-player")))
     (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
-
-(defun eaf--exit_fullscreen_request ()
-  "Exit EAF browser fullscreen."
-  (setq-local eaf-fullscreen-p nil)
-  (eaf-monitor-configuration-change))
-
-(defun eaf-browser-send-esc-or-exit-fullscreen ()
-  "Escape fullscreen status if browser current is fullscreen.
-Otherwise send key 'esc' to browser."
-  (interactive)
-  (if eaf-fullscreen-p
-      (eaf-call-async "execute_function" eaf--buffer-id "exit_fullscreen" "<escape>")
-    (eaf-call-async "send_key" eaf--buffer-id "<escape>")))
-
-(defun eaf-browser-is-loading ()
-  "Return non-nil if current page is loading."
-  (interactive)
-  (when (and (string= eaf--buffer-app-name "browser")
-             (string= (eaf-call-sync "call_function" eaf--buffer-id "page_is_loading") "True"))))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
@@ -2655,65 +2119,6 @@ Otherwise send key 'esc' to browser."
   (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
   (eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
   (eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
-
-(define-minor-mode eaf-pdf-outline-mode
-  "EAF pdf outline mode."
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
-            (define-key map (kbd "q") 'quit-window)
-            map))
-
-(defun eaf-pdf-outline ()
-  "Create PDF outline."
-  (interactive)
-  (let ((buffer-name (buffer-name (current-buffer)))
-        (toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc"))
-        (page-number (string-to-number (eaf-call-sync "call_function" eaf--buffer-id "current_page"))))
-    ;; Save window configuration before outline.
-    (setq eaf-pdf-outline-window-configuration (current-window-configuration))
-
-    ;; Insert outline content.
-    (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
-      (setq buffer-read-only nil)
-      (erase-buffer)
-      (insert toc)
-      (setq toc (mapcar (lambda (line)
-                          (string-to-number (car (last (split-string line " ")))))
-                        (butlast (split-string (buffer-string) "\n"))))
-      (goto-line (seq-count (apply-partially #'>= page-number) toc))
-      (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
-      (let ((view-read-only nil))
-        (read-only-mode 1))
-      (eaf-pdf-outline-mode 1))
-
-    ;; Popup ouline buffer.
-    (pop-to-buffer eaf-pdf-outline-buffer-name)))
-
-(defun eaf-pdf-outline-jump ()
-  "Jump into specific page."
-  (interactive)
-  (let* ((line (thing-at-point 'line))
-         (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
-    ;; Jump to page.
-    (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
-    (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
-
-    ;; Restore window configuration before outline operation.
-    (when eaf-pdf-outline-window-configuration
-      (set-window-configuration eaf-pdf-outline-window-configuration)
-      (setq eaf-pdf-outline-window-configuration nil))))
-
-(defun eaf-pdf-get-annots (page)
-  "Return a map of annotations on PAGE.
-
-The key is the annot id on PAGE."
-  (eaf-call-sync "call_function_with_args" eaf--buffer-id "get_annots" (format "%s" page)))
-
-(defun eaf-pdf-jump-to-annot (annot)
-  "Jump to specifical pdf annot."
-  (let ((rect (gethash "rect" annot))
-        (page (gethash "page" annot)))
-    (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_rect" (format "%s" page) rect)))
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."
@@ -2772,35 +2177,6 @@ The key is the annot id on PAGE."
     (eaf--activate-emacs-mac-window))
    ((eq system-type 'gnu/linux)
     (eaf--activate-emacs-linux-window buffer_id))))
-
-(defun eaf-elfeed-open-url ()
-  "Display the currently selected item in an eaf buffer."
-  (interactive)
-  (if (featurep 'elfeed)
-      (let ((entry (elfeed-search-selected :ignore-region)))
-        (require 'elfeed-show)
-        (when (elfeed-entry-p entry)
-          ;; Move to next feed item.
-          (elfeed-untag entry 'unread)
-          (elfeed-search-update-entry entry)
-          (unless elfeed-search-remain-on-entry (forward-line))
-
-          ;; Open elfeed item in other window,
-          ;; and scroll EAF browser content by command `scroll-other-window'.
-          (delete-other-windows)
-          (pcase eaf-elfeed-split-direction
-            ("below"
-             (split-window-no-error nil 30 'up)
-             (eaf--select-window-by-direction "down")
-             (eaf-open-browser (elfeed-entry-link entry))
-             (eaf--select-window-by-direction "up"))
-            ("right"
-             (split-window-no-error nil 60 'right)
-             (eaf--select-window-by-direction "right")
-             (eaf-open-browser (elfeed-entry-link entry))
-             (eaf--select-window-by-direction "left")))
-          ))
-    (message "Please install elfeed first.")))
 
 (defun eaf--select-window-by-direction (direction)
   "Select the most on the side according to the direction."
@@ -2888,16 +2264,15 @@ The key is the annot id on PAGE."
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
       (insert "\n"))))
 
-(defun eaf--browser-export-text (buffer-name html-text)
-  (let ((eaf-export-text-buffer (get-buffer-create buffer-name)))
-    (with-current-buffer eaf-export-text-buffer
-      (read-only-mode -1)
-      (erase-buffer)
-      (insert html-text)
-      (goto-char (point-min))
-      (read-only-mode 1))
-    (switch-to-buffer eaf-export-text-buffer)
-    ))
+(defun eaf-color-int-to-hex (int)
+  (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
+
+(defun eaf-color-name-to-hex (color)
+  (let ((components (x-color-values color)))
+    (concat "#"
+            (eaf-color-int-to-hex (nth 0 components))
+            (eaf-color-int-to-hex (nth 1 components))
+            (eaf-color-int-to-hex (nth 2 components)))))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

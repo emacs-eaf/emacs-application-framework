@@ -206,14 +206,28 @@ def close_epc_client():
     if epc_client != None:
         epc_client.close()
 
+def convert_arg_to_str(arg):
+    if type(arg) == str:
+        return arg
+    elif type(arg) == bool:
+        arg = str(arg).upper()
+    elif type(arg) == list:
+        new_arg = ""
+        for a in arg:
+            new_arg = new_arg + " " + convert_arg_to_str(a)
+        arg = "(" + new_arg[1:] + ")"
+    return arg
+
 def eval_in_emacs(method_name, args):
     global epc_client
 
     if epc_client == None:
-        print("Please call init_epc_client first before call eval_in_emacs.")
+        print("Please call init_epc_client first before callling eval_in_emacs.")
     else:
+        args = list(map(convert_arg_to_str, args))
         # Make argument encode with Base64, avoid string quote problem pass to elisp side.
         args = list(map(string_to_base64, args))
+
         args.insert(0, method_name)
 
         # Call eval-in-emacs elisp function.
@@ -222,8 +236,8 @@ def eval_in_emacs(method_name, args):
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
 
-def set_emacs_var(var_name, var_value, eaf_specific):
-    eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, eaf_specific])
+def set_emacs_var(var_name, var_value, in_eaf_var_list):
+    eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, in_eaf_var_list])
 
 def open_url_in_background_tab(url):
     eval_in_emacs('eaf-open-browser-in-background', [url])
@@ -245,35 +259,3 @@ def focus_emacs_buffer(message):
 
 def atomic_edit(buffer_id, focus_text):
     eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
-
-def list_string_to_list(list_string):
-    '''Convert the list string from emacs var to list type.'''
-    list_var = list_string.removeprefix('(').removesuffix(')')
-    quote = 0
-    extra_char_num = 0
-    for x in range(len(list_var)):
-        x += extra_char_num
-        if list_var[x] == '"':
-            if quote == 1:
-                quote = 0
-            else:
-                quote = 1
-
-        if (list_var[x] == '(') and (quote == 0):
-            list_var = list_var[:x] + '[' + list_var[x + 1:]
-        elif (list_var[x] == ')') and (quote == 0):
-            list_var = list_var[:x] + ']' + list_var[x + 1:]
-        elif (list_var[x] == ' ') and (quote == 0):
-            list_var = list_var[:x] + '{split}' + list_var[x + 1:]
-            extra_char_num += 6
-        elif (list_var[x] == '.') and (quote == 0):
-            list_var = list_var[:x] + '' + list_var[x + 2:]
-            extra_char_num -= 2
-
-    list_var = str(list_var.split('{split}')).replace("', '[", "', ['").replace("]'", "']").replace("'[", "['").replace("'\"", "'").replace("\"'", "'")
-    
-    if list_var[0] == "'" and list_var[1] == "[":
-        list_var = "['" + list_var[2:]
-
-    list_var = literal_eval(str(list_var))
-    return list_var

@@ -43,7 +43,7 @@ class AppBuffer(BrowserBuffer):
         self.render_js = os.path.join(os.path.dirname(__file__), "render.js")
         self.server_port = get_free_port()
         self.dark_mode = "false"
-        if emacs_var_dict["eaf-markdown-dark-mode"] == "true" or \
+        if emacs_var_dict["eaf-markdown-dark-mode"] == True or \
            (emacs_var_dict["eaf-markdown-dark-mode"] == "follow" and emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             self.dark_mode = "true"
 

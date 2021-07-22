@@ -33,6 +33,7 @@ class AppBuffer(BrowserBuffer):
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
+        self.arguments = json.loads(arguments)
 
         with open(self.index_file, "r") as f:
             html = self.convert_index_html(f.read(), self.index_file_dir)
@@ -40,8 +41,13 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.loadFinished.connect(self.init_path)
 
+        for (python_method_name, js_method_name) in [("select_next_file", "selectNextFile"),
+                                                     ("select_prev_file", "selectPrevFile"),
+                                                     ]:
+            self.build_js_bridge_method(python_method_name, js_method_name)
+
     def init_path(self):
-        path = os.path.expanduser("~")
+        path = os.path.expanduser(self.url)
         search_path = Path(path)
 
         file_infos = []
@@ -66,6 +72,16 @@ class AppBuffer(BrowserBuffer):
 
         self.buffer_widget.execute_js('''addPath(\"{}\");'''.format(path))
         self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(file_infos)))
+
+        self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+            self.emacs_var_dict["eaf-emacs-theme-background-color"],
+            self.emacs_var_dict["eaf-emacs-theme-foreground-color"],
+            self.arguments["header-color"],
+            self.emacs_var_dict["eaf-emacs-theme-foreground-color"],
+            self.arguments["directory-color"],
+            self.arguments["symlink-color"],
+            self.arguments["select-color"],
+        ))
 
     def file_compare(self, a, b):
         type_sort_weights = ["directory", "file", "symlink"]
