@@ -146,6 +146,54 @@
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))
 
+(defun eaf-pdf-imenu-create-index-from-toc ()
+  "Create an alist based on the table of contents of this buffer.
+
+It call the Python's function \"get_toc\" then from the output, make an alist
+with each element that looks like
+(\"CHAPTER_NAME\" PAGE_NUMBER 'eaf-pdf-imenu-go-to-index nil).
+
+(See why the element has to be that way in `imenu--index-alist'
+ Hint: Look for \"Special elements\" in the documentation.)
+
+the \"CHAPTER_NAME\" part will be replace with \"Page PAGE_NUMBER\"
+when there is no table of contents for the buffer."
+  (interactive)
+  (or imenu--index-alist
+      (setq imenu--index-alist
+            (let ((toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc")))
+              (cond ((string= toc "")
+                     (mapcar #'(lambda (page-num)
+                                 (list (concat "Page " (number-to-string page-num)) page-num
+                                       #'eaf-pdf-imenu-go-to-index
+                                       nil))
+                             (number-sequence 1
+                                              (string-to-number
+                                               (eaf-call-sync "call_function"
+                                                              eaf--buffer-id
+                                                              "page_total_number")))))
+                    (t
+                     (mapcar #'(lambda (line)
+                                 (let ((line-split (split-string line " ")))
+                                   (list (string-trim (string-join (butlast line-split) " "))
+                                         (string-to-number (car (last line-split)))
+                                         #'eaf-pdf-imenu-go-to-index
+                                         nil)))
+                             (split-string toc "\n"))))))))
+
+(defun eaf-pdf-imenu-go-to-index (_chapter-name page-num _arg)
+  "Ignore _CHAPTER-NAME and _ARG, call Python's \"jump_page\" function with PAGE-NUM as its argument.
+
+The _CHAPTER-NAME is from the car of a element in `eaf-pdf-imenu-create-index-from-toc'
+The _ARG is hardcoded to be nil from `eaf-pdf-imenu-create-index-from-toc'
+Just ignore them and call \"jump_page\" to PAGE-NUM."
+  (eaf-call-async "handle_input_response" eaf--buffer-id "jump_page" page-num))
+
+(defun eaf-pdf-imenu-setup ()
+  (setq imenu-create-index-function 'eaf-pdf-imenu-create-index-from-toc))
+
+(add-hook 'eaf-pdf-viewer-hook 'eaf-pdf-imenu-setup)
+
 (defun eaf-pdf-get-annots (page)
   "Return a map of annotations on PAGE.
 
@@ -211,5 +259,4 @@ This function works best if paired with a fuzzy search package."
     (if history-pdf (eaf-open history-pdf))))
 
 (provide 'eaf-pdf-viewer)
-
 ;;; eaf-pdf-viewer.el ends here
