@@ -104,12 +104,14 @@
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
             (define-key map (kbd "q") 'quit-window)
+            (define-key map (kbd "o") 'eaf-pdf-outline-view)
+            (define-key map (kbd "v") 'eaf-pdf-outline-view)
             map))
 
 (defun eaf-pdf-outline ()
   "Create PDF outline."
   (interactive)
-  (let ((buffer-name (buffer-name (current-buffer)))
+  (let ((buf (current-buffer))
         (toc (eaf-call-sync "call_function" eaf--buffer-id "get_toc"))
         (page-number (string-to-number (eaf-call-sync "call_function" eaf--buffer-id "current_page"))))
     ;; Save window configuration before outline.
@@ -119,12 +121,14 @@
     (with-current-buffer (get-buffer-create  eaf-pdf-outline-buffer-name)
       (setq buffer-read-only nil)
       (erase-buffer)
+      (setq outline-regexp "^[[:space:]]*")
       (insert toc)
+      (outline-mode)
       (setq toc (mapcar (lambda (line)
                           (string-to-number (car (last (split-string line " ")))))
                         (butlast (split-string (buffer-string) "\n"))))
       (goto-line (seq-count (apply-partially #'>= page-number) toc))
-      (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buffer-name)
+      (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buf)
       (let ((view-read-only nil))
         (read-only-mode 1))
       (eaf-pdf-outline-mode 1))
@@ -136,7 +140,7 @@
   "Jump into specific page."
   (interactive)
   (let* ((line (thing-at-point 'line))
-         (page-num (replace-regexp-in-string "\n" "" (car (last (s-split " " line))))))
+         (page-num (substring-no-properties (replace-regexp-in-string "\n" "" (car (last (s-split " " line)))))))
     ;; Jump to page.
     (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
     (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
@@ -145,6 +149,16 @@
     (when eaf-pdf-outline-window-configuration
       (set-window-configuration eaf-pdf-outline-window-configuration)
       (setq eaf-pdf-outline-window-configuration nil))))
+
+(defun eaf-pdf-outline-view ()
+  "View the specific page."
+  (interactive)
+  (let* ((line (thing-at-point 'line))
+         (page-num (substring-no-properties (replace-regexp-in-string "\n" "" (car (last (s-split " " line)))))))
+    ;; Jump to page.
+    (eaf-call-sync "call_function_with_args"
+                   (buffer-local-value 'eaf--buffer-id eaf-pdf-outline-original-buffer-name)
+                   "jump_to_page_with_num" (format "%s" page-num))))
 
 (defun eaf-pdf-imenu-create-index-from-toc ()
   "Create an alist based on the table of contents of this buffer.
