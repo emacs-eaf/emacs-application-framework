@@ -81,9 +81,11 @@
 
 ;;; Require
 
-(require 'eaf)
-
 ;;; Code:
+
+(defgroup eaf-pdf-viewer nil
+  "EAF's PDF Viewer."
+  :group 'eaf)
 
 (defcustom eaf-pdf-viewer-keybinding
   '(("j" . "scroll_up")
@@ -135,11 +137,25 @@
   :type 'cons
   :group 'eaf-pdf-viewer)
 
-(defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
-  "The name of pdf-outline-buffer.")
+(defcustom eaf-pdf-scroll-up-hook nil
+  "Hook run when Python's scroll_up, scroll_up_page or scroll_to_begin function is called."
+  :type 'hook
+  :group 'eaf-pdf-viewer)
 
-(defvar eaf-pdf-outline-window-configuration nil
-  "Save window configure before popup outline buffer.")
+(defcustom eaf-pdf-scroll-down-hook nil
+  "Hook run when Python's scroll_down, scroll_down_page or scroll_to_end function is called."
+  :type 'hook
+  :group 'eaf-pdf-viewer)
+
+(defcustom eaf-pdf-scroll-left-hook nil
+  "Hook run when Python's scroll_left function is called."
+  :type 'hook
+  :group 'eaf-pdf-viewer)
+
+(defcustom eaf-pdf-scroll-right-hook nil
+  "Hook run when Python's scroll_right function is called."
+  :type 'hook
+  :group 'eaf-pdf-viewer)
 
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
@@ -158,6 +174,12 @@
             (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
             (define-key map (kbd "q") 'quit-window)
             map))
+
+(defvar eaf-pdf-outline-buffer-name "*eaf pdf outline*"
+  "The name of pdf-outline-buffer.")
+
+(defvar eaf-pdf-outline-window-configuration nil
+  "Save window configure before popup outline buffer.")
 
 (defun eaf-pdf-outline ()
   "Create PDF outline."
