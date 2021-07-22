@@ -573,20 +573,20 @@ class PdfViewerWidget(QWidget):
         self.rotation = 0
 
         # Simple string comparation.
-        if (self.emacs_var_dict["eaf-pdf-default-zoom"] != "1.0"):
+        if (float(self.emacs_var_dict["eaf-pdf-default-zoom"]) != 1.0):
             self.read_mode = "fit_to_customize"
             self.scale = float(self.emacs_var_dict["eaf-pdf-default-zoom"])
         self.horizontal_offset = 0
 
         # Inverted mode.
         self.inverted_mode = False
-        if (self.emacs_var_dict["eaf-pdf-dark-mode"] == "true" or \
+        if (self.emacs_var_dict["eaf-pdf-dark-mode"] == True or \
             ((self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" or self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore") and \
              self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] == "true" and self.document.isPDF
+        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] and self.document.isPDF
 
         # mark link
         self.is_mark_link = False
@@ -622,7 +622,7 @@ class PdfViewerWidget(QWidget):
         self.scroll_offset = 0
         self.scroll_ratio = 0.05
         self.scroll_wheel_lasttime = time.time()
-        if self.emacs_var_dict["eaf-pdf-scroll-ratio"] != "0.05":
+        if float(self.emacs_var_dict["eaf-pdf-scroll-ratio"]) != 0.05:
             self.scroll_ratio = float(self.emacs_var_dict["eaf-pdf-scroll-ratio"])
 
         # Default presentation mode

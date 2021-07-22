@@ -643,9 +643,9 @@ class BrowserBuffer(Buffer):
 
         self.settings = QWebEngineSettings.globalSettings()
         try:
-            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"] == "true")
-            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"] == "true")
-            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, self.emacs_var_dict["eaf-browser-enable-scrollbar"] == "true")
+            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.emacs_var_dict["eaf-browser-enable-plugin"])
+            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.emacs_var_dict["eaf-browser-enable-javascript"])
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, self.emacs_var_dict["eaf-browser-enable-scrollbar"])
             self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
@@ -714,7 +714,7 @@ class BrowserBuffer(Buffer):
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
-        return (self.emacs_var_dict["eaf-browser-dark-mode"] == "true" or \
+        return (self.emacs_var_dict["eaf-browser-dark-mode"] == True or
                 (self.emacs_var_dict["eaf-browser-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
                 and module_name in ["browser", "terminal", "mindmap", "js-video-player"] \
                 and self.url != "devtools://devtools/bundled/devtools_app.html"
