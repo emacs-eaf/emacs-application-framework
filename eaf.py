@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs
+from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -156,6 +156,8 @@ class EAF(object):
                 self.emacs_var_dict[key] = False
             elif str(value).upper() == "TRUE":
                 self.emacs_var_dict[key] = True
+            elif str(value).startswith('(') and str(value).endswith(')'):
+                self.emacs_var_dict[key] = list_string_to_list(str(value))
 
         for buffer in list(self.buffer_dict.values()):
             buffer.emacs_var_dict = self.emacs_var_dict

@@ -1599,7 +1599,9 @@ For convenience, use the Lisp macro `eaf-setq' instead."
   (cond ((and (stringp val) (string= (upcase val) "TRUE"))
          (setq val t))
         ((and (stringp val) (string= (upcase val) "FALSE"))
-         (setq val nil)))
+         (setq val nil))
+        ((and (listp val) val)
+         (setq val (format "%S" val))))
   (setf (map-elt eaf-var-list sym) val)
   ;; Update python side variable dynamically.
   (when (epc:live-p eaf-epc-process)
