@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jul 22 00:14:37 2021 (-0400)
+;; Last-Updated: Thu Jul 22 01:22:41 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -111,10 +111,8 @@
 (require 's)
 (require 'seq)
 (require 'subr-x)
-(when (featurep 'elfeed)
-  (require 'eaf-elfeed))
-(when (featurep 'netease-cloud-music)
-  (require 'eaf-netease-cloud-music))
+(require 'eaf-elfeed)
+(require 'eaf-netease-cloud-music)
 
 
 (defgroup eaf nil
