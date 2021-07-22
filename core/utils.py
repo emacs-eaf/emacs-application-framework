@@ -259,3 +259,36 @@ def focus_emacs_buffer(message):
 
 def atomic_edit(buffer_id, focus_text):
     eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
+    print(self.emacs_var_dict["eaf-netease-cloud-music-user-playlists+list"])
+
+def list_string_to_list(list_string):
+    '''Convert the list string from emacs var to list type.'''
+    list_var = list_string.removeprefix('(').removesuffix(')')
+    quote = 0
+    extra_char_num = 0
+    for x in range(len(list_var)):
+        x += extra_char_num
+        if list_var[x] == '"':
+            if quote == 1:
+                quote = 0
+            else:
+                quote = 1
+
+        if (list_var[x] == '(') and (quote == 0):
+            list_var = list_var[:x] + '[' + list_var[x + 1:]
+        elif (list_var[x] == ')') and (quote == 0):
+            list_var = list_var[:x] + ']' + list_var[x + 1:]
+        elif (list_var[x] == ' ') and (quote == 0):
+            list_var = list_var[:x] + '{split}' + list_var[x + 1:]
+            extra_char_num += 6
+        elif (list_var[x] == '.') and (quote == 0):
+            list_var = list_var[:x] + '' + list_var[x + 2:]
+            extra_char_num -= 2
+
+    list_var = str(list_var.split('{split}')).replace("', '[", "', ['").replace("]'", "']").replace("'[", "['").replace("'\"", "'").replace("\"'", "'")
+
+    if list_var[0] == "'" and list_var[1] == "[":
+        list_var = "['" + list_var[2:]
+
+    list_var = literal_eval(str(list_var))
+    return list_var
