@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul  9 12:18:52 2021 (-0400)
+;; Last-Updated: Wed Jul 21 23:15:13 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -96,14 +96,11 @@
           ((eq system-type 'darwin)
            (shell-command (concat "./install-eaf-mac.sh" "&"))))))
 
-
 (require 'bookmark)
 (require 'cl-lib)
 (require 'eaf-interleave)
 (require 'eaf-mindmap)
 (require 'eaf-pdf-viewer)
-(require 'eaf-netease-cloud-music)
-(require 'eaf-elfeed)
 (require 'eaf-mail)
 (require 'eaf-browser)
 (require 'eaf-terminal)
@@ -114,6 +111,11 @@
 (require 's)
 (require 'seq)
 (require 'subr-x)
+(when (featurep 'elfeed)
+  (require 'eaf-elfeed))
+(when (featurep 'netease-cloud-music)
+  (require 'eaf-netease-cloud-music))
+
 
 (defgroup eaf nil
   "Emacs Application Framework."
@@ -146,6 +148,9 @@
 Don't modify this map directly.  To bind keys for all apps use
 `eaf-mode-map*' and to bind keys for individual apps use
 `eaf-bind-key'.")
+
+(defvar eaf-server nil
+  "The EAF Server.")
 
 (defvar eaf-edit-mode-map
   (let ((map (make-sparse-keymap)))
@@ -247,31 +252,29 @@ been initialized."
           epcs:server-processes)
     main-process))
 
-(defvar eaf-server nil)
 (defun eaf--start-epc-server ()
+  "Function to start the EPC server."
   (unless eaf-server
-    (setq eaf-server (epcs:server-start
-                      (lambda (mngr)
-                        (let ((mngr mngr))
-                          (epc:define-method
-                           mngr 'eval-in-emacs
-                           (lambda (&rest args)
-                             ;; Decode argument with Base64 format automatically.
-                             (apply (read (car args))
-                                    (mapcar
-                                     (lambda (arg)
-                                       (let ((arg (eaf--decode-string arg)))
-                                         (cond ((string-prefix-p "'" arg)
-                                                (read (substring arg 1)))
-                                               (t arg)))) (cdr args)))))))
-                      ))
+    (setq eaf-server
+          (epcs:server-start
+           (lambda (mngr)
+             (let ((mngr mngr))
+               (epc:define-method
+                mngr 'eval-in-emacs
+                (lambda (&rest args)
+                  ;; Decode argument with Base64 format automatically.
+                  (apply (read (car args))
+                         (mapcar
+                          (lambda (arg)
+                            (let ((arg (eaf--decode-string arg)))
+                              (cond ((string-prefix-p "'" arg)
+                                     (read (substring arg 1)))
+                                    (t arg))))
+                          (cdr args)))))))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
-      (error "eaf-server fails to start.")
-      )
-    )
-  eaf-server
-  )
+      (error "[EAF] eaf-server failed to start")))
+  eaf-server)
 
 (when noninteractive
   ;; Start "event loop".
@@ -1597,8 +1600,8 @@ For convenience, use the Lisp macro `eaf-setq' instead."
                 (format "%S" val))))
 
   (setf (map-elt eaf-var-list sym) val)
+  ;; Update python side variable dynamically.
   (when (epc:live-p eaf-epc-process)
-    ;; Update python side variable dynamically.
     (eaf-call-async "update_emacs_var_dict" (eaf-serialization-var-list)))
   val)
 
@@ -1640,10 +1643,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
-  (message "[EAF/%s] %s"
-           eaf--buffer-app-name
-           format-string
-           ))
+  (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
 (defun eaf--set-emacs-var (name value eaf-specific)
   "Set Lisp variable NAME with VALUE on the Emacs side.
@@ -1907,7 +1907,7 @@ To override and open a new terminal regardless, call interactively with prefix a
        (string-match-p ".exe" eaf-python-command)))
 
 (defun eaf--translate-wsl-url-to-windows (path)
-  "Translate from a WSL path to a Windows path'"
+  "Translate from a WSL PATH to a Windows path."
   (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" path))
 
 ;;;###autoload
@@ -2071,7 +2071,7 @@ the file at current cursor position in dired."
              (pdf-file (format "/tmp/%s.pdf" file-md5)))
         (if (file-exists-p pdf-file)
             (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf"))
-          (message "Converting %s to PDF format, EAF will start after convert finish." file)
+          (message "Converting %s to PDF, EAF will start shortly..." file)
           (make-process
            :name ""
            :buffer " *eaf-open-office*"
