@@ -128,7 +128,7 @@
                           (string-to-number (car (last (split-string line " ")))))
                         (butlast (split-string (buffer-string) "\n"))))
       (goto-line (seq-count (apply-partially #'>= page-number) toc))
-      (set (make-local-variable 'eaf-pdf-outline-original-buffer-name) buf)
+      (set (make-local-variable 'eaf-pdf-outline-original-buffer) buf)
       (let ((view-read-only nil))
         (read-only-mode 1))
       (eaf-pdf-outline-mode 1))
@@ -142,7 +142,7 @@
   (let* ((line (thing-at-point 'line))
          (page-num (substring-no-properties (replace-regexp-in-string "\n" "" (car (last (s-split " " line)))))))
     ;; Jump to page.
-    (switch-to-buffer-other-window eaf-pdf-outline-original-buffer-name)
+    (switch-to-buffer-other-window eaf-pdf-outline-original-buffer)
     (eaf-call-sync "call_function_with_args" eaf--buffer-id "jump_to_page_with_num" (format "%s" page-num))
 
     ;; Restore window configuration before outline operation.
@@ -157,7 +157,7 @@
          (page-num (substring-no-properties (replace-regexp-in-string "\n" "" (car (last (s-split " " line)))))))
     ;; Jump to page.
     (eaf-call-sync "call_function_with_args"
-                   (buffer-local-value 'eaf--buffer-id eaf-pdf-outline-original-buffer-name)
+                   (buffer-local-value 'eaf--buffer-id eaf-pdf-outline-original-buffer)
                    "jump_to_page_with_num" (format "%s" page-num))))
 
 (defun eaf-pdf-imenu-create-index-from-toc ()
