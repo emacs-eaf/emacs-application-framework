@@ -14,8 +14,9 @@ function installExecSync(command, app_dir) {
             cwd: path.join(__dirname, app_dir),
             stdio: "inherit",
         });
-        console.info("[EAF] [" + command + "] on [" + app_dir + "] has succeeded!");
+        console.info("[EAF] [" + command + "] on [" + app_dir + "] has succeeded! :)");
     } catch (err) {
+        console.info("[EAF] [" + command + "] on [" + app_dir + "] has failed! :(");
         failedApps.push(app_dir);
     }
 }
