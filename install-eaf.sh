@@ -2,12 +2,38 @@
 
 set -eu
 
+IGNORE_SYS_DEPS=""
+IGNORE_PY_DEPS=""
+IGNORE_NPM_DEPS=""
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    --ignore-sys-deps)
+        IGNORE_SYS_DEPS=YES
+        shift
+        ;;
+    --ignore-py-deps)
+        IGNORE_PY_DEPS=YES
+        shift
+        ;;
+    --ignore-npm-deps)
+        IGNORE_NPM_DEPS=YES
+        shift
+        ;;
+  esac
+done
+
 ARCH_PACKAGES="git nodejs npm \
 python-pyqt5 python-pyqt5-sip python-pyqtwebengine wmctrl \
 python-qrcode aria2 python-qtconsole taglib"
 
 # System dependencies
-if [ "$(command -v apt)" ]; then
+if [ $IGNORE_SYS_DEPS ]; then
+    :
+elif [ "$(command -v apt)" ]; then
     # Missing in Ubuntu: filebrowser-bin
     # shellcheck disable=SC2015
     DEPS="git aria2 wmctrl"
@@ -54,7 +80,9 @@ https://github.com/manateelazycat/emacs-application-framework for the script to 
 fi
 
 # Python dependencies
-if [ "$(command -v pip3)" ]; then
+if [ $IGNORE_PY_DEPS ]; then
+    :
+elif [ "$(command -v pip3)" ]; then
     pip3 install --user pymupdf epc retrying pytaglib psutil || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
 elif [ "$(command -v pip)" ]; then
     pip install --user pymupdf epc retrying pytaglib psutil || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
@@ -63,7 +91,13 @@ else
     exit 1
 fi
 
-echo "[EAF] Installing npm dependencies..."
-npm install || { echo "[EAF] Failed to install dependency with npm."; exit 1;}
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+if [ $IGNORE_NPM_DEPS ]; then
+    :
+else
+    echo "[EAF] Installing npm dependencies..."
+    (cd $SCRIPT_DIR && npm install) || { echo "[EAF] Failed to install dependency with npm."; exit 1;}
+fi
 
 echo "[EAF] eaf-install.sh finished."

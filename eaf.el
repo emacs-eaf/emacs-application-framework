@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jul 22 01:22:41 2021 (-0400)
+;; Last-Updated: Fri Jul 23 11:54:00 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -2098,13 +2098,13 @@ the file at current cursor position in dired."
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
-  (format "%s"(frame-parameter nil 'background-mode)))
+  (format "%s" (frame-parameter nil 'background-mode)))
 
 (defun eaf-get-theme-background-color ()
-  (format "%s"(frame-parameter nil 'background-color)))
+  (format "%s" (frame-parameter nil 'background-color)))
 
 (defun eaf-get-theme-foreground-color ()
-  (format "%s"(frame-parameter nil 'foreground-color)))
+  (format "%s" (frame-parameter nil 'foreground-color)))
 
 (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
 
