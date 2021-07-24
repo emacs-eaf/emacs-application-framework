@@ -6,7 +6,6 @@ IGNORE_SYS_DEPS=""
 IGNORE_PY_DEPS=""
 IGNORE_NPM_DEPS=""
 
-POSITIONAL=()
 while [[ $# -gt 0 ]]; do
   key="$1"
 
