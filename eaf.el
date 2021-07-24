@@ -1833,10 +1833,10 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open EAF file manager."
   (interactive)
   (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (face-attribute dired-header-face :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (face-attribute dired-directory-face :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (face-attribute dired-symlink-face :foreground)) args)
-    (puthash "select-color" (eaf-color-name-to-hex (face-attribute hl-line-face :background)) args)
+    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face diredp-dir-heading) :foreground)) args)
+    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face diredp-dir-name) :foreground)) args)
+    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face diredp-symlink) :foreground)) args)
+    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
@@ -2273,6 +2273,13 @@ the file at current cursor position in dired."
             (eaf-color-int-to-hex (nth 0 components))
             (eaf-color-int-to-hex (nth 1 components))
             (eaf-color-int-to-hex (nth 2 components)))))
+
+(defun eaf-get-face-attribute (candicates attribute)
+  "Get a face `ATTRIBUTE' from face `CANDICATES' which is specified."
+  (or (car (seq-filter (lambda (attr) (not (eq attr 'unspecified)))
+                       (mapcar (lambda (face) (face-attribute face attribute))
+                               candicates)))
+      'unspecified))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
