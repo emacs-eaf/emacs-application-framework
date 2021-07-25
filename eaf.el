@@ -376,7 +376,9 @@ been initialized."
     (eaf-netease-cloud-music-playlist-id . "0")
     (eaf-netease-cloud-music-play-status . "")
     (eaf-netease-cloud-music-current-song+list . ("" ""))
-    (eaf-netease-cloud-music-user+list . ()))
+    (eaf-netease-cloud-music-user+list . ())
+    (eaf-buffer-background-color . "#000000") ;background color for pdf-viewer, camera, file-sender and airshare
+    )
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
 

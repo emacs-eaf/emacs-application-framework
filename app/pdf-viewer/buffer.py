@@ -41,7 +41,7 @@ class AppBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(emacs_var_dict["eaf-buffer-background-color"]), buffer_id, emacs_var_dict))
         self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
