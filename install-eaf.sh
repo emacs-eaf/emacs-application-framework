@@ -6,7 +6,7 @@ IGNORE_SYS_DEPS=""
 IGNORE_PY_DEPS=""
 IGNORE_NPM_DEPS=""
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   key="$1"
 
   case $key in
@@ -99,4 +99,4 @@ else
     (cd $SCRIPT_DIR && npm install) || { echo "[EAF] Failed to install dependency with npm."; exit 1;}
 fi
 
-echo "[EAF] eaf-install.sh finished."
+echo "[EAF] install-eaf.sh finished."
