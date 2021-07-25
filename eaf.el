@@ -1542,6 +1542,11 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (eaf-call-async "action_quit" eaf--buffer-id)
   (call-interactively 'keyboard-quit))
 
+(defun eaf-read-key (key)
+  "Read `KEY' from EAF Python side."
+  (setq unread-command-events
+        (append (apply 'vconcat (mapcar 'kbd (list key))) nil)))
+
 (defun eaf-send-key ()
   "Directly send key to EAF Python side."
   (interactive)

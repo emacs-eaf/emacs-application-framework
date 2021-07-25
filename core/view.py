@@ -27,6 +27,24 @@ from core.utils import eval_in_emacs, focus_emacs_buffer
 import platform
 import os
 
+emacs_key_dict = {
+    Qt.Key_Space: '''SPC''',
+    Qt.Key_Return: '''RET''',
+    Qt.Key_Backspace: '''DEL''',
+    Qt.Key_Tab: '''TAB''',
+    Qt.Key_Backtab: '''<backtab>''',
+    Qt.Key_Home: '''<home>''',
+    Qt.Key_End: '''<end>''',
+    Qt.Key_Left: '''<left>''',
+    Qt.Key_Right: '''<right>''',
+    Qt.Key_Up: '''<up>''',
+    Qt.Key_Down: '''<down>''',
+    Qt.Key_PageUp: '''<prior>''',
+    Qt.Key_PageDown: '''<next>''',
+    Qt.Key_Delete: '''<delete>'''
+}
+
+
 class View(QWidget):
 
     def __init__(self, buffer, view_info):
@@ -128,7 +146,8 @@ class View(QWidget):
 
         # Transfer the key event to buffer widget.
         if event.type() == QEvent.KeyPress:
-            self.buffer.fake_key_event(event.text())
+            args = [emacs_key_dict.get(event.key(), event.text())]
+            eval_in_emacs("eaf-read-key", args)
             # Stop key event.
             return True
 
@@ -137,7 +156,7 @@ class View(QWidget):
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
-        
+
         if platform.system() in ["Windows", "Darwin"]:
             eval_in_emacs('eaf-activate-emacs-window', [])
 
