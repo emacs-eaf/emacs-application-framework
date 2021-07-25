@@ -126,12 +126,6 @@ class View(QWidget):
             # Stop mouse event.
             return True
 
-        # Transfer the key event to buffer widget.
-        if event.type() == QEvent.KeyPress:
-            self.buffer.fake_key_event(event.text())
-            # Stop key event.
-            return True
-
         return False
 
     def showEvent(self, event):
