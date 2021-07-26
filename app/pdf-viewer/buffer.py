@@ -1002,7 +1002,7 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
-        self.is_mark_link = not self.is_mark_link
+        self.is_mark_link = not self.is_mark_link and self.document.isPDF
         self.page_cache_pixmap_dict.clear()
         self.update()
 
@@ -1029,7 +1029,7 @@ class PdfViewerWidget(QWidget):
         self.update_rotate((self.rotation - 90) % 360)
 
     def add_mark_jump_link_tips(self):
-        self.is_jump_link = True
+        self.is_jump_link = True and self.document.isPDF
         self.page_cache_pixmap_dict.clear()
         self.update()
 
