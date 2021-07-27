@@ -259,7 +259,6 @@ def focus_emacs_buffer(message):
 
 def atomic_edit(buffer_id, focus_text):
     eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
-    print(self.emacs_var_dict["eaf-netease-cloud-music-user-playlists+list"])
 
 def list_string_to_list(list_string):
     '''Convert the list string from emacs var to list type.'''

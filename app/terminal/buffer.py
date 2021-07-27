@@ -107,7 +107,12 @@ class AppBuffer(BrowserBuffer):
             theme = "dark"
 
         with request.urlopen(self.index_file) as f:
-            html = f.read().decode("utf-8").replace("%1", str(self.port)).replace("%2", self.http_url).replace("%3", theme).replace("%4", self.emacs_var_dict["eaf-terminal-font-size"]).replace("%5", self.current_directory).replace("%6", self.emacs_var_dict["eaf-terminal-font-family"])
+            html = f.read().decode("utf-8").replace("%1", str(self.port))\
+                                           .replace("%2", self.http_url)\
+                                           .replace("%3", theme)\
+                                           .replace("%4", str(self.emacs_var_dict["eaf-terminal-font-size"]))\
+                                           .replace("%5", self.current_directory)\
+                                           .replace("%6", self.emacs_var_dict["eaf-terminal-font-family"])
             self.buffer_widget.setHtml(html)
 
     def checking_status(self):

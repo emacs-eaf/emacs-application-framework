@@ -348,7 +348,7 @@ class EAF(object):
     @PostGui()
     def execute_function(self, buffer_id, function_name, event_string):
         ''' Execute function and do not return anything. '''
-        if buffer_id in self.buffer_dict:
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
             try:
                 buffer = self.buffer_dict[buffer_id]
                 buffer.current_event_string = event_string

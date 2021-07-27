@@ -38,7 +38,7 @@ class AppBuffer(Buffer):
 
         self.background_color = QColor(0, 0, 0)
 
-        self.add_widget(CameraWidget(QColor(0, 0, 0, 255)))
+        self.add_widget(CameraWidget(QColor(emacs_var_dict["eaf-buffer-background-color"])))
 
     def all_views_hide(self):
         # Need stop camera if all view will hide, otherwise camera will crash.

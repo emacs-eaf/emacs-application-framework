@@ -41,7 +41,7 @@ class AppBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(0, 0, 0, 255), buffer_id, emacs_var_dict))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(emacs_var_dict["eaf-buffer-background-color"]), buffer_id, emacs_var_dict))
         self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
@@ -1002,7 +1002,7 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
-        self.is_mark_link = not self.is_mark_link
+        self.is_mark_link = not self.is_mark_link and self.document.isPDF
         self.page_cache_pixmap_dict.clear()
         self.update()
 
@@ -1029,7 +1029,7 @@ class PdfViewerWidget(QWidget):
         self.update_rotate((self.rotation - 90) % 360)
 
     def add_mark_jump_link_tips(self):
-        self.is_jump_link = True
+        self.is_jump_link = True and self.document.isPDF
         self.page_cache_pixmap_dict.clear()
         self.update()
 

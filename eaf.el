@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Jul 22 01:22:41 2021 (-0400)
+;; Last-Updated: Fri Jul 23 11:54:00 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -376,7 +376,9 @@ been initialized."
     (eaf-netease-cloud-music-playlist-id . "0")
     (eaf-netease-cloud-music-play-status . "")
     (eaf-netease-cloud-music-current-song+list . ("" ""))
-    (eaf-netease-cloud-music-user+list . ()))
+    (eaf-netease-cloud-music-user+list . ())
+    (eaf-buffer-background-color . "#000000") ;background color for pdf-viewer, camera, file-sender and airshare
+    )
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
 
@@ -1833,10 +1835,10 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open EAF file manager."
   (interactive)
   (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (face-attribute dired-header-face :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (face-attribute dired-directory-face :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (face-attribute dired-symlink-face :foreground)) args)
-    (puthash "select-color" (eaf-color-name-to-hex (face-attribute hl-line-face :background)) args)
+    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face diredp-dir-heading) :foreground)) args)
+    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face diredp-dir-name) :foreground)) args)
+    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face diredp-symlink) :foreground)) args)
+    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
@@ -2098,13 +2100,13 @@ the file at current cursor position in dired."
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
-  (format "%s"(frame-parameter nil 'background-mode)))
+  (format "%s" (frame-parameter nil 'background-mode)))
 
 (defun eaf-get-theme-background-color ()
-  (format "%s"(frame-parameter nil 'background-color)))
+  (format "%s" (frame-parameter nil 'background-color)))
 
 (defun eaf-get-theme-foreground-color ()
-  (format "%s"(frame-parameter nil 'foreground-color)))
+  (format "%s" (frame-parameter nil 'foreground-color)))
 
 (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
 
@@ -2273,6 +2275,13 @@ the file at current cursor position in dired."
             (eaf-color-int-to-hex (nth 0 components))
             (eaf-color-int-to-hex (nth 1 components))
             (eaf-color-int-to-hex (nth 2 components)))))
+
+(defun eaf-get-face-attribute (candicates attribute)
+  "Get a face `ATTRIBUTE' from face `CANDICATES' which is specified."
+  (or (car (seq-filter (lambda (attr) (not (eq attr 'unspecified)))
+                       (mapcar (lambda (face) (face-attribute face attribute))
+                               candicates)))
+      'unspecified))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
