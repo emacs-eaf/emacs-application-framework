@@ -92,10 +92,11 @@
                            (netease-cloud-music-get-user-playlist
                             netease-cloud-music-user-id))
                      (eaf-setq eaf-netease-cloud-music-user-playlists+list
-                               (format "%S" netease-cloud-music-playlists))
+                               netease-cloud-music-playlists)
                      (with-current-buffer "eaf-netease-cloud-music"
-                       (eaf-call-sync "call_function" eaf--buffer-id
-                                      "refresh_user_playlist")))))))))))
+                       (eaf-call-sync "call_function_with_args" eaf--buffer-id
+                                      "refresh_user_playlist"
+                                      netease-cloud-music-playlists)))))))))))
 
 (defun eaf--netease-cloud-music--update-song-style ()
   "Update song style."

@@ -150,9 +150,12 @@ class AppBuffer(BrowserBuffer):
         self.set_playlist()
         eval_in_emacs('''eaf--netease-cloud-music--update-song-style''', [])
 
-    def update_user_info(self):
-        self.buffer_widget.execute_js('''updateUserInfo({})'''.format(
-            self.emacs_var_dict["eaf-netease-cloud-music-user+list"]))
+    def update_user_info(self, info=None):
+        if info:
+            self.buffer_widget.execute_js('''updateUserInfo({})'''.format(info))
+        else:
+            self.buffer_widget.execute_js('''updateUserInfo({})'''.format(
+                self.emacs_var_dict["eaf-netease-cloud-music-user+list"]))
 
     def refresh_user_playlist(self, playlists=None):
         '''Only refresh the value.'''
