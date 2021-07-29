@@ -165,15 +165,18 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(
                 self.emacs_var_dict["eaf-netease-cloud-music-user-playlists+list"]))
 
-    def update_playlist_style(self, init=False):
+    def update_playlist_style(self, init=False, playlist_id=None):
         if init:
             func_string = '''changePlaylistStyle({}, true)'''
         else:
             func_string = '''changePlaylistStyle({})'''
 
-        self.buffer_widget.execute_js(func_string.format(
-            self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]))
-
+        if playlist_id:
+            self.buffer_widget.execute_js(func_string.format(playlist_id))
+        else:
+            self.buffer_widget.execute_js(func_string.format(
+                self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]))
+            
     def set_panel_song(self, name=None, artist=None):
         if name and artist:
             self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format([name, artist]))
@@ -181,9 +184,12 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format(
                 self.emacs_var_dict["eaf-netease-cloud-music-current-song+list"]))
 
-    def set_repeat_mode(self):
-        self.buffer_widget.execute_js('''setRepeatMode(\"{}\")'''.format(
-            self.emacs_var_dict["eaf-netease-cloud-music-repeat-mode"]))
+    def set_repeat_mode(self, mode=None):
+        if mode:
+            self.buffer_widget.execute_js('''setRepeatMode(\"{}\")'''.format(mode))
+        else:
+            self.buffer_widget.execute_js('''setRepeatMode(\"{}\")'''.format(
+                self.emacs_var_dict["eaf-netease-cloud-music-repeat-mode"]))
 
     def change_song_style(self, index):
         if index == -1:

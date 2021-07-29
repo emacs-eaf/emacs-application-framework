@@ -24,42 +24,46 @@
 
 ;;; Code:
 
-
 (defun eaf--netease-cloud-music-change-playlist (pid)
   "Change the current playlist to PID."
   (when (featurep 'netease-cloud-music)
     (when (stringp pid)
       (setq pid (string-to-number pid)))
-    (cond ((= pid 0)
-           (setq netease-cloud-music-use-local-playlist t
-                 netease-cloud-music-playlists-songs nil
-                 netease-cloud-music-playlist-id nil)
-           (when netease-cloud-music-playlist-refresh-timer
-             (cancel-timer netease-cloud-music-playlist-refresh-timer)
-             (setq netease-cloud-music-playlist-refresh-timer nil))
-           (eaf-setq eaf-netease-cloud-music-local-playlist+list netease-cloud-music-playlist)
-           (eaf-setq eaf-netease-cloud-music-playlist-id 0))
+    (let (playlist)
+      (cond ((= pid 0)
+             (setq netease-cloud-music-use-local-playlist t
+                   netease-cloud-music-playlists-songs nil
+                   netease-cloud-music-playlist-id nil)
+             (when netease-cloud-music-playlist-refresh-timer
+               (cancel-timer netease-cloud-music-playlist-refresh-timer)
+               (setq netease-cloud-music-playlist-refresh-timer nil))
+             (eaf-setq eaf-netease-cloud-music-local-playlist+list netease-cloud-music-playlist)
+             (eaf-setq eaf-netease-cloud-music-playlist-id 0)
+             (setq playlist netease-cloud-music-playlist))
+            
+            ((and netease-cloud-music-playlists
+                  (netease-cloud-music-alist-cdr
+                   pid netease-cloud-music-playlists))
+             (setq netease-cloud-music-use-local-playlist nil
+                   netease-cloud-music-playlist-id pid
+                   netease-cloud-music-playlists-songs
+                   (netease-cloud-music-get-playlist-songs
+                    netease-cloud-music-playlist-id))
+             (eaf-setq eaf-netease-cloud-music-playlist-id
+                       (setq pid
+                             (1+
+                              (cl-position
+                               (netease-cloud-music-alist-cdr pid netease-cloud-music-playlists)
+                               netease-cloud-music-playlists))))
+             (eaf-setq eaf-netease-cloud-music-playlists-songs+list
+                       netease-cloud-music-playlists-songs)
+             (setq playlist netease-cloud-music-playlists-songs))
+            (t (na-error "The pid cannot be found!")))
 
-          ((and netease-cloud-music-playlists
-                (netease-cloud-music-alist-cdr
-                 pid netease-cloud-music-playlists))
-           (setq netease-cloud-music-use-local-playlist nil
-                 netease-cloud-music-playlist-id pid
-                 netease-cloud-music-playlists-songs
-                 (netease-cloud-music-get-playlist-songs
-                  netease-cloud-music-playlist-id))
-           (eaf-setq eaf-netease-cloud-music-playlist-id
-                     (number-to-string
-                      (1+
-                       (cl-position
-                        (netease-cloud-music-alist-cdr pid netease-cloud-music-playlists)
-                        netease-cloud-music-playlists))))
-           (eaf-setq eaf-netease-cloud-music-playlists-songs+list
-                     netease-cloud-music-playlists-songs))
-          (t (na-error "The pid cannot be found!")))
-
-    (eaf-call-sync "call_function" eaf--buffer-id "update_playlist_style")
-    (eaf-call-sync "call_function" eaf--buffer-id "set_playlist")
+      (eaf-call-sync "call_function_with_args" eaf--buffer-id
+                     "update_playlist_style" nil pid)
+      (eaf-call-sync "call_function_with_args" eaf--buffer-id
+                     "set_playlist" playlist))
     (when netease-cloud-music-process
       (netease-cloud-music-kill-current-song))))
 
