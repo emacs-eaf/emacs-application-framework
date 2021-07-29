@@ -90,6 +90,11 @@
 (defvar eaf-pdf-outline-window-configuration nil
   "Save window configure before popup outline buffer.")
 
+(defvar-local eaf-pdf-total-page nil
+  "The total page of this pdf-viewer app.
+
+Set by Python's page_total_number function.")
+
 (defvar-local eaf-pdf-current-page nil
   "The current page of this pdf-viewer app.
 
@@ -114,6 +119,19 @@ Set by Python's update_vertical_offset function every time user scrolls.")
             (define-key map (kbd "RET") 'eaf-pdf-outline-jump)
             (define-key map (kbd "q") 'quit-window)
             map))
+
+(defun eaf-pdf-format-mode-line-position ()
+  "Format the line position indicator in mode line to indicate CURRENT-PAGE/TOTAL-PAGE."
+  (setq-local mode-line-position
+              '(" P" eaf-pdf-current-page
+                ;; Avoid errors during redisplay.
+                "/" (:eval (or eaf-pdf-total-page
+                               (setq-local
+                                eaf-pdf-total-page
+                                (eaf-call-sync "call_function"
+                                               eaf--buffer-id "page_total_number")))))))
+
+(add-hook 'eaf-pdf-viewer-hook #'eaf-pdf-format-mode-line-position)
 
 (defun eaf-pdf-outline ()
   "Create PDF outline."
