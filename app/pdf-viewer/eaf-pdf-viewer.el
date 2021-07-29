@@ -95,7 +95,7 @@
 
 Set by Python's page_total_number function.")
 
-(defvar-local eaf-pdf-current-page nil
+(defvar-local eaf-pdf-current-page "??"
   "The current page of this pdf-viewer app.
 
 Set by Python's update_vertical_offset function every time user scrolls.")
