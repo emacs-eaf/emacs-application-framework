@@ -178,7 +178,7 @@ class AppBuffer(BrowserBuffer):
                 self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]))
             
     def set_panel_song(self, name=None, artist=None):
-        if name and artist:
+        if name != None and artist != None:
             self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format([name, artist]))
         else:
             self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format(
