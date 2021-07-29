@@ -90,6 +90,15 @@
 (defvar eaf-pdf-outline-window-configuration nil
   "Save window configure before popup outline buffer.")
 
+(defvar-local eaf-pdf-current-page nil
+  "The current page of this pdf-viewer app.
+
+Set by Python's update_vertical_offset function every time user scrolls.")
+
+(defcustom eaf-pdf-scroll-hook '(force-mode-line-update)
+  "List of Functions to run when user scrolls in pdf-viewer app."
+  :type 'hook)
+
 (defcustom eaf-pdf-extension-list
   '("pdf" "xps" "oxps" "cbz" "epub" "fb2" "fbz")
   "The extension list of pdf application."

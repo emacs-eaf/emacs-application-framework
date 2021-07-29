@@ -26,7 +26,7 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QToolTip
 from core.buffer import Buffer
-from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit
+from core.utils import touch, interactive, eval_in_emacs, set_emacs_var, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit
 import fitz
 import time
 import random
@@ -1335,6 +1335,9 @@ class PdfViewerWidget(QWidget):
         if self.scroll_offset != new_offset:
             self.scroll_offset = new_offset
             self.update()
+            page_index = self.start_page_index + 1
+            set_emacs_var('eaf-pdf-current-page', page_index, False)
+            eval_in_emacs('run-hooks', ["\'eaf-pdf-scroll-hook"])
 
     def update_horizontal_offset(self, new_offset):
         if self.horizontal_offset != new_offset:
