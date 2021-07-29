@@ -1336,6 +1336,8 @@ class PdfViewerWidget(QWidget):
             self.scroll_offset = new_offset
             self.update()
 
+            eval_in_emacs("eaf--pdf-update-position", [self.start_page_index + 1, self.page_total_number])
+
     def update_horizontal_offset(self, new_offset):
         if self.horizontal_offset != new_offset:
             self.horizontal_offset = new_offset

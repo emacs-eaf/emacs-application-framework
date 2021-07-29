@@ -213,6 +213,9 @@ The key is the annot id on PAGE."
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
 
+(defun eaf--pdf-update-position (page-index page-total-number)
+  )
+
 (defun eaf-store-pdf-history (url)
   "A wrapper around `eaf-open' that store pdf history candidates."
   (let* (found-history-result (pdf-history-file-path
