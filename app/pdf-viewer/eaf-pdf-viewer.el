@@ -214,7 +214,11 @@ The key is the annot id on PAGE."
     (filename . ,(eaf-get-path-or-url))))
 
 (defun eaf--pdf-update-position (page-index page-total-number)
-  )
+  "Format mode line position indicator to show the current page and the total pages."
+  (setq-local mode-line-position
+              `(" P" ,page-index
+                "/" ,page-total-number))
+  (force-mode-line-update)))
 
 (defun eaf-store-pdf-history (url)
   "A wrapper around `eaf-open' that store pdf history candidates."
