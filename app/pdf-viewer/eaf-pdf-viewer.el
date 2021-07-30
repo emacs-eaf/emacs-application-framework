@@ -218,7 +218,7 @@ The key is the annot id on PAGE."
   (setq-local mode-line-position
               `(" P" ,page-index
                 "/" ,page-total-number))
-  (force-mode-line-update)))
+  (force-mode-line-update))
 
 (defun eaf-store-pdf-history (url)
   "A wrapper around `eaf-open' that store pdf history candidates."
