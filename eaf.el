@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul 23 11:54:00 2021 (-0400)
+;; Last-Updated: Fri Jul 30 11:56:37 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1992,6 +1992,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (push `(,url ,app-name ,args) eaf--active-buffers))
     (eaf-start-process)
     (message (concat "[EAF/" app-name "] " "Opening %s") url)))
+
+(defun eaf-duplicate-current-buffer ()
+  "Duplicate the current EAF buffer in a new buffer.
+
+So multiple EAF buffers visiting the same file do not sync with each other."
+  (interactive)
+  (when (derived-mode-p 'eaf-mode)
+    (eaf-open eaf--buffer-url eaf--buffer-app-name eaf--buffer-args t)))
 
 (defun eaf--display-app-buffer (app-name buffer)
   "Display specified APP-NAME's app buffer in BUFFER."
