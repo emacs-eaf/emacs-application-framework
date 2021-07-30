@@ -7,8 +7,8 @@
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Created: 2021-07-20 22:16:40
 ;; Version: 0.1
-;; Last-Updated: 2021-07-20 22:16:40
-;;           By: Andy Stewart
+;; Last-Updated: Fri Jul 30 00:48:38 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-pdf-viewer.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
@@ -218,7 +218,7 @@ The key is the annot id on PAGE."
   (setq-local mode-line-position
               `(" P" ,page-index
                 "/" ,page-total-number))
-  (force-mode-line-update)))
+  (force-mode-line-update))
 
 (defun eaf-store-pdf-history (url)
   "A wrapper around `eaf-open' that store pdf history candidates."
