@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul 30 11:59:48 2021 (-0400)
+;; Last-Updated: Fri Jul 30 12:07:25 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -2000,6 +2000,9 @@ When called interactively, URL accepts a file that can be opened by EAF."
 So multiple EAF buffers visiting the same file do not sync with each other."
   (interactive)
   (when (derived-mode-p 'eaf-mode)
+    (delete-other-windows)
+    (split-window-horizontally)
+    (other-window +1)
     (eaf-open eaf--buffer-url eaf--buffer-app-name eaf--buffer-args t)))
 
 (defun eaf--display-app-buffer (app-name buffer)
