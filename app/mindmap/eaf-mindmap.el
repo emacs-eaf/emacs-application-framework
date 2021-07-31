@@ -84,6 +84,18 @@
 
 ;;; Code:
 
+(defcustom eaf-mindmap-dark-mode "follow"
+  ""
+  :type 'string)
+
+(defcustom eaf-mindmap-save-path "~/Documents"
+  ""
+  :type 'string)
+
+(defcustom eaf-mindmap-edit-mode nil
+  ""
+  :type 'boolean)
+
 (defun eaf--export-org-json (org-json-content org-file-path)
   (let (org-parse-data)
     (with-temp-buffer

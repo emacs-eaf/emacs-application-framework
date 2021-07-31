@@ -7,8 +7,8 @@
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Created: 2021-07-20 22:16:40
 ;; Version: 0.1
-;; Last-Updated: 2021-07-20 22:16:40
-;;           By: Andy Stewart
+;; Last-Updated: Fri Jul 30 00:48:38 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-pdf-viewer.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
@@ -97,6 +97,22 @@
 
 (defcustom eaf-pdf-store-history t
   "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
+  :type 'boolean)
+
+(defcustom eaf-pdf-dark-mode "follow"
+  ""
+  :type 'string)
+
+(defcustom eaf-pdf-default-zoom 1.0
+  ""
+  :type 'float)
+
+(defcustom eaf-pdf-scroll-ratio 0.05
+  ""
+  :type 'float)
+
+(defcustom eaf-pdf-dark-exclude-image t
+  ""
   :type 'boolean)
 
 (define-minor-mode eaf-pdf-outline-mode
@@ -212,6 +228,13 @@ The key is the annot id on PAGE."
     (eaf-app . "pdf-viewer")
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
+
+(defun eaf--pdf-update-position (page-index page-total-number)
+  "Format mode line position indicator to show the current page and the total pages."
+  (setq-local mode-line-position
+              `(" P" ,page-index
+                "/" ,page-total-number))
+  (force-mode-line-update))
 
 (defun eaf-store-pdf-history (url)
   "A wrapper around `eaf-open' that store pdf history candidates."

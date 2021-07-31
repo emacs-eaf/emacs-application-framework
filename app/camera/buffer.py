@@ -27,18 +27,18 @@ from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QFrame
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
-from core.utils import message_to_emacs
+from core.utils import message_to_emacs, get_emacs_var
 from pathlib import Path
 import time
 import os
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, True)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, module_path, True)
 
         self.background_color = QColor(0, 0, 0)
 
-        self.add_widget(CameraWidget(QColor(emacs_var_dict["eaf-buffer-background-color"])))
+        self.add_widget(CameraWidget(QColor(get_emacs_var("eaf-buffer-background-color"))))
 
     def all_views_hide(self):
         # Need stop camera if all view will hide, otherwise camera will crash.
@@ -49,8 +49,8 @@ class AppBuffer(Buffer):
         self.buffer_widget.camera.start()
 
     def take_photo(self):
-        if os.path.exists(os.path.expanduser(self.emacs_var_dict["eaf-camera-save-path"])):
-            location = self.emacs_var_dict["eaf-camera-save-path"]
+        if os.path.exists(os.path.expanduser(get_emacs_var("eaf-camera-save-path"))):
+            location = get_emacs_var("eaf-camera-save-path")
         else:
             location = "~/Downloads"
         result = self.buffer_widget.take_photo(location)

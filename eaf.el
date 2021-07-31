@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul 23 11:54:00 2021 (-0400)
+;; Last-Updated: Sat Jul 31 00:24:54 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -74,14 +74,16 @@
 ;;; Code:
 (require 'cl-lib)
 
-(defun add-subdirs-to-load-path (dir)
-  "Recursive add directory DIR to `load-path'."
-  (mapcar
-   (lambda (path)
-     (add-to-list 'load-path path))
-   (delete-dups (mapcar 'file-name-directory (directory-files-recursively dir "\\.el$")))))
+(defun eaf-add-app-dirs-to-load-path ()
+  "Add EAF app directories where .el exists to `load-path'."
+  (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
+    (mapcar
+     (lambda (path) (add-to-list 'load-path path))
+     (cl-remove-if-not
+      (lambda (d) (and (file-directory-p d) (directory-files d t "\\.el$")))
+      (directory-files app-dir t directory-files-no-dot-files-regexp)))))
 
-(add-subdirs-to-load-path (expand-file-name "app" (file-name-directory (locate-library "eaf"))))
+(eaf-add-app-dirs-to-load-path)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
@@ -104,6 +106,8 @@
 (require 'eaf-mail)
 (require 'eaf-browser)
 (require 'eaf-terminal)
+(require 'eaf-camera)
+(require 'eaf-markdown-previewer)
 (require 'epc)
 (require 'epcs)
 (require 'json)
@@ -111,7 +115,9 @@
 (require 's)
 (require 'seq)
 (require 'subr-x)
+(require 'eaf-jupyter)
 (require 'eaf-elfeed)
+(require 'eaf-music-player)
 (require 'eaf-netease-cloud-music)
 
 
@@ -126,6 +132,7 @@
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
+    (define-key map (kbd "C-o") #'eaf-duplicate-current-buffer)
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
     (define-key map (kbd "C-c i") #'eaf-import-chrome-bookmarks)
@@ -273,7 +280,14 @@ been initialized."
                                           (string-suffix-p ")" arg)) ;; list
                                      (split-string (substring arg 1 -1) " "))
                                     (t arg))))
-                          (cdr args)))))))))
+                          (cdr args)))))
+
+               (epc:define-method
+                mngr 'read-emacs-var
+                (lambda (&rest args)
+                  (let ((var-name (car args)))
+                    (symbol-value (intern var-name)))))
+               ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
       (error "[EAF] eaf-server failed to start")))
@@ -326,64 +340,25 @@ been initialized."
   "The default chrome bookmark file to import."
   :type 'string)
 
-(defcustom eaf-var-list
-  '((eaf-camera-save-path . "~/Downloads")
-    (eaf-browser-enable-plugin . t)
-    (eaf-browser-enable-adblocker . nil)
-    (eaf-browser-enable-autofill . nil)
-    (eaf-browser-enable-javascript . t)
-    (eaf-browser-enable-scrollbar . nil)
-    (eaf-browser-remember-history . t)
-    (eaf-browser-default-zoom . 1.0)
-    (eaf-browser-font-family . "")
-    (eaf-browser-blank-page-url . "https://www.google.com")
-    (eaf-browser-scroll-behavior . "auto")
-    (eaf-browser-download-path . "~/Downloads")
-    (eaf-browser-aria2-proxy-host . "")
-    (eaf-browser-aria2-proxy-port . "")
-    (eaf-browser-aria2-auto-file-renaming . nil)
-    (eaf-browser-dark-mode . "follow")
-    (eaf-browser-pc-user-agent . "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
-    (eaf-browser-phone-user-agent . "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1")
-    (eaf-browser-chrome-history-file . "~/.config/google-chrome/Default/History")
-    (eaf-browser-translate-language . "") ; EAF browser will use current system locale if this option is empty
-    ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
-    (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
-    (eaf-pdf-dark-mode . "follow")
-    (eaf-pdf-default-zoom . 1.0)
-    (eaf-pdf-dark-exclude-image . t)
-    (eaf-pdf-scroll-ratio . 0.05)
-    (eaf-pdf-enable-trim-white-margin . nil)
-    (eaf-terminal-dark-mode . "follow")
-    (eaf-terminal-font-size . 13)
-    (eaf-terminal-font-family . "")
-    (eaf-markdown-dark-mode . "follow")
-    (eaf-mindmap-dark-mode . "follow")
-    (eaf-mindmap-save-path . "~/Documents")
-    (eaf-mindmap-edit-mode . nil)
-    (eaf-jupyter-font-size . 13)
-    (eaf-jupyter-font-family . "")
-    (eaf-jupyter-dark-mode . "follow")
-    (eaf-marker-letters . "ASDFHJKLWEOPCNM")
-    (eaf-music-play-order . "list")
-    (eaf-emacs-theme-mode . "")
-    (eaf-emacs-theme-background-color . "")
-    (eaf-emacs-theme-foreground-color . "")
-    (eaf-netease-cloud-music-local-playlist+list . ())
-    (eaf-netease-cloud-music-repeat-mode . "")
-    (eaf-netease-cloud-music-user-playlists+list . ())
-    (eaf-netease-cloud-music-playlists-songs+list . ())
-    (eaf-netease-cloud-music-playlist-id . "0")
-    (eaf-netease-cloud-music-play-status . "")
-    (eaf-netease-cloud-music-current-song+list . ("" ""))
-    (eaf-netease-cloud-music-user+list . ())
-    (eaf-buffer-background-color . "#000000") ;background color for pdf-viewer, camera, file-sender and airshare
-    )
-  ;; TODO: The data type problem
-  "The alist storing user-defined variables that's shared with EAF Python side.
+(defcustom eaf-marker-letters "ASDFHJKLWEOPCNM"
+  ""
+  :type 'string)
 
-Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
-  :type 'cons)
+(defcustom eaf-buffer-background-color "#000000"
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-mode ""
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-background-color ""
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-foreground-color ""
+  ""
+  :type 'string)
 
 (defcustom eaf-browser-caret-mode-keybinding
   '(("j"   . "caret_next_line")
@@ -1091,10 +1066,6 @@ A hashtable, key is url and value is title.")
       (eaf-call-sync "get_emacs_wsl_window_id")
     (frame-parameter frame 'window-id)))
 
-(defun eaf-serialization-var-list ()
-  "Serialize variable list."
-  (json-encode eaf-var-list))
-
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -1110,7 +1081,7 @@ A hashtable, key is url and value is title.")
                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
                     (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
-                    (list (eaf-serialization-var-list))))
+                    ))
          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
     (if (and (getenv "WAYLAND_DISPLAY") (not (string= (getenv "WAYLAND_DISPLAY") "")))
         (progn
@@ -1594,28 +1565,6 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (interactive)
   (eaf-call-async "send_key_sequence" eaf--buffer-id "S-RET"))
 
-(defun eaf-set (sym val)
-  "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
-
-For convenience, use the Lisp macro `eaf-setq' instead."
-  (cond ((and (stringp val) (string= (upcase val) "TRUE"))
-         (setq val t))
-        ((and (stringp val) (string= (upcase val) "FALSE"))
-         (setq val nil))
-        ((and (listp val) val)
-         (setq val (format "%S" val))))
-  (setf (map-elt eaf-var-list sym) val)
-  ;; Update python side variable dynamically.
-  (when (epc:live-p eaf-epc-process)
-    (eaf-call-async "update_emacs_var_dict" (eaf-serialization-var-list)))
-  val)
-
-(defmacro eaf-setq (var val)
-  "Similar to `setq', but store VAR with VAL in EAF Python side, and return VAL.
-
-Use it as (eaf-setq var val)"
-  `(eaf-set ',var ,val))
-
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
 
@@ -1651,12 +1600,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
 (defun eaf--set-emacs-var (name value in-eaf-var-list)
-  "Set Lisp variable NAME with VALUE on the Emacs side.
-
-If IN-EAF-VAR-LIST is true, we assume the variable is in `eaf-var-list'"
-  (if in-eaf-var-list
-      (eaf-set (intern name) value)
-    (set (intern name) value)))
+  "Set Lisp variable NAME with VALUE on the Emacs side."
+  (set (intern name) value))
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
   "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
@@ -1993,6 +1938,17 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (eaf-start-process)
     (message (concat "[EAF/" app-name "] " "Opening %s") url)))
 
+(defun eaf-duplicate-current-buffer ()
+  "Duplicate the current EAF buffer in a new buffer.
+
+So multiple EAF buffers visiting the same file do not sync with each other."
+  (interactive)
+  (when (derived-mode-p 'eaf-mode)
+    (delete-other-windows)
+    (split-window-horizontally)
+    (other-window +1)
+    (eaf-open eaf--buffer-url eaf--buffer-app-name eaf--buffer-args t)))
+
 (defun eaf--display-app-buffer (app-name buffer)
   "Display specified APP-NAME's app buffer in BUFFER."
   (let ((display-fun (or (cdr (assoc app-name
@@ -2108,19 +2064,19 @@ the file at current cursor position in dired."
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
 
-(eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+(setq eaf-emacs-theme-mode (eaf-get-theme-mode))
 
-(eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+(setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
 
-(eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
+(setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
 
 (advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
   "Update `eaf-emacs-theme-mode' after execute `load-theme'."
   (apply orig-fun arg args)
-  (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
-  (eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
-  (eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
+  (setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+  (setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+  (setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."

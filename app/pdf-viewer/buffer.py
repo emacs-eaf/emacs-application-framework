@@ -26,7 +26,7 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QToolTip
 from core.buffer import Buffer
-from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit
+from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit, get_emacs_var
 import fitz
 import time
 import random
@@ -37,11 +37,11 @@ import json
 import platform
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(emacs_var_dict["eaf-buffer-background-color"]), buffer_id, emacs_var_dict))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(get_emacs_var("eaf-buffer-background-color")), buffer_id))
         self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
@@ -99,7 +99,7 @@ class AppBuffer(Buffer):
         self.buffer_widget.scale = float(scale)
         self.buffer_widget.read_mode = read_mode
         self.buffer_widget.rotation = int(rotation)
-        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore":
+        if get_emacs_var("eaf-pdf-dark-mode") == "ignore":
             self.buffer_widget.inverted_mode = inverted_mode == "True"
         self.buffer_widget.update()
 
@@ -545,7 +545,7 @@ class PdfViewerWidget(QWidget):
 
     translate_double_click_word = QtCore.pyqtSignal(str)
 
-    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict):
+    def __init__(self, url, config_dir, background_color, buffer_id):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
@@ -554,7 +554,6 @@ class PdfViewerWidget(QWidget):
         self.buffer_id = buffer_id
         self.installEventFilter(self)
         self.setMouseTracking(True)
-        self.emacs_var_dict = emacs_var_dict
 
         # Load document first.
         self.document = PdfDocument(fitz.open(url))
@@ -573,20 +572,20 @@ class PdfViewerWidget(QWidget):
         self.rotation = 0
 
         # Simple string comparation.
-        if (float(self.emacs_var_dict["eaf-pdf-default-zoom"]) != 1.0):
+        if (get_emacs_var("eaf-pdf-default-zoom") != 1.0):
             self.read_mode = "fit_to_customize"
-            self.scale = float(self.emacs_var_dict["eaf-pdf-default-zoom"])
+            self.scale = get_emacs_var("eaf-pdf-default-zoom")
         self.horizontal_offset = 0
 
         # Inverted mode.
         self.inverted_mode = False
-        if (self.emacs_var_dict["eaf-pdf-dark-mode"] == True or \
-            ((self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" or self.emacs_var_dict["eaf-pdf-dark-mode"] == "ignore") and \
-             self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
+        if (get_emacs_var("eaf-pdf-dark-mode") == True or \
+            ((get_emacs_var("eaf-pdf-dark-mode") == "follow" or get_emacs_var("eaf-pdf-dark-mode") == "ignore") and \
+             get_emacs_var("eaf-emacs-theme-mode") == "dark")):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = self.emacs_var_dict["eaf-pdf-dark-exclude-image"] and self.document.isPDF
+        self.inverted_mode_exclude_image = get_emacs_var("eaf-pdf-dark-exclude-image") and self.document.isPDF
 
         # mark link
         self.is_mark_link = False
@@ -622,8 +621,8 @@ class PdfViewerWidget(QWidget):
         self.scroll_offset = 0
         self.scroll_ratio = 0.05
         self.scroll_wheel_lasttime = time.time()
-        if float(self.emacs_var_dict["eaf-pdf-scroll-ratio"]) != 0.05:
-            self.scroll_ratio = float(self.emacs_var_dict["eaf-pdf-scroll-ratio"])
+        if get_emacs_var("eaf-pdf-scroll-ratio") != 0.05:
+            self.scroll_ratio = get_emacs_var("eaf-pdf-scroll-ratio")
 
         # Default presentation mode
         self.presentation_mode = False
@@ -634,7 +633,7 @@ class PdfViewerWidget(QWidget):
         # Init font.
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.page_annotate_light_color = QColor(get_emacs_var("eaf-emacs-theme-foreground-color"))
 
         self.font = QFont()
         self.font.setPointSize(12)
@@ -717,13 +716,13 @@ class PdfViewerWidget(QWidget):
             page.cleanup_search_text()
 
         if self.is_jump_link:
-            self.jump_link_key_cache_dict.update(page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"]))
+            self.jump_link_key_cache_dict.update(page.mark_jump_link_tips(get_emacs_var("eaf-marker-letters")))
         else:
             page.cleanup_jump_link_tips()
             self.jump_link_key_cache_dict.clear()
 
-        if self.emacs_var_dict["eaf-pdf-dark-mode"] == "follow" and self.document.isPDF:
-            color = inverted_color(self.emacs_var_dict["eaf-emacs-theme-background-color"], self.inverted_mode)
+        if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.isPDF:
+            color = inverted_color(get_emacs_var("eaf-emacs-theme-background-color"), self.inverted_mode)
             col = (color.redF(), color.greenF(), color.blueF())
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
@@ -807,9 +806,9 @@ class PdfViewerWidget(QWidget):
         painter.setFont(self.font)
 
         if self.rect().width() <= render_width and not self.inverted_mode:
-            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"]), True))
+            painter.setPen(inverted_color((get_emacs_var("eaf-emacs-theme-foreground-color")), True))
         else:
-            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"])))
+            painter.setPen(inverted_color((get_emacs_var("eaf-emacs-theme-foreground-color"))))
 
         # Draw progress.
         progress_percent = int((self.start_page_index + 1) * 100 / self.page_total_number)
@@ -1335,6 +1334,8 @@ class PdfViewerWidget(QWidget):
         if self.scroll_offset != new_offset:
             self.scroll_offset = new_offset
             self.update()
+
+            eval_in_emacs("eaf--pdf-update-position", [self.start_page_index + 1, self.page_total_number])
 
     def update_horizontal_offset(self, new_offset):
         if self.horizontal_offset != new_offset:

@@ -23,7 +23,7 @@ from PyQt5.QtCore import QUrl, QTimer, QPointF, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication
 from core.webengine import BrowserBuffer
-from core.utils import PostGui, get_free_port, interactive, string_to_base64, eval_in_emacs, message_to_emacs
+from core.utils import PostGui, get_free_port, interactive, string_to_base64, eval_in_emacs, message_to_emacs, get_emacs_var
 import os
 import subprocess
 import signal
@@ -35,8 +35,8 @@ from http.server import SimpleHTTPRequestHandler
 from socketserver import TCPServer
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
 
         # Get free port.
         self.port = get_free_port()
@@ -102,17 +102,16 @@ class AppBuffer(BrowserBuffer):
     @PostGui()
     def open_terminal_page(self):
         theme = "light"
-        if self.emacs_var_dict["eaf-terminal-dark-mode"] == True or \
-           (self.emacs_var_dict["eaf-terminal-dark-mode"] == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+        if (get_emacs_var("eaf-terminal-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"):
             theme = "dark"
 
         with request.urlopen(self.index_file) as f:
             html = f.read().decode("utf-8").replace("%1", str(self.port))\
                                            .replace("%2", self.http_url)\
                                            .replace("%3", theme)\
-                                           .replace("%4", str(self.emacs_var_dict["eaf-terminal-font-size"]))\
+                                           .replace("%4", str(get_emacs_var("eaf-terminal-font-size")))\
                                            .replace("%5", self.current_directory)\
-                                           .replace("%6", self.emacs_var_dict["eaf-terminal-font-family"])
+                                           .replace("%6", get_emacs_var("eaf-terminal-font-family"))
             self.buffer_widget.setHtml(html)
 
     def checking_status(self):

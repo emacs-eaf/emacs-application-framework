@@ -27,8 +27,8 @@ import os
 import json
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
 
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
@@ -74,10 +74,10 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(file_infos)))
 
         self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            self.emacs_var_dict["eaf-emacs-theme-background-color"],
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"],
+            get_emacs_var("eaf-emacs-theme-background-color"),
+            get_emacs_var("eaf-emacs-theme-foreground-color"),
             self.arguments["header-color"],
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"],
+            get_emacs_var("eaf-emacs-theme-foreground-color"),
             self.arguments["directory-color"],
             self.arguments["symlink-color"],
             self.arguments["select-color"],

@@ -48,7 +48,7 @@ class EAF(object):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Parse init arguments.
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
@@ -56,11 +56,7 @@ class EAF(object):
         # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
-        self.emacs_var_dict = {}
         self.session_file = os.path.join(eaf_config_dir, "session.json")
-
-        # Update Emacs var dictionary.
-        self.update_emacs_var_dict(var_dict_string)
 
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
@@ -146,23 +142,6 @@ class EAF(object):
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
     @PostGui()
-    def update_emacs_var_dict(self, var_dict_string):
-        ''' Update Python side emacs_var_dict.'''
-        self.emacs_var_dict = json.loads(var_dict_string)
-        for key, value in self.emacs_var_dict.items():
-            if key.endswith("+list") and value == None:
-                self.emacs_var_dict[key] = []
-            elif self.emacs_var_dict[key] == None or str(value).upper() == "FALSE":
-                self.emacs_var_dict[key] = False
-            elif str(value).upper() == "TRUE":
-                self.emacs_var_dict[key] = True
-            elif str(value).startswith('(') and str(value).endswith(')'):
-                self.emacs_var_dict[key] = list_string_to_list(str(value))
-
-        for buffer in list(self.buffer_dict.values()):
-            buffer.emacs_var_dict = self.emacs_var_dict
-
-    @PostGui()
     def new_buffer(self, buffer_id, url, app_name, arguments):
         ''' Create new buffer. '''
         self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), str(arguments))
@@ -226,7 +205,7 @@ class EAF(object):
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path)
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, module_path)
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer

@@ -26,20 +26,20 @@ from qtconsole import styles
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.manager import QtKernelManager
 from core.buffer import Buffer
-from core.utils import interactive
+from core.utils import interactive, get_emacs_var
 from core.kill_ring import EafKillRing
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         arguments_dict = json.loads(arguments)
         self.kernel = arguments_dict["kernel"]
 
-        font_size = int(self.emacs_var_dict["eaf-jupyter-font-size"])
-        font_family = self.emacs_var_dict["eaf-jupyter-font-family"]
+        font_size = get_emacs_var("eaf-jupyter-font-size")
+        font_family = get_emacs_var("eaf-jupyter-font-family")
 
-        self.add_widget(EafJupyterWidget(emacs_var_dict, self.kernel, font_size=font_size, font_family=font_family))
+        self.add_widget(EafJupyterWidget(self.kernel, font_size=font_size, font_family=font_family))
 
         QTimer.singleShot(500, self.focus_widget)
 
@@ -59,11 +59,10 @@ class AppBuffer(Buffer):
 
 
 class EafJupyterWidget(RichJupyterWidget):
-    def __init__(self, emacs_var_dict, kernel, *args, **kwargs):
-        bg_color = emacs_var_dict["eaf-emacs-theme-background-color"]
-        fg_color = emacs_var_dict["eaf-emacs-theme-foreground-color"]
-        dark_mode = emacs_var_dict["eaf-jupyter-dark-mode"] == "true" or \
-           (emacs_var_dict["eaf-jupyter-dark-mode"] == "follow" and emacs_var_dict["eaf-emacs-theme-mode"] == "dark")
+    def __init__(self, kernel, *args, **kwargs):
+        bg_color = get_emacs_var("eaf-emacs-theme-background-color")
+        fg_color = get_emacs_var("eaf-emacs-theme-foreground-color")
+        dark_mode = get_emacs_var("eaf-jupyter-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"
         self._init_style(bg_color, fg_color, dark_mode)
 
         self.scrollbar_visibility = False

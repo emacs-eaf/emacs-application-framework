@@ -23,20 +23,18 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl
 from core.webengine import BrowserBuffer
-from core.utils import interactive
-from core.utils import eval_in_emacs
-from core.utils import message_to_emacs
+from core.utils import interactive, eval_in_emacs, message_to_emacs, get_emacs_var
 import os
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
 
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
 
-        self.backgroundColor = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]).darker(110).name()
+        self.backgroundColor = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
 
         self.buffer_widget.loadFinished.connect(self.init_app)
 
@@ -79,13 +77,13 @@ class AppBuffer(BrowserBuffer):
         if playlist:
             self.buffer_widget.execute_js('''setPlaylist({})'''.format(playlist))
         else:
-            if float(self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]) == 0:
+            if get_emacs_var("eaf-netease-cloud-music-playlist-id") == 0:
                 playlist_var = 'eaf-netease-cloud-music-local-playlist+list'
             else:
                 playlist_var = 'eaf-netease-cloud-music-playlists-songs+list'
 
             self.buffer_widget.execute_js('''setPlaylist({})'''.format(
-                self.emacs_var_dict[playlist_var]))
+                get_emacs_var(playlist_var)))
 
     @interactive(insert_or_do=True)
     @QtCore.pyqtSlot()
@@ -95,7 +93,7 @@ class AppBuffer(BrowserBuffer):
     @interactive(insert_or_do=True)
     @QtCore.pyqtSlot()
     def play_or_pause(self):
-        if self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "":
+        if get_emacs_var("eaf-netease-cloud-music-play-status") == "":
             message_to_emacs("You've never started to play a song.")
             return
         eval_in_emacs("netease-cloud-music-pause-or-continue", [])
@@ -106,7 +104,7 @@ class AppBuffer(BrowserBuffer):
             icon = 'pause-circle'
         elif status == "paused":
             icon = 'play-circle'
-        elif (self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "") or (self.emacs_var_dict["eaf-netease-cloud-music-play-status"] == "paused"):
+        elif (get_emacs_var("eaf-netease-cloud-music-play-status") == "") or (get_emacs_var("eaf-netease-cloud-music-play-status") == "paused"):
             icon = 'play-circle'
         else:
             icon = 'pause-circle'
@@ -135,8 +133,8 @@ class AppBuffer(BrowserBuffer):
 
     def init_app(self):
         self.buffer_widget.execute_js('initColor(\"{}\", \"{}\")'.format(
-            self.emacs_var_dict["eaf-emacs-theme-background-color"],
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+            get_emacs_var("eaf-emacs-theme-background-color"),
+            get_emacs_var("eaf-emacs-theme-foreground-color")
         ))
         self.update_user_info()
         self.refresh_user_playlist()
@@ -155,7 +153,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''updateUserInfo({})'''.format(info))
         else:
             self.buffer_widget.execute_js('''updateUserInfo({})'''.format(
-                self.emacs_var_dict["eaf-netease-cloud-music-user+list"]))
+                get_emacs_var("eaf-netease-cloud-music-user+list")))
 
     def refresh_user_playlist(self, playlists=None):
         '''Only refresh the value.'''
@@ -163,7 +161,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(playlists))
         else:
             self.buffer_widget.execute_js('''setUserPlaylists({})'''.format(
-                self.emacs_var_dict["eaf-netease-cloud-music-user-playlists+list"]))
+                get_emacs_var("eaf-netease-cloud-music-user-playlists+list")))
 
     def update_playlist_style(self, init=False, playlist_id=None):
         if init:
@@ -175,21 +173,21 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.execute_js(func_string.format(playlist_id))
         else:
             self.buffer_widget.execute_js(func_string.format(
-                self.emacs_var_dict["eaf-netease-cloud-music-playlist-id"]))
-            
+                get_emacs_var("eaf-netease-cloud-music-playlist-id")))
+
     def set_panel_song(self, name=None, artist=None):
         if name != None and artist != None:
             self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format([name, artist]))
         else:
             self.buffer_widget.execute_js('''setPanelSongInfo({})'''.format(
-                self.emacs_var_dict["eaf-netease-cloud-music-current-song+list"]))
+                get_emacs_var("eaf-netease-cloud-music-current-song+list")))
 
     def set_repeat_mode(self, mode=None):
         if mode:
             self.buffer_widget.execute_js('''setRepeatMode(\"{}\")'''.format(mode))
         else:
             self.buffer_widget.execute_js('''setRepeatMode(\"{}\")'''.format(
-                self.emacs_var_dict["eaf-netease-cloud-music-repeat-mode"]))
+                get_emacs_var("eaf-netease-cloud-music-repeat-mode")))
 
     def change_song_style(self, index):
         if index == -1:

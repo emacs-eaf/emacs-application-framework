@@ -38,10 +38,7 @@ function installVueApps() {
 
 function rebuildNodeApps() {
     for (let i = 0; i < rebuildApps.length; i++) {
-        execSync("npm rebuild", {
-            cwd: path.join(__dirname, rebuildApps[i]),
-            stdio: "inherit",
-        });
+        installExecSync("npm rebuild", rebuildApps[i]);
     }
 }
 

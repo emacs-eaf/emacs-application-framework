@@ -117,6 +117,86 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
   "If non-nil, move the mouse cursor to the corner when fullscreen in the browser."
   :type 'boolean)
 
+(defcustom eaf-browser-enable-plugin t
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-enable-adblocker nil
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-enable-autofill nil
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-enable-javascript t
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-enable-scrollbar nil
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-remember-history t
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-default-zoom 1.0
+  ""
+  :type 'float)
+
+(defcustom eaf-browser-font-family ""
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-blank-page-url "https://www.google.com"
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-scroll-behavior "auto"
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-download-path "~/Downloads"
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-aria2-proxy-host ""
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-aria2-proxy-port ""
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-aria2-auto-file-renaming nil
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-dark-mode "follow"
+  ""
+  :type 'boolean)
+
+(defcustom eaf-browser-pc-user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-phone-user-agent "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1"
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-chrome-history-file "~/.config/google-chrome/Default/History"
+  ""
+  :type 'string)
+
+(defcustom eaf-browser-translate-language ""
+  "EAF browser will use current system locale if this option is empty"
+  :type 'string)
+
+(defcustom eaf-browser-unknown-url-scheme-policy "AllowUnknownUrlSchemesFromUserInteraction"
+  "Allowed options: DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes."
+  :type 'string)
+
 (defun eaf-browser-restore-buffers ()
   "EAF restore all opened EAF Browser buffers in the previous Emacs session.
 

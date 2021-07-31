@@ -29,15 +29,15 @@ import json
 import psutil
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
 
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
         self.first_file = arguments
 
-        self.panel_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"]).darker(110).name()
+        self.panel_background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
 
         self.buffer_widget.loadFinished.connect(self.load_first_file)
 
@@ -56,13 +56,13 @@ class AppBuffer(BrowserBuffer):
 
     def load_first_file(self):
         self.buffer_widget.execute_js('''initProcesslistColor(\"{}\", \"{}\")'''.format(
-            self.emacs_var_dict["eaf-emacs-theme-background-color"],
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+            get_emacs_var("eaf-emacs-theme-background-color"),
+            get_emacs_var("eaf-emacs-theme-foreground-color")
         ))
 
         self.buffer_widget.execute_js('''initPanelColor(\"{}\", \"{}\")'''.format(
             self.panel_background_color,
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+            get_emacs_var("eaf-emacs-theme-foreground-color")
         ))
 
         self.update_process_info()

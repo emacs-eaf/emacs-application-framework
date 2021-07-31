@@ -24,7 +24,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl, QFileSystemWatcher, QTimer
 from retrying import retry
 from core.webengine import BrowserBuffer
-from core.utils import get_free_port, message_to_emacs, eval_in_emacs
+from core.utils import get_free_port, message_to_emacs, eval_in_emacs, get_emacs_var
 from urllib.error import URLError
 from urllib.request import urlopen
 from urllib.parse import urlencode
@@ -35,16 +35,15 @@ import tempfile
 
 class AppBuffer(BrowserBuffer):
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
 
         self.url = url
         self.preview_file = tempfile.mkstemp(prefix='eaf-', suffix='.html', text=True)[1]
         self.render_js = os.path.join(os.path.dirname(__file__), "render.js")
         self.server_port = get_free_port()
         self.dark_mode = "false"
-        if emacs_var_dict["eaf-markdown-dark-mode"] == True or \
-           (emacs_var_dict["eaf-markdown-dark-mode"] == "follow" and emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+        if (get_emacs_var("eaf-markdown-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"):
             self.dark_mode = "true"
 
         self.draw_progressbar = True
