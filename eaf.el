@@ -276,7 +276,14 @@ been initialized."
                                           (string-suffix-p ")" arg)) ;; list
                                      (split-string (substring arg 1 -1) " "))
                                     (t arg))))
-                          (cdr args)))))))))
+                          (cdr args)))))
+
+               (epc:define-method
+                mngr 'read-emacs-var
+                (lambda (&rest args)
+                  (let ((var-name (car args)))
+                    (symbol-value (intern var-name)))))
+               ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
       (error "[EAF] eaf-server failed to start")))
