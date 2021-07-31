@@ -74,6 +74,14 @@
 ;;; Code:
 (require 'cl-lib)
 
+(define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
+  "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
+for more information.
+
+In summary, the EAF's python applications can now access users' customized
+variables with the get_emacs_var module, eliminating the need to store
+them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
+
 (defun eaf-add-app-dirs-to-load-path ()
   "Add EAF app directories where .el exists to `load-path'."
   (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
