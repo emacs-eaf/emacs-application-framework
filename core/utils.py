@@ -233,7 +233,7 @@ def eval_in_emacs(method_name, args):
         # Call eval-in-emacs elisp function.
         epc_client.call("eval-in-emacs", args)
 
-def read_emacs_var(var_name):
+def get_emacs_var(var_name):
     global epc_client
 
     return epc_client.call_sync("read-emacs-var", [var_name])
