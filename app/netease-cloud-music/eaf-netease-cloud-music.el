@@ -36,23 +36,23 @@
   ""
   :type 'string)
 
-(defcustom eaf-netease-cloud-music-local-playlist+list ()
+(defcustom eaf-netease-cloud-music-local-playlist+list '()
   ""
   :type 'cons)
 
-(defcustom eaf-netease-cloud-music-user-playlists+list ()
+(defcustom eaf-netease-cloud-music-user-playlists+list '()
   ""
   :type 'cons)
 
-(defcustom eaf-netease-cloud-music-playlists-songs+list ()
+(defcustom eaf-netease-cloud-music-playlists-songs+list '()
   ""
   :type 'cons)
 
-(defcustom eaf-netease-cloud-music-current-song+list ("" "")
+(defcustom eaf-netease-cloud-music-current-song+list '("" "")
   ""
   :type 'cons)
 
-(defcustom eaf-netease-cloud-music-user+list ()
+(defcustom eaf-netease-cloud-music-user+list '()
   ""
   :type 'cons)
 
