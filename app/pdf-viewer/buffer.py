@@ -579,7 +579,8 @@ class PdfViewerWidget(QWidget):
 
         # Inverted mode.
         self.inverted_mode = False
-        if (get_emacs_var("eaf-pdf-dark-mode") == True or \
+        if (get_emacs_var("eaf-pdf-dark-mode") == "force" or \
+            get_emacs_var("eaf-pdf-dark-mode") == True or \
             ((get_emacs_var("eaf-pdf-dark-mode") == "follow" or get_emacs_var("eaf-pdf-dark-mode") == "ignore") and \
              get_emacs_var("eaf-emacs-theme-mode") == "dark")):
             self.inverted_mode = True

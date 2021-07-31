@@ -87,7 +87,9 @@ class AppBuffer(BrowserBuffer):
         QTimer.singleShot(200, lambda: self.buffer_widget.eval_js("select_root_node();"))
 
         color = "#FFFFFF"
-        if (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"):
+        if (get_emacs_var("eaf-mindmap-dark-mode") == "force" or \
+            get_emacs_var("eaf-mindmap-dark-mode") == True or \
+                (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")):
             color = "#242525"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 
@@ -112,7 +114,9 @@ class AppBuffer(BrowserBuffer):
                 self.buffer_widget.execute_js("refresh('{}');".format(string_to_base64(f.read())))
 
             color = "#FFFFFF"
-            if (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"):
+            if (get_emacs_var("eaf-mindmap-dark-mode") == "force" or \
+                get_emacs_var("eaf-mindmap-dark-mode") == True or \
+                (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")):
                 color = "#242525"
             self.buffer_widget.eval_js("init_background('{}');".format(color))
 

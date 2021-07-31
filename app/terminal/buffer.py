@@ -102,7 +102,9 @@ class AppBuffer(BrowserBuffer):
     @PostGui()
     def open_terminal_page(self):
         theme = "light"
-        if (get_emacs_var("eaf-terminal-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"):
+        if (get_emacs_var("eaf-terminal-dark-mode") == "follow" or \
+            get_emacs_var("eaf-terminal-dark-mode") == True or \
+            (get_emacs_var("eaf-terminal-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")):
             theme = "dark"
 
         with request.urlopen(self.index_file) as f:
