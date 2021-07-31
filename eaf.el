@@ -74,14 +74,17 @@
 ;;; Code:
 (require 'cl-lib)
 
-(defun add-subdirs-to-load-path (dir)
-  "Recursive add directory DIR to `load-path'."
-  (mapcar
-   (lambda (path)
-     (add-to-list 'load-path path))
-   (delete-dups (mapcar 'file-name-directory (directory-files-recursively dir "\\.el$")))))
+(defun add-apps-dir-to-load-path()
+  "Add app's dir to `load-path'."
+  (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
+    (mapcar
+     (lambda (path) (add-to-list 'load-path path))
+     (cl-remove-if-not
+      (lambda(d) (directory-files d t "\.el$"))
+      (directory-files app-dir t directory-files-no-dot-files-regexp)))
+    ))
 
-(add-subdirs-to-load-path (expand-file-name "app" (file-name-directory (locate-library "eaf"))))
+(add-apps-dir-to-load-path)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
