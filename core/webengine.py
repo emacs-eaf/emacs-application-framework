@@ -1103,7 +1103,7 @@ class BrowserBuffer(Buffer):
 
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
-        return self.buffer_widget.get_focus_text() != None or self.url == "devtools://devtools/bundled/devtools_app.html"
+        return self.buffer_widget.get_focus_text() != None or self.url.startswith("devtools://")
 
     @interactive(insert_or_do=True)
     def duplicate_page(self):
