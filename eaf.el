@@ -615,7 +615,6 @@ A hashtable, key is url and value is title.")
   (let* ((eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
-                    (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
                     (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
                     ))

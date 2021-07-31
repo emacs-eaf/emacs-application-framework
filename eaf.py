@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list
+from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_var
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -48,7 +48,7 @@ class EAF(object):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Parse init arguments.
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port) = args
+        (emacs_width, emacs_height, config_dir, emacs_server_port) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
@@ -60,6 +60,10 @@ class EAF(object):
 
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
+
+        proxy_host = get_emacs_var("eaf-proxy-host")
+        proxy_port = get_emacs_var("eaf-proxy-port")
+        proxy_type = get_emacs_var("eaf-proxy-type")
 
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
