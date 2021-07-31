@@ -360,15 +360,6 @@ been initialized."
   ""
   :type 'string)
 
-(defcustom eaf-var-list
-  '(
-    )
-  ;; TODO: The data type problem
-  "The alist storing user-defined variables that's shared with EAF Python side.
-
-Try not to modify this alist directly.  Use `eaf-setq' to modify instead."
-  :type 'cons)
-
 (defcustom eaf-browser-caret-mode-keybinding
   '(("j"   . "caret_next_line")
     ("k"   . "caret_previous_line")
@@ -1075,10 +1066,6 @@ A hashtable, key is url and value is title.")
       (eaf-call-sync "get_emacs_wsl_window_id")
     (frame-parameter frame 'window-id)))
 
-(defun eaf-serialization-var-list ()
-  "Serialize variable list."
-  (json-encode eaf-var-list))
-
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
@@ -1094,7 +1081,7 @@ A hashtable, key is url and value is title.")
                     (list eaf-proxy-host eaf-proxy-port eaf-proxy-type)
                     (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
-                    (list (eaf-serialization-var-list))))
+                    ))
          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
     (if (and (getenv "WAYLAND_DISPLAY") (not (string= (getenv "WAYLAND_DISPLAY") "")))
         (progn

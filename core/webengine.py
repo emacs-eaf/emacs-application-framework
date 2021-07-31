@@ -607,8 +607,8 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     open_devtools_tab = QtCore.pyqtSignal(object)
 
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, fit_to_view):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, fit_to_view)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path, fit_to_view):
+        Buffer.__init__(self, buffer_id, url, arguments, module_path, fit_to_view)
 
         self.add_widget(BrowserView(buffer_id, config_dir))
 

@@ -33,8 +33,8 @@ import tempfile
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, argument, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, argument, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, argument, module_path):
+        Buffer.__init__(self, buffer_id, url, argument, module_path, False)
 
         self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
 

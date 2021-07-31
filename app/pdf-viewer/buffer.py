@@ -37,11 +37,11 @@ import json
 import platform
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(get_emacs_var("eaf-buffer-background-color")), buffer_id, emacs_var_dict))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(get_emacs_var("eaf-buffer-background-color")), buffer_id))
         self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
@@ -545,7 +545,7 @@ class PdfViewerWidget(QWidget):
 
     translate_double_click_word = QtCore.pyqtSignal(str)
 
-    def __init__(self, url, config_dir, background_color, buffer_id, emacs_var_dict):
+    def __init__(self, url, config_dir, background_color, buffer_id):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
@@ -554,7 +554,6 @@ class PdfViewerWidget(QWidget):
         self.buffer_id = buffer_id
         self.installEventFilter(self)
         self.setMouseTracking(True)
-        self.emacs_var_dict = emacs_var_dict
 
         # Load document first.
         self.document = PdfDocument(fitz.open(url))

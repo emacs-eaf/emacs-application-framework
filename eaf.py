@@ -48,7 +48,7 @@ class EAF(object):
         global emacs_width, emacs_height, eaf_config_dir, proxy_string
 
         # Parse init arguments.
-        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port, var_dict_string) = args
+        (emacs_width, emacs_height, proxy_host, proxy_port, proxy_type, config_dir, emacs_server_port) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
         eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
@@ -56,7 +56,6 @@ class EAF(object):
         # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
-        self.emacs_var_dict = {}
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         # Init EPC client port.
@@ -206,7 +205,7 @@ class EAF(object):
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, self.emacs_var_dict, module_path)
+        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, module_path)
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer

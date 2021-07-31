@@ -35,8 +35,8 @@ from http.server import SimpleHTTPRequestHandler
 from socketserver import TCPServer
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path, False)
+    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
 
         # Get free port.
         self.port = get_free_port()
