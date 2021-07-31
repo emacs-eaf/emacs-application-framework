@@ -59,17 +59,13 @@ class EAF(object):
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
 
-        proxy_host = get_emacs_var("eaf-proxy-host")
-        proxy_port = get_emacs_var("eaf-proxy-port")
-        proxy_type = get_emacs_var("eaf-proxy-type")
-
-        eaf_config_dir = get_emacs_config_dir()
-        self.session_file = os.path.join(eaf_config_dir, "session.json")
-
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
         self.server.logger.setLevel(logging.DEBUG)
         self.server.allow_reuse_address = True
+
+        eaf_config_dir = get_emacs_config_dir()
+        self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         if not os.path.exists(eaf_config_dir):
             os.makedirs(eaf_config_dir);
@@ -88,6 +84,10 @@ class EAF(object):
         eval_in_emacs('eaf--first-start', [self.server.server_address[1], self.webengine_include_private_codec()])
 
         # Set Network proxy.
+        proxy_host = get_emacs_var("eaf-proxy-host")
+        proxy_port = get_emacs_var("eaf-proxy-port")
+        proxy_type = get_emacs_var("eaf-proxy-type")
+
         self.proxy = (proxy_type, proxy_host, proxy_port)
         self.is_proxy = False
 
