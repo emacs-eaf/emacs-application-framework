@@ -716,7 +716,7 @@ class BrowserBuffer(Buffer):
         module_name = self.module_path.split(".")[1]
         return ((get_emacs_var("eaf-browser-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")) \
                 and module_name in ["browser", "terminal", "mindmap", "js-video-player"] \
-                and self.url != "devtools://devtools/bundled/devtools_app.html"
+                and not self.url.startswith("devtools://")
 
     def init_background_color(self):
         ''' Initialize the background colour.'''
