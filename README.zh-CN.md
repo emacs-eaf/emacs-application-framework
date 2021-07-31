@@ -7,7 +7,7 @@
 # Emacs Application Framework
 Emacs Application Framework (EAF) 是新一代的Emacs图形应用框架，通过扩展Emacs的多媒体能力，最终达到 Live in Emacs 的终极目标。
 
-EAF可以在多个操作系统下工作，包括Linux、Windows和macOS。
+EAF可以在多个操作系统下工作，包括Linux、Windows、macOS和FreeBSD。
 
 ## EAF 愿景
 Emacs距今已经有45年的发展历史，比现在人们用的操作系统都老。在这45年中，全世界最顶级的黑客在贡献自己的智慧和想象力，一起构建了Emacs这个伟大的开发者工具生态。
