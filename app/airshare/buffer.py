@@ -31,7 +31,11 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
-        self.add_widget(AirShareWidget(url, QColor(get_emacs_var("eaf-buffer-background-color"))))
+        self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
+        
+        self.add_widget(AirShareWidget(url,
+                                       get_emacs_var("eaf-emacs-theme-background-color"),
+                                       get_emacs_var("eaf-emacs-theme-foreground-color")))
 
 class Image(qrcode.image.base.BaseImage):
     def __init__(self, border, width, box_size):
@@ -57,9 +61,9 @@ class Image(qrcode.image.base.BaseImage):
         pass
 
 class AirShareWidget(QWidget):
-    def __init__(self, url, color):
+    def __init__(self, url, background_color, foreground_color):
         QWidget.__init__(self)
-        self.setStyleSheet("background-color: black")
+        self.setStyleSheet("background-color: transparent;")
 
         self.file_name_font = QFont()
         self.file_name_font.setPointSize(24)
@@ -68,7 +72,7 @@ class AirShareWidget(QWidget):
         self.file_name_label.setText(url)
         self.file_name_label.setFont(self.file_name_font)
         self.file_name_label.setAlignment(Qt.AlignCenter)
-        self.file_name_label.setStyleSheet("color: #eee")
+        self.file_name_label.setStyleSheet("color: {}".format(foreground_color))
 
         self.qrcode_label = QLabel(self)
 
@@ -78,7 +82,7 @@ class AirShareWidget(QWidget):
         self.notify_label.setText("Scan QR code above to copy data.")
         self.notify_label.setFont(self.notify_font)
         self.notify_label.setAlignment(Qt.AlignCenter)
-        self.notify_label.setStyleSheet("color: #eee")
+        self.notify_label.setStyleSheet("color: {}".format(foreground_color))
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
