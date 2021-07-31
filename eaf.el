@@ -359,10 +359,6 @@ been initialized."
     (eaf-browser-translate-language . "") ; EAF browser will use current system locale if this option is empty
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
-    (eaf-pdf-dark-mode . "follow")
-    (eaf-pdf-default-zoom . 1.0)
-    (eaf-pdf-dark-exclude-image . t)
-    (eaf-pdf-scroll-ratio . 0.05)
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . 13)
     (eaf-terminal-font-family . "")

@@ -99,6 +99,22 @@
   "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
   :type 'boolean)
 
+(defcustom eaf-pdf-dark-mode "follow"
+  ""
+  :type 'string)
+
+(defcustom eaf-pdf-default-zoom 1.0
+  ""
+  :type 'float)
+
+(defcustom eaf-pdf-scroll-ratio 0.05
+  ""
+  :type 'float)
+
+(defcustom eaf-pdf-dark-exclude-image t
+  ""
+  :type 'boolean)
+
 (define-minor-mode eaf-pdf-outline-mode
   "EAF pdf outline mode."
   :keymap (let ((map (make-sparse-keymap)))
