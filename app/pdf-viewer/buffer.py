@@ -582,7 +582,7 @@ class PdfViewerWidget(QWidget):
         self.inverted_mode = False
         if (get_emacs_var("eaf-pdf-dark-mode") == True or \
             ((get_emacs_var("eaf-pdf-dark-mode") == "follow" or get_emacs_var("eaf-pdf-dark-mode") == "ignore") and \
-             self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")):
+             get_emacs_var("eaf-emacs-theme-mode") == "dark")):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
@@ -634,7 +634,7 @@ class PdfViewerWidget(QWidget):
         # Init font.
         self.page_annotate_padding_right = 10
         self.page_annotate_padding_bottom = 10
-        self.page_annotate_light_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.page_annotate_light_color = QColor(get_emacs_var("eaf-emacs-theme-foreground-color"))
 
         self.font = QFont()
         self.font.setPointSize(12)
@@ -723,7 +723,7 @@ class PdfViewerWidget(QWidget):
             self.jump_link_key_cache_dict.clear()
 
         if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.isPDF:
-            color = inverted_color(self.emacs_var_dict["eaf-emacs-theme-background-color"], self.inverted_mode)
+            color = inverted_color(get_emacs_var("eaf-emacs-theme-background-color"), self.inverted_mode)
             col = (color.redF(), color.greenF(), color.blueF())
             page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
 
@@ -807,9 +807,9 @@ class PdfViewerWidget(QWidget):
         painter.setFont(self.font)
 
         if self.rect().width() <= render_width and not self.inverted_mode:
-            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"]), True))
+            painter.setPen(inverted_color((get_emacs_var("eaf-emacs-theme-foreground-color")), True))
         else:
-            painter.setPen(inverted_color((self.emacs_var_dict["eaf-emacs-theme-foreground-color"])))
+            painter.setPen(inverted_color((get_emacs_var("eaf-emacs-theme-foreground-color"))))
 
         # Draw progress.
         progress_percent = int((self.start_page_index + 1) * 100 / self.page_total_number)

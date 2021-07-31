@@ -106,6 +106,8 @@
 (require 'eaf-mail)
 (require 'eaf-browser)
 (require 'eaf-terminal)
+(require 'eaf-camera)
+(require 'eaf-markdown-previewer)
 (require 'epc)
 (require 'epcs)
 (require 'json)
@@ -113,7 +115,9 @@
 (require 's)
 (require 'seq)
 (require 'subr-x)
+(require 'eaf-jupyter)
 (require 'eaf-elfeed)
+(require 'eaf-music-player)
 (require 'eaf-netease-cloud-music)
 
 
@@ -344,19 +348,20 @@ been initialized."
   ""
   :type 'string)
 
+(defcustom eaf-emacs-theme-mode ""
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-background-color ""
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-foreground-color ""
+  ""
+  :type 'string)
+
 (defcustom eaf-var-list
-  '((eaf-camera-save-path . "~/Downloads")
-    (eaf-markdown-dark-mode . "follow")
-    (eaf-mindmap-dark-mode . "follow")
-    (eaf-mindmap-save-path . "~/Documents")
-    (eaf-mindmap-edit-mode . nil)
-    (eaf-jupyter-font-size . 13)
-    (eaf-jupyter-font-family . "")
-    (eaf-jupyter-dark-mode . "follow")
-    (eaf-music-play-order . "list")
-    (eaf-emacs-theme-mode . "")
-    (eaf-emacs-theme-background-color . "")
-    (eaf-emacs-theme-foreground-color . "")
+  '(
     )
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
@@ -1573,28 +1578,6 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (interactive)
   (eaf-call-async "send_key_sequence" eaf--buffer-id "S-RET"))
 
-(defun eaf-set (sym val)
-  "Similar to `set', but store SYM with VAL in EAF Python side, and return VAL.
-
-For convenience, use the Lisp macro `eaf-setq' instead."
-  (cond ((and (stringp val) (string= (upcase val) "TRUE"))
-         (setq val t))
-        ((and (stringp val) (string= (upcase val) "FALSE"))
-         (setq val nil))
-        ((and (listp val) val)
-         (setq val (format "%S" val))))
-  (setf (map-elt eaf-var-list sym) val)
-  ;; Update python side variable dynamically.
-  (when (epc:live-p eaf-epc-process)
-    (eaf-call-async "update_emacs_var_dict" (eaf-serialization-var-list)))
-  val)
-
-(defmacro eaf-setq (var val)
-  "Similar to `setq', but store VAR with VAL in EAF Python side, and return VAL.
-
-Use it as (eaf-setq var val)"
-  `(eaf-set ',var ,val))
-
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
 
@@ -1630,12 +1613,8 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
 (defun eaf--set-emacs-var (name value in-eaf-var-list)
-  "Set Lisp variable NAME with VALUE on the Emacs side.
-
-If IN-EAF-VAR-LIST is true, we assume the variable is in `eaf-var-list'"
-  (if in-eaf-var-list
-      (eaf-set (intern name) value)
-    (set (intern name) value)))
+  "Set Lisp variable NAME with VALUE on the Emacs side."
+  (set (intern name) value))
 
 (defun eaf-request-kill-buffer (kill-buffer-id)
   "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
@@ -2098,19 +2077,19 @@ the file at current cursor position in dired."
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
 
-(eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+(setq eaf-emacs-theme-mode (eaf-get-theme-mode))
 
-(eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+(setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
 
-(eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
+(setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
 
 (advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
   "Update `eaf-emacs-theme-mode' after execute `load-theme'."
   (apply orig-fun arg args)
-  (eaf-setq eaf-emacs-theme-mode (eaf-get-theme-mode))
-  (eaf-setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
-  (eaf-setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
+  (setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+  (setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+  (setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."

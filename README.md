@@ -144,7 +144,7 @@ Alternatively, if you use [use-package](https://github.com/jwiegley/use-package)
       :custom
       (eaf-browser-continue-where-left-off t)
       :config
-      (eaf-setq eaf-browser-enable-adblocker t")
+      (setq eaf-browser-enable-adblocker t")
       (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
       (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
       (eaf-bind-key take_photo "p" eaf-camera-keybinding)

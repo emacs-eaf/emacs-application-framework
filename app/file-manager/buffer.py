@@ -74,10 +74,10 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(file_infos)))
 
         self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            self.emacs_var_dict["eaf-emacs-theme-background-color"],
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"],
+            get_emacs_var("eaf-emacs-theme-background-color"),
+            get_emacs_var("eaf-emacs-theme-foreground-color"),
             self.arguments["header-color"],
-            self.emacs_var_dict["eaf-emacs-theme-foreground-color"],
+            get_emacs_var("eaf-emacs-theme-foreground-color"),
             self.arguments["directory-color"],
             self.arguments["symlink-color"],
             self.arguments["select-color"],

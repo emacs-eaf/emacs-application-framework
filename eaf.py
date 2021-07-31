@@ -59,9 +59,6 @@ class EAF(object):
         self.emacs_var_dict = {}
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
-        # Update Emacs var dictionary.
-        self.update_emacs_var_dict(var_dict_string)
-
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
 
@@ -144,23 +141,6 @@ class EAF(object):
             return False
         path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
-
-    @PostGui()
-    def update_emacs_var_dict(self, var_dict_string):
-        ''' Update Python side emacs_var_dict.'''
-        self.emacs_var_dict = json.loads(var_dict_string)
-        for key, value in self.emacs_var_dict.items():
-            if key.endswith("+list") and value == None:
-                self.emacs_var_dict[key] = []
-            elif self.emacs_var_dict[key] == None or str(value).upper() == "FALSE":
-                self.emacs_var_dict[key] = False
-            elif str(value).upper() == "TRUE":
-                self.emacs_var_dict[key] = True
-            elif str(value).startswith('(') and str(value).endswith(')'):
-                self.emacs_var_dict[key] = list_string_to_list(str(value))
-
-        for buffer in list(self.buffer_dict.values()):
-            buffer.emacs_var_dict = self.emacs_var_dict
 
     @PostGui()
     def new_buffer(self, buffer_id, url, app_name, arguments):

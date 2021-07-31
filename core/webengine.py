@@ -714,7 +714,7 @@ class BrowserBuffer(Buffer):
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
-        return ((get_emacs_var("eaf-browser-dark-mode") == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
+        return ((get_emacs_var("eaf-browser-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")) \
                 and module_name in ["browser", "terminal", "mindmap", "js-video-player"] \
                 and self.url != "devtools://devtools/bundled/devtools_app.html"
 
@@ -1226,8 +1226,8 @@ class BrowserBuffer(Buffer):
             '''<link href=''', '''<link href=''' + dist_dir).replace(
                 '''<script src=''', '''<script src=''' + dist_dir).replace(
                     '''<body>''', '''<body style="background: {}; color: {}">'''.format(
-                        self.emacs_var_dict["eaf-emacs-theme-background-color"],
-                        self.emacs_var_dict["eaf-emacs-theme-foreground-color"]
+                        get_emacs_var("eaf-emacs-theme-background-color"),
+                        get_emacs_var("eaf-emacs-theme-foreground-color")
                     ))
 
 class ZoomSizeDb(object):
