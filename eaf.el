@@ -359,9 +359,6 @@ been initialized."
     (eaf-browser-translate-language . "") ; EAF browser will use current system locale if this option is empty
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
-    (eaf-terminal-dark-mode . "follow")
-    (eaf-terminal-font-size . 13)
-    (eaf-terminal-font-family . "")
     (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
