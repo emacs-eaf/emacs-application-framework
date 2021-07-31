@@ -363,7 +363,6 @@ been initialized."
     (eaf-pdf-default-zoom . 1.0)
     (eaf-pdf-dark-exclude-image . t)
     (eaf-pdf-scroll-ratio . 0.05)
-    (eaf-pdf-enable-trim-white-margin . nil)
     (eaf-terminal-dark-mode . "follow")
     (eaf-terminal-font-size . 13)
     (eaf-terminal-font-family . "")
