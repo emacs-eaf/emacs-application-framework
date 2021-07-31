@@ -23,7 +23,7 @@ from PyQt5.QtCore import QUrl, QTimer, QPointF, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QApplication
 from core.webengine import BrowserBuffer
-from core.utils import PostGui, get_free_port, interactive, string_to_base64, eval_in_emacs, message_to_emacs, read_emacs_var
+from core.utils import PostGui, get_free_port, interactive, string_to_base64, eval_in_emacs, message_to_emacs, get_emacs_var
 import os
 import subprocess
 import signal
@@ -102,16 +102,16 @@ class AppBuffer(BrowserBuffer):
     @PostGui()
     def open_terminal_page(self):
         theme = "light"
-        if (read_emacs_var("eaf-terminal-dark-mode") == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
+        if (get_emacs_var("eaf-terminal-dark-mode") == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark"):
             theme = "dark"
 
         with request.urlopen(self.index_file) as f:
             html = f.read().decode("utf-8").replace("%1", str(self.port))\
                                            .replace("%2", self.http_url)\
                                            .replace("%3", theme)\
-                                           .replace("%4", str(read_emacs_var("eaf-terminal-font-size")))\
+                                           .replace("%4", str(get_emacs_var("eaf-terminal-font-size")))\
                                            .replace("%5", self.current_directory)\
-                                           .replace("%6", read_emacs_var("eaf-terminal-font-family"))
+                                           .replace("%6", get_emacs_var("eaf-terminal-font-family"))
             self.buffer_widget.setHtml(html)
 
     def checking_status(self):

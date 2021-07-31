@@ -24,14 +24,14 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 from core.buffer import Buffer
-from core.utils import read_emacs_var
+from core.utils import get_emacs_var
 import qrcode
 
 class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, arguments, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
 
-        self.add_widget(AirShareWidget(url, QColor(read_emacs_var("eaf-buffer-background-color"))))
+        self.add_widget(AirShareWidget(url, QColor(get_emacs_var("eaf-buffer-background-color"))))
 
 class Image(qrcode.image.base.BaseImage):
     def __init__(self, border, width, box_size):

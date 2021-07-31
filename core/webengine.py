@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, read_emacs_var
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -281,7 +281,7 @@ class BrowserView(QWebEngineView):
     def zoom_in(self):
         ''' Zoom in.'''
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
-        if read_emacs_var("eaf-browser-default-zoom") == self.zoomFactor():
+        if get_emacs_var("eaf-browser-default-zoom") == self.zoomFactor():
             self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
         else:
             self.buffer.zoom_data.add_entry(urlparse(self.buffer.current_url).hostname, self.zoomFactor())
@@ -290,7 +290,7 @@ class BrowserView(QWebEngineView):
     def zoom_out(self):
         ''' Zoom out.'''
         self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
-        if read_emacs_var("eaf-browser-default-zoom") == self.zoomFactor():
+        if get_emacs_var("eaf-browser-default-zoom") == self.zoomFactor():
             self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
         else:
             self.buffer.zoom_data.add_entry(urlparse(self.buffer.current_url).hostname, self.zoomFactor())
@@ -298,7 +298,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def zoom_reset(self):
         ''' Reset the magnification.'''
-        self.setZoomFactor(read_emacs_var("eaf-browser-default-zoom"))
+        self.setZoomFactor(get_emacs_var("eaf-browser-default-zoom"))
 
     def eval_js(self, js):
         ''' Run JavaScript.'''
@@ -335,7 +335,7 @@ class BrowserView(QWebEngineView):
     @interactive
     def scroll_up_page(self):
         ''' Scroll page up.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + read_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
 
     @interactive
     def insert_or_scroll_up_page(self):
@@ -352,17 +352,17 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
         ''' Scroll down a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + read_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_begin(self):
         ''' Scroll to the beginning.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + read_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_bottom(self):
         ''' Scroll to the bottom.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + read_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
 
     @interactive
     def get_selection_text(self):
@@ -432,7 +432,7 @@ class BrowserView(QWebEngineView):
         return self.url().toString().replace(" ", "%20")
 
     def load_marker_file(self):
-        self.eval_js(self.marker_js_raw.replace("%1", read_emacs_var("eaf-marker-letters")))
+        self.eval_js(self.marker_js_raw.replace("%1", get_emacs_var("eaf-marker-letters")))
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''
@@ -617,8 +617,8 @@ class BrowserBuffer(Buffer):
 
         self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(config_dir), "browser", "zoom_data.db"))
 
-        self.pc_user_agent = read_emacs_var("eaf-browser-pc-user-agent")
-        self.phone_user_agent = read_emacs_var("eaf-browser-phone-user-agent")
+        self.pc_user_agent = get_emacs_var("eaf-browser-pc-user-agent")
+        self.phone_user_agent = get_emacs_var("eaf-browser-phone-user-agent")
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
@@ -643,22 +643,22 @@ class BrowserBuffer(Buffer):
 
         self.settings = QWebEngineSettings.globalSettings()
         try:
-            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, read_emacs_var("eaf-browser-enable-plugin"))
-            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, read_emacs_var("eaf-browser-enable-javascript"))
-            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, read_emacs_var("eaf-browser-enable-scrollbar"))
+            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, get_emacs_var("eaf-browser-enable-plugin"))
+            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, get_emacs_var("eaf-browser-enable-javascript"))
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, get_emacs_var("eaf-browser-enable-scrollbar"))
             self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
 
-            if read_emacs_var("eaf-browser-unknown-url-scheme-policy") == "DisallowUnknownUrlSchemes":
+            if get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "DisallowUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
-            elif read_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowUnknownUrlSchemesFromUserInteraction":
+            elif get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowUnknownUrlSchemesFromUserInteraction":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowUnknownUrlSchemesFromUserInteraction)
-            elif read_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowAllUnknownUrlSchemes":
+            elif get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowAllUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowAllUnknownUrlSchemes)
 
-            font_family = read_emacs_var('eaf-browser-font-family')
+            font_family = get_emacs_var('eaf-browser-font-family')
             if font_family:
                 for ff in (
                         self.settings.StandardFont,
@@ -690,7 +690,7 @@ class BrowserBuffer(Buffer):
         if success:
             # Try to rename pdf file with title.
             # Use host name if title include invalid file char.
-            title_path = os.path.join(os.path.expanduser(read_emacs_var("eaf-browser-download-path")), "{}.pdf".format(self.title))
+            title_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.pdf".format(self.title))
             try:
                 os.rename(file_path, title_path)
                 message_to_emacs("Successfully saved current webpage as '{}'.".format(title_path))
@@ -714,7 +714,7 @@ class BrowserBuffer(Buffer):
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         module_name = self.module_path.split(".")[1]
-        return ((read_emacs_var("eaf-browser-dark-mode") == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
+        return ((get_emacs_var("eaf-browser-dark-mode") == "follow" and self.emacs_var_dict["eaf-emacs-theme-mode"] == "dark")) \
                 and module_name in ["browser", "terminal", "mindmap", "js-video-player"] \
                 and self.url != "devtools://devtools/bundled/devtools_app.html"
 
@@ -745,7 +745,7 @@ class BrowserBuffer(Buffer):
         download_data = download_item.url().toString()
 
         if download_data.startswith("data:image/"):
-            image_path = os.path.join(os.path.expanduser(read_emacs_var("eaf-browser-download-path")), "image.png")
+            image_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "image.png")
             touch(image_path)
             with open(image_path, "wb") as f:
                 f.write(base64.decodestring(download_data.split(",")[1].encode("utf-8")))
@@ -765,7 +765,7 @@ class BrowserBuffer(Buffer):
     def _save_as_pdf(self):
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
-        pdf_path = os.path.join(os.path.expanduser(read_emacs_var("eaf-browser-download-path")), "{}.pdf".format(parsed.netloc))
+        pdf_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.pdf".format(parsed.netloc))
         message_to_emacs("Saving as pdf...")
         self.buffer_widget.web_page.printToPdf(pdf_path)
 
@@ -777,10 +777,10 @@ class BrowserBuffer(Buffer):
     def _save_as_single_file(self):
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
-        file_path = os.path.join(os.path.expanduser(read_emacs_var("eaf-browser-download-path")), "{}.html".format(parsed.netloc))
+        file_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.html".format(parsed.netloc))
         message_to_emacs("Saving as single file...")
         args = ["monolith", self.url, "-o", file_path]
-        handler = partial(self.notify_monolith_message, read_emacs_var("eaf-browser-download-path"), file_path, self.title)
+        handler = partial(self.notify_monolith_message, get_emacs_var("eaf-browser-download-path"), file_path, self.title)
         call_and_check_code(args, handler)
 
     @interactive(insert_or_do=True)
@@ -793,7 +793,7 @@ class BrowserBuffer(Buffer):
             self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
 
     def _save_as_screenshot(self):
-        screenshot_path = os.path.join(os.path.expanduser(read_emacs_var("eaf-browser-download-path")), "{}.png".format(self.title))
+        screenshot_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.png".format(self.title))
         message_to_emacs("Save as screenshot at {}".format(screenshot_path))
         self.buffer_widget.grab().save(screenshot_path, b'PNG')
 
@@ -1087,7 +1087,7 @@ class BrowserBuffer(Buffer):
         ''' Reset default magnification.'''
         if hasattr(self, "buffer_widget"):
             result = self.zoom_data.get_entry(urlparse(self.url).hostname)
-            zoom_factor = read_emacs_var("eaf-browser-default-zoom")
+            zoom_factor = get_emacs_var("eaf-browser-default-zoom")
             for row in result:
                 zoom_factor = float(row[0])
 
@@ -1189,7 +1189,7 @@ class BrowserBuffer(Buffer):
             import shutil
 
             if shutil.which("youtube-dl"):
-                download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(read_emacs_var("eaf-browser-download-path")))
+                download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(get_emacs_var("eaf-browser-download-path")))
 
                 youtube_dl_args = ["youtube-dl"]
                 youtube_dl_args.append("--proxy")
