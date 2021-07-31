@@ -236,8 +236,8 @@ def eval_in_emacs(method_name, args):
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
 
-def set_emacs_var(var_name, var_value, in_eaf_var_list):
-    eval_in_emacs('eaf--set-emacs-var', [var_name, var_value, in_eaf_var_list])
+def set_emacs_var(var_name, var_value):
+    eval_in_emacs('eaf--set-emacs-var', [var_name, var_value])
 
 def open_url_in_background_tab(url):
     eval_in_emacs('eaf-open-browser-in-background', [url])
