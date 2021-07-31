@@ -1,15 +1,15 @@
-;;; eaf-music-player.el --- Music player
+;;; eaf-image-viewer.el --- Image viewer
 
-;; Filename: eaf-music-player.el
-;; Description: Music player
+;; Filename: eaf-image-viewer.el
+;; Description: Image viewer
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
-;; Created: 2021-07-31 17:23:55
+;; Created: 2021-07-31 20:43:15
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 17:23:55
+;; Last-Updated: 2021-07-31 20:43:15
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/eaf-music-player.el
+;; URL: http://www.emacswiki.org/emacs/download/eaf-image-viewer.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Music player
+;; Image viewer
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf-music-player.el to your load-path.
+;; Put eaf-image-viewer.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'eaf-music-player)
+;; (require 'eaf-image-viewer)
 ;;
 ;; No need more.
 
@@ -60,7 +60,7 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET eaf-music-player RET
+;;      M-x customize-group RET eaf-image-viewer RET
 ;;
 
 ;;; Change log:
@@ -84,30 +84,32 @@
 
 ;;; Code:
 
-(defcustom eaf-music-play-order "list"
-  ""
-  :type 'string)
-
-(defcustom eaf-music-player-keybinding
-  '(("<f12>" . "open_devtools")
-    ("j" . "play_next")
-    ("k" . "play_prev")
-    ("h" . "play_random")
-    ("," . "backward")
-    ("." . "forward")
-    ("SPC" . "toggle")
-    ("C-n" . "scroll_up")
-    ("C-p" . "scroll_down")
-    ("C-v" . "scroll_up_page")
-    ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom")
-    ("g" . "jump_to_file")
-    ("t" . "toggle_play_order")
+(defcustom eaf-image-viewer-keybinding
+  '(("n" . "load_next_image")
+    ("p" . "load_prev_image")
+    ("SPC" . "load_prev_image")
+    ("," . "zoom_out")
+    ("." . "zoom_in")
+    ("/" . "zoom_reset")
+    ("-" . "zoom_out")
+    ("=" . "zoom_in")
+    ("0" . "zoom_reset")
+    ("9" . "zoom_toggle")
+    ("x" . "close_buffer")
+    ("u" . "rotate_left")
+    ("i" . "rotate_right")
+    ("y" . "flip_horizontal")
+    ("o" . "flip_vertical")
+    ("j" . "move_down")
+    ("k" . "move_up")
+    ("h" . "move_left")
+    ("l" . "move_right")
+    ("d" . "delete_current_image")
+    ("<f12>" . "open_devtools")
     )
-  "The keybinding of EAF Music Player."
+  "The keybinding of EAF Image Viewer."
   :type 'cons)
 
-(provide 'eaf-music-player)
+(provide 'eaf-image-viewer)
 
-;;; eaf-music-player.el ends here
+;;; eaf-image-viewer.el ends here

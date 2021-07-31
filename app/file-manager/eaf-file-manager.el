@@ -1,15 +1,15 @@
-;;; eaf-music-player.el --- Music player
+;;; eaf-file-manager.el --- File manager
 
-;; Filename: eaf-music-player.el
-;; Description: Music player
+;; Filename: eaf-file-manager.el
+;; Description: File manager
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
-;; Created: 2021-07-31 17:23:55
+;; Created: 2021-07-31 20:45:09
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 17:23:55
+;; Last-Updated: 2021-07-31 20:45:09
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/eaf-music-player.el
+;; URL: http://www.emacswiki.org/emacs/download/eaf-file-manager.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Music player
+;; File manager
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf-music-player.el to your load-path.
+;; Put eaf-file-manager.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'eaf-music-player)
+;; (require 'eaf-file-manager)
 ;;
 ;; No need more.
 
@@ -60,7 +60,7 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET eaf-music-player RET
+;;      M-x customize-group RET eaf-file-manager RET
 ;;
 
 ;;; Change log:
@@ -84,30 +84,14 @@
 
 ;;; Code:
 
-(defcustom eaf-music-play-order "list"
-  ""
-  :type 'string)
-
-(defcustom eaf-music-player-keybinding
+(defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
-    ("j" . "play_next")
-    ("k" . "play_prev")
-    ("h" . "play_random")
-    ("," . "backward")
-    ("." . "forward")
-    ("SPC" . "toggle")
-    ("C-n" . "scroll_up")
-    ("C-p" . "scroll_down")
-    ("C-v" . "scroll_up_page")
-    ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom")
-    ("g" . "jump_to_file")
-    ("t" . "toggle_play_order")
+    ("j" . "select_next_file")
+    ("k" . "select_prev_file")
     )
-  "The keybinding of EAF Music Player."
+  "The keybinding of EAF File Manager."
   :type 'cons)
 
-(provide 'eaf-music-player)
+(provide 'eaf-file-manager)
 
-;;; eaf-music-player.el ends here
+;;; eaf-file-manager.el ends here

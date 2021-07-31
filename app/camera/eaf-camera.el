@@ -88,6 +88,11 @@
   ""
   :type 'string)
 
+(defcustom eaf-camera-keybinding
+  '(("p" . "take_photo"))
+  "The keybinding of EAF Camera."
+  :type 'cons)
+
 (provide 'eaf-camera)
 
 ;;; eaf-camera.el ends here
