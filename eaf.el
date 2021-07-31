@@ -336,29 +336,16 @@ been initialized."
   "The default chrome bookmark file to import."
   :type 'string)
 
+(defcustom eaf-marker-letters "ASDFHJKLWEOPCNM"
+  ""
+  :type 'string)
+
+(defcustom eaf-buffer-background-color "#000000"
+  ""
+  :type 'string)
+
 (defcustom eaf-var-list
   '((eaf-camera-save-path . "~/Downloads")
-    (eaf-browser-enable-plugin . t)
-    (eaf-browser-enable-adblocker . nil)
-    (eaf-browser-enable-autofill . nil)
-    (eaf-browser-enable-javascript . t)
-    (eaf-browser-enable-scrollbar . nil)
-    (eaf-browser-remember-history . t)
-    (eaf-browser-default-zoom . 1.0)
-    (eaf-browser-font-family . "")
-    (eaf-browser-blank-page-url . "https://www.google.com")
-    (eaf-browser-scroll-behavior . "auto")
-    (eaf-browser-download-path . "~/Downloads")
-    (eaf-browser-aria2-proxy-host . "")
-    (eaf-browser-aria2-proxy-port . "")
-    (eaf-browser-aria2-auto-file-renaming . nil)
-    (eaf-browser-dark-mode . "follow")
-    (eaf-browser-pc-user-agent . "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
-    (eaf-browser-phone-user-agent . "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1")
-    (eaf-browser-chrome-history-file . "~/.config/google-chrome/Default/History")
-    (eaf-browser-translate-language . "") ; EAF browser will use current system locale if this option is empty
-    ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
-    (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
     (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
@@ -366,7 +353,6 @@ been initialized."
     (eaf-jupyter-font-size . 13)
     (eaf-jupyter-font-family . "")
     (eaf-jupyter-dark-mode . "follow")
-    (eaf-marker-letters . "ASDFHJKLWEOPCNM")
     (eaf-music-play-order . "list")
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
@@ -379,7 +365,6 @@ been initialized."
     (eaf-netease-cloud-music-play-status . "")
     (eaf-netease-cloud-music-current-song+list . ("" ""))
     (eaf-netease-cloud-music-user+list . ())
-    (eaf-buffer-background-color . "#000000") ;background color for pdf-viewer, camera, file-sender and airshare
     )
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.

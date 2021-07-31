@@ -27,7 +27,7 @@ from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView, QFrame
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from core.buffer import Buffer
-from core.utils import message_to_emacs
+from core.utils import message_to_emacs, read_emacs_var
 from pathlib import Path
 import time
 import os
@@ -38,7 +38,7 @@ class AppBuffer(Buffer):
 
         self.background_color = QColor(0, 0, 0)
 
-        self.add_widget(CameraWidget(QColor(emacs_var_dict["eaf-buffer-background-color"])))
+        self.add_widget(CameraWidget(QColor(read_emacs_var("eaf-buffer-background-color"))))
 
     def all_views_hide(self):
         # Need stop camera if all view will hide, otherwise camera will crash.

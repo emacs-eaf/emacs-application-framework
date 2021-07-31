@@ -41,7 +41,7 @@ class AppBuffer(Buffer):
         Buffer.__init__(self, buffer_id, url, arguments, emacs_var_dict, module_path, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(emacs_var_dict["eaf-buffer-background-color"]), buffer_id, emacs_var_dict))
+        self.add_widget(PdfViewerWidget(url, config_dir, QColor(read_emacs_var("eaf-buffer-background-color")), buffer_id, emacs_var_dict))
         self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
@@ -717,7 +717,7 @@ class PdfViewerWidget(QWidget):
             page.cleanup_search_text()
 
         if self.is_jump_link:
-            self.jump_link_key_cache_dict.update(page.mark_jump_link_tips(self.emacs_var_dict["eaf-marker-letters"]))
+            self.jump_link_key_cache_dict.update(page.mark_jump_link_tips(read_emacs_var("eaf-marker-letters")))
         else:
             page.cleanup_jump_link_tips()
             self.jump_link_key_cache_dict.clear()
