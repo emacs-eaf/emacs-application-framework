@@ -124,7 +124,7 @@
 
  .file-list {
    width: 100%;
-   overflow: scroll;
+   overflow: hidden;
  }
 
  .file {
