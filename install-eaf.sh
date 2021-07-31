@@ -67,6 +67,16 @@ elif [ "$(command -v pacman)" ]; then
     sudo pacman -Sy --noconfirm --needed $ARCH_PACKAGES ||
         { echo "[EAF] Failed to install dependency with pacman."; exit 1;}
     [ "$(command -v yay)" ] && yay -S --noconfirm filebrowser-bin
+
+elif [ "$(command -v pkg)" ]; then
+    # shellcheck disable=SC2086
+    # NOTE: No filebrowser-bin, so eaf-open-file-manager won't work!
+    doas pkg install -y node npm wmctrl aria2 &&
+        doas pkg install -y glib &&
+        doas pkg install -y python38 py38-pip py38-qt5-sip py38-qt5-webengine \
+             py38-qrcode py38-qtconsole taglib ||
+            { echo "[EAF] Failed to install dependency with pkg."; exit 1;}
+    
 else
     echo "[EAF] Unsupported distribution/package manager. Here are the packages that needs to be installed:"
     for PCK in $ARCH_PACKAGES; do

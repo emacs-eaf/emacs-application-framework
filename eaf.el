@@ -1670,7 +1670,8 @@ the file at current cursor position in dired."
     (eaf--activate-emacs-win32-window))
    ((eq system-type 'darwin)
     (eaf--activate-emacs-mac-window))
-   ((eq system-type 'gnu/linux)
+   ((or (eq system-type 'gnu/linux)
+        (eq system-type 'berkeley-unix))
     (eaf--activate-emacs-linux-window buffer_id))))
 
 (defun eaf--select-window-by-direction (direction)
