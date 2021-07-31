@@ -283,7 +283,7 @@ been initialized."
                           (cdr args)))))
 
                (epc:define-method
-                mngr 'read-emacs-var
+                mngr 'get-emacs-var
                 (lambda (&rest args)
                   (let ((var-name (car args)))
                     (symbol-value (intern var-name)))))

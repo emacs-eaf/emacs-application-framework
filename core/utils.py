@@ -236,7 +236,7 @@ def eval_in_emacs(method_name, args):
 def get_emacs_var(var_name):
     global epc_client
 
-    return epc_client.call_sync("read-emacs-var", [var_name])
+    return epc_client.call_sync("get-emacs-var", [var_name])
 
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
