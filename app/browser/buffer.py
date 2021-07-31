@@ -95,15 +95,15 @@ class AppBuffer(BrowserBuffer):
 
         # Draw progressbar.
         self.progressbar_progress = 0
-        self.progressbar_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.progressbar_color = QColor(get_emacs_var("eaf-emacs-theme-foreground-color"))
         self.progressbar_height = 2
         self.buffer_widget.loadStarted.connect(self.start_progress)
         self.buffer_widget.loadProgress.connect(self.update_progress)
         self.is_loading = False
 
         # Reverse background and foreground color, to help cursor recognition.
-        self.caret_foreground_color = QColor(self.emacs_var_dict["eaf-emacs-theme-background-color"])
-        self.caret_background_color = QColor(self.emacs_var_dict["eaf-emacs-theme-foreground-color"])
+        self.caret_foreground_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
+        self.caret_background_color = QColor(get_emacs_var("eaf-emacs-theme-foreground-color"))
 
         # Reset to default zoom when page init or page url changed.
         self.reset_default_zoom()

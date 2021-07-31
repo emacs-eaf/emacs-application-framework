@@ -106,6 +106,8 @@
 (require 'eaf-mail)
 (require 'eaf-browser)
 (require 'eaf-terminal)
+(require 'eaf-camera)
+(require 'eaf-markdown-previewer)
 (require 'epc)
 (require 'epcs)
 (require 'json)
@@ -113,7 +115,9 @@
 (require 's)
 (require 'seq)
 (require 'subr-x)
+(require 'eaf-jupyter)
 (require 'eaf-elfeed)
+(require 'eaf-music-player)
 (require 'eaf-netease-cloud-music)
 
 
@@ -344,19 +348,20 @@ been initialized."
   ""
   :type 'string)
 
+(defcustom eaf-emacs-theme-mode ""
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-background-color ""
+  ""
+  :type 'string)
+
+(defcustom eaf-emacs-theme-foreground-color ""
+  ""
+  :type 'string)
+
 (defcustom eaf-var-list
-  '((eaf-camera-save-path . "~/Downloads")
-    (eaf-markdown-dark-mode . "follow")
-    (eaf-mindmap-dark-mode . "follow")
-    (eaf-mindmap-save-path . "~/Documents")
-    (eaf-mindmap-edit-mode . nil)
-    (eaf-jupyter-font-size . 13)
-    (eaf-jupyter-font-family . "")
-    (eaf-jupyter-dark-mode . "follow")
-    (eaf-music-play-order . "list")
-    (eaf-emacs-theme-mode . "")
-    (eaf-emacs-theme-background-color . "")
-    (eaf-emacs-theme-foreground-color . "")
+  '(
     )
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.

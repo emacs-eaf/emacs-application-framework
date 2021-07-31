@@ -49,8 +49,8 @@ class AppBuffer(Buffer):
         self.buffer_widget.camera.start()
 
     def take_photo(self):
-        if os.path.exists(os.path.expanduser(self.emacs_var_dict["eaf-camera-save-path"])):
-            location = self.emacs_var_dict["eaf-camera-save-path"]
+        if os.path.exists(os.path.expanduser(get_emacs_var("eaf-camera-save-path"))):
+            location = get_emacs_var("eaf-camera-save-path")
         else:
             location = "~/Downloads"
         result = self.buffer_widget.take_photo(location)

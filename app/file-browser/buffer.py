@@ -36,11 +36,11 @@ class AppBuffer(Buffer):
     def __init__(self, buffer_id, url, config_dir, argument, emacs_var_dict, module_path):
         Buffer.__init__(self, buffer_id, url, argument, emacs_var_dict, module_path, False)
 
-        self.background_color = QColor(emacs_var_dict["eaf-emacs-theme-background-color"])
+        self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
 
         self.add_widget(FileUploaderWidget(url,
-                                           emacs_var_dict["eaf-emacs-theme-background-color"],
-                                           emacs_var_dict["eaf-emacs-theme-foreground-color"]))
+                                           get_emacs_var("eaf-emacs-theme-background-color"),
+                                           get_emacs_var("eaf-emacs-theme-foreground-color")))
 
     def destroy_buffer(self):
         os.kill(self.buffer_widget.background_process.pid, signal.SIGKILL)
