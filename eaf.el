@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Fri Jul 23 11:54:00 2021 (-0400)
+;; Last-Updated: Sat Jul 31 00:24:54 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -74,14 +74,16 @@
 ;;; Code:
 (require 'cl-lib)
 
-(defun add-subdirs-to-load-path (dir)
-  "Recursive add directory DIR to `load-path'."
-  (mapcar
-   (lambda (path)
-     (add-to-list 'load-path path))
-   (delete-dups (mapcar 'file-name-directory (directory-files-recursively dir "\\.el$")))))
+(defun eaf-add-app-dirs-to-load-path ()
+  "Add EAF app directories where .el exists to `load-path'."
+  (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
+    (mapcar
+     (lambda (path) (add-to-list 'load-path path))
+     (cl-remove-if-not
+      (lambda (d) (and (file-directory-p d) (directory-files d t "\\.el$")))
+      (directory-files app-dir t directory-files-no-dot-files-regexp)))))
 
-(add-subdirs-to-load-path (expand-file-name "app" (file-name-directory (locate-library "eaf"))))
+(eaf-add-app-dirs-to-load-path)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
@@ -126,6 +128,7 @@
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
+    (define-key map (kbd "C-o") #'eaf-duplicate-current-buffer)
     (define-key map [remap describe-bindings] #'eaf-describe-bindings)
     (define-key map (kbd "C-c b") #'eaf-open-bookmark)
     (define-key map (kbd "C-c i") #'eaf-import-chrome-bookmarks)
@@ -273,7 +276,14 @@ been initialized."
                                           (string-suffix-p ")" arg)) ;; list
                                      (split-string (substring arg 1 -1) " "))
                                     (t arg))))
-                          (cdr args)))))))))
+                          (cdr args)))))
+
+               (epc:define-method
+                mngr 'read-emacs-var
+                (lambda (&rest args)
+                  (let ((var-name (car args)))
+                    (symbol-value (intern var-name)))))
+               ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
       (error "[EAF] eaf-server failed to start")))
@@ -349,14 +359,6 @@ been initialized."
     (eaf-browser-translate-language . "") ; EAF browser will use current system locale if this option is empty
     ;; DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes
     (eaf-browser-unknown-url-scheme-policy . "AllowUnknownUrlSchemesFromUserInteraction")
-    (eaf-pdf-dark-mode . "follow")
-    (eaf-pdf-default-zoom . 1.0)
-    (eaf-pdf-dark-exclude-image . t)
-    (eaf-pdf-scroll-ratio . 0.05)
-    (eaf-pdf-enable-trim-white-margin . nil)
-    (eaf-terminal-dark-mode . "follow")
-    (eaf-terminal-font-size . 13)
-    (eaf-terminal-font-family . "")
     (eaf-markdown-dark-mode . "follow")
     (eaf-mindmap-dark-mode . "follow")
     (eaf-mindmap-save-path . "~/Documents")
@@ -1992,6 +1994,17 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (push `(,url ,app-name ,args) eaf--active-buffers))
     (eaf-start-process)
     (message (concat "[EAF/" app-name "] " "Opening %s") url)))
+
+(defun eaf-duplicate-current-buffer ()
+  "Duplicate the current EAF buffer in a new buffer.
+
+So multiple EAF buffers visiting the same file do not sync with each other."
+  (interactive)
+  (when (derived-mode-p 'eaf-mode)
+    (delete-other-windows)
+    (split-window-horizontally)
+    (other-window +1)
+    (eaf-open eaf--buffer-url eaf--buffer-app-name eaf--buffer-args t)))
 
 (defun eaf--display-app-buffer (app-name buffer)
   "Display specified APP-NAME's app buffer in BUFFER."

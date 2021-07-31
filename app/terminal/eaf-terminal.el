@@ -84,6 +84,18 @@
 
 ;;; Code:
 
+(defcustom eaf-terminal-dark-mode "follow"
+  ""
+  :type 'boolean)
+
+(defcustom eaf-terminal-font-size 13
+  ""
+  :type 'integer)
+
+(defcustom eaf-terminal-font-family ""
+  ""
+  :type 'string)
+
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."
   (interactive)
