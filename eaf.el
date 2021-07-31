@@ -352,18 +352,6 @@ been initialized."
   ""
   :type 'string)
 
-(defcustom eaf-emacs-theme-mode ""
-  ""
-  :type 'string)
-
-(defcustom eaf-emacs-theme-background-color ""
-  ""
-  :type 'string)
-
-(defcustom eaf-emacs-theme-foreground-color ""
-  ""
-  :type 'string)
-
 (defcustom eaf-markdown-extension-list
   '("md")
   "The extension list of markdown previewer application."
@@ -1600,11 +1588,17 @@ the file at current cursor position in dired."
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
 
-(setq eaf-emacs-theme-mode (eaf-get-theme-mode))
+(defcustom eaf-emacs-theme-mode (eaf-get-theme-mode)
+  ""
+  :type 'string)
 
-(setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
+(defcustom eaf-emacs-theme-background-color (eaf-get-theme-background-color)
+  ""
+  :type 'string)
 
-(setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color))
+(defcustom eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)
+  ""
+  :type 'string)
 
 (advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
