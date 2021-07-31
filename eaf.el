@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jul 31 00:24:54 2021 (-0400)
+;; Last-Updated: Sat Jul 31 11:35:34 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -1131,7 +1131,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
-(defun eaf--set-emacs-var (name value in-eaf-var-list)
+(defun eaf--set-emacs-var (name value)
   "Set Lisp variable NAME with VALUE on the Emacs side."
   (set (intern name) value))
 

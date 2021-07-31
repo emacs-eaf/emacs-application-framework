@@ -252,11 +252,11 @@ class AppBuffer(BrowserBuffer):
     def toggle_adblocker(self):
         ''' Change adblocker status.'''
         if get_emacs_var("eaf-browser-enable-adblocker"):
-            set_emacs_var("eaf-browser-enable-adblocker", False, True)
+            set_emacs_var("eaf-browser-enable-adblocker", False)
             self.buffer_widget.remove_css('adblocker', True)
             message_to_emacs("Successfully disabled adblocker!")
         elif not get_emacs_var("eaf-browser-enable-adblocker"):
-            set_emacs_var("eaf-browser-enable-adblocker", True, True)
+            set_emacs_var("eaf-browser-enable-adblocker", True)
             self.load_adblocker()
             message_to_emacs("Successfully enabled adblocker!")
 
@@ -318,13 +318,13 @@ class AppBuffer(BrowserBuffer):
     def toggle_password_autofill(self):
         ''' Toggle Autofill status for password data'''
         if not get_emacs_var("eaf-browser-enable-autofill"):
-            set_emacs_var("eaf-browser-enable-autofill", True, True)
+            set_emacs_var("eaf-browser-enable-autofill", True)
             self.pw_autofill_id = self.pw_autofill_gen_id(0)
             message_to_emacs("Successfully enabled autofill!")
         else:
             self.pw_autofill_id = self.pw_autofill_gen_id(self.pw_autofill_id)
             if self.pw_autofill_id == 0:
-                set_emacs_var("eaf-browser-enable-autofill", False, True)
+                set_emacs_var("eaf-browser-enable-autofill", False)
                 message_to_emacs("Successfully disabled password autofill!")
             else:
                 message_to_emacs("Successfully changed password autofill id!")
