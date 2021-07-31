@@ -22,15 +22,15 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import QUrl, QTimer
 from core.webengine import BrowserBuffer
-from core.utils import interactive
+from core.utils import interactive, get_emacs_var
 from functools import cmp_to_key
 import os
 import json
 import psutil
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")

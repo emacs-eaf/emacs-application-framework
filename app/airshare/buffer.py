@@ -28,7 +28,7 @@ from core.utils import get_emacs_var
 import qrcode
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+    def __init__(self, buffer_id, url, arguments, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         self.add_widget(AirShareWidget(url, QColor(get_emacs_var("eaf-buffer-background-color"))))
@@ -91,15 +91,3 @@ class AirShareWidget(QWidget):
         layout.addStretch()
 
         self.qrcode_label.setPixmap(qrcode.make(url, image_factory=Image).pixmap())
-
-if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
-    import sys
-    import signal
-    app = QApplication(sys.argv)
-
-    test = AirShareWidget("/home/andy/rms/1.jpg", QColor(0, 0, 0, 255))
-    test.show()
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    sys.exit(app.exec_())

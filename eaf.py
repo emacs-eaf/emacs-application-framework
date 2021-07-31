@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_var
+from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_var, get_emacs_config_dir
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -45,18 +45,16 @@ if platform.system() == "Windows":
 
 class EAF(object):
     def __init__(self, args):
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string
+        global emacs_width, emacs_height, proxy_string
 
         # Parse init arguments.
-        (emacs_width, emacs_height, config_dir, emacs_server_port) = args
+        (emacs_width, emacs_height, emacs_server_port) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
-        eaf_config_dir = os.path.join(os.path.expanduser(config_dir), '')
 
         # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
-        self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
@@ -64,6 +62,9 @@ class EAF(object):
         proxy_host = get_emacs_var("eaf-proxy-host")
         proxy_port = get_emacs_var("eaf-proxy-port")
         proxy_type = get_emacs_var("eaf-proxy-type")
+
+        eaf_config_dir = get_emacs_config_dir()
+        self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
@@ -205,11 +206,11 @@ class EAF(object):
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
         ''' Create buffer.'''
-        global emacs_width, emacs_height, eaf_config_dir, proxy_string
+        global emacs_width, emacs_height, proxy_string
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, eaf_config_dir, arguments, module_path)
+        app_buffer = module.AppBuffer(buffer_id, url, arguments, module_path)
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer
@@ -513,7 +514,6 @@ if __name__ == "__main__":
     proxy_string = ""
 
     emacs_width = emacs_height = 0
-    eaf_config_dir = ""
 
     hardware_acceleration_args = []
     if platform.system() != "Windows":

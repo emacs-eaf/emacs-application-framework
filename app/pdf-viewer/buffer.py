@@ -26,7 +26,7 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QToolTip
 from core.buffer import Buffer
-from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit, get_emacs_var
+from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit, get_emacs_var, get_emacs_var, get_emacs_config_dir
 import fitz
 import time
 import random
@@ -37,11 +37,11 @@ import json
 import platform
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+    def __init__(self, buffer_id, url, arguments, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
-        self.add_widget(PdfViewerWidget(url, config_dir, QColor(get_emacs_var("eaf-buffer-background-color")), buffer_id))
+        self.add_widget(PdfViewerWidget(url, QColor(get_emacs_var("eaf-buffer-background-color")), buffer_id))
         self.buffer_widget.translate_double_click_word.connect(translate_text)
 
         self.build_all_methods(self.buffer_widget)
@@ -545,11 +545,11 @@ class PdfViewerWidget(QWidget):
 
     translate_double_click_word = QtCore.pyqtSignal(str)
 
-    def __init__(self, url, config_dir, background_color, buffer_id):
+    def __init__(self, url, background_color, buffer_id):
         super(PdfViewerWidget, self).__init__()
 
         self.url = url
-        self.config_dir = config_dir
+        self.config_dir = get_emacs_config_dir()
         self.background_color = background_color
         self.buffer_id = buffer_id
         self.installEventFilter(self)

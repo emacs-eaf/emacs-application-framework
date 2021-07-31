@@ -23,7 +23,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
-from core.utils import get_local_ip, get_free_port
+from core.utils import get_local_ip, get_free_port, get_emacs_var
 import subprocess
 import os
 import qrcode
@@ -33,7 +33,7 @@ import tempfile
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, argument, module_path):
+    def __init__(self, buffer_id, url, argument, module_path):
         Buffer.__init__(self, buffer_id, url, argument, module_path, False)
 
         self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))

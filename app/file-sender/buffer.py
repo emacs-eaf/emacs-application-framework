@@ -35,7 +35,7 @@ import socket
 from urllib.parse import quote
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+    def __init__(self, buffer_id, url, arguments, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
         self.add_widget(FileTransferWidget(url, QColor(get_emacs_var("eaf-buffer-background-color"))))

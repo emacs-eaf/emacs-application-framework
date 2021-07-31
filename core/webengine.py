@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -42,18 +42,18 @@ class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
 
-    def __init__(self, buffer_id, config_dir):
+    def __init__(self, buffer_id):
         super(QWebEngineView, self).__init__()
 
         self.installEventFilter(self)
         self.buffer_id = buffer_id
-        self.config_dir = config_dir
+        self.config_dir = get_emacs_config_dir()
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
 
         self.cookie_store = self.page().profile().cookieStore()
-        self.cookie_storage = BrowserCookieStorage(config_dir)
+        self.cookie_storage = BrowserCookieStorage(self.config_dir)
         self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
 
         self.selectionChanged.connect(self.select_text_change)
@@ -607,15 +607,15 @@ class BrowserBuffer(Buffer):
     close_page = QtCore.pyqtSignal(str)
     open_devtools_tab = QtCore.pyqtSignal(object)
 
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path, fit_to_view):
+    def __init__(self, buffer_id, url, arguments, module_path, fit_to_view):
         Buffer.__init__(self, buffer_id, url, arguments, module_path, fit_to_view)
 
-        self.add_widget(BrowserView(buffer_id, config_dir))
+        self.add_widget(BrowserView(buffer_id))
 
-        self.config_dir = config_dir
+        self.config_dir = get_emacs_config_dir()
         self.page_closed = False
 
-        self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(config_dir), "browser", "zoom_data.db"))
+        self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(self.config_dir), "browser", "zoom_data.db"))
 
         self.pc_user_agent = get_emacs_var("eaf-browser-pc-user-agent")
         self.phone_user_agent = get_emacs_var("eaf-browser-phone-user-agent")

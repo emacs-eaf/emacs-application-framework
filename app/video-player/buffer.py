@@ -28,7 +28,7 @@ from core.buffer import Buffer
 from core.utils import interactive
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
+    def __init__(self, buffer_id, url, arguments, module_path):
         Buffer.__init__(self, buffer_id, url, arguments, module_path, True)
 
         self.background_color = QColor(0, 0, 0)

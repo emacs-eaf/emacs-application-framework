@@ -23,7 +23,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.webengine import BrowserBuffer
-from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab, get_emacs_var
+from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab, get_emacs_var, get_emacs_config_dir
 from urllib.parse import urlparse
 import urllib
 import os
@@ -32,10 +32,10 @@ import sqlite3
 import subprocess
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, config_dir, arguments, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, config_dir, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments, module_path):
+        BrowserBuffer.__init__(self, buffer_id, url, arguments, module_path, False)
 
-        self.config_dir = config_dir
+        self.config_dir = get_emacs_config_dir()
 
         # When arguments is "temp_html_file", browser will load content of html file, then delete temp file.
         # Usually use for render html mail.
@@ -67,7 +67,7 @@ class AppBuffer(BrowserBuffer):
                     else:
                         self.history_list.append(HistoryPage(his_line.group(1), his_line.group(2), his_line.group(3)))
 
-        self.autofill = PasswordDb(os.path.join(os.path.dirname(config_dir), "browser", "password.db"))
+        self.autofill = PasswordDb(os.path.join(os.path.dirname(self.config_dir), "browser", "password.db"))
         self.pw_autofill_id = 0
         self.pw_autofill_raw = self.buffer_widget.read_js_content("pw_autofill.js")
 

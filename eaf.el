@@ -123,6 +123,7 @@
 (require 'eaf-js-video-player)
 (require 'eaf-image-viewer)
 (require 'eaf-system-monitor)
+(require 'eaf-file-manager)
 
 (defgroup eaf nil
   "Emacs Application Framework."
@@ -615,7 +616,6 @@ A hashtable, key is url and value is title.")
   (let* ((eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
-                    (list eaf-config-location)
                     (list (number-to-string eaf-server-port))
                     ))
          (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
@@ -1316,9 +1316,9 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open EAF file manager."
   (interactive)
   (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face diredp-dir-heading) :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face diredp-dir-name) :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face diredp-symlink) :foreground)) args)
+    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face) :foreground)) args)
+    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face) :foreground)) args)
+    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face) :foreground)) args)
     (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
