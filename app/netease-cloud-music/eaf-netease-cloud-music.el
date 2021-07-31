@@ -24,6 +24,38 @@
 
 ;;; Code:
 
+(defcustom eaf-netease-cloud-music-repeat-mode ""
+  ""
+  :type 'string)
+
+(defcustom eaf-netease-cloud-music-playlist-id 0
+  ""
+  :type 'integer)
+
+(defcustom eaf-netease-cloud-music-play-status ""
+  ""
+  :type 'string)
+
+(defcustom eaf-netease-cloud-music-local-playlist+list ()
+  ""
+  :type 'cons)
+
+(defcustom eaf-netease-cloud-music-user-playlists+list ()
+  ""
+  :type 'cons)
+
+(defcustom eaf-netease-cloud-music-playlists-songs+list ()
+  ""
+  :type 'cons)
+
+(defcustom eaf-netease-cloud-music-current-song+list ("" "")
+  ""
+  :type 'cons)
+
+(defcustom eaf-netease-cloud-music-user+list ()
+  ""
+  :type 'cons)
+
 (defun eaf--netease-cloud-music-change-playlist (pid)
   "Change the current playlist to PID."
   (when (featurep 'netease-cloud-music)
@@ -37,10 +69,10 @@
              (when netease-cloud-music-playlist-refresh-timer
                (cancel-timer netease-cloud-music-playlist-refresh-timer)
                (setq netease-cloud-music-playlist-refresh-timer nil))
-             (eaf-setq eaf-netease-cloud-music-local-playlist+list netease-cloud-music-playlist)
-             (eaf-setq eaf-netease-cloud-music-playlist-id 0)
+             (setq eaf-netease-cloud-music-local-playlist+list netease-cloud-music-playlist)
+             (setq eaf-netease-cloud-music-playlist-id 0)
              (setq playlist netease-cloud-music-playlist))
-            
+
             ((and netease-cloud-music-playlists
                   (netease-cloud-music-alist-cdr
                    pid netease-cloud-music-playlists))
@@ -49,13 +81,13 @@
                    netease-cloud-music-playlists-songs
                    (netease-cloud-music-get-playlist-songs
                     netease-cloud-music-playlist-id))
-             (eaf-setq eaf-netease-cloud-music-playlist-id
+             (setq eaf-netease-cloud-music-playlist-id
                        (setq pid
                              (1+
                               (cl-position
                                (netease-cloud-music-alist-cdr pid netease-cloud-music-playlists)
                                netease-cloud-music-playlists))))
-             (eaf-setq eaf-netease-cloud-music-playlists-songs+list
+             (setq eaf-netease-cloud-music-playlists-songs+list
                        netease-cloud-music-playlists-songs)
              (setq playlist netease-cloud-music-playlists-songs))
             (t (na-error "The pid cannot be found!")))
@@ -95,7 +127,7 @@
                      (setq netease-cloud-music-playlists
                            (netease-cloud-music-get-user-playlist
                             netease-cloud-music-user-id))
-                     (eaf-setq eaf-netease-cloud-music-user-playlists+list
+                     (setq eaf-netease-cloud-music-user-playlists+list
                                netease-cloud-music-playlists)
                      (with-current-buffer "eaf-netease-cloud-music"
                        (eaf-call-sync "call_function_with_args" eaf--buffer-id

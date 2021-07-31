@@ -357,14 +357,6 @@ been initialized."
     (eaf-emacs-theme-mode . "")
     (eaf-emacs-theme-background-color . "")
     (eaf-emacs-theme-foreground-color . "")
-    (eaf-netease-cloud-music-local-playlist+list . ())
-    (eaf-netease-cloud-music-repeat-mode . "")
-    (eaf-netease-cloud-music-user-playlists+list . ())
-    (eaf-netease-cloud-music-playlists-songs+list . ())
-    (eaf-netease-cloud-music-playlist-id . "0")
-    (eaf-netease-cloud-music-play-status . "")
-    (eaf-netease-cloud-music-current-song+list . ("" ""))
-    (eaf-netease-cloud-music-user+list . ())
     )
   ;; TODO: The data type problem
   "The alist storing user-defined variables that's shared with EAF Python side.
