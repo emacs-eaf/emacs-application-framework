@@ -1300,11 +1300,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
-(defun eaf-open-music-player (music-file)
-  "Open EAF music player."
-  (interactive "fOpen music: ")
-  (eaf-open "eaf-music-player" "music-player" music-file))
-
 (defun eaf-open-netease-cloud-music ()
   "Open EAF netease cloud music."
   (interactive)
