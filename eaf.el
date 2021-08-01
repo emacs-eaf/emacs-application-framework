@@ -1458,27 +1458,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   "Get the MD5 value of a specified FILE."
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
 
-(defun eaf-open-office (file)
-  "View Microsoft Office FILE as READ-ONLY PDF."
-  (interactive "f[EAF/office] Open Office file as PDF: ")
-  (if (executable-find "libreoffice")
-      (let* ((file-md5 (eaf-get-file-md5 file))
-             (file-name-base (file-name-base file))
-             (convert-file (format "/tmp/%s.pdf" file-name-base))
-             (pdf-file (format "/tmp/%s.pdf" file-md5)))
-        (if (file-exists-p pdf-file)
-            (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf"))
-          (message "Converting %s to PDF, EAF will start shortly..." file)
-          (make-process
-           :name ""
-           :buffer " *eaf-open-office*"
-           :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
-           :sentinel (lambda (_ event)
-                       (when (string= (substring event 0 -1) "finished")
-                         (rename-file convert-file pdf-file)
-                         (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf")))))))
-    (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
-
 (defun eaf--enter-fullscreen-request ()
   "Entering EAF browser fullscreen use Emacs frame's size."
   (setq-local eaf-fullscreen-p t)
