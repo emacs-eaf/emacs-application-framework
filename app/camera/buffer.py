@@ -33,8 +33,8 @@ import time
 import os
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, module_path, True)
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, True)
 
         self.background_color = QColor(0, 0, 0)
 

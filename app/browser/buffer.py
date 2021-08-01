@@ -32,8 +32,8 @@ import sqlite3
 import subprocess
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments):
+        BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
         self.config_dir = get_emacs_config_dir()
 

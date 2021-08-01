@@ -27,8 +27,8 @@ from pathlib import Path
 import os
 
 class AppBuffer(BrowserBuffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments):
+        BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
         self.index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.url = url

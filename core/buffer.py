@@ -104,13 +104,12 @@ class Buffer(QGraphicsScene):
     enter_fullscreen_request = QtCore.pyqtSignal()
     exit_fullscreen_request = QtCore.pyqtSignal()
 
-    def __init__(self, buffer_id, url, arguments, module_path, fit_to_view):
+    def __init__(self, buffer_id, url, arguments, fit_to_view):
         super(QGraphicsScene, self).__init__()
 
         self.buffer_id = buffer_id
         self.url = url
         self.arguments = arguments
-        self.module_path = module_path
         self.fit_to_view = fit_to_view
 
         self.title = ""

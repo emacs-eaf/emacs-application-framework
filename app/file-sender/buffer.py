@@ -35,8 +35,8 @@ import socket
 from urllib.parse import quote
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, False)
 
         self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
 

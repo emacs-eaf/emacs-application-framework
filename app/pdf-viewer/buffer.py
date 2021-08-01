@@ -37,8 +37,8 @@ import json
 import platform
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, False)
 
         self.delete_temp_file = arguments == "temp_pdf_file"
         self.add_widget(PdfViewerWidget(url, QColor(get_emacs_var("eaf-buffer-background-color")), buffer_id))

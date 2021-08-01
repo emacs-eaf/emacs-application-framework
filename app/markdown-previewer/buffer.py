@@ -35,8 +35,8 @@ import tempfile
 
 class AppBuffer(BrowserBuffer):
 
-    def __init__(self, buffer_id, url, arguments, module_path):
-        BrowserBuffer.__init__(self, buffer_id, url, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments):
+        BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
         self.url = url
         self.preview_file = tempfile.mkstemp(prefix='eaf-', suffix='.html', text=True)[1]

@@ -182,7 +182,10 @@ class EAF(object):
 
         # Create application buffer.
         module = importlib.import_module(module_path)
-        app_buffer = module.AppBuffer(buffer_id, url, arguments, module_path)
+        app_buffer = module.AppBuffer(buffer_id, url, arguments)
+
+        # Add module_path.
+        app_buffer.module_path = module_path
 
         # Add buffer to buffer dict.
         self.buffer_dict[buffer_id] = app_buffer

@@ -24,8 +24,8 @@ from PyQt5.QtWidgets import QPushButton
 from core.buffer import Buffer
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, module_path, True)
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, True)
 
         self.add_widget(QPushButton("Hello, EAF hacker, it's working!!!"))
         self.buffer_widget.setStyleSheet("font-size: 100px")

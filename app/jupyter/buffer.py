@@ -30,8 +30,8 @@ from core.utils import interactive, get_emacs_var
 from core.kill_ring import EafKillRing
 
 class AppBuffer(Buffer):
-    def __init__(self, buffer_id, url, arguments, module_path):
-        Buffer.__init__(self, buffer_id, url, arguments, module_path, False)
+    def __init__(self, buffer_id, url, arguments):
+        Buffer.__init__(self, buffer_id, url, arguments, False)
 
         arguments_dict = json.loads(arguments)
         self.kernel = arguments_dict["kernel"]
