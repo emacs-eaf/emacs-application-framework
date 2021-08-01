@@ -1430,21 +1430,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-file-sender-qrcode (file)
-  "Open EAF File Sender application.
-
-Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
-
-Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "F[EAF/file-sender] Select File: ")
-  (eaf-open file "file-sender"))
-
-(defun eaf-file-sender-qrcode-in-dired ()
-  "Open EAF File Transfer application using `eaf-file-sender-qrcode' on
-the file at current cursor position in dired."
-  (interactive)
-  (eaf-file-sender-qrcode (dired-get-filename)))
-
 (defun eaf-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
