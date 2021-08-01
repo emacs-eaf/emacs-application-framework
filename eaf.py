@@ -147,11 +147,6 @@ class EAF(object):
         return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
     @PostGui()
-    def new_buffer(self, buffer_id, url, app_name, arguments):
-        ''' Create new buffer. '''
-        self.create_app(buffer_id, str(url), "app.{0}.buffer".format(str(app_name)), str(arguments))
-
-    @PostGui()
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
         ''' Update buffer with url '''
         for buffer in list(self.buffer_dict.values()):
@@ -193,10 +188,14 @@ class EAF(object):
         # Return new QWebEngineView for create new browser window.
         return app_buffer.buffer_widget
 
-    def create_app(self, buffer_id, url, module_path, arguments):
-        ''' Create app using create_buffer.'''
+    @PostGui()
+    def new_buffer(self, buffer_id, url, app_name, arguments):
+        ''' Create new buffer. '''
         try:
-            self.create_buffer(buffer_id, url, module_path, arguments)
+            self.create_buffer(buffer_id,
+                               str(url),
+                               "app.{0}.buffer".format(str(app_name)),
+                               str(arguments))
 
             return ""
         except ImportError:
