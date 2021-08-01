@@ -1300,18 +1300,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
-;;;###autoload
-(defun eaf-open-terminal ()
-  "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
-
-The initial directory is `default-directory'.  However, it opens `$HOME'
- when `default-directory' is part of a remote process.
-
-If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
-To override and open a new terminal regardless, call interactively with prefix arg."
-  (interactive)
-  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
-
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
   (if (or (file-remote-p default-directory)

@@ -196,6 +196,18 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
       "powershell.exe"
     (getenv "SHELL")))
 
+;;;###autoload
+(defun eaf-open-terminal ()
+  "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
+
+The initial directory is `default-directory'.  However, it opens `$HOME'
+ when `default-directory' is part of a remote process.
+
+If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
+To override and open a new terminal regardless, call interactively with prefix arg."
+  (interactive)
+  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
+
 (provide 'eaf-terminal)
 
 ;;; eaf-terminal.el ends here
