@@ -1,15 +1,15 @@
-;;; eaf-markdown-previewer.el --- Markdown previewer
+;;; eaf-vue-demo.el --- Vue demo
 
-;; Filename: eaf-markdown-previewer.el
-;; Description: Markdown previewer
+;; Filename: eaf-vue-demo.el
+;; Description: Vue demo
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
-;; Created: 2021-07-31 17:15:43
+;; Created: 2021-08-01 10:30:42
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 17:15:43
+;; Last-Updated: 2021-08-01 10:30:42
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/eaf-markdown-previewer.el
+;; URL: http://www.emacswiki.org/emacs/download/eaf-vue-demo.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Markdown previewer
+;; Vue demo
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf-markdown-previewer.el to your load-path.
+;; Put eaf-vue-demo.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'eaf-markdown-previewer)
+;; (require 'eaf-vue-demo)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET eaf-markdown-previewer RET
+;;      M-x customize-group RET eaf-vue-demo RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2021/07/31
+;; 2021/08/01
 ;;      * First released.
 ;;
 
@@ -84,18 +84,12 @@
 
 ;;; Code:
 
-(defcustom eaf-markdown-dark-mode "follow"
-  ""
-  :type 'string)
+;;;###autoload
+(defun eaf-open-vue-demo ()
+  "Open EAF vue demo"
+  (interactive)
+  (eaf-open "eaf-vue-demo" "vue-demo"))
 
-(defun eaf--markdown-preview-display (buf)
-  "Given BUF, split window to show file and previewer."
-  (eaf-split-preview-windows
-   (buffer-local-value
-    'eaf--buffer-url buf))
-  (switch-to-buffer buf)
-  (other-window +1))
+(provide 'eaf-vue-demo)
 
-(provide 'eaf-markdown-previewer)
-
-;;; eaf-markdown-previewer.el ends here
+;;; eaf-vue-demo.el ends here

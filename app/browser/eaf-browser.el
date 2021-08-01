@@ -197,6 +197,10 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
   "Allowed options: DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes."
   :type 'string)
 
+(defcustom eaf-chrome-bookmark-file "~/.config/google-chrome/Default/Bookmarks"
+  "The default chrome bookmark file to import."
+  :type 'string)
+
 (defcustom eaf-browser-caret-mode-keybinding
   '(("j"   . "caret_next_line")
     ("k"   . "caret_previous_line")

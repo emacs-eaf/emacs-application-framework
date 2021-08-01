@@ -104,6 +104,23 @@
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
+(defun eaf-color-int-to-hex (int)
+  (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
+
+(defun eaf-color-name-to-hex (color)
+  (let ((components (x-color-values color)))
+    (concat "#"
+            (eaf-color-int-to-hex (nth 0 components))
+            (eaf-color-int-to-hex (nth 1 components))
+            (eaf-color-int-to-hex (nth 2 components)))))
+
+(defun eaf-get-face-attribute (candicates attribute)
+  "Get a face `ATTRIBUTE' from face `CANDICATES' which is specified."
+  (or (car (seq-filter (lambda (attr) (not (eq attr 'unspecified)))
+                       (mapcar (lambda (face) (face-attribute face attribute))
+                               candicates)))
+      'unspecified))
+
 (provide 'eaf-file-manager)
 
 ;;; eaf-file-manager.el ends here

@@ -352,5 +352,9 @@ This function works best if paired with a fuzzy search package."
                          (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf")))))))
     (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
+(defun eaf-get-file-md5 (file)
+  "Get the MD5 value of a specified FILE."
+  (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
+
 (provide 'eaf-pdf-viewer)
 ;;; eaf-pdf-viewer.el ends here

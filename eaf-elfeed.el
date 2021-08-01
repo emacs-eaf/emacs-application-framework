@@ -118,6 +118,17 @@ Default is `below', you can chang it with `right'."
           ))
     (message "Please install elfeed first.")))
 
+(defun eaf--select-window-by-direction (direction)
+  "Select the most on the side according to the direction."
+  (ignore-errors
+    (dotimes (_ 50)
+      (pcase direction
+        ("left" (windmove-left))
+        ("right" (windmove-right))
+        ("up" (windmove-up))
+        ("below" (windmove-down))
+        ))))
+
 (provide 'eaf-elfeed)
 
 ;;; eaf-elfeed.el ends here

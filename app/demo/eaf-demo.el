@@ -1,15 +1,15 @@
-;;; eaf-markdown-previewer.el --- Markdown previewer
+;;; eaf-demo.el --- Demo
 
-;; Filename: eaf-markdown-previewer.el
-;; Description: Markdown previewer
+;; Filename: eaf-demo.el
+;; Description: Demo
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
-;; Created: 2021-07-31 17:15:43
+;; Created: 2021-08-01 10:28:44
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 17:15:43
+;; Last-Updated: 2021-08-01 10:28:44
 ;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/eaf-markdown-previewer.el
+;; URL: http://www.emacswiki.org/emacs/download/eaf-demo.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
 ;;
@@ -39,19 +39,19 @@
 
 ;;; Commentary:
 ;;
-;; Markdown previewer
+;; Demo
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf-markdown-previewer.el to your load-path.
+;; Put eaf-demo.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'eaf-markdown-previewer)
+;; (require 'eaf-demo)
 ;;
 ;; No need more.
 
@@ -60,12 +60,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET eaf-markdown-previewer RET
+;;      M-x customize-group RET eaf-demo RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2021/07/31
+;; 2021/08/01
 ;;      * First released.
 ;;
 
@@ -84,18 +84,12 @@
 
 ;;; Code:
 
-(defcustom eaf-markdown-dark-mode "follow"
-  ""
-  :type 'string)
+;;;###autoload
+(defun eaf-open-demo ()
+  "Open EAF demo screen to verify that EAF is working properly."
+  (interactive)
+  (eaf-open "eaf-demo" "demo"))
 
-(defun eaf--markdown-preview-display (buf)
-  "Given BUF, split window to show file and previewer."
-  (eaf-split-preview-windows
-   (buffer-local-value
-    'eaf--buffer-url buf))
-  (switch-to-buffer buf)
-  (other-window +1))
+(provide 'eaf-demo)
 
-(provide 'eaf-markdown-previewer)
-
-;;; eaf-markdown-previewer.el ends here
+;;; eaf-demo.el ends here

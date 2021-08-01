@@ -87,6 +87,7 @@
 (require 'eaf-js-video-player)
 (require 'eaf-video-player)
 (require 'eaf-image-viewer)
+(require 'eaf-org-previewer)
 (autoload 'eaf-open-mindmap "eaf-mindmap" "Open Mindmap" t)
 (autoload 'eaf-open-mail-as-html "eaf-mail" "Open mail as HTML." t)
 (autoload 'eaf-open-browser "eaf-browser" "Open browser." t)
@@ -96,6 +97,8 @@
 (autoload 'eaf-open-netease-cloud-music "eaf-netease-cloud-music" "Open netease cloud music." t)
 (autoload 'eaf-open-system-monitor "eaf-system-monitor" "Open system monitor." t)
 (autoload 'eaf-open-file-manager "eaf-file-manager" "Open file manager." t)
+(autoload 'eaf-open-demo "eaf-demo" "Open demo." t)
+(autoload 'eaf-open-vue-demo "eaf-vue-demo" "Open vue demo." t)
 
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
@@ -344,10 +347,6 @@ been initialized."
 (defcustom eaf-config-location (expand-file-name (locate-user-emacs-file "eaf/"))
   "Directory where eaf will store configuration files."
   :type 'directory)
-
-(defcustom eaf-chrome-bookmark-file "~/.config/google-chrome/Default/Bookmarks"
-  "The default chrome bookmark file to import."
-  :type 'string)
 
 (defcustom eaf-marker-letters "ASDFHJKLWEOPCNM"
   ""
@@ -661,7 +660,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 
   ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
   (dolist (org-file-name eaf-org-file-list)
-    (eaf--delete-org-preview-file org-file-name))
+    (eaf--org-delete-preview-file org-file-name))
   (setq eaf-org-file-list nil)
   (setq eaf-org-killed-file-list nil)
   (setq-local eaf-fullscreen-p nil)
@@ -957,21 +956,6 @@ Including title-bar, menu-bar, offset depends on window system, and border."
                           view-infos)))))))
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
 
-(defun eaf--delete-org-preview-file (org-file)
-  "Delete the org-preview file when given ORG-FILE name."
-  (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
-    (when (file-exists-p org-html-file)
-      (delete-file org-html-file)
-      (message "[EAF] Cleaned org-preview file %s (%s)." org-html-file org-file))))
-
-(defun eaf--org-killed-buffer-clean ()
-  "Function cleaning the killed org buffer."
-  (dolist (org-killed-buffer eaf-org-killed-file-list)
-    (unless (get-file-buffer org-killed-buffer)
-      (setq eaf-org-file-list (remove org-killed-buffer eaf-org-file-list))
-      (eaf--delete-org-preview-file org-killed-buffer)))
-  (setq eaf-org-killed-file-list nil))
-
 (defun eaf--get-eaf-buffers ()
   "A function that return a list of EAF buffers."
   (cl-remove-if-not
@@ -1012,26 +996,6 @@ Including title-bar, menu-bar, offset depends on window system, and border."
                (setq browser-urls (concat eaf--buffer-url "\n" browser-urls)))))
          nil browser-restore-file-path)))
     (eaf-call-async "kill_emacs")))
-
-(defun eaf--org-preview-monitor-kill ()
-  "Function monitoring when org-preview application is killed."
-  ;; Because save org buffer will trigger `kill-buffer' action,
-  ;; but org buffer still live after do `kill-buffer' action.
-  ;; So I run a timer to check org buffer is live after `kill-buffer' action.
-  (when (member (buffer-file-name) eaf-org-file-list)
-    (unless (member (buffer-file-name) eaf-org-killed-file-list)
-      (push (buffer-file-name) eaf-org-killed-file-list))
-    (run-with-timer 1 nil (lambda () (eaf--org-killed-buffer-clean)))))
-
-
-(defun eaf--org-preview-monitor-buffer-save ()
-  "Save org-preview buffer."
-  (when (epc:live-p eaf-epc-process)
-    (ignore-errors
-      ;; eaf-org-file-list?
-      (org-html-export-to-html)
-      (eaf-call-async "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
-      (message "[EAF] Export %s to HTML." (buffer-file-name)))))
 
 (defun eaf-keyboard-quit ()
   "Wrap around `keyboard-quit' and signals a ‘quit’ condition to EAF applications."
@@ -1234,33 +1198,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (declare-function eaf-all-the-icons-update-icon "eaf-all-the-icons.el")
     (eaf-all-the-icons-update-icon)))
 
-(defun eaf--markdown-preview-display (buf)
-  "Given BUF, split window to show file and previewer."
-  (eaf-split-preview-windows
-   (buffer-local-value
-    'eaf--buffer-url buf))
-  (switch-to-buffer buf)
-  (other-window +1))
-
-(defun eaf--org-preview-display (buf)
-  "Given BUF, split window to show file and previewer."
-  (let ((url (buffer-local-value
-              'eaf--buffer-url buf)))
-    ;; Find file first, because `find-file' will trigger `kill-buffer' operation.
-    (save-excursion
-      (find-file url)
-      (org-html-export-to-html)
-      (add-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save nil t)
-      (add-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill nil t))
-    ;; Add file name to `eaf-org-file-list' after command `find-file'.
-    (unless (member url eaf-org-file-list)
-      (push url eaf-org-file-list))
-    ;; Split window to show file and previewer.
-    (eaf-split-preview-windows url)
-    ;; Switch to new buffer if buffer create successful.
-    (switch-to-buffer buf)
-    (other-window +1)))
-
 (defun eaf-goto-left-tab ()
   "Go to left tab when awesome-tab exists."
   (interactive)
@@ -1272,17 +1209,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   (interactive)
   (when (ignore-errors (require 'awesome-tab))
     (awesome-tab-forward-tab)))
-
-;;;###autoload
-(defun eaf-open-demo ()
-  "Open EAF demo screen to verify that EAF is working properly."
-  (interactive)
-  (eaf-open "eaf-demo" "demo"))
-
-(defun eaf-open-vue-demo ()
-  "Open EAF vue demo"
-  (interactive)
-  (eaf-open "eaf-vue-demo" "vue-demo"))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
@@ -1443,10 +1369,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (kill-buffer)
   (delete-window))
 
-(defun eaf-get-file-md5 (file)
-  "Get the MD5 value of a specified FILE."
-  (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
-
 (defun eaf--enter-fullscreen-request ()
   "Entering EAF browser fullscreen use Emacs frame's size."
   (setq-local eaf-fullscreen-p t)
@@ -1545,17 +1467,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
         (eq system-type 'berkeley-unix))
     (eaf--activate-emacs-linux-window buffer_id))))
 
-(defun eaf--select-window-by-direction (direction)
-  "Select the most on the side according to the direction."
-  (ignore-errors
-    (dotimes (_ 50)
-      (pcase direction
-        ("left" (windmove-left))
-        ("right" (windmove-right))
-        ("up" (windmove-up))
-        ("below" (windmove-down))
-        ))))
-
 (defun eaf--change-default-directory (directory)
   "Change default directory to DIRECTORY."
   (when (file-accessible-directory-p (or (file-name-directory directory) directory))
@@ -1630,23 +1541,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
       (dolist (element (eval (car (get var 'standard-value))))
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
       (insert "\n"))))
-
-(defun eaf-color-int-to-hex (int)
-  (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
-
-(defun eaf-color-name-to-hex (color)
-  (let ((components (x-color-values color)))
-    (concat "#"
-            (eaf-color-int-to-hex (nth 0 components))
-            (eaf-color-int-to-hex (nth 1 components))
-            (eaf-color-int-to-hex (nth 2 components)))))
-
-(defun eaf-get-face-attribute (candicates attribute)
-  "Get a face `ATTRIBUTE' from face `CANDICATES' which is specified."
-  (or (car (seq-filter (lambda (attr) (not (eq attr 'unspecified)))
-                       (mapcar (lambda (face) (face-attribute face attribute))
-                               candicates)))
-      'unspecified))
 
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
