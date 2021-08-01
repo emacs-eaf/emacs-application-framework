@@ -207,7 +207,7 @@ class BrowserView(QWebEngineView):
 
     def createWindow(self, window_type):
         ''' Create new browser window.'''
-        return self.create_new_browser_window_callback()
+        return self.create_new_window()
 
     def event(self, event):
         ''' Catch event.'''

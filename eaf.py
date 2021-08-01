@@ -161,33 +161,6 @@ class EAF(object):
         if buffer_id in self.buffer_dict:
             self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
 
-    def get_new_browser_window_buffer_id(self):
-        ''' Return new browser window's buffer ID. '''
-        import secrets
-
-        return "{0}-{1}-{2}-{3}-{4}-{5}-{6}".format(
-            secrets.token_hex(2),
-            secrets.token_hex(2),
-            secrets.token_hex(2),
-            secrets.token_hex(2),
-            secrets.token_hex(2),
-            secrets.token_hex(2),
-            secrets.token_hex(2))
-
-    def create_new_browser_window(self):
-        ''' Create new browser window.'''
-        # Generate buffer id same as eaf.el does.
-        buffer_id = self.get_new_browser_window_buffer_id()
-
-        # Create buffer for create new browser window.
-        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer", "")
-
-        # Create emacs buffer with buffer id.
-        eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
-
-        # Return new QWebEngineView for create new browser window.
-        return app_buffer.buffer_widget
-
     @PostGui()
     def new_buffer(self, buffer_id, url, app_name, arguments):
         ''' Create new buffer. '''
@@ -222,9 +195,9 @@ class EAF(object):
         if getattr(app_buffer, "open_devtools_tab", False) and getattr(app_buffer.open_devtools_tab, "connect", False):
             app_buffer.open_devtools_tab.connect(self.open_devtools_tab)
 
-        # Add create new window when create_new_browser_window_callback is call.
+        # Add create buffer interface for createWindow signal.
         if (app_buffer.__class__.__bases__[0].__name__ == "BrowserBuffer"):
-            app_buffer.buffer_widget.create_new_browser_window_callback = self.create_new_browser_window
+            app_buffer.create_buffer = self.create_buffer
 
         # Set proxy for browser.
         if module_path == "app.browser.buffer":

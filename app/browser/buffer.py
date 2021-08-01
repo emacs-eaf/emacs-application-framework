@@ -113,6 +113,8 @@ class AppBuffer(BrowserBuffer):
         # Otherwise page won't zoom if we call setUrl api in current page.
         self.buffer_widget.loadFinished.connect(lambda : self.buffer_widget.zoom_reset())
 
+        self.buffer_widget.create_new_window = self.create_new_window
+
     def drawForeground(self, painter, rect):
         # Draw progress bar.
         if self.progressbar_progress > 0 and self.progressbar_progress < 100:
@@ -461,6 +463,33 @@ class AppBuffer(BrowserBuffer):
 
         open_url_in_new_tab("https://translate.google.com/translate?hl=en&sl=auto&tl={}&u={}".format(language, url))
         message_to_emacs("Translating page...")
+
+    def get_new_window_buffer_id(self):
+        ''' Return new browser window's buffer ID. '''
+        import secrets
+
+        return "{0}-{1}-{2}-{3}-{4}-{5}-{6}".format(
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2))
+
+    def create_new_window(self):
+        ''' Create new browser window.'''
+        # Generate buffer id same as eaf.el does.
+        buffer_id = self.get_new_window_buffer_id()
+
+        # Create buffer for create new browser window.
+        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer", "")
+
+        # Create emacs buffer with buffer id.
+        eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])
+
+        # Return new QWebEngineView for create new browser window.
+        return app_buffer.buffer_widget
 
 class HistoryPage():
     def __init__(self, title, url, hit):
