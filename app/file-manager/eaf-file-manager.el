@@ -92,6 +92,18 @@
   "The keybinding of EAF File Manager."
   :type 'cons)
 
+;;;###autoload
+(defun eaf-open-file-manager ()
+  "Open EAF file manager."
+  (interactive)
+  (let* ((args (make-hash-table :test 'equal)))
+    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face) :foreground)) args)
+    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face) :foreground)) args)
+    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face) :foreground)) args)
+    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
+    (eaf-open "~" "file-manager" (json-encode-hash-table args))
+    ))
+
 (provide 'eaf-file-manager)
 
 ;;; eaf-file-manager.el ends here
