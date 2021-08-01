@@ -1266,22 +1266,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (switch-to-buffer buf)
     (other-window +1)))
 
-;;;###autoload
-(defun eaf-open-browser (url &optional args)
-  "Open EAF browser application given a URL and ARGS."
-  (interactive "M[EAF/browser] URL: ")
-  (eaf-open (eaf-wrap-url url) "browser" args))
-
-(defun eaf-open-url-at-point ()
-  "Open URL at current point by EAF browser."
-  (interactive)
-  (eaf-open-browser (browse-url-url-at-point)))
-
-(defun eaf-toggle-proxy()
-  "Toggle proxy to none or default proxy."
-  (interactive)
-  (eaf-call-sync "toggle_proxy"))
-
 (defun eaf-goto-left-tab ()
   "Go to left tab when awesome-tab exists."
   (interactive)
