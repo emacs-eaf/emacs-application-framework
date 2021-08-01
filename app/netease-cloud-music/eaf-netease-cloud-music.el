@@ -252,14 +252,14 @@ If Up is not non-nil, move the song up.Otherwise move it down."
   (interactive)
   (with-current-buffer "eaf-netease-cloud-music"
     (eaf-call-sync "call_function_with_args" eaf--buffer-id
-                   "set_index_style" t)
+                   "set_index_style" "true")
     (let ((index (1- (read-number "Enter the playlist's index: "))))
       (eaf--netease-cloud-music-change-playlist
        (if (= index 0)
            index
          (cdr (nth (1- index) netease-cloud-music-playlists)))))
     (eaf-call-sync "call_function_with_args" eaf--buffer-id
-                   "set_index_style" "False")))
+                   "set_index_style" "false")))
 
 (defun eaf--netease-cloud-music-add-to-playlist ()
   "Add the search songs or playlists to current playlist."
