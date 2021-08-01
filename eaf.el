@@ -1301,12 +1301,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     ))
 
 ;;;###autoload
-(defun eaf-open-camera ()
-  "Open EAF camera application."
-  (interactive)
-  (eaf-open "eaf-camera" "camera"))
-
-;;;###autoload
 (defun eaf-open-terminal ()
   "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
 
