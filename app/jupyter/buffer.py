@@ -62,7 +62,9 @@ class EafJupyterWidget(RichJupyterWidget):
     def __init__(self, kernel, *args, **kwargs):
         bg_color = get_emacs_var("eaf-emacs-theme-background-color")
         fg_color = get_emacs_var("eaf-emacs-theme-foreground-color")
-        dark_mode = get_emacs_var("eaf-jupyter-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"
+        dark_mode = (get_emacs_var("eaf-jupyter-dark-mode") == "force" or \
+                     get_emacs_var("eaf-jupyter-dark-mode") == True or \
+                     (get_emacs_var("eaf-jupyter-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark"))
         self._init_style(bg_color, fg_color, dark_mode)
 
         self.scrollbar_visibility = False

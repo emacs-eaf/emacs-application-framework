@@ -7,8 +7,8 @@
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Created: 2021-07-20 22:46:47
 ;; Version: 0.1
-;; Last-Updated: 2021-07-20 22:46:47
-;;           By: Andy Stewart
+;; Last-Updated: Sat Jul 31 11:29:58 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-terminal.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
@@ -86,7 +86,7 @@
 
 (defcustom eaf-terminal-dark-mode "follow"
   ""
-  :type 'boolean)
+  :type 'string)
 
 (defcustom eaf-terminal-font-size 13
   ""

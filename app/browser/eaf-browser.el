@@ -7,8 +7,8 @@
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
 ;; Created: 2021-07-20 22:30:28
 ;; Version: 0.1
-;; Last-Updated: 2021-07-20 22:30:28
-;;           By: Andy Stewart
+;; Last-Updated: Sat Jul 31 11:30:12 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; URL: http://www.emacswiki.org/emacs/download/eaf-browser.el
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
@@ -175,7 +175,7 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 
 (defcustom eaf-browser-dark-mode "follow"
   ""
-  :type 'boolean)
+  :type 'string)
 
 (defcustom eaf-browser-pc-user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"
   ""
