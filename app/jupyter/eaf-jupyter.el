@@ -122,6 +122,8 @@
   "The keybinding of EAF Jupyter."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("jupyter" . eaf-jupyter-keybinding))
+
 ;;;###autoload
 (defun eaf-open-jupyter ()
   "Open jupyter."

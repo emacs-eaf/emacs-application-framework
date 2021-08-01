@@ -152,6 +152,8 @@
   "The keybinding of EAF Mindmap."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("mindmap" . eaf-mindmap-keybinding))
+
 (defun eaf--export-org-json (org-json-content org-file-path)
   (let (org-parse-data)
     (with-temp-buffer

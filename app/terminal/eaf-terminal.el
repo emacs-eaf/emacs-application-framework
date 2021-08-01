@@ -140,6 +140,8 @@
   "The keybinding of EAF Terminal."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("terminal" . eaf-terminal-keybinding))
+
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."
   (interactive)

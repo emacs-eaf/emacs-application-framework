@@ -96,6 +96,8 @@
   "The keybinding of EAF System Monitor."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("system-monitor" . eaf-system-monitor-keybinding))
+
 ;;;###autoload
 (defun eaf-open-system-monitor ()
   "Open EAF system monitor."

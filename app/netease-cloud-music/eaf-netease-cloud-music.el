@@ -109,6 +109,8 @@
   "The keybinding of EAF Netease Cloud Music."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("netease-cloud-music" . eaf-netease-cloud-music-keybinding))
+
 (defun eaf--netease-cloud-music-change-playlist (pid)
   "Change the current playlist to PID."
   (when (featurep 'netease-cloud-music)

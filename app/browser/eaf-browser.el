@@ -337,6 +337,8 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
   "The keybinding of EAF Browser."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("browser" . eaf-browser-keybinding))
+
 (defcustom eaf-browser-key-alias
   '(("C-a" . "<home>")
     ("C-e" . "<end>"))

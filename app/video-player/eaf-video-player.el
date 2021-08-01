@@ -92,6 +92,8 @@
   "The keybinding of EAF Video Player."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("video-player" . eaf-video-player-keybinding))
+
 (provide 'eaf-video-player)
 
 ;;; eaf-video-player.el ends here

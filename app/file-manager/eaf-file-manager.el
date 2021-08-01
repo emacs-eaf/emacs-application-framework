@@ -92,6 +92,8 @@
   "The keybinding of EAF File Manager."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("file-manager" . eaf-file-manager-keybinding))
+
 ;;;###autoload
 (defun eaf-open-file-manager ()
   "Open EAF file manager."

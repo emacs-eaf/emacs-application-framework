@@ -164,6 +164,8 @@
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("pdf-viewer" . eaf-pdf-viewer-keybinding))
+
 (define-minor-mode eaf-pdf-outline-mode
   "EAF pdf outline mode."
   :keymap (let ((map (make-sparse-keymap)))

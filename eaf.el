@@ -90,6 +90,12 @@ In summary, the EAF's python applications can now access users' customized
 variables with the get_emacs_var module, eliminating the need to store
 them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
 
+(defvar eaf-app-binding-alist '()
+  "Mapping app names to keybinding variables.
+
+Any new app should add the its name and the corresponding
+keybinding variable to this list.")
+
 (defun eaf-add-app-dirs-to-load-path ()
   "Add EAF app directories where .el exists to `load-path'."
   (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
@@ -101,6 +107,7 @@ them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
 
 (eaf-add-app-dirs-to-load-path)
 
+(require 'eaf-browser)
 (require 'eaf-pdf-viewer)
 (require 'eaf-markdown-previewer)
 (require 'eaf-js-video-player)
@@ -109,7 +116,6 @@ them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
 (require 'eaf-org-previewer)
 (require 'eaf-mindmap)
 (require 'eaf-mail)
-(require 'eaf-browser)
 (require 'eaf-terminal)
 (require 'eaf-camera)
 (require 'eaf-jupyter)
@@ -435,28 +441,6 @@ If your window manager can't receive input event, you can try add `NAME' of comm
 Please send PR if it works.
 Please fill an issue if it still doesn't work."
   :type 'list)
-
-(defvar eaf-app-binding-alist
-  '(("browser" . eaf-browser-keybinding)
-    ("pdf-viewer" . eaf-pdf-viewer-keybinding)
-    ("video-player" . eaf-video-player-keybinding)
-    ("js-video-player" . eaf-js-video-player-keybinding)
-    ("image-viewer" . eaf-image-viewer-keybinding)
-    ("music-player" . eaf-music-player-keybinding)
-    ("file-manager" . eaf-file-manager-keybinding)
-    ("netease-cloud-music" . eaf-netease-cloud-music-keybinding)
-    ("system-monitor" . eaf-system-monitor-keybinding)
-    ("camera" . eaf-camera-keybinding)
-    ("terminal" . eaf-terminal-keybinding)
-    ("markdown-previewer" . eaf-browser-keybinding)
-    ("org-previewer" . eaf-browser-keybinding)
-    ("mindmap" . eaf-mindmap-keybinding)
-    ("jupyter" . eaf-jupyter-keybinding)
-    )
-  "Mapping app names to keybinding variables.
-
-Any new app should add the its name and the corresponding
-keybinding variable to this list.")
 
 (defvar eaf-app-display-function-alist
   '(("markdown-previewer" . eaf--markdown-preview-display)

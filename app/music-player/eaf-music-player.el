@@ -108,6 +108,8 @@
   "The keybinding of EAF Music Player."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("music-player" . eaf-music-player-keybinding))
+
 ;;;###autoload
 (defun eaf-open-music-player (music-file)
   "Open EAF music player."

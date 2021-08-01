@@ -110,6 +110,8 @@
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("image-viewer" . eaf-image-viewer-keybinding))
+
 (provide 'eaf-image-viewer)
 
 ;;; eaf-image-viewer.el ends here

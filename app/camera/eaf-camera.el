@@ -93,6 +93,8 @@
   "The keybinding of EAF Camera."
   :type 'cons)
 
+(add-to-list 'eaf-app-binding-alist '("camera" . eaf-camera-keybinding))
+
 ;;;###autoload
 (defun eaf-open-camera ()
   "Open EAF camera application."
