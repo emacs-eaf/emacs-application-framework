@@ -82,21 +82,6 @@
 (require 'subr-x)
 (require 'bookmark)
 
-(require 'eaf-pdf-viewer)
-(require 'eaf-markdown-previewer)
-(require 'eaf-js-video-player)
-(require 'eaf-video-player)
-(require 'eaf-image-viewer)
-(autoload 'eaf-open-mindmap "eaf-mindmap" "Open Mindmap" t)
-(autoload 'eaf-open-mail-as-html "eaf-mail" "Open mail as HTML." t)
-(autoload 'eaf-open-browser "eaf-browser" "Open browser." t)
-(autoload 'eaf-open-terminal "eaf-terminal" "Open terminal." t)
-(autoload 'eaf-open-camera "eaf-camera" "Open camera." t)
-(autoload 'eaf-open-jupyter "eaf-jupyter" "Open jupyter." t)
-(autoload 'eaf-open-netease-cloud-music "eaf-netease-cloud-music" "Open netease cloud music." t)
-(autoload 'eaf-open-system-monitor "eaf-system-monitor" "Open system monitor." t)
-(autoload 'eaf-open-file-manager "eaf-file-manager" "Open file manager." t)
-
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
 for more information.
@@ -115,6 +100,21 @@ them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
       (directory-files app-dir t directory-files-no-dot-files-regexp)))))
 
 (eaf-add-app-dirs-to-load-path)
+
+(require 'eaf-pdf-viewer)
+(require 'eaf-markdown-previewer)
+(require 'eaf-js-video-player)
+(require 'eaf-video-player)
+(require 'eaf-image-viewer)
+(autoload 'eaf-open-mindmap "eaf-mindmap" "Open Mindmap" t)
+(autoload 'eaf-open-mail-as-html "eaf-mail" "Open mail as HTML." t)
+(autoload 'eaf-open-browser "eaf-browser" "Open browser." t)
+(autoload 'eaf-open-terminal "eaf-terminal" "Open terminal." t)
+(autoload 'eaf-open-camera "eaf-camera" "Open camera." t)
+(autoload 'eaf-open-jupyter "eaf-jupyter" "Open jupyter." t)
+(autoload 'eaf-open-netease-cloud-music "eaf-netease-cloud-music" "Open netease cloud music." t)
+(autoload 'eaf-open-system-monitor "eaf-system-monitor" "Open system monitor." t)
+(autoload 'eaf-open-file-manager "eaf-file-manager" "Open file manager." t)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
