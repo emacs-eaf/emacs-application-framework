@@ -82,24 +82,6 @@
 (require 'subr-x)
 (require 'bookmark)
 
-(require 'eaf-pdf-viewer)
-(require 'eaf-markdown-previewer)
-(require 'eaf-js-video-player)
-(require 'eaf-video-player)
-(require 'eaf-image-viewer)
-(require 'eaf-org-previewer)
-(require 'eaf-mindmap)
-(require 'eaf-mail)
-(require 'eaf-browser)
-(require 'eaf-terminal)
-(require 'eaf-camera)
-(require 'eaf-jupyter)
-(require 'eaf-netease-cloud-music)
-(require 'eaf-system-monitor)
-(require 'eaf-file-manager)
-(require 'eaf-demo)
-(require 'eaf-vue-demo)
-
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
 for more information.
@@ -118,6 +100,24 @@ them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
       (directory-files app-dir t directory-files-no-dot-files-regexp)))))
 
 (eaf-add-app-dirs-to-load-path)
+
+(require 'eaf-pdf-viewer)
+(require 'eaf-markdown-previewer)
+(require 'eaf-js-video-player)
+(require 'eaf-video-player)
+(require 'eaf-image-viewer)
+(require 'eaf-org-previewer)
+(require 'eaf-mindmap)
+(require 'eaf-mail)
+(require 'eaf-browser)
+(require 'eaf-terminal)
+(require 'eaf-camera)
+(require 'eaf-jupyter)
+(require 'eaf-netease-cloud-music)
+(require 'eaf-system-monitor)
+(require 'eaf-file-manager)
+(require 'eaf-demo)
+(require 'eaf-vue-demo)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
