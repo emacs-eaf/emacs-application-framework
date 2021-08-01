@@ -1,15 +1,14 @@
-;;; eaf-file-manager.el --- File manager
+;;; eaf-file-sender.el --- File sender plugin
 
-;; Filename: eaf-file-manager.el
-;; Description: File manager
+;; Filename: eaf-file-sender.el
+;; Description: File sender plugins
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
-;; Created: 2021-07-31 20:45:09
+;; Created: 2021-08-01 22:30:28
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 20:45:09
-;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/eaf-file-manager.el
+;; Last-Updated: Sat Jul 31 11:30:12 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
 ;;
@@ -39,19 +38,19 @@
 
 ;;; Commentary:
 ;;
-;; File manager
+;; For sending file to the devices on the same network.
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf-file-manager.el to your load-path.
+;; Put eaf-file-sender.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'eaf-file-manager)
+;; (require 'eaf-file-sender)
 ;;
 ;; No need more.
 
@@ -60,12 +59,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET eaf-file-manager RET
+;;      M-x customize-group RET eaf-browser RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2021/07/31
+;; 2021/07/20
 ;;      * First released.
 ;;
 
@@ -84,26 +83,21 @@
 
 ;;; Code:
 
-(defcustom eaf-file-manager-keybinding
-  '(("<f12>" . "open_devtools")
-    ("j" . "select_next_file")
-    ("k" . "select_prev_file")
-    )
-  "The keybinding of EAF File Manager."
-  :type 'cons)
-
 ;;;###autoload
-(defun eaf-open-file-manager ()
-  "Open EAF file manager."
+(defun eaf-file-sender-qrcode (file)
+  "Open EAF File Sender application.
+
+Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
+
+Make sure that your smartphone is connected to the same WiFi network as this computer."
+  (interactive "F[EAF/file-sender] Select File: ")
+  (eaf-open file "file-sender"))
+
+(defun eaf-file-sender-qrcode-in-dired ()
+  "Open EAF File Transfer application using `eaf-file-sender-qrcode' on
+the file at current cursor position in dired."
   (interactive)
-  (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face) :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face) :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face) :foreground)) args)
-    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
-    (eaf-open "~" "file-manager" (json-encode-hash-table args))
-    ))
+  (eaf-file-sender-qrcode (dired-get-filename)))
 
-(provide 'eaf-file-manager)
-
-;;; eaf-file-manager.el ends here
+(provide 'eaf-file-sender)
+;;; eaf-file-sender ends here

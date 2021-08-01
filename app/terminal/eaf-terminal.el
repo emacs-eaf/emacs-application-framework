@@ -161,21 +161,6 @@
        (eaf--non-remote-default-directory))
     (message "[EAF/terminal] Please install ipython first.")))
 
-(defun eaf-open-jupyter ()
-  "Open jupyter."
-  (interactive)
-  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
-                           "jupyter-qtconsole.exe"
-                         "jupyter-qtconsole"))
-      (let* ((data (json-read-from-string (shell-command-to-string (if (eaf--called-from-wsl-on-windows-p)
-                                                                       "jupyter.exe kernelspec list --json"
-                                                                     "jupyter kernelspec list --json"))))
-             (kernel (completing-read "Jupyter Kernels: " (mapcar #'car (alist-get 'kernelspecs data))))
-             (args (make-hash-table :test 'equal)))
-        (puthash "kernel" kernel args)
-        (eaf-open (format "eaf-jupyter-%s" kernel) "jupyter" (json-encode-hash-table args) t))
-    (message "[EAF/jupyter] Please install qtconsole first.")))
-
 (defun eaf-terminal-run-command-in-dir (command dir &optional always-new)
   "Run COMMAND in terminal in directory DIR.
 
@@ -195,6 +180,18 @@ If ALWAYS-NEW is non-nil, always open a new terminal for the dedicated DIR."
           (eq system-type 'windows-nt))
       "powershell.exe"
     (getenv "SHELL")))
+
+;;;###autoload
+(defun eaf-open-terminal ()
+  "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
+
+The initial directory is `default-directory'.  However, it opens `$HOME'
+ when `default-directory' is part of a remote process.
+
+If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
+To override and open a new terminal regardless, call interactively with prefix arg."
+  (interactive)
+  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
 
 (provide 'eaf-terminal)
 

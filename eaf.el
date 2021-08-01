@@ -73,6 +73,29 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'epc)
+(require 'epcs)
+(require 'json)
+(require 'map)
+(require 's)
+(require 'seq)
+(require 'subr-x)
+(require 'bookmark)
+
+(require 'eaf-pdf-viewer)
+(require 'eaf-markdown-previewer)
+(require 'eaf-js-video-player)
+(require 'eaf-video-player)
+(require 'eaf-image-viewer)
+(autoload 'eaf-open-mindmap "eaf-mindmap" "Open Mindmap" t)
+(autoload 'eaf-open-mail-as-html "eaf-mail" "Open mail as HTML." t)
+(autoload 'eaf-open-browser "eaf-browser" "Open browser." t)
+(autoload 'eaf-open-terminal "eaf-terminal" "Open terminal." t)
+(autoload 'eaf-open-camera "eaf-camera" "Open camera." t)
+(autoload 'eaf-open-jupyter "eaf-jupyter" "Open jupyter." t)
+(autoload 'eaf-open-netease-cloud-music "eaf-netease-cloud-music" "Open netease cloud music." t)
+(autoload 'eaf-open-system-monitor "eaf-system-monitor" "Open system monitor." t)
+(autoload 'eaf-open-file-manager "eaf-file-manager" "Open file manager." t)
 
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
@@ -106,32 +129,6 @@ them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
           ((eq system-type 'darwin)
            (shell-command (concat "./install-eaf-mac.sh" "&"))))))
 
-(require 'bookmark)
-(require 'cl-lib)
-(require 'eaf-interleave)
-(require 'eaf-mindmap)
-(require 'eaf-pdf-viewer)
-(require 'eaf-mail)
-(require 'eaf-browser)
-(require 'eaf-terminal)
-(require 'eaf-camera)
-(require 'eaf-markdown-previewer)
-(require 'epc)
-(require 'epcs)
-(require 'json)
-(require 'map)
-(require 's)
-(require 'seq)
-(require 'subr-x)
-(require 'eaf-jupyter)
-(require 'eaf-elfeed)
-(require 'eaf-music-player)
-(require 'eaf-netease-cloud-music)
-(require 'eaf-video-player)
-(require 'eaf-js-video-player)
-(require 'eaf-image-viewer)
-(require 'eaf-system-monitor)
-(require 'eaf-file-manager)
 
 (defgroup eaf nil
   "Emacs Application Framework."
@@ -773,11 +770,6 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (eaf-call-async "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
-(defun eaf-share-path-or-url ()
-  "Share the current file path or web URL as QRCode."
-  (interactive)
-  (eaf-open (eaf-get-path-or-url) "airshare"))
-
 (defun eaf--make-proxy-function (fun)
   "Define elisp command which can call python function string FUN."
   (let ((sym (intern (format "eaf-proxy-%s" fun))))
@@ -1269,22 +1261,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (switch-to-buffer buf)
     (other-window +1)))
 
-;;;###autoload
-(defun eaf-open-browser (url &optional args)
-  "Open EAF browser application given a URL and ARGS."
-  (interactive "M[EAF/browser] URL: ")
-  (eaf-open (eaf-wrap-url url) "browser" args))
-
-(defun eaf-open-url-at-point ()
-  "Open URL at current point by EAF browser."
-  (interactive)
-  (eaf-open-browser (browse-url-url-at-point)))
-
-(defun eaf-toggle-proxy()
-  "Toggle proxy to none or default proxy."
-  (interactive)
-  (eaf-call-sync "toggle_proxy"))
-
 (defun eaf-goto-left-tab ()
   "Go to left tab when awesome-tab exists."
   (interactive)
@@ -1307,58 +1283,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open EAF vue demo"
   (interactive)
   (eaf-open "eaf-vue-demo" "vue-demo"))
-
-(defun eaf-open-file-manager ()
-  "Open EAF file manager."
-  (interactive)
-  (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face) :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face) :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face) :foreground)) args)
-    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
-    (eaf-open "~" "file-manager" (json-encode-hash-table args))
-    ))
-
-(defun eaf-open-music-player (music-file)
-  "Open EAF music player."
-  (interactive "fOpen music: ")
-  (eaf-open "eaf-music-player" "music-player" music-file))
-
-(defun eaf-open-netease-cloud-music ()
-  "Open EAF netease cloud music."
-  (interactive)
-  (if (ignore-errors (or (featurep 'netease-cloud-music)
-                         (load-library "netease-cloud-music")))
-      (progn
-        (setq netease-cloud-music-last-buffer (current-buffer))
-        (if (get-buffer "eaf-netease-cloud-music")
-            (switch-to-buffer "eaf-netease-cloud-music")
-          (eaf-open "eaf-netease-cloud-music" "netease-cloud-music")))
-    (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")
-    ))
-
-(defun eaf-open-system-monitor ()
-  "Open EAF system monitor."
-  (interactive)
-  (eaf-open "eaf-system-monitor" "system-monitor"))
-
-;;;###autoload
-(defun eaf-open-camera ()
-  "Open EAF camera application."
-  (interactive)
-  (eaf-open "eaf-camera" "camera"))
-
-;;;###autoload
-(defun eaf-open-terminal ()
-  "Open EAF Terminal, a powerful GUI terminal emulator in Emacs.
-
-The initial directory is `default-directory'.  However, it opens `$HOME'
- when `default-directory' is part of a remote process.
-
-If a buffer of EAF Terminal in `default-directory' exists, switch to the buffer.
-To override and open a new terminal regardless, call interactively with prefix arg."
-  (interactive)
-  (eaf-terminal-run-command-in-dir (eaf--generate-terminal-command) (eaf--non-remote-default-directory) t))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
@@ -1495,32 +1419,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (split-window-horizontally)
   (other-window +1))
 
-(defun eaf-open-airshare ()
-  "Open EAF Airshare application, share text string with your phone."
-  (interactive)
-  (let* ((current-symbol (if (use-region-p)
-                             (buffer-substring-no-properties (region-beginning) (region-end))
-                           (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "[EAF/airshare] Share Text (%s): " current-symbol)))))
-    (when (string-empty-p input-string)
-      (setq input-string current-symbol))
-    (eaf-open input-string "airshare")))
-
-(defun eaf-file-sender-qrcode (file)
-  "Open EAF File Sender application.
-
-Select the file FILE to send to your smartphone, a QR code for the corresponding file will appear.
-
-Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "F[EAF/file-sender] Select File: ")
-  (eaf-open file "file-sender"))
-
-(defun eaf-file-sender-qrcode-in-dired ()
-  "Open EAF File Transfer application using `eaf-file-sender-qrcode' on
-the file at current cursor position in dired."
-  (interactive)
-  (eaf-file-sender-qrcode (dired-get-filename)))
-
 (defun eaf-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
@@ -1545,37 +1443,9 @@ the file at current cursor position in dired."
   (kill-buffer)
   (delete-window))
 
-(defalias 'eaf-create-mindmap 'eaf-open-mindmap) ;; compatible
-
-(defun eaf-open-mindmap (file)
-  "Open a given Mindmap FILE."
-  (interactive "F[EAF/mindmap] Select Mindmap file: ")
-  (eaf-open file "mindmap"))
-
 (defun eaf-get-file-md5 (file)
   "Get the MD5 value of a specified FILE."
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
-
-(defun eaf-open-office (file)
-  "View Microsoft Office FILE as READ-ONLY PDF."
-  (interactive "f[EAF/office] Open Office file as PDF: ")
-  (if (executable-find "libreoffice")
-      (let* ((file-md5 (eaf-get-file-md5 file))
-             (file-name-base (file-name-base file))
-             (convert-file (format "/tmp/%s.pdf" file-name-base))
-             (pdf-file (format "/tmp/%s.pdf" file-md5)))
-        (if (file-exists-p pdf-file)
-            (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf"))
-          (message "Converting %s to PDF, EAF will start shortly..." file)
-          (make-process
-           :name ""
-           :buffer " *eaf-open-office*"
-           :command (list "libreoffice" "--headless" "--convert-to" "pdf" (file-truename file) "--outdir" "/tmp")
-           :sentinel (lambda (_ event)
-                       (when (string= (substring event 0 -1) "finished")
-                         (rename-file convert-file pdf-file)
-                         (eaf-open pdf-file "pdf-viewer" (concat file-name-base "_office-pdf")))))))
-    (error "[EAF/office] libreoffice is required convert Office file to PDF!")))
 
 (defun eaf--enter-fullscreen-request ()
   "Entering EAF browser fullscreen use Emacs frame's size."

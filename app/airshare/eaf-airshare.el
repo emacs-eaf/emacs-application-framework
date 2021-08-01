@@ -1,15 +1,14 @@
-;;; eaf-file-manager.el --- File manager
+;;; eaf-airshare.el --- Airshare plugins
 
-;; Filename: eaf-file-manager.el
-;; Description: File manager
+;; Filename: eaf-airshare.el
+;; Description: Airshare plugins
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
 ;; Copyright (C) 2021, Andy Stewart, all rights reserved.
-;; Created: 2021-07-31 20:45:09
+;; Created: 2021-08-01 22:30:28
 ;; Version: 0.1
-;; Last-Updated: 2021-07-31 20:45:09
-;;           By: Andy Stewart
-;; URL: http://www.emacswiki.org/emacs/download/eaf-file-manager.el
+;; Last-Updated: Sat Jul 31 11:30:12 2021 (-0400)
+;;           By: Mingde (Matthew) Zeng
 ;; Keywords:
 ;; Compatibility: GNU Emacs 28.0.50
 ;;
@@ -39,19 +38,19 @@
 
 ;;; Commentary:
 ;;
-;; File manager
+;; Airshare plugins
 ;;
 
 ;;; Installation:
 ;;
-;; Put eaf-file-manager.el to your load-path.
+;; Put eaf-airshare.el to your load-path.
 ;; The load-path is usually ~/elisp/.
 ;; It's set in your ~/.emacs like this:
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;;
 ;; And the following to your ~/.emacs startup file.
 ;;
-;; (require 'eaf-file-manager)
+;; (require 'eaf-airshare)
 ;;
 ;; No need more.
 
@@ -60,12 +59,12 @@
 ;;
 ;;
 ;; All of the above can customize by:
-;;      M-x customize-group RET eaf-file-manager RET
+;;      M-x customize-group RET eaf-browser RET
 ;;
 
 ;;; Change log:
 ;;
-;; 2021/07/31
+;; 2021/07/20
 ;;      * First released.
 ;;
 
@@ -84,26 +83,22 @@
 
 ;;; Code:
 
-(defcustom eaf-file-manager-keybinding
-  '(("<f12>" . "open_devtools")
-    ("j" . "select_next_file")
-    ("k" . "select_prev_file")
-    )
-  "The keybinding of EAF File Manager."
-  :type 'cons)
-
 ;;;###autoload
-(defun eaf-open-file-manager ()
-  "Open EAF file manager."
+(defun eaf-open-airshare ()
+  "Open EAF Airshare application, share text string with your phone."
   (interactive)
-  (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face) :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face) :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face) :foreground)) args)
-    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
-    (eaf-open "~" "file-manager" (json-encode-hash-table args))
-    ))
+  (let* ((current-symbol (if (use-region-p)
+                             (buffer-substring-no-properties (region-beginning) (region-end))
+                           (thing-at-point 'symbol)))
+         (input-string (string-trim (read-string (format "[EAF/airshare] Share Text (%s): " current-symbol)))))
+    (when (string-empty-p input-string)
+      (setq input-string current-symbol))
+    (eaf-open input-string "airshare")))
 
-(provide 'eaf-file-manager)
+(defun eaf-share-path-or-url ()
+  "Share the current file path or web URL as QRCode."
+  (interactive)
+  (eaf-open (eaf-get-path-or-url) "airshare"))
 
-;;; eaf-file-manager.el ends here
+(provide 'eaf-airshare)
+;;; eaf-airshare ends here

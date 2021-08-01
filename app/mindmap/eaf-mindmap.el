@@ -439,6 +439,14 @@ actural call `org-json-gen-alist1' to work."
       (goto-char (point-min)))
     ))
 
+;;;###autoload
+(defun eaf-open-mindmap (file)
+  "Open a given Mindmap FILE."
+  (interactive "F[EAF/mindmap] Select Mindmap file: ")
+  (eaf-open file "mindmap"))
+
+(defalias 'eaf-create-mindmap 'eaf-open-mindmap "For compatibility")
+
 (provide 'eaf-mindmap)
 
 ;;; eaf-mindmap.el ends here

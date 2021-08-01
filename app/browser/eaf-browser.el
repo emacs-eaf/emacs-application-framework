@@ -668,6 +668,22 @@ Otherwise send key 'esc' to browser."
           (bookmark-save)
           (message "Import success."))))))
 
+;;;###autoload
+(defun eaf-open-browser (url &optional args)
+  "Open EAF browser application given a URL and ARGS."
+  (interactive "M[EAF/browser] URL: ")
+  (eaf-open (eaf-wrap-url url) "browser" args))
+
+(defun eaf-open-url-at-point ()
+  "Open URL at current point by EAF browser."
+  (interactive)
+  (eaf-open-browser (browse-url-url-at-point)))
+
+(defun eaf-toggle-proxy()
+  "Toggle proxy to none or default proxy."
+  (interactive)
+  (eaf-call-sync "toggle_proxy"))
+
 (provide 'eaf-browser)
 
 ;;; eaf-browser.el ends here
