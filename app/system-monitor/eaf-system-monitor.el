@@ -96,6 +96,12 @@
   "The keybinding of EAF System Monitor."
   :type 'cons)
 
+;;;###autoload
+(defun eaf-open-system-monitor ()
+  "Open EAF system monitor."
+  (interactive)
+  (eaf-open "eaf-system-monitor" "system-monitor"))
+
 (provide 'eaf-system-monitor)
 
 ;;; eaf-system-monitor.el ends here

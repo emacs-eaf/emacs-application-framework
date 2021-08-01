@@ -1300,11 +1300,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
-(defun eaf-open-system-monitor ()
-  "Open EAF system monitor."
-  (interactive)
-  (eaf-open "eaf-system-monitor" "system-monitor"))
-
 ;;;###autoload
 (defun eaf-open-camera ()
   "Open EAF camera application."
