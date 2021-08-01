@@ -84,6 +84,10 @@
 
 ;;; Code:
 
+(defcustom eaf-js-video-player-dark-mode "follow"
+  ""
+  :type 'string)
+
 (defcustom eaf-js-video-player-keybinding
   '(("SPC" . "toggle_play")
     ("M-g" . "exit_fullscreen")

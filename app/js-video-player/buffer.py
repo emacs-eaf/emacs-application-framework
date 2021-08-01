@@ -59,3 +59,10 @@ class AppBuffer(BrowserBuffer):
         def _do ():
             self.buffer_widget.eval_js("{}();".format(method_name))
         setattr(self, method_name, _do)
+
+    def dark_mode_is_enabled(self):
+        ''' Return bool of whether dark mode is enabled.'''
+        return (get_emacs_var("eaf-js-video-player-dark-mode") == "force" or \
+                get_emacs_var("eaf-js-video-player-dark-mode") == True or \
+                (get_emacs_var("eaf-js-video-player-dark-mode") == "follow" and \
+                 get_emacs_var("eaf-emacs-theme-mode") == "dark"))

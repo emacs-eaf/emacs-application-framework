@@ -101,11 +101,7 @@ class AppBuffer(BrowserBuffer):
 
     @PostGui()
     def open_terminal_page(self):
-        theme = "light"
-        if (get_emacs_var("eaf-terminal-dark-mode") == "follow" or \
-            get_emacs_var("eaf-terminal-dark-mode") == True or \
-            (get_emacs_var("eaf-terminal-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")):
-            theme = "dark"
+        theme = "dark" if self.dark_mode_is_enabled() else "light"
 
         with request.urlopen(self.index_file) as f:
             html = f.read().decode("utf-8").replace("%1", str(self.port))\
@@ -234,3 +230,10 @@ class AppBuffer(BrowserBuffer):
             self._search_text(str(result_content))
         elif callback_tag == "search_text_backward":
             self._search_text(str(result_content), True)
+
+    def dark_mode_is_enabled(self):
+        ''' Return bool of whether dark mode is enabled.'''
+        return (get_emacs_var("eaf-terminal-dark-mode") == "force" or \
+                get_emacs_var("eaf-terminal-dark-mode") == True or \
+                (get_emacs_var("eaf-terminal-dark-mode") == "follow" and \
+                 get_emacs_var("eaf-emacs-theme-mode") == "dark"))

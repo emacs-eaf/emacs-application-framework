@@ -713,13 +713,7 @@ class BrowserBuffer(Buffer):
 
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
-        module_name = self.module_path.split(".")[1]
-        return (get_emacs_var("eaf-browser-dark-mode") == "force" or \
-                get_emacs_var("eaf-browser-dark-mode") == True or \
-                (get_emacs_var("eaf-browser-dark-mode") == "follow" and \
-                 get_emacs_var("eaf-emacs-theme-mode") == "dark")) and \
-                 module_name in ["browser", "terminal", "mindmap", "js-video-player"] and \
-                 not self.url.startswith("devtools://")
+        return False
 
     def init_background_color(self):
         ''' Initialize the background colour.'''

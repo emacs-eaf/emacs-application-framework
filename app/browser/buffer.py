@@ -491,6 +491,14 @@ class AppBuffer(BrowserBuffer):
         # Return new QWebEngineView for create new browser window.
         return app_buffer.buffer_widget
 
+    def dark_mode_is_enabled(self):
+        ''' Return bool of whether dark mode is enabled.'''
+        return (get_emacs_var("eaf-browser-dark-mode") == "force" or \
+                get_emacs_var("eaf-browser-dark-mode") == True or \
+                (get_emacs_var("eaf-browser-dark-mode") == "follow" and \
+                 get_emacs_var("eaf-emacs-theme-mode") == "dark")) and \
+                 not self.url.startswith("devtools://")
+
 class HistoryPage():
     def __init__(self, title, url, hit):
         self.title = title

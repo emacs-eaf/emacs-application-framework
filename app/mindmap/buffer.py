@@ -86,11 +86,7 @@ class AppBuffer(BrowserBuffer):
 
         QTimer.singleShot(200, lambda: self.buffer_widget.eval_js("select_root_node();"))
 
-        color = "#FFFFFF"
-        if (get_emacs_var("eaf-mindmap-dark-mode") == "force" or \
-            get_emacs_var("eaf-mindmap-dark-mode") == True or \
-                (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")):
-            color = "#242525"
+        color = "#242525" if self.dark_mode_is_enabled() else "#FFFFFF"
         self.buffer_widget.eval_js("init_background('{}');".format(color))
 
         self.change_title(self.get_title())
@@ -113,11 +109,7 @@ class AppBuffer(BrowserBuffer):
             with open(self.url, "r") as f:
                 self.buffer_widget.execute_js("refresh('{}');".format(string_to_base64(f.read())))
 
-            color = "#FFFFFF"
-            if (get_emacs_var("eaf-mindmap-dark-mode") == "force" or \
-                get_emacs_var("eaf-mindmap-dark-mode") == True or \
-                (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and get_emacs_var("eaf-emacs-theme-mode") == "dark")):
-                color = "#242525"
+            color = "#242525" if self.dark_mode_is_enabled() else "#FFFFFF"
             self.buffer_widget.eval_js("init_background('{}');".format(color))
 
             self.change_title(self.get_title())
@@ -287,3 +279,10 @@ class AppBuffer(BrowserBuffer):
 
         if notify:
             message_to_emacs("Save freemind file: " + file_path)
+
+    def dark_mode_is_enabled(self):
+        ''' Return bool of whether dark mode is enabled.'''
+        return (get_emacs_var("eaf-mindmap-dark-mode") == "force" or \
+                get_emacs_var("eaf-mindmap-dark-mode") == True or \
+                (get_emacs_var("eaf-mindmap-dark-mode") == "follow" and \
+                 get_emacs_var("eaf-emacs-theme-mode") == "dark"))
