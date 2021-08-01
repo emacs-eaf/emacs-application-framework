@@ -1454,13 +1454,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (kill-buffer)
   (delete-window))
 
-(defalias 'eaf-create-mindmap 'eaf-open-mindmap) ;; compatible
-
-(defun eaf-open-mindmap (file)
-  "Open a given Mindmap FILE."
-  (interactive "F[EAF/mindmap] Select Mindmap file: ")
-  (eaf-open file "mindmap"))
-
 (defun eaf-get-file-md5 (file)
   "Get the MD5 value of a specified FILE."
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
