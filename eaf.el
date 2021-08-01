@@ -770,11 +770,6 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (eaf-call-async "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
-(defun eaf-share-path-or-url ()
-  "Share the current file path or web URL as QRCode."
-  (interactive)
-  (eaf-open (eaf-get-path-or-url) "airshare"))
-
 (defun eaf--make-proxy-function (fun)
   "Define elisp command which can call python function string FUN."
   (let ((sym (intern (format "eaf-proxy-%s" fun))))
@@ -1434,17 +1429,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (find-file url)
   (split-window-horizontally)
   (other-window +1))
-
-(defun eaf-open-airshare ()
-  "Open EAF Airshare application, share text string with your phone."
-  (interactive)
-  (let* ((current-symbol (if (use-region-p)
-                             (buffer-substring-no-properties (region-beginning) (region-end))
-                           (thing-at-point 'symbol)))
-         (input-string (string-trim (read-string (format "[EAF/airshare] Share Text (%s): " current-symbol)))))
-    (when (string-empty-p input-string)
-      (setq input-string current-symbol))
-    (eaf-open input-string "airshare")))
 
 (defun eaf-file-sender-qrcode (file)
   "Open EAF File Sender application.
