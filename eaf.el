@@ -1300,19 +1300,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf-open "~" "file-manager" (json-encode-hash-table args))
     ))
 
-(defun eaf-open-netease-cloud-music ()
-  "Open EAF netease cloud music."
-  (interactive)
-  (if (ignore-errors (or (featurep 'netease-cloud-music)
-                         (load-library "netease-cloud-music")))
-      (progn
-        (setq netease-cloud-music-last-buffer (current-buffer))
-        (if (get-buffer "eaf-netease-cloud-music")
-            (switch-to-buffer "eaf-netease-cloud-music")
-          (eaf-open "eaf-netease-cloud-music" "netease-cloud-music")))
-    (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")
-    ))
-
 (defun eaf-open-system-monitor ()
   "Open EAF system monitor."
   (interactive)

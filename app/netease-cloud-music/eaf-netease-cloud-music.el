@@ -268,6 +268,19 @@ If Up is not non-nil, move the song up.Otherwise move it down."
       (netease-cloud-music-switch-add-to-playlist)
     (netease-cloud-music-playlist-add-all)))
 
+;;;###autoload
+(defun eaf-open-netease-cloud-music ()
+  "Open EAF netease cloud music."
+  (interactive)
+  (if (ignore-errors (or (featurep 'netease-cloud-music)
+                         (load-library "netease-cloud-music")))
+      (progn
+        (setq netease-cloud-music-last-buffer (current-buffer))
+        (if (get-buffer "eaf-netease-cloud-music")
+            (switch-to-buffer "eaf-netease-cloud-music")
+          (eaf-open "eaf-netease-cloud-music" "netease-cloud-music")))
+    (user-error "[EAF/Netease-Cloud-Music]: You haven't install the package netease-cloud-music.")))
+
 (provide 'eaf-netease-cloud-music)
 
 ;;; eaf-netease-cloud-music.el ends here
