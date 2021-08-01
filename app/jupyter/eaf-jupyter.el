@@ -122,6 +122,22 @@
   "The keybinding of EAF Jupyter."
   :type 'cons)
 
+;;;###autoload
+(defun eaf-open-jupyter ()
+  "Open jupyter."
+  (interactive)
+  (if (executable-find (if (eaf--called-from-wsl-on-windows-p)
+                           "jupyter-qtconsole.exe"
+                         "jupyter-qtconsole"))
+      (let* ((data (json-read-from-string (shell-command-to-string (if (eaf--called-from-wsl-on-windows-p)
+                                                                       "jupyter.exe kernelspec list --json"
+                                                                     "jupyter kernelspec list --json"))))
+             (kernel (completing-read "Jupyter Kernels: " (mapcar #'car (alist-get 'kernelspecs data))))
+             (args (make-hash-table :test 'equal)))
+        (puthash "kernel" kernel args)
+        (eaf-open (format "eaf-jupyter-%s" kernel) "jupyter" (json-encode-hash-table args) t))
+    (message "[EAF/jupyter] Please install qtconsole first.")))
+
 (provide 'eaf-jupyter)
 
 ;;; eaf-jupyter.el ends here
