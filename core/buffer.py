@@ -127,6 +127,9 @@ class Buffer(QGraphicsScene):
         self.enter_fullscreen_request.connect(self.enable_fullscreen)
         self.exit_fullscreen_request.connect(self.disable_fullscreen)
 
+    def base_class_name(self):
+        return self.__class__.__bases__[0].__name__
+
     def build_all_methods(self, origin_class):
         ''' Build all methods.'''
         method_list = [func for func in dir(origin_class) if callable(getattr(origin_class, func)) and not func.startswith("__")]

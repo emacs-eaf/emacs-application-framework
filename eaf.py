@@ -196,15 +196,15 @@ class EAF(object):
             app_buffer.open_devtools_tab.connect(self.open_devtools_tab)
 
         # Add create buffer interface for createWindow signal.
-        if (app_buffer.__class__.__bases__[0].__name__ == "BrowserBuffer"):
+        if app_buffer.base_class_name() == "BrowserBuffer":
             app_buffer.create_buffer = self.create_buffer
 
         # Set proxy for browser.
-        if module_path == "app.browser.buffer":
+        if app_buffer.base_class_name() == "BrowserBuffer":
             app_buffer.proxy_string = proxy_string
 
         # If arguments is devtools, create devtools page.
-        if module_path == "app.browser.buffer" and arguments == "devtools" and self.devtools_page:
+        if app_buffer.base_class_name() == "BrowserBuffer" and arguments == "devtools" and self.devtools_page:
             self.devtools_page.setDevToolsPage(app_buffer.buffer_widget.web_page)
             self.devtools_page = None
 
