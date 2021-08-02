@@ -559,7 +559,10 @@ class BrowserPage(QWebEnginePage):
         QTimer.singleShot(250, self.loop.quit)
 
         self.runJavaScript(script_src, self.callback_js)
-        self.loop.exec_()
+        # To avoid the error when call the javascript function asynchronously
+        if self.loop is not None and not(self.loop.isRunning()):
+            self.loop.exec_()
+
         self.loop = None
         return self.result
 
