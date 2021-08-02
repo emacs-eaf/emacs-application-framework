@@ -162,8 +162,15 @@ class EAF(object):
             self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
 
     @PostGui()
+    def new_buffer(self, buffer_id, url, module_path, arguments):
+        ''' New buffer.
+        new_buffer just clone of create_buffer with @PostGui elisp call asynchronously.
+        '''
+        self.create_buffer(buffer_id, url, module_path, arguments)
+
     def create_buffer(self, buffer_id, url, module_path, arguments):
-        ''' Create buffer.'''
+        ''' Create buffer.
+        create_buffer can't wrap with @PostGui, because need call by createNewWindow signal of browser.'''
         global emacs_width, emacs_height, proxy_string
 
         # Load module with app absolute path.

@@ -1166,7 +1166,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args)))
     (with-current-buffer buffer
-      (eaf-call-async "create_buffer" eaf--buffer-id
+      (eaf-call-async "new_buffer" eaf--buffer-id
                       (if (eaf--called-from-wsl-on-windows-p)
                           (eaf--translate-wsl-url-to-windows url)
                         url)
