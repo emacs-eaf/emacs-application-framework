@@ -162,26 +162,16 @@ class EAF(object):
             self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
 
     @PostGui()
-    def new_buffer(self, buffer_id, url, app_name, arguments):
-        ''' Create new buffer. '''
-        try:
-            self.create_buffer(buffer_id,
-                               str(url),
-                               "app.{0}.buffer".format(str(app_name)),
-                               str(arguments))
-
-            return ""
-        except ImportError:
-            import traceback
-            traceback.print_exc()
-            return "EAF: Something went wrong when trying to import {0}".format(module_path)
-
     def create_buffer(self, buffer_id, url, module_path, arguments):
         ''' Create buffer.'''
         global emacs_width, emacs_height, proxy_string
 
+        # Load module with app absolute path.
+        spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
         # Create application buffer.
-        module = importlib.import_module(module_path)
         app_buffer = module.AppBuffer(buffer_id, url, arguments)
 
         # Add module_path.

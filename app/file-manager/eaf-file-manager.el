@@ -94,6 +94,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("file-manager" . eaf-file-manager-keybinding))
 
+(setq eaf-file-manager-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("file-manager" . eaf-file-manager-module-path))
+
 ;;;###autoload
 (defun eaf-open-file-manager ()
   "Open EAF file manager."

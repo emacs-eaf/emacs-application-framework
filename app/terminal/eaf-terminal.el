@@ -142,6 +142,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("terminal" . eaf-terminal-keybinding))
 
+(setq eaf-terminal-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("terminal" . eaf-terminal-module-path))
+
 (defun eaf-send-second-key-sequence ()
   "Send second part of key sequence to terminal."
   (interactive)

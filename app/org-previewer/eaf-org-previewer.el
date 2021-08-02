@@ -181,6 +181,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("org-previewer" . eaf-org-previewer-keybinding))
 
+(setq eaf-org-previewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("org-previewer" . eaf-org-previewer-module-path))
+
 (defun eaf--org-delete-preview-file (org-file)
   "Delete the org-preview file when given ORG-FILE name."
   (let ((org-html-file (concat (file-name-sans-extension org-file) ".html")))
@@ -212,7 +215,7 @@
     (ignore-errors
       ;; eaf-org-file-list?
       (org-html-export-to-html)
-      (eaf-call-async "update_buffer_with_url" "app.org-previewer.buffer" (buffer-file-name) "")
+      (eaf-call-async "update_buffer_with_url" eaf-org-previewer-module-path (buffer-file-name) "")
       (message "[EAF] Export %s to HTML." (buffer-file-name)))))
 
 (defun eaf--org-preview-display (buf)

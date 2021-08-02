@@ -154,6 +154,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("mindmap" . eaf-mindmap-keybinding))
 
+(setq path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("mindmap" . path))
+
 (defun eaf--export-org-json (org-json-content org-file-path)
   (let (org-parse-data)
     (with-temp-buffer

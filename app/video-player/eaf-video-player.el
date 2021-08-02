@@ -94,6 +94,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("video-player" . eaf-video-player-keybinding))
 
+(setq eaf-video-player-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("video-player" . eaf-video-player-module-path))
+
 (provide 'eaf-video-player)
 
 ;;; eaf-video-player.el ends here

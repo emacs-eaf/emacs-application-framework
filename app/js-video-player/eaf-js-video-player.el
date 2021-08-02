@@ -108,6 +108,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("js-video-player" . eaf-js-video-player-keybinding))
 
+(setq eaf-js-vide-player-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("js-video-player" . eaf-js-vide-player-module-path))
+
 (provide 'eaf-js-video-player)
 
 ;;; eaf-js-video-player.el ends here

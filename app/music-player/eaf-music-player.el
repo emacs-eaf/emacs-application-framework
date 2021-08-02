@@ -110,6 +110,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("music-player" . eaf-music-player-keybinding))
 
+(setq eaf-music-player-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("music-player" . eaf-music-player-module-path))
+
 ;;;###autoload
 (defun eaf-open-music-player (music-file)
   "Open EAF music player."

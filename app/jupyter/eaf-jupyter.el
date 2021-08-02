@@ -124,6 +124,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("jupyter" . eaf-jupyter-keybinding))
 
+(setq eaf-jupyter-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("jupyter" . eaf-jupyter-module-path))
+
 ;;;###autoload
 (defun eaf-open-jupyter ()
   "Open jupyter."

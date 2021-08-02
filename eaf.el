@@ -96,6 +96,8 @@ them in `eaf-var-list' and thus, `eaf-setq' is no longer necessary.")
 Any new app should add the its name and the corresponding
 keybinding variable to this list.")
 
+(defvar eaf-app-module-path-alist '())
+
 (defun eaf-add-app-dirs-to-load-path ()
   "Add EAF app directories where .el exists to `load-path'."
   (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
@@ -120,6 +122,7 @@ keybinding variable to this list.")
 (require 'eaf-camera)
 (require 'eaf-jupyter)
 (require 'eaf-netease-cloud-music)
+(require 'eaf-music-player)
 (require 'eaf-system-monitor)
 (require 'eaf-file-manager)
 (require 'eaf-demo)
@@ -802,6 +805,10 @@ keybinding variable to eaf-app-binding-alist."
   (symbol-value
    (cdr (assoc app-name eaf-app-binding-alist))))
 
+(defun eaf--get-app-module-path (app-name)
+  (symbol-value
+   (cdr (assoc app-name eaf-app-module-path-alist))))
+
 (defun eaf--create-buffer (url app-name args)
   "Create an EAF buffer given URL, APP-NAME, and ARGS."
   (eaf--gen-keybinding-map (eaf--get-app-bindings app-name))
@@ -1159,11 +1166,12 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args)))
     (with-current-buffer buffer
-      (eaf-call-async "new_buffer" eaf--buffer-id
+      (eaf-call-async "create_buffer" eaf--buffer-id
                       (if (eaf--called-from-wsl-on-windows-p)
                           (eaf--translate-wsl-url-to-windows url)
                         url)
-                      app-name args)
+                      (eaf--get-app-module-path app-name)
+                      args)
       (eaf--update-modeline-icon))
     (eaf--display-app-buffer app-name buffer))
   (eaf--post-open-actions url app-name args))

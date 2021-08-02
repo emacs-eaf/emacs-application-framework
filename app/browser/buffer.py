@@ -483,7 +483,7 @@ class AppBuffer(BrowserBuffer):
         buffer_id = self.get_new_window_buffer_id()
 
         # Create buffer for create new browser window.
-        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", "app.browser.buffer", "")
+        app_buffer = self.create_buffer(buffer_id, "http://0.0.0.0", self.module_path, "")
 
         # Create emacs buffer with buffer id.
         eval_in_emacs('eaf--create-new-browser-buffer', [buffer_id])

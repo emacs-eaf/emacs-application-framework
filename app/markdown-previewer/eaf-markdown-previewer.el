@@ -185,6 +185,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("markdown-previewer" . eaf-markdown-previewer-keybinding))
 
+(setq eaf-markdown-previewer-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("markdown-previewer" . eaf-markdown-previewer-path))
+
 (defun eaf--markdown-preview-display (buf)
   "Given BUF, split window to show file and previewer."
   (eaf-split-preview-windows

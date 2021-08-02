@@ -98,6 +98,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("system-monitor" . eaf-system-monitor-keybinding))
 
+(setq eaf-system-monitor-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("system-monitor" . eaf-system-monitor-module-path))
+
 ;;;###autoload
 (defun eaf-open-system-monitor ()
   "Open EAF system monitor."

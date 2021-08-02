@@ -111,6 +111,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("netease-cloud-music" . eaf-netease-cloud-music-keybinding))
 
+(setq eaf-netease-cloud-music-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("netease-cloud-music" . eaf-netease-cloud-music-module-path))
+
 (defun eaf--netease-cloud-music-change-playlist (pid)
   "Change the current playlist to PID."
   (when (featurep 'netease-cloud-music)

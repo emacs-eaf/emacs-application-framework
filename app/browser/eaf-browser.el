@@ -339,6 +339,9 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
 
 (add-to-list 'eaf-app-binding-alist '("browser" . eaf-browser-keybinding))
 
+(setq eaf-browser-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("browser" . eaf-browser-module-path))
+
 (defcustom eaf-browser-key-alias
   '(("C-a" . "<home>")
     ("C-e" . "<end>"))

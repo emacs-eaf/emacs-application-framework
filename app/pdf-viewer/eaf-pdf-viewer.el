@@ -166,6 +166,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("pdf-viewer" . eaf-pdf-viewer-keybinding))
 
+(setq eaf-pdf-viewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("pdf-viewer" . eaf-pdf-viewer-module-path))
+
 (define-minor-mode eaf-pdf-outline-mode
   "EAF pdf outline mode."
   :keymap (let ((map (make-sparse-keymap)))

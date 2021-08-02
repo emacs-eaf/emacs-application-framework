@@ -112,6 +112,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("image-viewer" . eaf-image-viewer-keybinding))
 
+(setq eaf-image-viewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("image-viewer" . eaf-image-viewer-module-path))
+
 (provide 'eaf-image-viewer)
 
 ;;; eaf-image-viewer.el ends here

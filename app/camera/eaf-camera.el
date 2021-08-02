@@ -95,6 +95,9 @@
 
 (add-to-list 'eaf-app-binding-alist '("camera" . eaf-camera-keybinding))
 
+(setq eaf-camera-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("camera" . eaf-camera-module-path))
+
 ;;;###autoload
 (defun eaf-open-camera ()
   "Open EAF camera application."
