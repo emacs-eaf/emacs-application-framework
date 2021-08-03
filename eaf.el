@@ -125,6 +125,7 @@ keybinding variable to this list.")
 (require 'eaf-music-player)
 (require 'eaf-system-monitor)
 (require 'eaf-file-manager)
+(require 'eaf-file-browser)
 (require 'eaf-demo)
 (require 'eaf-vue-demo)
 
