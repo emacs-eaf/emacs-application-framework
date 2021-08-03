@@ -136,7 +136,8 @@
     ("C-S-l" . "clear_selection")
     ("C-M-l" . "clear")
     ("M-DEL" . "eaf-send-alt-backspace-sequence")
-    ("M-<backspace>" . "eaf-send-alt-backspace-sequence"))
+    ("M-<backspace>" . "eaf-send-alt-backspace-sequence")
+    ("<escape>" . "eaf-send-escape-key"))
   "The keybinding of EAF Terminal."
   :type 'cons)
 

@@ -1025,6 +1025,11 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (interactive)
   (eaf-call-async "send_key" eaf--buffer-id "RET"))
 
+(defun eaf-send-escape-key ()
+  "Directly send escape key to EAF Python side."
+  (interactive)
+  (eaf-call-async "send_key" eaf--buffer-id "<escape>"))
+
 (defun eaf-send-key-sequence ()
   "Directly send key sequence to EAF Python side."
   (interactive)
