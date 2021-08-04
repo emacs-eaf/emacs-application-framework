@@ -20,10 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import QUrl
+from PyQt5 import QtCore
 from core.webengine import BrowserBuffer
 from core.utils import get_emacs_var
 from pathlib import Path
 from functools import cmp_to_key
+from core.utils import eval_in_emacs
 import os
 import json
 
@@ -44,12 +46,27 @@ class AppBuffer(BrowserBuffer):
 
         for (python_method_name, js_method_name) in [("select_next_file", "selectNextFile"),
                                                      ("select_prev_file", "selectPrevFile"),
+                                                     ("open_file", "openFile"),
+                                                     ("up_directory", "upDirectory"),
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
 
     def init_path(self):
-        path = os.path.expanduser(self.url)
-        search_path = Path(path)
+        self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+            get_emacs_var("eaf-emacs-theme-background-color"),
+            get_emacs_var("eaf-emacs-theme-foreground-color"),
+            self.arguments["header-color"],
+            get_emacs_var("eaf-emacs-theme-foreground-color"),
+            self.arguments["directory-color"],
+            self.arguments["symlink-color"],
+            self.arguments["select-color"],
+        ))
+
+        self.change_directory(self.url)
+
+    def get_files(self, path):
+        self.url = os.path.expanduser(path)
+        search_path = Path(self.url)
 
         file_infos = []
         for p in search_path.glob("*"):
@@ -71,18 +88,7 @@ class AppBuffer(BrowserBuffer):
 
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
-        self.buffer_widget.execute_js('''addPath(\"{}\");'''.format(path))
-        self.buffer_widget.execute_js('''addFiles({});'''.format(json.dumps(file_infos)))
-
-        self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            get_emacs_var("eaf-emacs-theme-background-color"),
-            get_emacs_var("eaf-emacs-theme-foreground-color"),
-            self.arguments["header-color"],
-            get_emacs_var("eaf-emacs-theme-foreground-color"),
-            self.arguments["directory-color"],
-            self.arguments["symlink-color"],
-            self.arguments["select-color"],
-        ))
+        return file_infos
 
     def file_compare(self, a, b):
         type_sort_weights = ["directory", "file", "symlink"]
@@ -99,3 +105,21 @@ class AppBuffer(BrowserBuffer):
                 return 0
         else:
             return a_type_weights - b_type_weights
+
+    @QtCore.pyqtSlot(str)
+    def open_file(self, file):
+        eval_in_emacs("find-file", [file])
+
+    @QtCore.pyqtSlot(str)
+    def change_directory(self, dir):
+        file_infos = self.get_files(dir)
+        self.buffer_widget.execute_js('''changePath(\"{}\", {});'''.format(self.url, json.dumps(file_infos)))
+
+    @QtCore.pyqtSlot(str)
+    def change_up_directory(self, file):
+        dir = os.path.dirname(file)
+        up_directory_path = Path(dir).parent.absolute()
+        if up_directory_path != dir:
+            self.change_directory(up_directory_path)
+        else:
+            eval_in_emacs("message", ["Already in root directory"])

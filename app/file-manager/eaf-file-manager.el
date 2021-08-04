@@ -88,6 +88,8 @@
   '(("<f12>" . "open_devtools")
     ("j" . "select_next_file")
     ("k" . "select_prev_file")
+    ("f" . "open_file")
+    ("'" . "up_directory")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)

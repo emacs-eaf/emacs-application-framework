@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "qwebchannel": "^5.9.0",
     "vue": "^2.6.11"
   },
   "devDependencies": {

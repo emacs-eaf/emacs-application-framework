@@ -5,7 +5,9 @@
       :style="{ 'color': headerForegroundColor() }">
       {{ path }}
     </div>
-    <div class="file-list">
+    <div
+      ref="filelist"
+      class="file-list">
       <div
         class="file"
         v-for="file in files"
@@ -18,6 +20,8 @@
 </template>
 
 <script>
+ import { QWebChannel } from "qwebchannel";
+
  export default {
    name: 'Main',
    props: {
@@ -39,18 +43,22 @@
      }
    },
    mounted() {
-     window.addPath = this.addPath;
-     window.addFiles = this.addFiles;
+     window.changePath = this.changePath;
      window.initColors = this.initColors;
      window.selectNextFile = this.selectNextFile;
      window.selectPrevFile = this.selectPrevFile;
+     window.openFile = this.openFile;
+     window.upDirectory = this.upDirectory;
+   },
+   created() {
+     // eslint-disable-next-line no-undef
+     new QWebChannel(qt.webChannelTransport, channel => {
+       window.pyobject = channel.objects.pyobject;
+     });
    },
    methods: {
-     addPath(path) {
+     changePath(path, files) {
        this.path = path;
-     },
-
-     addFiles(files) {
        this.files = files;
        this.currentIndex = 0;
        this.currentPath = files[this.currentIndex].path;
@@ -94,6 +102,8 @@
        }
 
        this.currentPath = this.files[this.currentIndex].path;
+
+       this.$refs.filelist.children[this.currentIndex].scrollIntoViewIfNeeded(false);
      },
 
      selectPrevFile() {
@@ -102,6 +112,22 @@
        }
 
        this.currentPath = this.files[this.currentIndex].path;
+
+       this.$refs.filelist.children[this.currentIndex].scrollIntoViewIfNeeded(false);
+     },
+
+     openFile() {
+       var currentFile = this.files[this.currentIndex];
+
+       if (currentFile.type == "directory") {
+         window.pyobject.change_directory(currentFile.path);
+       } else if (currentFile.type == "file") {
+         window.pyobject.open_file(currentFile.path);
+       }
+     },
+
+     upDirectory() {
+       window.pyobject.change_up_directory(this.currentPath);
      }
    }
  }
@@ -124,6 +150,7 @@
 
  .file-list {
    width: 100%;
+   height: 100%;
    overflow: hidden;
  }
 
