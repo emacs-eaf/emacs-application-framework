@@ -90,7 +90,8 @@ qt_key_dict.update({
     '''<next>''': Qt.Key_PageDown,
     '''<delete>''': Qt.Key_Delete,
     '''<backspace>''': Qt.Key_Backspace,
-    '''<return>''': Qt.Key_Return
+    '''<return>''': Qt.Key_Return,
+    '''<escape>''': Qt.Key_Escape
 })
 
 qt_text_dict = {

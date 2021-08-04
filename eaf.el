@@ -73,14 +73,16 @@
 
 ;;; Code:
 (require 'cl-lib)
-(require 'epc)
-(require 'epcs)
 (require 'json)
 (require 'map)
 (require 's)
 (require 'seq)
 (require 'subr-x)
 (require 'bookmark)
+
+(add-to-list 'load-path (expand-file-name "epc" (file-name-directory (locate-library "eaf"))))
+(require 'epc)
+(require 'epcs)
 
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
@@ -125,6 +127,7 @@ keybinding variable to this list.")
 (require 'eaf-music-player)
 (require 'eaf-system-monitor)
 (require 'eaf-file-manager)
+(require 'eaf-file-browser)
 (require 'eaf-demo)
 (require 'eaf-vue-demo)
 
@@ -999,50 +1002,33 @@ Including title-bar, menu-bar, offset depends on window system, and border."
   (interactive)
   (eaf-call-async "send_key" eaf--buffer-id (key-description (this-command-keys-vector))))
 
-(defun eaf-send-left-key ()
-  "Directly send left key to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key" eaf--buffer-id "<left>"))
-
-(defun eaf-send-right-key ()
-  "Directly send right key to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key" eaf--buffer-id "<right>"))
-
-(defun eaf-send-down-key ()
-  "Directly send down key to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key" eaf--buffer-id "<down>"))
-
-(defun eaf-send-up-key ()
-  "Directly send up key to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key" eaf--buffer-id "<up>"))
-
-(defun eaf-send-return-key ()
-  "Directly send return key to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key" eaf--buffer-id "RET"))
-
 (defun eaf-send-key-sequence ()
   "Directly send key sequence to EAF Python side."
   (interactive)
   (eaf-call-async "send_key_sequence" eaf--buffer-id (key-description (this-command-keys-vector))))
 
-(defun eaf-send-ctrl-return-sequence ()
-  "Directly send Ctrl-Return key sequence to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key_sequence" eaf--buffer-id "C-RET"))
+(defmacro eaf-create-send-key-function (key &optional value)
+  (let ((send-key-function (intern (format "eaf-send-%s-key" key))))
+    `(defun ,send-key-function()
+       (interactive)
+       (eaf-call-async "send_key" eaf--buffer-id (or ,value (format "<%s>" ,key))))))
 
-(defun eaf-send-alt-backspace-sequence ()
-  "Directly send Alt-Backspace key sequence to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key_sequence" eaf--buffer-id "M-<backspace>"))
+(defmacro eaf-create-send-sequence-function (key value)
+  (let ((send-key-sequence-function (intern (format "eaf-send-%s-sequence" key))))
+    `(defun ,send-key-sequence-function()
+       (interactive)
+       (eaf-call-async "send_key_sequence" eaf--buffer-id ,value))))
 
-(defun eaf-send-shift-return-sequence ()
-  "Directly send Shift-Return key sequence to EAF Python side."
-  (interactive)
-  (eaf-call-async "send_key_sequence" eaf--buffer-id "S-RET"))
+(eaf-create-send-key-function "left")
+(eaf-create-send-key-function "right")
+(eaf-create-send-key-function "down")
+(eaf-create-send-key-function "up")
+(eaf-create-send-key-function "escape")
+(eaf-create-send-key-function "return" "RET")
+
+(eaf-create-send-sequence-function "ctrl-return" "C-RET")
+(eaf-create-send-sequence-function "alt-backspace" "M-<backspace>")
+(eaf-create-send-sequence-function "shift-return" "S-RET")
 
 (defmacro eaf-bind-key (command key eaf-app-keybinding)
   "This function binds COMMAND to KEY in EAF-APP-KEYBINDING list.
