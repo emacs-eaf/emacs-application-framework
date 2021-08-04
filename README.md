@@ -120,9 +120,6 @@ If you prefer to manually call the installation script in the terminal,
 Feel free to inspect the install script yourself. An explanation of each dependency can be found at [Dependency List](#dependency-list).
 
 3. Install Elisp packages:
-- [emacs-ctable](https://github.com/kiwanami/emacs-ctable)
-- [emacs-deferred](https://github.com/kiwanami/emacs-deferred)
-- [emacs-epc](https://github.com/kiwanami/emacs-epc)
 - [s.el](https://github.com/magnars/s.el)
 
 4. From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
