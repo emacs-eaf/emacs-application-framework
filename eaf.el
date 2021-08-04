@@ -73,8 +73,6 @@
 
 ;;; Code:
 (require 'cl-lib)
-(require 'epc)
-(require 'epcs)
 (require 'json)
 (require 'map)
 (require 's)
@@ -98,17 +96,54 @@ keybinding variable to this list.")
 
 (defvar eaf-app-module-path-alist '())
 
+(defun eaf-add-subdirs-to-load-path ()
+  "Recursively add all subdirectories of `default-directory' to `load-path'.
+More precisely, this uses only the subdirectories whose names
+start with letters or digits; it excludes any subdirectory named `RCS'
+or `CVS', and any subdirectory that contains a file named `.nosearch'."
+  (let (dirs
+        attrs
+        (pending (list default-directory)))
+    ;; This loop does a breadth-first tree walk on DIR's subtree,
+    ;; putting each subdir into DIRS as its contents are examined.
+    (while pending
+      (push (pop pending) dirs)
+      (let* ((this-dir (car dirs))
+             (contents (directory-files this-dir))
+             (default-directory this-dir)
+             (canonicalized (if (fboundp 'w32-untranslated-canonical-name)
+                                (w32-untranslated-canonical-name this-dir))))
+        ;; The Windows version doesn't report meaningful inode numbers, so
+        ;; use the canonicalized absolute file name of the directory instead.
+        (setq attrs (or canonicalized
+                        (nthcdr 10 (file-attributes this-dir))))
+        (unless (member attrs normal-top-level-add-subdirs-inode-list)
+          (push attrs normal-top-level-add-subdirs-inode-list)
+          (dolist (file contents)
+            (and
+             ;; NOTE:
+             ;; Don't scan node_modules directories, such as EAF npm subdirectories.
+             (not (string-match-p "/node_modules" this-dir))
+
+             (string-match "\\`[[:alnum:]]" file)
+             ;; The lower-case variants of RCS and CVS are for DOS/Windows.
+             (not (member file '("RCS" "CVS" "rcs" "cvs")))
+             (file-directory-p file)
+             (let ((expanded (expand-file-name file)))
+               (or (file-exists-p (expand-file-name ".nosearch" expanded))
+                   (setq pending (nconc pending (list expanded))))))))))
+    (normal-top-level-add-to-load-path (cdr (nreverse dirs)))))
+
 (defun eaf-add-app-dirs-to-load-path ()
   "Add EAF app directories where .el exists to `load-path'."
-  (let ((app-dir (expand-file-name "app" (file-name-directory (locate-library "eaf")))))
-    (mapcar
-     (lambda (path) (add-to-list 'load-path path))
-     (cl-remove-if-not
-      (lambda (d) (and (file-directory-p d) (directory-files d t "\\.el$")))
-      (directory-files app-dir t directory-files-no-dot-files-regexp)))))
+  (let ((default-directory (file-name-directory (locate-library "eaf"))))
+    (add-to-list 'load-path default-directory)
+    (eaf-add-subdirs-to-load-path)))
 
 (eaf-add-app-dirs-to-load-path)
 
+(require 'epc)
+(require 'epcs)
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
 (require 'eaf-markdown-previewer)
