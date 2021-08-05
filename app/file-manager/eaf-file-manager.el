@@ -86,8 +86,10 @@
 
 (defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
+    ("h" . "up_directory")
     ("j" . "select_next_file")
     ("k" . "select_prev_file")
+    ("l" . "open_file")
     ("f" . "open_file")
     ("'" . "up_directory")
     )
