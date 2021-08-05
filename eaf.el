@@ -856,7 +856,9 @@ keybinding variable to eaf-app-binding-alist."
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (when (file-accessible-directory-p url-directory)
-        (setq-local default-directory url-directory))
+        (setq-local default-directory url-directory)
+        (when (file-exists-p url)
+          (setq-local buffer-file-name url)))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
