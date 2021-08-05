@@ -19,13 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QThread
 from PyQt5 import QtCore
 from core.webengine import BrowserBuffer
 from core.utils import get_emacs_var
 from pathlib import Path
 from functools import cmp_to_key
-from core.utils import eval_in_emacs
+from core.utils import eval_in_emacs, PostGui
 import os
 import json
 
@@ -50,6 +50,8 @@ class AppBuffer(BrowserBuffer):
                                                      ("up_directory", "upDirectory"),
                                                      ]:
             self.build_js_bridge_method(python_method_name, js_method_name)
+
+        self.fetch_preview_info_thread = None
 
     def init_path(self):
         self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
@@ -157,9 +159,36 @@ class AppBuffer(BrowserBuffer):
 
     @QtCore.pyqtSlot(str)
     def update_preview(self, file):
+        self.exit_preview_thread()
+
+        self.fetch_preview_info_thread = FetchPreviewInfoThread(file, self.get_files)
+        self.fetch_preview_info_thread.fetch_finish.connect(self.update_preview_info)
+        self.fetch_preview_info_thread.start()
+
+    def exit_preview_thread(self):
+        if self.fetch_preview_info_thread != None and self.fetch_preview_info_thread.isRunning():
+            self.fetch_preview_info_thread.exit()
+
+    def update_preview_info(self, file, file_type, file_infos):
+        self.buffer_widget.execute_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, file_infos))
+
+    def destroy_buffer(self):
+        self.exit_preview_thread()
+
+class FetchPreviewInfoThread(QThread):
+
+    fetch_finish = QtCore.pyqtSignal(str, str, str)
+
+    def __init__(self, file, get_files_callback):
+        QThread.__init__(self)
+
+        self.file = file
+        self.get_files_callback = get_files_callback
+
+    def run(self):
         path = ""
-        if file != "":
-            path = Path(file)
+        if self.file != "":
+            path = Path(self.file)
 
         file_type = ""
         file_infos = []
@@ -168,11 +197,8 @@ class AppBuffer(BrowserBuffer):
             file_type = "file"
         elif path.is_dir():
             file_type = "directory"
-            file_infos = self.get_files(file)
+            file_infos = self.get_files_callback(self.file)
         elif path.is_symlink():
             file_type = "symlink"
 
-        self.buffer_widget.execute_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, json.dumps(file_infos)))
-
-    def key_release(self):
-        self.buffer_widget.execute_js('''tryUpdatePreview()''')
+        self.fetch_finish.emit(self.file, file_type, json.dumps(file_infos))

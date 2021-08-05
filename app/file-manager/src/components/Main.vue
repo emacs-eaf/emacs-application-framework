@@ -81,7 +81,6 @@
        symlinkColor: "",
        selectColor: "",
 
-       previewLastPath: "",
        previewPath: "",
        previewType: "",
        previewFiles: [],
@@ -95,7 +94,6 @@
      window.openFile = this.openFile;
      window.upDirectory = this.upDirectory;
      window.setPreview = this.setPreview;
-     window.tryUpdatePreview = this.tryUpdatePreview;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -186,16 +184,7 @@
      },
 
      updatePreview() {
-       this.previewLastPath = this.files[this.currentIndex].path;
-     },
-
-     tryUpdatePreview() {
-       console.log("*****", this.previewLastPath);
-
-       if (this.previewLastPath != "") {
-         window.pyobject.update_preview(this.previewLastPath);
-         this.previewLastPath = "";
-       }
+       window.pyobject.update_preview(this.files[this.currentIndex].path);
      },
 
      setPreview(filePath, fileType, fileInfos) {

@@ -155,7 +155,6 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 | python-epc                     | 核心                         | EPC Python端                             |
 | python-pyqt5, python-pyqt5-sip | 核心                         | GUI图形库                                |
 | python-pyqtwebengine           | 核心                         | 基于Chromium的浏览器引擎                 |
-| python-pynput                  | 核心                               | 监听键盘按下和释放的状态                |
 | wmctrl                         | 核心                         | 激活Emacs窗口输入焦点                    |
 | pygetwindow                    | 核心                         | 从Windows中eaf激活WSL中Emacs窗口输入焦点 |
 | nodejs                         | 核心                         | 下载依赖与应用交互                       |
