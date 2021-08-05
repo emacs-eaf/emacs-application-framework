@@ -92,6 +92,7 @@
     ("l" . "open_file")
     ("f" . "open_file")
     ("'" . "up_directory")
+    ("q" . "bury-buffer")
     )
   "The keybinding of EAF File Manager."
   :type 'cons)
