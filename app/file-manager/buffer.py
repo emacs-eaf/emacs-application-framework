@@ -173,3 +173,6 @@ class AppBuffer(BrowserBuffer):
             file_type = "symlink"
 
         self.buffer_widget.execute_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, json.dumps(file_infos)))
+
+    def key_release(self):
+        self.buffer_widget.execute_js('''tryUpdatePreview()''')

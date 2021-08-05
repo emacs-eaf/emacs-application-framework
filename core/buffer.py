@@ -269,6 +269,14 @@ class Buffer(QGraphicsScene):
     def update_with_data(self, update_data):
         pass
 
+    @abstract
+    def key_press(self):
+        pass
+
+    @abstract
+    def key_release(self):
+        pass
+
     def execute_function(self, function_name):
         ''' Execute function.'''
         getattr(self, function_name)()

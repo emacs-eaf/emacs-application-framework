@@ -7,4 +7,5 @@ qtconsole
 markdown
 epc
 retrying
+pynput
 pygetwindow; sys_platform == 'win32'

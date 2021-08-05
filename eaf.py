@@ -42,6 +42,7 @@ import subprocess
 import threading
 if platform.system() == "Windows":
     import pygetwindow as gw
+from pynput import keyboard
 
 class EAF(object):
     def __init__(self, args):
@@ -93,6 +94,20 @@ class EAF(object):
 
         if proxy_type != "" and proxy_host != "" and proxy_port != "":
             self.enable_proxy()
+
+        # Monitor keyboard event.
+        listener = keyboard.Listener(
+            on_press=self.on_key_press,
+            on_release=self.on_key_release)
+        listener.start()
+
+    def on_key_press(self, key):
+        for buffer in list(self.buffer_dict.values()):
+            buffer.key_press()
+
+    def on_key_release(self, key):
+        for buffer in list(self.buffer_dict.values()):
+            buffer.key_release()
 
     def enable_proxy(self):
         global proxy_string
