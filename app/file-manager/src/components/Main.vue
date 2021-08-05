@@ -5,19 +5,52 @@
       :style="{ 'color': headerForegroundColor() }">
       {{ path }}
     </div>
-    <div
-      ref="filelist"
-      class="file-list">
+    <div class="content">
       <div
-        class="file"
-        v-for="file in files"
-        :key="file.path"
-        :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
-        <div class="file-name">
-          {{ file.name }}
+        ref="filelist"
+        class="file-list">
+        <div
+          class="file"
+          v-for="file in files"
+          :key="file.path"
+          :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
+          <div class="file-name">
+            {{ file.name }}
+          </div>
+          <div class="file-size">
+            {{ file.size }}
+          </div>
         </div>
-        <div class="file-size">
-          {{ file.size }}
+      </div>
+      <div class="preview">
+        <div v-if="previewType == 'file'">
+        </div>
+        <div
+          v-if="previewType == 'directory' && previewFiles.length > 0"
+          class="preview-file-list">
+          <div
+            class="file"
+            v-for="file in previewFiles"
+            :key="file.path"
+            :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
+            <div class="file-name">
+              {{ file.name }}
+            </div>
+            <div class="file-size">
+              {{ file.size }}
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="previewType == 'directory'"
+          class="preview-empty-directory">
+          <div class="empty-directory-info-warp">
+            <div class="empty-directory-info">
+              Empty directory.
+            </div>
+          </div>
+        </div>
+        <div v-if="previewType == 'symlink'">
         </div>
       </div>
     </div>
@@ -29,6 +62,8 @@
 
  export default {
    name: 'Main',
+   components: {
+   },
    props: {
      msg: String
    },
@@ -45,6 +80,10 @@
        directoryColor: "",
        symlinkColor: "",
        selectColor: "",
+
+       previewPath: "",
+       previewType: "",
+       previewFiles: [],
      }
    },
    mounted() {
@@ -54,6 +93,7 @@
      window.selectPrevFile = this.selectPrevFile;
      window.openFile = this.openFile;
      window.upDirectory = this.upDirectory;
+     window.setPreview = this.setPreview;
    },
    created() {
      // eslint-disable-next-line no-undef
@@ -108,7 +148,9 @@
 
        this.currentPath = this.files[this.currentIndex].path;
 
-       this.$refs.filelist.children[this.currentIndex].scrollIntoViewIfNeeded(false);
+       this.keepSelectVisible();
+
+       this.updatePreview();
      },
 
      selectPrevFile() {
@@ -118,6 +160,12 @@
 
        this.currentPath = this.files[this.currentIndex].path;
 
+       this.keepSelectVisible();
+
+       this.updatePreview();
+     },
+
+     keepSelectVisible() {
        this.$refs.filelist.children[this.currentIndex].scrollIntoViewIfNeeded(false);
      },
 
@@ -133,6 +181,16 @@
 
      upDirectory() {
        window.pyobject.change_up_directory(this.currentPath);
+     },
+
+     updatePreview() {
+       window.pyobject.update_preview(this.files[this.currentIndex].path);
+     },
+
+     setPreview(filePath, fileType, fileInfos) {
+       this.previewPath = filePath;
+       this.previewType = fileType;
+       this.previewFiles = fileInfos;
      }
    }
  }
@@ -154,7 +212,7 @@
  }
 
  .file-list {
-   width: 100%;
+   width: 50%;
    height: 100%;
    overflow: hidden;
  }
@@ -175,5 +233,46 @@
 
  .file-size {
    padding-right: 20px;
+ }
+
+ .preview {
+   width: 50%;
+   height: 100%;
+   overflow: hidden;
+
+   border-left: 1px solid;
+ }
+
+ .content {
+   width: 100%;
+   height: 100%;
+   overflow: hidden;
+
+   display: flex;
+   flex-direction: row;
+ }
+
+ .preview-file-list {
+   width: 100%;
+   height: 100%;
+   overflow: hidden;
+ }
+
+ .preview-empty-directory {
+   width: 100%;
+   height: 100%;
+   overflow: hidden;
+ }
+
+ .empty-directory-info-warp {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+ }
+
+ .empty-directory-info {
+   text-align: center;
  }
 </style>

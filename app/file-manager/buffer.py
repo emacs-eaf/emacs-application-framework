@@ -136,7 +136,15 @@ class AppBuffer(BrowserBuffer):
             files = list(map(lambda file: file["path"], file_infos))
             select_index = files.index(current_dir)
 
-        self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(self.url, json.dumps(file_infos), select_index))
+        self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(
+            self.url,
+            json.dumps(file_infos),
+            select_index))
+
+        if file_infos == []:
+            self.update_preview("")
+        else:
+            self.update_preview(file_infos[select_index]["path"])
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
@@ -146,3 +154,22 @@ class AppBuffer(BrowserBuffer):
             self.change_directory(up_directory_path, current_dir)
         else:
             eval_in_emacs("message", ["Already in root directory"])
+
+    @QtCore.pyqtSlot(str)
+    def update_preview(self, file):
+        path = ""
+        if file != "":
+            path = Path(file)
+
+        file_type = ""
+        file_infos = []
+
+        if path.is_file():
+            file_type = "file"
+        elif path.is_dir():
+            file_type = "directory"
+            file_infos = self.get_files(file)
+        elif path.is_symlink():
+            file_type = "symlink"
+
+        self.buffer_widget.execute_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, json.dumps(file_infos)))
