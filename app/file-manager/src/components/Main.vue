@@ -13,7 +13,12 @@
         v-for="file in files"
         :key="file.path"
         :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
-        {{ file.name }}
+        <div class="file-name">
+          {{ file.name }}
+        </div>
+        <div class="file-size">
+          {{ file.size }}
+        </div>
       </div>
     </div>
   </div>
@@ -162,5 +167,13 @@
 
    display: flex;
    flex-direction: row;
+ }
+
+ .file-name {
+   flex: 1;
+ }
+
+ .file-size {
+   padding-right: 20px;
  }
 </style>

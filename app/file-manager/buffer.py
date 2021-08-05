@@ -71,17 +71,24 @@ class AppBuffer(BrowserBuffer):
         file_infos = []
         for p in search_path.glob("*"):
             if not p.name.startswith("."):
-                file_type = "file"
+                file_type = ""
+                file_size = ""
 
-                if p.is_dir():
+                if p.is_file():
+                    file_type = "file"
+                    file_size = self.file_size_format(os.path.getsize(p.absolute()))
+                elif p.is_dir():
                     file_type = "directory"
+                    file_size = str(self.get_dir_file_number(p.absolute()))
                 elif p.is_symlink():
                     file_type = "symlink"
+                    file_size = "1"
 
                 file_info = {
                     "path": str(p.absolute()),
                     "name": p.name,
-                    "type": file_type
+                    "type": file_type,
+                    "size": file_size
                 }
 
                 file_infos.append(file_info)
@@ -89,6 +96,16 @@ class AppBuffer(BrowserBuffer):
         file_infos.sort(key=cmp_to_key(self.file_compare))
 
         return file_infos
+
+    def file_size_format(self, num, suffix='B'):
+        for unit in ['','K','M','G','T','P','E','Z']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
+
+    def get_dir_file_number(self, dir):
+        return len(list(filter(lambda f: not f.startswith("."), (os.listdir(dir)))))
 
     def file_compare(self, a, b):
         type_sort_weights = ["directory", "file", "symlink"]
@@ -114,7 +131,7 @@ class AppBuffer(BrowserBuffer):
     def change_directory(self, dir, current_dir):
         file_infos = self.get_files(dir)
         select_index = 0
-        
+
         if current_dir != "":
             files = list(map(lambda file: file["path"], file_infos))
             select_index = files.index(current_dir)
