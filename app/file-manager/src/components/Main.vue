@@ -57,10 +57,10 @@
      });
    },
    methods: {
-     changePath(path, files) {
+     changePath(path, files, index) {
        this.path = path;
        this.files = files;
-       this.currentIndex = 0;
+       this.currentIndex = index;
        this.currentPath = files[this.currentIndex].path;
      },
 
@@ -120,7 +120,7 @@
        var currentFile = this.files[this.currentIndex];
 
        if (currentFile.type == "directory") {
-         window.pyobject.change_directory(currentFile.path);
+         window.pyobject.change_directory(currentFile.path, "");
        } else if (currentFile.type == "file") {
          window.pyobject.open_file(currentFile.path);
        }

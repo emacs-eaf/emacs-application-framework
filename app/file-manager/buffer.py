@@ -62,7 +62,7 @@ class AppBuffer(BrowserBuffer):
             self.arguments["select-color"],
         ))
 
-        self.change_directory(self.url)
+        self.change_directory(self.url, "")
 
     def get_files(self, path):
         self.url = os.path.expanduser(path)
@@ -110,16 +110,22 @@ class AppBuffer(BrowserBuffer):
     def open_file(self, file):
         eval_in_emacs("find-file", [file])
 
-    @QtCore.pyqtSlot(str)
-    def change_directory(self, dir):
+    @QtCore.pyqtSlot(str, str)
+    def change_directory(self, dir, current_dir):
         file_infos = self.get_files(dir)
-        self.buffer_widget.execute_js('''changePath(\"{}\", {});'''.format(self.url, json.dumps(file_infos)))
+        select_index = 0
+        
+        if current_dir != "":
+            files = list(map(lambda file: file["path"], file_infos))
+            select_index = files.index(current_dir)
+
+        self.buffer_widget.execute_js('''changePath(\"{}\", {}, {});'''.format(self.url, json.dumps(file_infos), select_index))
 
     @QtCore.pyqtSlot(str)
     def change_up_directory(self, file):
-        dir = os.path.dirname(file)
-        up_directory_path = Path(dir).parent.absolute()
-        if up_directory_path != dir:
-            self.change_directory(up_directory_path)
+        current_dir = os.path.dirname(file)
+        up_directory_path = Path(current_dir).parent.absolute()
+        if up_directory_path != current_dir:
+            self.change_directory(up_directory_path, current_dir)
         else:
             eval_in_emacs("message", ["Already in root directory"])
