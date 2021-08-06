@@ -1268,7 +1268,7 @@ By default, `eaf-open' will switch to buffer if corresponding url exists.
 `eaf-open' always open new buffer if option OPEN-ALWAYS is non-nil.
 
 When called interactively, URL accepts a file that can be opened by EAF."
-  (interactive "F[EAF] EAF Open: ")
+  (interactive "G[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
     (when (and eaf-pdf-store-history (string-match "^\\(.+\\)\\.pdf$" url))
@@ -1276,23 +1276,25 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
-    (let* ((extension-name (eaf-get-file-name-extension url)))
-      ;; Initialize url, app-name and args
-      (setq app-name (eaf--get-app-for-extension extension-name))
-      (cond
-       ((equal app-name "browser")
-        (setq url (concat "file://" url)))
-       ((equal app-name "office")
-        (user-error "Please use `eaf-open-office' instead!"))
-       ((equal app-name "markdown-previewer")
-        ;; Warning user install java if found PlantUML syntax in markdown file.
-        (with-temp-buffer
-          (insert-file-contents url)
-          (goto-char (point-min))
-          (when (search-forward "```puml" nil t)
-            (unless (executable-find "java")
-              (user-error (format "Have PlantUML code in file '%s', you need to install Java to preview normally." url))
-              )))))))
+    (if (file-directory-p url)
+        (setq app-name "file-manager")
+      (let* ((extension-name (eaf-get-file-name-extension url)))
+        ;; Initialize url, app-name and args
+        (setq app-name (eaf--get-app-for-extension extension-name))
+        (cond
+         ((equal app-name "browser")
+          (setq url (concat "file://" url)))
+         ((equal app-name "office")
+          (user-error "Please use `eaf-open-office' instead!"))
+         ((equal app-name "markdown-previewer")
+          ;; Warning user install java if found PlantUML syntax in markdown file.
+          (with-temp-buffer
+            (insert-file-contents url)
+            (goto-char (point-min))
+            (when (search-forward "```puml" nil t)
+              (unless (executable-find "java")
+                (user-error (format "Have PlantUML code in file '%s', you need to install Java to preview normally." url))
+                ))))))))
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
