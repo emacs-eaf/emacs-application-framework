@@ -1418,9 +1418,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
 
-(defun eaf-get-theme-select-color ()
-  (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)))
-
 (defcustom eaf-emacs-theme-mode (eaf-get-theme-mode)
   ""
   :type 'string)
@@ -1430,10 +1427,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   :type 'string)
 
 (defcustom eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)
-  ""
-  :type 'string)
-
-(defcustom eaf-emacs-theme-select-color (eaf-get-theme-select-color)
   ""
   :type 'string)
 

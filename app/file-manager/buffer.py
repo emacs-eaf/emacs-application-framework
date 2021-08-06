@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import QUrl, QThread
+from PyQt5.QtGui import QColor
 from PyQt5 import QtCore
 from core.webengine import BrowserBuffer
 from core.utils import get_emacs_var
@@ -61,7 +62,7 @@ class AppBuffer(BrowserBuffer):
                 get_emacs_var("eaf-file-manager-dark-header-color"),
                 get_emacs_var("eaf-file-manager-dark-directory-color"),
                 get_emacs_var("eaf-file-manager-dark-symlink-color"),
-                get_emacs_var("eaf-emacs-theme-select-color"),
+                QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(120).name()
             ))
         else:
             self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
@@ -70,7 +71,7 @@ class AppBuffer(BrowserBuffer):
                 get_emacs_var("eaf-file-manager-light-header-color"),
                 get_emacs_var("eaf-file-manager-light-directory-color"),
                 get_emacs_var("eaf-file-manager-light-symlink-color"),
-                get_emacs_var("eaf-emacs-theme-select-color"),
+                QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
             ))
 
         self.change_directory(self.url, "")
