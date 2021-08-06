@@ -646,6 +646,19 @@ class BrowserBuffer(Buffer):
 
         self.settings = QWebEngineSettings.globalSettings()
         try:
+            font_family = get_emacs_var('eaf-browser-font-family')
+            if font_family:
+                for ff in (
+                        self.settings.StandardFont,
+                        self.settings.FixedFont,
+                        self.settings.SerifFont,
+                        self.settings.SansSerifFont,
+                        self.settings.CursiveFont,
+                        self.settings.FantasyFont,
+                        self.settings.PictographFont
+                ):
+                    self.settings.setFontFamily(ff, font_family)
+
             self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
@@ -661,19 +674,6 @@ class BrowserBuffer(Buffer):
             elif get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowAllUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowAllUnknownUrlSchemes)
 
-            font_family = get_emacs_var('eaf-browser-font-family')
-            if font_family:
-                for ff in (
-                        self.settings.StandardFont,
-                        self.settings.FixedFont,
-                        self.settings.SerifFont,
-                        self.settings.SansSerifFont,
-                        # What's these font families?
-                        # self.settings.CursiveFont,
-                        # self.settings.FantasyFont,
-                        # self.settings.PictographFont
-                ):
-                    self.settings.setFontFamily(ff, font_family)
         except Exception:
             pass
 
