@@ -667,11 +667,13 @@ class BrowserBuffer(Buffer):
             self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, get_emacs_var("eaf-browser-enable-javascript"))
             self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, get_emacs_var("eaf-browser-enable-scrollbar"))
 
-            if get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "DisallowUnknownUrlSchemes":
+            unkown_url_scheme_policy = get_emacs_var("eaf-browser-unknown-url-scheme-policy")
+
+            if unknown_url_scheme_policy == "DisallowUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
-            elif get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowUnknownUrlSchemesFromUserInteraction":
+            elif unknown_url_scheme_policy == "AllowUnknownUrlSchemesFromUserInteraction":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowUnknownUrlSchemesFromUserInteraction)
-            elif get_emacs_var("eaf-browser-unknown-url-scheme-policy") == "AllowAllUnknownUrlSchemes":
+            elif unknown_url_scheme_policy == "AllowAllUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowAllUnknownUrlSchemes)
 
         except Exception:
