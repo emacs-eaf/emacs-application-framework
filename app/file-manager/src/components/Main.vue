@@ -24,6 +24,10 @@
       </div>
       <div class="preview">
         <div v-if="previewType == 'file'">
+          <img
+            v-if="previewMime == 'image'"
+            class="file-image"
+            :src="previewPath"/>
         </div>
         <div
           v-if="previewType == 'directory' && previewFiles.length > 0"
@@ -84,6 +88,7 @@
        previewPath: "",
        previewType: "",
        previewFiles: [],
+       previewMime: "",
      }
    },
    mounted() {
@@ -191,6 +196,16 @@
        this.previewPath = filePath;
        this.previewType = fileType;
        this.previewFiles = fileInfos;
+
+       if (fileType == "file") {
+         var mime = fileInfos[0]["mime"]
+         console.log("***** ", filePath, mime)
+         if (mime.startsWith("image/")) {
+           this.previewMime = "image"
+         } else if (mime.startsWith("text/")) {
+           this.previewMime = "text"
+         }
+       }
      }
    }
  }
@@ -274,5 +289,10 @@
 
  .empty-directory-info {
    text-align: center;
+ }
+
+ .file-image {
+   width: 100%;
+   height: 100%;
  }
 </style>

@@ -26,6 +26,7 @@ from core.utils import get_emacs_var
 from pathlib import Path
 from functools import cmp_to_key
 from core.utils import eval_in_emacs, PostGui
+import magic
 import os
 import json
 
@@ -195,6 +196,9 @@ class FetchPreviewInfoThread(QThread):
 
         if path.is_file():
             file_type = "file"
+            file_infos = [{
+                "mime": magic.Magic(mime=True).from_file(str(path.absolute()))
+            }]
         elif path.is_dir():
             file_type = "directory"
             file_infos = self.get_files_callback(self.file)

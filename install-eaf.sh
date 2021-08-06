@@ -92,9 +92,9 @@ fi
 if [ $IGNORE_PY_DEPS ]; then
     :
 elif [ "$(command -v pip3)" ]; then
-    pip3 install --user pymupdf epc retrying pytaglib psutil || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
+    pip3 install --user pymupdf epc retrying pytaglib psutil python-magic || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
 elif [ "$(command -v pip)" ]; then
-    pip install --user pymupdf epc retrying pytaglib psutil || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
+    pip install --user pymupdf epc retrying pytaglib psutil python-magic || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
 else
     echo "[EAF] Cannot find pip. Please install it before launching the script again."
     exit 1

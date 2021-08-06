@@ -170,6 +170,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-retrying                | Markdown Previewer                   | Provide @retry                                                     |
 | python-pytaglib                | Music Player                         | Parse ID3 tag                                                      |
 | python-psutil                  | System Monitor                       | Retrieving information on running processes and system utilization |
+| python-magic                   | File Manager                         | Get the MIME type of the file                                      |
 
 Some EAF application may have `npm` dependencies, please refer to the corresponding `app/name/package.json` for details.
 
