@@ -33,8 +33,13 @@
           <pre
             v-if="previewMime == 'text'"
             class="file-text">
-{{ previewContent }}
+            {{ previewContent }}
           </pre>
+          <pdf
+            v-if="previewMime == 'pdf'"
+            :src="previewPath"
+            :key="dynamicKey"
+          ></pdf>
         </div>
         <div
           v-if="previewType == 'directory' && previewFiles.length > 0"
@@ -70,10 +75,12 @@
 
 <script>
  import { QWebChannel } from "qwebchannel";
+ import pdf from 'pdfvuer'
 
  export default {
    name: 'Main',
    components: {
+     pdf
    },
    props: {
      msg: String
@@ -208,11 +215,16 @@
        if (fileType == "file") {
          var mime = fileInfos[0]["mime"]
          console.log("***** ", filePath, mime)
+
          if (mime.startsWith("image/")) {
            this.previewMime = "image"
          } else if (mime.startsWith("text/")) {
            this.previewMime = "text"
            this.previewContent = fileInfos[0]["content"]
+         } else if (mime == "application/pdf") {
+           this.previewMime = "pdf"
+           /* Make pdfvuer can render after load new pdf file. */
+           this.dynamicKey = Math.random(10000);
          }
        }
      }
