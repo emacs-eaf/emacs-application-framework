@@ -1404,7 +1404,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 (defun eaf-get-face-attribute (candicates attribute)
   "Get a face `ATTRIBUTE' from face `CANDICATES' which is specified."
   (or (car (seq-filter (lambda (attr) (not (eq attr 'unspecified)))
-                       (mapcar (lambda (face) (face-attribute face attribute))
+                       (mapcar (lambda (face) (face-attribute face attribute nil t))
                                candicates)))
       'unspecified))
 
