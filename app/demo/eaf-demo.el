@@ -1,4 +1,4 @@
-;;; eaf-demo.el --- Demo
+;;; eaf-demo.el --- Demo  -*- lexical-binding: t; -*-
 
 ;; Filename: eaf-demo.el
 ;; Description: Demo
@@ -89,6 +89,9 @@
   "Open EAF demo screen to verify that EAF is working properly."
   (interactive)
   (eaf-open "eaf-demo" "demo"))
+
+(setq eaf-demo-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("demo" . eaf-demo-module-path))
 
 (provide 'eaf-demo)
 
