@@ -195,9 +195,16 @@ class FetchPreviewInfoThread(QThread):
         file_infos = []
 
         if path.is_file():
+            mime = magic.Magic(mime=True).from_file(str(path.absolute()))
+            content = ""
+            if mime.startswith("text/"):
+                with open(str(path.absolute())) as f:
+                    content = f.read()
+
             file_type = "file"
             file_infos = [{
-                "mime": magic.Magic(mime=True).from_file(str(path.absolute()))
+                "mime": mime,
+                "content": content
             }]
         elif path.is_dir():
             file_type = "directory"

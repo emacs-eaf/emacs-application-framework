@@ -23,11 +23,18 @@
         </div>
       </div>
       <div class="preview">
-        <div v-if="previewType == 'file'">
+        <div
+          v-if="previewType == 'file'"
+          class="preview-file">
           <img
             v-if="previewMime == 'image'"
             class="file-image"
             :src="previewPath"/>
+          <pre
+            v-if="previewMime == 'text'"
+            class="file-text">
+{{ previewContent }}
+          </pre>
         </div>
         <div
           v-if="previewType == 'directory' && previewFiles.length > 0"
@@ -89,6 +96,7 @@
        previewType: "",
        previewFiles: [],
        previewMime: "",
+       previewContent: "",
      }
    },
    mounted() {
@@ -204,6 +212,7 @@
            this.previewMime = "image"
          } else if (mime.startsWith("text/")) {
            this.previewMime = "text"
+           this.previewContent = fileInfos[0]["content"]
          }
        }
      }
@@ -267,6 +276,12 @@
    flex-direction: row;
  }
 
+ .preview-file {
+   width: 100%;
+   height: 100%;
+   overflow: hidden;
+ }
+
  .preview-file-list {
    width: 100%;
    height: 100%;
@@ -293,6 +308,11 @@
 
  .file-image {
    width: 100%;
-   height: 100%;
+ }
+
+ .file-text {
+   padding-left: 20px;
+   padding-right: 20px;
+   margin: 0;
  }
 </style>
