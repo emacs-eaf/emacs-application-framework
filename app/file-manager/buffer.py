@@ -37,7 +37,6 @@ class AppBuffer(BrowserBuffer):
         self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
-        self.arguments = json.loads(arguments)
 
         with open(self.index_file, "r") as f:
             html = self.convert_index_html(f.read(), self.index_file_dir)
@@ -55,15 +54,24 @@ class AppBuffer(BrowserBuffer):
         self.fetch_preview_info_thread = None
 
     def init_path(self):
-        self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
-            get_emacs_var("eaf-emacs-theme-background-color"),
-            get_emacs_var("eaf-emacs-theme-foreground-color"),
-            self.arguments["header-color"],
-            get_emacs_var("eaf-emacs-theme-foreground-color"),
-            self.arguments["directory-color"],
-            self.arguments["symlink-color"],
-            self.arguments["select-color"],
-        ))
+        if get_emacs_var("eaf-emacs-theme-mode") == "dark":
+            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+                get_emacs_var("eaf-emacs-theme-background-color"),
+                get_emacs_var("eaf-emacs-theme-foreground-color"),
+                get_emacs_var("eaf-file-manager-dark-header-color"),
+                get_emacs_var("eaf-file-manager-dark-directory-color"),
+                get_emacs_var("eaf-file-manager-dark-symlink-color"),
+                get_emacs_var("eaf-emacs-theme-select-color"),
+            ))
+        else:
+            self.buffer_widget.execute_js('''initColors(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")'''.format(
+                get_emacs_var("eaf-emacs-theme-background-color"),
+                get_emacs_var("eaf-emacs-theme-foreground-color"),
+                get_emacs_var("eaf-file-manager-light-header-color"),
+                get_emacs_var("eaf-file-manager-light-directory-color"),
+                get_emacs_var("eaf-file-manager-light-symlink-color"),
+                get_emacs_var("eaf-emacs-theme-select-color"),
+            ))
 
         self.change_directory(self.url, "")
 

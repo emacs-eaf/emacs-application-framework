@@ -106,30 +106,31 @@
 (defun eaf-open-file-manager ()
   "Open EAF file manager."
   (interactive)
-  (let* ((args (make-hash-table :test 'equal)))
-    (puthash "header-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-header-face) :foreground)) args)
-    (puthash "directory-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-directory-face) :foreground)) args)
-    (puthash "symlink-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list dired-symlink-face) :foreground)) args)
-    (puthash "select-color" (eaf-color-name-to-hex (eaf-get-face-attribute (list hl-line-face) :background)) args)
-    (eaf-open "~" "file-manager" (json-encode-hash-table args))
-    ))
+  (eaf-open "~" "file-manager"))
 
-(defun eaf-color-int-to-hex (int)
-  (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
+(defcustom eaf-file-manager-dark-header-color "#EEC900"
+  ""
+  :type 'string)
 
-(defun eaf-color-name-to-hex (color)
-  (let ((components (x-color-values color)))
-    (concat "#"
-            (eaf-color-int-to-hex (nth 0 components))
-            (eaf-color-int-to-hex (nth 1 components))
-            (eaf-color-int-to-hex (nth 2 components)))))
+(defcustom eaf-file-manager-dark-directory-color "#00B8FF"
+  ""
+  :type 'string)
 
-(defun eaf-get-face-attribute (candicates attribute)
-  "Get a face `ATTRIBUTE' from face `CANDICATES' which is specified."
-  (or (car (seq-filter (lambda (attr) (not (eq attr 'unspecified)))
-                       (mapcar (lambda (face) (face-attribute face attribute))
-                               candicates)))
-      'unspecified))
+(defcustom eaf-file-manager-dark-symlink-color "#46D9FF"
+  ""
+  :type 'string)
+
+(defcustom eaf-file-manager-light-header-color "#7E4C8D"
+  ""
+  :type 'string)
+
+(defcustom eaf-file-manager-light-directory-color "#2257A0"
+  ""
+  :type 'string)
+
+(defcustom eaf-file-manager-light-symlink-color "#46D9FF"
+  ""
+  :type 'string)
 
 (provide 'eaf-file-manager)
 

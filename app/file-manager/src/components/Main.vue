@@ -122,11 +122,11 @@
        this.currentPath = files[this.currentIndex].path;
      },
 
-     initColors(backgroundColor, foregroundColor, headerColor, fileColor, directoryColor, symlinkColor, selectColor) {
+     initColors(backgroundColor, foregroundColor, headerColor, directoryColor, symlinkColor, selectColor) {
        this.backgroundColor = backgroundColor;
        this.foregroundColor = foregroundColor;
+       this.fileColor = foregroundColor;
        this.headerColor = headerColor;
-       this.fileColor = fileColor;
        this.directoryColor = directoryColor;
        this.symlinkColor = symlinkColor;
        this.selectColor = selectColor;
