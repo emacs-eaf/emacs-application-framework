@@ -88,21 +88,21 @@ https://github.com/manateelazycat/emacs-application-framework for the script to 
     exit 1
 fi
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 # Python dependencies
-PYTHON_PIP_PACKAGES="pymupdf epc retrying pytaglib psutil python-magic"
 if [ $IGNORE_PY_DEPS ]; then
     :
 elif [ "$(command -v pip3)" ]; then
-    pip3 install --user $PYTHON_PIP_PACKAGES || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
+    (cd $SCRIPT_DIR && pip3 install --user -r requirements.txt) || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
 elif [ "$(command -v pip)" ]; then
-    pip install --user $PYTHON_PIP_PACKAGES || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
+    (cd $SCRIPT_DIR && pip install --user -r requirements.txt) || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
 else
     echo "[EAF] Cannot find pip. Please install it before launching the script again."
     exit 1
 fi
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
+# NPM dependencies
 if [ $IGNORE_NPM_DEPS ]; then
     :
 else
