@@ -446,7 +446,7 @@ class PdfPage(fitz.Page):
     def get_qpixmap(self, scale, *args):
         if self.isPDF:
             self.page.setCropBox(self.clip)
-        pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
+        pixmap = self.page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
 
