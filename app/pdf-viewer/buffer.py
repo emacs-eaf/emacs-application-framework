@@ -364,13 +364,13 @@ class PdfPage(fitz.Page):
             # the rawdict bbox coordinate is wrong
             # cause the select text failed
             self.page.setCropBox(self.clip)
-            d = self.page.getText("rawdict")
+            d = self.page.get_text("rawdict")
             # cancel the cropbox, if not, will cause the pixmap set cropbox
             # don't begin on top-left(0, 0), page display black margin
             self.page.setCropBox(self.page.MediaBox)
             return d
         else:
-            return self.page.getText("rawdict")
+            return self.page.get_text("rawdict")
 
     def _init_page_char_rect_list(self):
         '''Collection page char rect list when page init'''
