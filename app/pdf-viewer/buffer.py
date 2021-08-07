@@ -469,10 +469,10 @@ class PdfPage(fitz.Page):
             # exclude image only support PDF document
             imagelist = None
             try:
-                imagelist = page.getImageList(full=True)
+                imagelist = page.get_images(full=True)
             except Exception:
                 # PyMupdf 1.14 not include argument 'full'.
-                imagelist = page.getImageList()
+                imagelist = page.get_images()
 
             imagebboxlist = []
             for image in imagelist:
