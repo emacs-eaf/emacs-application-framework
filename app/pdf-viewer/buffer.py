@@ -504,7 +504,7 @@ class PdfPage(fitz.Page):
             self._mark_link_annot_list = []
 
     def mark_search_text(self, keyword):
-        quads_list = self.page.searchFor(keyword, hit_max=999, quads=True)
+        quads_list = self.page.search_for(keyword, hit_max=999, quads=True)
         if quads_list:
             for quads in quads_list:
                 annot = self.page.addHighlightAnnot(quads)
