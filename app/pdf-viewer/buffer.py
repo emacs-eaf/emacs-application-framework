@@ -435,7 +435,7 @@ class PdfPage(fitz.Page):
         return None
 
     def set_rotation(self, rotation):
-        self.page.setRotation(rotation)
+        self.page.set_rotation(rotation)
         if rotation % 180 != 0:
             self.page_width = self.page.cropbox.height
             self.page_height = self.page.cropbox.width
