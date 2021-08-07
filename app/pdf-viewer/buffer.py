@@ -203,7 +203,7 @@ class AppBuffer(Buffer):
 
     def get_toc(self):
         result = ""
-        toc = self.buffer_widget.document.getToC()
+        toc = self.buffer_widget.document.get_toc()
         for line in toc:
             result += "{0}{1} {2}\n".format("".join("    " * (line[0] - 1)), line[1], line[2])
         return result
