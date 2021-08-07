@@ -486,7 +486,7 @@ class PdfPage(fitz.Page):
                     pass
 
             for bbox in imagebboxlist:
-                pixmap.invert_irect(bbox * page.rotationMatrix * scale)
+                pixmap.invert_irect(bbox * page.rotation_matrix * scale)
 
         return fn
 
