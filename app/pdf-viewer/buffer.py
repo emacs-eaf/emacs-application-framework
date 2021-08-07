@@ -249,7 +249,7 @@ class PdfDocument(fitz.Document):
             if not self._is_trim_margin:
                 return page
 
-            if page.CropBox == self._document_page_clip:
+            if page.cropbox == self._document_page_clip:
                 return page
 
         page = PdfPage(self.document[index], self.document.isPDF)
@@ -345,7 +345,7 @@ class PdfPage(fitz.Page):
     def __init__(self, page, isPDF, clip=None):
         self.page = page
         self.isPDF = isPDF
-        self.clip = clip or page.CropBox
+        self.clip = clip or page.cropbox
 
         self._mark_link_annot_list = []
         self._mark_search_annot_list = []
@@ -409,7 +409,7 @@ class PdfPage(fitz.Page):
             y1 = max(y1, r.y1)
             r = fitz.Rect(x0, y0, x1, y1)
         if r is None:
-            return self.page.CropBox
+            return self.page.cropbox
         return r
 
     def get_tight_margin_rect(self):
@@ -437,11 +437,11 @@ class PdfPage(fitz.Page):
     def set_rotation(self, rotation):
         self.page.setRotation(rotation)
         if rotation % 180 != 0:
-            self.page_width = self.page.CropBox.height
-            self.page_height = self.page.CropBox.width
+            self.page_width = self.page.cropbox.height
+            self.page_height = self.page.cropbox.width
         else:
-            self.page_width = self.page.CropBox.width
-            self.page_height = self.page.CropBox.height
+            self.page_width = self.page.cropbox.width
+            self.page_height = self.page.cropbox.height
 
     def get_qpixmap(self, scale, *args):
         if self.isPDF:
@@ -725,7 +725,7 @@ class PdfViewerWidget(QWidget):
         if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.isPDF:
             color = inverted_color(get_emacs_var("eaf-emacs-theme-background-color"), self.inverted_mode)
             col = (color.redF(), color.greenF(), color.blueF())
-            page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
+            page.drawRect(page.cropbox, color=col, fill=col, overlay=False)
 
         qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
 
