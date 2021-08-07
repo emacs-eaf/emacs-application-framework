@@ -38,8 +38,16 @@
           <pdf
             v-if="previewMime == 'pdf'"
             :src="previewPath"
-            :key="dynamicKey"
+            :key="previewDynamicKey"
           ></pdf>
+          <video
+            ref="video-player"
+            v-if="previewMime == 'video'"
+            :key="previewDynamicKey"
+            class="file-video"
+            controls>
+            <source :src="previewPath">
+          </video>
         </div>
         <div
           v-if="previewType == 'directory' && previewFiles.length > 0"
@@ -224,7 +232,10 @@
          } else if (mime == "application/pdf") {
            this.previewMime = "pdf"
            /* Make pdfvuer can render after load new pdf file. */
-           this.dynamicKey = Math.random(10000);
+           this.previewDynamicKey = Math.random(10000);
+         } else if (mime.startsWith("video/")) {
+           this.previewMime = "video"
+           this.previewDynamicKey = Math.random(10000);
          }
        }
      }
@@ -326,5 +337,9 @@
    padding-left: 20px;
    padding-right: 20px;
    margin: 0;
+ }
+
+ .file-video {
+   width: 100%;
  }
 </style>
