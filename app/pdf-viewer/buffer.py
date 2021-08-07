@@ -492,7 +492,7 @@ class PdfPage(fitz.Page):
 
     def add_mark_link(self):
         if self.page.first_link:
-            for link in self.page.getLinks():
+            for link in self.page.get_links():
                 annot = self.page.addUnderlineAnnot(link["from"])
                 annot.parent = self.page # Must assign annot parent, else deleteAnnot cause parent is None problem.
                 self._mark_link_annot_list.append(annot)
@@ -522,7 +522,7 @@ class PdfPage(fitz.Page):
         tips_size = 4
         cache_dict = {}
         if self.page.first_link:
-            links = self.page.getLinks()
+            links = self.page.get_links()
             key_list = generate_random_key(len(links), letters)
             for index, link in enumerate(links):
                 key = key_list[index]
@@ -1383,7 +1383,7 @@ class PdfViewerWidget(QWidget):
             return None
 
         page = self.document[page_index]
-        for link in page.getLinks():
+        for link in page.get_links():
             rect = link["from"]
             if ex >= rect.x0 and ex <= rect.x1 and ey >= rect.y0 and ey <= rect.y1:
                 return link
