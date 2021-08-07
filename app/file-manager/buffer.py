@@ -117,10 +117,13 @@ class AppBuffer(BrowserBuffer):
         return "%.1f%s%s" % (num, 'Yi', suffix)
 
     def get_dir_file_number(self, dir):
-        return len(list(filter(lambda f: not f.startswith("."), (os.listdir(dir)))))
+        try:
+            return len(list(filter(lambda f: not f.startswith("."), (os.listdir(dir)))))
+        except PermissionError:
+            return 0
 
     def file_compare(self, a, b):
-        type_sort_weights = ["directory", "file", "symlink"]
+        type_sort_weights = ["directory", "file", "symlink", ""]
 
         a_type_weights = type_sort_weights.index(a["type"])
         b_type_weights = type_sort_weights.index(b["type"])
