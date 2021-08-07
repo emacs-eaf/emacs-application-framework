@@ -462,7 +462,7 @@ class PdfPage(fitz.Page):
         # if exclude image is True, will find the page all image, then get
         # each image rect. Finally, again invert all image rect.
         def fn(page, pixmap, scale):
-            pixmap.invertIRect(pixmap.irect)
+            pixmap.invert_irect(pixmap.irect)
             if not exclude_image:
                 return pixmap
 
@@ -486,7 +486,7 @@ class PdfPage(fitz.Page):
                     pass
 
             for bbox in imagebboxlist:
-                pixmap.invertIRect(bbox * page.rotationMatrix * scale)
+                pixmap.invert_irect(bbox * page.rotationMatrix * scale)
 
         return fn
 
