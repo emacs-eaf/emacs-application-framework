@@ -507,7 +507,7 @@ class PdfPage(fitz.Page):
         quads_list = self.page.search_for(keyword, hit_max=999, quads=True)
         if quads_list:
             for quads in quads_list:
-                annot = self.page.addHighlightAnnot(quads)
+                annot = self.page.add_highlight_annot(quads)
                 annot.parent = self.page
                 self._mark_search_annot_list.append(annot)
 
@@ -1145,7 +1145,7 @@ class PdfViewerWidget(QWidget):
             page = self.document[page_index]
 
             if annot_type == "highlight":
-                new_annot = page.addHighlightAnnot(quad_list)
+                new_annot = page.add_highlight_annot(quad_list)
             elif annot_type == "strikeout":
                 new_annot = page.addStrikeoutAnnot(quad_list)
             elif annot_type == "underline":
@@ -1219,7 +1219,7 @@ class PdfViewerWidget(QWidget):
                 page.delete_annot(old_annot)
 
             quad_list = list(map(lambda x: x.quad, line_rect_list))
-            annot = page.addHighlightAnnot(quad_list)
+            annot = page.add_highlight_annot(quad_list)
             annot.parent = page
 
             # refresh annot
