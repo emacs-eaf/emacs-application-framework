@@ -494,13 +494,13 @@ class PdfPage(fitz.Page):
         if self.page.first_link:
             for link in self.page.get_links():
                 annot = self.page.addUnderlineAnnot(link["from"])
-                annot.parent = self.page # Must assign annot parent, else deleteAnnot cause parent is None problem.
+                annot.parent = self.page # Must assign annot parent, else delete_annot cause parent is None problem.
                 self._mark_link_annot_list.append(annot)
 
     def cleanup_mark_link(self):
         if self._mark_link_annot_list:
             for annot in self._mark_link_annot_list:
-                self.page.deleteAnnot(annot)
+                self.page.delete_annot(annot)
             self._mark_link_annot_list = []
 
     def mark_search_text(self, keyword):
@@ -515,7 +515,7 @@ class PdfPage(fitz.Page):
         if self._mark_search_annot_list:
             message_to_emacs("Unmarked all matched results.")
             for annot in self._mark_search_annot_list:
-                self.page.deleteAnnot(annot)
+                self.page.delete_annot(annot)
             self._mark_search_annot_list = []
 
     def mark_jump_link_tips(self, letters):
@@ -537,7 +537,7 @@ class PdfPage(fitz.Page):
 
     def cleanup_jump_link_tips(self):
         for annot in self._mark_jump_annot_list:
-            self.page.deleteAnnot(annot)
+            self.page.delete_annot(annot)
         self._mark_jump_annot_list = []
 
 
@@ -1216,7 +1216,7 @@ class PdfViewerWidget(QWidget):
             page = self.document[page_index]
             old_annot = self.select_area_annot_cache_dict[page_index]
             if old_annot:
-                page.deleteAnnot(old_annot)
+                page.delete_annot(old_annot)
 
             quad_list = list(map(lambda x: x.quad, line_rect_list))
             annot = page.addHighlightAnnot(quad_list)
@@ -1233,7 +1233,7 @@ class PdfViewerWidget(QWidget):
         if self.select_area_annot_cache_dict:
             for page_index, annot in self.select_area_annot_cache_dict.items():
                 if annot and annot.parent:
-                        annot.parent.deleteAnnot(annot)
+                        annot.parent.delete_annot(annot)
                 self.select_area_annot_cache_dict[page_index] = None # restore cache
         self.last_char_page_index = None
         self.last_char_rect_index = None
@@ -1304,7 +1304,7 @@ class PdfViewerWidget(QWidget):
         page, annot = self.hover_annot()
         if annot.parent:
             if action == "delete":
-                page.deleteAnnot(annot)
+                page.delete_annot(annot)
                 self.save_annot()
             if action == "edit":
                 self.edited_page_annot = (page, annot)
