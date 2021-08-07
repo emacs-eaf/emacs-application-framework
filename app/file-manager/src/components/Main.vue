@@ -26,28 +26,11 @@
         <div
           v-if="previewType == 'file'"
           class="preview-file">
-          <img
-            v-if="previewMime == 'image'"
-            class="file-image"
-            :src="previewPath"/>
-          <pre
-            v-if="previewMime == 'text'"
-            class="file-text">
-            {{ previewContent }}
-          </pre>
-          <pdf
-            v-if="previewMime == 'pdf'"
-            :src="previewPath"
-            :key="previewDynamicKey"
-          ></pdf>
-          <video
-            ref="video-player"
-            v-if="previewMime == 'video'"
-            :key="previewDynamicKey"
-            class="file-video"
-            controls>
-            <source :src="previewPath">
-          </video>
+          <PreviewImage v-if="previewMime == 'image'" :file="previewPath"/>
+          <PreviewCode v-if="previewMime == 'text'" :content="previewContent"/>
+          <PreviewPdf v-if="previewMime == 'pdf'" :file="previewPath"/>
+          <PreviewVideo v-if="previewMime == 'video'" :file="previewPath"/>
+          <PreviewAudio v-if="previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
         </div>
         <div
           v-if="previewType == 'directory' && previewFiles.length > 0"
@@ -83,12 +66,20 @@
 
 <script>
  import { QWebChannel } from "qwebchannel";
- import pdf from 'pdfvuer'
+ import PreviewVideo from "./PreviewVideo.vue"
+ import PreviewAudio from "./PreviewAudio.vue"
+ import PreviewPdf from "./PreviewPdf.vue"
+ import PreviewCode from "./PreviewCode.vue"
+ import PreviewImage from "./PreviewImage.vue"
 
  export default {
    name: 'Main',
    components: {
-     pdf
+     PreviewVideo,
+     PreviewAudio,
+     PreviewPdf,
+     PreviewCode,
+     PreviewImage,
    },
    props: {
      msg: String
@@ -231,11 +222,10 @@
            this.previewContent = fileInfos[0]["content"]
          } else if (mime == "application/pdf") {
            this.previewMime = "pdf"
-           /* Make pdfvuer can render after load new pdf file. */
-           this.previewDynamicKey = Math.random(10000);
          } else if (mime.startsWith("video/")) {
            this.previewMime = "video"
-           this.previewDynamicKey = Math.random(10000);
+         } else if (mime.startsWith("audio/")) {
+           this.previewMime = "audio"
          }
        }
      }
@@ -327,19 +317,5 @@
 
  .empty-directory-info {
    text-align: center;
- }
-
- .file-image {
-   width: 100%;
- }
-
- .file-text {
-   padding-left: 20px;
-   padding-right: 20px;
-   margin: 0;
- }
-
- .file-video {
-   width: 100%;
  }
 </style>
