@@ -177,7 +177,8 @@ class AppBuffer(BrowserBuffer):
 
     def exit_preview_thread(self):
         if self.fetch_preview_info_thread != None and self.fetch_preview_info_thread.isRunning():
-            self.fetch_preview_info_thread.exit()
+            self.fetch_preview_info_thread.quit()
+            self.fetch_preview_info_thread.wait()
 
     def update_preview_info(self, file, file_type, file_infos):
         self.buffer_widget.execute_js('''setPreview(\"{}\", \"{}\", {});'''.format(file, file_type, file_infos))
