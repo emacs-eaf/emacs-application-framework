@@ -725,7 +725,7 @@ class PdfViewerWidget(QWidget):
         if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.isPDF:
             color = inverted_color(get_emacs_var("eaf-emacs-theme-background-color"), self.inverted_mode)
             col = (color.redF(), color.greenF(), color.blueF())
-            page.drawRect(page.cropbox, color=col, fill=col, overlay=False)
+            page.draw_rect(page.cropbox, color=col, fill=col, overlay=False)
 
         qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
 
