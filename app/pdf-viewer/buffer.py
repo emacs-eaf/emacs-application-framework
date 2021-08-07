@@ -491,7 +491,7 @@ class PdfPage(fitz.Page):
         return fn
 
     def add_mark_link(self):
-        if self.page.firstLink:
+        if self.page.first_link:
             for link in self.page.getLinks():
                 annot = self.page.addUnderlineAnnot(link["from"])
                 annot.parent = self.page # Must assign annot parent, else deleteAnnot cause parent is None problem.
@@ -521,7 +521,7 @@ class PdfPage(fitz.Page):
     def mark_jump_link_tips(self, letters):
         tips_size = 4
         cache_dict = {}
-        if self.page.firstLink:
+        if self.page.first_link:
             links = self.page.getLinks()
             key_list = generate_random_key(len(links), letters)
             for index, link in enumerate(links):
