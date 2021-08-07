@@ -24,7 +24,7 @@ from PyQt5.QtCore import QUrl, QTimer, QEvent, QPointF, Qt
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor, QMouseEvent
 from core.webengine import BrowserBuffer
-from core.utils import touch, string_to_base64, interactive, eval_in_emacs, message_to_emacs, get_emacs_var
+from core.utils import touch, string_to_base64, interactive, eval_in_emacs, message_to_emacs, get_emacs_var, get_emacs_bool_var
 from html import escape, unescape
 import os
 import base64
@@ -41,7 +41,7 @@ class AppBuffer(BrowserBuffer):
 
         self.cut_node_id = None
 
-        edit_mode = "true" if get_emacs_var("eaf-mindmap-edit-mode") else "false"
+        edit_mode = "true" if get_emacs_bool_var("eaf-mindmap-edit-mode") else "false"
         for method_name in ["add_sub_node", "add_brother_node", "add_middle_node"]:
             self.build_js_method(method_name, True, js_kwargs={"inline": edit_mode})
 

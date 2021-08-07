@@ -297,6 +297,9 @@ def get_emacs_var(var_name):
 
     return epc_client.call_sync("get-emacs-var", [var_name])
 
+def get_emacs_bool_var(var_name):
+    return get_emacs_var(var_name) == True
+
 emacs_config_dir = ""
 
 def get_emacs_config_dir():

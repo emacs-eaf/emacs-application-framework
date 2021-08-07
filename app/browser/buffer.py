@@ -23,7 +23,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtGui import QColor, QCursor, QScreen
 from core.webengine import BrowserBuffer
-from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab, get_emacs_var, get_emacs_config_dir
+from core.utils import touch, interactive, is_port_in_use, eval_in_emacs, message_to_emacs, set_emacs_var, translate_text, open_url_in_new_tab, get_emacs_var, get_emacs_config_dir, get_emacs_bool_var
 from urllib.parse import urlparse
 import urllib
 import os
@@ -48,7 +48,7 @@ class AppBuffer(BrowserBuffer):
             self.buffer_widget.setUrl(QUrl(url))
 
         self.history_list = []
-        if get_emacs_var("eaf-browser-remember-history"):
+        if get_emacs_bool_var("eaf-browser-remember-history"):
             self.history_log_file_path = os.path.join(self.config_dir, "browser", "history", "log.txt")
 
             self.history_pattern = re.compile("^(.+)ᛝ(.+)ᛡ(.+)$")
@@ -176,7 +176,7 @@ class AppBuffer(BrowserBuffer):
     def after_page_load_hook(self):
         ''' Hook to run after update_progress hits 100. '''
         self.init_pw_autofill()
-        if get_emacs_var("eaf-browser-enable-adblocker"):
+        if get_emacs_bool_var("eaf-browser-enable-adblocker"):
             self.load_adblocker()
 
     def handle_input_response(self, callback_tag, result_content):
@@ -197,7 +197,7 @@ class AppBuffer(BrowserBuffer):
 
                 aria2_args.append("-d") # daemon
                 aria2_args.append("-c") # continue download
-                aria2_args.append("--auto-file-renaming={}".format(str(get_emacs_var("eaf-browser-aria2-auto-file-renaming"))))
+                aria2_args.append("--auto-file-renaming={}".format(str(get_emacs_bool_var("eaf-browser-aria2-auto-file-renaming"))))
                 aria2_args.append("-d {}".format(os.path.expanduser(get_emacs_var("eaf-browser-download-path"))))
 
                 aria2_proxy_host = get_emacs_var("eaf-browser-aria2-proxy-host")
@@ -222,7 +222,7 @@ class AppBuffer(BrowserBuffer):
     def record_close_page(self, url):
         ''' Record closing pages.'''
         self.page_closed = True
-        if get_emacs_var("eaf-browser-remember-history") and self.arguments != "temp_html_file" and url != "about:blank":
+        if get_emacs_bool_var("eaf-browser-remember-history") and self.arguments != "temp_html_file" and url != "about:blank":
             touch(self.history_close_file_path)
             with open(self.history_close_file_path, "r") as f:
                 close_urls = f.readlines()
@@ -253,11 +253,11 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def toggle_adblocker(self):
         ''' Change adblocker status.'''
-        if get_emacs_var("eaf-browser-enable-adblocker"):
+        if get_emacs_bool_var("eaf-browser-enable-adblocker"):
             set_emacs_var("eaf-browser-enable-adblocker", False)
             self.buffer_widget.remove_css('adblocker', True)
             message_to_emacs("Successfully disabled adblocker!")
-        elif not get_emacs_var("eaf-browser-enable-adblocker"):
+        elif not get_emacs_bool_var("eaf-browser-enable-adblocker"):
             set_emacs_var("eaf-browser-enable-adblocker", True)
             self.load_adblocker()
             message_to_emacs("Successfully enabled adblocker!")
@@ -266,7 +266,7 @@ class AppBuffer(BrowserBuffer):
         self.url = self.buffer_widget.url().toString()
 
     def set_adblocker(self, url):
-        if get_emacs_var("eaf-browser-enable-adblocker") and not self.page_closed:
+        if get_emacs_bool_var("eaf-browser-enable-adblocker") and not self.page_closed:
             self.load_adblocker()
 
     def skip_youtube_ads(self, url):
@@ -305,13 +305,13 @@ class AppBuffer(BrowserBuffer):
         return new_id
 
     def init_pw_autofill(self):
-        if get_emacs_var("eaf-browser-enable-autofill"):
+        if get_emacs_bool_var("eaf-browser-enable-autofill"):
             self.pw_autofill_id = self.pw_autofill_gen_id(0)
 
     @interactive
     def save_page_password(self):
         ''' Record form data.'''
-        if get_emacs_var("eaf-browser-enable-autofill"):
+        if get_emacs_bool_var("eaf-browser-enable-autofill"):
             self.add_password_entry()
         else:
             message_to_emacs("Password autofill is not enabled! Enable with `C-t` (default binding)")
@@ -319,7 +319,7 @@ class AppBuffer(BrowserBuffer):
     @interactive
     def toggle_password_autofill(self):
         ''' Toggle Autofill status for password data'''
-        if not get_emacs_var("eaf-browser-enable-autofill"):
+        if not get_emacs_bool_var("eaf-browser-enable-autofill"):
             set_emacs_var("eaf-browser-enable-autofill", True)
             self.pw_autofill_id = self.pw_autofill_gen_id(0)
             message_to_emacs("Successfully enabled autofill!")
@@ -367,7 +367,7 @@ class AppBuffer(BrowserBuffer):
     def record_history(self, new_title):
         ''' Record browser history.'''
         new_url = self.buffer_widget.filter_url(self.buffer_widget.get_url())
-        if get_emacs_var("eaf-browser-remember-history") and self.buffer_widget.filter_title(new_title) != "" and \
+        if get_emacs_bool_var("eaf-browser-remember-history") and self.buffer_widget.filter_title(new_title) != "" and \
            self.arguments != "temp_html_file" and new_title != "about:blank" and new_url != "about:blank":
             self._record_history(new_title, new_url)
 
