@@ -1399,7 +1399,7 @@ class PdfViewerWidget(QWidget):
         draw_rect = fitz.Rect(ex, ey, ex + word_offset, ey + word_offset)
 
         page.set_cropbox(page.rect)
-        page_words = page.getTextWords()
+        page_words = page.get_text_words()
         rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
         if rect_words:
             return rect_words[0][4]
