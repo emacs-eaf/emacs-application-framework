@@ -177,6 +177,8 @@ class AppBuffer(BrowserBuffer):
 
     def exit_preview_thread(self):
         if self.fetch_preview_info_thread != None and self.fetch_preview_info_thread.isRunning():
+            # We need call "quit" and then call "wait" function to quit thread safely.
+            # Otherwise will cause crash.
             self.fetch_preview_info_thread.quit()
             self.fetch_preview_info_thread.wait()
 
