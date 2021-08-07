@@ -54,7 +54,9 @@
   (let* ((icon (all-the-icons-match-to-alist mode-name eaf-all-the-icons-alist))
          (args (cdr icon)))
     (when arg-overrides (setq args (append `(,(car args)) arg-overrides (cdr args))))
-    (apply (car icon) args)))
+    (if (and (car icon) args)
+        (apply (car icon) args)
+      (message (concat "[" mode-name "] all-the-icons not found for this application!")))))
 
 (when (require 'all-the-icons-ibuffer nil 'noerror)
   (define-ibuffer-column icon
