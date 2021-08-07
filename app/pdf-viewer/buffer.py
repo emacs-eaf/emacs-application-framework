@@ -493,7 +493,7 @@ class PdfPage(fitz.Page):
     def add_mark_link(self):
         if self.page.first_link:
             for link in self.page.get_links():
-                annot = self.page.addUnderlineAnnot(link["from"])
+                annot = self.page.add_underline_annot(link["from"])
                 annot.parent = self.page # Must assign annot parent, else delete_annot cause parent is None problem.
                 self._mark_link_annot_list.append(annot)
 
@@ -1149,7 +1149,7 @@ class PdfViewerWidget(QWidget):
             elif annot_type == "strikeout":
                 new_annot = page.addStrikeoutAnnot(quad_list)
             elif annot_type == "underline":
-                new_annot = page.addUnderlineAnnot(quad_list)
+                new_annot = page.add_underline_annot(quad_list)
             elif annot_type == "squiggly":
                 new_annot = page.addSquigglyAnnot(quad_list)
             elif annot_type == "text":
