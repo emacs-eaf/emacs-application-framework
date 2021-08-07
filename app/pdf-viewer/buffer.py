@@ -363,11 +363,11 @@ class PdfPage(fitz.Page):
             # Must set CropBox before get page rawdict , if no,
             # the rawdict bbox coordinate is wrong
             # cause the select text failed
-            self.page.setCropBox(self.clip)
+            self.page.set_cropbox(self.clip)
             d = self.page.get_text("rawdict")
             # cancel the cropbox, if not, will cause the pixmap set cropbox
             # don't begin on top-left(0, 0), page display black margin
-            self.page.setCropBox(self.page.MediaBox)
+            self.page.set_cropbox(self.page.MediaBox)
             return d
         else:
             return self.page.get_text("rawdict")
@@ -445,7 +445,7 @@ class PdfPage(fitz.Page):
 
     def get_qpixmap(self, scale, *args):
         if self.isPDF:
-            self.page.setCropBox(self.clip)
+            self.page.set_cropbox(self.clip)
         pixmap = self.page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
@@ -1398,7 +1398,7 @@ class PdfViewerWidget(QWidget):
         word_offset = 10 # 10 pixel is enough for word intersect operation
         draw_rect = fitz.Rect(ex, ey, ex + word_offset, ey + word_offset)
 
-        page.setCropBox(page.rect)
+        page.set_cropbox(page.rect)
         page_words = page.getTextWords()
         rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
         if rect_words:
