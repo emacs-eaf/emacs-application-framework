@@ -13,6 +13,7 @@
         <div
           class="file"
           v-for="file in files"
+          @click="selectFile(file)"
           :key="file.path"
           :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
           <div class="file-name">
@@ -163,6 +164,13 @@
        this.currentPath = this.files[this.currentIndex].path;
 
        this.keepSelectVisible();
+
+       this.updatePreview();
+     },
+
+     selectFile(file) {
+       this.currentPath = file.path;
+       this.currentIndex = this.files.map(file => file.path).indexOf(file.path);
 
        this.updatePreview();
      },
