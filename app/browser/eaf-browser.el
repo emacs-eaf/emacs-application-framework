@@ -362,7 +362,7 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
              (browser-url-list
               (with-temp-buffer (insert-file-contents browser-restore-file-path)
                                 (split-string (buffer-string) "\n" t))))
-        (if (epc:live-p eaf-epc-process)
+        (if (eaf-epc-live-p eaf-epc-process)
             (dolist (url browser-url-list)
               (eaf-open-browser url))
           (dolist (url browser-url-list)

@@ -142,7 +142,6 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 
 (eaf-add-app-dirs-to-load-path)
 
-(require 'epc)
 (require 'epcs)
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
@@ -286,12 +285,12 @@ been initialized."
 
 (defvar eaf-server-port nil)
 
-(defun epcs:server-start (connect-function &optional port)
+(defun eaf-epcs-server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
   (let*
       ((connect-function connect-function)
-       (name (format "EPC Server %s" (epc:uid)))
-       (buf (epc:make-procbuf (format " *%s*" name)))
+       (name (format "EPC Server %s" (eaf-epc-uid)))
+       (buf (eaf-epc-make-procbuf (format " *%s*" name)))
        (main-process
         (make-network-process
          :name name
@@ -302,27 +301,27 @@ been initialized."
          :service (or port t)
          :sentinel
          (lambda (process message)
-           (epcs:sentinel process message connect-function)))))
+           (eaf-epcs-sentinel process message connect-function)))))
     (unless port
       ;; notify port number to the parent process via STDOUT.
       (message "%s\n" (process-contact main-process :service)))
     (push (cons main-process
-                (make-epcs:server
+                (make-eaf-epcs-server
                  :name name :process main-process
                  :port (process-contact main-process :service)
                  :connect-function connect-function))
-          epcs:server-processes)
+          eaf-epcs-server-processes)
     main-process))
 
 (defun eaf--start-epc-server ()
   "Function to start the EPC server."
   (unless eaf-server
     (setq eaf-server
-          (epcs:server-start
+          (eaf-epcs-server-start
            (lambda (mngr)
              (let ((mngr mngr))
-               (epc:define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
-               (epc:define-method mngr 'get-emacs-var 'get-emacs-var-func)
+               (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
+               (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -608,12 +607,12 @@ A hashtable, key is url and value is title.")
 
 (defun eaf-call-async (method &rest args)
   "Call Python EPC function METHOD and ARGS asynchronously."
-  (deferred:$
-    (epc:call-deferred eaf-epc-process (read method) args)))
+  (eaf-deferred-$
+    (eaf-epc-call-deferred eaf-epc-process (read method) args)))
 
 (defun eaf-call-sync (method &rest args)
   "Call Python EPC function METHOD and ARGS synchronously."
-  (epc:call-sync eaf-epc-process (read method) args))
+  (eaf-epc-call-sync eaf-epc-process (read method) args))
 
 (defun eaf-get-emacs-xid (frame)
   "Get Emacs FRAME xid."
@@ -626,7 +625,7 @@ A hashtable, key is url and value is title.")
   (cond
    ((not eaf--active-buffers)
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
-   ((epc:live-p eaf-epc-process)
+   ((eaf-epc-live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
   ;; start epc server and set `eaf-server-port'
   (eaf--start-epc-server)
@@ -706,11 +705,11 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf--kill-python-process ()
   "Kill EAF background python process."
   (interactive)
-  (when (epc:live-p eaf-epc-process)
+  (when (eaf-epc-live-p eaf-epc-process)
     ;; Cleanup before exit EAF server process.
     (eaf-call-async "cleanup")
     ;; Delete EAF server process.
-    (epc:stop-epc eaf-epc-process)
+    (eaf-epc-stop-epc eaf-epc-process)
     ;; Kill *eaf* buffer.
     (when (get-buffer eaf-name)
       (kill-buffer eaf-name))
@@ -871,7 +870,7 @@ keybinding variable to eaf-app-binding-alist."
 
 (defun eaf-monitor-window-size-change (frame)
   "Delay some time and run `eaf-try-adjust-view-with-frame-size' to compare with Emacs FRAME size."
-  (when (epc:live-p eaf-epc-process)
+  (when (eaf-epc-live-p eaf-epc-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
     (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame)))))
@@ -956,7 +955,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
-             (epc:live-p eaf-epc-process))
+             (eaf-epc-live-p eaf-epc-process))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
@@ -1118,14 +1117,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   ;; Make EPC process.
-  (setq eaf-epc-process (make-epc:manager
+  (setq eaf-epc-process (make-eaf-epc-manager
                          :server-process eaf-internal-process
                          :commands (cons eaf-internal-process-prog eaf-internal-process-args)
                          :title (mapconcat 'identity (cons eaf-internal-process-prog eaf-internal-process-args) " ")
                          :port eaf-epc-port
-                         :connection (epc:connect "localhost" eaf-epc-port)
+                         :connection (eaf-epc-connect "localhost" eaf-epc-port)
                          ))
-  (epc:init-epc-layer eaf-epc-process)
+  (eaf-epc-init-epc-layer eaf-epc-process)
 
   ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
   (setq eaf--webengine-include-private-codec webengine-include-private-codec)
@@ -1313,7 +1312,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
   ;; Open URL with EAF application
-  (if (epc:live-p eaf-epc-process)
+  (if (eaf-epc-live-p eaf-epc-process)
       (let (exists-eaf-buffer)
         ;; Try to open buffer
         (catch 'found-eaf
