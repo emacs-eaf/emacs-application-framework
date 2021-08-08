@@ -349,7 +349,6 @@ This variable is for debug purpose.")
   "[internal] Remove the EPC manager object."
   (setq eaf-epc-live-connections (delete mngr eaf-epc-live-connections)))
 
-
 (defun eaf-epc-start-epc (server-prog server-args)
   "Start the epc server program and return an eaf-epc-manager object.
 
@@ -467,14 +466,6 @@ to see full traceback:\n%s" port-str))
       (error (eaf-epc-log "Error on exit-hooks : %S / " err mngr)))
     (eaf-epc-live-connections-delete mngr)))
 
-(defun eaf-epc-start-epc-debug (port)
-  "[internal] Return an eaf-epc-manager instance which is set up partially."
-  (eaf-epc-init-epc-layer
-   (make-eaf-epc-manager :server-process nil
-                     :commands (cons "[DEBUG]" nil)
-                     :port port
-                     :connection (eaf-epc-connect "localhost" port))))
-
 (defun eaf-epc-args (args)
   "[internal] If ARGS is an atom, return it. If list, return the cadr of it."
   (cond
@@ -514,7 +505,6 @@ to see full traceback:\n%s" port-str))
     (eaf-epc-live-connections-add mngr)
     mngr))
 
-
 (defun eaf-epc-manager-add-exit-hook (mngr hook-function)
   "Register the HOOK-FUNCTION which is called after the EPC connection closed by the EPC controller UI.
 HOOK-FUNCTION is a function with no argument."
@@ -528,43 +518,6 @@ HOOK-FUNCTION is a function with no argument."
     (run-hooks hooks)
     (setf (eaf-epc-manager-exit-hooks mngr) nil)
     mngr))
-
-(defun eaf-epc-manager-status-server-process (mngr)
-  "[internal] Return the status of the process object for the peer process. If the process is nil, return nil."
-  (and mngr
-       (eaf-epc-manager-server-process mngr)
-       (process-status (eaf-epc-manager-server-process mngr))))
-
-(defun eaf-epc-manager-status-connection-process (mngr)
-  "[internal] Return the status of the process object for the connection process."
-  (and (eaf-epc-manager-connection mngr)
-       (process-status (eaf-epc-connection-process
-                        (eaf-epc-manager-connection mngr)))))
-
-(defun eaf-epc-manager-restart-process (mngr)
-  "[internal] Restart the process and reconnect."
-  (cond
-   ((null (eaf-epc-manager-server-process mngr))
-    (error "Cannot restart this EPC process!"))
-   (t
-    (eaf-epc-stop-epc mngr)
-    (let* ((cmds (eaf-epc-manager-commands mngr))
-           (new-mngr (eaf-epc-start-server (car cmds) (cdr cmds))))
-      (setf (eaf-epc-manager-server-process mngr)
-            (eaf-epc-manager-server-process new-mngr))
-      (setf (eaf-epc-manager-port mngr)
-            (eaf-epc-manager-port new-mngr))
-      (setf (eaf-epc-manager-connection mngr)
-            (eaf-epc-manager-connection new-mngr))
-      (setf (eaf-epc-manager-methods mngr)
-            (eaf-epc-manager-methods new-mngr))
-      (setf (eaf-epc-manager-sessions mngr)
-            (eaf-epc-manager-sessions new-mngr))
-      (eaf-epc-connection-reset (eaf-epc-manager-connection mngr))
-      (eaf-epc-init-epc-layer mngr)
-      (eaf-epc-live-connections-delete new-mngr)
-      (eaf-epc-live-connections-add mngr)
-      mngr))))
 
 (defun eaf-epc-manager-send (mngr method &rest messages)
   "[internal] low-level message sending."
@@ -652,7 +605,6 @@ HOOK-FUNCTION is a function with no argument."
      (t ; error
       (eaf-epc-log "RET-EPC-ERR: NOT FOUND: id:%s [%S]" uid args)))))
 
-
 (defun eaf-epc-call-deferred (mngr method-name args)
   "Call peer's method with args asynchronously. Return a deferred
 object which is called with the result."
@@ -672,18 +624,6 @@ object which is called with the result."
          (methods (cons method (eaf-epc-manager-methods mngr))))
     (setf (eaf-epc-manager-methods mngr) methods)
     method))
-
-(defun eaf-epc-query-methods-deferred (mngr)
-  "Return a list of information for the peer's methods.
-The list is consisted of lists of strings:
- (name arg-specs docstring)."
-  (let ((uid (eaf-epc-uid))
-        (sessions (eaf-epc-manager-sessions mngr))
-        (d (eaf-deferred-new)))
-    (push (cons uid d) sessions)
-    (setf (eaf-epc-manager-sessions mngr) sessions)
-    (eaf-epc-manager-send mngr 'methods uid)
-    d))
 
 (defun eaf-epc-sync (mngr d)
   "Wrap deferred methods with synchronous waiting, and return the result.
@@ -730,76 +670,6 @@ failed to start (e.g., to see its traceback / error message)."
       (error "No buffer for the last server process.  \
 Probably the EPC connection exits correctly or you didn't start it yet."))))
 
-
-;;==================================================
-;; Management Interface
-
-(defun eaf-epc-controller ()
-  "Display the management interface for EPC processes and connections.
-Process list.
-Session status, statistics and uptime.
-Peer's method list.
-Display process buffer.
-Kill sessions and connections.
-Restart process."
-  (interactive)
-  (let* ((buf-name "*EPC Controller*")
-         (buf (get-buffer buf-name)))
-    (unless (buffer-live-p buf)
-      (setq buf (get-buffer-create buf-name)))
-    (pop-to-buffer buf)))
-
-(defun eaf-epc-controller-methods (mngr)
-  "Display a list of methods for the MNGR process."
-  (let* ((buf-name "*EPC Controller/Methods*")
-         (buf (get-buffer buf-name)))
-    (unless (buffer-live-p buf)
-      (setq buf (get-buffer-create buf-name))
-      (with-current-buffer buf
-        (setq buffer-read-only t)))
-    (lexical-let ((buf buf) (mngr mngr))
-      (eaf-deferred-$
-        (eaf-epc-query-methods-deferred mngr)
-        (eaf-deferred-nextc it
-          (lambda (methods)
-            (pop-to-buffer buf)))))))
-
-(defface eaf-epc-face-title
-  '((((class color) (background light))
-     :foreground "Slategray4" :background "Gray90" :weight bold)
-    (((class color) (background dark))
-     :foreground "maroon2" :weight bold))
-  "Face for titles" :group 'epc)
-
-(defun eaf-epc-define-keymap (keymap-list &optional prefix)
-  "[internal] Keymap utility."
-  (let ((map (make-sparse-keymap)))
-    (mapc
-     (lambda (i)
-       (define-key map
-         (if (stringp (car i))
-             (read-kbd-macro
-              (if prefix
-                  (replace-regexp-in-string "prefix" prefix (car i))
-                (car i)))
-           (car i))
-         (cdr i)))
-     keymap-list)
-    map))
-
-(defun eaf-epc-add-keymap (keymap keymap-list &optional prefix)
-  (loop with nkeymap = (copy-keymap keymap)
-        for i in keymap-list
-        do
-        (define-key nkeymap
-          (if (stringp (car i))
-              (read-kbd-macro
-               (if prefix
-                   (replace-regexp-in-string "prefix" prefix (car i))
-                 (car i)))
-            (car i))
-          (cdr i))
-        finally return nkeymap))
 
 ;; Concurrent
 (defvar eaf-concurrent-version nil "version number")
