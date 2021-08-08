@@ -26,7 +26,7 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QToolTip
 from core.buffer import Buffer
-from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit, get_emacs_var, get_emacs_var, get_emacs_config_dir, get_emacs_bool_var
+from core.utils import touch, interactive, eval_in_emacs, message_to_emacs, open_url_in_new_tab, translate_text, atomic_edit, get_emacs_var, get_emacs_var, get_emacs_config_dir
 import fitz
 import time
 import random
@@ -586,7 +586,7 @@ class PdfViewerWidget(QWidget):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = get_emacs_bool_var("eaf-pdf-dark-exclude-image") and self.document.isPDF
+        self.inverted_mode_exclude_image = get_emacs_var("eaf-pdf-dark-exclude-image") and self.document.isPDF
 
         # mark link
         self.is_mark_link = False

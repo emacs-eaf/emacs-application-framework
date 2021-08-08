@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, get_emacs_bool_var
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -663,9 +663,9 @@ class BrowserBuffer(Buffer):
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
-            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, get_emacs_bool_var("eaf-browser-enable-plugin"))
-            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, get_emacs_bool_var("eaf-browser-enable-javascript"))
-            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, get_emacs_bool_var("eaf-browser-enable-scrollbar"))
+            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, get_emacs_var("eaf-browser-enable-plugin"))
+            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, get_emacs_var("eaf-browser-enable-javascript"))
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, get_emacs_var("eaf-browser-enable-scrollbar"))
 
             unknown_url_scheme_policy = get_emacs_var("eaf-browser-unknown-url-scheme-policy")
 

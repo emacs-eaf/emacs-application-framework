@@ -321,29 +321,8 @@ been initialized."
           (epcs:server-start
            (lambda (mngr)
              (let ((mngr mngr))
-               (epc:define-method
-                mngr 'eval-in-emacs
-                (lambda (&rest args)
-                  ;; Decode argument with Base64 format automatically.
-                  (apply (read (car args))
-                         (mapcar
-                          (lambda (arg)
-                            (let ((arg (eaf--decode-string arg)))
-                              (cond ((string-prefix-p "'" arg) ;; single quote
-                                     (read (substring arg 1)))
-                                    ((string= arg "TRUE") 't)
-                                    ((string= arg "FALSE") 'nil)
-                                    ((and (string-prefix-p "(" arg)
-                                          (string-suffix-p ")" arg)) ;; list
-                                     (split-string (substring arg 1 -1) " "))
-                                    (t arg))))
-                          (cdr args)))))
-
-               (epc:define-method
-                mngr 'get-emacs-var
-                (lambda (&rest args)
-                  (let ((var-name (car args)))
-                    (symbol-value (intern var-name)))))
+               (epc:define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
+               (epc:define-method mngr 'get-emacs-var 'get-emacs-var-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -354,6 +333,29 @@ been initialized."
   ;; Start "event loop".
   (cl-loop repeat 600
            do (sleep-for 0.1)))
+
+(defun eval-in-emacs-func (&rest args)
+  (apply (read (car args))
+         (mapcar
+          (lambda (arg)
+            (let ((arg (eaf--decode-string arg)))
+              (cond ((string-prefix-p "'" arg) ;; single quote
+                     (read (substring arg 1)))
+                    ((string= arg "TRUE") 't)
+                    ((string= arg "FALSE") 'nil)
+                    ((and (string-prefix-p "(" arg)
+                          (string-suffix-p ")" arg)) ;; list
+                     (split-string (substring arg 1 -1) " "))
+                    (t arg))))
+          (cdr args))))
+
+(defun get-emacs-var-func (var-name)
+  (let* ((var-symbol (intern var-name))
+         (var-value (symbol-value var-symbol))
+         ;; We need convert result of booleanp to string.
+         ;; Otherwise, python-epc will convert all `nil' to [] at Python side.
+         (var-is-bool (prin1-to-string (booleanp var-value))))
+    (list var-value var-is-bool)))
 
 (defvar eaf-epc-process nil)
 
