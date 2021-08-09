@@ -6,12 +6,14 @@
       {{ path }}
     </div>
     <div class="content">
+
       <div
         ref="filelist"
         class="file-list">
         <div
           class="file"
           v-for="file in files"
+          @click="selectFile(file)"
           :key="file.path"
           :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
           <div class="file-name">
@@ -22,44 +24,20 @@
           </div>
         </div>
       </div>
+
       <div class="preview">
-        <div
-          v-if="previewType == 'file'"
-          class="preview-file">
-          <PreviewImage v-if="previewMime == 'image'" :file="previewPath"/>
-          <PreviewCode v-if="previewMime == 'text'" :content="previewContent"/>
-          <PreviewPdf v-if="previewMime == 'pdf'" :file="previewPath"/>
-          <PreviewVideo v-if="previewMime == 'video'" :file="previewPath"/>
-          <PreviewAudio v-if="previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
-        </div>
-        <div
+        <PreviewImage v-if="previewType == 'file' && previewMime == 'image'" :file="previewPath"/>
+        <PreviewCode v-if="previewType == 'file' && previewMime == 'text'" :content="previewContent"/>
+        <PreviewPdf v-if="previewType == 'file' && previewMime == 'pdf'" :file="previewPath"/>
+        <PreviewVideo v-if="previewType == 'file' && previewMime == 'video'" :file="previewPath"/>
+        <PreviewAudio v-if="previewType == 'file' && previewMime == 'audio'" :file="previewPath" :barColor="foregroundColor"/>
+        <PreviewDirectory
           v-if="previewType == 'directory' && previewFiles.length > 0"
-          class="preview-file-list">
-          <div
-            class="file"
-            v-for="file in previewFiles"
-            :key="file.path"
-            :style="{ 'background': itemBackgroundColor(file), 'color': itemForegroundColor(file) }">
-            <div class="file-name">
-              {{ file.name }}
-            </div>
-            <div class="file-size">
-              {{ file.size }}
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="previewType == 'directory'"
-          class="preview-empty-directory">
-          <div class="empty-directory-info-warp">
-            <div class="empty-directory-info">
-              Empty directory.
-            </div>
-          </div>
-        </div>
-        <div v-if="previewType == 'symlink'">
-        </div>
+          :files="previewFiles" :itemBackgroundColor="itemBackgroundColor" :itemForegroundColor="itemForegroundColor"/>
+        <PreviewEmpty v-if="previewType == 'directory' && previewFiles.length == 0"/>
+        <PreviewSymlink v-if="previewType == 'symlink'"/>
       </div>
+
     </div>
   </div>
 </template>
@@ -71,6 +49,9 @@
  import PreviewPdf from "./PreviewPdf.vue"
  import PreviewCode from "./PreviewCode.vue"
  import PreviewImage from "./PreviewImage.vue"
+ import PreviewEmpty from "./PreviewEmpty.vue"
+ import PreviewSymlink from "./PreviewSymlink.vue"
+ import PreviewDirectory from "./PreviewDirectory.vue"
 
  export default {
    name: 'Main',
@@ -80,6 +61,9 @@
      PreviewPdf,
      PreviewCode,
      PreviewImage,
+     PreviewEmpty,
+     PreviewSymlink,
+     PreviewDirectory,
    },
    props: {
      msg: String
@@ -180,6 +164,13 @@
        this.currentPath = this.files[this.currentIndex].path;
 
        this.keepSelectVisible();
+
+       this.updatePreview();
+     },
+
+     selectFile(file) {
+       this.currentPath = file.path;
+       this.currentIndex = this.files.map(file => file.path).indexOf(file.path);
 
        this.updatePreview();
      },
@@ -287,35 +278,5 @@
 
    display: flex;
    flex-direction: row;
- }
-
- .preview-file {
-   width: 100%;
-   height: 100%;
-   overflow: hidden;
- }
-
- .preview-file-list {
-   width: 100%;
-   height: 100%;
-   overflow: hidden;
- }
-
- .preview-empty-directory {
-   width: 100%;
-   height: 100%;
-   overflow: hidden;
- }
-
- .empty-directory-info-warp {
-   width: 100%;
-   height: 100%;
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
- }
-
- .empty-directory-info {
-   text-align: center;
  }
 </style>
