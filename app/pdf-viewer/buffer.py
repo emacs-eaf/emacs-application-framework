@@ -1063,7 +1063,7 @@ class PdfViewerWidget(QWidget):
 
         self.search_text_index = 0
         for page_index in range(self.page_total_number):
-            quads_list = self.document.searchPageFor(page_index, text, hit_max=999, quads=True)
+            quads_list = self.document.search_page_for(page_index, text, hit_max=999, quads=True)
             if quads_list:
                 for index, quad in enumerate(quads_list):
                     search_text_offset = (page_index * self.page_height + quad.ul.y) * self.scale
