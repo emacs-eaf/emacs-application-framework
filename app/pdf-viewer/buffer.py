@@ -1313,7 +1313,7 @@ class PdfViewerWidget(QWidget):
     def update_annot_text(self, annot_text):
         page, annot = self.edited_page_annot
         if annot.parent:
-            annot.setInfo(content=annot_text)
+            annot.set_info(content=annot_text)
             annot.update()
         self.save_annot()
         self.edited_page_annot = (None, None)
