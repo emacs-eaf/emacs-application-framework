@@ -35,15 +35,8 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
-        self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
-        self.index_file = os.path.join(self.index_file_dir, "index.html")
-        self.url = url
-
         self.buffer_widget.loadFinished.connect(self.init_path)
-
-        with open(self.index_file, "r") as f:
-            html = self.convert_index_html(f.read(), self.index_file_dir)
-            self.buffer_widget.setHtml(html, QUrl("file://"))
+        self.load_index_html(__file__)
 
         self.fetch_preview_info_thread = None
 

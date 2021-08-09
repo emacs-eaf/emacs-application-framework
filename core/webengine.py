@@ -618,6 +618,8 @@ class BrowserBuffer(Buffer):
 
         self.add_widget(BrowserView(buffer_id))
 
+        self.url = url
+
         self.config_dir = get_emacs_config_dir()
         self.page_closed = False
 
@@ -696,7 +698,7 @@ class BrowserBuffer(Buffer):
 
         self.download_path = get_emacs_var("eaf-browser-download-path")
         self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
-        
+
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
         if success:
@@ -1227,6 +1229,14 @@ class BrowserBuffer(Buffer):
             self.buffer_widget.execute_js('''{}()'''.format(to_camel_case(function_name)))
         else:
             self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
+
+    def load_index_html(self, app_file):
+        self.index_file_dir = os.path.join(os.path.dirname(app_file), "dist")
+        self.index_file = os.path.join(self.index_file_dir, "index.html")
+
+        with open(self.index_file, "r") as f:
+            html = self.convert_index_html(f.read(), self.index_file_dir)
+            self.buffer_widget.setHtml(html, QUrl("file://"))
 
     def convert_index_html(self, index_file_content, dist_dir):
         '''

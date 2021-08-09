@@ -90,6 +90,9 @@
   (interactive)
   (eaf-open "eaf-vue-demo" "vue-demo"))
 
+(setq eaf-vue-demo-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("vue-demo" . eaf-vue-demo-module-path))
+
 (provide 'eaf-vue-demo)
 
 ;;; eaf-vue-demo.el ends here
