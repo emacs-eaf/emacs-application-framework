@@ -76,32 +76,33 @@ elif [ "$(command -v pkg)" ]; then
         doas pkg install -y python38 py38-pip py38-qt5-sip py38-qt5-webengine \
              py38-qrcode py38-qtconsole taglib ||
             { echo "[EAF] Failed to install dependency with pkg."; exit 1;}
-    
+
 else
     echo "[EAF] Unsupported distribution/package manager. Here are the packages that needs to be installed:"
     for PCK in $ARCH_PACKAGES; do
         # shellcheck disable=SC2039
         echo "- ${PCK}"
     done
-    echo "Please test their installation and submit an issue/PR to \
+    echo "[EAF] Please find your appropriate installation method and submit an issue/PR to \
 https://github.com/manateelazycat/emacs-application-framework for the script to be updated."
-    exit 1
-fi
-
-# Python dependencies
-if [ $IGNORE_PY_DEPS ]; then
-    :
-elif [ "$(command -v pip3)" ]; then
-    pip3 install --user pymupdf epc retrying pytaglib psutil || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
-elif [ "$(command -v pip)" ]; then
-    pip install --user pymupdf epc retrying pytaglib psutil || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
-else
-    echo "[EAF] Cannot find pip. Please install it before launching the script again."
     exit 1
 fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+# Python dependencies
+if [ $IGNORE_PY_DEPS ]; then
+    :
+elif [ "$(command -v pip3)" ]; then
+    (cd $SCRIPT_DIR && pip3 install --user -r requirements.txt) || { echo "[EAF] Failed to install dependency with pip3."; exit 1;}
+elif [ "$(command -v pip)" ]; then
+    (cd $SCRIPT_DIR && pip install --user -r requirements.txt) || { echo "[EAF] Failed to install dependency with pip."; exit 1;}
+else
+    echo "[EAF] Cannot find pip. Please install it before launching the script again."
+    exit 1
+fi
+
+# NPM dependencies
 if [ $IGNORE_NPM_DEPS ]; then
     :
 else

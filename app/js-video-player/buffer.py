@@ -24,7 +24,7 @@ from PyQt5.QtCore import QUrl, QTimer
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QColor
 from core.webengine import BrowserBuffer
-from core.utils import touch, string_to_base64
+from core.utils import touch, string_to_base64, get_emacs_var
 import os
 import base64
 
@@ -36,9 +36,6 @@ class AppBuffer(BrowserBuffer):
         self.url = url
         index_file = os.path.join(os.path.dirname(__file__), "index.html")
         self.buffer_widget.setUrl(QUrl.fromLocalFile(index_file))
-
-        for method_name in ["toggle_play", "forward", "backward", "restart", "increase_volume", "decrease_volume"]:
-            self.build_js_method(method_name)
 
         QTimer.singleShot(500, self.play_video)
 
@@ -54,11 +51,6 @@ class AppBuffer(BrowserBuffer):
 
     def play_video(self):
         self.buffer_widget.eval_js("play(\"{}\");".format(QUrl.fromLocalFile(self.url).toString()))
-
-    def build_js_method(self, method_name):
-        def _do ():
-            self.buffer_widget.eval_js("{}();".format(method_name))
-        setattr(self, method_name, _do)
 
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''

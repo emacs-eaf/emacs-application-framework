@@ -30,30 +30,10 @@ class AppBuffer(BrowserBuffer):
     def __init__(self, buffer_id, url, arguments):
         BrowserBuffer.__init__(self, buffer_id, url, arguments, False)
 
-        self.index_file_dir = os.path.join(os.path.dirname(__file__), "dist")
-        self.index_file = os.path.join(self.index_file_dir, "index.html")
-        self.url = url
-
         self.backgroundColor = QColor(get_emacs_var("eaf-emacs-theme-background-color")).darker(110).name()
-
+        
         self.buffer_widget.loadFinished.connect(self.init_app)
-
-        with open(self.index_file, "r") as f:
-            html = self.convert_index_html(f.read(), self.index_file_dir)
-            self.buffer_widget.setHtml(html, QUrl("file://"))
-
-        for (python_method_name, js_method_name) in [("play_next", "playNext"),
-                                                     ("play_prev", "playPrev"),
-                                                     ("scroll_up", "scrollUp"),
-                                                     ("scroll_down", "scrollDown"),
-                                                     ("scroll_up_page", "scrollUpPage"),
-                                                     ("scroll_down_page", "scrollDownPage"),
-                                                     ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom"),
-                                                     ("scroll_playlist_up", "scrollPlaylistUp"),
-                                                     ("scroll_playlist_down", "scrollPlaylistDown"),
-                                                     ]:
-            self.build_js_bridge_method(python_method_name, js_method_name)
+        self.load_index_html(__file__)
 
     @QtCore.pyqtSlot(list)
     def play_song(self, song):

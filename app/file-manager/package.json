@@ -9,7 +9,10 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "pdfvuer": "^1.9.2",
+    "qwebchannel": "^5.9.0",
+    "vue": "^2.6.11",
+    "vue-audio-visual": "^2.3.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

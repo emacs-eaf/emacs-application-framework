@@ -28,7 +28,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_var, get_emacs_config_dir
+from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_var, get_emacs_config_dir, to_camel_case
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -313,6 +313,18 @@ class EAF(object):
                 import traceback
                 traceback.print_exc()
                 message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
+
+    @PostGui()
+    def execute_js_function(self, buffer_id, function_name, function_arguments):
+        ''' Execute JavaScript function and do not return anything. '''
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            try:
+                buffer = self.buffer_dict[buffer_id]
+                buffer.execute_js_function(function_name, function_arguments)
+            except AttributeError:
+                import traceback
+                traceback.print_exc()
+                message_to_emacs("Cannot execute JavaScript function: " + to_camel_case(function_name) + " (" + buffer_id + ")")
 
     def call_function(self, buffer_id, function_name):
         ''' Call function and return the result. '''

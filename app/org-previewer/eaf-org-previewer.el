@@ -211,7 +211,7 @@
 
 (defun eaf--org-preview-monitor-buffer-save ()
   "Save org-preview buffer."
-  (when (epc:live-p eaf-epc-process)
+  (when (eaf-epc-live-p eaf-epc-process)
     (ignore-errors
       ;; eaf-org-file-list?
       (org-html-export-to-html)

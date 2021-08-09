@@ -86,12 +86,12 @@
 
 (defcustom eaf-system-monitor-keybinding
   '(("<f12>" . "open_devtools")
-    ("C-n" . "scroll_up")
-    ("C-p" . "scroll_down")
-    ("C-v" . "scroll_up_page")
-    ("M-v" . "scroll_down_page")
-    ("M-<" . "scroll_to_begin")
-    ("M->" . "scroll_to_bottom")
+    ("C-n" . "js_scroll_up")
+    ("C-p" . "js_scroll_down")
+    ("C-v" . "js_scroll_up_page")
+    ("M-v" . "js_scroll_down_page")
+    ("M-<" . "js_scroll_to_begin")
+    ("M->" . "js_scroll_to_bottom")
     )
   "The keybinding of EAF System Monitor."
   :type 'cons)

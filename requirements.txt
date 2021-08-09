@@ -1,10 +1,13 @@
-pyqt5
-pyqt5-sip
-pyqtwebengine
-pymupdf
-qrcode
-qtconsole
-markdown
-epc
-retrying
+pyqt5; sys_platform == 'win32'
+pyqt5-sip; sys_platform == 'win32'
+pyqtwebengine; sys_platform == 'win32'
+qrcode; sys_platform == 'win32'
+qtconsole; sys_platform == 'win32'
+markdown; sys_platform == 'win32'
 pygetwindow; sys_platform == 'win32'
+epc
+pymupdf
+retrying
+pytaglib
+psutil
+python-magic

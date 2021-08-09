@@ -68,6 +68,11 @@ EAF is an extensible framework. It comes with a number of useful applications, a
 | <img src="./screenshot/music_player.png" width="400"> | <img src="./screenshot/system_monitor.png" width="400">          |
 |                                                       |                |
 
+| File Manager                                          |
+| :--------:                                            |
+| <img src="./screenshot/file_manager.png" width="400"> |
+|                                                       |
+
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 - EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
 - Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
@@ -170,6 +175,7 @@ Packages listed as **Core** are mandatory for EAF to work, whereas other package
 | python-retrying                | Markdown Previewer                   | Provide @retry                                                     |
 | python-pytaglib                | Music Player                         | Parse ID3 tag                                                      |
 | python-psutil                  | System Monitor                       | Retrieving information on running processes and system utilization |
+| python-magic                   | File Manager                         | Get the MIME type of the file                                      |
 
 Some EAF application may have `npm` dependencies, please refer to the corresponding `app/name/package.json` for details.
 

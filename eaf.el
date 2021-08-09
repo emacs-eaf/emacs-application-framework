@@ -142,8 +142,7 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 
 (eaf-add-app-dirs-to-load-path)
 
-(require 'epc)
-(require 'epcs)
+(require 'eaf-epc)
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
 (require 'eaf-markdown-previewer)
@@ -286,12 +285,12 @@ been initialized."
 
 (defvar eaf-server-port nil)
 
-(defun epcs:server-start (connect-function &optional port)
+(defun eaf-epcs-server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
   (let*
       ((connect-function connect-function)
-       (name (format "EPC Server %s" (epc:uid)))
-       (buf (epc:make-procbuf (format " *%s*" name)))
+       (name (format "EPC Server %s" (eaf-epc-uid)))
+       (buf (eaf-epc-make-procbuf (format " *%s*" name)))
        (main-process
         (make-network-process
          :name name
@@ -302,48 +301,27 @@ been initialized."
          :service (or port t)
          :sentinel
          (lambda (process message)
-           (epcs:sentinel process message connect-function)))))
+           (eaf-epcs-sentinel process message connect-function)))))
     (unless port
       ;; notify port number to the parent process via STDOUT.
       (message "%s\n" (process-contact main-process :service)))
     (push (cons main-process
-                (make-epcs:server
+                (make-eaf-epcs-server
                  :name name :process main-process
                  :port (process-contact main-process :service)
                  :connect-function connect-function))
-          epcs:server-processes)
+          eaf-epcs-server-processes)
     main-process))
 
 (defun eaf--start-epc-server ()
   "Function to start the EPC server."
   (unless eaf-server
     (setq eaf-server
-          (epcs:server-start
+          (eaf-epcs-server-start
            (lambda (mngr)
              (let ((mngr mngr))
-               (epc:define-method
-                mngr 'eval-in-emacs
-                (lambda (&rest args)
-                  ;; Decode argument with Base64 format automatically.
-                  (apply (read (car args))
-                         (mapcar
-                          (lambda (arg)
-                            (let ((arg (eaf--decode-string arg)))
-                              (cond ((string-prefix-p "'" arg) ;; single quote
-                                     (read (substring arg 1)))
-                                    ((string= arg "TRUE") 't)
-                                    ((string= arg "FALSE") 'nil)
-                                    ((and (string-prefix-p "(" arg)
-                                          (string-suffix-p ")" arg)) ;; list
-                                     (split-string (substring arg 1 -1) " "))
-                                    (t arg))))
-                          (cdr args)))))
-
-               (epc:define-method
-                mngr 'get-emacs-var
-                (lambda (&rest args)
-                  (let ((var-name (car args)))
-                    (symbol-value (intern var-name)))))
+               (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
+               (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -354,6 +332,29 @@ been initialized."
   ;; Start "event loop".
   (cl-loop repeat 600
            do (sleep-for 0.1)))
+
+(defun eval-in-emacs-func (&rest args)
+  (apply (read (car args))
+         (mapcar
+          (lambda (arg)
+            (let ((arg (eaf--decode-string arg)))
+              (cond ((string-prefix-p "'" arg) ;; single quote
+                     (read (substring arg 1)))
+                    ((string= arg "TRUE") 't)
+                    ((string= arg "FALSE") 'nil)
+                    ((and (string-prefix-p "(" arg)
+                          (string-suffix-p ")" arg)) ;; list
+                     (split-string (substring arg 1 -1) " "))
+                    (t arg))))
+          (cdr args))))
+
+(defun get-emacs-var-func (var-name)
+  (let* ((var-symbol (intern var-name))
+         (var-value (symbol-value var-symbol))
+         ;; We need convert result of booleanp to string.
+         ;; Otherwise, python-epc will convert all `nil' to [] at Python side.
+         (var-is-bool (prin1-to-string (booleanp var-value))))
+    (list var-value var-is-bool)))
 
 (defvar eaf-epc-process nil)
 
@@ -606,12 +607,12 @@ A hashtable, key is url and value is title.")
 
 (defun eaf-call-async (method &rest args)
   "Call Python EPC function METHOD and ARGS asynchronously."
-  (deferred:$
-    (epc:call-deferred eaf-epc-process (read method) args)))
+  (eaf-deferred-$
+   (eaf-epc-call-deferred eaf-epc-process (read method) args)))
 
 (defun eaf-call-sync (method &rest args)
   "Call Python EPC function METHOD and ARGS synchronously."
-  (epc:call-sync eaf-epc-process (read method) args))
+  (eaf-epc-call-sync eaf-epc-process (read method) args))
 
 (defun eaf-get-emacs-xid (frame)
   "Get Emacs FRAME xid."
@@ -624,7 +625,7 @@ A hashtable, key is url and value is title.")
   (cond
    ((not eaf--active-buffers)
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
-   ((epc:live-p eaf-epc-process)
+   ((eaf-epc-live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
   ;; start epc server and set `eaf-server-port'
   (eaf--start-epc-server)
@@ -704,11 +705,11 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
 (defun eaf--kill-python-process ()
   "Kill EAF background python process."
   (interactive)
-  (when (epc:live-p eaf-epc-process)
+  (when (eaf-epc-live-p eaf-epc-process)
     ;; Cleanup before exit EAF server process.
     (eaf-call-async "cleanup")
     ;; Delete EAF server process.
-    (epc:stop-epc eaf-epc-process)
+    (eaf-epc-stop-epc eaf-epc-process)
     ;; Kill *eaf* buffer.
     (when (get-buffer eaf-name)
       (kill-buffer eaf-name))
@@ -811,6 +812,16 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
+(defun eaf--call-js-function (fun &optional args)
+  (lambda nil
+    (interactive)
+    (unless args
+      (setq args ""))
+    ;; Ensure this is only called from EAF buffer
+    (when (derived-mode-p 'eaf-mode)
+      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") args)
+      )))
+
 (defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
   (setq eaf-mode-map
@@ -826,6 +837,9 @@ to edit EAF keybindings!" fun fun)))
                          ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
                          ((string-match "-" fun)
                           (intern fun))
+                         ;; If command prefix with js_, call JavaScript function directly.
+                         ((string-prefix-p "js_" fun)
+                          (eaf--call-js-function fun))
                          ;; If command is not built-in function and not include char '-'
                          ;; it's command in python side, build elisp proxy function to call it.
                          (t
@@ -856,7 +870,9 @@ keybinding variable to eaf-app-binding-alist."
     (with-current-buffer eaf-buffer
       (eaf-mode)
       (when (file-accessible-directory-p url-directory)
-        (setq-local default-directory url-directory))
+        (setq-local default-directory url-directory)
+        (when (file-exists-p url)
+          (setq-local buffer-file-name url)))
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
@@ -867,7 +883,7 @@ keybinding variable to eaf-app-binding-alist."
 
 (defun eaf-monitor-window-size-change (frame)
   "Delay some time and run `eaf-try-adjust-view-with-frame-size' to compare with Emacs FRAME size."
-  (when (epc:live-p eaf-epc-process)
+  (when (eaf-epc-live-p eaf-epc-process)
     (setq eaf-last-frame-width (frame-pixel-width frame))
     (setq eaf-last-frame-height (frame-pixel-height frame))
     (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame)))))
@@ -952,7 +968,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
-             (epc:live-p eaf-epc-process))
+             (eaf-epc-live-p eaf-epc-process))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
@@ -1114,14 +1130,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   ;; Make EPC process.
-  (setq eaf-epc-process (make-epc:manager
+  (setq eaf-epc-process (make-eaf-epc-manager
                          :server-process eaf-internal-process
                          :commands (cons eaf-internal-process-prog eaf-internal-process-args)
                          :title (mapconcat 'identity (cons eaf-internal-process-prog eaf-internal-process-args) " ")
                          :port eaf-epc-port
-                         :connection (epc:connect "localhost" eaf-epc-port)
+                         :connection (eaf-epc-connect "localhost" eaf-epc-port)
                          ))
-  (epc:init-epc-layer eaf-epc-process)
+  (eaf-epc-init-epc-layer eaf-epc-process)
 
   ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
   (setq eaf--webengine-include-private-codec webengine-include-private-codec)
@@ -1266,7 +1282,7 @@ By default, `eaf-open' will switch to buffer if corresponding url exists.
 `eaf-open' always open new buffer if option OPEN-ALWAYS is non-nil.
 
 When called interactively, URL accepts a file that can be opened by EAF."
-  (interactive "F[EAF] EAF Open: ")
+  (interactive "G[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
     (when (and eaf-pdf-store-history (string-match "^\\(.+\\)\\.pdf$" url))
@@ -1274,23 +1290,25 @@ When called interactively, URL accepts a file that can be opened by EAF."
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
-    (let* ((extension-name (eaf-get-file-name-extension url)))
-      ;; Initialize url, app-name and args
-      (setq app-name (eaf--get-app-for-extension extension-name))
-      (cond
-       ((equal app-name "browser")
-        (setq url (concat "file://" url)))
-       ((equal app-name "office")
-        (user-error "Please use `eaf-open-office' instead!"))
-       ((equal app-name "markdown-previewer")
-        ;; Warning user install java if found PlantUML syntax in markdown file.
-        (with-temp-buffer
-          (insert-file-contents url)
-          (goto-char (point-min))
-          (when (search-forward "```puml" nil t)
-            (unless (executable-find "java")
-              (user-error (format "Have PlantUML code in file '%s', you need to install Java to preview normally." url))
-              )))))))
+    (if (file-directory-p url)
+        (setq app-name "file-manager")
+      (let* ((extension-name (eaf-get-file-name-extension url)))
+        ;; Initialize url, app-name and args
+        (setq app-name (eaf--get-app-for-extension extension-name))
+        (cond
+         ((equal app-name "browser")
+          (setq url (concat "file://" url)))
+         ((equal app-name "office")
+          (user-error "Please use `eaf-open-office' instead!"))
+         ((equal app-name "markdown-previewer")
+          ;; Warning user install java if found PlantUML syntax in markdown file.
+          (with-temp-buffer
+            (insert-file-contents url)
+            (goto-char (point-min))
+            (when (search-forward "```puml" nil t)
+              (unless (executable-find "java")
+                (user-error (format "Have PlantUML code in file '%s', you need to install Java to preview normally." url))
+                ))))))))
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
@@ -1307,7 +1325,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
   ;; Open URL with EAF application
-  (if (epc:live-p eaf-epc-process)
+  (if (eaf-epc-live-p eaf-epc-process)
       (let (exists-eaf-buffer)
         ;; Try to open buffer
         (catch 'found-eaf

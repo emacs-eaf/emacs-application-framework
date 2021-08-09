@@ -295,7 +295,12 @@ def list_string_to_list(list_string):
 def get_emacs_var(var_name):
     global epc_client
 
-    return epc_client.call_sync("get-emacs-var", [var_name])
+    (symbol_value, symbol_is_boolean) = epc_client.call_sync("get-emacs-var", [var_name])
+
+    if symbol_is_boolean == "t":
+        return symbol_value == True
+    else:
+        return symbol_value
 
 emacs_config_dir = ""
 
@@ -306,3 +311,7 @@ def get_emacs_config_dir():
         emacs_config_dir = os.path.join(os.path.expanduser(get_emacs_var("eaf-config-location")), '')
 
     return emacs_config_dir
+
+def to_camel_case(string):
+    components = string.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
