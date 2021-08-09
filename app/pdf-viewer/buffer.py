@@ -252,7 +252,7 @@ class PdfDocument(fitz.Document):
             if page.cropbox == self._document_page_clip:
                 return page
 
-        page = PdfPage(self.document[index], self.document.isPDF)
+        page = PdfPage(self.document[index], self.document.is_pdf)
 
         # udpate the page clip
         new_rect_clip = self.computer_page_clip(page.get_tight_margin_rect(), self._document_page_clip)
@@ -262,7 +262,7 @@ class PdfDocument(fitz.Document):
                 self._document_page_change(new_rect_clip)
 
         if self._is_trim_margin:
-            return PdfPage(self.document[index], self.document.isPDF, self._document_page_clip)
+            return PdfPage(self.document[index], self.document.is_pdf, self._document_page_clip)
 
         return page
 
@@ -359,7 +359,7 @@ class PdfPage(fitz.Page):
         return getattr(self.page, attr)
 
     def _init_page_rawdict(self):
-        if self.isPDF:
+        if self.isPDFr:
             # Must set CropBox before get page rawdict , if no,
             # the rawdict bbox coordinate is wrong
             # cause the select text failed
@@ -586,7 +586,7 @@ class PdfViewerWidget(QWidget):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = get_emacs_var("eaf-pdf-dark-exclude-image") and self.document.isPDF
+        self.inverted_mode_exclude_image = get_emacs_var("eaf-pdf-dark-exclude-image") and self.document.is_pdf
 
         # mark link
         self.is_mark_link = False
@@ -702,7 +702,7 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
 
         page = self.document[index]
-        if self.document.isPDF:
+        if self.document.is_pdf:
             page.set_rotation(rotation)
 
         if self.is_mark_link:
@@ -722,7 +722,7 @@ class PdfViewerWidget(QWidget):
             page.cleanup_jump_link_tips()
             self.jump_link_key_cache_dict.clear()
 
-        if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.isPDF:
+        if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.is_pdf:
             color = inverted_color(get_emacs_var("eaf-emacs-theme-background-color"), self.inverted_mode)
             col = (color.redF(), color.greenF(), color.blueF())
             page.draw_rect(page.cropbox, color=col, fill=col, overlay=False)
@@ -984,7 +984,7 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
 
         # Toggle inverted status.
-        if not self.document.isPDF:
+        if not self.document.is_pdf:
             self.inverted_mode = not self.inverted_mode
             self.update()
             return
@@ -1002,12 +1002,12 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
-        self.is_mark_link = not self.is_mark_link and self.document.isPDF
+        self.is_mark_link = not self.is_mark_link and self.document.is_pdf
         self.page_cache_pixmap_dict.clear()
         self.update()
 
     def update_rotate(self, rotate):
-        if self.document.isPDF:
+        if self.document.is_pdf:
             current_page_index = self.start_page_index
             self.rotation = rotate
             self.page_width, self.page_height = self.page_height, self.page_width
@@ -1029,7 +1029,7 @@ class PdfViewerWidget(QWidget):
         self.update_rotate((self.rotation - 90) % 360)
 
     def add_mark_jump_link_tips(self):
-        self.is_jump_link = True and self.document.isPDF
+        self.is_jump_link = True and self.document.is_pdf
         self.page_cache_pixmap_dict.clear()
         self.update()
 
@@ -1406,7 +1406,7 @@ class PdfViewerWidget(QWidget):
 
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.MouseButtonPress]:
-            if not self.document.isPDF:
+            if not self.document.is_pdf:
                 return False
 
         if event.type() == QEvent.MouseMove:
