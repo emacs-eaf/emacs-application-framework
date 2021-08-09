@@ -77,6 +77,9 @@ class BrowserView(QWebEngineView):
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
 
+        self.scroll_behavior = get_emacs_var("eaf-browser-scroll-behavior")
+        self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
+
     def load_css(self, path, name):
         path = QFile(path)
         if not path.open(QFile.ReadOnly | QtCore.QFile.Text):
@@ -281,7 +284,7 @@ class BrowserView(QWebEngineView):
     def zoom_in(self):
         ''' Zoom in.'''
         self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
-        if get_emacs_var("eaf-browser-default-zoom") == self.zoomFactor():
+        if self.default_zoom == self.zoomFactor():
             self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
         else:
             self.buffer.zoom_data.add_entry(urlparse(self.buffer.current_url).hostname, self.zoomFactor())
@@ -290,7 +293,7 @@ class BrowserView(QWebEngineView):
     def zoom_out(self):
         ''' Zoom out.'''
         self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
-        if get_emacs_var("eaf-browser-default-zoom") == self.zoomFactor():
+        if self.default_zoom == self.zoomFactor():
             self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
         else:
             self.buffer.zoom_data.add_entry(urlparse(self.buffer.current_url).hostname, self.zoomFactor())
@@ -298,7 +301,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def zoom_reset(self):
         ''' Reset the magnification.'''
-        self.setZoomFactor(get_emacs_var("eaf-browser-default-zoom"))
+        self.setZoomFactor(self.default_zoom)
 
     def eval_js(self, js):
         ''' Run JavaScript.'''
@@ -335,7 +338,7 @@ class BrowserView(QWebEngineView):
     @interactive
     def scroll_up_page(self):
         ''' Scroll page up.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive
     def insert_or_scroll_up_page(self):
@@ -352,17 +355,17 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
         ''' Scroll down a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_begin(self):
         ''' Scroll to the beginning.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_bottom(self):
         ''' Scroll to the bottom.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + get_emacs_var("eaf-browser-scroll-behavior") + "'})")
+        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive
     def get_selection_text(self):
@@ -691,12 +694,15 @@ class BrowserBuffer(Buffer):
         self.channel.registerObject("pyobject", self)
         self.buffer_widget.web_page.setWebChannel(self.channel)
 
+        self.download_path = get_emacs_var("eaf-browser-download-path")
+        self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
+        
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
         if success:
             # Try to rename pdf file with title.
             # Use host name if title include invalid file char.
-            title_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.pdf".format(self.title))
+            title_path = os.path.join(os.path.expanduser(self.download_path), "{}.pdf".format(self.title))
             try:
                 os.rename(file_path, title_path)
                 message_to_emacs("Successfully saved current webpage as '{}'.".format(title_path))
@@ -748,7 +754,7 @@ class BrowserBuffer(Buffer):
         download_data = download_item.url().toString()
 
         if download_data.startswith("data:image/"):
-            image_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "image.png")
+            image_path = os.path.join(os.path.expanduser(self.download_path), "image.png")
             touch(image_path)
             with open(image_path, "wb") as f:
                 f.write(base64.decodestring(download_data.split(",")[1].encode("utf-8")))
@@ -768,7 +774,7 @@ class BrowserBuffer(Buffer):
     def _save_as_pdf(self):
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
-        pdf_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.pdf".format(parsed.netloc))
+        pdf_path = os.path.join(os.path.expanduser(self.download_path), "{}.pdf".format(parsed.netloc))
         message_to_emacs("Saving as pdf...")
         self.buffer_widget.web_page.printToPdf(pdf_path)
 
@@ -780,10 +786,10 @@ class BrowserBuffer(Buffer):
     def _save_as_single_file(self):
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
-        file_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.html".format(parsed.netloc))
+        file_path = os.path.join(os.path.expanduser(self.download_path), "{}.html".format(parsed.netloc))
         message_to_emacs("Saving as single file...")
         args = ["monolith", self.url, "-o", file_path]
-        handler = partial(self.notify_monolith_message, get_emacs_var("eaf-browser-download-path"), file_path, self.title)
+        handler = partial(self.notify_monolith_message, self.download_path, file_path, self.title)
         call_and_check_code(args, handler)
 
     @interactive(insert_or_do=True)
@@ -796,7 +802,7 @@ class BrowserBuffer(Buffer):
             self.send_input_message("Save current webpage as single html file?", "save_as_single_file", "yes-or-no")
 
     def _save_as_screenshot(self):
-        screenshot_path = os.path.join(os.path.expanduser(get_emacs_var("eaf-browser-download-path")), "{}.png".format(self.title))
+        screenshot_path = os.path.join(os.path.expanduser(self.download_path), "{}.png".format(self.title))
         message_to_emacs("Save as screenshot at {}".format(screenshot_path))
         self.buffer_widget.grab().save(screenshot_path, b'PNG')
 
@@ -1090,7 +1096,7 @@ class BrowserBuffer(Buffer):
         ''' Reset default magnification.'''
         if hasattr(self, "buffer_widget"):
             result = self.zoom_data.get_entry(urlparse(self.url).hostname)
-            zoom_factor = get_emacs_var("eaf-browser-default-zoom")
+            zoom_factor = self.default_zoom
             for row in result:
                 zoom_factor = float(row[0])
 
@@ -1192,7 +1198,7 @@ class BrowserBuffer(Buffer):
             import shutil
 
             if shutil.which("youtube-dl"):
-                download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(get_emacs_var("eaf-browser-download-path")))
+                download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(self.download_path))
 
                 youtube_dl_args = ["youtube-dl"]
                 youtube_dl_args.append("--proxy")
