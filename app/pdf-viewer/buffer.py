@@ -478,7 +478,7 @@ class PdfPage(fitz.Page):
             for image in imagelist:
                 try:
                     imagerect = page.get_image_bbox(image)
-                    if imagerect.is_infinite or imagerect.isEmpty:
+                    if imagerect.is_infinite or imagerect.is_empty:
                         continue
                     else:
                         imagebboxlist.append(imagerect)
