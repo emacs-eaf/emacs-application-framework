@@ -274,7 +274,7 @@ class Buffer(QGraphicsScene):
         getattr(self, function_name)()
 
     @abstract
-    def execute_js_function(self, function_name):
+    def execute_js_function(self, function_name, function_arguments):
         ''' Execute JavaScript function.'''
         pass
 

@@ -817,7 +817,7 @@ to edit EAF keybindings!" fun fun)))
     (interactive)
     ;; Ensure this is only called from EAF buffer
     (when (derived-mode-p 'eaf-mode)
-      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") (key-description (this-command-keys-vector)))
+      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") "")
       )))
 
 (defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)

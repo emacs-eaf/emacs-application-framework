@@ -315,13 +315,12 @@ class EAF(object):
                 message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
 
     @PostGui()
-    def execute_js_function(self, buffer_id, function_name, event_string):
+    def execute_js_function(self, buffer_id, function_name, function_arguments):
         ''' Execute JavaScript function and do not return anything. '''
         if type(buffer_id) == str and buffer_id in self.buffer_dict:
             try:
                 buffer = self.buffer_dict[buffer_id]
-                buffer.current_event_string = event_string
-                buffer.execute_js_function(function_name)
+                buffer.execute_js_function(function_name, function_arguments)
             except AttributeError:
                 import traceback
                 traceback.print_exc()

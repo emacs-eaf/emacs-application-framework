@@ -1215,9 +1215,12 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
-    def execute_js_function(self, function_name):
+    def execute_js_function(self, function_name, function_arguments):
         ''' Execute JavaScript function.'''
-        self.buffer_widget.execute_js('''{}()'''.format(to_camel_case(function_name)))
+        if function_arguments == "":
+            self.buffer_widget.execute_js('''{}()'''.format(to_camel_case(function_name)))
+        else:
+            self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
 
     def convert_index_html(self, index_file_content, dist_dir):
         '''
