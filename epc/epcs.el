@@ -108,7 +108,6 @@ channel : Event channels for incoming messages."
 
 \(fn EAF-EPC-CONNECTION)")
 
-
 (defun eaf-epc-connect (host port)
   "[internal] Connect the server, initialize the process and
 return eaf-epc-connection object."
@@ -134,11 +133,6 @@ return eaf-epc-connection object."
                             (eaf-epc-process-sentinel connection p e)))
     (set-process-query-on-exit-flag connection-process nil)
     connection))
-
-(defun eaf-epc-connection-reset (connection)
-  "[internal] Reset the connection for restarting the process."
-  (eaf-concurrent-signal-disconnect-all (eaf-epc-connection-channel connection))
-  connection)
 
 (defun eaf-epc-process-sentinel (connection process msg)
   (eaf-epc-log "!! Process Sentinel [%s] : %S : %S"
@@ -299,13 +293,6 @@ This is *not* network process but the external program started by
 
 \(fn EAF-EPC-MANAGER)")
 
-(eaf-epc-document-function 'eaf-epc-manager-exit-hooks
-  "Hooks called after shutdown EPC connection.
-
-Use `eaf-epc-manager-add-exit-hook' to add hook.
-
-\(fn EAF-EPC-MANAGER)")
-
 (defstruct eaf-epc-method
   "Object to hold serving method information.
 
@@ -335,7 +322,6 @@ docstring  : docstring (one string) ex: \"A test function. Return sum of A,B,C a
   "[internal] docstring (one string) ex: \"A test function. Return sum of A,B,C and D\"
 
 \(fn EAF-EPC-METHOD)")
-
 
 (defvar eaf-epc-live-connections nil
   "[internal] A list of `eaf-epc-manager' objects those currently connect to the epc peer.
@@ -461,9 +447,6 @@ to see full traceback:\n%s" port-str))
     (when (and proc (equal 'run (process-status proc)))
       (kill-process proc))
     (when buf  (kill-buffer buf))
-    (condition-case err
-        (eaf-epc-manager-fire-exit-hook mngr)
-      (error (eaf-epc-log "Error on exit-hooks : %S / " err mngr)))
     (eaf-epc-live-connections-delete mngr)))
 
 (defun eaf-epc-args (args)
@@ -503,20 +486,6 @@ to see full traceback:\n%s" port-str))
             ) do
               (eaf-concurrent-signal-connect channel method body))
     (eaf-epc-live-connections-add mngr)
-    mngr))
-
-(defun eaf-epc-manager-add-exit-hook (mngr hook-function)
-  "Register the HOOK-FUNCTION which is called after the EPC connection closed by the EPC controller UI.
-HOOK-FUNCTION is a function with no argument."
-  (let* ((hooks (eaf-epc-manager-exit-hooks mngr)))
-    (setf (eaf-epc-manager-exit-hooks mngr) (cons hook-function hooks))
-    mngr))
-
-(defun eaf-epc-manager-fire-exit-hook (mngr)
-  "[internal] Call exit-hooks functions of MNGR. After calling hooks, this functions clears the hook slot so as not to call doubly."
-  (let* ((hooks (eaf-epc-manager-exit-hooks mngr)))
-    (run-hooks hooks)
-    (setf (eaf-epc-manager-exit-hooks mngr) nil)
     mngr))
 
 (defun eaf-epc-manager-send (mngr method &rest messages)
@@ -939,14 +908,6 @@ the removed deferred object. "
               else
               do (push i deleted)))
     deleted))
-
-(defun eaf-concurrent-signal-disconnect-all (channel)
-  "Remove all observers."
-  (setf
-   (eaf-concurrent-signal-observers channel) ; place
-   nil))
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dataflow
