@@ -203,7 +203,7 @@ class AppBuffer(Buffer):
 
     def get_toc(self):
         result = ""
-        toc = self.buffer_widget.document.getToC()
+        toc = self.buffer_widget.document.get_toc()
         for line in toc:
             result += "{0}{1} {2}\n".format("".join("    " * (line[0] - 1)), line[1], line[2])
         return result
@@ -249,10 +249,10 @@ class PdfDocument(fitz.Document):
             if not self._is_trim_margin:
                 return page
 
-            if page.CropBox == self._document_page_clip:
+            if page.cropbox == self._document_page_clip:
                 return page
 
-        page = PdfPage(self.document[index], self.document.isPDF)
+        page = PdfPage(self.document[index], self.document.is_pdf)
 
         # udpate the page clip
         new_rect_clip = self.computer_page_clip(page.get_tight_margin_rect(), self._document_page_clip)
@@ -262,7 +262,7 @@ class PdfDocument(fitz.Document):
                 self._document_page_change(new_rect_clip)
 
         if self._is_trim_margin:
-            return PdfPage(self.document[index], self.document.isPDF, self._document_page_clip)
+            return PdfPage(self.document[index], self.document.is_pdf, self._document_page_clip)
 
         return page
 
@@ -326,7 +326,7 @@ class PdfDocument(fitz.Document):
         if self.isPDF:
             if self._is_trim_margin:
                 return self._document_page_clip.width
-            return self.document.pageCropBox(0).width
+            return self.document.page_cropbox(0).width
         else:
             return self[0].clip.width
 
@@ -334,7 +334,7 @@ class PdfDocument(fitz.Document):
         if self.isPDF:
             if self._is_trim_margin:
                 return self._document_page_clip.height
-            return self.document.pageCropBox(0).height
+            return self.document.page_cropbox(0).height
         else:
             return self[0].clip.height
 
@@ -345,7 +345,7 @@ class PdfPage(fitz.Page):
     def __init__(self, page, isPDF, clip=None):
         self.page = page
         self.isPDF = isPDF
-        self.clip = clip or page.CropBox
+        self.clip = clip or page.cropbox
 
         self._mark_link_annot_list = []
         self._mark_search_annot_list = []
@@ -359,18 +359,18 @@ class PdfPage(fitz.Page):
         return getattr(self.page, attr)
 
     def _init_page_rawdict(self):
-        if self.isPDF:
+        if self.isPDFr:
             # Must set CropBox before get page rawdict , if no,
             # the rawdict bbox coordinate is wrong
             # cause the select text failed
-            self.page.setCropBox(self.clip)
-            d = self.page.getText("rawdict")
+            self.page.set_cropbox(self.clip)
+            d = self.page.get_text("rawdict")
             # cancel the cropbox, if not, will cause the pixmap set cropbox
             # don't begin on top-left(0, 0), page display black margin
-            self.page.setCropBox(self.page.MediaBox)
+            self.page.set_cropbox(self.page.mediabox)
             return d
         else:
-            return self.page.getText("rawdict")
+            return self.page.get_text("rawdict")
 
     def _init_page_char_rect_list(self):
         '''Collection page char rect list when page init'''
@@ -409,13 +409,13 @@ class PdfPage(fitz.Page):
             y1 = max(y1, r.y1)
             r = fitz.Rect(x0, y0, x1, y1)
         if r is None:
-            return self.page.CropBox
+            return self.page.cropbox
         return r
 
     def get_tight_margin_rect(self):
         # if current page don't computer tight rect
         # return None
-        if self._tight_margin_rect == self.page.MediaBox:
+        if self._tight_margin_rect == self.page.mediabox:
             return None
         return self._tight_margin_rect
 
@@ -435,18 +435,18 @@ class PdfPage(fitz.Page):
         return None
 
     def set_rotation(self, rotation):
-        self.page.setRotation(rotation)
+        self.page.set_rotation(rotation)
         if rotation % 180 != 0:
-            self.page_width = self.page.CropBox.height
-            self.page_height = self.page.CropBox.width
+            self.page_width = self.page.cropbox.height
+            self.page_height = self.page.cropbox.width
         else:
-            self.page_width = self.page.CropBox.width
-            self.page_height = self.page.CropBox.height
+            self.page_width = self.page.cropbox.width
+            self.page_height = self.page.cropbox.height
 
     def get_qpixmap(self, scale, *args):
         if self.isPDF:
-            self.page.setCropBox(self.clip)
-        pixmap = self.page.getPixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
+            self.page.set_cropbox(self.clip)
+        pixmap = self.page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
         for fn in args:
             fn(self.page, pixmap, scale)
 
@@ -462,23 +462,23 @@ class PdfPage(fitz.Page):
         # if exclude image is True, will find the page all image, then get
         # each image rect. Finally, again invert all image rect.
         def fn(page, pixmap, scale):
-            pixmap.invertIRect(pixmap.irect)
+            pixmap.invert_irect(pixmap.irect)
             if not exclude_image:
                 return pixmap
 
             # exclude image only support PDF document
             imagelist = None
             try:
-                imagelist = page.getImageList(full=True)
+                imagelist = page.get_images(full=True)
             except Exception:
                 # PyMupdf 1.14 not include argument 'full'.
-                imagelist = page.getImageList()
+                imagelist = page.get_images()
 
             imagebboxlist = []
             for image in imagelist:
                 try:
-                    imagerect = page.getImageBbox(image)
-                    if imagerect.isInfinite or imagerect.isEmpty:
+                    imagerect = page.get_image_bbox(image)
+                    if imagerect.is_infinite or imagerect.is_empty:
                         continue
                     else:
                         imagebboxlist.append(imagerect)
@@ -486,28 +486,28 @@ class PdfPage(fitz.Page):
                     pass
 
             for bbox in imagebboxlist:
-                pixmap.invertIRect(bbox * page.rotationMatrix * scale)
+                pixmap.invert_irect(bbox * page.rotation_matrix * scale)
 
         return fn
 
     def add_mark_link(self):
-        if self.page.firstLink:
-            for link in self.page.getLinks():
-                annot = self.page.addUnderlineAnnot(link["from"])
-                annot.parent = self.page # Must assign annot parent, else deleteAnnot cause parent is None problem.
+        if self.page.first_link:
+            for link in self.page.get_links():
+                annot = self.page.add_underline_annot(link["from"])
+                annot.parent = self.page # Must assign annot parent, else delete_annot cause parent is None problem.
                 self._mark_link_annot_list.append(annot)
 
     def cleanup_mark_link(self):
         if self._mark_link_annot_list:
             for annot in self._mark_link_annot_list:
-                self.page.deleteAnnot(annot)
+                self.page.delete_annot(annot)
             self._mark_link_annot_list = []
 
     def mark_search_text(self, keyword):
-        quads_list = self.page.searchFor(keyword, hit_max=999, quads=True)
+        quads_list = self.page.search_for(keyword, hit_max=999, quads=True)
         if quads_list:
             for quads in quads_list:
-                annot = self.page.addHighlightAnnot(quads)
+                annot = self.page.add_highlight_annot(quads)
                 annot.parent = self.page
                 self._mark_search_annot_list.append(annot)
 
@@ -515,20 +515,20 @@ class PdfPage(fitz.Page):
         if self._mark_search_annot_list:
             message_to_emacs("Unmarked all matched results.")
             for annot in self._mark_search_annot_list:
-                self.page.deleteAnnot(annot)
+                self.page.delete_annot(annot)
             self._mark_search_annot_list = []
 
     def mark_jump_link_tips(self, letters):
         tips_size = 4
         cache_dict = {}
-        if self.page.firstLink:
-            links = self.page.getLinks()
+        if self.page.first_link:
+            links = self.page.get_links()
             key_list = generate_random_key(len(links), letters)
             for index, link in enumerate(links):
                 key = key_list[index]
                 link_rect = link["from"]
                 annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + (tips_size * len(key)), link_rect.y0 + 7)
-                annot = self.page.addFreetextAnnot(annot_rect, str(key), fontsize=6, fontname="Cour", \
+                annot = self.page.add_freetext_annot(annot_rect, str(key), fontsize=6, fontname="Cour", \
                                               text_color=[0.0, 0.0, 0.0], fill_color=[255/255.0, 197/255.0, 36/255.0])
                 annot.parent = self.page
                 self._mark_jump_annot_list.append(annot)
@@ -537,7 +537,7 @@ class PdfPage(fitz.Page):
 
     def cleanup_jump_link_tips(self):
         for annot in self._mark_jump_annot_list:
-            self.page.deleteAnnot(annot)
+            self.page.delete_annot(annot)
         self._mark_jump_annot_list = []
 
 
@@ -563,7 +563,7 @@ class PdfViewerWidget(QWidget):
         self.document.watch_page_size_change(self.update_page_size)
         self.page_width = self.document.get_page_width()
         self.page_height = self.document.get_page_height()
-        self.page_total_number = self.document.pageCount
+        self.page_total_number = self.document.page_count
 
         # Init scale and scale mode.
         self.scale = 1.0
@@ -586,7 +586,7 @@ class PdfViewerWidget(QWidget):
             self.inverted_mode = True
 
         # Inverted mode exclude image. (current exclude image inner implement use PDF Only method)
-        self.inverted_mode_exclude_image = get_emacs_var("eaf-pdf-dark-exclude-image") and self.document.isPDF
+        self.inverted_mode_exclude_image = get_emacs_var("eaf-pdf-dark-exclude-image") and self.document.is_pdf
 
         # mark link
         self.is_mark_link = False
@@ -702,7 +702,7 @@ class PdfViewerWidget(QWidget):
             self.page_cache_scale = scale
 
         page = self.document[index]
-        if self.document.isPDF:
+        if self.document.is_pdf:
             page.set_rotation(rotation)
 
         if self.is_mark_link:
@@ -722,10 +722,10 @@ class PdfViewerWidget(QWidget):
             page.cleanup_jump_link_tips()
             self.jump_link_key_cache_dict.clear()
 
-        if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.isPDF:
+        if get_emacs_var("eaf-pdf-dark-mode") == "follow" and self.document.is_pdf:
             color = inverted_color(get_emacs_var("eaf-emacs-theme-background-color"), self.inverted_mode)
             col = (color.redF(), color.greenF(), color.blueF())
-            page.drawRect(page.CropBox, color=col, fill=col, overlay=False)
+            page.draw_rect(page.cropbox, color=col, fill=col, overlay=False)
 
         qpixmap = page.get_qpixmap(scale, page.with_invert(self.inverted_mode, self.inverted_mode_exclude_image))
 
@@ -984,7 +984,7 @@ class PdfViewerWidget(QWidget):
         self.page_cache_pixmap_dict.clear()
 
         # Toggle inverted status.
-        if not self.document.isPDF:
+        if not self.document.is_pdf:
             self.inverted_mode = not self.inverted_mode
             self.update()
             return
@@ -1002,12 +1002,12 @@ class PdfViewerWidget(QWidget):
 
     @interactive
     def toggle_mark_link(self): #  mark_link will add underline mark on link, using prompt link position.
-        self.is_mark_link = not self.is_mark_link and self.document.isPDF
+        self.is_mark_link = not self.is_mark_link and self.document.is_pdf
         self.page_cache_pixmap_dict.clear()
         self.update()
 
     def update_rotate(self, rotate):
-        if self.document.isPDF:
+        if self.document.is_pdf:
             current_page_index = self.start_page_index
             self.rotation = rotate
             self.page_width, self.page_height = self.page_height, self.page_width
@@ -1029,7 +1029,7 @@ class PdfViewerWidget(QWidget):
         self.update_rotate((self.rotation - 90) % 360)
 
     def add_mark_jump_link_tips(self):
-        self.is_jump_link = True and self.document.isPDF
+        self.is_jump_link = True and self.document.is_pdf
         self.page_cache_pixmap_dict.clear()
         self.update()
 
@@ -1063,7 +1063,7 @@ class PdfViewerWidget(QWidget):
 
         self.search_text_index = 0
         for page_index in range(self.page_total_number):
-            quads_list = self.document.searchPageFor(page_index, text, hit_max=999, quads=True)
+            quads_list = self.document.search_page_for(page_index, text, hit_max=999, quads=True)
             if quads_list:
                 for index, quad in enumerate(quads_list):
                     search_text_offset = (page_index * self.page_height + quad.ul.y) * self.scale
@@ -1145,16 +1145,16 @@ class PdfViewerWidget(QWidget):
             page = self.document[page_index]
 
             if annot_type == "highlight":
-                new_annot = page.addHighlightAnnot(quad_list)
+                new_annot = page.add_highlight_annot(quad_list)
             elif annot_type == "strikeout":
-                new_annot = page.addStrikeoutAnnot(quad_list)
+                new_annot = page.add_strikeout_annot(quad_list)
             elif annot_type == "underline":
-                new_annot = page.addUnderlineAnnot(quad_list)
+                new_annot = page.add_underline_annot(quad_list)
             elif annot_type == "squiggly":
-                new_annot = page.addSquigglyAnnot(quad_list)
+                new_annot = page.add_squiggly_annot(quad_list)
             elif annot_type == "text":
                 point = quad_list[-1].lr # lower right point
-                new_annot = page.addTextAnnot(point, text, icon="Note")
+                new_annot = page.add_text_annot(point, text, icon="Note")
 
             new_annot.parent = page
         self.document.saveIncr()
@@ -1166,7 +1166,7 @@ class PdfViewerWidget(QWidget):
             return
 
         page = self.document[page_index]
-        new_annot = page.addTextAnnot(point, text, icon="Note")
+        new_annot = page.add_text_annot(point, text, icon="Note")
         new_annot.parent = page
 
         self.save_annot()
@@ -1216,10 +1216,10 @@ class PdfViewerWidget(QWidget):
             page = self.document[page_index]
             old_annot = self.select_area_annot_cache_dict[page_index]
             if old_annot:
-                page.deleteAnnot(old_annot)
+                page.delete_annot(old_annot)
 
             quad_list = list(map(lambda x: x.quad, line_rect_list))
-            annot = page.addHighlightAnnot(quad_list)
+            annot = page.add_highlight_annot(quad_list)
             annot.parent = page
 
             # refresh annot
@@ -1233,7 +1233,7 @@ class PdfViewerWidget(QWidget):
         if self.select_area_annot_cache_dict:
             for page_index, annot in self.select_area_annot_cache_dict.items():
                 if annot and annot.parent:
-                        annot.parent.deleteAnnot(annot)
+                        annot.parent.delete_annot(annot)
                 self.select_area_annot_cache_dict[page_index] = None # restore cache
         self.last_char_page_index = None
         self.last_char_rect_index = None
@@ -1252,7 +1252,7 @@ class PdfViewerWidget(QWidget):
         try:
             ex, ey, page_index = self.get_cursor_absolute_position()
             page = self.document[page_index]
-            annot = page.firstAnnot
+            annot = page.first_annot
             if not annot:
                 return None, None
 
@@ -1273,7 +1273,7 @@ class PdfViewerWidget(QWidget):
                 else:
                     opacity = 1.0
                 if opacity != annot.opacity:
-                    annot.setOpacity(opacity)
+                    annot.set_opacity(opacity)
                     annot.update()
 
             # update only if changed
@@ -1304,7 +1304,7 @@ class PdfViewerWidget(QWidget):
         page, annot = self.hover_annot()
         if annot.parent:
             if action == "delete":
-                page.deleteAnnot(annot)
+                page.delete_annot(annot)
                 self.save_annot()
             if action == "edit":
                 self.edited_page_annot = (page, annot)
@@ -1313,7 +1313,7 @@ class PdfViewerWidget(QWidget):
     def update_annot_text(self, annot_text):
         page, annot = self.edited_page_annot
         if annot.parent:
-            annot.setInfo(content=annot_text)
+            annot.set_info(content=annot_text)
             annot.update()
         self.save_annot()
         self.edited_page_annot = (None, None)
@@ -1383,7 +1383,7 @@ class PdfViewerWidget(QWidget):
             return None
 
         page = self.document[page_index]
-        for link in page.getLinks():
+        for link in page.get_links():
             rect = link["from"]
             if ex >= rect.x0 and ex <= rect.x1 and ey >= rect.y0 and ey <= rect.y1:
                 return link
@@ -1398,15 +1398,15 @@ class PdfViewerWidget(QWidget):
         word_offset = 10 # 10 pixel is enough for word intersect operation
         draw_rect = fitz.Rect(ex, ey, ex + word_offset, ey + word_offset)
 
-        page.setCropBox(page.rect)
-        page_words = page.getTextWords()
+        page.set_cropbox(page.rect)
+        page_words = page.get_text_words()
         rect_words = [w for w in page_words if fitz.Rect(w[:4]).intersect(draw_rect)]
         if rect_words:
             return rect_words[0][4]
 
     def eventFilter(self, obj, event):
         if event.type() in [QEvent.MouseMove, QEvent.MouseButtonDblClick, QEvent.MouseButtonPress]:
-            if not self.document.isPDF:
+            if not self.document.is_pdf:
                 return False
 
         if event.type() == QEvent.MouseMove:
