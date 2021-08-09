@@ -812,12 +812,14 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
-(defun eaf--call-js-function (fun)
+(defun eaf--call-js-function (fun &optional args)
   (lambda nil
     (interactive)
+    (unless args
+      (setq args ""))
     ;; Ensure this is only called from EAF buffer
     (when (derived-mode-p 'eaf-mode)
-      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") "")
+      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") args)
       )))
 
 (defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)
