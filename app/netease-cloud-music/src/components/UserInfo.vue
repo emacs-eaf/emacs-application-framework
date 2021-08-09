@@ -52,8 +52,14 @@
        window.pyobject.change_playlist([Number(pid)]);
      },
 
-     changePlaylistStyle(index, init) {
+     changePlaylistStyle(index) {
        /* Change the song's style to show that the song is playing */
+       var init = undefined
+       if (index instanceof Array) {
+         init = true;
+         index = index[0];
+       }
+
        if (index != this.currentPlaylistId || init) {
          var target = this.$refs.allplaylists.getElementsByClassName('playlist')[index];
          var prev = this.$refs.allplaylists.getElementsByClassName('playlist')[this.currentPlaylistId]
@@ -115,7 +121,6 @@
 
  #user-status > img {
    width: 50%;
-   height: 50%;
    border-radius: 50%;
  }
 
