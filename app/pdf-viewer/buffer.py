@@ -1273,7 +1273,7 @@ class PdfViewerWidget(QWidget):
                 else:
                     opacity = 1.0
                 if opacity != annot.opacity:
-                    annot.setOpacity(opacity)
+                    annot.set_opacity(opacity)
                     annot.update()
 
             # update only if changed
