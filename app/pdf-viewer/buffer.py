@@ -528,7 +528,7 @@ class PdfPage(fitz.Page):
                 key = key_list[index]
                 link_rect = link["from"]
                 annot_rect = fitz.Rect(link_rect.top_left, link_rect.x0 + (tips_size * len(key)), link_rect.y0 + 7)
-                annot = self.page.addFreetextAnnot(annot_rect, str(key), fontsize=6, fontname="Cour", \
+                annot = self.page.add_freetext_annot(annot_rect, str(key), fontsize=6, fontname="Cour", \
                                               text_color=[0.0, 0.0, 0.0], fill_color=[255/255.0, 197/255.0, 36/255.0])
                 annot.parent = self.page
                 self._mark_jump_annot_list.append(annot)
