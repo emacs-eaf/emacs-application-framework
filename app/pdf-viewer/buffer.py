@@ -1252,7 +1252,7 @@ class PdfViewerWidget(QWidget):
         try:
             ex, ey, page_index = self.get_cursor_absolute_position()
             page = self.document[page_index]
-            annot = page.firstAnnot
+            annot = page.first_annot
             if not annot:
                 return None, None
 
