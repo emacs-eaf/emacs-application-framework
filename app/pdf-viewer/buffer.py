@@ -1151,7 +1151,7 @@ class PdfViewerWidget(QWidget):
             elif annot_type == "underline":
                 new_annot = page.add_underline_annot(quad_list)
             elif annot_type == "squiggly":
-                new_annot = page.addSquigglyAnnot(quad_list)
+                new_annot = page.add_squiggly_annot(quad_list)
             elif annot_type == "text":
                 point = quad_list[-1].lr # lower right point
                 new_annot = page.addTextAnnot(point, text, icon="Note")
