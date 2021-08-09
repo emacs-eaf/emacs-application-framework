@@ -28,6 +28,898 @@
 (require 'cl-lib)
 (require 'subr-x)
 
+;; deferred
+(declare-function pp-display-expression 'pp)
+
+(defvar eaf-deferred-version nil "deferred.el version")
+(setq eaf-deferred-version "0.5.0")
+
+;;; Code:
+
+(defmacro eaf-deferred-aand (test &rest rest)
+  "[internal] Anaphoric AND."
+  (declare (debug ("test" form &rest form)))
+  `(let ((it ,test))
+     (if it ,(if rest `(eaf-deferred-aand ,@rest) 'it))))
+
+(defmacro eaf-deferred-$ (&rest elements)
+  "Anaphoric function chain macro for deferred chains."
+  (declare (debug (&rest form)))
+  `(let (it)
+     ,@(cl-loop for i in elements
+                collect
+                `(setq it ,i))
+     it))
+
+(defmacro eaf-deferred-lambda (args &rest body)
+  "Anaphoric lambda macro for self recursion."
+  (declare (debug ("args" form &rest form)))
+  (let ((argsyms (cl-loop repeat (length args) collect (cl-gensym))))
+  `(lambda (,@argsyms)
+     (let (self)
+       (setq self (lambda( ,@args ) ,@body))
+       (funcall self ,@argsyms)))))
+
+(cl-defmacro eaf-deferred-try (d &key catch finally)
+  "Try-catch-finally macro. This macro simulates the
+try-catch-finally block asynchronously. CATCH and FINALLY can be
+nil. Because of asynchrony, this macro does not ensure that the
+task FINALLY should be called."
+  (let ((chain
+         (if catch `((eaf-deferred-error it ,catch)))))
+    (when finally
+      (setq chain (append chain `((eaf-deferred-watch it ,finally)))))
+    `(eaf-deferred-$ ,d ,@chain)))
+
+(defun eaf-deferred-setTimeout (f msec)
+  "[internal] Timer function that emulates the `setTimeout' function in JS."
+  (run-at-time (/ msec 1000.0) nil f))
+
+(defun eaf-deferred-cancelTimeout (id)
+  "[internal] Timer cancellation function that emulates the `cancelTimeout' function in JS."
+  (cancel-timer id))
+
+(defun eaf-deferred-run-with-idle-timer (sec f)
+  "[internal] Wrapper function for run-with-idle-timer."
+  (run-with-idle-timer sec nil f))
+
+(defun eaf-deferred-call-lambda (f &optional arg)
+  "[internal] Call a function with one or zero argument safely.
+The lambda function can define with zero and one argument."
+  (condition-case err
+      (funcall f arg)
+    ('wrong-number-of-arguments
+     (display-warning 'deferred "\
+Callback that takes no argument may be specified.
+Passing callback with no argument is deprecated.
+Callback must take one argument.
+Or, this error is coming from somewhere inside of the callback: %S" err)
+     (condition-case nil
+         (funcall f)
+       ('wrong-number-of-arguments
+        (signal 'wrong-number-of-arguments (cdr err))))))) ; return the first error
+
+;; debug
+
+(eval-and-compile
+  (defvar eaf-deferred-debug nil "Debug output switch."))
+(defvar eaf-deferred-debug-count 0 "[internal] Debug output counter.")
+
+(defmacro eaf-deferred-message (&rest args)
+  "[internal] Debug log function."
+  (when eaf-deferred-debug
+    `(progn
+       (with-current-buffer (get-buffer-create "*eaf-deferred-debug*")
+         (save-excursion
+           (goto-char (point-max))
+           (insert (format "%5i %s\n" eaf-deferred-debug-count (format ,@args)))))
+       (cl-incf eaf-deferred-debug-count))))
+
+(defun eaf-deferred-message-mark ()
+  "[internal] Debug log function."
+  (interactive)
+  (eaf-deferred-message "==================== mark ==== %s"
+    (format-time-string "%H:%M:%S" (current-time))))
+
+(defun eaf-deferred-pp (d)
+  (require 'pp)
+  (eaf-deferred-$
+    (eaf-deferred-nextc d
+      (lambda (x)
+        (pp-display-expression x "*eaf-deferred-pp*")))
+    (eaf-deferred-error it
+      (lambda (e)
+        (pp-display-expression e "*eaf-deferred-pp*")))
+    (eaf-deferred-nextc it
+      (lambda (_x) (pop-to-buffer "*eaf-deferred-pp*")))))
+
+(defvar eaf-deferred-debug-on-signal nil
+"If non nil, the value `debug-on-signal' is substituted this
+value in the `condition-case' form in deferred
+implementations. Then, Emacs debugger can catch an error occurred
+in the asynchronous tasks.")
+
+(defmacro eaf-deferred-condition-case (var protected-form &rest handlers)
+  "[internal] Custom condition-case. See the comment for
+`eaf-deferred-debug-on-signal'."
+  (declare (debug condition-case)
+           (indent 2))
+  `(let ((debug-on-signal
+          (or debug-on-signal eaf-deferred-debug-on-signal)))
+     (condition-case ,var
+         ,protected-form
+       ,@handlers)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Back end functions of deferred tasks
+
+(defvar eaf-deferred-tick-time 0.001
+  "Waiting time between asynchronous tasks (second).
+The shorter waiting time increases the load of Emacs. The end
+user can tune this parameter. However, applications should not
+modify it because the applications run on various environments.")
+
+(defvar eaf-deferred-queue nil
+  "[internal] The execution queue of deferred objects.
+See the functions `eaf-deferred-post-task' and `eaf-deferred-worker'.")
+
+(defmacro eaf-deferred-pack (a b c)
+  `(cons ,a (cons ,b ,c)))
+
+(defun eaf-deferred-schedule-worker ()
+  "[internal] Schedule consuming a deferred task in the execution queue."
+  (run-at-time eaf-deferred-tick-time nil 'eaf-deferred-worker))
+
+(defun eaf-deferred-post-task (d which &optional arg)
+  "[internal] Add a deferred object to the execution queue
+`eaf-deferred-queue' and schedule to execute.
+D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
+an argument value for execution of the deferred task."
+  (push (eaf-deferred-pack d which arg) eaf-deferred-queue)
+  (eaf-deferred-message "QUEUE-POST [%s]: %s"
+    (length eaf-deferred-queue) (eaf-deferred-pack d which arg))
+  (eaf-deferred-schedule-worker)
+  d)
+
+(defun eaf-deferred-clear-queue ()
+  "Clear the execution queue. For test and debugging."
+  (interactive)
+  (eaf-deferred-message "QUEUE-CLEAR [%s -> 0]" (length eaf-deferred-queue))
+  (setq eaf-deferred-queue nil))
+
+(defun eaf-deferred-worker ()
+  "[internal] Consume a deferred task.
+Mainly this function is called by timer asynchronously."
+  (when eaf-deferred-queue
+    (let* ((pack (car (last eaf-deferred-queue)))
+           (d (car pack))
+           (which (cadr pack))
+           (arg (cddr pack)) value)
+      (setq eaf-deferred-queue (nbutlast eaf-deferred-queue))
+      (condition-case err
+          (setq value (eaf-deferred-exec-task d which arg))
+        (error
+         (eaf-deferred-message "ERROR : %s" err)
+         (message "deferred error : %s" err)))
+      value)))
+
+(defun eaf-deferred-flush-queue! ()
+  "Call all deferred tasks synchronously. For test and debugging."
+  (let (value)
+    (while eaf-deferred-queue
+      (setq value (eaf-deferred-worker)))
+    value))
+
+(defun eaf-deferred-sync! (d)
+  "Wait for the given deferred task. For test and debugging.
+Error is raised if it is not processed within deferred chain D."
+  (progn
+    (let ((last-value 'eaf-deferred-undefined*)
+          uncaught-error)
+      (eaf-deferred-try
+        (eaf-deferred-nextc d
+          (lambda (x) (setq last-value x)))
+        :catch
+        (lambda (err) (setq uncaught-error err)))
+      (while (and (eq 'eaf-deferred-undefined* last-value)
+                  (not uncaught-error))
+        (sit-for 0.05)
+        (sleep-for 0.05))
+      (when uncaught-error
+        (eaf-deferred-resignal uncaught-error))
+      last-value)))
+
+
+;; Struct: deferred
+;;
+;; callback    : a callback function (default `eaf-deferred-default-callback')
+;; errorback   : an errorback function (default `eaf-deferred-default-errorback')
+;; cancel      : a canceling function (default `eaf-deferred-default-cancel')
+;; next        : a next chained deferred object (default nil)
+;; status      : if 'ok or 'ng, this deferred has a result (error) value. (default nil)
+;; value       : saved value (default nil)
+;;
+(cl-defstruct deferred
+  (callback 'eaf-deferred-default-callback)
+  (errorback 'eaf-deferred-default-errorback)
+  (cancel 'eaf-deferred-default-cancel)
+  next status value)
+
+(defun eaf-deferred-default-callback (i)
+  "[internal] Default callback function."
+  (identity i))
+
+(defun eaf-deferred-default-errorback (err)
+  "[internal] Default errorback function."
+  (eaf-deferred-resignal err))
+
+(defun eaf-deferred-resignal (err)
+  "[internal] Safely resignal ERR as an Emacs condition.
+
+If ERR is a cons (ERROR-SYMBOL . DATA) where ERROR-SYMBOL has an
+`error-conditions' property, it is re-signaled unchanged. If ERR
+is a string, it is signaled as a generic error using `error'.
+Otherwise, ERR is formatted into a string as if by `print' before
+raising with `error'."
+  (cond ((and (listp err)
+              (symbolp (car err))
+              (get (car err) 'error-conditions))
+         (signal (car err) (cdr err)))
+        ((stringp err)
+         (error "%s" err))
+        (t
+         (error "%S" err))))
+
+(defun eaf-deferred-default-cancel (d)
+  "[internal] Default canceling function."
+  (eaf-deferred-message "CANCEL : %s" d)
+  (setf (deferred-callback d) 'eaf-deferred-default-callback)
+  (setf (deferred-errorback d) 'eaf-deferred-default-errorback)
+  (setf (deferred-next d) nil)
+  d)
+
+(defvar eaf-deferred-onerror nil
+  "Default error handler. This value is nil or a function that
+  have one argument for the error message.")
+
+(defun eaf-deferred-exec-task (d which &optional arg)
+  "[internal] Executing deferred task. If the deferred object has
+next deferred task or the return value is a deferred object, this
+function adds the task to the execution queue.
+D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
+an argument value for execution of the deferred task."
+  (eaf-deferred-message "EXEC : %s / %s / %s" d which arg)
+  (when (null d) (error "eaf-deferred-exec-task was given a nil."))
+  (let ((callback (if (eq which 'ok)
+                      (deferred-callback d)
+                    (deferred-errorback d)))
+        (next-deferred (deferred-next d)))
+    (cond
+     (callback
+      (eaf-deferred-condition-case err
+          (let ((value (eaf-deferred-call-lambda callback arg)))
+            (cond
+             ((deferred-p value)
+              (eaf-deferred-message "WAIT NEST : %s" value)
+              (if next-deferred
+                  (eaf-deferred-set-next value next-deferred)
+                value))
+             (t
+              (if next-deferred
+                  (eaf-deferred-post-task next-deferred 'ok value)
+                (setf (deferred-status d) 'ok)
+                (setf (deferred-value d) value)
+                value))))
+        (error
+         (cond
+          (next-deferred
+           (eaf-deferred-post-task next-deferred 'ng err))
+          (eaf-deferred-onerror
+            (eaf-deferred-call-lambda eaf-deferred-onerror err))
+          (t
+           (eaf-deferred-message "ERROR : %S" err)
+           (message "deferred error : %S" err)
+           (setf (deferred-status d) 'ng)
+           (setf (deferred-value d) err)
+           err)))))
+     (t ; <= (null callback)
+      (cond
+       (next-deferred
+        (eaf-deferred-exec-task next-deferred which arg))
+       ((eq which 'ok) arg)
+       (t                             ; (eq which 'ng)
+        (eaf-deferred-resignal arg)))))))
+
+(defun eaf-deferred-set-next (prev next)
+  "[internal] Connect deferred objects."
+  (setf (deferred-next prev) next)
+  (cond
+   ((eq 'ok (deferred-status prev))
+    (setf (deferred-status prev) nil)
+    (let ((ret (eaf-deferred-exec-task
+                 next 'ok (deferred-value prev))))
+      (if (deferred-p ret) ret
+        next)))
+   ((eq 'ng (deferred-status prev))
+    (setf (deferred-status prev) nil)
+    (let ((ret (eaf-deferred-exec-task next 'ng (deferred-value prev))))
+      (if (deferred-p ret) ret
+        next)))
+   (t
+    next)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Basic functions for deferred objects
+
+(defun eaf-deferred-new (&optional callback)
+  "Create a deferred object."
+  (if callback
+      (make-deferred :callback callback)
+    (make-deferred)))
+
+(defun eaf-deferred-callback (d &optional arg)
+  "Start deferred chain with a callback message."
+  (eaf-deferred-exec-task d 'ok arg))
+
+(defun eaf-deferred-errorback (d &optional arg)
+  "Start deferred chain with an errorback message."
+  (eaf-deferred-exec-task d 'ng arg))
+
+(defun eaf-deferred-callback-post (d &optional arg)
+  "Add the deferred object to the execution queue."
+  (eaf-deferred-post-task d 'ok arg))
+
+(defun eaf-deferred-errorback-post (d &optional arg)
+  "Add the deferred object to the execution queue."
+  (eaf-deferred-post-task d 'ng arg))
+
+(defun eaf-deferred-cancel (d)
+  "Cancel all callbacks and deferred chain in the deferred object."
+  (eaf-deferred-message "CANCEL : %s" d)
+  (funcall (deferred-cancel d) d)
+  d)
+
+(defun eaf-deferred-status (d)
+  "Return a current status of the deferred object. The returned value means following:
+`ok': the callback was called and waiting for next deferred.
+`ng': the errorback was called and waiting for next deferred.
+ nil: The neither callback nor errorback was not called."
+  (deferred-status d))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Basic utility functions
+
+(defun eaf-deferred-succeed (&optional arg)
+  "Create a synchronous deferred object."
+  (let ((d (eaf-deferred-new)))
+    (eaf-deferred-exec-task d 'ok arg)
+    d))
+
+(defun eaf-deferred-fail (&optional arg)
+  "Create a synchronous deferred object."
+  (let ((d (eaf-deferred-new)))
+    (eaf-deferred-exec-task d 'ng arg)
+    d))
+
+(defun eaf-deferred-next (&optional callback arg)
+  "Create a deferred object and schedule executing. This function
+is a short cut of following code:
+ (eaf-deferred-callback-post (eaf-deferred-new callback))."
+  (let ((d (if callback
+               (make-deferred :callback callback)
+             (make-deferred))))
+    (eaf-deferred-callback-post d arg)
+    d))
+
+(defun eaf-deferred-nextc (d callback)
+  "Create a deferred object with OK callback and connect it to the given deferred object."
+  (let ((nd (make-deferred :callback callback)))
+    (eaf-deferred-set-next d nd)))
+
+(defun eaf-deferred-error (d callback)
+  "Create a deferred object with errorback and connect it to the given deferred object."
+  (let ((nd (make-deferred :errorback callback)))
+    (eaf-deferred-set-next d nd)))
+
+(defun eaf-deferred-watch (d callback)
+  "Create a deferred object with watch task and connect it to the given deferred object.
+The watch task CALLBACK can not affect deferred chains with
+return values. This function is used in following purposes,
+simulation of try-finally block in asynchronous tasks, progress
+monitoring of tasks."
+  (let* ((callback callback)
+         (normal (lambda (x) (ignore-errors (eaf-deferred-call-lambda callback x)) x))
+         (err    (lambda (e)
+                   (ignore-errors (eaf-deferred-call-lambda callback e))
+                   (eaf-deferred-resignal e))))
+    (let ((nd (make-deferred :callback normal :errorback err)))
+      (eaf-deferred-set-next d nd))))
+
+(defun eaf-deferred-wait (msec)
+  "Return a deferred object scheduled at MSEC millisecond later."
+  (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
+    (eaf-deferred-message "WAIT : %s" msec)
+    (setq timer (eaf-deferred-setTimeout
+                  (lambda ()
+                    (eaf-deferred-exec-task d 'ok
+                      (* 1000.0 (- (float-time) start-time)))
+                    nil) msec))
+    (setf (deferred-cancel d)
+          (lambda (x)
+            (eaf-deferred-cancelTimeout timer)
+            (eaf-deferred-default-cancel x)))
+    d))
+
+(defun eaf-deferred-wait-idle (msec)
+  "Return a deferred object which will run when Emacs has been
+idle for MSEC millisecond."
+  (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
+    (eaf-deferred-message "WAIT-IDLE : %s" msec)
+    (setq timer
+          (eaf-deferred-run-with-idle-timer
+            (/ msec 1000.0)
+            (lambda ()
+              (eaf-deferred-exec-task d 'ok
+                (* 1000.0 (- (float-time) start-time)))
+              nil)))
+    (setf (deferred-cancel d)
+          (lambda (x)
+            (eaf-deferred-cancelTimeout timer)
+            (eaf-deferred-default-cancel x)))
+    d))
+
+(defun eaf-deferred-call (f &rest args)
+  "Call the given function asynchronously."
+  (eaf-deferred-next
+    (lambda (_x)
+      (apply f args))))
+
+(defun eaf-deferred-apply (f &optional args)
+  "Call the given function asynchronously."
+  (eaf-deferred-next
+    (lambda (_x)
+      (apply f args))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Utility functions
+
+(defun eaf-deferred-empty-p (times-or-seq)
+  "[internal] Return non-nil if TIMES-OR-SEQ is the number zero or nil."
+  (or (and (numberp times-or-seq) (<= times-or-seq 0))
+      (and (sequencep times-or-seq) (= (length times-or-seq) 0))))
+
+(defun eaf-deferred-loop (times-or-seq func)
+  "Return a iteration deferred object."
+  (eaf-deferred-message "LOOP : %s" times-or-seq)
+  (if (eaf-deferred-empty-p times-or-seq) (eaf-deferred-next)
+    (let* (items (rd
+                  (cond
+                   ((numberp times-or-seq)
+                    (cl-loop for i from 0 below times-or-seq
+                             with ld = (eaf-deferred-next)
+                             do
+                             (push ld items)
+                             (setq ld
+                                   (let ((i i))
+                                     (eaf-deferred-nextc ld
+                                       (lambda (_x) (eaf-deferred-call-lambda func i)))))
+                             finally return ld))
+                   ((sequencep times-or-seq)
+                    (cl-loop for i in (append times-or-seq nil) ; seq->list
+                             with ld = (eaf-deferred-next)
+                             do
+                             (push ld items)
+                             (setq ld
+                                   (let ((i i))
+                                     (eaf-deferred-nextc ld
+                                       (lambda (_x) (eaf-deferred-call-lambda func i)))))
+                             finally return ld)))))
+      (setf (deferred-cancel rd)
+            (lambda (x) (eaf-deferred-default-cancel x)
+              (cl-loop for i in items
+                       do (eaf-deferred-cancel i))))
+      rd)))
+
+(defun eaf-deferred-trans-multi-args (args self-func list-func main-func)
+  "[internal] Check the argument values and dispatch to methods."
+  (cond
+   ((and (= 1 (length args)) (consp (car args)) (not (functionp (car args))))
+    (let ((lst (car args)))
+      (cond
+       ((or (null lst) (null (car lst)))
+        (eaf-deferred-next))
+       ((eaf-deferred-aand lst (car it) (or (functionp it) (deferred-p it)))
+        ;; a list of deferred objects
+        (funcall list-func lst))
+       ((eaf-deferred-aand lst (consp it))
+        ;; an alist of deferred objects
+        (funcall main-func lst))
+       (t (error "Wrong argument type. %s" args)))))
+   (t (funcall self-func args))))
+
+(defun eaf-deferred-parallel-array-to-alist (lst)
+  "[internal] Translation array to alist."
+  (cl-loop for d in lst
+           for i from 0 below (length lst)
+           collect (cons i d)))
+
+(defun eaf-deferred-parallel-alist-to-array (alst)
+  "[internal] Translation alist to array."
+  (cl-loop for pair in
+           (sort alst (lambda (x y)
+                        (< (car x) (car y))))
+           collect (cdr pair)))
+
+(defun eaf-deferred-parallel-func-to-deferred (alst)
+  "[internal] Normalization for parallel and earlier arguments."
+  (cl-loop for pair in alst
+           for d = (cdr pair)
+           collect
+           (progn
+             (unless (deferred-p d)
+               (setf (cdr pair) (eaf-deferred-next d)))
+             pair)))
+
+(defun eaf-deferred-parallel-main (alst)
+  "[internal] Deferred alist implementation for `eaf-deferred-parallel'. "
+  (eaf-deferred-message "PARALLEL<KEY . VALUE>" )
+  (let ((nd (eaf-deferred-new))
+        (len (length alst))
+        values)
+    (cl-loop for pair in
+             (eaf-deferred-parallel-func-to-deferred alst)
+             with cd ; current child deferred
+             do
+             (let ((name (car pair)))
+               (setq cd
+                     (eaf-deferred-nextc (cdr pair)
+                       (lambda (x)
+                         (push (cons name x) values)
+                         (eaf-deferred-message "PARALLEL VALUE [%s/%s] %s"
+                           (length values) len (cons name x))
+                         (when (= len (length values))
+                           (eaf-deferred-message "PARALLEL COLLECTED")
+                           (eaf-deferred-post-task nd 'ok (nreverse values)))
+                         nil)))
+               (eaf-deferred-error cd
+                 (lambda (e)
+                   (push (cons name e) values)
+                   (eaf-deferred-message "PARALLEL ERROR [%s/%s] %s"
+                     (length values) len (cons name e))
+                   (when (= (length values) len)
+                     (eaf-deferred-message "PARALLEL COLLECTED")
+                     (eaf-deferred-post-task nd 'ok (nreverse values)))
+                   nil))))
+    nd))
+
+(defun eaf-deferred-parallel-list (lst)
+  "[internal] Deferred list implementation for `eaf-deferred-parallel'. "
+  (eaf-deferred-message "PARALLEL<LIST>" )
+  (let* ((pd (eaf-deferred-parallel-main (eaf-deferred-parallel-array-to-alist lst)))
+         (rd (eaf-deferred-nextc pd 'eaf-deferred-parallel-alist-to-array)))
+    (setf (deferred-cancel rd)
+          (lambda (x) (eaf-deferred-default-cancel x)
+            (eaf-deferred-cancel pd)))
+    rd))
+
+(defun eaf-deferred-parallel (&rest args)
+  "Return a deferred object that calls given deferred objects or
+functions in parallel and wait for all callbacks. The following
+deferred task will be called with an array of the return
+values. ARGS can be a list or an alist of deferred objects or
+functions."
+  (eaf-deferred-message "PARALLEL : %s" args)
+  (eaf-deferred-trans-multi-args args
+    'eaf-deferred-parallel 'eaf-deferred-parallel-list 'eaf-deferred-parallel-main))
+
+(defun eaf-deferred-earlier-main (alst)
+  "[internal] Deferred alist implementation for `eaf-deferred-earlier'. "
+  (eaf-deferred-message "EARLIER<KEY . VALUE>" )
+  (let ((nd (eaf-deferred-new))
+        (len (length alst))
+        value results)
+    (cl-loop for pair in
+             (eaf-deferred-parallel-func-to-deferred alst)
+             with cd ; current child deferred
+             do
+             (let ((name (car pair)))
+               (setq cd
+                     (eaf-deferred-nextc (cdr pair)
+                       (lambda (x)
+                         (push (cons name x) results)
+                         (cond
+                          ((null value)
+                           (setq value (cons name x))
+                           (eaf-deferred-message "EARLIER VALUE %s" (cons name value))
+                           (eaf-deferred-post-task nd 'ok value))
+                          (t
+                           (eaf-deferred-message "EARLIER MISS [%s/%s] %s" (length results) len (cons name value))
+                           (when (eql (length results) len)
+                             (eaf-deferred-message "EARLIER COLLECTED"))))
+                         nil)))
+               (eaf-deferred-error cd
+                 (lambda (e)
+                   (push (cons name e) results)
+                   (eaf-deferred-message "EARLIER ERROR [%s/%s] %s" (length results) len (cons name e))
+                   (when (and (eql (length results) len) (null value))
+                     (eaf-deferred-message "EARLIER FAILED")
+                     (eaf-deferred-post-task nd 'ok nil))
+                   nil))))
+    nd))
+
+(defun eaf-deferred-earlier-list (lst)
+  "[internal] Deferred list implementation for `eaf-deferred-earlier'. "
+  (eaf-deferred-message "EARLIER<LIST>" )
+  (let* ((pd (eaf-deferred-earlier-main (eaf-deferred-parallel-array-to-alist lst)))
+         (rd (eaf-deferred-nextc pd (lambda (x) (cdr x)))))
+    (setf (deferred-cancel rd)
+          (lambda (x) (eaf-deferred-default-cancel x)
+            (eaf-deferred-cancel pd)))
+    rd))
+
+
+(defun eaf-deferred-earlier (&rest args)
+  "Return a deferred object that calls given deferred objects or
+functions in parallel and wait for the first callback. The
+following deferred task will be called with the first return
+value. ARGS can be a list or an alist of deferred objects or
+functions."
+  (eaf-deferred-message "EARLIER : %s" args)
+  (eaf-deferred-trans-multi-args args
+    'eaf-deferred-earlier 'eaf-deferred-earlier-list 'eaf-deferred-earlier-main))
+
+(defmacro eaf-deferred-timeout (timeout-msec timeout-form d)
+  "Time out macro on a deferred task D.  If the deferred task D
+does not complete within TIMEOUT-MSEC, this macro cancels the
+deferred task and return the TIMEOUT-FORM."
+  `(eaf-deferred-earlier
+     (eaf-deferred-nextc (eaf-deferred-wait ,timeout-msec)
+       (lambda (x) ,timeout-form))
+     ,d))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Application functions
+
+(defvar eaf-deferred-uid 0 "[internal] Sequence number for some utilities. See the function `eaf-deferred-uid'.")
+
+(defun eaf-deferred-uid ()
+  "[internal] Generate a sequence number."
+  (cl-incf eaf-deferred-uid))
+
+(defun eaf-deferred-buffer-string (strformat buf)
+  "[internal] Return a string in the buffer with the given format."
+  (format strformat
+          (with-current-buffer buf (buffer-string))))
+
+(defun eaf-deferred-process (command &rest args)
+  "A deferred wrapper of `start-process'. Return a deferred
+object. The process name and buffer name of the argument of the
+`start-process' are generated by this function automatically.
+The next deferred object receives stdout and stderr string from
+the command process."
+  (eaf-deferred-process-gen 'start-process command args))
+
+(defun eaf-deferred-process-shell (command &rest args)
+  "A deferred wrapper of `start-process-shell-command'. Return a deferred
+object. The process name and buffer name of the argument of the
+`start-process-shell-command' are generated by this function automatically.
+The next deferred object receives stdout and stderr string from
+the command process."
+  (eaf-deferred-process-gen 'start-process-shell-command command args))
+
+(defun eaf-deferred-process-buffer (command &rest args)
+  "A deferred wrapper of `start-process'. Return a deferred
+object. The process name and buffer name of the argument of the
+`start-process' are generated by this function automatically.
+The next deferred object receives stdout and stderr buffer from
+the command process."
+  (eaf-deferred-process-buffer-gen 'start-process command args))
+
+(defun eaf-deferred-process-shell-buffer (command &rest args)
+  "A deferred wrapper of `start-process-shell-command'. Return a deferred
+object. The process name and buffer name of the argument of the
+`start-process-shell-command' are generated by this function automatically.
+The next deferred object receives stdout and stderr buffer from
+the command process."
+  (eaf-deferred-process-buffer-gen 'start-process-shell-command command args))
+
+(defun eaf-deferred-process-gen (f command args)
+  "[internal]"
+  (let ((pd (eaf-deferred-process-buffer-gen f command args)) d)
+    (setq d (eaf-deferred-nextc pd
+              (lambda (buf)
+                (prog1
+                    (with-current-buffer buf (buffer-string))
+                  (kill-buffer buf)))))
+    (setf (deferred-cancel d)
+          (lambda (_x)
+            (eaf-deferred-default-cancel d)
+            (eaf-deferred-default-cancel pd)))
+    d))
+
+(defun eaf-deferred-process-buffer-gen (f command args)
+  "[internal]"
+  (let ((d (eaf-deferred-next)) (uid (eaf-deferred-uid)))
+    (let ((proc-name (format "*eaf-deferred-*%s*:%s" command uid))
+          (buf-name (format " *eaf-deferred-*%s*:%s" command uid))
+          (pwd default-directory)
+          (env process-environment)
+          (con-type process-connection-type)
+          (nd (eaf-deferred-new)) proc-buf proc)
+      (eaf-deferred-nextc d
+        (lambda (_x)
+          (setq proc-buf (get-buffer-create buf-name))
+          (condition-case err
+              (let ((default-directory pwd)
+                    (process-environment env)
+                    (process-connection-type con-type))
+                (setq proc
+                      (if (null (car args))
+                          (apply f proc-name buf-name command nil)
+                        (apply f proc-name buf-name command args)))
+                (set-process-sentinel
+                 proc
+                 (lambda (proc event)
+		   (unless (process-live-p proc)
+		     (if (zerop (process-exit-status proc))
+			 (eaf-deferred-post-task nd 'ok proc-buf)
+		       (let ((msg (format "Deferred process exited abnormally:\n  command: %s\n  exit status: %s %s\n  event: %s\n  buffer contents: %S"
+					  command
+					  (process-status proc)
+					  (process-exit-status proc)
+					  (string-trim-right event)
+					  (if (buffer-live-p proc-buf)
+					      (with-current-buffer proc-buf
+						(buffer-string))
+					    "(unavailable)"))))
+			 (kill-buffer proc-buf)
+			 (eaf-deferred-post-task nd 'ng msg))))))
+		(setf (deferred-cancel nd)
+		      (lambda (x) (eaf-deferred-default-cancel x)
+			(when proc
+			  (kill-process proc)
+			  (kill-buffer proc-buf)))))
+	    (error (eaf-deferred-post-task nd 'ng err)))
+	  nil))
+      nd)))
+
+(defmacro eaf-deferred-processc (d command &rest args)
+  "Process chain of `eaf-deferred-process'."
+  `(eaf-deferred-nextc ,d
+    (lambda (,(cl-gensym)) (eaf-deferred-process ,command ,@args))))
+
+(defmacro eaf-deferred-process-bufferc (d command &rest args)
+  "Process chain of `eaf-deferred-process-buffer'."
+  `(eaf-deferred-nextc ,d
+     (lambda (,(cl-gensym)) (eaf-deferred-process-buffer ,command ,@args))))
+
+(defmacro eaf-deferred-process-shellc (d command &rest args)
+  "Process chain of `eaf-deferred-process'."
+  `(eaf-deferred-nextc ,d
+    (lambda (,(cl-gensym)) (eaf-deferred-process-shell ,command ,@args))))
+
+(defmacro eaf-deferred-process-shell-bufferc (d command &rest args)
+  "Process chain of `eaf-deferred-process-buffer'."
+  `(eaf-deferred-nextc ,d
+     (lambda (,(cl-gensym)) (eaf-deferred-process-shell-buffer ,command ,@args))))
+
+;; Special variables defined in url-vars.el.
+(defvar url-request-data)
+(defvar url-request-method)
+(defvar url-request-extra-headers)
+
+(declare-function url-http-symbol-value-in-buffer "url-http"
+                  (symbol buffer &optional unbound-value))
+
+(declare-function eaf-deferred-url-param-serialize "request" (params))
+
+(declare-function eaf-deferred-url-escape "request" (val))
+
+(eval-after-load "url"
+  ;; for url package
+  ;; TODO: proxy, charaset
+  ;; List of gloabl variables to preserve and restore before url-retrieve call
+  '(let ((url-global-variables '(url-request-data
+                                 url-request-method
+                                 url-request-extra-headers)))
+
+     (defun eaf-deferred-url-retrieve (url &optional cbargs silent inhibit-cookies)
+       "A wrapper function for url-retrieve. The next deferred
+object receives the buffer object that URL will load
+into. Values of dynamically bound 'url-request-data', 'url-request-method' and
+'url-request-extra-headers' are passed to url-retrieve call."
+       (let ((nd (eaf-deferred-new))
+             buf
+             (local-values (mapcar (lambda (symbol) (symbol-value symbol)) url-global-variables)))
+         (eaf-deferred-next
+           (lambda (_x)
+             (cl-progv url-global-variables local-values
+               (condition-case err
+                   (setq buf
+                         (url-retrieve
+                          url (lambda (_xx) (eaf-deferred-post-task nd 'ok buf))
+                          cbargs silent inhibit-cookies))
+                 (error (eaf-deferred-post-task nd 'ng err)))
+             nil)))
+         (setf (deferred-cancel nd)
+               (lambda (_x)
+                 (when (buffer-live-p buf)
+                   (kill-buffer buf))))
+         nd))
+
+     (defun eaf-deferred-url-delete-header (buf)
+       (with-current-buffer buf
+         (let ((pos (url-http-symbol-value-in-buffer
+                     'url-http-end-of-headers buf)))
+           (when pos
+             (delete-region (point-min) (1+ pos)))))
+       buf)
+
+     (defun eaf-deferred-url-delete-buffer (buf)
+       (when (and buf (buffer-live-p buf))
+         (kill-buffer buf))
+       nil)
+
+     (defun eaf-deferred-url-get (url &optional params &rest args)
+       "Perform a HTTP GET method with `url-retrieve'. PARAMS is
+a parameter list of (key . value) or key. ARGS will be appended
+to eaf-deferred-url-retrieve args list. The next deferred
+object receives the buffer object that URL will load into."
+       (when params
+         (setq url
+               (concat url "?" (eaf-deferred-url-param-serialize params))))
+       (let ((d (eaf-deferred-$
+                  (apply 'eaf-deferred-url-retrieve url args)
+                  (eaf-deferred-nextc it 'eaf-deferred-url-delete-header))))
+         (eaf-deferred-set-next
+           d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
+         d))
+
+     (defun eaf-deferred-url-post (url &optional params &rest args)
+       "Perform a HTTP POST method with `url-retrieve'. PARAMS is
+a parameter list of (key . value) or key. ARGS will be appended
+to eaf-deferred-url-retrieve args list. The next deferred
+object receives the buffer object that URL will load into."
+       (let ((url-request-method "POST")
+             (url-request-extra-headers
+              (append url-request-extra-headers
+                      '(("Content-Type" . "application/x-www-form-urlencoded"))))
+             (url-request-data (eaf-deferred-url-param-serialize params)))
+         (let ((d (eaf-deferred-$
+                    (apply 'eaf-deferred-url-retrieve url args)
+                    (eaf-deferred-nextc it 'eaf-deferred-url-delete-header))))
+           (eaf-deferred-set-next
+             d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
+           d)))
+
+     (defun eaf-deferred-url-escape (val)
+       "[internal] Return a new string that is VAL URI-encoded."
+       (unless (stringp val)
+         (setq val (format "%s" val)))
+       (url-hexify-string
+        (encode-coding-string val 'utf-8)))
+
+     (defun eaf-deferred-url-param-serialize (params)
+       "[internal] Serialize a list of (key . value) cons cells
+into a query string."
+       (when params
+         (mapconcat
+          'identity
+          (cl-loop for p in params
+                   collect
+                   (cond
+                    ((consp p)
+                     (concat
+                      (eaf-deferred-url-escape (car p)) "="
+                      (eaf-deferred-url-escape (cdr p))))
+                    (t
+                     (eaf-deferred-url-escape p))))
+          "&")))
+     ))
+
 ;;==================================================
 ;; Utility
 
@@ -1083,897 +1975,6 @@ This function does nothing for the waiting deferred objects."
   (eaf-concurrent-dataflow-signal df 'clear-all)
   (setf (eaf-concurrent-dataflow-list df) nil))
 
-;; deferred
-(declare-function pp-display-expression 'pp)
-
-(defvar eaf-deferred-version nil "deferred.el version")
-(setq eaf-deferred-version "0.5.0")
-
-;;; Code:
-
-(defmacro eaf-deferred-aand (test &rest rest)
-  "[internal] Anaphoric AND."
-  (declare (debug ("test" form &rest form)))
-  `(let ((it ,test))
-     (if it ,(if rest `(eaf-deferred-aand ,@rest) 'it))))
-
-(defmacro eaf-deferred-$ (&rest elements)
-  "Anaphoric function chain macro for deferred chains."
-  (declare (debug (&rest form)))
-  `(let (it)
-     ,@(cl-loop for i in elements
-                collect
-                `(setq it ,i))
-     it))
-
-(defmacro eaf-deferred-lambda (args &rest body)
-  "Anaphoric lambda macro for self recursion."
-  (declare (debug ("args" form &rest form)))
-  (let ((argsyms (cl-loop repeat (length args) collect (cl-gensym))))
-  `(lambda (,@argsyms)
-     (let (self)
-       (setq self (lambda( ,@args ) ,@body))
-       (funcall self ,@argsyms)))))
-
-(cl-defmacro eaf-deferred-try (d &key catch finally)
-  "Try-catch-finally macro. This macro simulates the
-try-catch-finally block asynchronously. CATCH and FINALLY can be
-nil. Because of asynchrony, this macro does not ensure that the
-task FINALLY should be called."
-  (let ((chain
-         (if catch `((eaf-deferred-error it ,catch)))))
-    (when finally
-      (setq chain (append chain `((eaf-deferred-watch it ,finally)))))
-    `(eaf-deferred-$ ,d ,@chain)))
-
-(defun eaf-deferred-setTimeout (f msec)
-  "[internal] Timer function that emulates the `setTimeout' function in JS."
-  (run-at-time (/ msec 1000.0) nil f))
-
-(defun eaf-deferred-cancelTimeout (id)
-  "[internal] Timer cancellation function that emulates the `cancelTimeout' function in JS."
-  (cancel-timer id))
-
-(defun eaf-deferred-run-with-idle-timer (sec f)
-  "[internal] Wrapper function for run-with-idle-timer."
-  (run-with-idle-timer sec nil f))
-
-(defun eaf-deferred-call-lambda (f &optional arg)
-  "[internal] Call a function with one or zero argument safely.
-The lambda function can define with zero and one argument."
-  (condition-case err
-      (funcall f arg)
-    ('wrong-number-of-arguments
-     (display-warning 'deferred "\
-Callback that takes no argument may be specified.
-Passing callback with no argument is deprecated.
-Callback must take one argument.
-Or, this error is coming from somewhere inside of the callback: %S" err)
-     (condition-case nil
-         (funcall f)
-       ('wrong-number-of-arguments
-        (signal 'wrong-number-of-arguments (cdr err))))))) ; return the first error
-
-;; debug
-
-(eval-and-compile
-  (defvar eaf-deferred-debug nil "Debug output switch."))
-(defvar eaf-deferred-debug-count 0 "[internal] Debug output counter.")
-
-(defmacro eaf-deferred-message (&rest args)
-  "[internal] Debug log function."
-  (when eaf-deferred-debug
-    `(progn
-       (with-current-buffer (get-buffer-create "*eaf-deferred-debug*")
-         (save-excursion
-           (goto-char (point-max))
-           (insert (format "%5i %s\n" eaf-deferred-debug-count (format ,@args)))))
-       (cl-incf eaf-deferred-debug-count))))
-
-(defun eaf-deferred-message-mark ()
-  "[internal] Debug log function."
-  (interactive)
-  (eaf-deferred-message "==================== mark ==== %s"
-    (format-time-string "%H:%M:%S" (current-time))))
-
-(defun eaf-deferred-pp (d)
-  (require 'pp)
-  (eaf-deferred-$
-    (eaf-deferred-nextc d
-      (lambda (x)
-        (pp-display-expression x "*eaf-deferred-pp*")))
-    (eaf-deferred-error it
-      (lambda (e)
-        (pp-display-expression e "*eaf-deferred-pp*")))
-    (eaf-deferred-nextc it
-      (lambda (_x) (pop-to-buffer "*eaf-deferred-pp*")))))
-
-(defvar eaf-deferred-debug-on-signal nil
-"If non nil, the value `debug-on-signal' is substituted this
-value in the `condition-case' form in deferred
-implementations. Then, Emacs debugger can catch an error occurred
-in the asynchronous tasks.")
-
-(defmacro eaf-deferred-condition-case (var protected-form &rest handlers)
-  "[internal] Custom condition-case. See the comment for
-`eaf-deferred-debug-on-signal'."
-  (declare (debug condition-case)
-           (indent 2))
-  `(let ((debug-on-signal
-          (or debug-on-signal eaf-deferred-debug-on-signal)))
-     (condition-case ,var
-         ,protected-form
-       ,@handlers)))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Back end functions of deferred tasks
-
-(defvar eaf-deferred-tick-time 0.001
-  "Waiting time between asynchronous tasks (second).
-The shorter waiting time increases the load of Emacs. The end
-user can tune this parameter. However, applications should not
-modify it because the applications run on various environments.")
-
-(defvar eaf-deferred-queue nil
-  "[internal] The execution queue of deferred objects.
-See the functions `eaf-deferred-post-task' and `eaf-deferred-worker'.")
-
-(defmacro eaf-deferred-pack (a b c)
-  `(cons ,a (cons ,b ,c)))
-
-(defun eaf-deferred-schedule-worker ()
-  "[internal] Schedule consuming a deferred task in the execution queue."
-  (run-at-time eaf-deferred-tick-time nil 'eaf-deferred-worker))
-
-(defun eaf-deferred-post-task (d which &optional arg)
-  "[internal] Add a deferred object to the execution queue
-`eaf-deferred-queue' and schedule to execute.
-D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
-an argument value for execution of the deferred task."
-  (push (eaf-deferred-pack d which arg) eaf-deferred-queue)
-  (eaf-deferred-message "QUEUE-POST [%s]: %s"
-    (length eaf-deferred-queue) (eaf-deferred-pack d which arg))
-  (eaf-deferred-schedule-worker)
-  d)
-
-(defun eaf-deferred-clear-queue ()
-  "Clear the execution queue. For test and debugging."
-  (interactive)
-  (eaf-deferred-message "QUEUE-CLEAR [%s -> 0]" (length eaf-deferred-queue))
-  (setq eaf-deferred-queue nil))
-
-(defun eaf-deferred-worker ()
-  "[internal] Consume a deferred task.
-Mainly this function is called by timer asynchronously."
-  (when eaf-deferred-queue
-    (let* ((pack (car (last eaf-deferred-queue)))
-           (d (car pack))
-           (which (cadr pack))
-           (arg (cddr pack)) value)
-      (setq eaf-deferred-queue (nbutlast eaf-deferred-queue))
-      (condition-case err
-          (setq value (eaf-deferred-exec-task d which arg))
-        (error
-         (eaf-deferred-message "ERROR : %s" err)
-         (message "deferred error : %s" err)))
-      value)))
-
-(defun eaf-deferred-flush-queue! ()
-  "Call all deferred tasks synchronously. For test and debugging."
-  (let (value)
-    (while eaf-deferred-queue
-      (setq value (eaf-deferred-worker)))
-    value))
-
-(defun eaf-deferred-sync! (d)
-  "Wait for the given deferred task. For test and debugging.
-Error is raised if it is not processed within deferred chain D."
-  (progn
-    (let ((last-value 'eaf-deferred-undefined*)
-          uncaught-error)
-      (eaf-deferred-try
-        (eaf-deferred-nextc d
-          (lambda (x) (setq last-value x)))
-        :catch
-        (lambda (err) (setq uncaught-error err)))
-      (while (and (eq 'eaf-deferred-undefined* last-value)
-                  (not uncaught-error))
-        (sit-for 0.05)
-        (sleep-for 0.05))
-      (when uncaught-error
-        (eaf-deferred-resignal uncaught-error))
-      last-value)))
-
-
-;; Struct: deferred
-;;
-;; callback    : a callback function (default `eaf-deferred-default-callback')
-;; errorback   : an errorback function (default `eaf-deferred-default-errorback')
-;; cancel      : a canceling function (default `eaf-deferred-default-cancel')
-;; next        : a next chained deferred object (default nil)
-;; status      : if 'ok or 'ng, this deferred has a result (error) value. (default nil)
-;; value       : saved value (default nil)
-;;
-(cl-defstruct deferred
-  (callback 'eaf-deferred-default-callback)
-  (errorback 'eaf-deferred-default-errorback)
-  (cancel 'eaf-deferred-default-cancel)
-  next status value)
-
-(defun eaf-deferred-default-callback (i)
-  "[internal] Default callback function."
-  (identity i))
-
-(defun eaf-deferred-default-errorback (err)
-  "[internal] Default errorback function."
-  (eaf-deferred-resignal err))
-
-(defun eaf-deferred-resignal (err)
-  "[internal] Safely resignal ERR as an Emacs condition.
-
-If ERR is a cons (ERROR-SYMBOL . DATA) where ERROR-SYMBOL has an
-`error-conditions' property, it is re-signaled unchanged. If ERR
-is a string, it is signaled as a generic error using `error'.
-Otherwise, ERR is formatted into a string as if by `print' before
-raising with `error'."
-  (cond ((and (listp err)
-              (symbolp (car err))
-              (get (car err) 'error-conditions))
-         (signal (car err) (cdr err)))
-        ((stringp err)
-         (error "%s" err))
-        (t
-         (error "%S" err))))
-
-(defun eaf-deferred-default-cancel (d)
-  "[internal] Default canceling function."
-  (eaf-deferred-message "CANCEL : %s" d)
-  (setf (deferred-callback d) 'eaf-deferred-default-callback)
-  (setf (deferred-errorback d) 'eaf-deferred-default-errorback)
-  (setf (deferred-next d) nil)
-  d)
-
-(defvar eaf-deferred-onerror nil
-  "Default error handler. This value is nil or a function that
-  have one argument for the error message.")
-
-(defun eaf-deferred-exec-task (d which &optional arg)
-  "[internal] Executing deferred task. If the deferred object has
-next deferred task or the return value is a deferred object, this
-function adds the task to the execution queue.
-D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
-an argument value for execution of the deferred task."
-  (eaf-deferred-message "EXEC : %s / %s / %s" d which arg)
-  (when (null d) (error "eaf-deferred-exec-task was given a nil."))
-  (let ((callback (if (eq which 'ok)
-                      (deferred-callback d)
-                    (deferred-errorback d)))
-        (next-deferred (deferred-next d)))
-    (cond
-     (callback
-      (eaf-deferred-condition-case err
-          (let ((value (eaf-deferred-call-lambda callback arg)))
-            (cond
-             ((deferred-p value)
-              (eaf-deferred-message "WAIT NEST : %s" value)
-              (if next-deferred
-                  (eaf-deferred-set-next value next-deferred)
-                value))
-             (t
-              (if next-deferred
-                  (eaf-deferred-post-task next-deferred 'ok value)
-                (setf (deferred-status d) 'ok)
-                (setf (deferred-value d) value)
-                value))))
-        (error
-         (cond
-          (next-deferred
-           (eaf-deferred-post-task next-deferred 'ng err))
-          (eaf-deferred-onerror
-            (eaf-deferred-call-lambda eaf-deferred-onerror err))
-          (t
-           (eaf-deferred-message "ERROR : %S" err)
-           (message "deferred error : %S" err)
-           (setf (deferred-status d) 'ng)
-           (setf (deferred-value d) err)
-           err)))))
-     (t ; <= (null callback)
-      (cond
-       (next-deferred
-        (eaf-deferred-exec-task next-deferred which arg))
-       ((eq which 'ok) arg)
-       (t                             ; (eq which 'ng)
-        (eaf-deferred-resignal arg)))))))
-
-(defun eaf-deferred-set-next (prev next)
-  "[internal] Connect deferred objects."
-  (setf (deferred-next prev) next)
-  (cond
-   ((eq 'ok (deferred-status prev))
-    (setf (deferred-status prev) nil)
-    (let ((ret (eaf-deferred-exec-task
-                 next 'ok (deferred-value prev))))
-      (if (deferred-p ret) ret
-        next)))
-   ((eq 'ng (deferred-status prev))
-    (setf (deferred-status prev) nil)
-    (let ((ret (eaf-deferred-exec-task next 'ng (deferred-value prev))))
-      (if (deferred-p ret) ret
-        next)))
-   (t
-    next)))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Basic functions for deferred objects
-
-(defun eaf-deferred-new (&optional callback)
-  "Create a deferred object."
-  (if callback
-      (make-deferred :callback callback)
-    (make-deferred)))
-
-(defun eaf-deferred-callback (d &optional arg)
-  "Start deferred chain with a callback message."
-  (eaf-deferred-exec-task d 'ok arg))
-
-(defun eaf-deferred-errorback (d &optional arg)
-  "Start deferred chain with an errorback message."
-  (eaf-deferred-exec-task d 'ng arg))
-
-(defun eaf-deferred-callback-post (d &optional arg)
-  "Add the deferred object to the execution queue."
-  (eaf-deferred-post-task d 'ok arg))
-
-(defun eaf-deferred-errorback-post (d &optional arg)
-  "Add the deferred object to the execution queue."
-  (eaf-deferred-post-task d 'ng arg))
-
-(defun eaf-deferred-cancel (d)
-  "Cancel all callbacks and deferred chain in the deferred object."
-  (eaf-deferred-message "CANCEL : %s" d)
-  (funcall (deferred-cancel d) d)
-  d)
-
-(defun eaf-deferred-status (d)
-  "Return a current status of the deferred object. The returned value means following:
-`ok': the callback was called and waiting for next deferred.
-`ng': the errorback was called and waiting for next deferred.
- nil: The neither callback nor errorback was not called."
-  (deferred-status d))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Basic utility functions
-
-(defun eaf-deferred-succeed (&optional arg)
-  "Create a synchronous deferred object."
-  (let ((d (eaf-deferred-new)))
-    (eaf-deferred-exec-task d 'ok arg)
-    d))
-
-(defun eaf-deferred-fail (&optional arg)
-  "Create a synchronous deferred object."
-  (let ((d (eaf-deferred-new)))
-    (eaf-deferred-exec-task d 'ng arg)
-    d))
-
-(defun eaf-deferred-next (&optional callback arg)
-  "Create a deferred object and schedule executing. This function
-is a short cut of following code:
- (eaf-deferred-callback-post (eaf-deferred-new callback))."
-  (let ((d (if callback
-               (make-deferred :callback callback)
-             (make-deferred))))
-    (eaf-deferred-callback-post d arg)
-    d))
-
-(defun eaf-deferred-nextc (d callback)
-  "Create a deferred object with OK callback and connect it to the given deferred object."
-  (let ((nd (make-deferred :callback callback)))
-    (eaf-deferred-set-next d nd)))
-
-(defun eaf-deferred-error (d callback)
-  "Create a deferred object with errorback and connect it to the given deferred object."
-  (let ((nd (make-deferred :errorback callback)))
-    (eaf-deferred-set-next d nd)))
-
-(defun eaf-deferred-watch (d callback)
-  "Create a deferred object with watch task and connect it to the given deferred object.
-The watch task CALLBACK can not affect deferred chains with
-return values. This function is used in following purposes,
-simulation of try-finally block in asynchronous tasks, progress
-monitoring of tasks."
-  (let* ((callback callback)
-         (normal (lambda (x) (ignore-errors (eaf-deferred-call-lambda callback x)) x))
-         (err    (lambda (e)
-                   (ignore-errors (eaf-deferred-call-lambda callback e))
-                   (eaf-deferred-resignal e))))
-    (let ((nd (make-deferred :callback normal :errorback err)))
-      (eaf-deferred-set-next d nd))))
-
-(defun eaf-deferred-wait (msec)
-  "Return a deferred object scheduled at MSEC millisecond later."
-  (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
-    (eaf-deferred-message "WAIT : %s" msec)
-    (setq timer (eaf-deferred-setTimeout
-                  (lambda ()
-                    (eaf-deferred-exec-task d 'ok
-                      (* 1000.0 (- (float-time) start-time)))
-                    nil) msec))
-    (setf (deferred-cancel d)
-          (lambda (x)
-            (eaf-deferred-cancelTimeout timer)
-            (eaf-deferred-default-cancel x)))
-    d))
-
-(defun eaf-deferred-wait-idle (msec)
-  "Return a deferred object which will run when Emacs has been
-idle for MSEC millisecond."
-  (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
-    (eaf-deferred-message "WAIT-IDLE : %s" msec)
-    (setq timer
-          (eaf-deferred-run-with-idle-timer
-            (/ msec 1000.0)
-            (lambda ()
-              (eaf-deferred-exec-task d 'ok
-                (* 1000.0 (- (float-time) start-time)))
-              nil)))
-    (setf (deferred-cancel d)
-          (lambda (x)
-            (eaf-deferred-cancelTimeout timer)
-            (eaf-deferred-default-cancel x)))
-    d))
-
-(defun eaf-deferred-call (f &rest args)
-  "Call the given function asynchronously."
-  (eaf-deferred-next
-    (lambda (_x)
-      (apply f args))))
-
-(defun eaf-deferred-apply (f &optional args)
-  "Call the given function asynchronously."
-  (eaf-deferred-next
-    (lambda (_x)
-      (apply f args))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Utility functions
-
-(defun eaf-deferred-empty-p (times-or-seq)
-  "[internal] Return non-nil if TIMES-OR-SEQ is the number zero or nil."
-  (or (and (numberp times-or-seq) (<= times-or-seq 0))
-      (and (sequencep times-or-seq) (= (length times-or-seq) 0))))
-
-(defun eaf-deferred-loop (times-or-seq func)
-  "Return a iteration deferred object."
-  (eaf-deferred-message "LOOP : %s" times-or-seq)
-  (if (eaf-deferred-empty-p times-or-seq) (eaf-deferred-next)
-    (let* (items (rd
-                  (cond
-                   ((numberp times-or-seq)
-                    (cl-loop for i from 0 below times-or-seq
-                             with ld = (eaf-deferred-next)
-                             do
-                             (push ld items)
-                             (setq ld
-                                   (let ((i i))
-                                     (eaf-deferred-nextc ld
-                                       (lambda (_x) (eaf-deferred-call-lambda func i)))))
-                             finally return ld))
-                   ((sequencep times-or-seq)
-                    (cl-loop for i in (append times-or-seq nil) ; seq->list
-                             with ld = (eaf-deferred-next)
-                             do
-                             (push ld items)
-                             (setq ld
-                                   (let ((i i))
-                                     (eaf-deferred-nextc ld
-                                       (lambda (_x) (eaf-deferred-call-lambda func i)))))
-                             finally return ld)))))
-      (setf (deferred-cancel rd)
-            (lambda (x) (eaf-deferred-default-cancel x)
-              (cl-loop for i in items
-                       do (eaf-deferred-cancel i))))
-      rd)))
-
-(defun eaf-deferred-trans-multi-args (args self-func list-func main-func)
-  "[internal] Check the argument values and dispatch to methods."
-  (cond
-   ((and (= 1 (length args)) (consp (car args)) (not (functionp (car args))))
-    (let ((lst (car args)))
-      (cond
-       ((or (null lst) (null (car lst)))
-        (eaf-deferred-next))
-       ((eaf-deferred-aand lst (car it) (or (functionp it) (deferred-p it)))
-        ;; a list of deferred objects
-        (funcall list-func lst))
-       ((eaf-deferred-aand lst (consp it))
-        ;; an alist of deferred objects
-        (funcall main-func lst))
-       (t (error "Wrong argument type. %s" args)))))
-   (t (funcall self-func args))))
-
-(defun eaf-deferred-parallel-array-to-alist (lst)
-  "[internal] Translation array to alist."
-  (cl-loop for d in lst
-           for i from 0 below (length lst)
-           collect (cons i d)))
-
-(defun eaf-deferred-parallel-alist-to-array (alst)
-  "[internal] Translation alist to array."
-  (cl-loop for pair in
-           (sort alst (lambda (x y)
-                        (< (car x) (car y))))
-           collect (cdr pair)))
-
-(defun eaf-deferred-parallel-func-to-deferred (alst)
-  "[internal] Normalization for parallel and earlier arguments."
-  (cl-loop for pair in alst
-           for d = (cdr pair)
-           collect
-           (progn
-             (unless (deferred-p d)
-               (setf (cdr pair) (eaf-deferred-next d)))
-             pair)))
-
-(defun eaf-deferred-parallel-main (alst)
-  "[internal] Deferred alist implementation for `eaf-deferred-parallel'. "
-  (eaf-deferred-message "PARALLEL<KEY . VALUE>" )
-  (let ((nd (eaf-deferred-new))
-        (len (length alst))
-        values)
-    (cl-loop for pair in
-             (eaf-deferred-parallel-func-to-deferred alst)
-             with cd ; current child deferred
-             do
-             (let ((name (car pair)))
-               (setq cd
-                     (eaf-deferred-nextc (cdr pair)
-                       (lambda (x)
-                         (push (cons name x) values)
-                         (eaf-deferred-message "PARALLEL VALUE [%s/%s] %s"
-                           (length values) len (cons name x))
-                         (when (= len (length values))
-                           (eaf-deferred-message "PARALLEL COLLECTED")
-                           (eaf-deferred-post-task nd 'ok (nreverse values)))
-                         nil)))
-               (eaf-deferred-error cd
-                 (lambda (e)
-                   (push (cons name e) values)
-                   (eaf-deferred-message "PARALLEL ERROR [%s/%s] %s"
-                     (length values) len (cons name e))
-                   (when (= (length values) len)
-                     (eaf-deferred-message "PARALLEL COLLECTED")
-                     (eaf-deferred-post-task nd 'ok (nreverse values)))
-                   nil))))
-    nd))
-
-(defun eaf-deferred-parallel-list (lst)
-  "[internal] Deferred list implementation for `eaf-deferred-parallel'. "
-  (eaf-deferred-message "PARALLEL<LIST>" )
-  (let* ((pd (eaf-deferred-parallel-main (eaf-deferred-parallel-array-to-alist lst)))
-         (rd (eaf-deferred-nextc pd 'eaf-deferred-parallel-alist-to-array)))
-    (setf (deferred-cancel rd)
-          (lambda (x) (eaf-deferred-default-cancel x)
-            (eaf-deferred-cancel pd)))
-    rd))
-
-(defun eaf-deferred-parallel (&rest args)
-  "Return a deferred object that calls given deferred objects or
-functions in parallel and wait for all callbacks. The following
-deferred task will be called with an array of the return
-values. ARGS can be a list or an alist of deferred objects or
-functions."
-  (eaf-deferred-message "PARALLEL : %s" args)
-  (eaf-deferred-trans-multi-args args
-    'eaf-deferred-parallel 'eaf-deferred-parallel-list 'eaf-deferred-parallel-main))
-
-(defun eaf-deferred-earlier-main (alst)
-  "[internal] Deferred alist implementation for `eaf-deferred-earlier'. "
-  (eaf-deferred-message "EARLIER<KEY . VALUE>" )
-  (let ((nd (eaf-deferred-new))
-        (len (length alst))
-        value results)
-    (cl-loop for pair in
-             (eaf-deferred-parallel-func-to-deferred alst)
-             with cd ; current child deferred
-             do
-             (let ((name (car pair)))
-               (setq cd
-                     (eaf-deferred-nextc (cdr pair)
-                       (lambda (x)
-                         (push (cons name x) results)
-                         (cond
-                          ((null value)
-                           (setq value (cons name x))
-                           (eaf-deferred-message "EARLIER VALUE %s" (cons name value))
-                           (eaf-deferred-post-task nd 'ok value))
-                          (t
-                           (eaf-deferred-message "EARLIER MISS [%s/%s] %s" (length results) len (cons name value))
-                           (when (eql (length results) len)
-                             (eaf-deferred-message "EARLIER COLLECTED"))))
-                         nil)))
-               (eaf-deferred-error cd
-                 (lambda (e)
-                   (push (cons name e) results)
-                   (eaf-deferred-message "EARLIER ERROR [%s/%s] %s" (length results) len (cons name e))
-                   (when (and (eql (length results) len) (null value))
-                     (eaf-deferred-message "EARLIER FAILED")
-                     (eaf-deferred-post-task nd 'ok nil))
-                   nil))))
-    nd))
-
-(defun eaf-deferred-earlier-list (lst)
-  "[internal] Deferred list implementation for `eaf-deferred-earlier'. "
-  (eaf-deferred-message "EARLIER<LIST>" )
-  (let* ((pd (eaf-deferred-earlier-main (eaf-deferred-parallel-array-to-alist lst)))
-         (rd (eaf-deferred-nextc pd (lambda (x) (cdr x)))))
-    (setf (deferred-cancel rd)
-          (lambda (x) (eaf-deferred-default-cancel x)
-            (eaf-deferred-cancel pd)))
-    rd))
-
-
-(defun eaf-deferred-earlier (&rest args)
-  "Return a deferred object that calls given deferred objects or
-functions in parallel and wait for the first callback. The
-following deferred task will be called with the first return
-value. ARGS can be a list or an alist of deferred objects or
-functions."
-  (eaf-deferred-message "EARLIER : %s" args)
-  (eaf-deferred-trans-multi-args args
-    'eaf-deferred-earlier 'eaf-deferred-earlier-list 'eaf-deferred-earlier-main))
-
-(defmacro eaf-deferred-timeout (timeout-msec timeout-form d)
-  "Time out macro on a deferred task D.  If the deferred task D
-does not complete within TIMEOUT-MSEC, this macro cancels the
-deferred task and return the TIMEOUT-FORM."
-  `(eaf-deferred-earlier
-     (eaf-deferred-nextc (eaf-deferred-wait ,timeout-msec)
-       (lambda (x) ,timeout-form))
-     ,d))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Application functions
-
-(defvar eaf-deferred-uid 0 "[internal] Sequence number for some utilities. See the function `eaf-deferred-uid'.")
-
-(defun eaf-deferred-uid ()
-  "[internal] Generate a sequence number."
-  (cl-incf eaf-deferred-uid))
-
-(defun eaf-deferred-buffer-string (strformat buf)
-  "[internal] Return a string in the buffer with the given format."
-  (format strformat
-          (with-current-buffer buf (buffer-string))))
-
-(defun eaf-deferred-process (command &rest args)
-  "A deferred wrapper of `start-process'. Return a deferred
-object. The process name and buffer name of the argument of the
-`start-process' are generated by this function automatically.
-The next deferred object receives stdout and stderr string from
-the command process."
-  (eaf-deferred-process-gen 'start-process command args))
-
-(defun eaf-deferred-process-shell (command &rest args)
-  "A deferred wrapper of `start-process-shell-command'. Return a deferred
-object. The process name and buffer name of the argument of the
-`start-process-shell-command' are generated by this function automatically.
-The next deferred object receives stdout and stderr string from
-the command process."
-  (eaf-deferred-process-gen 'start-process-shell-command command args))
-
-(defun eaf-deferred-process-buffer (command &rest args)
-  "A deferred wrapper of `start-process'. Return a deferred
-object. The process name and buffer name of the argument of the
-`start-process' are generated by this function automatically.
-The next deferred object receives stdout and stderr buffer from
-the command process."
-  (eaf-deferred-process-buffer-gen 'start-process command args))
-
-(defun eaf-deferred-process-shell-buffer (command &rest args)
-  "A deferred wrapper of `start-process-shell-command'. Return a deferred
-object. The process name and buffer name of the argument of the
-`start-process-shell-command' are generated by this function automatically.
-The next deferred object receives stdout and stderr buffer from
-the command process."
-  (eaf-deferred-process-buffer-gen 'start-process-shell-command command args))
-
-(defun eaf-deferred-process-gen (f command args)
-  "[internal]"
-  (let ((pd (eaf-deferred-process-buffer-gen f command args)) d)
-    (setq d (eaf-deferred-nextc pd
-              (lambda (buf)
-                (prog1
-                    (with-current-buffer buf (buffer-string))
-                  (kill-buffer buf)))))
-    (setf (deferred-cancel d)
-          (lambda (_x)
-            (eaf-deferred-default-cancel d)
-            (eaf-deferred-default-cancel pd)))
-    d))
-
-(defun eaf-deferred-process-buffer-gen (f command args)
-  "[internal]"
-  (let ((d (eaf-deferred-next)) (uid (eaf-deferred-uid)))
-    (let ((proc-name (format "*eaf-deferred-*%s*:%s" command uid))
-          (buf-name (format " *eaf-deferred-*%s*:%s" command uid))
-          (pwd default-directory)
-          (env process-environment)
-          (con-type process-connection-type)
-          (nd (eaf-deferred-new)) proc-buf proc)
-      (eaf-deferred-nextc d
-        (lambda (_x)
-          (setq proc-buf (get-buffer-create buf-name))
-          (condition-case err
-              (let ((default-directory pwd)
-                    (process-environment env)
-                    (process-connection-type con-type))
-                (setq proc
-                      (if (null (car args))
-                          (apply f proc-name buf-name command nil)
-                        (apply f proc-name buf-name command args)))
-                (set-process-sentinel
-                 proc
-                 (lambda (proc event)
-		   (unless (process-live-p proc)
-		     (if (zerop (process-exit-status proc))
-			 (eaf-deferred-post-task nd 'ok proc-buf)
-		       (let ((msg (format "Deferred process exited abnormally:\n  command: %s\n  exit status: %s %s\n  event: %s\n  buffer contents: %S"
-					  command
-					  (process-status proc)
-					  (process-exit-status proc)
-					  (string-trim-right event)
-					  (if (buffer-live-p proc-buf)
-					      (with-current-buffer proc-buf
-						(buffer-string))
-					    "(unavailable)"))))
-			 (kill-buffer proc-buf)
-			 (eaf-deferred-post-task nd 'ng msg))))))
-		(setf (deferred-cancel nd)
-		      (lambda (x) (eaf-deferred-default-cancel x)
-			(when proc
-			  (kill-process proc)
-			  (kill-buffer proc-buf)))))
-	    (error (eaf-deferred-post-task nd 'ng err)))
-	  nil))
-      nd)))
-
-(defmacro eaf-deferred-processc (d command &rest args)
-  "Process chain of `eaf-deferred-process'."
-  `(eaf-deferred-nextc ,d
-    (lambda (,(cl-gensym)) (eaf-deferred-process ,command ,@args))))
-
-(defmacro eaf-deferred-process-bufferc (d command &rest args)
-  "Process chain of `eaf-deferred-process-buffer'."
-  `(eaf-deferred-nextc ,d
-     (lambda (,(cl-gensym)) (eaf-deferred-process-buffer ,command ,@args))))
-
-(defmacro eaf-deferred-process-shellc (d command &rest args)
-  "Process chain of `eaf-deferred-process'."
-  `(eaf-deferred-nextc ,d
-    (lambda (,(cl-gensym)) (eaf-deferred-process-shell ,command ,@args))))
-
-(defmacro eaf-deferred-process-shell-bufferc (d command &rest args)
-  "Process chain of `eaf-deferred-process-buffer'."
-  `(eaf-deferred-nextc ,d
-     (lambda (,(cl-gensym)) (eaf-deferred-process-shell-buffer ,command ,@args))))
-
-;; Special variables defined in url-vars.el.
-(defvar url-request-data)
-(defvar url-request-method)
-(defvar url-request-extra-headers)
-
-(declare-function url-http-symbol-value-in-buffer "url-http"
-                  (symbol buffer &optional unbound-value))
-
-(declare-function eaf-deferred-url-param-serialize "request" (params))
-
-(declare-function eaf-deferred-url-escape "request" (val))
-
-(eval-after-load "url"
-  ;; for url package
-  ;; TODO: proxy, charaset
-  ;; List of gloabl variables to preserve and restore before url-retrieve call
-  '(let ((url-global-variables '(url-request-data
-                                 url-request-method
-                                 url-request-extra-headers)))
-
-     (defun eaf-deferred-url-retrieve (url &optional cbargs silent inhibit-cookies)
-       "A wrapper function for url-retrieve. The next deferred
-object receives the buffer object that URL will load
-into. Values of dynamically bound 'url-request-data', 'url-request-method' and
-'url-request-extra-headers' are passed to url-retrieve call."
-       (let ((nd (eaf-deferred-new))
-             buf
-             (local-values (mapcar (lambda (symbol) (symbol-value symbol)) url-global-variables)))
-         (eaf-deferred-next
-           (lambda (_x)
-             (cl-progv url-global-variables local-values
-               (condition-case err
-                   (setq buf
-                         (url-retrieve
-                          url (lambda (_xx) (eaf-deferred-post-task nd 'ok buf))
-                          cbargs silent inhibit-cookies))
-                 (error (eaf-deferred-post-task nd 'ng err)))
-             nil)))
-         (setf (deferred-cancel nd)
-               (lambda (_x)
-                 (when (buffer-live-p buf)
-                   (kill-buffer buf))))
-         nd))
-
-     (defun eaf-deferred-url-delete-header (buf)
-       (with-current-buffer buf
-         (let ((pos (url-http-symbol-value-in-buffer
-                     'url-http-end-of-headers buf)))
-           (when pos
-             (delete-region (point-min) (1+ pos)))))
-       buf)
-
-     (defun eaf-deferred-url-delete-buffer (buf)
-       (when (and buf (buffer-live-p buf))
-         (kill-buffer buf))
-       nil)
-
-     (defun eaf-deferred-url-get (url &optional params &rest args)
-       "Perform a HTTP GET method with `url-retrieve'. PARAMS is
-a parameter list of (key . value) or key. ARGS will be appended
-to eaf-deferred-url-retrieve args list. The next deferred
-object receives the buffer object that URL will load into."
-       (when params
-         (setq url
-               (concat url "?" (eaf-deferred-url-param-serialize params))))
-       (let ((d (eaf-deferred-$
-                  (apply 'eaf-deferred-url-retrieve url args)
-                  (eaf-deferred-nextc it 'eaf-deferred-url-delete-header))))
-         (eaf-deferred-set-next
-           d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
-         d))
-
-     (defun eaf-deferred-url-post (url &optional params &rest args)
-       "Perform a HTTP POST method with `url-retrieve'. PARAMS is
-a parameter list of (key . value) or key. ARGS will be appended
-to eaf-deferred-url-retrieve args list. The next deferred
-object receives the buffer object that URL will load into."
-       (let ((url-request-method "POST")
-             (url-request-extra-headers
-              (append url-request-extra-headers
-                      '(("Content-Type" . "application/x-www-form-urlencoded"))))
-             (url-request-data (eaf-deferred-url-param-serialize params)))
-         (let ((d (eaf-deferred-$
-                    (apply 'eaf-deferred-url-retrieve url args)
-                    (eaf-deferred-nextc it 'eaf-deferred-url-delete-header))))
-           (eaf-deferred-set-next
-             d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
-           d)))
-
-     (defun eaf-deferred-url-escape (val)
-       "[internal] Return a new string that is VAL URI-encoded."
-       (unless (stringp val)
-         (setq val (format "%s" val)))
-       (url-hexify-string
-        (encode-coding-string val 'utf-8)))
-
-     (defun eaf-deferred-url-param-serialize (params)
-       "[internal] Serialize a list of (key . value) cons cells
-into a query string."
-       (when params
-         (mapconcat
-          'identity
-          (cl-loop for p in params
-                   collect
-                   (cond
-                    ((consp p)
-                     (concat
-                      (eaf-deferred-url-escape (car p)) "="
-                      (eaf-deferred-url-escape (cdr p))))
-                    (t
-                     (eaf-deferred-url-escape p))))
-          "&")))
-     ))
 
 ;; epcs
 (defvar eaf-epcs-client-processes nil
