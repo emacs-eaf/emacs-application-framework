@@ -2100,5 +2100,5 @@ This variable is used for the management purpose.")
           ))
       nil))))
 
-(provide 'epcs)
-;;; epcs.el ends here
+(provide 'eaf-epc)
+;;; eaf-epc.el ends here

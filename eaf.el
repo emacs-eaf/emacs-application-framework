@@ -142,7 +142,7 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 
 (eaf-add-app-dirs-to-load-path)
 
-(require 'epcs)
+(require 'eaf-epc)
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
 (require 'eaf-markdown-previewer)
