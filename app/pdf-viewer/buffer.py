@@ -1147,7 +1147,7 @@ class PdfViewerWidget(QWidget):
             if annot_type == "highlight":
                 new_annot = page.add_highlight_annot(quad_list)
             elif annot_type == "strikeout":
-                new_annot = page.addStrikeoutAnnot(quad_list)
+                new_annot = page.add_strikeout_annot(quad_list)
             elif annot_type == "underline":
                 new_annot = page.add_underline_annot(quad_list)
             elif annot_type == "squiggly":
