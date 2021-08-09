@@ -1154,7 +1154,7 @@ class PdfViewerWidget(QWidget):
                 new_annot = page.add_squiggly_annot(quad_list)
             elif annot_type == "text":
                 point = quad_list[-1].lr # lower right point
-                new_annot = page.addTextAnnot(point, text, icon="Note")
+                new_annot = page.add_text_annot(point, text, icon="Note")
 
             new_annot.parent = page
         self.document.saveIncr()
@@ -1166,7 +1166,7 @@ class PdfViewerWidget(QWidget):
             return
 
         page = self.document[page_index]
-        new_annot = page.addTextAnnot(point, text, icon="Note")
+        new_annot = page.add_text_annot(point, text, icon="Note")
         new_annot.parent = page
 
         self.save_annot()
