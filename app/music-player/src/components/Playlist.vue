@@ -129,7 +129,7 @@
      },
 
      jumpToFile() {
-       window.pyobject.open_in_dired(this.currentTrack);
+       window.pyobject.call_emacs_func("dired", [this.currentTrack]);
      }
    }
  }

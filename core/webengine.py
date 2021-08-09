@@ -1256,6 +1256,10 @@ class BrowserBuffer(Buffer):
 
         return LH.tostring(root).decode(encoding="UTF-8")
 
+    @QtCore.pyqtSlot(str, list)
+    def call_emacs_func(self, function_name, function_arguments):
+        eval_in_emacs(function_name, function_arguments)
+
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         self._conn = sqlite3.connect(dbpath)

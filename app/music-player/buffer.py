@@ -41,10 +41,6 @@ class AppBuffer(BrowserBuffer):
         self.buffer_widget.loadFinished.connect(self.load_first_file)
         self.load_index_html(__file__)
 
-    @QtCore.pyqtSlot(str)
-    def open_in_dired(self, path):
-        eval_in_emacs('dired', [path])
-
     def load_first_file(self):
         self.buffer_widget.execute_js('''initPlaylistColor(\"{}\", \"{}\")'''.format(
             get_emacs_var("eaf-emacs-theme-background-color"),
