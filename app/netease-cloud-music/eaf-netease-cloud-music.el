@@ -200,7 +200,9 @@
                      (with-current-buffer "eaf-netease-cloud-music"
                        (eaf-call-async "execute_js_function" eaf--buffer-id
                                        (string-trim-left "set_user_playlists" "js_")
-                                       (json-encode-array netease-cloud-music-playlists)))))))))))
+                                       (json-encode-array
+                                        (netease-cloud-music--cons-to-list
+                                         netease-cloud-music-playlists))))))))))))
   
   (eaf-call-async "execute_js_function" eaf--buffer-id
                   (string-trim-left "set_playlist" "js_")
