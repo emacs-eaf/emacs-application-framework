@@ -326,7 +326,7 @@ class PdfDocument(fitz.Document):
         if self.isPDF:
             if self._is_trim_margin:
                 return self._document_page_clip.width
-            return self.document.pageCropBox(0).width
+            return self.document.page_cropbox(0).width
         else:
             return self[0].clip.width
 
@@ -334,7 +334,7 @@ class PdfDocument(fitz.Document):
         if self.isPDF:
             if self._is_trim_margin:
                 return self._document_page_clip.height
-            return self.document.pageCropBox(0).height
+            return self.document.page_cropbox(0).height
         else:
             return self[0].clip.height
 
