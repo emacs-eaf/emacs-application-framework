@@ -1257,7 +1257,7 @@ class BrowserBuffer(Buffer):
         return LH.tostring(root).decode(encoding="UTF-8")
 
     @QtCore.pyqtSlot(str, list)
-    def call_emacs_func(self, function_name, function_arguments):
+    def eval_emacs_function(self, function_name, function_arguments):
         eval_in_emacs(function_name, function_arguments)
 
 class ZoomSizeDb(object):
