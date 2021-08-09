@@ -86,12 +86,12 @@
 
 (defcustom eaf-file-manager-keybinding
   '(("<f12>" . "open_devtools")
-    ("h" . "up_directory")
-    ("j" . "select_next_file")
-    ("k" . "select_prev_file")
-    ("l" . "open_file")
-    ("f" . "open_file")
-    ("'" . "up_directory")
+    ("h" . "js_up_directory")
+    ("j" . "js_select_next_file")
+    ("k" . "js_select_prev_file")
+    ("l" . "js_open_file")
+    ("f" . "js_open_file")
+    ("'" . "js_up_directory")
     ("q" . "bury-buffer")
     )
   "The keybinding of EAF File Manager."

@@ -45,15 +45,6 @@ class AppBuffer(BrowserBuffer):
             html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
-        for (python_method_name, js_method_name) in [("scroll_up", "scrollUp"),
-                                                     ("scroll_down", "scrollDown"),
-                                                     ("scroll_up_page", "scrollUpPage"),
-                                                     ("scroll_down_page", "scrollDownPage"),
-                                                     ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom")
-                                                     ]:
-            self.build_js_bridge_method(python_method_name, js_method_name)
-
     def load_first_file(self):
         self.buffer_widget.execute_js('''initProcesslistColor(\"{}\", \"{}\")'''.format(
             get_emacs_var("eaf-emacs-theme-background-color"),

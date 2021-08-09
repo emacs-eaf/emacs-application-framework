@@ -48,23 +48,6 @@ class AppBuffer(BrowserBuffer):
             html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
-        for (python_method_name, js_method_name) in [("play_next", "playNext"),
-                                                     ("play_prev", "playPrev"),
-                                                     ("play_random", "playRandom"),
-                                                     ("forward", "forward"),
-                                                     ("backward", "backward"),
-                                                     ("toggle", "toggle"),
-                                                     ("scroll_up", "scrollUp"),
-                                                     ("scroll_down", "scrollDown"),
-                                                     ("scroll_up_page", "scrollUpPage"),
-                                                     ("scroll_down_page", "scrollDownPage"),
-                                                     ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom"),
-                                                     ("jump_to_file", "jumpToFile"),
-                                                     ("toggle_play_order", "togglePlayOrder")
-                                                     ]:
-            self.build_js_bridge_method(python_method_name, js_method_name)
-
     @QtCore.pyqtSlot(str)
     def open_in_dired(self, path):
         eval_in_emacs('dired', [path])

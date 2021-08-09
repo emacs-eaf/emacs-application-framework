@@ -42,19 +42,6 @@ class AppBuffer(BrowserBuffer):
             html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
-        for (python_method_name, js_method_name) in [("play_next", "playNext"),
-                                                     ("play_prev", "playPrev"),
-                                                     ("scroll_up", "scrollUp"),
-                                                     ("scroll_down", "scrollDown"),
-                                                     ("scroll_up_page", "scrollUpPage"),
-                                                     ("scroll_down_page", "scrollDownPage"),
-                                                     ("scroll_to_begin", "scrollToBegin"),
-                                                     ("scroll_to_bottom", "scrollToBottom"),
-                                                     ("scroll_playlist_up", "scrollPlaylistUp"),
-                                                     ("scroll_playlist_down", "scrollPlaylistDown"),
-                                                     ]:
-            self.build_js_bridge_method(python_method_name, js_method_name)
-
     @QtCore.pyqtSlot(list)
     def play_song(self, song):
         eval_in_emacs("netease-cloud-music-play", song)

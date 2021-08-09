@@ -39,18 +39,11 @@ class AppBuffer(BrowserBuffer):
         self.index_file = os.path.join(self.index_file_dir, "index.html")
         self.url = url
 
+        self.buffer_widget.loadFinished.connect(self.init_path)
+
         with open(self.index_file, "r") as f:
             html = self.convert_index_html(f.read(), self.index_file_dir)
             self.buffer_widget.setHtml(html, QUrl("file://"))
-
-        self.buffer_widget.loadFinished.connect(self.init_path)
-
-        for (python_method_name, js_method_name) in [("select_next_file", "selectNextFile"),
-                                                     ("select_prev_file", "selectPrevFile"),
-                                                     ("open_file", "openFile"),
-                                                     ("up_directory", "upDirectory"),
-                                                     ]:
-            self.build_js_bridge_method(python_method_name, js_method_name)
 
         self.fetch_preview_info_thread = None
 

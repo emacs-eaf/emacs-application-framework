@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, to_camel_case
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -1215,23 +1215,27 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
-    def build_js_bridge_method(self, python_method_name, js_method_name):
-        def _do():
-            self.buffer_widget.execute_js('''{}()'''.format(js_method_name))
-
-        setattr(self, python_method_name, _do)
+    def execute_js_function(self, function_name):
+        ''' Execute JavaScript function.'''
+        self.buffer_widget.execute_js('''{}()'''.format(to_camel_case(function_name)))
 
     def convert_index_html(self, index_file_content, dist_dir):
         '''
         Convert path to absolute path and change body background.
         '''
-        return index_file_content.replace(
-            '''<link href=''', '''<link href=''' + dist_dir).replace(
-                '''<script src=''', '''<script src=''' + dist_dir).replace(
-                    '''<body>''', '''<body style="background: {}; color: {}">'''.format(
-                        get_emacs_var("eaf-emacs-theme-background-color"),
-                        get_emacs_var("eaf-emacs-theme-foreground-color")
-                    ))
+        import lxml.html as LH
+
+        root = LH.fromstring(index_file_content)
+        for el in root.iter('link'):
+            el.attrib['href'] = "{}{}".format(dist_dir, el.attrib['href'])
+        for el in root.iter('script'):
+            el.attrib['src'] = "{}{}".format(dist_dir, el.attrib['src'])
+        for el in root.iter('body'):
+            el.attrib['style'] = "background: {}; color: {}".format(
+                get_emacs_var("eaf-emacs-theme-background-color"),
+                get_emacs_var("eaf-emacs-theme-foreground-color"))
+
+        return LH.tostring(root).decode(encoding="UTF-8")
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):

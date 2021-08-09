@@ -311,3 +311,7 @@ def get_emacs_config_dir():
         emacs_config_dir = os.path.join(os.path.expanduser(get_emacs_var("eaf-config-location")), '')
 
     return emacs_config_dir
+
+def to_camel_case(string):
+    components = string.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])

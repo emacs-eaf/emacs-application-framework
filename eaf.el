@@ -608,7 +608,7 @@ A hashtable, key is url and value is title.")
 (defun eaf-call-async (method &rest args)
   "Call Python EPC function METHOD and ARGS asynchronously."
   (eaf-deferred-$
-    (eaf-epc-call-deferred eaf-epc-process (read method) args)))
+   (eaf-epc-call-deferred eaf-epc-process (read method) args)))
 
 (defun eaf-call-sync (method &rest args)
   "Call Python EPC function METHOD and ARGS synchronously."
@@ -812,6 +812,14 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
+(defun eaf--call-js-function (fun)
+  (lambda nil
+    (interactive)
+    ;; Ensure this is only called from EAF buffer
+    (when (derived-mode-p 'eaf-mode)
+      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") (key-description (this-command-keys-vector)))
+      )))
+
 (defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
   (setq eaf-mode-map
@@ -827,6 +835,9 @@ to edit EAF keybindings!" fun fun)))
                          ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
                          ((string-match "-" fun)
                           (intern fun))
+                         ;; If command prefix with js_, call JavaScript function directly.
+                         ((string-prefix-p "js_" fun)
+                          (eaf--call-js-function fun))
                          ;; If command is not built-in function and not include char '-'
                          ;; it's command in python side, build elisp proxy function to call it.
                          (t
