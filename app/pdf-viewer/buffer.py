@@ -563,7 +563,7 @@ class PdfViewerWidget(QWidget):
         self.document.watch_page_size_change(self.update_page_size)
         self.page_width = self.document.get_page_width()
         self.page_height = self.document.get_page_height()
-        self.page_total_number = self.document.pageCount
+        self.page_total_number = self.document.page_count
 
         # Init scale and scale mode.
         self.scale = 1.0
