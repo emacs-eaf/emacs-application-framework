@@ -67,9 +67,9 @@
 
      playSong(songInfo) {
        if (!this.searchMode) {
-         window.pyobject.play_song([Number(songInfo[0]), songInfo[1], songInfo[3]]);
+         window.pyobject.eval_emacs_function("netease-cloud-music-play", [Number(songInfo[0]), songInfo[1], songInfo[3]]);
        } else {
-         window.pyobject.switch_enter([this.playlists.indexOf(songInfo)]);
+         window.pyobject.eval_emacs_function("eaf--netease-cloud-music-switch-enter", [this.playlists.indexOf(songInfo)])
          this.searchMode = false;
        }
      },

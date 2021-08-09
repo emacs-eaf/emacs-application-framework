@@ -185,7 +185,7 @@
        if (currentFile.type == "directory") {
          window.pyobject.change_directory(currentFile.path, "");
        } else if (currentFile.type == "file") {
-         window.pyobject.open_file(currentFile.path);
+         window.pyobject.eval_emacs_function("find-file", [currentFile.path])
        }
      },
 

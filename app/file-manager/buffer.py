@@ -124,10 +124,6 @@ class AppBuffer(BrowserBuffer):
         else:
             return a_type_weights - b_type_weights
 
-    @QtCore.pyqtSlot(str)
-    def open_file(self, file):
-        eval_in_emacs("find-file", [file])
-
     @QtCore.pyqtSlot(str, str)
     def change_directory(self, dir, current_dir):
         file_infos = self.get_files(dir)

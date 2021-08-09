@@ -49,7 +49,7 @@
 
    methods: {
      selectPlaylist(pid) {
-       window.pyobject.change_playlist([Number(pid)]);
+       window.pyobject.eval_emacs_function("eaf--netease-cloud-music-change-playlist", [Number(pid)])
      },
 
      changePlaylistStyle(index) {

@@ -55,7 +55,6 @@
 
    mounted() {
      window.setRepeatMode = this.setRepeatMode;
-     window.playNextOrPrevSong = this.playNextOrPrevSong;
      window.setPanelSongInfo = this.setPanelSongInfo;
      window.setPlayIconStatus = this.setPlayIconStatus;
      window.playNext = this.playNext;
@@ -64,19 +63,15 @@
 
    methods: {
      changeRepeatMode() {
-       window.pyobject.change_repeat_mode();
-     },
-
-     playNextOrPrevSong(prev) {
-       window.pyobject.play_next_or_prev(prev);
+       window.pyobject.eval_emacs_function("netease-cloud-music-change-repeat-mode", [])
      },
 
      playPrev() {
-       this.playNextOrPrevSong(true);
+       window.pyobject.eval_emacs_function("netease-cloud-music-play-previous-song", [])
      },
 
      playNext() {
-       this.playNextOrPrevSong(false);
+       window.pyobject.eval_emacs_function("netease-cloud-music-play-next-song", [])
      },
 
      setRepeatMode(mode) {
@@ -91,7 +86,8 @@
      },
 
      pauseOrContinue() {
-       window.pyobject.play_or_pause();
+       /* NOTE: You should check eaf-netease-cloud-music-play-status at Elisp side */
+       window.pyobject.eval_emacs_function("netease-cloud-music-pause-or-continue", [])
      },
 
      setPlayIconStatus(status) {
