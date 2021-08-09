@@ -1,4 +1,4 @@
-;;; epcs.el --- EPC Server
+;;; epcs.el --- EPC Server              -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011,2012,2013  Masashi Sakurai
 
@@ -24,7 +24,6 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
 (require 'cl-lib)
 (require 'subr-x)
 
@@ -963,7 +962,7 @@ into a query string."
 (defvar eaf-epc-uid 1)
 
 (defun eaf-epc-uid ()
-  (incf eaf-epc-uid))
+  (cl-incf eaf-epc-uid))
 
 (defvar eaf-epc-accept-process-timeout 150  "Asynchronous timeout time. (msec)")
 (defvar eaf-epc-accept-process-timeout-count 100 " Startup function waits (`eaf-epc-accept-process-timeout' * `eaf-epc-accept-process-timeout-count') msec for the external process getting ready.")
@@ -971,7 +970,7 @@ into a query string."
 (put 'epc-error 'error-conditions '(error epc-error))
 (put 'epc-error 'error-message "EPC Error")
 
-(defstruct eaf-epc-connection
+(cl-defstruct eaf-epc-connection
   "Set of information for network connection and event handling.
 
 name    : Connection name. This name is used for process and buffer names.
@@ -1004,7 +1003,7 @@ channel : Event channels for incoming messages."
   "[internal] Connect the server, initialize the process and
 return eaf-epc-connection object."
   (eaf-epc-log ">> Connection start: %s:%s" host port)
-  (lexical-let* ((connection-id (eaf-epc-uid))
+  (let* ((connection-id (eaf-epc-uid))
                  (connection-name (format "epc con %s" connection-id))
                  (connection-buf (eaf-epc-make-procbuf (format "*%s*" connection-name)))
                  (connection-process
@@ -1040,7 +1039,7 @@ return eaf-epc-connection object."
     (process-send-string proc string)))
 
 (defun eaf-epc-disconnect (connection)
-  (lexical-let
+  (let
       ((process (eaf-epc-connection-process connection))
        (buf (eaf-epc-connection-buffer connection))
        (name (eaf-epc-connection-name connection)))
@@ -1087,7 +1086,7 @@ return eaf-epc-connection object."
          (if (featurep 'xemacs) itimer-short-interval 0)
          nil function args))
 
-(defun eaf-epc-net-read-or-lose (process)
+(defun eaf-epc-net-read-or-lose (_process)
   (condition-case error
       (eaf-epc-net-read)
     (error
@@ -1099,8 +1098,8 @@ return eaf-epc-connection object."
   (goto-char (point-min))
   (let* ((length (eaf-epc-net-decode-length))
          (start (+ 6 (point)))
-         (end (+ start length)) content)
-    (assert (plusp length))
+         (end (+ start length)) _content)
+    (cl-assert (cl-plusp length))
     (prog1 (save-restriction
              (narrow-to-region start end)
              (read (decode-coding-string
@@ -1129,7 +1128,7 @@ This is more compatible with the CL reader."
 ;;==================================================
 ;; High Level Interface
 
-(defstruct eaf-epc-manager
+(cl-defstruct eaf-epc-manager
   "Root object that holds all information related to an EPC activity.
 
 `eaf-epc-start-epc' returns this object.
@@ -1185,7 +1184,7 @@ This is *not* network process but the external program started by
 
 \(fn EAF-EPC-MANAGER)")
 
-(defstruct eaf-epc-method
+(cl-defstruct eaf-epc-method
   "Object to hold serving method information.
 
 name       : method name (symbol)   ex: 'test
@@ -1275,7 +1274,7 @@ to see full traceback:\n%s" port-str))
          ((not (eq 'run (process-status process)))
           (setq cont nil))
          (t
-          (incf cont)
+          (cl-incf cont)
           (when (< eaf-epc-accept-process-timeout-count cont) ; timeout 15 seconds
             (error "Timeout server response."))))))
     (set-process-query-on-exit-flag process nil)
@@ -1287,7 +1286,7 @@ to see full traceback:\n%s" port-str))
 
 (defun eaf-epc-start-server-deferred (server-prog server-args)
   "[internal] Same as `eaf-epc-start-server' but start the server asynchronously."
-  (lexical-let*
+  (let*
       ((uid (eaf-epc-uid))
        (process-name (eaf-epc-server-process-name uid))
        (process-buffer (get-buffer-create (eaf-epc-server-buffer-name uid)))
@@ -1317,7 +1316,7 @@ to see full traceback:\n%s" port-str))
              ((not (eq 'run (process-status process)))
               (setq cont nil))
              (t
-              (incf cont)
+              (cl-incf cont)
               (when (< eaf-epc-accept-process-timeout-count cont)
                 ;; timeout 15 seconds
                 (error "Timeout server response."))
@@ -1349,12 +1348,12 @@ to see full traceback:\n%s" port-str))
 
 (defun eaf-epc-init-epc-layer (mngr)
   "[internal] Connect to the server program and return an eaf-epc-connection instance."
-  (lexical-let*
+  (let*
       ((mngr mngr)
        (conn (eaf-epc-manager-connection mngr))
        (channel (eaf-epc-connection-channel conn)))
     ;; dispatch incoming messages with the lexical scope
-    (loop for (method . body) in
+    (cl-loop for (method . body) in
           `((call
              . (lambda (args)
                  (eaf-epc-log "SIG CALL: %S" args)
@@ -1387,14 +1386,14 @@ to see full traceback:\n%s" port-str))
 
 (defun eaf-epc-manager-get-method (mngr method-name)
   "[internal] Return a method object. If not found, return nil."
-  (loop for i in (eaf-epc-manager-methods mngr)
+  (cl-loop for i in (eaf-epc-manager-methods mngr)
         if (eq method-name (eaf-epc-method-name i))
-        do (return i)))
+        do (cl-return i)))
 
 (defun eaf-epc-handler-methods (mngr uid)
   "[internal] Return a list of information for registered methods."
   (let ((info
-         (loop for i in (eaf-epc-manager-methods mngr)
+         (cl-loop for i in (eaf-epc-manager-methods mngr)
                collect
                (list
                 (eaf-epc-method-name i)
@@ -1404,8 +1403,8 @@ to see full traceback:\n%s" port-str))
 
 (defun eaf-epc-handler-called-method (mngr uid name args)
   "[internal] low-level message handler for peer's calling."
-  (lexical-let ((mngr mngr) (uid uid))
-    (let* ((methods (eaf-epc-manager-methods mngr))
+  (let ((mngr mngr) (uid uid))
+    (let* ((_methods (eaf-epc-manager-methods mngr))
            (method (eaf-epc-manager-get-method mngr name)))
       (cond
        ((null method)
@@ -1426,7 +1425,7 @@ to see full traceback:\n%s" port-str))
 
 (defun eaf-epc-manager-remove-session (mngr uid)
   "[internal] Remove a session from the epc manager object."
-  (loop with ret = nil
+  (cl-loop with ret = nil
         for pair in (eaf-epc-manager-sessions mngr)
         unless (eq uid (car pair))
         do (push pair ret)
@@ -1489,7 +1488,7 @@ object which is called with the result."
 (defun eaf-epc-sync (mngr d)
   "Wrap deferred methods with synchronous waiting, and return the result.
 If an exception is occurred, this function throws the error."
-  (lexical-let ((result 'eaf-epc-nothing))
+  (let ((result 'eaf-epc-nothing))
     (eaf-deferred-$ d
       (eaf-deferred-nextc it
         (lambda (x) (setq result x)))
@@ -1989,7 +1988,7 @@ purpose.")
 ;;   process : server process object
 ;;   port    : port number
 ;;   connect-function : initialize function for `eaf-epc-manager' instances
-(defstruct eaf-epcs-server name process port connect-function)
+(cl-defstruct eaf-epcs-server name process port connect-function)
 
 (defvar eaf-epcs-server-processes nil
   "[internal] A list of ([process object] . [`eaf-epcs-server' instance]).
@@ -1997,7 +1996,7 @@ This variable is used for the management purpose.")
 
 (defun eaf-epcs-server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
-  (lexical-let*
+  (let*
       ((connect-function connect-function)
        (name (format "EPC Server %s" (eaf-epc-uid)))
        (buf (eaf-epc-make-procbuf (format "*%s*" name)))
@@ -2036,15 +2035,15 @@ This variable is used for the management purpose.")
 
 (defun eaf-epcs-get-manager-by-process (proc)
   "[internal] Return the eaf-epc-manager instance for the PROC."
-  (loop for (pp . mngr) in eaf-epcs-client-processes
+  (cl-loop for (pp . mngr) in eaf-epcs-client-processes
         if (eql pp proc)
-        do (return mngr)
+        do (cl-return mngr)
         finally return nil))
 
 (defun eaf-epcs-kill-all-processes ()
   "Kill all child processes for debug purpose."
   (interactive)
-  (loop for (proc . mngr) in eaf-epcs-client-processes
+  (cl-loop for (proc . mngr) in eaf-epcs-client-processes
         do (ignore-errors
              (delete-process proc)
              (kill-buffer (process-buffer proc)))))
@@ -2052,7 +2051,7 @@ This variable is used for the management purpose.")
 (defun eaf-epcs-accept (process)
   "[internal] Initialize the process and return eaf-epc-manager object."
   (eaf-epc-log "EAF-EPCS- >> Connection accept: %S" process)
-  (lexical-let* ((connection-id (eaf-epc-uid))
+  (let* ((connection-id (eaf-epc-uid))
                  (connection-name (format "epc con %s" connection-id))
                  (channel (eaf-concurrent-signal-channel connection-name))
                  (connection (make-eaf-epc-connection
@@ -2092,7 +2091,7 @@ This variable is used for the management purpose.")
      ((null mngr) nil )
      ;; disconnect
      (t
-      (let ((pair (assq process eaf-epcs-client-processes)) d)
+      (let ((pair (assq process eaf-epcs-client-processes)) _d)
         (when pair
           (eaf-epc-log "EAF-EPCS- DISCONNECT %S" process)
           (eaf-epc-stop-epc (cdr pair))
