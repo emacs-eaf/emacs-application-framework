@@ -161,7 +161,7 @@ Mainly this function is called by timer asynchronously."
          (message "deferred error : %s" err)))
       value)))
 
-;; Struct: deferred
+;; Struct: eaferred
 ;;
 ;; callback    : a callback function (default `eaf-deferred-default-callback')
 ;; errorback   : an errorback function (default `eaf-deferred-default-errorback')
@@ -170,7 +170,7 @@ Mainly this function is called by timer asynchronously."
 ;; status      : if 'ok or 'ng, this deferred has a result (error) value. (default nil)
 ;; value       : saved value (default nil)
 ;;
-(cl-defstruct deferred
+(cl-defstruct eaferred
   (callback 'eaf-deferred-default-callback)
   (errorback 'eaf-deferred-default-errorback)
   (cancel 'eaf-deferred-default-cancel)
@@ -204,9 +204,9 @@ raising with `error'."
 (defun eaf-deferred-default-cancel (d)
   "[internal] Default canceling function."
   (eaf-deferred-message "CANCEL : %s" d)
-  (setf (deferred-callback d) 'eaf-deferred-default-callback)
-  (setf (deferred-errorback d) 'eaf-deferred-default-errorback)
-  (setf (deferred-next d) nil)
+  (setf (eaferred-callback d) 'eaf-deferred-default-callback)
+  (setf (eaferred-errorback d) 'eaf-deferred-default-errorback)
+  (setf (eaferred-next d) nil)
   d)
 
 (defvar eaf-deferred-onerror nil
@@ -222,15 +222,15 @@ an argument value for execution of the deferred task."
   (eaf-deferred-message "EXEC : %s / %s / %s" d which arg)
   (when (null d) (error "eaf-deferred-exec-task was given a nil."))
   (let ((callback (if (eq which 'ok)
-                      (deferred-callback d)
-                    (deferred-errorback d)))
-        (next-deferred (deferred-next d)))
+                      (eaferred-callback d)
+                    (eaferred-errorback d)))
+        (next-deferred (eaferred-next d)))
     (cond
      (callback
       (eaf-deferred-condition-case err
         (let ((value (eaf-deferred-call-lambda callback arg)))
           (cond
-           ((deferred-p value)
+           ((eaferred-p value)
             (eaf-deferred-message "WAIT NEST : %s" value)
             (if next-deferred
                 (eaf-deferred-set-next value next-deferred)
@@ -238,8 +238,8 @@ an argument value for execution of the deferred task."
            (t
             (if next-deferred
                 (eaf-deferred-post-task next-deferred 'ok value)
-              (setf (deferred-status d) 'ok)
-              (setf (deferred-value d) value)
+              (setf (eaferred-status d) 'ok)
+              (setf (eaferred-value d) value)
               value))))
         (error
          (cond
@@ -250,8 +250,8 @@ an argument value for execution of the deferred task."
           (t
            (eaf-deferred-message "ERROR : %S" err)
            (message "deferred error : %S" err)
-           (setf (deferred-status d) 'ng)
-           (setf (deferred-value d) err)
+           (setf (eaferred-status d) 'ng)
+           (setf (eaferred-value d) err)
            err)))))
      (t ; <= (null callback)
       (cond
@@ -263,18 +263,18 @@ an argument value for execution of the deferred task."
 
 (defun eaf-deferred-set-next (prev next)
   "[internal] Connect deferred objects."
-  (setf (deferred-next prev) next)
+  (setf (eaferred-next prev) next)
   (cond
-   ((eq 'ok (deferred-status prev))
-    (setf (deferred-status prev) nil)
+   ((eq 'ok (eaferred-status prev))
+    (setf (eaferred-status prev) nil)
     (let ((ret (eaf-deferred-exec-task
-                next 'ok (deferred-value prev))))
-      (if (deferred-p ret) ret
+                next 'ok (eaferred-value prev))))
+      (if (eaferred-p ret) ret
         next)))
-   ((eq 'ng (deferred-status prev))
-    (setf (deferred-status prev) nil)
-    (let ((ret (eaf-deferred-exec-task next 'ng (deferred-value prev))))
-      (if (deferred-p ret) ret
+   ((eq 'ng (eaferred-status prev))
+    (setf (eaferred-status prev) nil)
+    (let ((ret (eaf-deferred-exec-task next 'ng (eaferred-value prev))))
+      (if (eaferred-p ret) ret
         next)))
    (t
     next)))
@@ -286,8 +286,8 @@ an argument value for execution of the deferred task."
 (defun eaf-deferred-new (&optional callback)
   "Create a deferred object."
   (if callback
-      (make-deferred :callback callback)
-    (make-deferred)))
+      (make-eaferred :callback callback)
+    (make-eaferred)))
 
 (defun eaf-deferred-callback (d &optional arg)
   "Start deferred chain with a callback message."
@@ -311,7 +311,7 @@ an argument value for execution of the deferred task."
 (defun eaf-deferred-cancel (d)
   "Cancel all callbacks and deferred chain in the deferred object."
   (eaf-deferred-message "CANCEL : %s" d)
-  (funcall (deferred-cancel d) d)
+  (funcall (eaferred-cancel d) d)
   d)
 
 (defun eaf-deferred-status (d)
@@ -319,7 +319,7 @@ an argument value for execution of the deferred task."
 `ok': the callback was called and waiting for next deferred.
 `ng': the errorback was called and waiting for next deferred.
  nil: The neither callback nor errorback was not called."
-  (deferred-status d))
+  (eaferred-status d))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Basic utility functions
@@ -341,21 +341,21 @@ an argument value for execution of the deferred task."
 is a short cut of following code:
  (eaf-deferred-callback-post (eaf-deferred-new callback))."
   (let ((d (if callback
-               (make-deferred :callback callback)
-             (make-deferred))))
+               (make-eaferred :callback callback)
+             (make-eaferred))))
     (eaf-deferred-callback-post d arg)
     d))
 
 (defun eaf-deferred-nextc (d callback)
   "Create a deferred object with OK callback and connect it to the given deferred object."
   (declare (indent 1))
-  (let ((nd (make-deferred :callback callback)))
+  (let ((nd (make-eaferred :callback callback)))
     (eaf-deferred-set-next d nd)))
 
 (defun eaf-deferred-error (d callback)
   "Create a deferred object with errorback and connect it to the given deferred object."
   (declare (indent 1))
-  (let ((nd (make-deferred :errorback callback)))
+  (let ((nd (make-eaferred :errorback callback)))
     (eaf-deferred-set-next d nd)))
 
 (defun eaf-deferred-watch (d callback)
@@ -369,7 +369,7 @@ monitoring of tasks."
          (err    (lambda (e)
                    (ignore-errors (eaf-deferred-call-lambda callback e))
                    (eaf-deferred-resignal e))))
-    (let ((nd (make-deferred :callback normal :errorback err)))
+    (let ((nd (make-eaferred :callback normal :errorback err)))
       (eaf-deferred-set-next d nd))))
 
 (defun eaf-deferred-wait (msec)
@@ -381,7 +381,7 @@ monitoring of tasks."
                    (eaf-deferred-exec-task
                     d 'ok (* 1000.0 (- (float-time) start-time)))
                    nil) msec))
-    (setf (deferred-cancel d)
+    (setf (eaferred-cancel d)
           (lambda (x)
             (eaf-deferred-cancelTimeout timer)
             (eaf-deferred-default-cancel x)))
@@ -960,7 +960,7 @@ to see full traceback:\n%s" port-str))
             (let* ((f (eaf-epc-method-task method))
                    (ret (apply f args)))
               (cond
-               ((deferred-p ret)
+               ((eaferred-p ret)
                 (eaf-deferred-nextc ret
                   (lambda (xx) (eaf-epc-manager-send mngr 'return uid xx))))
                (t (eaf-epc-manager-send mngr 'return uid ret))))
