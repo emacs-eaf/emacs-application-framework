@@ -108,16 +108,22 @@
   "The keybinding of EAF Music Player."
   :type 'cons)
 
-(add-to-list 'eaf-app-binding-alist '("music-player" . eaf-music-player-keybinding))
-
-(setq eaf-music-player-module-path (concat (file-name-directory load-file-name) "buffer.py"))
-(add-to-list 'eaf-app-module-path-alist '("music-player" . eaf-music-player-module-path))
+(defcustom eaf-music-extension-list
+  '("mp3")
+  "The extension list of music application."
+  :type 'cons)
 
 ;;;###autoload
 (defun eaf-open-music-player (music-file)
   "Open EAF music player."
   (interactive "fOpen music: ")
   (eaf-open "eaf-music-player" "music-player" music-file))
+
+(add-to-list 'eaf-app-extensions-alist '("music-player" . eaf-music-extension-list))
+(add-to-list 'eaf-app-binding-alist '("music-player" . eaf-music-player-keybinding))
+
+(setq eaf-music-player-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("music-player" . eaf-music-player-module-path))
 
 (provide 'eaf-music-player)
 ;;; eaf-music-player.el ends here

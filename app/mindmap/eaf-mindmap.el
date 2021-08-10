@@ -152,10 +152,10 @@
   "The keybinding of EAF Mindmap."
   :type 'cons)
 
-(add-to-list 'eaf-app-binding-alist '("mindmap" . eaf-mindmap-keybinding))
-
-(setq path (concat (file-name-directory load-file-name) "buffer.py"))
-(add-to-list 'eaf-app-module-path-alist '("mindmap" . path))
+(defcustom eaf-mindmap-extension-list
+  '("emm" "mm")
+  "The extension list of mindmap application."
+  :type 'cons)
 
 (defun eaf--export-org-json (org-json-content org-file-path)
   (let (org-parse-data)
@@ -451,6 +451,13 @@ actural call `org-json-gen-alist1' to work."
   (eaf-open file "mindmap"))
 
 (defalias 'eaf-create-mindmap 'eaf-open-mindmap "For compatibility")
+
+(add-to-list 'eaf-app-binding-alist '("mindmap" . eaf-mindmap-keybinding))
+
+(setq path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("mindmap" . path))
+
+(add-to-list 'eaf-app-extensions-alist '("mindmap" . eaf-mindmap-extension-list))
 
 (provide 'eaf-mindmap)
 

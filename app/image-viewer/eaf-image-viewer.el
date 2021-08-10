@@ -110,10 +110,17 @@
   "The keybinding of EAF Image Viewer."
   :type 'cons)
 
+(defcustom eaf-image-extension-list
+  '("jpg" "jpeg" "png" "bmp" "gif" "svg" "webp")
+  "The extension list of image viewer application."
+  :type 'cons)
+
 (add-to-list 'eaf-app-binding-alist '("image-viewer" . eaf-image-viewer-keybinding))
 
 (setq eaf-image-viewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
 (add-to-list 'eaf-app-module-path-alist '("image-viewer" . eaf-image-viewer-module-path))
+
+(add-to-list 'eaf-app-extensions-alist '("image-viewer" . eaf-image-extension-list))
 
 (provide 'eaf-image-viewer)
 

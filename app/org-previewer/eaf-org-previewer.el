@@ -179,10 +179,10 @@
   "The keybinding of EAF Org Previewer."
   :type 'cons)
 
-(add-to-list 'eaf-app-binding-alist '("org-previewer" . eaf-org-previewer-keybinding))
-
-(setq eaf-org-previewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
-(add-to-list 'eaf-app-module-path-alist '("org-previewer" . eaf-org-previewer-module-path))
+(defcustom eaf-org-extension-list
+  '("org")
+  "The extension list of org previewer application."
+  :type 'cons)
 
 (defun eaf--org-delete-preview-file (org-file)
   "Delete the org-preview file when given ORG-FILE name."
@@ -236,6 +236,15 @@
     ;; Switch to new buffer if buffer create successful.
     (switch-to-buffer buf)
     (other-window +1)))
+
+(add-to-list 'eaf-app-binding-alist '("org-previewer" . eaf-org-previewer-keybinding))
+
+(setq eaf-org-previewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("org-previewer" . eaf-org-previewer-module-path))
+
+(add-to-list 'eaf-app-display-function-alist '("org-previewer" . eaf--org-preview-display))
+
+(add-to-list 'eaf-app-extensions-alist '("org-previewer" . eaf-org-extension-list))
 
 (provide 'eaf-org-previewer)
 

@@ -95,6 +95,11 @@
   "The extension list of pdf application."
   :type 'cons)
 
+(defcustom eaf-office-extension-list
+  '("docx" "doc" "ppt" "pptx" "xlsx" "xls")
+  "The extension list of office application."
+  :type 'cons)
+
 (defcustom eaf-pdf-store-history t
   "If it is t, the pdf file path will be stored in eaf-config-location/pdf/history/log.txt for eaf-open-pdf-from-history to use"
   :type 'boolean)
@@ -163,11 +168,6 @@
     ("T" . "toggle_trim_white_margin"))
   "The keybinding of EAF PDF Viewer."
   :type 'cons)
-
-(add-to-list 'eaf-app-binding-alist '("pdf-viewer" . eaf-pdf-viewer-keybinding))
-
-(setq eaf-pdf-viewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
-(add-to-list 'eaf-app-module-path-alist '("pdf-viewer" . eaf-pdf-viewer-module-path))
 
 (define-minor-mode eaf-pdf-outline-mode
   "EAF pdf outline mode."
@@ -283,6 +283,9 @@ The key is the annot id on PAGE."
     (defaults . ,(list eaf--bookmark-title))
     (filename . ,(eaf-get-path-or-url))))
 
+(defun eaf--pdf-viewer-bookmark-restore (bookmark)
+  (eaf-open (cdr (assq 'filename bookmark))))
+
 (defun eaf--pdf-update-position (page-index page-total-number)
   "Format mode line position indicator to show the current page and the total pages."
   (setq-local mode-line-position
@@ -360,6 +363,17 @@ This function works best if paired with a fuzzy search package."
 (defun eaf-get-file-md5 (file)
   "Get the MD5 value of a specified FILE."
   (car (split-string (shell-command-to-string (format "md5sum '%s'" (file-truename file))) " ")))
+
+(add-to-list 'eaf-app-binding-alist '("pdf-viewer" . eaf-pdf-viewer-keybinding))
+
+(setq eaf-pdf-viewer-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("pdf-viewer" . eaf-pdf-viewer-module-path))
+
+(add-to-list 'eaf-app-bookmark-handlers-alist '("pdf-viewer" . eaf--pdf-viewer-bookmark))
+(add-to-list 'eaf-app-bookmark-restore-alist '("pdf-viewer" . eaf--pdf-viewer-bookmark-restore))
+
+(add-to-list 'eaf-app-extensions-alist '("pdf-viewer" . eaf-pdf-extension-list))
+(add-to-list 'eaf-app-extensions-alist '("office" . eaf-office-extension-list))
 
 (provide 'eaf-pdf-viewer)
 ;;; eaf-pdf-viewer.el ends here

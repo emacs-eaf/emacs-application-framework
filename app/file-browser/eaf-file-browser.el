@@ -84,6 +84,15 @@
 
 ;;; Code:
 
+(defun eaf-file-browser-qrcode (dir)
+  "Open EAF File Browser application.
+
+Select directory DIR to share file from the smartphone.
+
+Make sure that your smartphone is connected to the same WiFi network as this computer."
+  (interactive "D[EAF/file-browser] Specify Destination: ")
+  (eaf-open dir "file-browser"))
+
 (setq eaf-file-browser-module-path (concat (file-name-directory load-file-name) "buffer.py"))
 (add-to-list 'eaf-app-module-path-alist '("file-browser" . eaf-file-browser-module-path))
 

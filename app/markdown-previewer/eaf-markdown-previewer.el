@@ -183,10 +183,10 @@
   "The keybinding of EAF Markdown Previewer."
   :type 'cons)
 
-(add-to-list 'eaf-app-binding-alist '("markdown-previewer" . eaf-markdown-previewer-keybinding))
-
-(setq eaf-markdown-previewer-path (concat (file-name-directory load-file-name) "buffer.py"))
-(add-to-list 'eaf-app-module-path-alist '("markdown-previewer" . eaf-markdown-previewer-path))
+(defcustom eaf-markdown-extension-list
+  '("md")
+  "The extension list of markdown previewer application."
+  :type 'cons)
 
 (defun eaf--markdown-preview-display (buf)
   "Given BUF, split window to show file and previewer."
@@ -195,6 +195,15 @@
     'eaf--buffer-url buf))
   (switch-to-buffer buf)
   (other-window +1))
+
+(add-to-list 'eaf-app-binding-alist '("markdown-previewer" . eaf-markdown-previewer-keybinding))
+
+(setq eaf-markdown-previewer-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("markdown-previewer" . eaf-markdown-previewer-path))
+
+(add-to-list 'eaf-app-display-function-alist '("markdown-previewer" . eaf--markdown-preview-display))
+
+(add-to-list 'eaf-app-extensions-alist '("markdown-previewer" . eaf-markdown-extension-list))
 
 (provide 'eaf-markdown-previewer)
 

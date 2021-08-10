@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Aug 10 21:46:30 2021 (-0400)
+;; Last-Updated: Tue Aug 10 21:46:49 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -96,6 +96,31 @@ keybinding variable to this list.")
 
 (defvar eaf-app-module-path-alist '())
 
+(defvar eaf-app-bookmark-handlers-alist '()
+  "Mapping app names to bookmark handler functions.
+
+A bookmark handler function is used as
+`bookmark-make-record-function' and should follow its spec.")
+
+(defvar eaf-app-bookmark-restore-alist '())
+
+
+(defvar eaf-app-display-function-alist '()
+  "Mapping app names to display functions.
+
+Display functions are called to initilize the initial view when
+starting an app.
+
+A display function receives the initialized app buffer as
+argument and defaults to `switch-to-buffer'.")
+
+
+(defvar eaf-app-extensions-alist '()
+  "Mapping app names to extension list variables.
+
+A new app can use this to configure extensions which should
+handled by it.")
+
 (defun eaf-add-subdirs-to-load-path ()
   "Recursively add all subdirectories of `default-directory' to `load-path'.
 More precisely, this uses only the subdirectories whose names
@@ -143,25 +168,6 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 (eaf-add-app-dirs-to-load-path)
 
 (require 'eaf-epc)
-(require 'eaf-browser)
-(require 'eaf-pdf-viewer)
-(require 'eaf-markdown-previewer)
-(require 'eaf-js-video-player)
-(require 'eaf-video-player)
-(require 'eaf-image-viewer)
-(require 'eaf-org-previewer)
-(require 'eaf-mindmap)
-(require 'eaf-mail)
-(require 'eaf-terminal)
-(require 'eaf-camera)
-(require 'eaf-jupyter)
-(require 'eaf-netease-cloud-music)
-(require 'eaf-music-player)
-(require 'eaf-system-monitor)
-(require 'eaf-file-manager)
-(require 'eaf-file-browser)
-(require 'eaf-demo)
-(require 'eaf-vue-demo)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
@@ -425,40 +431,6 @@ Please send PR if it works.
 Please fill an issue if it still doesn't work."
   :type 'list)
 
-(defvar eaf-app-display-function-alist
-  '(("markdown-previewer" . eaf--markdown-preview-display)
-    ("org-previewer" . eaf--org-preview-display))
-  "Mapping app names to display functions.
-
-Display functions are called to initilize the initial view when
-starting an app.
-
-A display function receives the initialized app buffer as
-argument and defaults to `switch-to-buffer'.")
-
-
-(defvar eaf-app-bookmark-handlers-alist
-  '(("browser" . eaf--browser-bookmark)
-    ("pdf-viewer" . eaf--pdf-viewer-bookmark))
-  "Mapping app names to bookmark handler functions.
-
-A bookmark handler function is used as
-`bookmark-make-record-function' and should follow its spec.")
-
-(defvar eaf-app-extensions-alist
-  '(("pdf-viewer" . eaf-pdf-extension-list)
-    ("markdown-previewer" . eaf-markdown-extension-list)
-    ("image-viewer" . eaf-image-extension-list)
-    ("video-player" . eaf-video-extension-list)
-    ("browser" . eaf-browser-extension-list)
-    ("org-previewer" . eaf-org-extension-list)
-    ("mindmap" . eaf-mindmap-extension-list)
-    ("office" . eaf-office-extension-list))
-  "Mapping app names to extension list variables.
-
-A new app can use this to configure extensions which should
-handled by it.")
-
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -499,10 +471,7 @@ For now only EAF browser app is supported."
 (defun eaf--bookmark-restore (bookmark)
   "Restore EAF buffer according to BOOKMARK."
   (let ((app (cdr (assq 'eaf-app bookmark))))
-    (cond ((equal app "browser")
-           (eaf-open-browser (cdr (assq 'filename bookmark))))
-          ((equal app "pdf-viewer")
-           (eaf-open (cdr (assq 'filename bookmark)))))))
+    (funcall (cdr (assoc app eaf-app-bookmark-restore-alist)) bookmark)))
 
 ;;;###autoload
 (defun eaf-open-bookmark ()
@@ -551,7 +520,7 @@ A hashtable, key is url and value is title.")
 (defun eaf-call-async (method &rest args)
   "Call Python EPC function METHOD and ARGS asynchronously."
   (eaf-deferred-chain
-   (eaf-epc-call-deferred eaf-epc-process (read method) args)))
+    (eaf-epc-call-deferred eaf-epc-process (read method) args)))
 
 (defun eaf-call-sync (method &rest args)
   "Call Python EPC function METHOD and ARGS synchronously."
@@ -1546,20 +1515,20 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     (other-window -1)
     (apply orig-fun direction line args)))
 
+(defun eaf--match-app-extension-p (ext)
+  (catch 'match
+    (dolist (app-extensions (mapcar (lambda (x) (eval (cdr x))) eaf-app-extensions-alist))
+      (dolist (extension app-extensions)
+        (when (equal ext extension)
+          (throw 'match t))
+        ))))
+
 (defun eaf--buffer-file-p ()
   "Determine if the file opened at the current buffer be opened by EAF."
   (let ((ext (when (and buffer-file-name
                         (file-exists-p buffer-file-name))
                (file-name-extension buffer-file-name))))
-    (and ext
-         (member (downcase ext) (append
-                                 eaf-pdf-extension-list
-                                 eaf-markdown-extension-list
-                                 eaf-image-extension-list
-                                 eaf-video-extension-list
-                                 eaf-org-extension-list
-                                 eaf-mindmap-extension-list
-                                 eaf-office-extension-list)))))
+    (and ext (eaf--match-app-extension-p (downcase ext)))))
 
 (defun eaf-open-this-buffer ()
   "Try to open the current buffer using EAF, if possible."
@@ -1573,11 +1542,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 
 You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (and ext
-       (member (downcase ext) (append
-                               eaf-pdf-extension-list
-                               eaf-video-extension-list
-                               eaf-image-extension-list
-                               eaf-mindmap-extension-list))
+       (eaf--match-app-extension-p (downcase ext))
        (not (member ext eaf-find-file-ext-blacklist))))
 
 ;; Make EAF as default app for supported extensions.
@@ -1612,6 +1577,25 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
         (funcall-interactively orig-fn)))))
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
+
+(require 'eaf-browser)
+(require 'eaf-pdf-viewer)
+(require 'eaf-markdown-previewer)
+(require 'eaf-js-video-player)
+(require 'eaf-video-player)
+(require 'eaf-image-viewer)
+(require 'eaf-org-previewer)
+(require 'eaf-mindmap)
+(require 'eaf-mail)
+(require 'eaf-terminal)
+(require 'eaf-camera)
+(require 'eaf-jupyter)
+(require 'eaf-netease-cloud-music)
+(require 'eaf-music-player)
+(require 'eaf-system-monitor)
+(require 'eaf-file-manager)
+(require 'eaf-file-browser)
+(require 'eaf-vue-demo)
 
 (provide 'eaf)
 

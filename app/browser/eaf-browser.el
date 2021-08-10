@@ -337,11 +337,6 @@ and will re-open them when calling `eaf-browser-restore-buffers' in the future s
   "The keybinding of EAF Browser."
   :type 'cons)
 
-(add-to-list 'eaf-app-binding-alist '("browser" . eaf-browser-keybinding))
-
-(setq eaf-browser-module-path (concat (file-name-directory load-file-name) "buffer.py"))
-(add-to-list 'eaf-app-module-path-alist '("browser" . eaf-browser-module-path))
-
 (defcustom eaf-browser-key-alias
   '(("C-a" . "<home>")
     ("C-e" . "<end>"))
@@ -383,6 +378,9 @@ This should be used after setting `eaf-browser-continue-where-left-off' to t."
     (eaf-app . "browser")
     (defaults . ,(list name))
     (filename . ,url)))
+
+(defun eaf--browser-bookmark-restore (bookmark)
+  (eaf-open-browser (cdr (assq 'filename bookmark))))
 
 (defalias 'eaf--browser-firefox-bookmark 'eaf--browser-chrome-bookmark)
 
@@ -549,15 +547,6 @@ choose a search engine defined in `eaf-browser-search-engines'"
                            (format link search-string))))))
     (eaf-open search-url "browser")))
 
-(defun eaf-file-browser-qrcode (dir)
-  "Open EAF File Browser application.
-
-Select directory DIR to share file from the smartphone.
-
-Make sure that your smartphone is connected to the same WiFi network as this computer."
-  (interactive "D[EAF/file-browser] Specify Destination: ")
-  (eaf-open dir "file-browser"))
-
 (defun eaf--exit_fullscreen_request ()
   "Exit EAF browser fullscreen."
   (setq-local eaf-fullscreen-p nil)
@@ -693,6 +682,17 @@ Otherwise send key 'esc' to browser."
   "Toggle proxy to none or default proxy."
   (interactive)
   (eaf-call-sync "toggle_proxy"))
+
+(add-to-list 'eaf-app-binding-alist '("browser" . eaf-browser-keybinding))
+
+(setq eaf-browser-module-path (concat (file-name-directory load-file-name) "buffer.py"))
+(add-to-list 'eaf-app-module-path-alist '("browser" . eaf-browser-module-path))
+
+(add-to-list 'eaf-app-bookmark-handlers-alist '("browser" . eaf--browser-bookmark))
+
+(add-to-list 'eaf-app-bookmark-restore-alist '("browser" . eaf--browser-bookmark-restore))
+
+(add-to-list 'eaf-app-extensions-alist '("browser" . eaf-browser-extension-list))
 
 (provide 'eaf-browser)
 
