@@ -28,7 +28,7 @@
 (require 'subr-x)
 
 ;; deferred
-(defmacro eaf-deferred-$ (&rest elements)
+(defmacro eaf-deferred-chain (&rest elements)
   "Anaphoric function chain macro for deferred chains."
   (declare (debug (&rest form))
            (indent 0))
@@ -845,7 +845,7 @@ to see full traceback:\n%s" port-str))
                 :title (mapconcat 'identity (cons server-prog server-args) " ")))
          (cont 1) port)
     (set-process-query-on-exit-flag process nil)
-    (eaf-deferred-$
+    (eaf-deferred-chain
      (eaf-deferred-next
       (eaf-deferred-lambda (_)
         (accept-process-output process 0 nil t)
@@ -1034,7 +1034,7 @@ object which is called with the result."
   "Wrap deferred methods with synchronous waiting, and return the result.
 If an exception is occurred, this function throws the error."
   (let ((result 'eaf-epc-nothing))
-    (eaf-deferred-$
+    (eaf-deferred-chain
      d
      (eaf-deferred-nextc it
        (lambda (x) (setq result x)))
