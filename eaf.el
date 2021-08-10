@@ -607,7 +607,7 @@ A hashtable, key is url and value is title.")
 
 (defun eaf-call-async (method &rest args)
   "Call Python EPC function METHOD and ARGS asynchronously."
-  (eaf-deferred-$
+  (eaf-deferred-chain
    (eaf-epc-call-deferred eaf-epc-process (read method) args)))
 
 (defun eaf-call-sync (method &rest args)
