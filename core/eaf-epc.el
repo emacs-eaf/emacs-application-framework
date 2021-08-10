@@ -43,7 +43,8 @@
 
 (defmacro eaf-deferred-$ (&rest elements)
   "Anaphoric function chain macro for deferred chains."
-  (declare (debug (&rest form)))
+  (declare (debug (&rest form))
+           (indent 0))
   `(let (it)
      ,@(cl-loop for i in elements
                 collect
@@ -52,12 +53,13 @@
 
 (defmacro eaf-deferred-lambda (args &rest body)
   "Anaphoric lambda macro for self recursion."
-  (declare (debug ("args" form &rest form)))
+  (declare (debug ("args" form &rest form))
+           (indent 1))
   (let ((argsyms (cl-loop repeat (length args) collect (cl-gensym))))
-  `(lambda (,@argsyms)
-     (let (self)
-       (setq self (lambda( ,@args ) ,@body))
-       (funcall self ,@argsyms)))))
+    `(lambda (,@argsyms)
+       (let (self)
+         (setq self (lambda( ,@args ) ,@body))
+         (funcall self ,@argsyms)))))
 
 (cl-defmacro eaf-deferred-try (d &key catch finally)
   "Try-catch-finally macro. This macro simulates the
@@ -117,8 +119,9 @@ Or, this error is coming from somewhere inside of the callback: %S" err)
 (defun eaf-deferred-message-mark ()
   "[internal] Debug log function."
   (interactive)
-  (eaf-deferred-message "==================== mark ==== %s"
-    (format-time-string "%H:%M:%S" (current-time))))
+  (eaf-deferred-message
+   "==================== mark ==== %s"
+   (format-time-string "%H:%M:%S" (current-time))))
 
 (defun eaf-deferred-pp (d)
   (require 'pp)
@@ -133,7 +136,7 @@ Or, this error is coming from somewhere inside of the callback: %S" err)
       (lambda (_x) (pop-to-buffer "*eaf-deferred-pp*")))))
 
 (defvar eaf-deferred-debug-on-signal nil
-"If non nil, the value `debug-on-signal' is substituted this
+  "If non nil, the value `debug-on-signal' is substituted this
 value in the `condition-case' form in deferred
 implementations. Then, Emacs debugger can catch an error occurred
 in the asynchronous tasks.")
@@ -142,7 +145,7 @@ in the asynchronous tasks.")
   "[internal] Custom condition-case. See the comment for
 `eaf-deferred-debug-on-signal'."
   (declare (debug condition-case)
-           (indent 2))
+           (indent 1))
   `(let ((debug-on-signal
           (or debug-on-signal eaf-deferred-debug-on-signal)))
      (condition-case ,var
@@ -176,8 +179,9 @@ See the functions `eaf-deferred-post-task' and `eaf-deferred-worker'.")
 D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
 an argument value for execution of the deferred task."
   (push (eaf-deferred-pack d which arg) eaf-deferred-queue)
-  (eaf-deferred-message "QUEUE-POST [%s]: %s"
-    (length eaf-deferred-queue) (eaf-deferred-pack d which arg))
+  (eaf-deferred-message
+   "QUEUE-POST [%s]: %s"
+   (length eaf-deferred-queue) (eaf-deferred-pack d which arg))
   (eaf-deferred-schedule-worker)
   d)
 
@@ -217,10 +221,10 @@ Error is raised if it is not processed within deferred chain D."
     (let ((last-value 'eaf-deferred-undefined*)
           uncaught-error)
       (eaf-deferred-try
-        (eaf-deferred-nextc d
-          (lambda (x) (setq last-value x)))
-        :catch
-        (lambda (err) (setq uncaught-error err)))
+       (eaf-deferred-nextc d
+         (lambda (x) (setq last-value x)))
+       :catch
+       (lambda (err) (setq uncaught-error err)))
       (while (and (eq 'eaf-deferred-undefined* last-value)
                   (not uncaught-error))
         (sit-for 0.05)
@@ -297,25 +301,25 @@ an argument value for execution of the deferred task."
     (cond
      (callback
       (eaf-deferred-condition-case err
-          (let ((value (eaf-deferred-call-lambda callback arg)))
-            (cond
-             ((deferred-p value)
-              (eaf-deferred-message "WAIT NEST : %s" value)
-              (if next-deferred
-                  (eaf-deferred-set-next value next-deferred)
-                value))
-             (t
-              (if next-deferred
-                  (eaf-deferred-post-task next-deferred 'ok value)
-                (setf (deferred-status d) 'ok)
-                (setf (deferred-value d) value)
-                value))))
+        (let ((value (eaf-deferred-call-lambda callback arg)))
+          (cond
+           ((deferred-p value)
+            (eaf-deferred-message "WAIT NEST : %s" value)
+            (if next-deferred
+                (eaf-deferred-set-next value next-deferred)
+              value))
+           (t
+            (if next-deferred
+                (eaf-deferred-post-task next-deferred 'ok value)
+              (setf (deferred-status d) 'ok)
+              (setf (deferred-value d) value)
+              value))))
         (error
          (cond
           (next-deferred
            (eaf-deferred-post-task next-deferred 'ng err))
           (eaf-deferred-onerror
-            (eaf-deferred-call-lambda eaf-deferred-onerror err))
+           (eaf-deferred-call-lambda eaf-deferred-onerror err))
           (t
            (eaf-deferred-message "ERROR : %S" err)
            (message "deferred error : %S" err)
@@ -337,7 +341,7 @@ an argument value for execution of the deferred task."
    ((eq 'ok (deferred-status prev))
     (setf (deferred-status prev) nil)
     (let ((ret (eaf-deferred-exec-task
-                 next 'ok (deferred-value prev))))
+                   next 'ok (deferred-value prev))))
       (if (deferred-p ret) ret
         next)))
    ((eq 'ng (deferred-status prev))
@@ -364,14 +368,17 @@ an argument value for execution of the deferred task."
 
 (defun eaf-deferred-errorback (d &optional arg)
   "Start deferred chain with an errorback message."
+  (declare (indent 1))
   (eaf-deferred-exec-task d 'ng arg))
 
 (defun eaf-deferred-callback-post (d &optional arg)
   "Add the deferred object to the execution queue."
+  (declare (indent 1))
   (eaf-deferred-post-task d 'ok arg))
 
 (defun eaf-deferred-errorback-post (d &optional arg)
   "Add the deferred object to the execution queue."
+  (declare (indent 1))
   (eaf-deferred-post-task d 'ng arg))
 
 (defun eaf-deferred-cancel (d)
@@ -414,11 +421,13 @@ is a short cut of following code:
 
 (defun eaf-deferred-nextc (d callback)
   "Create a deferred object with OK callback and connect it to the given deferred object."
+  (declare (indent 1))
   (let ((nd (make-deferred :callback callback)))
     (eaf-deferred-set-next d nd)))
 
 (defun eaf-deferred-error (d callback)
   "Create a deferred object with errorback and connect it to the given deferred object."
+  (declare (indent 1))
   (let ((nd (make-deferred :errorback callback)))
     (eaf-deferred-set-next d nd)))
 
@@ -441,10 +450,10 @@ monitoring of tasks."
   (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
     (eaf-deferred-message "WAIT : %s" msec)
     (setq timer (eaf-deferred-setTimeout
-                  (lambda ()
-                    (eaf-deferred-exec-task d 'ok
-                      (* 1000.0 (- (float-time) start-time)))
-                    nil) msec))
+                 (lambda ()
+                   (eaf-deferred-exec-task
+                       d 'ok (* 1000.0 (- (float-time) start-time)))
+                   nil) msec))
     (setf (deferred-cancel d)
           (lambda (x)
             (eaf-deferred-cancelTimeout timer)
@@ -458,11 +467,11 @@ idle for MSEC millisecond."
     (eaf-deferred-message "WAIT-IDLE : %s" msec)
     (setq timer
           (eaf-deferred-run-with-idle-timer
-            (/ msec 1000.0)
-            (lambda ()
-              (eaf-deferred-exec-task d 'ok
-                (* 1000.0 (- (float-time) start-time)))
-              nil)))
+           (/ msec 1000.0)
+           (lambda ()
+             (eaf-deferred-exec-task
+                 d 'ok (* 1000.0 (- (float-time) start-time)))
+             nil)))
     (setf (deferred-cancel d)
           (lambda (x)
             (eaf-deferred-cancelTimeout timer)
@@ -472,14 +481,14 @@ idle for MSEC millisecond."
 (defun eaf-deferred-call (f &rest args)
   "Call the given function asynchronously."
   (eaf-deferred-next
-    (lambda (_x)
-      (apply f args))))
+   (lambda (_x)
+     (apply f args))))
 
 (defun eaf-deferred-apply (f &optional args)
   "Call the given function asynchronously."
   (eaf-deferred-next
-    (lambda (_x)
-      (apply f args))))
+   (lambda (_x)
+     (apply f args))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -577,8 +586,9 @@ idle for MSEC millisecond."
                      (eaf-deferred-nextc (cdr pair)
                        (lambda (x)
                          (push (cons name x) values)
-                         (eaf-deferred-message "PARALLEL VALUE [%s/%s] %s"
-                           (length values) len (cons name x))
+                         (eaf-deferred-message
+                          "PARALLEL VALUE [%s/%s] %s"
+                          (length values) len (cons name x))
                          (when (= len (length values))
                            (eaf-deferred-message "PARALLEL COLLECTED")
                            (eaf-deferred-post-task nd 'ok (nreverse values)))
@@ -586,8 +596,9 @@ idle for MSEC millisecond."
                (eaf-deferred-error cd
                  (lambda (e)
                    (push (cons name e) values)
-                   (eaf-deferred-message "PARALLEL ERROR [%s/%s] %s"
-                     (length values) len (cons name e))
+                   (eaf-deferred-message
+                    "PARALLEL ERROR [%s/%s] %s"
+                    (length values) len (cons name e))
                    (when (= (length values) len)
                      (eaf-deferred-message "PARALLEL COLLECTED")
                      (eaf-deferred-post-task nd 'ok (nreverse values)))
@@ -611,8 +622,9 @@ deferred task will be called with an array of the return
 values. ARGS can be a list or an alist of deferred objects or
 functions."
   (eaf-deferred-message "PARALLEL : %s" args)
-  (eaf-deferred-trans-multi-args args
-    'eaf-deferred-parallel 'eaf-deferred-parallel-list 'eaf-deferred-parallel-main))
+  (eaf-deferred-trans-multi-args
+   args 'eaf-deferred-parallel
+   'eaf-deferred-parallel-list 'eaf-deferred-parallel-main))
 
 (defun eaf-deferred-earlier-main (alst)
   "[internal] Deferred alist implementation for `eaf-deferred-earlier'. "
@@ -667,17 +679,18 @@ following deferred task will be called with the first return
 value. ARGS can be a list or an alist of deferred objects or
 functions."
   (eaf-deferred-message "EARLIER : %s" args)
-  (eaf-deferred-trans-multi-args args
-    'eaf-deferred-earlier 'eaf-deferred-earlier-list 'eaf-deferred-earlier-main))
+  (eaf-deferred-trans-multi-args
+   args 'eaf-deferred-earlier
+   'eaf-deferred-earlier-list 'eaf-deferred-earlier-main))
 
 (defmacro eaf-deferred-timeout (timeout-msec timeout-form d)
   "Time out macro on a deferred task D.  If the deferred task D
 does not complete within TIMEOUT-MSEC, this macro cancels the
 deferred task and return the TIMEOUT-FORM."
   `(eaf-deferred-earlier
-     (eaf-deferred-nextc (eaf-deferred-wait ,timeout-msec)
-       (lambda (x) ,timeout-form))
-     ,d))
+    (eaf-deferred-nextc (eaf-deferred-wait ,timeout-msec)
+      (lambda (x) ,timeout-form))
+    ,d))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Application functions
@@ -741,7 +754,8 @@ the command process."
 
 (defun eaf-deferred-process-buffer-gen (f command args)
   "[internal]"
-  (let ((d (eaf-deferred-next)) (uid (eaf-deferred-uid)))
+  (let ((d (eaf-deferred-next))
+        (uid (eaf-deferred-uid)))
     (let ((proc-name (format "*eaf-deferred-*%s*:%s" command uid))
           (buf-name (format " *eaf-deferred-*%s*:%s" command uid))
           (pwd default-directory)
@@ -788,7 +802,7 @@ the command process."
 (defmacro eaf-deferred-processc (d command &rest args)
   "Process chain of `eaf-deferred-process'."
   `(eaf-deferred-nextc ,d
-    (lambda (,(cl-gensym)) (eaf-deferred-process ,command ,@args))))
+     (lambda (,(cl-gensym)) (eaf-deferred-process ,command ,@args))))
 
 (defmacro eaf-deferred-process-bufferc (d command &rest args)
   "Process chain of `eaf-deferred-process-buffer'."
@@ -798,7 +812,7 @@ the command process."
 (defmacro eaf-deferred-process-shellc (d command &rest args)
   "Process chain of `eaf-deferred-process'."
   `(eaf-deferred-nextc ,d
-    (lambda (,(cl-gensym)) (eaf-deferred-process-shell ,command ,@args))))
+     (lambda (,(cl-gensym)) (eaf-deferred-process-shell ,command ,@args))))
 
 (defmacro eaf-deferred-process-shell-bufferc (d command &rest args)
   "Process chain of `eaf-deferred-process-buffer'."
@@ -834,15 +848,15 @@ into. Values of dynamically bound 'url-request-data', 'url-request-method' and
              buf
              (local-values (mapcar (lambda (symbol) (symbol-value symbol)) url-global-variables)))
          (eaf-deferred-next
-           (lambda (_x)
-             (cl-progv url-global-variables local-values
-               (condition-case err
-                   (setq buf
-                         (url-retrieve
-                          url (lambda (_xx) (eaf-deferred-post-task nd 'ok buf))
-                          cbargs silent inhibit-cookies))
-                 (error (eaf-deferred-post-task nd 'ng err)))
-             nil)))
+          (lambda (_x)
+            (cl-progv url-global-variables local-values
+              (condition-case err
+                  (setq buf
+                        (url-retrieve
+                         url (lambda (_xx) (eaf-deferred-post-task nd 'ok buf))
+                         cbargs silent inhibit-cookies))
+                (error (eaf-deferred-post-task nd 'ng err)))
+              nil)))
          (setf (deferred-cancel nd)
                (lambda (_x)
                  (when (buffer-live-p buf)
@@ -874,7 +888,7 @@ object receives the buffer object that URL will load into."
                   (apply 'eaf-deferred-url-retrieve url args)
                   (eaf-deferred-nextc it 'eaf-deferred-url-delete-header))))
          (eaf-deferred-set-next
-           d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
+          d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
          d))
 
      (defun eaf-deferred-url-post (url &optional params &rest args)
@@ -891,7 +905,7 @@ object receives the buffer object that URL will load into."
                     (apply 'eaf-deferred-url-retrieve url args)
                     (eaf-deferred-nextc it 'eaf-deferred-url-delete-header))))
            (eaf-deferred-set-next
-             d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
+            d (eaf-deferred-new 'eaf-deferred-url-delete-buffer))
            d)))
 
      (defun eaf-deferred-url-escape (val)
@@ -960,13 +974,13 @@ asynchronously."
    ((eq 'while (car line))
     (let ((condition (cadr line))
           (body (cddr line)))
-    `(setq ,chain
-      (eaf-deferred-nextc ,chain
-        (eaf-deferred-lambda (x)
-         (if ,condition
-             (eaf-deferred-nextc
-               (progn
-                 ,@(eaf-concurrent-generator-replace-yield body)) self)))))))
+      `(setq ,chain
+             (eaf-deferred-nextc ,chain
+               (eaf-deferred-lambda (x)
+                 (if ,condition
+                     (eaf-deferred-nextc
+                         (progn
+                           ,@(eaf-concurrent-generator-replace-yield body)) self)))))))
    ;; statement
    (t
     `(setq ,chain
@@ -1006,15 +1020,15 @@ CHAIN is the previous deferred task."
     (let ((condition (cadr line))
           (body (cddr line))
           (retsym (cl-gensym)))
-    `(setq ,chain
-      (eaf-deferred-nextc ,chain
-        (eaf-deferred-lambda (x)
-         (if ,condition
-             (eaf-deferred-nextc
-               (let ((,retsym (progn ,@body)))
-                 (if (deferred-p ,retsym) ,retsym
-                   (eaf-deferred-wait ,wait-time)))
-               self)))))))
+      `(setq ,chain
+             (eaf-deferred-nextc ,chain
+               (eaf-deferred-lambda (x)
+                 (if ,condition
+                     (eaf-deferred-nextc
+                         (let ((,retsym (progn ,@body)))
+                           (if (deferred-p ,retsym) ,retsym
+                             (eaf-deferred-wait ,wait-time)))
+                       self)))))))
    ;; statement
    (t
     `(setq ,chain
@@ -1081,11 +1095,11 @@ permission is returned, the task is executed."
 (defun eaf-concurrent-semaphore-with (semaphore body-func &optional error-func)
   "Execute the task BODY-FUNC asynchronously with the semaphore block."
   (eaf-deferred-try
-    (eaf-deferred-nextc (eaf-concurrent-semaphore-acquire semaphore) body-func)
-    :catch
-    error-func
-    :finally
-    (lambda (_x) (eaf-concurrent-semaphore-release semaphore))))
+   (eaf-deferred-nextc (eaf-concurrent-semaphore-acquire semaphore) body-func)
+   :catch
+   error-func
+   :finally
+   (lambda (_x) (eaf-concurrent-semaphore-release semaphore))))
 (put 'eaf-concurrent-semaphore-with 'lisp-indent-function 1)
 
 (defun eaf-concurrent-semaphore-release-all (semaphore)
@@ -1246,7 +1260,7 @@ CHANNEL is a channel object that sends signals of variable events. Observers can
               (value (and obj (eaf-concurrent-dataflow-value obj))))
          (when obj
            (cl-loop for i in (eaf-concurrent-aif (eaf-concurrent-dataflow-get-object-for-deferreds df key)
-                                     (eaf-concurrent-dataflow-deferred-list it) nil)
+                                 (eaf-concurrent-dataflow-deferred-list it) nil)
                     do (eaf-deferred-callback-post i value))
            (setf (eaf-concurrent-dataflow-deferred-list obj) nil)))))))
 
@@ -1260,8 +1274,8 @@ If the environment DF doesn't have the entry and the parent one has the entry, t
                     (not (eaf-concurrent-dataflow-undefine-p i)))
             return i)
    (eaf-deferred-aand
-     (eaf-concurrent-dataflow-parent-environment df)
-     (eaf-concurrent-dataflow-get-object-for-value it key))))
+    (eaf-concurrent-dataflow-parent-environment df)
+    (eaf-concurrent-dataflow-get-object-for-value it key))))
 
 (defun eaf-concurrent-dataflow-get-object-for-deferreds (df key)
   "[internal] Return a list of the deferred objects those are waiting for value binding.
@@ -1343,8 +1357,8 @@ This function does nothing for the waiting deferred objects."
             for val = (eaf-concurrent-dataflow-value i)
             unless (eaf-concurrent-dataflow-undefine-p i) collect (cons key val))
    (eaf-deferred-aand
-     (eaf-concurrent-dataflow-parent-environment df)
-     (eaf-concurrent-dataflow-get-avalable-pairs it))))
+    (eaf-concurrent-dataflow-parent-environment df)
+    (eaf-concurrent-dataflow-get-avalable-pairs it))))
 
 (defun eaf-concurrent-dataflow-get-waiting-keys (df)
   "Return a list of keys which have waiting deferred objects in the environment DF and the parent ones."
@@ -1353,8 +1367,8 @@ This function does nothing for the waiting deferred objects."
             for key = (eaf-concurrent-dataflow-key i)
             if (eaf-concurrent-dataflow-undefine-p i) collect key)
    (eaf-deferred-aand
-     (eaf-concurrent-dataflow-parent-environment df)
-     (eaf-concurrent-dataflow-get-waiting-keys it))))
+    (eaf-concurrent-dataflow-parent-environment df)
+    (eaf-concurrent-dataflow-get-waiting-keys it))))
 
 (defun eaf-concurrent-dataflow-clear-all (df)
   "Clear all entries in the environment DF.
@@ -1447,16 +1461,16 @@ channel : Event channels for incoming messages."
 return eaf-epc-connection object."
   (eaf-epc-log ">> Connection start: %s:%s" host port)
   (let* ((connection-id (eaf-epc-uid))
-                 (connection-name (format "epc con %s" connection-id))
-                 (connection-buf (eaf-epc-make-procbuf (format "*%s*" connection-name)))
-                 (connection-process
-                  (open-network-stream connection-name connection-buf host port))
-                 (channel (eaf-concurrent-signal-channel connection-name))
-                 (connection (make-eaf-epc-connection
-                              :name connection-name
-                              :process connection-process
-                              :buffer connection-buf
-                              :channel channel)))
+         (connection-name (format "epc con %s" connection-id))
+         (connection-buf (eaf-epc-make-procbuf (format "*%s*" connection-name)))
+         (connection-process
+          (open-network-stream connection-name connection-buf host port))
+         (channel (eaf-concurrent-signal-channel connection-name))
+         (connection (make-eaf-epc-connection
+                      :name connection-name
+                      :process connection-process
+                      :buffer connection-buf
+                      :channel channel)))
     (eaf-epc-log ">> Connection establish")
     (set-process-coding-system  connection-process 'binary 'binary)
     (set-process-filter connection-process
@@ -1470,7 +1484,7 @@ return eaf-epc-connection object."
 
 (defun eaf-epc-process-sentinel (connection process msg)
   (eaf-epc-log "!! Process Sentinel [%s] : %S : %S"
-           (eaf-epc-connection-name connection) process msg)
+               (eaf-epc-connection-name connection) process msg)
   (eaf-epc-disconnect connection))
 
 (defun eaf-epc-net-send (connection sexp)
@@ -1482,10 +1496,9 @@ return eaf-epc-connection object."
     (process-send-string proc string)))
 
 (defun eaf-epc-disconnect (connection)
-  (let
-      ((process (eaf-epc-connection-process connection))
-       (buf (eaf-epc-connection-buffer connection))
-       (name (eaf-epc-connection-name connection)))
+  (let ((process (eaf-epc-connection-process connection))
+        (buf (eaf-epc-connection-buffer connection))
+        (name (eaf-epc-connection-name connection)))
     (eaf-epc-log "!! Disconnect [%s]" name)
     (when process
       (set-process-sentinel process nil)
@@ -1541,7 +1554,8 @@ return eaf-epc-connection object."
   (goto-char (point-min))
   (let* ((length (eaf-epc-net-decode-length))
          (start (+ 6 (point)))
-         (end (+ start length)) _content)
+         (end (+ start length))
+         _content)
     (cl-assert (cl-plusp length))
     (prog1 (save-restriction
              (narrow-to-region start end)
@@ -1705,7 +1719,7 @@ failure."
     (while cont
       (accept-process-output process 0 eaf-epc-accept-process-timeout t)
       (let ((port-str (with-current-buffer process-buffer
-                          (buffer-string))))
+                        (buffer-string))))
         (cond
          ((string-match "^[ \n\r]*[0-9]+[ \n\r]*$" port-str)
           (setq port (string-to-number port-str)
@@ -1722,49 +1736,48 @@ to see full traceback:\n%s" port-str))
             (error "Timeout server response."))))))
     (set-process-query-on-exit-flag process nil)
     (make-eaf-epc-manager :server-process process
-                      :commands (cons server-prog server-args)
-                      :title (mapconcat 'identity (cons server-prog server-args) " ")
-                      :port port
-                      :connection (eaf-epc-connect "localhost" port))))
+                          :commands (cons server-prog server-args)
+                          :title (mapconcat 'identity (cons server-prog server-args) " ")
+                          :port port
+                          :connection (eaf-epc-connect "localhost" port))))
 
 (defun eaf-epc-start-server-deferred (server-prog server-args)
   "[internal] Same as `eaf-epc-start-server' but start the server asynchronously."
-  (let*
-      ((uid (eaf-epc-uid))
-       (process-name (eaf-epc-server-process-name uid))
-       (process-buffer (get-buffer-create (eaf-epc-server-buffer-name uid)))
-       (process (apply 'start-process
-                       process-name process-buffer
-                       server-prog server-args))
-       (mngr (make-eaf-epc-manager
-              :server-process process
-              :commands (cons server-prog server-args)
-              :title (mapconcat 'identity (cons server-prog server-args) " ")))
-       (cont 1) port)
+  (let* ((uid (eaf-epc-uid))
+         (process-name (eaf-epc-server-process-name uid))
+         (process-buffer (get-buffer-create (eaf-epc-server-buffer-name uid)))
+         (process (apply 'start-process
+                         process-name process-buffer
+                         server-prog server-args))
+         (mngr (make-eaf-epc-manager
+                :server-process process
+                :commands (cons server-prog server-args)
+                :title (mapconcat 'identity (cons server-prog server-args) " ")))
+         (cont 1) port)
     (set-process-query-on-exit-flag process nil)
     (eaf-deferred-$
       (eaf-deferred-next
-        (eaf-deferred-lambda (_)
-          (accept-process-output process 0 nil t)
-          (let ((port-str (with-current-buffer process-buffer
-                            (buffer-string))))
-            (cond
-             ((string-match "^[0-9]+$" port-str)
-              (setq port (string-to-number port-str)
-                    cont nil))
-             ((< 0 (length port-str))
-              (error "Server may raise an error. \
+       (eaf-deferred-lambda (_)
+         (accept-process-output process 0 nil t)
+         (let ((port-str (with-current-buffer process-buffer
+                           (buffer-string))))
+           (cond
+            ((string-match "^[0-9]+$" port-str)
+             (setq port (string-to-number port-str)
+                   cont nil))
+            ((< 0 (length port-str))
+             (error "Server may raise an error. \
 Use \"M-x eaf-epc-pop-to-last-server-process-buffer RET\" \
 to see full traceback:\n%s" port-str))
-             ((not (eq 'run (process-status process)))
-              (setq cont nil))
-             (t
-              (cl-incf cont)
-              (when (< eaf-epc-accept-process-timeout-count cont)
-                ;; timeout 15 seconds
-                (error "Timeout server response."))
-              (eaf-deferred-nextc (eaf-deferred-wait eaf-epc-accept-process-timeout)
-                self))))))
+            ((not (eq 'run (process-status process)))
+             (setq cont nil))
+            (t
+             (cl-incf cont)
+             (when (< eaf-epc-accept-process-timeout-count cont)
+               ;; timeout 15 seconds
+               (error "Timeout server response."))
+             (eaf-deferred-nextc (eaf-deferred-wait eaf-epc-accept-process-timeout)
+               self))))))
       (eaf-deferred-nextc it
         (lambda (_)
           (setf (eaf-epc-manager-port mngr) port)
@@ -1791,34 +1804,33 @@ to see full traceback:\n%s" port-str))
 
 (defun eaf-epc-init-epc-layer (mngr)
   "[internal] Connect to the server program and return an eaf-epc-connection instance."
-  (let*
-      ((mngr mngr)
-       (conn (eaf-epc-manager-connection mngr))
-       (channel (eaf-epc-connection-channel conn)))
+  (let* ((mngr mngr)
+         (conn (eaf-epc-manager-connection mngr))
+         (channel (eaf-epc-connection-channel conn)))
     ;; dispatch incoming messages with the lexical scope
     (cl-loop for (method . body) in
-          `((call
-             . (lambda (args)
-                 (eaf-epc-log "SIG CALL: %S" args)
-                 (apply 'eaf-epc-handler-called-method ,mngr (eaf-epc-args args))))
-            (return
-             . (lambda (args)
-                 (eaf-epc-log "SIG RET: %S" args)
-                 (apply 'eaf-epc-handler-return ,mngr (eaf-epc-args args))))
-            (return-error
-             . (lambda (args)
-                 (eaf-epc-log "SIG RET-ERROR: %S" args)
-                 (apply 'eaf-epc-handler-return-error ,mngr (eaf-epc-args args))))
-            (epc-error
-             . (lambda (args)
-                 (eaf-epc-log "SIG EPC-ERROR: %S" args)
-                 (apply 'eaf-epc-handler-epc-error ,mngr (eaf-epc-args args))))
-            (methods
-             . (lambda (args)
-                 (eaf-epc-log "SIG METHODS: %S" args)
-                 (eaf-epc-handler-methods ,mngr (caadr args))))
-            ) do
-              (eaf-concurrent-signal-connect channel method body))
+             `((call
+                . (lambda (args)
+                    (eaf-epc-log "SIG CALL: %S" args)
+                    (apply 'eaf-epc-handler-called-method ,mngr (eaf-epc-args args))))
+               (return
+                . (lambda (args)
+                    (eaf-epc-log "SIG RET: %S" args)
+                    (apply 'eaf-epc-handler-return ,mngr (eaf-epc-args args))))
+               (return-error
+                . (lambda (args)
+                    (eaf-epc-log "SIG RET-ERROR: %S" args)
+                    (apply 'eaf-epc-handler-return-error ,mngr (eaf-epc-args args))))
+               (epc-error
+                . (lambda (args)
+                    (eaf-epc-log "SIG EPC-ERROR: %S" args)
+                    (apply 'eaf-epc-handler-epc-error ,mngr (eaf-epc-args args))))
+               (methods
+                . (lambda (args)
+                    (eaf-epc-log "SIG METHODS: %S" args)
+                    (eaf-epc-handler-methods ,mngr (caadr args))))
+               ) do
+             (eaf-concurrent-signal-connect channel method body))
     (eaf-epc-live-connections-add mngr)
     mngr))
 
@@ -1830,18 +1842,18 @@ to see full traceback:\n%s" port-str))
 (defun eaf-epc-manager-get-method (mngr method-name)
   "[internal] Return a method object. If not found, return nil."
   (cl-loop for i in (eaf-epc-manager-methods mngr)
-        if (eq method-name (eaf-epc-method-name i))
-        do (cl-return i)))
+           if (eq method-name (eaf-epc-method-name i))
+           do (cl-return i)))
 
 (defun eaf-epc-handler-methods (mngr uid)
   "[internal] Return a list of information for registered methods."
   (let ((info
          (cl-loop for i in (eaf-epc-manager-methods mngr)
-               collect
-               (list
-                (eaf-epc-method-name i)
-                (or (eaf-epc-method-arg-specs i) "")
-                (or (eaf-epc-method-docstring i) "")))))
+                  collect
+                  (list
+                   (eaf-epc-method-name i)
+                   (or (eaf-epc-method-arg-specs i) "")
+                   (or (eaf-epc-method-docstring i) "")))))
     (eaf-epc-manager-send mngr 'return uid info)))
 
 (defun eaf-epc-handler-called-method (mngr uid name args)
@@ -1862,18 +1874,18 @@ to see full traceback:\n%s" port-str))
                 (eaf-deferred-nextc ret
                   (lambda (xx) (eaf-epc-manager-send mngr 'return uid xx))))
                (t (eaf-epc-manager-send mngr 'return uid ret))))
-            (error
-             (eaf-epc-log "ERROR : %S" err)
-             (eaf-epc-manager-send mngr 'return-error uid err))))))))
+          (error
+           (eaf-epc-log "ERROR : %S" err)
+           (eaf-epc-manager-send mngr 'return-error uid err))))))))
 
 (defun eaf-epc-manager-remove-session (mngr uid)
   "[internal] Remove a session from the epc manager object."
   (cl-loop with ret = nil
-        for pair in (eaf-epc-manager-sessions mngr)
-        unless (eq uid (car pair))
-        do (push pair ret)
-        finally
-        do (setf (eaf-epc-manager-sessions mngr) ret)))
+           for pair in (eaf-epc-manager-sessions mngr)
+           unless (eq uid (car pair))
+           do (push pair ret)
+           finally
+           do (setf (eaf-epc-manager-sessions mngr) ret)))
 
 (defun eaf-epc-handler-return (mngr uid args)
   "[internal] low-level message handler for normal returns."
@@ -1933,10 +1945,10 @@ object which is called with the result."
 If an exception is occurred, this function throws the error."
   (let ((result 'eaf-epc-nothing))
     (eaf-deferred-$ d
-      (eaf-deferred-nextc it
-        (lambda (x) (setq result x)))
-      (eaf-deferred-error it
-        (lambda (er) (setq result (cons 'error er)))))
+                    (eaf-deferred-nextc it
+                      (lambda (x) (setq result x)))
+                    (eaf-deferred-error it
+                      (lambda (er) (setq result (cons 'error er)))))
     (while (eq result 'eaf-epc-nothing)
       (save-current-buffer
         (accept-process-output
@@ -1997,19 +2009,18 @@ This variable is used for the management purpose.")
 
 (defun eaf-epcs-server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
-  (let*
-      ((connect-function connect-function)
-       (name (format "EPC Server %s" (eaf-epc-uid)))
-       (buf (eaf-epc-make-procbuf (format "*%s*" name)))
-       (main-process
-        (make-network-process
-         :name name
-         :buffer buf
-         :family 'ipv4 :server t :nowait t
-         :host "127.0.0.1" :service (or port t)
-         :sentinel
-         (lambda (process message)
-           (eaf-epcs-sentinel process message connect-function)))))
+  (let* ((connect-function connect-function)
+         (name (format "EPC Server %s" (eaf-epc-uid)))
+         (buf (eaf-epc-make-procbuf (format "*%s*" name)))
+         (main-process
+          (make-network-process
+           :name name
+           :buffer buf
+           :family 'ipv4 :server t :nowait t
+           :host "127.0.0.1" :service (or port t)
+           :sentinel
+           (lambda (process message)
+             (eaf-epcs-sentinel process message connect-function)))))
     (unless port
       ;; notify port number to the parent process via STDOUT.
       (message "%s\n" (process-contact main-process :service)))
@@ -2037,29 +2048,29 @@ This variable is used for the management purpose.")
 (defun eaf-epcs-get-manager-by-process (proc)
   "[internal] Return the eaf-epc-manager instance for the PROC."
   (cl-loop for (pp . mngr) in eaf-epcs-client-processes
-        if (eql pp proc)
-        do (cl-return mngr)
-        finally return nil))
+           if (eql pp proc)
+           do (cl-return mngr)
+           finally return nil))
 
 (defun eaf-epcs-kill-all-processes ()
   "Kill all child processes for debug purpose."
   (interactive)
   (cl-loop for (proc . mngr) in eaf-epcs-client-processes
-        do (ignore-errors
-             (delete-process proc)
-             (kill-buffer (process-buffer proc)))))
+           do (ignore-errors
+                (delete-process proc)
+                (kill-buffer (process-buffer proc)))))
 
 (defun eaf-epcs-accept (process)
   "[internal] Initialize the process and return eaf-epc-manager object."
   (eaf-epc-log "EAF-EPCS- >> Connection accept: %S" process)
   (let* ((connection-id (eaf-epc-uid))
-                 (connection-name (format "epc con %s" connection-id))
-                 (channel (eaf-concurrent-signal-channel connection-name))
-                 (connection (make-eaf-epc-connection
-                              :name connection-name
-                              :process process
-                              :buffer (process-buffer process)
-                              :channel channel)))
+         (connection-name (format "epc con %s" connection-id))
+         (channel (eaf-concurrent-signal-channel connection-name))
+         (connection (make-eaf-epc-connection
+                      :name connection-name
+                      :process process
+                      :buffer (process-buffer process)
+                      :channel channel)))
     (eaf-epc-log "EAF-EPCS- >> Connection establish")
     (set-process-coding-system process 'binary 'binary)
     (set-process-filter process
@@ -2069,7 +2080,7 @@ This variable is used for the management purpose.")
                           (lambda (p e)
                             (eaf-epc-process-sentinel connection p e)))
     (make-eaf-epc-manager :server-process process :port t
-                      :connection connection)))
+                          :connection connection)))
 
 (defun eaf-epcs-sentinel (process message connect-function)
   "[internal] Process sentinel handler for the server process."
