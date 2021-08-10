@@ -151,26 +151,18 @@ Mainly this function is called by timer asynchronously."
 
 ;; Struct: eaferred
 ;;
-;; callback    : a callback function (default `eaf-deferred-default-callback')
-;; errorback   : an errorback function (default `eaf-deferred-default-errorback')
+;; callback    : a callback function (default `identity')
+;; errorback   : an errorback function (default `eaf-deferred-resignal')
 ;; cancel      : a canceling function (default `eaf-deferred-default-cancel')
 ;; next        : a next chained deferred object (default nil)
 ;; status      : if 'ok or 'ng, this deferred has a result (error) value. (default nil)
 ;; value       : saved value (default nil)
 ;;
 (cl-defstruct eaferred
-  (callback 'eaf-deferred-default-callback)
-  (errorback 'eaf-deferred-default-errorback)
+  (callback 'identity)
+  (errorback 'eaf-deferred-resignal)
   (cancel 'eaf-deferred-default-cancel)
   next status value)
-
-(defun eaf-deferred-default-callback (i)
-  "[internal] Default callback function."
-  (identity i))
-
-(defun eaf-deferred-default-errorback (err)
-  "[internal] Default errorback function."
-  (eaf-deferred-resignal err))
 
 (defun eaf-deferred-resignal (err)
   "[internal] Safely resignal ERR as an Emacs condition.
@@ -192,8 +184,8 @@ raising with `error'."
 (defun eaf-deferred-default-cancel (d)
   "[internal] Default canceling function."
   (eaf-deferred-message "CANCEL : %s" d)
-  (setf (eaferred-callback d) 'eaf-deferred-default-callback)
-  (setf (eaferred-errorback d) 'eaf-deferred-default-errorback)
+  (setf (eaferred-callback d) 'identity)
+  (setf (eaferred-errorback d) 'eaf-deferred-resignal)
   (setf (eaferred-next d) nil)
   d)
 
@@ -267,9 +259,6 @@ an argument value for execution of the deferred task."
    (t
     next)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Basic functions for deferred objects
-
 (defun eaf-deferred-new (&optional callback)
   "Create a deferred object."
   (if callback
@@ -289,9 +278,6 @@ an argument value for execution of the deferred task."
   "Add the deferred object to the execution queue."
   (declare (indent 1))
   (eaf-deferred-post-task d 'ok arg))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Basic utility functions
 
 (defun eaf-deferred-next (&optional callback arg)
   "Create a deferred object and schedule executing. This function
@@ -329,9 +315,6 @@ is a short cut of following code:
             (eaf-deferred-cancelTimeout timer)
             (eaf-deferred-default-cancel x)))
     d))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Application functions
 
 (defvar eaf-deferred-uid 0
   "[internal] Sequence number for some utilities.
@@ -380,7 +363,8 @@ tasks to the returned deferred object."
     d))
 
 (defun eaf-concurrent-signal-send (channel event-sym &rest args)
-  "Send a signal to CHANNEL. If ARGS values are given, observers can get the values by following code: (lambda (event) (destructuring-bind (event-sym (args)) event ... )). "
+  "Send a signal to CHANNEL. If ARGS values are given,
+observers can get the values by following code: (lambda (event) (destructuring-bind (event-sym (args)) event ... )). "
   (let ((observers (eaf-concurrent-signal-observers channel))
         (event (list event-sym args)))
     (cl-loop for i in observers
@@ -388,9 +372,6 @@ tasks to the returned deferred object."
              for d = (cdr i)
              if (or (eq event-sym name) (eq t name))
              do (eaf-deferred-callback-post d event))))
-
-;;==================================================
-;; Utility
 
 (defvar eaf-epc-debug-out nil)
 (defvar eaf-epc-debug-buffer "*epc log*")
@@ -419,9 +400,6 @@ tasks to the returned deferred object."
       (set (make-local-variable 'kill-buffer-query-functions) nil)
       (erase-buffer) (buffer-disable-undo))
     buf))
-
-;;==================================================
-;; Low Level Interface
 
 (defvar eaf-epc-uid 1)
 
@@ -570,9 +548,6 @@ This is more compatible with the CL reader."
       (prin1 sexp (current-buffer))
       (buffer-string))))
 
-;;==================================================
-;; High Level Interface
-
 (cl-defstruct eaf-epc-manager
   "Root object that holds all information related to an EPC activity.
 
@@ -611,102 +586,11 @@ This variable is for debug purpose.")
   "[internal] Remove the EPC manager object."
   (setq eaf-epc-live-connections (delete mngr eaf-epc-live-connections)))
 
-(defun eaf-epc-start-epc (server-prog server-args)
-  "Start the epc server program and return an eaf-epc-manager object.
-
-Start server program SERVER-PROG with command line arguments
-SERVER-ARGS.  The server program must print out the port it is
-using at the first line of its stdout.  If the server prints out
-non-numeric value in the first line or does not print out the
-port number in three seconds, it is regarded as start-up
-failure."
-  (let ((mngr (eaf-epc-start-server server-prog server-args)))
-    (eaf-epc-init-epc-layer mngr)
-    mngr))
-
-(defun eaf-epc-start-epc-deferred (server-prog server-args)
-  "Deferred version of `eaf-epc-start-epc'"
-  (eaf-deferred-nextc (eaf-epc-start-server-deferred server-prog server-args)
-    #'eaf-epc-init-epc-layer))
-
 (defun eaf-epc-server-process-name (uid)
   (format "eaf-epc-server:%s" uid))
 
 (defun eaf-epc-server-buffer-name (uid)
   (format " *%s*" (eaf-epc-server-process-name uid)))
-
-(defun eaf-epc-start-server (server-prog server-args)
-  "[internal] Start a peer server and return an eaf-epc-manager instance which is set up partially."
-  (let* ((uid (eaf-epc-uid))
-         (process-name (eaf-epc-server-process-name uid))
-         (process-buffer (get-buffer-create (eaf-epc-server-buffer-name uid)))
-         (process (apply 'start-process
-                         process-name process-buffer
-                         server-prog server-args))
-         (cont 1) port)
-    (while cont
-      (accept-process-output process 0 eaf-epc-accept-process-timeout t)
-      (let ((port-str (with-current-buffer process-buffer
-                        (buffer-string))))
-        (cond
-         ((string-match "^[ \n\r]*[0-9]+[ \n\r]*$" port-str)
-          (setq port (string-to-number port-str)
-                cont nil))
-         ((< 0 (length port-str))
-          (error "Server may raise an error %s" port-str))
-         ((not (eq 'run (process-status process)))
-          (setq cont nil))
-         (t
-          (cl-incf cont)
-          (when (< eaf-epc-accept-process-timeout-count cont) ; timeout 15 seconds
-            (error "Timeout server response."))))))
-    (set-process-query-on-exit-flag process nil)
-    (make-eaf-epc-manager :server-process process
-                          :commands (cons server-prog server-args)
-                          :title (mapconcat 'identity (cons server-prog server-args) " ")
-                          :port port
-                          :connection (eaf-epc-connect "localhost" port))))
-
-(defun eaf-epc-start-server-deferred (server-prog server-args)
-  "[internal] Same as `eaf-epc-start-server' but start the server asynchronously."
-  (let* ((uid (eaf-epc-uid))
-         (process-name (eaf-epc-server-process-name uid))
-         (process-buffer (get-buffer-create (eaf-epc-server-buffer-name uid)))
-         (process (apply 'start-process
-                         process-name process-buffer
-                         server-prog server-args))
-         (mngr (make-eaf-epc-manager
-                :server-process process
-                :commands (cons server-prog server-args)
-                :title (mapconcat 'identity (cons server-prog server-args) " ")))
-         (cont 1) port)
-    (set-process-query-on-exit-flag process nil)
-    (eaf-deferred-chain
-     (eaf-deferred-next
-      (eaf-deferred-lambda (_)
-        (accept-process-output process 0 nil t)
-        (let ((port-str (with-current-buffer process-buffer
-                          (buffer-string))))
-          (cond
-           ((string-match "^[0-9]+$" port-str)
-            (setq port (string-to-number port-str)
-                  cont nil))
-           ((< 0 (length port-str))
-            (error "Server may raise an error %s" port-str))
-           ((not (eq 'run (process-status process)))
-            (setq cont nil))
-           (t
-            (cl-incf cont)
-            (when (< eaf-epc-accept-process-timeout-count cont)
-              ;; timeout 15 seconds
-              (error "Timeout server response."))
-            (eaf-deferred-nextc (eaf-deferred-wait eaf-epc-accept-process-timeout)
-              self))))))
-     (eaf-deferred-nextc it
-       (lambda (_)
-         (setf (eaf-epc-manager-port mngr) port)
-         (setf (eaf-epc-manager-connection mngr) (eaf-epc-connect "localhost" port))
-         mngr)))))
 
 (defun eaf-epc-stop-epc (mngr)
   "Disconnect the connection for the server."
