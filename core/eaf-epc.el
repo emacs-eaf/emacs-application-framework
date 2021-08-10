@@ -858,5 +858,33 @@ This variable is used for the management purpose.")
           ))
       nil))))
 
+(defun eaf-epcs-server-start (connect-function &optional port)
+  "Start TCP Server and return the main process object."
+  (let*
+      ((connect-function connect-function)
+       (name (format "EPC Server %s" (eaf-epc-uid)))
+       (buf (eaf-epc-make-procbuf (format " *%s*" name)))
+       (main-process
+        (make-network-process
+         :name name
+         :buffer buf
+         :family 'ipv4
+         :server t
+         :host "127.0.0.1"
+         :service (or port t)
+         :sentinel
+         (lambda (process message)
+           (eaf-epcs-sentinel process message connect-function)))))
+    (unless port
+      ;; notify port number to the parent process via STDOUT.
+      (message "%s\n" (process-contact main-process :service)))
+    (push (cons main-process
+                (make-eaf-epcs-server
+                 :name name :process main-process
+                 :port (process-contact main-process :service)
+                 :connect-function connect-function))
+          eaf-epcs-server-processes)
+    main-process))
+
 (provide 'eaf-epc)
 ;;; eaf-epc.el ends here
