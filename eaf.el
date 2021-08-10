@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Jul 31 11:35:34 2021 (-0400)
+;; Last-Updated: Tue Aug 10 21:46:30 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -374,37 +374,8 @@ been initialized."
   ""
   :type 'string)
 
-(defcustom eaf-markdown-extension-list
-  '("md")
-  "The extension list of markdown previewer application."
-  :type 'cons)
 
-(defcustom eaf-image-extension-list
-  '("jpg" "jpeg" "png" "bmp" "gif" "svg" "webp")
-  "The extension list of image viewer application."
-  :type 'cons)
-
-(defcustom eaf-video-extension-list
-  '("avi" "webm" "rmvb" "ogg" "mp4" "mkv" "m4v")
-  "The extension list of video player application."
-  :type 'cons)
-
-(defcustom eaf-org-extension-list
-  '("org")
-  "The extension list of org previewer application."
-  :type 'cons)
-
-(defcustom eaf-mindmap-extension-list
-  '("emm" "mm")
-  "The extension list of mindmap application."
-  :type 'cons)
-
-(defcustom eaf-office-extension-list
-  '("docx" "doc" "ppt" "pptx" "xlsx" "xls")
-  "The extension list of office application."
-  :type 'cons)
-
-(defcustom eaf-find-file-ext-blacklist '()
+(defcustom eaf-find-file-ext-blacklist '("md" "org" "html" "htm")
   "A blacklist of extensions to avoid when opening `find-file' file using EAF."
   :type 'cons)
 
