@@ -105,7 +105,6 @@ in the asynchronous tasks.")
          ,protected-form
        ,@handlers)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Back end functions of deferred tasks
 
@@ -122,10 +121,6 @@ See the functions `eaf-deferred-post-task' and `eaf-deferred-worker'.")
 (defmacro eaf-deferred-pack (a b c)
   `(cons ,a (cons ,b ,c)))
 
-(defun eaf-deferred-schedule-worker ()
-  "[internal] Schedule consuming a deferred task in the execution queue."
-  (run-at-time eaf-deferred-tick-time nil 'eaf-deferred-worker))
-
 (defun eaf-deferred-post-task (d which &optional arg)
   "[internal] Add a deferred object to the execution queue
 `eaf-deferred-queue' and schedule to execute.
@@ -135,7 +130,7 @@ an argument value for execution of the deferred task."
   (eaf-deferred-message
    "QUEUE-POST [%s]: %s"
    (length eaf-deferred-queue) (eaf-deferred-pack d which arg))
-  (eaf-deferred-schedule-worker)
+  (run-at-time eaf-deferred-tick-time nil 'eaf-deferred-worker)
   d)
 
 (defun eaf-deferred-worker ()
@@ -271,7 +266,6 @@ an argument value for execution of the deferred task."
         next)))
    (t
     next)))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Basic functions for deferred objects
@@ -659,9 +653,7 @@ failure."
           (setq port (string-to-number port-str)
                 cont nil))
          ((< 0 (length port-str))
-          (error "Server may raise an error. \
-Use \"M-x eaf-epc-pop-to-last-server-process-buffer RET\" \
-to see full traceback:\n%s" port-str))
+          (error "Server may raise an error %s" port-str))
          ((not (eq 'run (process-status process)))
           (setq cont nil))
          (t
@@ -700,9 +692,7 @@ to see full traceback:\n%s" port-str))
             (setq port (string-to-number port-str)
                   cont nil))
            ((< 0 (length port-str))
-            (error "Server may raise an error. \
-Use \"M-x eaf-epc-pop-to-last-server-process-buffer RET\" \
-to see full traceback:\n%s" port-str))
+            (error "Server may raise an error %s" port-str))
            ((not (eq 'run (process-status process)))
             (setq cont nil))
            (t
@@ -906,20 +896,6 @@ connection."
          ;; Same as `process-live-p' in Emacs >= 24:
          (memq (process-status proc) '(run open listen connect stop)))))
 
-;;==================================================
-;; Troubleshooting / Debugging support
-
-(defun eaf-epc-pop-to-last-server-process-buffer ()
-  "Open the buffer for most recently started server program process.
-This is useful when you want to check why the server program
-failed to start (e.g., to see its traceback / error message)."
-  (interactive)
-  (let ((buffer (get-buffer (eaf-epc-server-buffer-name eaf-epc-uid))))
-    (if buffer
-        (pop-to-buffer buffer)
-      (error "No buffer for the last server process.  \
-Probably the EPC connection exits correctly or you didn't start it yet."))))
-
 ;; epcs
 (defvar eaf-epcs-client-processes nil
   "[internal] A list of ([process object] . [`eaf-epc-manager' instance]).
@@ -938,44 +914,6 @@ purpose.")
 (defvar eaf-epcs-server-processes nil
   "[internal] A list of ([process object] . [`eaf-epcs-server' instance]).
 This variable is used for the management purpose.")
-
-(defun eaf-epcs-server-start (connect-function &optional port)
-  "Start TCP Server and return the main process object."
-  (let* ((connect-function connect-function)
-         (name (format "EPC Server %s" (eaf-epc-uid)))
-         (buf (eaf-epc-make-procbuf (format "*%s*" name)))
-         (main-process
-          (make-network-process
-           :name name
-           :buffer buf
-           :family 'ipv4 :server t :nowait t
-           :host "127.0.0.1" :service (or port t)
-           :sentinel
-           (lambda (process message)
-             (eaf-epcs-sentinel process message connect-function)))))
-    (unless port
-      ;; notify port number to the parent process via STDOUT.
-      (message "%s\n" (process-contact main-process :service)))
-    (push (cons main-process
-                (make-eaf-epcs-server
-                 :name name :process main-process
-                 :port (process-contact main-process :service)
-                 :connect-function connect-function))
-          eaf-epcs-server-processes)
-    main-process))
-
-(defun eaf-epcs-server-stop (process)
-  "Stop the TCP server process."
-  (cond
-   ((and process
-         (assq process eaf-epcs-server-processes))
-    (eaf-epc-log "EAF-EPCS- Shutdown Server: %S" process)
-    (let ((buf (process-buffer process)))
-      (delete-process process)
-      (kill-buffer buf))
-    (setq eaf-epcs-server-processes
-          (assq-delete-all process eaf-epcs-server-processes)))
-   (t (error "Not found in the server process list. [%S]" process))))
 
 (defun eaf-epcs-get-manager-by-process (proc)
   "[internal] Return the eaf-epc-manager instance for the PROC."
