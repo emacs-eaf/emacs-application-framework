@@ -48,30 +48,6 @@
          (setq self (lambda( ,@args ) ,@body))
          (funcall self ,@argsyms)))))
 
-(defun eaf-deferred-setTimeout (f msec)
-  "[internal] Timer function that emulates the `setTimeout' function in JS."
-  (run-at-time (/ msec 1000.0) nil f))
-
-(defun eaf-deferred-cancelTimeout (id)
-  "[internal] Timer cancellation function that emulates the `cancelTimeout' function in JS."
-  (cancel-timer id))
-
-(defun eaf-deferred-call-lambda (f &optional arg)
-  "[internal] Call a function with one or zero argument safely.
-The lambda function can define with zero and one argument."
-  (condition-case err
-      (funcall f arg)
-    ('wrong-number-of-arguments
-     (display-warning 'deferred "\
-Callback that takes no argument may be specified.
-Passing callback with no argument is deprecated.
-Callback must take one argument.
-Or, this error is coming from somewhere inside of the callback: %S" err)
-     (condition-case nil
-         (funcall f)
-       ('wrong-number-of-arguments
-        (signal 'wrong-number-of-arguments (cdr err))))))) ; return the first error
-
 ;; debug
 
 (eval-and-compile
@@ -208,7 +184,7 @@ an argument value for execution of the deferred task."
     (cond
      (callback
       (eaf-deferred-condition-case err
-        (let ((value (eaf-deferred-call-lambda callback arg)))
+        (let ((value (funcall callback arg)))
           (cond
            ((eaferred-p value)
             (eaf-deferred-message "WAIT NEST : %s" value)
@@ -226,7 +202,7 @@ an argument value for execution of the deferred task."
           (next-deferred
            (eaf-deferred-post-task next-deferred 'ng err))
           (eaf-deferred-onerror
-           (eaf-deferred-call-lambda eaf-deferred-onerror err))
+           (funcall eaf-deferred-onerror err))
           (t
            (eaf-deferred-message "ERROR : %S" err)
            (message "deferred error : %S" err)
@@ -305,14 +281,15 @@ is a short cut of following code:
   "Return a deferred object scheduled at MSEC millisecond later."
   (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
     (eaf-deferred-message "WAIT : %s" msec)
-    (setq timer (eaf-deferred-setTimeout
+    (setq timer (run-at-time
+                 (/ msec 1000.0) nil
                  (lambda ()
                    (eaf-deferred-exec-task
                     d 'ok (* 1000.0 (- (float-time) start-time)))
-                   nil) msec))
+                   nil)))
     (setf (eaferred-cancel d)
           (lambda (x)
-            (eaf-deferred-cancelTimeout timer)
+            (cancel-timer timer)
             (eaf-deferred-default-cancel x)))
     d))
 
