@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Aug 10 21:46:49 2021 (-0400)
+;; Last-Updated: Wed Aug 11 16:05:48 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/manateelazycat/emacs-application-framework
 ;; Keywords:
@@ -166,17 +166,16 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
     (eaf-add-subdirs-to-load-path)))
 
 (eaf-add-app-dirs-to-load-path)
-
 (require 'eaf-epc)
 
 ;;;###autoload
 (defun eaf-install-dependencies ()
-  "An interactive function that run install-eaf.sh or install-eaf-win32.js or install-eaf-mac.sh for Linux or Windows or macOS respectively."
+  "An interactive function that run install-eaf.py or install-eaf-win32.js or install-eaf-mac.sh for Linux or Windows or macOS respectively."
   (interactive)
   (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
          (default-directory eaf-dir))
     (cond ((eq system-type 'gnu/linux)
-           (shell-command (concat "./install-eaf.sh" "&")))
+           (shell-command (concat "python " "install-eaf.py" "&")))
           ((memq system-type '(cygwin windows-nt ms-dos))
            (shell-command (format "node %s" (concat "install-eaf-win32.js" "&"))))
           ((eq system-type 'darwin)
@@ -1578,24 +1577,26 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
-(require 'eaf-browser)
-(require 'eaf-pdf-viewer)
-(require 'eaf-markdown-previewer)
-(require 'eaf-js-video-player)
-(require 'eaf-video-player)
-(require 'eaf-image-viewer)
-(require 'eaf-org-previewer)
-(require 'eaf-mindmap)
-(require 'eaf-mail)
-(require 'eaf-terminal)
-(require 'eaf-camera)
-(require 'eaf-jupyter)
-(require 'eaf-netease-cloud-music)
-(require 'eaf-music-player)
-(require 'eaf-system-monitor)
-(require 'eaf-file-manager)
-(require 'eaf-file-browser)
-(require 'eaf-vue-demo)
+(ignore-errors (require 'eaf-airshare))
+(ignore-errors (require 'eaf-browser))
+(ignore-errors (require 'eaf-camera))
+(ignore-errors (require 'eaf-demo))
+(ignore-errors (require 'eaf-file-browser))
+(ignore-errors (require 'eaf-pdf-viewer))
+(ignore-errors (require 'eaf-markdown-previewer))
+(ignore-errors (require 'eaf-js-video-player))
+(ignore-errors (require 'eaf-video-player))
+(ignore-errors (require 'eaf-image-viewer))
+(ignore-errors (require 'eaf-org-previewer))
+(ignore-errors (require 'eaf-mindmap))
+(ignore-errors (require 'eaf-mail))
+(ignore-errors (require 'eaf-terminal))
+(ignore-errors (require 'eaf-jupyter))
+(ignore-errors (require 'eaf-netease-cloud-music))
+(ignore-errors (require 'eaf-music-player))
+(ignore-errors (require 'eaf-system-monitor))
+(ignore-errors (require 'eaf-file-manager))
+(ignore-errors (require 'eaf-vue-demo))
 
 (provide 'eaf)
 

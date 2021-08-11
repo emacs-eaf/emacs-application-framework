@@ -103,8 +103,8 @@ If you prefer to manually call the installation script in the terminal,
 
     ```Bash
     cd emacs-application-framework
-    chmod +x ./install-eaf.sh
-    ./install-eaf.sh
+    chmod +x ./install-eaf.py
+    python ./install-eaf.py
     ```
 
 - If you use Windows,

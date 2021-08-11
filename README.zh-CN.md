@@ -101,8 +101,8 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 
     ```Bash
     cd emacs-application-framework
-    chmod +x ./install-eaf.sh
-    ./install-eaf.sh
+    chmod +x ./install-eaf.py
+    python ./install-eaf.py
     ```
 
 - Windows用户：

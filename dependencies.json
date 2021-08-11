@@ -1,0 +1,48 @@
+{
+    "pacman": [
+        "wmctrl",
+        "python-pyqt5",
+        "python-pyqt5-sip",
+        "python-pyqtwebengine"
+    ],
+    "apt": [
+        "wmctrl",
+        "nodejs",
+        "npm",
+        "libglib2.0-dev",
+        "python3-pyqt5",
+        "python3-sip",
+        "python3-pyqt5.qtwebengine",
+        "python3-pygit2"
+    ],
+    "dnf": [
+        "wmctrl",
+        "nodejs",
+        "npm",
+        "glib2-devel",
+        "python3-qt5",
+        "python3-pyqt5-sip",
+        "pyqtwebengine-devel",
+        "python3-pygit2"
+    ],
+    "pkg": [
+        "wmctrl",
+        "node",
+        "npm",
+        "glib",
+        "py38-qt5-sip",
+        "py38-qt5-webengine"
+    ],
+    "pip": {
+        "linux": [
+            "epc",
+            "lxml"
+        ],
+        "win32": [
+            "pyqt5",
+            "pyqt5-sip",
+            "pyqtwebengine",
+            "pygetwindow"
+        ]
+    }
+}

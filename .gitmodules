@@ -1,0 +1,60 @@
+[submodule "app/airshare"]
+	path = app/airshare
+	url = https://github.com/emacs-eaf/eaf-airshare.git
+[submodule "app/browser"]
+	path = app/browser
+	url = https://github.com/emacs-eaf/eaf-browser.git
+[submodule "app/camera"]
+	path = app/camera
+	url = https://github.com/emacs-eaf/eaf-camera.git
+[submodule "app/demo"]
+	path = app/demo
+	url = https://github.com/emacs-eaf/eaf-demo.git
+[submodule "app/file-browser"]
+	path = app/file-browser
+	url = https://github.com/emacs-eaf/eaf-file-browser.git
+[submodule "app/file-manager"]
+	path = app/file-manager
+	url = https://github.com/emacs-eaf/eaf-file-manager.git
+[submodule "app/file-sender"]
+	path = app/file-sender
+	url = https://github.com/emacs-eaf/eaf-file-sender.git
+[submodule "app/image-viewer"]
+	path = app/image-viewer
+	url = https://github.com/emacs-eaf/eaf-image-viewer.git
+[submodule "app/js-video-player"]
+	path = app/js-video-player
+	url = https://github.com/emacs-eaf/eaf-js-video-player.git
+[submodule "app/jupyter"]
+	path = app/jupyter
+	url = https://github.com/emacs-eaf/eaf-jupyter.git
+[submodule "app/markdown-previewer"]
+	path = app/markdown-previewer
+	url = https://github.com/emacs-eaf/eaf-markdown-previewer.git
+[submodule "app/mindmap"]
+	path = app/mindmap
+	url = https://github.com/emacs-eaf/eaf-mindmap.git
+[submodule "app/music-player"]
+	path = app/music-player
+	url = https://github.com/emacs-eaf/eaf-music-player.git
+[submodule "app/netease-cloud-music"]
+	path = app/netease-cloud-music
+	url = https://github.com/emacs-eaf/eaf-netease-cloud-music.git
+[submodule "app/org-previewer"]
+	path = app/org-previewer
+	url = https://github.com/emacs-eaf/eaf-org-previewer.git
+[submodule "app/pdf-viewer"]
+	path = app/pdf-viewer
+	url = https://github.com/emacs-eaf/eaf-pdf-viewer.git
+[submodule "app/system-monitor"]
+	path = app/system-monitor
+	url = https://github.com/emacs-eaf/eaf-system-monitor.git
+[submodule "app/terminal"]
+	path = app/terminal
+	url = https://github.com/emacs-eaf/eaf-terminal.git
+[submodule "app/video-player"]
+	path = app/video-player
+	url = https://github.com/emacs-eaf/eaf-video-player.git
+[submodule "app/vue-demo"]
+	path = app/vue-demo
+	url = https://github.com/emacs-eaf/eaf-vue-demo.git
