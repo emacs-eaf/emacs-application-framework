@@ -22,7 +22,7 @@
 # NOTE
 # QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
-from app.browser.buffer import AppBuffer as NeverUsed # noqa
+from PyQt5 import QtWebEngineWidgets as NeverUsed # noqa
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
