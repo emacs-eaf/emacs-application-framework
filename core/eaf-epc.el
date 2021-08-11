@@ -316,63 +316,6 @@ is a short cut of following code:
             (eaf-deferred-default-cancel x)))
     d))
 
-(defvar eaf-deferred-uid 0
-  "[internal] Sequence number for some utilities.
-See the function `eaf-deferred-uid'.")
-
-(defun eaf-deferred-uid ()
-  "[internal] Generate a sequence number."
-  (cl-incf eaf-deferred-uid))
-
-;; Concurrent
-(defun eaf-concurrent-signal-channel (&optional name parent-channel)
-  "Create a channel.
-NAME is a channel name for debug.
-PARENT-CHANNEL is an upstream channel. The observers of this channel can receive the upstream signals.
-In the case of using the function `eaf-concurrent-signal-send', the observers of the upstream channel can not receive the signals of this channel."
-  (let ((ch (cons
-             (or name (format "signal%s" (eaf-deferred-uid))) ; name for debug
-             (cons
-              parent-channel ; parent-channel
-              nil)))) ; observers
-    (when parent-channel
-      (eaf-concurrent-signal-connect
-       parent-channel
-       t (lambda (event)
-           (cl-destructuring-bind
-               (event-name event-args) event
-             (apply 'eaf-concurrent-signal-send
-                    ch event-name event-args)))))
-    ch))
-
-(defmacro eaf-concurrent-signal-observers (ch)
-  "[internal] Return observers."
-  `(cddr ,ch))
-
-(defun eaf-concurrent-signal-connect (channel event-sym &optional callback)
-  "Append an observer for EVENT-SYM of CHANNEL and return a deferred object.
-If EVENT-SYM is `t', the observer receives all signals of the channel.
-If CALLBACK function is given, the deferred object executes the
-CALLBACK function asynchronously. One can connect subsequent
-tasks to the returned deferred object."
-  (let ((d (if callback
-               (eaf-deferred-new callback)
-             (eaf-deferred-new))))
-    (push (cons event-sym d)
-          (eaf-concurrent-signal-observers channel))
-    d))
-
-(defun eaf-concurrent-signal-send (channel event-sym &rest args)
-  "Send a signal to CHANNEL. If ARGS values are given,
-observers can get the values by following code: (lambda (event) (destructuring-bind (event-sym (args)) event ... )). "
-  (let ((observers (eaf-concurrent-signal-observers channel))
-        (event (list event-sym args)))
-    (cl-loop for i in observers
-             for name = (car i)
-             for d = (cdr i)
-             if (or (eq event-sym name) (eq t name))
-             do (eaf-deferred-callback-post d event))))
-
 (defvar eaf-epc-debug-out nil)
 (defvar eaf-epc-debug-buffer "*epc log*")
 
@@ -431,7 +374,7 @@ return eaf-epc-connection object."
          (connection-buf (eaf-epc-make-procbuf (format "*%s*" connection-name)))
          (connection-process
           (open-network-stream connection-name connection-buf host port))
-         (channel (eaf-concurrent-signal-channel connection-name))
+         (channel (list connection-name nil))
          (connection (make-eaf-epc-connection
                       :name connection-name
                       :process connection-process
@@ -479,6 +422,36 @@ return eaf-epc-connection object."
     (insert message)
     (eaf-epc-process-available-input connection process)))
 
+(defun eaf-epc-signal-connect (channel event-sym &optional callback)
+  "Append an observer for EVENT-SYM of CHANNEL and return a deferred object.
+If EVENT-SYM is `t', the observer receives all signals of the channel.
+If CALLBACK function is given, the deferred object executes the
+CALLBACK function asynchronously. One can connect subsequent
+tasks to the returned deferred object."
+  (let ((d (if callback
+               (eaf-deferred-new callback)
+             (eaf-deferred-new))))
+    (push (cons event-sym d)
+          (cddr channel))
+    d))
+
+(defun eaf-epc-signal-send (channel event-sym &rest args)
+  "Send a signal to CHANNEL. If ARGS values are given,
+observers can get the values by following code:
+
+  (lambda (event)
+    (destructuring-bind
+     (event-sym (args))
+     event ... ))
+"
+  (let ((observers (cddr channel))
+        (event (list event-sym args)))
+    (cl-loop for i in observers
+             for name = (car i)
+             for d = (cdr i)
+             if (or (eq event-sym name) (eq t name))
+             do (eaf-deferred-callback-post d event))))
+
 (defun eaf-epc-process-available-input (connection process)
   "Process all complete messages that have arrived from Lisp."
   (with-current-buffer (process-buffer process)
@@ -489,7 +462,7 @@ return eaf-epc-connection object."
         (unwind-protect
             (condition-case err
                 (progn
-                  (apply 'eaf-concurrent-signal-send
+                  (apply 'eaf-epc-signal-send
                          (cons (eaf-epc-connection-channel connection) event))
                   (setq ok t))
               ('error (eaf-epc-log "MsgError: %S / <= %S" err event)))
@@ -638,7 +611,7 @@ This variable is for debug purpose.")
                     (eaf-epc-log "SIG METHODS: %S" args)
                     (eaf-epc-handler-methods ,mngr (caadr args))))
                ) do
-             (eaf-concurrent-signal-connect channel method body))
+             (eaf-epc-signal-connect channel method body))
     (eaf-epc-live-connections-add mngr)
     mngr))
 
@@ -811,7 +784,7 @@ This variable is used for the management purpose.")
   (eaf-epc-log "EAF-EPCS- >> Connection accept: %S" process)
   (let* ((connection-id (eaf-epc-uid))
          (connection-name (format "epc con %s" connection-id))
-         (channel (eaf-concurrent-signal-channel connection-name))
+         (channel (list connection-name nil))
          (connection (make-eaf-epc-connection
                       :name connection-name
                       :process process
