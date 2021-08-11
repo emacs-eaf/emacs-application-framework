@@ -48,22 +48,6 @@
          (setq self (lambda( ,@args ) ,@body))
          (funcall self ,@argsyms)))))
 
-(defun eaf-deferred-call-lambda (f &optional arg)
-  "[internal] Call a function with one or zero argument safely.
-The lambda function can define with zero and one argument."
-  (condition-case err
-      (funcall f arg)
-    ('wrong-number-of-arguments
-     (display-warning 'deferred "\
-Callback that takes no argument may be specified.
-Passing callback with no argument is deprecated.
-Callback must take one argument.
-Or, this error is coming from somewhere inside of the callback: %S" err)
-     (condition-case nil
-         (funcall f)
-       ('wrong-number-of-arguments
-        (signal 'wrong-number-of-arguments (cdr err))))))) ; return the first error
-
 ;; debug
 
 (eval-and-compile
@@ -200,7 +184,7 @@ an argument value for execution of the deferred task."
     (cond
      (callback
       (eaf-deferred-condition-case err
-        (let ((value (eaf-deferred-call-lambda callback arg)))
+        (let ((value (funcall callback arg)))
           (cond
            ((eaferred-p value)
             (eaf-deferred-message "WAIT NEST : %s" value)
@@ -218,7 +202,7 @@ an argument value for execution of the deferred task."
           (next-deferred
            (eaf-deferred-post-task next-deferred 'ng err))
           (eaf-deferred-onerror
-           (eaf-deferred-call-lambda eaf-deferred-onerror err))
+           (funcall eaf-deferred-onerror err))
           (t
            (eaf-deferred-message "ERROR : %S" err)
            (message "deferred error : %S" err)
