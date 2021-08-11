@@ -1,7 +1,4 @@
 *.gif filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
-app/browser/aria2-ng/*.html linguist-vendored
 core/js/dark_mode.js linguist-vendored
 core/js/caret_browsing.js linguist-vendored
-app/mindmap/*.js linguist-vendored
-app/music/*.js linguist-vendored
