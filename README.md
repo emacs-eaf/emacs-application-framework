@@ -84,7 +84,7 @@ EAF is an extensible framework. It comes with a number of useful applications, a
 1. Download EAF
 
     ```Bash
-    git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+    git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
     ```
 
 Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
@@ -207,7 +207,7 @@ Some EAF application may have `npm` dependencies, please refer to the correspond
 
 ## Wiki
 
-It is **highly** suggested to read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first before using EAF.
+It is **highly** suggested to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first before using EAF.
 
 Wiki consists of documentations on:
 * Keybindings
@@ -225,7 +225,7 @@ EAF implements three major functionalities:
 2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via Python EPC.
 3. Create a window compositer to make a PyQt program window adapt Emacs' Window/Buffer design.
 
-Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)!
+Learn more from the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)!
 
 ### EAF vs EXWM?
 1. EAF and EXWM share a common goal: enhance collaboration between the standard GNU Emacs with other GUI tools.
@@ -237,7 +237,7 @@ Learn more from the [Wiki](https://github.com/manateelazycat/emacs-application-f
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
 
 ### macOS
-Currently, macOS is only partially supported and needs a lot of testing, not all functions can work normally, please check the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS) for details.
+Currently, macOS is only partially supported and needs a lot of testing, not all functions can work normally, please check the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/macOS) for details.
 
 ### Browser crashes
 Please DO NOT install PyQt5 through pip, pip version has bug, please install PyQt5 from the OS software repository.
@@ -277,13 +277,13 @@ If we missed your package, please make a PR to add it to the list.
 
 ## Report bug
 
-### For any installation and configuration assistance, please read the [Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki) first!
+### For any installation and configuration assistance, please read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first!
 
-If you encounter a problem with EAF, and it occured after pulling the latest commit, please check the [Discussions](https://github.com/manateelazycat/emacs-application-framework/discussions/527) page first.
+If you encounter a problem with EAF, and it occured after pulling the latest commit, please check the [Discussions](https://github.com/emacs-eaf/emacs-application-framework/discussions/527) page first.
 
 For any other problems, please use `emacs -q` and load a minimal setup with only EAF to verify that the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your Emacs config.
 
-If the problem persists, please report it [here](https://github.com/manateelazycat/emacs-application-framework/issues/new) with `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
+If the problem persists, please report it [here](https://github.com/emacs-eaf/emacs-application-framework/issues/new) with `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
 
 If you got segfault error, please use the following way to collect crash information:
 1. Install gdb and turn on option `eaf-enable-debug`
@@ -297,7 +297,7 @@ Do you want to live in Emacs more comfortably?
 
 Do you want to revolutionize the capabilities of Emacs?
 
-[Let's hack together!](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
+[Let's hack together!](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
 
 ## 打赏
 如果我的作品让你的生活充满快乐, 欢迎请我喝瓶啤酒, 哈哈哈哈

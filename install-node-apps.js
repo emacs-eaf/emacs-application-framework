@@ -53,5 +53,5 @@ if(failedApps.length > 0) {
     console.info("------");
     console.info("The usage of other EAF applications not listed here may not be affected.");
     console.info("Nonetheless please report the error log to EAF maintainers:");
-    console.info("https://github.com/manateelazycat/emacs-application-framework/issues");
+    console.info("https://github.com/emacs-eaf/emacs-application-framework/issues");
 }

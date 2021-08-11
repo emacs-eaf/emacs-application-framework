@@ -7,9 +7,9 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Wed Aug 11 16:05:48 2021 (-0400)
+;; Last-Updated: Wed Aug 11 17:04:08 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
-;; URL: https://github.com/manateelazycat/emacs-application-framework
+;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
 ;; Compatibility: emacs-version >= 27
 ;;
@@ -81,7 +81,7 @@
 (require 'bookmark)
 
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
-  "See https://github.com/manateelazycat/emacs-application-framework/issues/734.
+  "See https://github.com/emacs-eaf/emacs-application-framework/issues/734.
 for more information.
 
 In summary, the EAF's python applications can now access users' customized

@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/manateelazycat/emacs-application-framework.git"
+    "url": "git+https://github.com/emacs-eaf/emacs-application-framework.git"
   },
   "keywords": [
     "Emacs",
@@ -17,9 +17,9 @@
   "author": "ManateeLazycat",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/manateelazycat/emacs-application-framework/issues"
+    "url": "https://github.com/emacs-eaf/emacs-application-framework/issues"
   },
-  "homepage": "https://github.com/manateelazycat/emacs-application-framework#readme",
+  "homepage": "https://github.com/emacs-eaf/emacs-application-framework#readme",
   "dependencies": {
     "darkreader": "^4.9.34"
   }

@@ -7,9 +7,9 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2020-05-17 12:31:12
 ;; Version: 0.5
-;; Last-Updated: Tue Jan 19 01:15:08 2021 (-0500)
+;; Last-Updated: Wed Aug 11 17:04:08 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
-;; URL: https://github.com/manateelazycat/emacs-application-framework
+;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
 ;; Compatibility: emacs-version >= 27
 ;;

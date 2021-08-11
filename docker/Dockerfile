@@ -8,7 +8,7 @@ RUN pip install --upgrade pip
 
 RUN pip install PyMuPDF qrcode pyqt5 epc retrying && rm -rf /root/.cache
 
-RUN git clone --depth=1 https://github.com/manateelazycat/emacs-application-framework
+RUN git clone --depth=1 https://github.com/emacs-eaf/emacs-application-framework
 
 ARG _UID="1000"
 ARG _USER="eaf"

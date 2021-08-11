@@ -4,7 +4,7 @@
 ;; Description: Emacs application framework
 ;; Author: lhpfvs <lhpfvs@gmail.com>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; URL: https://github.com/manateelazycat/emacs-application-framework
+;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
 ;; Compatibility: emacs-version >= 27
 ;;

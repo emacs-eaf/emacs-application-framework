@@ -82,7 +82,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 1. 下载EAF:
 
     ```Bash
-    git clone --depth=1 -b master https://github.com/manateelazycat/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+    git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
     ```
 
 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
@@ -204,7 +204,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
 ## Wiki
-强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)。
+强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)。
 
 Wiki囊括了各种你想了解的EAF相关文档，包括了：
 1. 按键绑定
@@ -222,7 +222,7 @@ EAF主要实现这几个功能：
 2. 通过Python EPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
 3. 通过Qt5的QGraphicsScene来实现镜像窗口，以对应Emacs的Buffer/Window模型
 
-若想了解更多EAF设计背景，请看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
+若想了解更多EAF设计背景，请看[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
 
 ### EAF vs EXWM?
 1. EAF和EXWM的共同点都是：“提升Emacs和别的程序的协作效率“
@@ -235,7 +235,7 @@ EAF主要实现这几个功能：
 或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
 
 ### macOS
-EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki/macOS)。
+EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/macOS)。
 
 ### 浏览器崩溃
 请不要用pip安装PyQt5, pip的版本有bug，请从操作系统软件仓库安装PyQt5。
@@ -273,13 +273,13 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 ## 反馈问题
 
-### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/manateelazycat/emacs-application-framework/wiki)!!!
+### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)!!!
 
-如果你使用中遇到任何问题，并且问题是`git pull`后出现的，请先阅读[Discussions](https://github.com/manateelazycat/emacs-application-framework/discussions/527)页面。
+如果你使用中遇到任何问题，并且问题是`git pull`后出现的，请先阅读[Discussions](https://github.com/emacs-eaf/emacs-application-framework/discussions/527)页面。
 
 关于其他问题，请用命令 `emacs -q` 并只添加EAF配置做一个对比测试，如果 `emacs -q` 可以正常工作，请检查你个人的配置文件。
 
-如果`emacs -q`环境下问题依旧，请到[这里](https://github.com/manateelazycat/emacs-application-framework/issues/new)反馈, 并附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。。
+如果`emacs -q`环境下问题依旧，请到[这里](https://github.com/emacs-eaf/emacs-application-framework/issues/new)反馈, 并附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。。
 
 如果你遇到崩溃的问题, 请用下面的方式来收集崩溃信息:
 1. 先安装gdb并打开选项 `eaf-enable-debug`
@@ -293,7 +293,7 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 想要创建下一个激动人心的Emacs插件吗？
 
-[一起疯吧!](https://github.com/manateelazycat/emacs-application-framework/wiki/Hacking)
+[一起疯吧!](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
 
 ## 打赏
 如果我的作品让你的生活充满快乐，欢迎请我喝瓶啤酒，哈哈哈哈
