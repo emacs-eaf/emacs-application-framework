@@ -125,7 +125,7 @@ Mainly this function is called by timer asynchronously."
          (message "deferred error : %s" err)))
       value)))
 
-;; Struct: eaferred
+;; Struct: eaf-deferred-object
 ;;
 ;; callback    : a callback function (default `identity')
 ;; errorback   : an errorback function (default `eaf-deferred-resignal')
@@ -134,7 +134,7 @@ Mainly this function is called by timer asynchronously."
 ;; status      : if 'ok or 'ng, this deferred has a result (error) value. (default nil)
 ;; value       : saved value (default nil)
 ;;
-(cl-defstruct eaferred
+(cl-defstruct eaf-deferred-object
   (callback 'identity)
   (errorback 'eaf-deferred-resignal)
   (cancel 'eaf-deferred-default-cancel)
@@ -160,9 +160,9 @@ raising with `error'."
 (defun eaf-deferred-default-cancel (d)
   "[internal] Default canceling function."
   (eaf-deferred-message "CANCEL : %s" d)
-  (setf (eaferred-callback d) 'identity)
-  (setf (eaferred-errorback d) 'eaf-deferred-resignal)
-  (setf (eaferred-next d) nil)
+  (setf (eaf-deferred-object-callback d) 'identity)
+  (setf (eaf-deferred-object-errorback d) 'eaf-deferred-resignal)
+  (setf (eaf-deferred-object-next d) nil)
   d)
 
 (defvar eaf-deferred-onerror nil
@@ -178,15 +178,15 @@ an argument value for execution of the deferred task."
   (eaf-deferred-message "EXEC : %s / %s / %s" d which arg)
   (when (null d) (error "eaf-deferred-exec-task was given a nil."))
   (let ((callback (if (eq which 'ok)
-                      (eaferred-callback d)
-                    (eaferred-errorback d)))
-        (next-deferred (eaferred-next d)))
+                      (eaf-deferred-object-callback d)
+                    (eaf-deferred-object-errorback d)))
+        (next-deferred (eaf-deferred-object-next d)))
     (cond
      (callback
       (eaf-deferred-condition-case err
         (let ((value (funcall callback arg)))
           (cond
-           ((eaferred-p value)
+           ((eaf-deferred-object-p value)
             (eaf-deferred-message "WAIT NEST : %s" value)
             (if next-deferred
                 (eaf-deferred-set-next value next-deferred)
@@ -194,8 +194,8 @@ an argument value for execution of the deferred task."
            (t
             (if next-deferred
                 (eaf-deferred-post-task next-deferred 'ok value)
-              (setf (eaferred-status d) 'ok)
-              (setf (eaferred-value d) value)
+              (setf (eaf-deferred-object-status d) 'ok)
+              (setf (eaf-deferred-object-value d) value)
               value))))
         (error
          (cond
@@ -206,8 +206,8 @@ an argument value for execution of the deferred task."
           (t
            (eaf-deferred-message "ERROR : %S" err)
            (message "deferred error : %S" err)
-           (setf (eaferred-status d) 'ng)
-           (setf (eaferred-value d) err)
+           (setf (eaf-deferred-object-status d) 'ng)
+           (setf (eaf-deferred-object-value d) err)
            err)))))
      (t ; <= (null callback)
       (cond
@@ -219,18 +219,18 @@ an argument value for execution of the deferred task."
 
 (defun eaf-deferred-set-next (prev next)
   "[internal] Connect deferred objects."
-  (setf (eaferred-next prev) next)
+  (setf (eaf-deferred-object-next prev) next)
   (cond
-   ((eq 'ok (eaferred-status prev))
-    (setf (eaferred-status prev) nil)
+   ((eq 'ok (eaf-deferred-object-status prev))
+    (setf (eaf-deferred-object-status prev) nil)
     (let ((ret (eaf-deferred-exec-task
-                next 'ok (eaferred-value prev))))
-      (if (eaferred-p ret) ret
+                next 'ok (eaf-deferred-object-value prev))))
+      (if (eaf-deferred-object-p ret) ret
         next)))
-   ((eq 'ng (eaferred-status prev))
-    (setf (eaferred-status prev) nil)
-    (let ((ret (eaf-deferred-exec-task next 'ng (eaferred-value prev))))
-      (if (eaferred-p ret) ret
+   ((eq 'ng (eaf-deferred-object-status prev))
+    (setf (eaf-deferred-object-status prev) nil)
+    (let ((ret (eaf-deferred-exec-task next 'ng (eaf-deferred-object-value prev))))
+      (if (eaf-deferred-object-p ret) ret
         next)))
    (t
     next)))
@@ -238,8 +238,8 @@ an argument value for execution of the deferred task."
 (defun eaf-deferred-new (&optional callback)
   "Create a deferred object."
   (if callback
-      (make-eaferred :callback callback)
-    (make-eaferred)))
+      (make-eaf-deferred-object :callback callback)
+    (make-eaf-deferred-object)))
 
 (defun eaf-deferred-callback (d &optional arg)
   "Start deferred chain with a callback message."
@@ -260,21 +260,21 @@ an argument value for execution of the deferred task."
 is a short cut of following code:
  (eaf-deferred-callback-post (eaf-deferred-new callback))."
   (let ((d (if callback
-               (make-eaferred :callback callback)
-             (make-eaferred))))
+               (make-eaf-deferred-object :callback callback)
+             (make-eaf-deferred-object))))
     (eaf-deferred-callback-post d arg)
     d))
 
 (defun eaf-deferred-nextc (d callback)
   "Create a deferred object with OK callback and connect it to the given deferred object."
   (declare (indent 1))
-  (let ((nd (make-eaferred :callback callback)))
+  (let ((nd (make-eaf-deferred-object :callback callback)))
     (eaf-deferred-set-next d nd)))
 
 (defun eaf-deferred-error (d callback)
   "Create a deferred object with errorback and connect it to the given deferred object."
   (declare (indent 1))
-  (let ((nd (make-eaferred :errorback callback)))
+  (let ((nd (make-eaf-deferred-object :errorback callback)))
     (eaf-deferred-set-next d nd)))
 
 (defun eaf-deferred-wait (msec)
@@ -287,7 +287,7 @@ is a short cut of following code:
                    (eaf-deferred-exec-task
                     d 'ok (* 1000.0 (- (float-time) start-time)))
                    nil)))
-    (setf (eaferred-cancel d)
+    (setf (eaf-deferred-object-cancel d)
           (lambda (x)
             (cancel-timer timer)
             (eaf-deferred-default-cancel x)))
@@ -628,7 +628,7 @@ This variable is for debug purpose.")
             (let* ((f (eaf-epc-method-task method))
                    (ret (apply f args)))
               (cond
-               ((eaferred-p ret)
+               ((eaf-deferred-object-p ret)
                 (eaf-deferred-nextc ret
                   (lambda (xx) (eaf-epc-manager-send mngr 'return uid xx))))
                (t (eaf-epc-manager-send mngr 'return uid ret))))
