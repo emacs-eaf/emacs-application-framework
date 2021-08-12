@@ -294,7 +294,7 @@ been initialized."
   "Function to start the EPC server."
   (unless eaf-server
     (setq eaf-server
-          (eaf-epcs-server-start
+          (eaf-epc-server-start
            (lambda (mngr)
              (let ((mngr mngr))
                (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)

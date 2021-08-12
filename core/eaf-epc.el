@@ -731,34 +731,34 @@ connection."
          (memq (process-status proc) '(run open listen connect stop)))))
 
 ;; epcs
-(defvar eaf-epcs-client-processes nil
+(defvar eaf-epc-server-client-processes nil
   "[internal] A list of ([process object] . [`eaf-epc-manager' instance]).
 When the server process accepts the client connection, the
 `eaf-epc-manager' instance is created and stored in this variable
-`eaf-epcs-client-processes'. This variable is used for the management
+`eaf-epc-server-client-processes'. This variable is used for the management
 purpose.")
 
-;; eaf-epcs-server
+;; eaf-epc-server
 ;;   name    : process name (string)   ex: "EPC Server 1"
 ;;   process : server process object
 ;;   port    : port number
 ;;   connect-function : initialize function for `eaf-epc-manager' instances
-(cl-defstruct eaf-epcs-server name process port connect-function)
+(cl-defstruct eaf-epc-server name process port connect-function)
 
-(defvar eaf-epcs-server-processes nil
-  "[internal] A list of ([process object] . [`eaf-epcs-server' instance]).
+(defvar eaf-epc-server-processes nil
+  "[internal] A list of ([process object] . [`eaf-epc-server' instance]).
 This variable is used for the management purpose.")
 
-(defun eaf-epcs-get-manager-by-process (proc)
+(defun eaf-epc-server-get-manager-by-process (proc)
   "[internal] Return the eaf-epc-manager instance for the PROC."
-  (cl-loop for (pp . mngr) in eaf-epcs-client-processes
+  (cl-loop for (pp . mngr) in eaf-epc-server-client-processes
            if (eql pp proc)
            do (cl-return mngr)
            finally return nil))
 
-(defun eaf-epcs-accept (process)
+(defun eaf-epc-server-accept (process)
   "[internal] Initialize the process and return eaf-epc-manager object."
-  (eaf-epc-log "EAF-EPCS- >> Connection accept: %S" process)
+  (eaf-epc-log "EAF-EPC-SERVER- >> Connection accept: %S" process)
   (let* ((connection-id (eaf-epc-uid))
          (connection-name (format "epc con %s" connection-id))
          (channel (list connection-name nil))
@@ -767,7 +767,7 @@ This variable is used for the management purpose.")
                       :process process
                       :buffer (process-buffer process)
                       :channel channel)))
-    (eaf-epc-log "EAF-EPCS- >> Connection establish")
+    (eaf-epc-log "EAF-EPC-SERVER- >> Connection establish")
     (set-process-coding-system process 'binary 'binary)
     (set-process-filter process
                         (lambda (p m)
@@ -778,37 +778,37 @@ This variable is used for the management purpose.")
     (make-eaf-epc-manager :server-process process :port t
                           :connection connection)))
 
-(defun eaf-epcs-sentinel (process message connect-function)
+(defun eaf-epc-server-sentinel (process message connect-function)
   "[internal] Process sentinel handler for the server process."
-  (eaf-epc-log "EAF-EPCS- SENTINEL: %S %S" process message)
-  (let ((mngr (eaf-epcs-get-manager-by-process process)))
+  (eaf-epc-log "EAF-EPC-SERVER- SENTINEL: %S %S" process message)
+  (let ((mngr (eaf-epc-server-get-manager-by-process process)))
     (cond
      ;; new connection
      ((and (string-match "open" message) (null mngr))
       (condition-case err
-          (let ((mngr (eaf-epcs-accept process)))
-            (push (cons process mngr) eaf-epcs-client-processes)
+          (let ((mngr (eaf-epc-server-accept process)))
+            (push (cons process mngr) eaf-epc-server-client-processes)
             (eaf-epc-init-epc-layer mngr)
             (when connect-function (funcall connect-function mngr))
             mngr)
         ('error
-         (eaf-epc-log "EAF-EPCS- Protocol error: %S" err)
-         (eaf-epc-log "EAF-EPCS- ABORT %S" process)
+         (eaf-epc-log "EAF-EPC-SERVER- Protocol error: %S" err)
+         (eaf-epc-log "EAF-EPC-SERVER- ABORT %S" process)
          (delete-process process))))
      ;; ignore
      ((null mngr) nil )
      ;; disconnect
      (t
-      (let ((pair (assq process eaf-epcs-client-processes)) _d)
+      (let ((pair (assq process eaf-epc-server-client-processes)) _d)
         (when pair
-          (eaf-epc-log "EAF-EPCS- DISCONNECT %S" process)
+          (eaf-epc-log "EAF-EPC-SERVER- DISCONNECT %S" process)
           (eaf-epc-stop-epc (cdr pair))
-          (setq eaf-epcs-client-processes
-                (assq-delete-all process eaf-epcs-client-processes))
+          (setq eaf-epc-server-client-processes
+                (assq-delete-all process eaf-epc-server-client-processes))
           ))
       nil))))
 
-(defun eaf-epcs-server-start (connect-function &optional port)
+(defun eaf-epc-server-start (connect-function &optional port)
   "Start TCP Server and return the main process object."
   (let*
       ((connect-function connect-function)
@@ -824,16 +824,16 @@ This variable is used for the management purpose.")
          :service (or port t)
          :sentinel
          (lambda (process message)
-           (eaf-epcs-sentinel process message connect-function)))))
+           (eaf-epc-server-sentinel process message connect-function)))))
     (unless port
       ;; notify port number to the parent process via STDOUT.
       (message "%s\n" (process-contact main-process :service)))
     (push (cons main-process
-                (make-eaf-epcs-server
+                (make-eaf-epc-server
                  :name name :process main-process
                  :port (process-contact main-process :service)
                  :connect-function connect-function))
-          eaf-epcs-server-processes)
+          eaf-epc-server-processes)
     main-process))
 
 (provide 'eaf-epc)
