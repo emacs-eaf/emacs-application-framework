@@ -48,21 +48,21 @@
          (setq self (lambda( ,@args ) ,@body))
          (funcall self ,@argsyms)))))
 
-;; debug
+;; Debug
+(defvar eaf-deferred-debug nil
+  "Debug output switch.")
 
-(eval-and-compile
-  (defvar eaf-deferred-debug nil "Debug output switch."))
-(defvar eaf-deferred-debug-count 0 "[internal] Debug output counter.")
+(defvar eaf-deferred-debug-count 0
+  "[internal] Debug output counter.")
 
-(defmacro eaf-deferred-message (&rest args)
+(defun eaf-deferred-log (&rest args)
   "[internal] Debug log function."
   (when eaf-deferred-debug
-    `(progn
-       (with-current-buffer (get-buffer-create "*eaf-deferred-debug*")
-         (save-excursion
-           (goto-char (point-max))
-           (insert (format "%5i %s\n" eaf-deferred-debug-count (format ,@args)))))
-       (cl-incf eaf-deferred-debug-count))))
+    (with-current-buffer (get-buffer-create "*eaf-deferred-log*")
+      (save-excursion
+        (goto-char (point-max))
+        (insert (format "%5i %s\n\n\n" eaf-deferred-debug-count (apply #'format args)))))
+    (cl-incf eaf-deferred-debug-count)))
 
 (defvar eaf-deferred-debug-on-signal nil
   "If non nil, the value `debug-on-signal' is substituted this
@@ -94,20 +94,16 @@ modify it because the applications run on various environments.")
   "[internal] The execution queue of deferred objects.
 See the functions `eaf-deferred-post-task' and `eaf-deferred-worker'.")
 
-(defmacro eaf-deferred-pack (a b c)
-  `(cons ,a (cons ,b ,c)))
-
 (defun eaf-deferred-post-task (d which &optional arg)
   "[internal] Add a deferred object to the execution queue
 `eaf-deferred-queue' and schedule to execute.
 D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
 an argument value for execution of the deferred task."
-  (push (eaf-deferred-pack d which arg) eaf-deferred-queue)
-  (eaf-deferred-message
-   "QUEUE-POST [%s]: %s"
-   (length eaf-deferred-queue) (eaf-deferred-pack d which arg))
-  (run-at-time eaf-deferred-tick-time nil 'eaf-deferred-worker)
-  d)
+  (let ((pack `(,d ,which . ,arg)))
+    (push pack eaf-deferred-queue)
+    (eaf-deferred-log "QUEUE-POST [%s]: %s" (length eaf-deferred-queue) pack)
+    (run-at-time eaf-deferred-tick-time nil 'eaf-deferred-worker)
+    d))
 
 (defun eaf-deferred-worker ()
   "[internal] Consume a deferred task.
@@ -121,7 +117,7 @@ Mainly this function is called by timer asynchronously."
       (condition-case err
           (setq value (eaf-deferred-exec-task d which arg))
         (error
-         (eaf-deferred-message "ERROR : %s" err)
+         (eaf-deferred-log "ERROR : %s" err)
          (message "deferred error : %s" err)))
       value)))
 
@@ -159,7 +155,7 @@ raising with `error'."
 
 (defun eaf-deferred-default-cancel (d)
   "[internal] Default canceling function."
-  (eaf-deferred-message "CANCEL : %s" d)
+  (eaf-deferred-log "CANCEL : %s" d)
   (setf (eaf-deferred-object-callback d) 'identity)
   (setf (eaf-deferred-object-errorback d) 'eaf-deferred-resignal)
   (setf (eaf-deferred-object-next d) nil)
@@ -175,7 +171,7 @@ next deferred task or the return value is a deferred object, this
 function adds the task to the execution queue.
 D is a deferred object. WHICH is a symbol, `ok' or `ng'. ARG is
 an argument value for execution of the deferred task."
-  (eaf-deferred-message "EXEC : %s / %s / %s" d which arg)
+  (eaf-deferred-log "EXEC : %s / %s / %s" d which arg)
   (when (null d) (error "eaf-deferred-exec-task was given a nil."))
   (let ((callback (if (eq which 'ok)
                       (eaf-deferred-object-callback d)
@@ -187,7 +183,7 @@ an argument value for execution of the deferred task."
         (let ((value (funcall callback arg)))
           (cond
            ((eaf-deferred-object-p value)
-            (eaf-deferred-message "WAIT NEST : %s" value)
+            (eaf-deferred-log "WAIT NEST : %s" value)
             (if next-deferred
                 (eaf-deferred-set-next value next-deferred)
               value))
@@ -204,7 +200,7 @@ an argument value for execution of the deferred task."
           (eaf-deferred-onerror
            (funcall eaf-deferred-onerror err))
           (t
-           (eaf-deferred-message "ERROR : %S" err)
+           (eaf-deferred-log "ERROR : %S" err)
            (message "deferred error : %S" err)
            (setf (eaf-deferred-object-status d) 'ng)
            (setf (eaf-deferred-object-value d) err)
@@ -280,7 +276,7 @@ is a short cut of following code:
 (defun eaf-deferred-wait (msec)
   "Return a deferred object scheduled at MSEC millisecond later."
   (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
-    (eaf-deferred-message "WAIT : %s" msec)
+    (eaf-deferred-log "WAIT : %s" msec)
     (setq timer (run-at-time
                  (/ msec 1000.0) nil
                  (lambda ()
@@ -293,25 +289,14 @@ is a short cut of following code:
             (eaf-deferred-default-cancel x)))
     d))
 
-(defvar eaf-epc-debug-out nil)
-(defvar eaf-epc-debug-buffer "*epc log*")
-
-(defvar eaf-epc-mngr)
-
-;;(setq eaf-epc-debug-out t)
-;;(setq eaf-epc-debug-out nil)
-
-(defun eaf-epc-log-init ()
-  (when (get-buffer eaf-epc-debug-buffer)
-    (kill-buffer eaf-epc-debug-buffer)))
+(defvar eaf-epc-debug nil)
 
 (defun eaf-epc-log (&rest args)
-  (when eaf-epc-debug-out
-    (with-current-buffer
-        (get-buffer-create eaf-epc-debug-buffer)
-      (buffer-disable-undo)
-      (goto-char (point-max))
-      (insert (apply 'format args) "\n"))))
+(when eaf-epc-debug
+  (with-current-buffer (get-buffer-create "*eaf-epc-log*")
+    (buffer-disable-undo)
+    (goto-char (point-max))
+    (insert (apply 'format args) "\n\n\n"))))
 
 (defun eaf-epc-make-procbuf (name)
   "[internal] Make a process buffer."
@@ -326,8 +311,11 @@ is a short cut of following code:
 (defun eaf-epc-uid ()
   (cl-incf eaf-epc-uid))
 
-(defvar eaf-epc-accept-process-timeout 150  "Asynchronous timeout time. (msec)")
-(defvar eaf-epc-accept-process-timeout-count 100 " Startup function waits n msec for the external process getting ready.
+(defvar eaf-epc-accept-process-timeout 150
+  "Asynchronous timeout time. (msec)")
+
+(defvar eaf-epc-accept-process-timeout-count 100
+  " Startup function waits n msec for the external process getting ready.
 n=(`eaf-epc-accept-process-timeout' * `eaf-epc-accept-process-timeout-count') ")
 
 (put 'epc-error 'error-conditions '(error epc-error))
