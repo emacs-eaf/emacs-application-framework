@@ -136,8 +136,6 @@ From here on, you can either add the full path to the EAF installation directory
 
 ### Dependency List
 
-Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
-
 | Package                        | Description                                           |
 | :--------                      | :------                                               |
 | python-epc                     | EPC for Python                                        |
