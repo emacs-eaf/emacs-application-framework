@@ -12,11 +12,11 @@
     "markdown-previewer": "EAF Markdown Previewer",
     "mindmap": "EAF Mindmap",
     "music-player": "EAF Music Player",
-    "netease-cloud-music": "EAF NetEase Cloud Music",
     "org-previewer": "EAF Org Previewer",
     "pdf-viewer": "EAF PDF Viewer",
     "system-monitor": "EAF System Monitor",
     "terminal": "EAF Terminal",
     "video-player": "EAF Video Player",
-    "vue-demo": "EAF Vue Demo"
+    "vue-demo": "EAF Vue Demo",
+    "netease-cloud-music": "EAF NetEase Cloud Music"
 }

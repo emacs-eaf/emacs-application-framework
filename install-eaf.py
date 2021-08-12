@@ -10,7 +10,8 @@ import json
 script_path = os.path.dirname(os.path.realpath(__file__))
 def subprocess_run(command, path=script_path, ensure_pass=True):
     print("[EAF] Running", ' '.join(command), "@", path)
-    process = subprocess.run(command, capture_output=True, stdin = subprocess.PIPE, text=True, cwd=path)
+    process = subprocess.Popen(command, stdin = subprocess.PIPE, text=True, cwd=path)
+    process.wait()
     if process.returncode != 0 and ensure_pass:
         print(process.stderr)
         sys.exit(process.returncode)
@@ -52,10 +53,9 @@ def install_vue_install(app_path_list):
         command = ["npm", 'run', 'build']
         subprocess_run(command, path=app_path)
 
-
 def git_submodule_update_app(app: str):
-    command = ["git", "submodule", "update", "--remote", os.path.join("app", app)]
-    return subprocess_run(command)
+    subprocess_run(["git", "submodule", "update", "--remote", os.path.join("app", app)])
+    subprocess_run(["git", "submodule", "update", "--init", "--recursive"])
 
 def main():
     parser = argparse.ArgumentParser()
