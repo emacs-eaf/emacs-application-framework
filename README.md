@@ -48,7 +48,6 @@ EAF is an extensible framework. It comes with a number of useful applications, a
 - Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
 - Youtube link:
 
-### EAF Jupyter
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
 ## Install
