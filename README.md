@@ -1,7 +1,7 @@
 English | [简体中文](./README.zh-CN.md)
 
 <p align="center">
-  <img width="250" height="250" src="./EAF_Logo.png">
+  <img width="250" height="250" src="./img/EAF_Logo.png">
 </p>
 
 # Emacs Application Framework
