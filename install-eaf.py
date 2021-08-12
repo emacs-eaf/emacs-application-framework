@@ -18,6 +18,8 @@ parser.add_argument("--ignore-py-deps", action="store_true",
                     help='ignore python dependencies')
 parser.add_argument("--ignore-node-deps", action="store_true",
                     help='ignore node dependencies')
+parser.add_argument("--app-git-full-clone", action="store_true",
+                    help='apps to conduct a full clone to preserve git logs')
 parser.add_argument("--use-gitee", action="store_true",
                     help='use gitee mirror instead of github')
 args = parser.parse_args()
@@ -76,8 +78,10 @@ def git_add_app(app: str, app_spec_dict):
 
     if os.path.exists(path):
         run_command(["git", "pull", "origin", "master"], path=path)
+    elif args.app_git_full_clone:
+        run_command(["git", "clone", "--branch", "master", url, path])
     else:
-        run_command(["git", "clone", url, path])
+        run_command(["git", "clone", "--depth", "1", "--branch", "master", url, path])
 
 def main():
 
