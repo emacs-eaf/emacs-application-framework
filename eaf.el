@@ -149,6 +149,7 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
              ;; NOTE:
              ;; Don't scan node_modules directories, such as EAF npm subdirectories.
              (not (string-match-p "/node_modules" this-dir))
+             (not (string-match-p "/dist" this-dir))
 
              (string-match "\\`[[:alnum:]]" file)
              ;; The lower-case variants of RCS and CVS are for DOS/Windows.
@@ -163,7 +164,11 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
   "Add EAF app directories where .el exists to `load-path'."
   (let ((default-directory (file-name-directory (locate-library "eaf"))))
     (add-to-list 'load-path default-directory)
-    (eaf-add-subdirs-to-load-path)))
+    (eaf-add-subdirs-to-load-path)
+    (dolist (path load-path)
+      (when (or (string-match-p "/node_modules" path)
+                (string-match-p "/dist" path))
+            (setq load-path (delete path load-path))))))
 
 (eaf-add-app-dirs-to-load-path)
 (require 'eaf-epc)
