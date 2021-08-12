@@ -780,8 +780,11 @@ keybinding variable to eaf-app-binding-alist."
       (eaf-mode)
       (when (file-accessible-directory-p url-directory)
         (setq-local default-directory url-directory)
-        (when (file-exists-p url)
-          (setq-local buffer-file-name url)))
+
+        ;; NOTE:
+        ;; Don't set buffer `buffer-file-name' here.
+        ;; Otherwise, markdown or org previewer will switch to EAF preview buffer instead open real file.
+        )
       ;; `eaf-buffer-url' should record full path of url, otherwise `eaf-open' will open duplicate PDF tab for same url.
       (set (make-local-variable 'eaf--buffer-url) url)
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
@@ -1256,11 +1259,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
     ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
     (unless eaf--active-buffers
       (push `(,url ,app-name ,args) eaf--active-buffers))
-
-    ;; If EAF app is preview application.
-    ;; Then we need use Emacs open file before EAF python process start.
-    (when (cdr (assoc app-name eaf-preview-display-function-alist))
-      (find-file url))
 
     ;; Start EAF process.
     (eaf-start-process)
