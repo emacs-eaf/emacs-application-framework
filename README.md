@@ -19,75 +19,46 @@ However, one of the greatest disadvantages of Emacs is how *old* it is. Emacs la
 The vision of the EAF project is that, while retaining the culture and the ecosystem of Emacs, use Python, Qt5, and JavaScript to extend Emacs' graphical capabilities, with the hope to ultimately *Live in Emacs*.
 
 
-## Application Showcase
+## Applications
 EAF is an extensible framework. It comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
 
-| Browser                                          | Markdown Previewer (support Mermaid and PlantUML)                                          |
-| :--------:                                       | :----:                                                      |
-| <img src="./screenshot/browser.gif" width="400"> | <img src="./screenshot/markdown_previewer.gif" width="400"> |
-
-| Image Viewer                                          | Video Player                                          |
-| :--------:                                            | :----:                                                |
-| <img src="./screenshot/image_viewer.gif" width="400"> | <img src="./screenshot/video_player.gif" width="400"> |
-|                                                       |                                                       |
-
-| PDF Viewer                                          | Camera                                          |
-| :--------:                                          | :----:                                          |
-| <img src="./screenshot/pdf_viewer.gif" width="400"> | <img src="./screenshot/camera.gif" width="400"> |
-|                                                     |                                                 |
-
-| File Sender                                            | File Receiver                                          |
-| :--------:                                             | :----:                                                 |
-| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_browser.png" width="400"> |
-|                                                        |                                                        |
-
-
-| Air Share                                          | Org Previewer                                          |
-| :--------:                                         | :--------:                                             |
-| <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
-|                                                    |                                                        |
-
-| Terminal Emulator                                 | RSS Reader (Integrated with Elfeed)                                           |
-| :--------:                                        | :------:                                            |
-| <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
-|                                                   |                                                     |
-
-| Aria2 Download Manager                         | Mind Map  |
-| :--------:                                     | :-------: |
-| <img src="./screenshot/aria2.gif" width="400"> | <img src="./screenshot/mindmap.gif" width="400"> |
-|                                                |           |
-
-
-| Jupyter                                          | EAF Interleave                                          |
-| :--------:                                       | :----------:                                            |
-| <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
-|                                                  |                                                         |
-
-| Music Player                                          | System Monitor |
-| :--------:                                            | :--------:     |
-| <img src="./screenshot/music_player.png" width="400"> | <img src="./screenshot/system_monitor.png" width="400">          |
-|                                                       |                |
-
-| File Manager                                          |
-| :--------:                                            |
-| <img src="./screenshot/file_manager.png" width="400"> |
-|                                                       |
+- [Browser](https://github.com/emacs-eaf/eaf-browser): Full-featured browser
+- [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): The fastest PDF reader
+- [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal
+- [JS Video Player](https://github.com/emacs-eaf/eaf-js-video-player): Video player based on plyr.js
+- [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video player base on Qt
+- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown previewer in Emacs
+- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org previewer in Emacs
+- [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and audio visual
+- [File Manager](https://github.com/emacs-eaf/eaf-file-manager): File manager, support file real-time preview
+- [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): Mindmap with full-featured keyboard operation
+- [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): Jupyter in Emacs
+- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Picture viewer supporting real-time zoom rotation
+- [Camera](https://github.com/emacs-eaf/eaf-camera): Camera in Emacs
+- [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): System monitor base on Vue.js
+- [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): EAF frontend for netease cloud music
+- [File Browser](https://github.com/emacs-eaf/eaf-file-browser): Browse file in mobile phone
+- [File Share](https://github.com/emacs-eaf/eaf-file-sender): Share file between Emacs and mobile phone
+- [Airshare](https://github.com/emacs-eaf/eaf-airshare): Share text between Emacs and mobile phone
+- [Demo](https://github.com/emacs-eaf/eaf-demo): Application demo base on Qt
+- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): Application demo base on Vue.js
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 - EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
 - Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
 - Youtube link:
 
+### EAF Jupyter
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
 ## Install
-1. Download EAF
+#### 1. Download EAF
 
-    ```Bash
-    git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
-    ```
+```Bash
+git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+```
 
-Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
+- Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 
     ```Emacs-lisp
     (quelpa '(eaf :fetcher github
@@ -95,45 +66,46 @@ Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
                   :files ("*")))
     ```
 
-2. Install EAF dependencies using `M-x eaf-install-dependencies`.
+#### 2. Install EAF dependencies
 
-You may manually call the installation script in the terminal instead,
+##### If you use GNU/Linux,
 
-- If you use GNU/Linux,
+```Bash
+cd emacs-application-framework
+chmod +x ./install-eaf.py
+python ./install-eaf.py
+```
 
-    ```Bash
-    cd emacs-application-framework
-    chmod +x ./install-eaf.py
-    python ./install-eaf.py
-    ```
+##### If you use Windows,
 
-- If you use Windows,
+```Bash
+cd emacs-application-framework
+node ./install-eaf-win32.js
+```
 
-    ```Bash
-    cd emacs-application-framework
-    node ./install-eaf-win32.js
-    ```
+##### If you use macOS,
 
-- If you use macOS,
-
-    ```Bash
-    cd emacs-application-framework
-    chmod +x ./install-eaf-mac.sh
-    ./install-eaf-mac.sh
-    ```
+```Bash
+cd emacs-application-framework
+chmod +x ./install-eaf-mac.sh
+./install-eaf-mac.sh
+```
 
 There are many useful flags available for `install-eaf.py`, check it yourself using `--help`.
 
-3. Install Elisp packages:
+#### 3. Install Elisp packages:
 - [s.el](https://github.com/magnars/s.el)
 
-4. From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+#### 4. Load EAF:
 
-    ```Elisp
-    (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-    (require 'eaf)
-    ```
-Alternatively, if you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
+From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+
+```Elisp
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+(require 'eaf)
+```
+
+- Alternatively, if you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
 
     ```Elisp
     (use-package eaf
@@ -255,17 +227,17 @@ One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus
 ### Proxy
 If you need to use proxy to access internet, one can configure the proxy settings.
 
-    ```Elisp
-    (setq eaf-proxy-type "http")
-    (setq eaf-proxy-host "127.0.0.1")
-    (setq eaf-proxy-port "1080")
-    ```
+```Elisp
+(setq eaf-proxy-type "http")
+(setq eaf-proxy-host "127.0.0.1")
+(setq eaf-proxy-port "1080")
+```
 
 If you use Socks5 as local proxy, one can set proxy type with:
 
-    ```Elisp
-    (setq eaf-proxy-type "socks5")
-    ```
+```Elisp
+(setq eaf-proxy-type "socks5")
+```
 
 ## EAF in the community
 
@@ -304,6 +276,6 @@ Do you want to revolutionize the capabilities of Emacs?
 
 ### ManateeLazyCat
 <p float="left">
-    <img src="./screenshot/alipay.jpg" width="188">
-    <img src="./screenshot/wechat.jpg" width="200">
+    <img src="./img/alipay.jpg" width="188">
+    <img src="./img/wechat.jpg" width="200">
 </p>

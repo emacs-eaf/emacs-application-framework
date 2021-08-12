@@ -18,58 +18,29 @@ Emacs的劣势也是因为它太古老了，导致在多线程和图形扩展能
 
 EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过EAF框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
 
-## 应用展示
+## 应用列表
 EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你也可以开发自己的Qt5应用并集成在Emacs中。
 
-| 浏览器                                           | Markdown预览(支持Mermaid和PlantUML)                                    |
-| :--------:                                       | :----:                                                      |
-| <img src="./screenshot/browser.gif" width="400"> | <img src="./screenshot/markdown_previewer.gif" width="400"> |
-
-| 图片浏览器                                            | 视频播放器                                            |
-| :--------:                                            | :----:                                                |
-| <img src="./screenshot/image_viewer.gif" width="400"> | <img src="./screenshot/video_player.gif" width="400"> |
-|                                                       |                                                       |
-
-| PDF阅读器                                       | 摄像头程序                                     |
-| :--------:                                          | :----:                                          |
-| <img src="./screenshot/pdf_viewer.gif" width="400"> | <img src="./screenshot/camera.gif" width="400"> |
-|                                                     |                                                 |
-
-| 二维码下载文件 (PC到手机)                              | 二维码上传文件 (手机到PC)                                 |
-| :--------:                                             | :----:                                                 |
-| <img src="./screenshot/file_transfer.png" width="400"> | <img src="./screenshot/file_browser.png" width="400"> |
-|                                                        |                                                        |
-
-
-| 无线文字传输程序                                   | Org预览                                                |
-| :--------:                                         | :--------:                                             |
-| <img src="./screenshot/air_share.png" width="400"> | <img src="./screenshot/org_previewer.gif" width="400"> |
-|                                                    |                                                        |
-
-| 终端模拟器                                        | RSS阅读器 (集成Elfeed)                                           |
-| :--------:                                        | :------:                                            |
-| <img src="./screenshot/terminal.gif" width="400"> | <img src="./screenshot/rss_reader.gif" width="400"> |
-|                                                   |                                                     |
-
-| Aria2 下载管理器                               | 思维导图                                         |
-| :--------:                                     | :-------:                                        |
-| <img src="./screenshot/aria2.gif" width="400"> | <img src="./screenshot/mindmap.gif" width="400"> |
-|                                                |                                                  |
-
-| Jupyter                                           | 笔记管理系统                                            |
-| :--------:                                       | :--------:                                              |
-| <img src="./screenshot/jupyter.png" width="400"> | <img src="./screenshot/eaf-interleave.gif" width="400"> |
-|                                                  |                                                         |
-
-| 音乐播放器                                            | 系统监视器                                                   |
-| :--------:                                            | :--------:                                              |
-| <img src="./screenshot/music_player.png" width="400"> | <img src="./screenshot/system_monitor.png" width="400"> |
-|                                                       |                                                         |
-
-| 文件管理器                                     |
-| :--------:                                            |
-| <img src="./screenshot/file_manager.png" width="400"> |
-|                                                       |
+- [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于Chromium渲染引擎
+- [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Emacs里面渲染速度最快的PDF查看器
+- [Terminal](https://github.com/emacs-eaf/eaf-terminal): 支持图形绘制的全功能终端模拟器
+- [JS Video Player](https://github.com/emacs-eaf/eaf-js-video-player): 基于plyr.js的视频播放器
+- [Video Player](https://github.com/emacs-eaf/eaf-video-player): 基于Qt的视频播放器
+- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown文档实时预览程序，完美兼容Github样式
+- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org文件实时预览程序
+- [Music Player](https://github.com/emacs-eaf/eaf-music-player): 音乐播放器，支持播放列表对齐渲染和实时音频反馈
+- [File Manager](https://github.com/emacs-eaf/eaf-file-manager): 双栏文件管理器，支持文件实时预览
+- [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): 全键盘操作的思维导图
+- [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): 在Emacs里面运行Jupyter！
+- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): 支持实时缩放的图片查看器
+- [Camera](https://github.com/emacs-eaf/eaf-camera): 摄像头程序
+- [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): 可视化系统监视器
+- [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): 网易云音乐前端
+- [File Browser](https://github.com/emacs-eaf/eaf-file-browser): 在手机浏览电脑文件
+- [File Share](https://github.com/emacs-eaf/eaf-file-sender): 分享文件给手机
+- [Airshare](https://github.com/emacs-eaf/eaf-airshare): 分享文字给手机
+- [Demo](https://github.com/emacs-eaf/eaf-demo): Qt应用实例
+- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): Vue.js应用实例
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
 - 由[MatthewZMD](https://github.com/MatthewZMD)在EmacsConf2020的演讲和demo。
@@ -79,13 +50,14 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
 ## 安装
-1. 下载EAF:
 
-    ```Bash
-    git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
-    ```
+#### 1. 下载EAF:
 
-你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
+```Bash
+git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
+```
+
+- 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
 
     ```Emacs-lisp
     (quelpa '(eaf :fetcher github
@@ -93,46 +65,44 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
                   :files ("*")))
     ```
 
-2. 通过`M-x eaf-install-dependencies`安装EAF依赖，
+#### 2. 安装EAF依赖，
 
-如果你更喜欢手动执行安装脚本，
+##### GNU/Linux用户：
 
-- GNU/Linux用户：
+```Bash
+cd emacs-application-framework
+chmod +x ./install-eaf.py
+python ./install-eaf.py
+```
 
-    ```Bash
-    cd emacs-application-framework
-    chmod +x ./install-eaf.py
-    python ./install-eaf.py
-    ```
+##### Windows用户：
 
-- Windows用户：
+```Bash
+cd emacs-application-framework
+node ./install-eaf-win32.js
+```
 
-    ```Bash
-    cd emacs-application-framework
-    node ./install-eaf-win32.js
-    ```
+##### Mac用户:
 
-- Mac用户:
-
-    ```Bash
-    cd emacs-application-framework
-    chmod +x ./install-eaf-mac.sh
-    ./install-eaf-mac.sh
-    ```
+```Bash
+cd emacs-application-framework
+chmod +x ./install-eaf-mac.sh
+./install-eaf-mac.sh
+```
 
 `install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
 
-3. 安装Elisp依赖包:
+#### 3. 安装Elisp依赖包:
 - [s.el](https://github.com/magnars/s.el)
 
-4. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
+#### 4. 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
-    ```Elisp
-    (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-    (require 'eaf)
-    ```
+```Elisp
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+(require 'eaf)
+```
 
-或者，如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
+- 或者，如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
     ```Elisp
     (use-package eaf
@@ -253,23 +223,23 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 ### 代理
 可以通过下面设置来通过代理访问互联网：
 
-    ```Elisp
-    (setq eaf-proxy-type "http")
-    (setq eaf-proxy-host "127.0.0.1")
-    (setq eaf-proxy-port "1080")
-    ```
+```Elisp
+(setq eaf-proxy-type "http")
+(setq eaf-proxy-host "127.0.0.1")
+(setq eaf-proxy-port "1080")
+```
 
 如果你使用Socks5代理，你可以设置代理类型为：
 
-    ```Elisp
-    (setq eaf-proxy-type "socks5")
-    ```
+```Elisp
+(setq eaf-proxy-type "socks5")
+```
 
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。
 
-* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+* **[obr-viz](https://github.com/swhalemwo/obr-viz)**: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
 
 ## 反馈问题
 
@@ -300,6 +270,6 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 ### ManateeLazyCat
 <p float="left">
-    <img src="./screenshot/alipay.jpg" width="188">
-    <img src="./screenshot/wechat.jpg" width="200">
+    <img src="./img/alipay.jpg" width="188">
+    <img src="./img/wechat.jpg" width="200">
 </p>
