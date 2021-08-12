@@ -105,15 +105,8 @@ A bookmark handler function is used as
 (defvar eaf-app-bookmark-restore-alist '())
 
 
-(defvar eaf-app-display-function-alist '()
-  "Mapping app names to display functions.
-
-Display functions are called to initilize the initial view when
-starting an app.
-
-A display function receives the initialized app buffer as
-argument and defaults to `switch-to-buffer'.")
-
+(defvar eaf-preview-display-function-alist '()
+  "Preview display function.")
 
 (defvar eaf-app-extensions-alist '()
   "Mapping app names to extension list variables.
@@ -168,7 +161,7 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
     (dolist (path load-path)
       (when (or (string-match-p "/node_modules" path)
                 (string-match-p "/dist" path))
-            (setq load-path (delete path load-path))))))
+        (setq load-path (delete path load-path))))))
 
 (eaf-add-app-dirs-to-load-path)
 (require 'eaf-epc)
@@ -1124,7 +1117,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                       (eaf--get-app-module-path app-name)
                       args)
       (eaf--update-modeline-icon))
-    (eaf--display-app-buffer app-name buffer))
+    (eaf--preview-display-buffer app-name buffer))
   (eaf--post-open-actions url app-name args))
 
 (defun eaf--post-open-actions (url app-name args)
@@ -1255,13 +1248,21 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (if (and exists-eaf-buffer
                  (not always-new))
             (progn
-              (eaf--display-app-buffer app-name exists-eaf-buffer)
+              (eaf--preview-display-buffer app-name exists-eaf-buffer)
               (message (concat "[EAF/" app-name "] " "Switch to %s") url))
           (eaf--open-internal url app-name args)
           (message (concat "[EAF/" app-name "] " "Opening %s") url)))
+
     ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
     (unless eaf--active-buffers
       (push `(,url ,app-name ,args) eaf--active-buffers))
+
+    ;; If EAF app is preview application.
+    ;; Then we need use Emacs open file before EAF python process start.
+    (when (cdr (assoc app-name eaf-preview-display-function-alist))
+      (find-file url))
+
+    ;; Start EAF process.
     (eaf-start-process)
     (message (concat "[EAF/" app-name "] " "Opening %s") url)))
 
@@ -1276,10 +1277,10 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     (other-window +1)
     (eaf-open eaf--buffer-url eaf--buffer-app-name eaf--buffer-args t)))
 
-(defun eaf--display-app-buffer (app-name buffer)
+(defun eaf--preview-display-buffer (app-name buffer)
   "Display specified APP-NAME's app buffer in BUFFER."
   (let ((display-fun (or (cdr (assoc app-name
-                                     eaf-app-display-function-alist))
+                                     eaf-preview-display-function-alist))
                          #'switch-to-buffer)))
     (funcall display-fun buffer)))
 
