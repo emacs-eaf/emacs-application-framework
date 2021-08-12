@@ -1,7 +1,7 @@
 *.elc
 *.pyc
 /.log/
-/app/
+app/
 node_modules/
 dist/
 tags
