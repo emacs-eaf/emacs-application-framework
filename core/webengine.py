@@ -78,7 +78,7 @@ class BrowserView(QWebEngineView):
         self.focus_input_js = self.read_js_content("focus_input.js")
 
         self.scroll_behavior = get_emacs_var("eaf-browser-scroll-behavior")
-        self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
+        self.default_zoom = float(get_emacs_var("eaf-browser-default-zoom"))
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -697,7 +697,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.setWebChannel(self.channel)
 
         self.download_path = get_emacs_var("eaf-browser-download-path")
-        self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
+        self.default_zoom = float(get_emacs_var("eaf-browser-default-zoom"))
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
