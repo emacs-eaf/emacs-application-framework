@@ -97,7 +97,7 @@ Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
 
 2. Install EAF dependencies using `M-x eaf-install-dependencies`.
 
-If you prefer to manually call the installation script in the terminal,
+You may manually call the installation script in the terminal instead,
 
 - If you use GNU/Linux,
 
@@ -122,7 +122,7 @@ If you prefer to manually call the installation script in the terminal,
     ./install-eaf-mac.sh
     ```
 
-Feel free to inspect the install script yourself. An explanation of each dependency can be found at [Dependency List](#dependency-list).
+There are many useful flags available for `install-eaf.py`, check it yourself using `--help`.
 
 3. Install Elisp packages:
 - [s.el](https://github.com/magnars/s.el)

@@ -120,7 +120,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
     ./install-eaf-mac.sh
     ```
 
-脚本里安装的每一个依赖的解释可以在[依赖列表](#依赖列表)找到。
+`install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
 
 3. 安装Elisp依赖包:
 - [s.el](https://github.com/magnars/s.el)
