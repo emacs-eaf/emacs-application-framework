@@ -8,6 +8,20 @@ from shutil import which
 import json
 
 script_path = os.path.dirname(os.path.realpath(__file__))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--install-all-apps", action="store_true",
+                    help='install all available applications')
+parser.add_argument("--ignore-sys-deps", action="store_true",
+                    help='ignore system dependencies')
+parser.add_argument("--ignore-py-deps", action="store_true",
+                    help='ignore python dependencies')
+parser.add_argument("--ignore-node-deps", action="store_true",
+                    help='ignore node dependencies')
+parser.add_argument("--use-gitee", action="store_true",
+                    help='use gitee mirror instead of github')
+args = parser.parse_args()
+
 def run_command(command, path=script_path, ensure_pass=True):
     print("[EAF] Running", ' '.join(command), "@", path)
     process = subprocess.Popen(command, stdin = subprocess.PIPE, text=True, cwd=path)
@@ -52,27 +66,27 @@ def install_vue_install(app_path_list):
         command = ["npm", 'run', 'build']
         run_command(command, path=app_path)
 
-def git_submodule_update_app(app: str):
-    run_command(["git", "submodule", "update", "--remote", os.path.join("app", app)])
-    run_command(["git", "submodule", "update", "--init", "--recursive"])
+def git_add_app(app: str, app_spec_dict):
+    url = ""
+    path = os.path.join("app", app)
+    if args.use_gitee:
+        url = app_spec_dict['gitee']
+    else:
+        url = app_spec_dict['github']
+
+    if os.path.exists(path):
+        run_command(["git", "pull", "origin", "master"], path=path)
+    else:
+        run_command(["git", "clone", url, path])
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--install-all-apps", action="store_true",
-                        help='install all available applications')
-    parser.add_argument("--ignore-sys-deps", action="store_true",
-                        help='ignore system dependencies')
-    parser.add_argument("--ignore-py-deps", action="store_true",
-                        help='ignore python dependencies')
-    parser.add_argument("--ignore-node-deps", action="store_true",
-                        help='ignore node dependencies')
-    args = parser.parse_args()
 
 
     distro = ""
     if which("pacman"):
         distro = "pacman"
-        run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
+        if not args.ignore_sys_deps:
+            run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
     elif which("apt"):
         distro = "apt"
     elif which("dnf"):
@@ -110,14 +124,14 @@ def main():
     npm_install_apps = []
     vue_install_apps = []
     npm_rebuild_apps = []
-    for app_name, app_description in app_dict.items():
+    for app_name, app_spec_dict in app_dict.items():
         install_this_app = False
         if not args.install_all_apps:
-            key = input("[EAF] " + app_description + ". Install? (y/N): ")
-            install_this_app = key.lower() == 'y' or key != ""
+            key = input("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ")
+            install_this_app = key.lower() == 'y' or not (key == "" or key.lower() == 'n')
         if args.install_all_apps or install_this_app:
             print("[EAF] Adding", app_name, "application to EAF")
-            git_submodule_update_app(app_name)
+            git_add_app(app_name, app_spec_dict)
             app_path = os.path.join(script_path, "app", app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
             if os.path.exists(app_dep_path):
