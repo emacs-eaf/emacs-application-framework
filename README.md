@@ -129,27 +129,17 @@ From here on, you can either add the full path to the EAF installation directory
 
 Packages listed as **Core** are mandatory for EAF to work, whereas other packages are optional - install if you want to use corresponding EAF Application.
 
-| Package                        | Dependent                            | Description                                                        |
-| :--------                      | :------                              | :------                                                            |
-| python-epc                     | Core                                 | EPC for Python                                                     |
-| python-pyqt5, python-pyqt5-sip | Core                                 | Essential GUI library                                              |
-| python-pyqtwebengine           | Core                                 | Chromium based web rendering engine                                |
-| wmctrl                         | Core                                 | Activate Emacs window input focus                                  |
-| pygetwindow                    | Core                                 | Activate Emacs window input focus on WSL from Windows              |
-| nodejs                         | Core                                 | Installs dependencies, and for app communications                  |
-| mac-app-frontmost              | Core                                 | Monitor frontmost app on macOS                                     |
-| python-pymupdf                 | PDF Viewer                           | PDF rendering engine                                               |
-| python-qrcode                  | File Sender, File Receiver, Airshare | Render QR code pointing to local files                             |
-| aria2                          | Browser                              | Download files from the web                                        |
-| libreoffice                    | Doc Viewer                           | Convert doc file to pdf                                            |
-| filebrowser-bin                | File Browser                         | Share files between computer and smartphone                        |
-| python-qtconsole               | Jupyter                              | Provide RichJupyterWidget                                          |
-| python-retrying                | Markdown Previewer                   | Provide @retry                                                     |
-| python-pytaglib                | Music Player                         | Parse ID3 tag                                                      |
-| python-psutil                  | System Monitor                       | Retrieving information on running processes and system utilization |
-| python-magic                   | File Manager                         | Get the MIME type of the file                                      |
+| Package                        | Description                                           |
+| :--------                      | :------                                               |
+| python-epc                     | EPC for Python                                        |
+| python-pyqt5, python-pyqt5-sip | Essential GUI library                                 |
+| python-pyqtwebengine           | Chromium based web rendering engine                   |
+| wmctrl                         | Activate Emacs window input focus                     |
+| pygetwindow                    | Activate Emacs window input focus on WSL from Windows |
+| mac-app-frontmost              | Monitor frontmost app on macOS                        |
+| nodejs                         | Installs dependencies, and for app communications     |
 
-Some EAF application may have `npm` dependencies, please refer to the corresponding `app/name/package.json` for details.
+You can check `app/name/package.json` and `app/name/dependencies.json` for EAF application dependencies.
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -164,13 +154,14 @@ Some EAF application may have `npm` dependencies, please refer to the correspond
 | Org Previewer       | `M-x eaf-open` Org File                                                |
 | Camera              | `M-x eaf-open-camera`                                                  |
 | Terminal            | `M-x eaf-open-terminal`                                                |
+| File Manager   | `M-x eaf-open-file-manager`                                    |
 | File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`      |
 | File Browser        | `M-x eaf-file-browser-qrcode`                                          |
 | Airshare            | `M-x eaf-open-airshare`                                                |
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
 | MS Office Viewer    | `M-x eaf-open-office`                                                  |
 | Jupyter             | `M-x eaf-open-jupyter`                                                 |
-| Music               | `M-x eaf-open-music-player`                                            |
+| Music Player        | `M-x eaf-open-music-player`                                            |
 | System Monitor      | `M-x eaf-open-system-monitor`                                          |
 | Demo                | `M-x eaf-open-demo` to verify basic functionality                      |
 | Vue Demo            | `M-x eaf-open-vue-demo` to verify vue.js functionality                 |
