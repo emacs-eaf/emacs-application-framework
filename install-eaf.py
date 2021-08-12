@@ -8,7 +8,7 @@ from shutil import which
 import json
 
 script_path = os.path.dirname(os.path.realpath(__file__))
-def subprocess_run(command, path=script_path, ensure_pass=True):
+def run_command(command, path=script_path, ensure_pass=True):
     print("[EAF] Running", ' '.join(command), "@", path)
     process = subprocess.Popen(command, stdin = subprocess.PIPE, text=True, cwd=path)
     process.wait()
@@ -29,33 +29,33 @@ def install_sys_deps(distro: str, deps_list):
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
     command.extend(deps_list)
-    return subprocess_run(command)
+    return run_command(command)
 
 def install_py_deps(deps_list):
     command = ['pip', 'install', '--user']
     command.extend(deps_list)
-    return subprocess_run(command)
+    return run_command(command)
 
 def install_npm_install(app_path_list):
     for app_path in app_path_list:
         command = ["npm", "install"]
-        subprocess_run(command, path=app_path)
+        run_command(command, path=app_path)
 
 def install_npm_rebuild(app_path_list):
     for app_path in app_path_list:
         command = ["npm", 'rebuild']
-        subprocess_run(command, path=app_path)
+        run_command(command, path=app_path)
 
 def install_vue_install(app_path_list):
     for app_path in app_path_list:
         command = ["npm", 'install']
-        subprocess_run(command, path=app_path)
+        run_command(command, path=app_path)
         command = ["npm", 'run', 'build']
-        subprocess_run(command, path=app_path)
+        run_command(command, path=app_path)
 
 def git_submodule_update_app(app: str):
-    subprocess_run(["git", "submodule", "update", "--remote", os.path.join("app", app)])
-    subprocess_run(["git", "submodule", "update", "--init", "--recursive"])
+    run_command(["git", "submodule", "update", "--remote", os.path.join("app", app)])
+    run_command(["git", "submodule", "update", "--init", "--recursive"])
 
 def main():
     parser = argparse.ArgumentParser()
@@ -73,7 +73,7 @@ def main():
     distro = ""
     if which("pacman"):
         distro = "pacman"
-        subprocess_run(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
+        run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
     elif which("apt"):
         distro = "apt"
     elif which("dnf"):
@@ -100,7 +100,7 @@ def main():
     if not args.ignore_py_deps or sys.platform != "linux":
         install_py_deps(deps_dict["pip"][sys.platform])
     if not args.ignore_node_deps:
-        subprocess_run(["npm", "install"])
+        run_command(["npm", "install"])
 
     if not args.install_all_apps:
         key = input("[EAF] Install all available EAF applications? (Y/n): ")
