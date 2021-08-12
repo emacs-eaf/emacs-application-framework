@@ -6,3 +6,4 @@ app/*
 node_modules/
 dist/
 tags
+/.eaf-installed-apps.json

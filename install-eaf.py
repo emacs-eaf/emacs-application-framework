@@ -14,6 +14,8 @@ parser.add_argument("--install-all-apps", action="store_true",
                     help='install all available applications')
 parser.add_argument("--install-core-deps", action="store_true",
                     help='only install core dependencies')
+parser.add_argument("--ignore-core-deps", action="store_true",
+                    help='ignore core dependencies')
 parser.add_argument("--install-app", nargs='+', default=[],
                     help='only install apps listed here')
 parser.add_argument("--ignore-sys-deps", action="store_true",
@@ -90,7 +92,7 @@ def git_add_app(app: str, app_spec_dict):
 def get_distro():
     if which("pacman"):
         distro = "pacman"
-        if (not args.ignore_sys_deps and len(args.install_app) == 0) or args.install_core_deps:
+        if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install_app) == 0) or args.install_core_deps:
             run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
     elif which("apt"):
         distro = "apt"
@@ -117,14 +119,38 @@ def install_core_deps(distro, deps_dict):
         run_command(["npm", "install"])
     print("[EAF] Finished installing core dependencies")
 
+def yes_no(question, default_yes=False, default_no=False):
+    key = input(question)
+    if default_yes:
+        return key.lower() == 'y' or key == ""
+    elif default_no:
+        return key.lower() == 'y' or not (key == "" or key.lower() == 'n')
+    else:
+        return key.lower() == 'y'
+
 def install_app_deps(distro, deps_dict):
     print("[EAF] Installing application dependencies")
     with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
 
+    prev_app_choices = []
+    prev_app_choices_file = os.path.join(script_path, '.eaf-installed-apps.json')
+    if os.path.exists(prev_app_choices_file) and os.stat(prev_app_choices_file).st_size > 0:
+        with open(prev_app_choices_file) as f:
+            prev_app_choices = json.load(f)
+
+    use_prev_choices = False
     if not args.install_all_apps and len(args.install_app) == 0:
-        key = input("[EAF] Install all available EAF applications? (Y/n): ")
-        args.install_all_apps = key.lower() == 'y' or key == ""
+        if len(prev_app_choices) > 0:
+            print("[EAF] Found these existing EAF applications:")
+            for app in prev_app_choices:
+                print("[EAF]", app)
+            use_prev_choices = not yes_no("[EAF] Want something new? (y/N): ", default_no=True)
+        if not use_prev_choices:
+            args.install_all_apps = yes_no("[EAF] Install all available EAF applications? (Y/n): ", default_yes=True)
+
+    if not args.install_all_apps and use_prev_choices:
+        app_dict = {k: app_dict[k] for k in prev_app_choices}
 
     sys_deps = []
     py_deps = []
@@ -136,12 +162,14 @@ def install_app_deps(distro, deps_dict):
         if not args.install_all_apps:
             if len(args.install_app) > 0 and app_name in args.install_app:
                 install_this_app = True
-            elif len(args.install_app) == 0:
-                key = input("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ")
-                install_this_app = key.lower() == 'y' or not (key == "" or key.lower() == 'n')
+            elif len(args.install_app) == 0 and not (use_prev_choices and app_name in prev_app_choices):
+                install_this_app = yes_no("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ", default_no=True)
+            elif use_prev_choices and app_name in prev_app_choices:
+                install_this_app = True
 
         if args.install_all_apps or install_this_app:
             print("[EAF] Adding", app_name, "application to EAF")
+            prev_app_choices.append(app_name)
             git_add_app(app_name, app_spec_dict)
             app_path = os.path.join(script_path, "app", app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
@@ -174,13 +202,18 @@ def install_app_deps(distro, deps_dict):
             install_npm_rebuild(npm_rebuild_apps)
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
+
+    with open(prev_app_choices_file, 'w') as f:
+        json.dump(list(set(prev_app_choices)), f)
+
     print("[EAF] Finished installing application dependencies")
 
 def main():
     distro = get_distro()
     with open(os.path.join(script_path, 'dependencies.json')) as f:
         deps_dict = json.load(f)
-    if args.install_core_deps or len(args.install_app) == 0:
+
+    if (not args.ignore_core_deps and len(args.install_app) == 0) or args.install_core_deps:
         print("[EAF] ------------------------------------------")
         install_core_deps(distro, deps_dict)
         print("[EAF] ------------------------------------------")
