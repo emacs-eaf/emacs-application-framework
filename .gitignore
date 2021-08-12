@@ -1,11 +1,7 @@
 *.elc
 *.pyc
 /.log/
-/app/js-video-player/node_modules/
-/app/mermaid/node_modules/
-/app/terminal/node_modules/
-/app/image-viewer/node_modules/
-/app/markdown-previewer/node_modules/
+/app/
 node_modules/
 dist/
 tags

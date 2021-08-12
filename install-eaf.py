@@ -15,7 +15,6 @@ def run_command(command, path=script_path, ensure_pass=True):
     if process.returncode != 0 and ensure_pass:
         print(process.stderr)
         sys.exit(process.returncode)
-    print(process.stdout)
     return process
 
 def install_sys_deps(distro: str, deps_list):
