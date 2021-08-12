@@ -12,6 +12,10 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
                     help='install all available applications')
+parser.add_argument("--install-core-deps", action="store_true",
+                    help='only install core dependencies')
+parser.add_argument("--install-app", nargs='+', default=[],
+                    help='only install apps listed here')
 parser.add_argument("--ignore-sys-deps", action="store_true",
                     help='ignore system dependencies')
 parser.add_argument("--ignore-py-deps", action="store_true",
@@ -77,19 +81,16 @@ def git_add_app(app: str, app_spec_dict):
         url = app_spec_dict['github']
 
     if os.path.exists(path):
-        run_command(["git", "pull", "origin", "master"], path=path)
+        run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
     elif args.app_git_full_clone:
         run_command(["git", "clone", "--branch", "master", url, path])
     else:
         run_command(["git", "clone", "--depth", "1", "--branch", "master", url, path])
 
-def main():
-
-
-    distro = ""
+def get_distro():
     if which("pacman"):
         distro = "pacman"
-        if not args.ignore_sys_deps:
+        if (not args.ignore_sys_deps and len(args.install_app) == 0) or args.install_core_deps:
             run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
     elif which("apt"):
         distro = "apt"
@@ -101,25 +102,27 @@ def main():
         print("[EAF] Unsupported Linux distribution/package manager.")
         print(" Please see dependencies.json for list of dependencies.")
         sys.exit(1)
+    return distro
 
-    with open(os.path.join(script_path, 'dependencies.json')) as f:
-        deps_dict = json.load(f)
-    with open(os.path.join(script_path, 'applications.json')) as f:
-        app_dict = json.load(f)
-
+def install_core_deps(distro, deps_dict):
+    print("[EAF] Installing core dependencies")
     core_deps = []
     if not args.ignore_sys_deps and sys.platform == "linux":
         core_deps.extend(deps_dict[distro])
-        print("[EAF] Installing system dependencies")
         if len(core_deps) > 0:
             install_sys_deps(distro, core_deps)
-        print("[EAF] Finished installing system dependencies")
     if not args.ignore_py_deps or sys.platform != "linux":
         install_py_deps(deps_dict["pip"][sys.platform])
     if not args.ignore_node_deps:
         run_command(["npm", "install"])
+    print("[EAF] Finished installing core dependencies")
 
-    if not args.install_all_apps:
+def install_app_deps(distro, deps_dict):
+    print("[EAF] Installing application dependencies")
+    with open(os.path.join(script_path, 'applications.json')) as f:
+        app_dict = json.load(f)
+
+    if not args.install_all_apps and len(args.install_app) == 0:
         key = input("[EAF] Install all available EAF applications? (Y/n): ")
         args.install_all_apps = key.lower() == 'y' or key == ""
 
@@ -131,8 +134,12 @@ def main():
     for app_name, app_spec_dict in app_dict.items():
         install_this_app = False
         if not args.install_all_apps:
-            key = input("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ")
-            install_this_app = key.lower() == 'y' or not (key == "" or key.lower() == 'n')
+            if len(args.install_app) > 0 and app_name in args.install_app:
+                install_this_app = True
+            elif len(args.install_app) == 0:
+                key = input("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ")
+                install_this_app = key.lower() == 'y' or not (key == "" or key.lower() == 'n')
+
         if args.install_all_apps or install_this_app:
             print("[EAF] Adding", app_name, "application to EAF")
             git_add_app(app_name, app_spec_dict)
@@ -153,8 +160,7 @@ def main():
                     if 'npm_rebuild' in deps_dict and deps_dict['npm_rebuild']:
                         npm_rebuild_apps.append(app_path)
 
-
-    print("[EAF] Installing dependencies for installed applications")
+    print("[EAF] Installing dependencies for chosen applications")
     if not args.ignore_sys_deps and sys.platform == "linux" and len(sys_deps) > 0:
         print("[EAF] Installing system dependencies for installed applications")
         install_sys_deps(distro, sys_deps)
@@ -168,7 +174,21 @@ def main():
             install_npm_rebuild(npm_rebuild_apps)
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
+    print("[EAF] Finished installing application dependencies")
 
+def main():
+    distro = get_distro()
+    with open(os.path.join(script_path, 'dependencies.json')) as f:
+        deps_dict = json.load(f)
+    if args.install_core_deps or len(args.install_app) == 0:
+        print("[EAF] ------------------------------------------")
+        install_core_deps(distro, deps_dict)
+        print("[EAF] ------------------------------------------")
+
+    if not args.install_core_deps:
+        print("[EAF] ------------------------------------------")
+        install_app_deps(distro, deps_dict)
+        print("[EAF] ------------------------------------------")
 
     print("[EAF] install-eaf.py finished.")
 
