@@ -20,6 +20,16 @@ The vision of the EAF project is that, while retaining the culture and the ecosy
 
 
 ## Applications
+
+| Browser                                          | Pdf Viewer |
+| :--------:                                       | :----:                                                      |
+| <img src="./img/browser.png" width="400"> | <img src="./img/pdf-viewer.png" width="400"> |
+
+| Music Player                            | File Manager                              |
+| :--------:                                            | :----:                                                |
+| <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
+|                                                       |                                                       |
+
 EAF is an extensible framework. It comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
 
 - [Browser](https://github.com/emacs-eaf/eaf-browser): Full-featured browser

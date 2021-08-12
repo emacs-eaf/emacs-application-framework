@@ -19,6 +19,15 @@ Emacs的劣势也是因为它太古老了，导致在多线程和图形扩展能
 EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过EAF框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
 
 ## 应用列表
+| 浏览器                                       | PDF阅读器 |
+| :--------:                                       | :----:                                                      |
+| <img src="./img/browser.png" width="400"> | <img src="./img/pdf-viewer.png" width="400"> |
+
+| 音乐播放器                       | 文件管理器                         |
+| :--------:                                            | :----:                                                |
+| <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
+|                                                       |                                                       |
+
 EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你也可以开发自己的Qt5应用并集成在Emacs中。
 
 - [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于Chromium渲染引擎
