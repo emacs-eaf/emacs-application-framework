@@ -74,13 +74,18 @@ def install_vue_install(app_path_list):
         command = ["npm", 'run', 'build']
         run_command(command, path=app_path)
 
-def git_add_app(app: str, app_spec_dict):
+def add_or_update_app(app: str, app_spec_dict):
     url = ""
     path = os.path.join("app", app)
     if args.use_gitee:
         url = app_spec_dict['gitee']
     else:
         url = app_spec_dict['github']
+
+    if os.path.exists(path):
+        print("\n[EAF] Updating", app, "to newest version...")
+    else:
+        print("\n[EAF] Adding", app, "application to EAF...")
 
     if os.path.exists(path):
         run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
@@ -168,9 +173,8 @@ def install_app_deps(distro, deps_dict):
                 install_this_app = True
 
         if args.install_all_apps or install_this_app:
-            print("[EAF] Adding", app_name, "application to EAF")
             prev_app_choices.append(app_name)
-            git_add_app(app_name, app_spec_dict)
+            add_or_update_app(app_name, app_spec_dict)
             app_path = os.path.join(script_path, "app", app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
             if os.path.exists(app_dep_path):
