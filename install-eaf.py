@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import platform
 import sys
 import subprocess
 from shutil import which
@@ -29,6 +30,8 @@ parser.add_argument("--app-git-full-clone", action="store_true",
 parser.add_argument("--use-gitee", action="store_true",
                     help='use gitee mirror instead of github')
 args = parser.parse_args()
+
+NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
 
 def run_command(command, path=script_path, ensure_pass=True):
     print("[EAF] Running", ' '.join(command), "@", path)
@@ -59,19 +62,19 @@ def install_py_deps(deps_list):
 
 def install_npm_install(app_path_list):
     for app_path in app_path_list:
-        command = ["npm", "install"]
+        command = [NPM_CMD, "install"]
         run_command(command, path=app_path)
 
 def install_npm_rebuild(app_path_list):
     for app_path in app_path_list:
-        command = ["npm", 'rebuild']
+        command = [NPM_CMD, 'rebuild']
         run_command(command, path=app_path)
 
 def install_vue_install(app_path_list):
     for app_path in app_path_list:
-        command = ["npm", 'install']
+        command = [NPM_CMD, 'install']
         run_command(command, path=app_path)
-        command = ["npm", 'run', 'build']
+        command = [NPM_CMD, 'run', 'build']
         run_command(command, path=app_path)
 
 def add_or_update_app(app: str, app_spec_dict):
@@ -95,6 +98,7 @@ def add_or_update_app(app: str, app_spec_dict):
         run_command(["git", "clone", "--depth", "1", "--branch", "master", url, path])
 
 def get_distro():
+    distro = ""
     if which("pacman"):
         distro = "pacman"
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install_app) == 0) or args.install_core_deps:
