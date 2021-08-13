@@ -379,10 +379,12 @@ been initialized."
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
-(defcustom eaf-kill-process-after-last-buffer-closed t
-  "Kill eaf process when last eaf buffer closed, default is non-nil.
+(defcustom eaf-kill-process-after-last-buffer-closed nil
+  "Kill eaf process when last eaf buffer closed, default is nil.
 
-Improve EAF new page creation speed if this option is nil."
+If you don't want EAF process exist when all EAF buffer closed, turn on this option.
+
+Turn off this option will improve EAF new page creation speed."
   :type 'boolean)
 
 (defcustom eaf-wm-name ""
