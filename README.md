@@ -134,6 +134,16 @@ From here on, you can either add the full path to the EAF installation directory
       (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
     ```
 
+#### 5. Load EAF apps:
+
+You can use below code to load applications `browser` `pdf-viewer` `js-video-player`, more applications please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications):
+
+```Elisp
+(require 'eaf-browser)
+(require 'eaf-pdf-viewer)
+(require 'eaf-js-video-player)
+```
+
 ### Dependency List
 
 | Package                        | Description                                           |

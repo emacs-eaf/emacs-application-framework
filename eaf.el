@@ -1581,27 +1581,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
-(ignore-errors (require 'eaf-airshare))
-(ignore-errors (require 'eaf-browser))
-(ignore-errors (require 'eaf-camera))
-(ignore-errors (require 'eaf-demo))
-(ignore-errors (require 'eaf-file-browser))
-(ignore-errors (require 'eaf-pdf-viewer))
-(ignore-errors (require 'eaf-markdown-previewer))
-(ignore-errors (require 'eaf-js-video-player))
-(ignore-errors (require 'eaf-video-player))
-(ignore-errors (require 'eaf-image-viewer))
-(ignore-errors (require 'eaf-org-previewer))
-(ignore-errors (require 'eaf-mindmap))
-(ignore-errors (require 'eaf-mail))
-(ignore-errors (require 'eaf-terminal))
-(ignore-errors (require 'eaf-jupyter))
-(ignore-errors (require 'eaf-netease-cloud-music))
-(ignore-errors (require 'eaf-music-player))
-(ignore-errors (require 'eaf-system-monitor))
-(ignore-errors (require 'eaf-file-manager))
-(ignore-errors (require 'eaf-vue-demo))
-
 (provide 'eaf)
 
 ;;; eaf.el ends here
