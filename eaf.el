@@ -326,10 +326,6 @@ been initialized."
 
 (defvar eaf--webengine-include-private-codec nil)
 
-(defvar eaf-org-file-list '())
-
-(defvar eaf-org-killed-file-list '())
-
 (defvar eaf-last-frame-width 0)
 
 (defvar eaf-last-frame-height 0)
@@ -383,10 +379,12 @@ been initialized."
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
   :type 'boolean)
 
-(defcustom eaf-kill-process-after-last-buffer-closed t
-  "Kill eaf process when last eaf buffer closed, default is non-nil.
+(defcustom eaf-kill-process-after-last-buffer-closed nil
+  "Kill eaf process when last eaf buffer closed, default is nil.
 
-Improve EAF new page creation speed if this option is nil."
+If you don't want EAF process exist when all EAF buffer closed, turn on this option.
+
+Turn off this option will improve EAF new page creation speed."
   :type 'boolean)
 
 (defcustom eaf-wm-name ""
@@ -565,11 +563,17 @@ A hashtable, key is url and value is title.")
     (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
 
+(defvar eaf-stop-process-hook nil)
+
 (defun eaf-stop-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
 
 If RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
+
+  ;; Run stop process hooks.
+  (run-hooks 'eaf-stop-process-hook)
+
   (unless restart
     ;; Clear active buffers
     (setq eaf--first-start-app-buffers nil)
@@ -581,11 +585,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
     (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
 
-  ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
-  (dolist (org-file-name eaf-org-file-list)
-    (eaf--org-delete-preview-file org-file-name))
-  (setq eaf-org-file-list nil)
-  (setq eaf-org-killed-file-list nil)
+  ;; Set `eaf-fullscreen-p'.
   (setq-local eaf-fullscreen-p nil)
 
   ;; Kill EAF-mode buffers.
@@ -593,6 +593,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
          (count (length eaf-buffers)))
     (dolist (buffer eaf-buffers)
       (kill-buffer buffer))
+
     ;; Just report to me when EAF buffer exists.
     (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s!" "!")))
 
@@ -614,15 +615,27 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
       (kill-buffer eaf-name))
     (message "[EAF] Process terminated.")))
 
+(defun eaf--kill-devtools-buffers ()
+  (dolist (buffer (eaf--get-eaf-buffers))
+    (with-current-buffer buffer
+      (when (string-prefix-p "DevTools - " (buffer-name buffer))
+        (kill-buffer buffer)))))
+
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
   (interactive)
-  (when (get-buffer "DevTools - file:///")
-    (kill-buffer "DevTools - file:///"))
+  ;; We need kill debug page first.
+  (eaf--kill-devtools-buffers)
+
+  ;; Record reset buffers to `eaf--first-start-app-buffers'.
   (setq eaf--first-start-app-buffers nil)
   (eaf-for-each-eaf-buffer
    (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--first-start-app-buffers))
+
+  ;; Stop EAF process.
   (eaf-stop-process t)
+
+  ;; Start EAF process, EAF will restore page in `eaf--first-start-app-buffers'.
   (eaf-start-process))
 
 (defun eaf--decode-string (str)
@@ -1343,18 +1356,8 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     eaf-wm-name))
 
 (defun eaf--activate-emacs-win32-window()
-  "Use vbs activate Emacs win32 window."
-  (let* ((activate-window-file-path
-          (concat eaf-config-location "activate-window.vbs"))
-         (activate-window-file-exists (file-exists-p activate-window-file-path)))
-    (unless activate-window-file-exists
-      (with-temp-file activate-window-file-path
-        (insert "set WshShell = CreateObject(\"WScript.Shell\")\nWshShell.AppActivate Wscript.Arguments(0)")))
-    (shell-command-to-string (format "cscript %s %s" activate-window-file-path (emacs-pid)))))
-
-(defun eaf--activate-emacs-wsl-window()
-  "Activate Emacs window running on Wsl."
-  (eaf-call-async "activate_emacs_wsl_window" (frame-parameter nil 'name)))
+  "Activate Emacs win32 window."
+  (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
@@ -1380,9 +1383,8 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 (defun eaf-activate-emacs-window(&optional buffer_id)
   "Activate Emacs window."
   (cond
-   ((eaf--called-from-wsl-on-windows-p)
-    (eaf--activate-emacs-wsl-window))
-   ((memq system-type '(cygwin windows-nt ms-dos))
+   ((or (memq system-type '(cygwin windows-nt ms-dos))
+        (eaf--called-from-wsl-on-windows-p))
     (eaf--activate-emacs-win32-window))
    ((eq system-type 'darwin)
     (eaf--activate-emacs-mac-window))
