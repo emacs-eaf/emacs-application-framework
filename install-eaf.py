@@ -94,6 +94,7 @@ def add_or_update_app(app: str, app_spec_dict):
 
     if os.path.exists(path):
         if args.app_drop_local_edit:
+            print("[EAF] Clean %s's local changed for pull code automatically.".format(app))
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
         run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
