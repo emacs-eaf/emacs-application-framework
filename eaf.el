@@ -1197,8 +1197,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "G[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
-    (when (and (featurep 'eaf-pdf-viewer) eaf-pdf-store-history (string-match "^\\(.+\\)\\.pdf$" url))
-      (eaf-store-pdf-history url))
     (setq url (expand-file-name url))
     (when (featurep 'recentf)
       (recentf-add-file url))
