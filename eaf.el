@@ -443,8 +443,6 @@ Python process only create application view when Emacs window or buffer state ch
 
 (defvar-local eaf--bookmark-title nil)
 
-(defvar-local eaf-mindmap--current-add-mode nil)
-
 (defmacro eaf-for-each-eaf-buffer (&rest body)
   "A syntactic sugar to loop through each EAF buffer and evaluat BODY.
 
@@ -1298,27 +1296,23 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (split-window-horizontally)
   (other-window +1))
 
+(defvar-local eaf-edit-confirm-action nil)
+
+(defvar eaf-edit-confirm-function-alist '())
+
 (defun eaf-edit-buffer-confirm ()
   "Confirm input text and send the text to corresponding EAF app."
   (interactive)
   ;; Note: pickup buffer-id from buffer name and not restore buffer-id from buffer local variable.
   ;; Then we can switch edit buffer to any other mode, such as org-mode, to confirm buffer string.
-  (cond ((equal eaf-mindmap--current-add-mode "sub")
-         (eaf-call-async "update_multiple_sub_nodes"
-                         eaf--buffer-id
-                         (buffer-string)))
-        ((equal eaf-mindmap--current-add-mode "brother")
-         (eaf-call-async "update_multiple_brother_nodes"
-                         eaf--buffer-id
-                         (buffer-string)))
-        ((equal eaf-mindmap--current-add-mode "middle")
-         (eaf-call-async "update_multiple_middle_nodes"
-                         eaf--buffer-id
-                         (buffer-string)))
-        (t
-         (eaf-call-async "update_focus_text"
-                         eaf--buffer-id
-                         (eaf--encode-string (kill-new (buffer-string))))))
+
+  ;; Do confirm action.
+  (let ((confirm-function (cdr (assoc eaf-edit-confirm-action eaf-edit-confirm-function-alist))))
+    (if confirm-function
+        (funcal confirm-function)
+      (eaf-call-async "update_focus_text" eaf--buffer-id (eaf--encode-string (kill-new (buffer-string))))))
+
+  ;; Close confirm window.
   (kill-buffer)
   (delete-window))
 
