@@ -207,10 +207,14 @@ def install_app_deps(distro, deps_dict):
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
 
+    prev_app_choices = list(set(prev_app_choices))
     with open(prev_app_choices_file, 'w') as f:
         json.dump(list(set(prev_app_choices)), f)
 
     print("[EAF] Finished installing application dependencies")
+    print("[EAF] Please add the following to your init.el to use application:")
+    for app in prev_app_choices:
+        print("(require 'eaf-{})".format(app))
 
 def main():
     distro = get_distro()
