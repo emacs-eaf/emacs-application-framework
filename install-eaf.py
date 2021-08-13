@@ -118,6 +118,8 @@ def get_distro():
         print("[EAF] Unsupported Linux distribution/package manager.")
         print(" Please see dependencies.json for list of dependencies.")
         sys.exit(1)
+    elif which("brew"):
+        distro = "brew"
     return distro
 
 def install_core_deps(distro, deps_dict):

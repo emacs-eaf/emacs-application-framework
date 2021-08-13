@@ -33,6 +33,9 @@
         "py38-qt5-sip",
         "py38-qt5-webengine"
     ],
+    "brew": [
+        "node"
+    ],
     "pip": {
         "linux": [
             "epc",
@@ -43,6 +46,13 @@
             "pyqt5-sip",
             "pyqtwebengine",
             "pygetwindow"
+        ],
+        "darwin": [
+            "epc",
+            "pyqt5",
+            "pyqt5-sip",
+            "pyqtwebengine",
+            "mac-app-frontmost"
         ]
     }
 }
