@@ -31,18 +31,28 @@ parser.add_argument("--app-drop-local-edit", action="store_true",
                     help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
 parser.add_argument("--use-gitee", action="store_true",
                     help='use gitee mirror instead of github')
+parser.add_argument("--force-install-app", action="store_true",
+                    help="force install app deps even when app is not updated")
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
 
-def run_command(command, path=script_path, ensure_pass=True):
+def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     print("[EAF] Running", ' '.join(command), "@", path)
-    process = subprocess.Popen(command, stdin = subprocess.PIPE, text=True, cwd=path)
+    if get_result:
+        process = subprocess.Popen(command, stdin = subprocess.PIPE, stderr = subprocess.PIPE,
+                                   stdout = subprocess.PIPE, universal_newlines=True, text=True, cwd=path)
+    else:
+        process = subprocess.Popen(command, stdin = subprocess.PIPE, stderr = subprocess.PIPE,
+                                   universal_newlines=True, text=True, cwd=path)
     process.wait()
     if process.returncode != 0 and ensure_pass:
         print(process.stderr)
         sys.exit(process.returncode)
-    return process
+    if get_result:
+        return process.stdout.readlines()
+    else:
+        return None
 
 def install_sys_deps(distro: str, deps_list):
     command = []
@@ -92,16 +102,22 @@ def add_or_update_app(app: str, app_spec_dict):
     else:
         print("\n[EAF] Adding", app, "application to EAF...")
 
+    updated = True
     if os.path.exists(path):
         if args.app_drop_local_edit:
             print("[EAF] Clean {}'s local changed for pull code automatically.".format(app))
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
-        run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
+        output_lines = run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False, get_result=True)
+        for output in output_lines:
+            print(output)
+            if "Already up to date." in output:
+                updated = False
     elif args.app_git_full_clone:
         run_command(["git", "clone", "--branch", "master", url, path])
     else:
         run_command(["git", "clone", "--depth", "1", "--branch", "master", url, path])
+    return updated
 
 def get_distro():
     distro = ""
@@ -184,10 +200,10 @@ def install_app_deps(distro, deps_dict):
 
         if args.install_all_apps or install_this_app:
             prev_app_choices.append(app_name)
-            add_or_update_app(app_name, app_spec_dict)
+            updated = add_or_update_app(app_name, app_spec_dict)
             app_path = os.path.join(script_path, "app", app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
-            if os.path.exists(app_dep_path):
+            if (updated or args.force_install_app) and os.path.exists(app_dep_path):
                 with open(os.path.join(app_dep_path)) as f:
                     deps_dict = json.load(f)
                 if not args.ignore_sys_deps and sys.platform == "linux" and distro in deps_dict:
