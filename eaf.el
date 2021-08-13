@@ -75,7 +75,6 @@
 (require 'cl-lib)
 (require 'json)
 (require 'map)
-(require 's)
 (require 'seq)
 (require 'subr-x)
 (require 'bookmark)

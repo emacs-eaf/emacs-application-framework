@@ -94,10 +94,7 @@ chmod +x ./install-eaf-mac.sh
 
 `install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
 
-#### 3. 安装Elisp依赖包:
-- [s.el](https://github.com/magnars/s.el)
-
-#### 4. 加载EAF
+#### 3. 加载EAF
 
 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
@@ -126,7 +123,7 @@ chmod +x ./install-eaf-mac.sh
       (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
     ```
 
-#### 5. 加载EAF应用:
+#### 4. 加载EAF应用:
 
 你可以用下面的代码来加载一部分EAF应用，比如浏览器、PDF阅读器和视频播放器，更多的应用请查看 [应用列表](https://github.com/emacs-eaf/emacs-application-framework#applications):
 

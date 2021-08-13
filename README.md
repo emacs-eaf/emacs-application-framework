@@ -95,10 +95,7 @@ chmod +x ./install-eaf-mac.sh
 
 There are many useful flags available for `install-eaf.py`, check it yourself using `--help`.
 
-#### 3. Install Elisp packages:
-- [s.el](https://github.com/magnars/s.el)
-
-#### 4. Load EAF:
+#### 3. Load EAF:
 
 From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
@@ -127,7 +124,7 @@ From here on, you can either add the full path to the EAF installation directory
       (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
     ```
 
-#### 5. Load EAF apps:
+#### 4. Load EAF apps:
 
 You can use below code to load applications `browser` `pdf-viewer` `js-video-player`, more applications please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications):
 
