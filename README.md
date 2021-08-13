@@ -37,21 +37,21 @@ EAF is an extensible framework. It comes with a number of useful applications, a
 - [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal
 - [JS Video Player](https://github.com/emacs-eaf/eaf-js-video-player): Video player based on plyr.js
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video player base on Qt
-- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown previewer in Emacs
-- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org previewer in Emacs
+- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown file previewer in Emacs
+- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org file previewer in Emacs
 - [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and audio visual
 - [File Manager](https://github.com/emacs-eaf/eaf-file-manager): File manager, support file real-time preview
 - [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): Mindmap with full-featured keyboard operation
 - [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): Jupyter in Emacs
-- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Picture viewer supporting real-time zoom rotation
-- [Camera](https://github.com/emacs-eaf/eaf-camera): Camera in Emacs
+- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Picture viewer, supporting real-time zoom rotation
+- [Camera](https://github.com/emacs-eaf/eaf-camera): Use camera in Emacs
 - [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): System monitor base on Vue.js
 - [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): EAF frontend for netease cloud music
 - [File Browser](https://github.com/emacs-eaf/eaf-file-browser): Browse file in mobile phone
-- [File Share](https://github.com/emacs-eaf/eaf-file-sender): Share file between Emacs and mobile phone
+- [File Sender](https://github.com/emacs-eaf/eaf-file-sender): Share file between Emacs and mobile phone
 - [Airshare](https://github.com/emacs-eaf/eaf-airshare): Share text between Emacs and mobile phone
-- [Demo](https://github.com/emacs-eaf/eaf-demo): Application demo base on Qt
-- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): Application demo base on Vue.js
+- [Demo](https://github.com/emacs-eaf/eaf-demo): EAF Application demo base on Qt
+- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF Application demo base on Vue.js
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 - EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)

@@ -46,10 +46,10 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 - [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): 可视化系统监视器
 - [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): 网易云音乐前端
 - [File Browser](https://github.com/emacs-eaf/eaf-file-browser): 在手机浏览电脑文件
-- [File Share](https://github.com/emacs-eaf/eaf-file-sender): 分享文件给手机
+- [File Sender](https://github.com/emacs-eaf/eaf-file-sender): 分享文件给手机
 - [Airshare](https://github.com/emacs-eaf/eaf-airshare): 分享文字给手机
-- [Demo](https://github.com/emacs-eaf/eaf-demo): Qt应用实例
-- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): Vue.js应用实例
+- [Demo](https://github.com/emacs-eaf/eaf-demo): EAF的Qt应用实例
+- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF的Vue.js应用实例
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
 - 由[MatthewZMD](https://github.com/MatthewZMD)在EmacsConf2020的演讲和demo。
