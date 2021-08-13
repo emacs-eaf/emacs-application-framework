@@ -120,8 +120,6 @@ def install_core_deps(distro, deps_dict):
             install_sys_deps(distro, core_deps)
     if not args.ignore_py_deps or sys.platform != "linux":
         install_py_deps(deps_dict["pip"][sys.platform])
-    if not args.ignore_node_deps:
-        run_command(["npm", "install"])
     print("[EAF] Finished installing core dependencies")
 
 def yes_no(question, default_yes=False, default_no=False):
