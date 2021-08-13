@@ -69,10 +69,6 @@ class BrowserView(QWebEngineView):
         self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
         self.clear_focus_js = self.read_js_content("clear_focus.js")
         self.select_input_text_js = self.read_js_content("select_input_text.js")
-        self.dark_mode_js = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                              "node_modules",
-                                              "darkreader",
-                                              "darkreader.js")).read()
         self.caret_browsing_js_raw = self.read_js_content("caret_browsing.js")
         self.get_selection_text_js = self.read_js_content("get_selection_text.js")
         self.focus_input_js = self.read_js_content("focus_input.js")
