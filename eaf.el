@@ -164,6 +164,7 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
         (setq load-path (delete path load-path))))))
 
 (eaf-add-app-dirs-to-load-path)
+
 (require 'eaf-epc)
 
 ;;;###autoload
@@ -337,7 +338,7 @@ been initialized."
 (defvar eaf-internal-process-prog nil)
 (defvar eaf-internal-process-args nil)
 
-(defvar eaf--active-buffers nil
+(defvar eaf--first-start-app-buffers nil
   "Contains a list of '(buffer-url buffer-app-name buffer-args).")
 
 (defvar eaf--webengine-include-private-codec nil)
@@ -529,44 +530,52 @@ A hashtable, key is url and value is title.")
       (eaf-call-sync "get_emacs_wsl_window_id")
     (frame-parameter frame 'window-id)))
 
+(defun eaf--follow-system-dpi ()
+  (if (and (getenv "WAYLAND_DISPLAY") (not (string= (getenv "WAYLAND_DISPLAY") "")))
+      (progn
+        ;; We need manually set scale factor when at Gnome/Wayland environment.
+        ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
+        ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
+        (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
+        ;; Set EAF application scale factor.
+        (setenv "QT_SCALE_FACTOR" "1")
+        ;; Force xwayland to ensure SWay works.
+        (setenv "QT_QPA_PLATFORM" "xcb"))
+    (setq process-environment
+          (seq-filter
+           (lambda (var)
+             (and (not (string-match-p "QT_SCALE_FACTOR" var))
+                  (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
+           process-environment))))
+
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
-   ((not eaf--active-buffers)
+   ((not eaf--first-start-app-buffers)
     (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((eaf-epc-live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
+
   ;; start epc server and set `eaf-server-port'
   (eaf--start-epc-server)
   (let* ((eaf-args (append
                     (list eaf-python-file)
                     (eaf-get-render-size)
                     (list (number-to-string eaf-server-port))
-                    ))
-         (gdb-args (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command)))
-    (if (and (getenv "WAYLAND_DISPLAY") (not (string= (getenv "WAYLAND_DISPLAY") "")))
-        (progn
-          ;; We need manually set scale factor when at Gnome/Wayland environment.
-          ;; It is important to set QT_AUTO_SCREEN_SCALE_FACTOR=0
-          ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
-          (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")
-          ;; Set EAF application scale factor.
-          (setenv "QT_SCALE_FACTOR" "1")
-          ;; Force xwayland to ensure SWay works.
-          (setenv "QT_QPA_PLATFORM" "xcb"))
-      (setq process-environment
-            (seq-filter
-             (lambda (var)
-               (and (not (string-match-p "QT_SCALE_FACTOR" var))
-                    (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
-             process-environment)))
-    ;; Start python process.
+                    )))
+
+    ;; Folow system DPI.
+    (eaf--follow-system-dpi)
+
+    ;; Set process arguments.
     (if eaf-enable-debug
         (progn
           (setq eaf-internal-process-prog "gdb")
-          (setq eaf-internal-process-args (append gdb-args eaf-args)))
+          (setq eaf-internal-process-args (append (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command) eaf-args)))
       (setq eaf-internal-process-prog eaf-python-command)
       (setq eaf-internal-process-args eaf-args))
+
+    ;; Start python process.
     (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p))))
       (setq eaf-internal-process
             (apply 'start-process
@@ -582,7 +591,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
   (unless restart
     ;; Clear active buffers
-    (setq eaf--active-buffers nil)
+    (setq eaf--first-start-app-buffers nil)
     ;; Remove all EAF related hooks since the EAF process is stopped.
     (remove-hook 'kill-buffer-hook #'eaf--monitor-buffer-kill)
     (remove-hook 'kill-emacs-hook #'eaf--monitor-emacs-kill)
@@ -629,9 +638,9 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
   (when (get-buffer "DevTools - file:///")
     (kill-buffer "DevTools - file:///"))
-  (setq eaf--active-buffers nil)
+  (setq eaf--first-start-app-buffers nil)
   (eaf-for-each-eaf-buffer
-   (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--active-buffers))
+   (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--first-start-app-buffers))
   (eaf-stop-process t)
   (eaf-start-process))
 
@@ -743,12 +752,15 @@ to edit EAF keybindings!" fun fun)))
                          ;; If command is normal symbol, just call it directly.
                          ((symbolp fun)
                           fun)
+
                          ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
                          ((string-match "-" fun)
                           (intern fun))
+
                          ;; If command prefix with js_, call JavaScript function directly.
                          ((string-prefix-p "js_" fun)
                           (eaf--call-js-function fun))
+
                          ;; If command is not built-in function and not include char '-'
                          ;; it's command in python side, build elisp proxy function to call it.
                          (t
@@ -1053,7 +1065,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
   ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
   (setq eaf--webengine-include-private-codec webengine-include-private-codec)
-  (let* ((first-buffer-info (pop eaf--active-buffers))
+  (let* ((first-buffer-info (pop eaf--first-start-app-buffers))
          (first-start-url (nth 0 first-buffer-info))
          (first-start-app-name (nth 1 first-buffer-info))
          (first-start-args (nth 2 first-buffer-info)))
@@ -1063,9 +1075,9 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     ;; Start first app.
     (eaf--open-internal first-start-url first-start-app-name first-start-args))
 
-  (dolist (buffer-info eaf--active-buffers)
+  (dolist (buffer-info eaf--first-start-app-buffers)
     (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info)))
-  (setq eaf--active-buffers nil))
+  (setq eaf--first-start-app-buffers nil))
 
 (defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
@@ -1197,9 +1209,14 @@ When called interactively, URL accepts a file that can be opened by EAF."
   (interactive "G[EAF] EAF Open: ")
   ;; Try to set app-name along with url when calling INTERACTIVELY
   (when (and (not app-name) (file-exists-p url))
+    ;; Expand file name.
     (setq url (expand-file-name url))
+
+    ;; Add recentf list.
     (when (featurep 'recentf)
       (recentf-add-file url))
+
+    ;; Adjust before open.
     (if (file-directory-p url)
         (setq app-name "file-manager")
       (let* ((extension-name (eaf-get-file-name-extension url)))
@@ -1217,6 +1234,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
               (unless (executable-find "java")
                 (user-error (format "Have PlantUML code in file '%s', you need to install Java to preview normally." url))
                 ))))))))
+
   ;; Now that app-name should hopefully be set
   (unless app-name
     ;; Output error to user if app-name is empty string.
@@ -1227,11 +1245,15 @@ When called interactively, URL accepts a file that can be opened by EAF."
                          ((file-exists-p url) "File %s cannot be opened.")
                          (t "File %s does not exist.")))
                 url))
+
+  ;; Init arguments.
   (unless args (setq args ""))
   (setq always-new (or always-new current-prefix-arg))
+
   ;; Hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
   (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
+
   ;; Open URL with EAF application
   (if (eaf-epc-live-p eaf-epc-process)
       (let (exists-eaf-buffer)
@@ -1242,6 +1264,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
                       (string= eaf--buffer-app-name app-name))
              (setq exists-eaf-buffer buffer)
              (throw 'found-eaf t))))
+
         ;; Switch to existing buffer,
         ;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
@@ -1253,8 +1276,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
           (message (concat "[EAF/" app-name "] " "Opening %s") url)))
 
     ;; Record user input, and call `eaf--open-internal' after receive `start_finish' signal from server process.
-    (unless eaf--active-buffers
-      (push `(,url ,app-name ,args) eaf--active-buffers))
+    (unless eaf--first-start-app-buffers
+      (push `(,url ,app-name ,args) eaf--first-start-app-buffers))
 
     ;; Start EAF process.
     (eaf-start-process)
@@ -1469,58 +1492,11 @@ So multiple EAF buffers visiting the same file do not sync with each other."
         (insert (format "| %s | %s |\n" (car element) (cdr element))))
       (insert "\n"))))
 
-;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; FIXME: In the code below we should use `save-selected-window' (or even
-;; better `with-selected-window') rather than (other-window +1) followed by
-;; (other-window -1) since this is not always a no-op.
-
-(advice-add 'scroll-other-window :around #'eaf--scroll-other-window)
-(defun eaf--scroll-other-window (orig-fun &optional arg &rest args)
-  "When next buffer is `eaf-mode', do `eaf-scroll-up-or-next-page'."
-  (other-window +1)
-  (if (derived-mode-p 'eaf-mode)
-      (progn
-        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "up"
-                        (if arg "line" "page"))
-        (other-window -1))
-    (other-window -1)
-    (apply orig-fun arg args)))
-
-(advice-add 'scroll-other-window-down :around #'eaf--scroll-other-window-down)
-(defun eaf--scroll-other-window-down (orig-fun &optional arg &rest args)
-  "When next buffer is `eaf-mode', do `eaf-scroll-down-or-previous-page'."
-  (other-window +1)
-  (if (derived-mode-p 'eaf-mode)
-      (progn
-        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "down"
-                        (if arg "line" "page"))
-        (other-window -1))
-    (other-window -1)
-    (apply orig-fun arg args)))
-
-(advice-add 'watch-other-window-internal :around
-            #'eaf--watch-other-window-internal)
-(defun eaf--watch-other-window-internal (orig-fun &optional direction line
-                                                  &rest args)
-  "When next buffer is `eaf-mode', do `eaf-watch-other-window'."
-  (other-window +1)
-  (if (derived-mode-p 'eaf-mode)
-      (progn
-        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info)
-                        (if (string-equal direction "up") "up" "down")
-                        (if line "line" "page"))
-        (other-window -1))
-    (other-window -1)
-    (apply orig-fun direction line args)))
-
 (defun eaf--match-app-extension-p (ext)
-  (catch 'match
-    (dolist (app-extensions (mapcar (lambda (x) (eval (cdr x))) eaf-app-extensions-alist))
-      (dolist (extension app-extensions)
-        (when (equal ext extension)
-          (throw 'match t))
-        ))))
+  (cl-loop for app-extensions-alist in eaf-app-extensions-alist
+           for extensions = (eval (cdr app-extensions-alist))
+           when (member ext extensions)
+           return t))
 
 (defun eaf--buffer-file-p ()
   "Determine if the file opened at the current buffer be opened by EAF."
@@ -1543,6 +1519,50 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (and ext
        (eaf--match-app-extension-p (downcase ext))
        (not (member ext eaf-find-file-ext-blacklist))))
+
+;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; FIXME: In the code below we should use `save-selected-window' (or even
+;; better `with-selected-window') rather than (other-window +1) followed by
+;; (other-window -1) since this is not always a no-op.
+(defun eaf--scroll-other-window (orig-fun &optional arg &rest args)
+  "When next buffer is `eaf-mode', do `eaf-scroll-up-or-next-page'."
+  (other-window +1)
+  (if (derived-mode-p 'eaf-mode)
+      (progn
+        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "up"
+                        (if arg "line" "page"))
+        (other-window -1))
+    (other-window -1)
+    (apply orig-fun arg args)))
+(advice-add 'scroll-other-window :around #'eaf--scroll-other-window)
+
+(defun eaf--scroll-other-window-down (orig-fun &optional arg &rest args)
+  "When next buffer is `eaf-mode', do `eaf-scroll-down-or-previous-page'."
+  (other-window +1)
+  (if (derived-mode-p 'eaf-mode)
+      (progn
+        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "down"
+                        (if arg "line" "page"))
+        (other-window -1))
+    (other-window -1)
+    (apply orig-fun arg args)))
+(advice-add 'scroll-other-window-down :around #'eaf--scroll-other-window-down)
+
+(defun eaf--watch-other-window-internal (orig-fun &optional direction line
+                                                  &rest args)
+  "When next buffer is `eaf-mode', do `eaf-watch-other-window'."
+  (other-window +1)
+  (if (derived-mode-p 'eaf-mode)
+      (progn
+        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info)
+                        (if (string-equal direction "up") "up" "down")
+                        (if line "line" "page"))
+        (other-window -1))
+    (other-window -1)
+    (apply orig-fun direction line args)))
+(advice-add 'watch-other-window-internal :around
+            #'eaf--watch-other-window-internal)
 
 ;; Make EAF as default app for supported extensions.
 ;; Use `eaf-open' in `find-file'
