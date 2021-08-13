@@ -258,9 +258,9 @@ def main():
             install_app_deps(distro, deps_dict)
             print("[EAF] ------------------------------------------")
 
-            print("[EAF] install-eaf.py finished.")
+        print("[EAF] install-eaf.py finished.")
     except KeyboardInterrupt:
-        print("[EAF] install-eaf.py aborted")
+        print("[EAF] install-eaf.py aborted!")
         sys.exit()
 
 
