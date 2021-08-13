@@ -326,10 +326,6 @@ been initialized."
 
 (defvar eaf--webengine-include-private-codec nil)
 
-(defvar eaf-org-file-list '())
-
-(defvar eaf-org-killed-file-list '())
-
 (defvar eaf-last-frame-width 0)
 
 (defvar eaf-last-frame-height 0)
@@ -565,11 +561,17 @@ A hashtable, key is url and value is title.")
     (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
 
+(defvar eaf-stop-process-hook nil)
+
 (defun eaf-stop-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
 
 If RESTART is non-nil, cached URL and app-name will not be cleared."
   (interactive)
+
+  ;; Run stop process hooks.
+  (run-hooks 'eaf-stop-process-hook)
+
   (unless restart
     ;; Clear active buffers
     (setq eaf--first-start-app-buffers nil)
@@ -581,11 +583,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
     (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
 
-  ;; Clean `eaf-org-file-list' and `eaf-org-killed-file-list'.
-  (dolist (org-file-name eaf-org-file-list)
-    (eaf--org-delete-preview-file org-file-name))
-  (setq eaf-org-file-list nil)
-  (setq eaf-org-killed-file-list nil)
+  ;; Set `eaf-fullscreen-p'.
   (setq-local eaf-fullscreen-p nil)
 
   ;; Kill EAF-mode buffers.
@@ -593,6 +591,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
          (count (length eaf-buffers)))
     (dolist (buffer eaf-buffers)
       (kill-buffer buffer))
+
     ;; Just report to me when EAF buffer exists.
     (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s!" "!")))
 
