@@ -316,8 +316,6 @@ been initialized."
             (let ((arg (eaf--decode-string arg)))
               (cond ((string-prefix-p "'" arg) ;; single quote
                      (read (substring arg 1)))
-                    ((string= arg "TRUE") 't)
-                    ((string= arg "FALSE") 'nil)
                     ((and (string-prefix-p "(" arg)
                           (string-suffix-p ")" arg)) ;; list
                      (split-string (substring arg 1 -1) " "))
