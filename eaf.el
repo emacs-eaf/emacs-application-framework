@@ -1343,18 +1343,8 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     eaf-wm-name))
 
 (defun eaf--activate-emacs-win32-window()
-  "Use vbs activate Emacs win32 window."
-  (let* ((activate-window-file-path
-          (concat eaf-config-location "activate-window.vbs"))
-         (activate-window-file-exists (file-exists-p activate-window-file-path)))
-    (unless activate-window-file-exists
-      (with-temp-file activate-window-file-path
-        (insert "set WshShell = CreateObject(\"WScript.Shell\")\nWshShell.AppActivate Wscript.Arguments(0)")))
-    (shell-command-to-string (format "cscript %s %s" activate-window-file-path (emacs-pid)))))
-
-(defun eaf--activate-emacs-wsl-window()
-  "Activate Emacs window running on Wsl."
-  (eaf-call-async "activate_emacs_wsl_window" (frame-parameter nil 'name)))
+  "Activate Emacs win32 window."
+  (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
@@ -1380,9 +1370,8 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 (defun eaf-activate-emacs-window(&optional buffer_id)
   "Activate Emacs window."
   (cond
-   ((eaf--called-from-wsl-on-windows-p)
-    (eaf--activate-emacs-wsl-window))
-   ((memq system-type '(cygwin windows-nt ms-dos))
+   ((or (memq system-type '(cygwin windows-nt ms-dos))
+         (eaf--called-from-wsl-on-windows-p))
     (eaf--activate-emacs-win32-window))
    ((eq system-type 'darwin)
     (eaf--activate-emacs-mac-window))

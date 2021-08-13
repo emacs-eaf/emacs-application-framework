@@ -352,7 +352,7 @@ class EAF(object):
         if platform.system() == "Windows":
             return gw.getActiveWindow()._hWnd
 
-    def activate_emacs_wsl_window(self, frame_title):
+    def activate_emacs_win32_window(self, frame_title):
         if platform.system() == "Windows":
             w = gw.getWindowsWithTitle(frame_title)
             w[0].activate()
