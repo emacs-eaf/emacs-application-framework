@@ -38,16 +38,6 @@
                 `(setq it ,i))
      it))
 
-(defmacro eaf-deferred-lambda (args &rest body)
-  "Anaphoric lambda macro for self recursion."
-  (declare (debug ("args" form &rest form))
-           (indent 1))
-  (let ((argsyms (cl-loop repeat (length args) collect (cl-gensym))))
-    `(lambda (,@argsyms)
-       (let (self)
-         (setq self (lambda( ,@args ) ,@body))
-         (funcall self ,@argsyms)))))
-
 ;; Debug
 (defvar eaf-deferred-debug nil
   "Debug output switch.")
@@ -161,10 +151,6 @@ raising with `error'."
   (setf (eaf-deferred-object-next d) nil)
   d)
 
-(defvar eaf-deferred-onerror nil
-  "Default error handler. This value is nil or a function that
-  have one argument for the error message.")
-
 (defun eaf-deferred-exec-task (d which &optional arg)
   "[internal] Executing deferred task. If the deferred object has
 next deferred task or the return value is a deferred object, this
@@ -197,8 +183,6 @@ an argument value for execution of the deferred task."
          (cond
           (next-deferred
            (eaf-deferred-post-task next-deferred 'ng err))
-          (eaf-deferred-onerror
-           (funcall eaf-deferred-onerror err))
           (t
            (eaf-deferred-log "ERROR : %S" err)
            (message "deferred error : %S" err)
@@ -273,22 +257,6 @@ is a short cut of following code:
   (let ((nd (make-eaf-deferred-object :errorback callback)))
     (eaf-deferred-set-next d nd)))
 
-(defun eaf-deferred-wait (msec)
-  "Return a deferred object scheduled at MSEC millisecond later."
-  (let ((d (eaf-deferred-new)) (start-time (float-time)) timer)
-    (eaf-deferred-log "WAIT : %s" msec)
-    (setq timer (run-at-time
-                 (/ msec 1000.0) nil
-                 (lambda ()
-                   (eaf-deferred-exec-task
-                    d 'ok (* 1000.0 (- (float-time) start-time)))
-                   nil)))
-    (setf (eaf-deferred-object-cancel d)
-          (lambda (x)
-            (cancel-timer timer)
-            (eaf-deferred-default-cancel x)))
-    d))
-
 (defvar eaf-epc-debug nil)
 
 (defun eaf-epc-log (&rest args)
@@ -313,10 +281,6 @@ is a short cut of following code:
 
 (defvar eaf-epc-accept-process-timeout 150
   "Asynchronous timeout time. (msec)")
-
-(defvar eaf-epc-accept-process-timeout-count 100
-  " Startup function waits n msec for the external process getting ready.
-n=(`eaf-epc-accept-process-timeout' * `eaf-epc-accept-process-timeout-count') ")
 
 (put 'epc-error 'error-conditions '(error epc-error))
 (put 'epc-error 'error-message "EPC Error")
@@ -364,7 +328,7 @@ return eaf-epc-connection object."
 (defun eaf-epc-net-send (connection sexp)
   (let* ((msg (encode-coding-string
                (concat (eaf-epc-prin1-to-string sexp) "\n") 'utf-8-unix))
-         (string (concat (eaf-epc-net-encode-length (length msg)) msg))
+         (string (concat (format "%06x" (length msg)) msg))
          (proc (eaf-epc-connection-process connection)))
     (eaf-epc-log ">> SEND : [%S]" string)
     (process-send-string proc string)))
@@ -432,19 +396,13 @@ observers can get the values by following code:
                   (setq ok t))
               ('error (eaf-epc-log "MsgError: %S / <= %S" err event)))
           (unless ok
-            (eaf-epc-run-when-idle 'eaf-epc-process-available-input connection process)))))))
+            (eaf-epc-process-available-input connection process)))))))
 
 (defun eaf-epc-net-have-input-p ()
   "Return true if a complete message is available."
   (goto-char (point-min))
   (and (>= (buffer-size) 6)
        (>= (- (buffer-size) 6) (eaf-epc-net-decode-length))))
-
-(defun eaf-epc-run-when-idle (function &rest args)
-  "Call FUNCTION as soon as Emacs is idle."
-  (apply #'run-at-time
-         (if (featurep 'xemacs) itimer-short-interval 0)
-         nil function args))
 
 (defun eaf-epc-net-read-or-lose (_process)
   (condition-case error
@@ -470,10 +428,6 @@ observers can get the values by following code:
 (defun eaf-epc-net-decode-length ()
   "Read a 24-bit hex-encoded integer from buffer."
   (string-to-number (buffer-substring-no-properties (point) (+ (point) 6)) 16))
-
-(defun eaf-epc-net-encode-length (n)
-  "Encode an integer into a 24-bit hex string."
-  (format "%06x" n))
 
 (defun eaf-epc-prin1-to-string (sexp)
   "Like `prin1-to-string' but don't octal-escape non-ascii characters.
@@ -516,14 +470,6 @@ docstring  : docstring (one string) ex: \"A test function. Return sum of A,B,C a
 those objects currently connect to the epc peer.
 This variable is for debug purpose.")
 
-(defun eaf-epc-live-connections-add (mngr)
-  "[internal] Add the EPC manager object."
-  (push mngr eaf-epc-live-connections))
-
-(defun eaf-epc-live-connections-delete (mngr)
-  "[internal] Remove the EPC manager object."
-  (setq eaf-epc-live-connections (delete mngr eaf-epc-live-connections)))
-
 (defun eaf-epc-server-process-name (uid)
   (format "eaf-epc-server:%s" uid))
 
@@ -540,7 +486,8 @@ This variable is for debug purpose.")
     (when (and proc (equal 'run (process-status proc)))
       (kill-process proc))
     (when buf  (kill-buffer buf))
-    (eaf-epc-live-connections-delete mngr)))
+    (setq eaf-epc-live-connections (delete mngr eaf-epc-live-connections))
+    ))
 
 (defun eaf-epc-args (args)
   "[internal] If ARGS is an atom, return it. If list, return the cadr of it."
@@ -577,7 +524,7 @@ This variable is for debug purpose.")
                     (eaf-epc-handler-methods ,mngr (caadr args))))
                ) do
              (eaf-epc-signal-connect channel method body))
-    (eaf-epc-live-connections-add mngr)
+    (push mngr eaf-epc-live-connections)
     mngr))
 
 (defun eaf-epc-manager-send (mngr method &rest messages)
