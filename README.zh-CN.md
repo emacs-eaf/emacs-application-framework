@@ -76,19 +76,12 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
 
 #### 2. 安装EAF依赖，
 
-##### GNU/Linux用户：
+##### Linux用户和Windows用户：
 
 ```Bash
 cd emacs-application-framework
 chmod +x ./install-eaf.py
 python ./install-eaf.py
-```
-
-##### Windows用户：
-
-```Bash
-cd emacs-application-framework
-node ./install-eaf-win32.js
 ```
 
 ##### Mac用户:

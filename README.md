@@ -77,19 +77,12 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
 
 #### 2. Install EAF dependencies
 
-##### If you use GNU/Linux,
+##### Linux and Windows,
 
 ```Bash
 cd emacs-application-framework
 chmod +x ./install-eaf.py
 python ./install-eaf.py
-```
-
-##### If you use Windows,
-
-```Bash
-cd emacs-application-framework
-node ./install-eaf-win32.js
 ```
 
 ##### If you use macOS,

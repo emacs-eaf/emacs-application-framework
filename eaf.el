@@ -167,20 +167,6 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 
 (require 'eaf-epc)
 
-;;;###autoload
-(defun eaf-install-dependencies ()
-  "An interactive function that run install-eaf.py or install-eaf-win32.js or install-eaf-mac.sh for Linux or Windows or macOS respectively."
-  (interactive)
-  (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
-         (default-directory eaf-dir))
-    (cond ((eq system-type 'gnu/linux)
-           (shell-command (concat "python " "install-eaf.py" "&")))
-          ((memq system-type '(cygwin windows-nt ms-dos))
-           (shell-command (format "node %s" (concat "install-eaf-win32.js" "&"))))
-          ((eq system-type 'darwin)
-           (shell-command (concat "./install-eaf-mac.sh" "&"))))))
-
-
 (defgroup eaf nil
   "Emacs Application Framework."
   :group 'applications)
