@@ -614,15 +614,27 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
       (kill-buffer eaf-name))
     (message "[EAF] Process terminated.")))
 
+(defun eaf--kill-devtools-buffers ()
+  (dolist (buffer (eaf--get-eaf-buffers))
+    (with-current-buffer buffer
+      (when (string-prefix-p "DevTools - " (buffer-name buffer))
+        (kill-buffer buffer)))))
+
 (defun eaf-restart-process ()
   "Stop and restart EAF process."
   (interactive)
-  (when (get-buffer "DevTools - file:///")
-    (kill-buffer "DevTools - file:///"))
+  ;; We need kill debug page first.
+  (eaf--kill-devtools-buffers)
+
+  ;; Record reset buffers to `eaf--first-start-app-buffers'.
   (setq eaf--first-start-app-buffers nil)
   (eaf-for-each-eaf-buffer
    (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--first-start-app-buffers))
+
+  ;; Stop EAF process.
   (eaf-stop-process t)
+
+  ;; Start EAF process, EAF will restore page in `eaf--first-start-app-buffers'.
   (eaf-start-process))
 
 (defun eaf--decode-string (str)
@@ -1371,7 +1383,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   "Activate Emacs window."
   (cond
    ((or (memq system-type '(cygwin windows-nt ms-dos))
-         (eaf--called-from-wsl-on-windows-p))
+        (eaf--called-from-wsl-on-windows-p))
     (eaf--activate-emacs-win32-window))
    ((eq system-type 'darwin)
     (eaf--activate-emacs-mac-window))
