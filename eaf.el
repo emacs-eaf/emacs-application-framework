@@ -1208,8 +1208,6 @@ When called interactively, URL accepts a file that can be opened by EAF."
         (cond
          ((equal app-name "browser")
           (setq url (concat "file://" url)))
-         ((equal app-name "office")
-          (user-error "Please use `eaf-open-office' instead!"))
          ((equal app-name "markdown-previewer")
           ;; Warning user install java if found PlantUML syntax in markdown file.
           (with-temp-buffer
