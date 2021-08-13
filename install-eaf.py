@@ -27,6 +27,8 @@ parser.add_argument("--ignore-node-deps", action="store_true",
                     help='ignore node dependencies')
 parser.add_argument("--app-git-full-clone", action="store_true",
                     help='apps to conduct a full clone to preserve git logs')
+parser.add_argument("--app-drop-local-edit", action="store_true",
+                    help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
 parser.add_argument("--use-gitee", action="store_true",
                     help='use gitee mirror instead of github')
 args = parser.parse_args()
@@ -91,6 +93,9 @@ def add_or_update_app(app: str, app_spec_dict):
         print("\n[EAF] Adding", app, "application to EAF...")
 
     if os.path.exists(path):
+        if args.app_drop_local_edit:
+            run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
+            run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
         run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
     elif args.app_git_full_clone:
         run_command(["git", "clone", "--branch", "master", url, path])
