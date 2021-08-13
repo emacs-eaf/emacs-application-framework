@@ -1250,7 +1250,7 @@ class BrowserBuffer(Buffer):
                 get_emacs_var("eaf-emacs-theme-background-color"),
                 get_emacs_var("eaf-emacs-theme-foreground-color"))
 
-        return LH.tostring(root).decode(encoding="UTF-8")
+        return LH.tostring(root, encoding=str)
 
     @QtCore.pyqtSlot(str, list)
     def eval_emacs_function(self, function_name, function_arguments):
