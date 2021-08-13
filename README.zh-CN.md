@@ -79,7 +79,7 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
 ```Bash
 cd emacs-application-framework
 chmod +x ./install-eaf.py
-python ./install-eaf.py
+./install-eaf.py
 ```
 
 `install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
