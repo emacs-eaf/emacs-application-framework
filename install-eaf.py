@@ -238,26 +238,30 @@ def install_app_deps(distro, deps_dict):
         json.dump(list(set(prev_app_choices)), f)
 
     print("[EAF] Finished installing application dependencies")
-    print("[EAF] Please add the following to your init.el to use application:")
+    print("[EAF] Please ensure the following are added to your init.el:")
     for app in prev_app_choices:
         print("(require 'eaf-{})".format(app))
 
 def main():
-    distro = get_distro()
-    with open(os.path.join(script_path, 'dependencies.json')) as f:
-        deps_dict = json.load(f)
+    try:
+        distro = get_distro()
+        with open(os.path.join(script_path, 'dependencies.json')) as f:
+            deps_dict = json.load(f)
 
-    if (not args.ignore_core_deps and len(args.install_app) == 0) or args.install_core_deps:
-        print("[EAF] ------------------------------------------")
-        install_core_deps(distro, deps_dict)
-        print("[EAF] ------------------------------------------")
+        if (not args.ignore_core_deps and len(args.install_app) == 0) or args.install_core_deps:
+            print("[EAF] ------------------------------------------")
+            install_core_deps(distro, deps_dict)
+            print("[EAF] ------------------------------------------")
 
-    if not args.install_core_deps:
-        print("[EAF] ------------------------------------------")
-        install_app_deps(distro, deps_dict)
-        print("[EAF] ------------------------------------------")
+        if not args.install_core_deps:
+            print("[EAF] ------------------------------------------")
+            install_app_deps(distro, deps_dict)
+            print("[EAF] ------------------------------------------")
 
-    print("[EAF] install-eaf.py finished.")
+            print("[EAF] install-eaf.py finished.")
+    except KeyboardInterrupt:
+        print("[EAF] install-eaf.py aborted")
+        sys.exit()
 
 
 if __name__ == '__main__':
