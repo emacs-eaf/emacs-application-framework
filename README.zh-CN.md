@@ -118,6 +118,14 @@ chmod +x ./install-eaf.py
 (require 'eaf-js-video-player)
 ```
 
+#### 5. 下载完成！
+
+恭喜，到这一步你已成功下载好了EAF！你可以通过`M-x eaf-open-demo`（前提是你下载了`demo`应用）看看EAF是否可以成功运行了。
+
+如果你有任何使用上的问题，强烈建议读一下[Wiki](#Wiki)以及[常用问题](#常用问题)部分。
+
+我也建议你时常`git pull` **并且** 运行`install-eaf.py`来更新EAF，各种应用与依赖。如果你使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分页面。
+
 ### 依赖列表
 
 | 包名                           | 解释                                     |
@@ -231,7 +239,7 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 ### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)!!!
 
-如果你使用中遇到任何问题，并且问题是`git pull`后出现的，请先阅读[Discussions](https://github.com/emacs-eaf/emacs-application-framework/discussions/527)页面。
+如果你使用中遇到任何问题，并且问题是`git pull`后出现的，请先阅读[Mandatory Procedures to Keep Your EAF Up-To-Date](https://github.com/emacs-eaf/emacs-application-framework/discussions/527?sort=new)页面。
 
 关于其他问题，请用命令 `emacs -q` 并只添加EAF配置做一个对比测试，如果 `emacs -q` 可以正常工作，请检查你个人的配置文件。
 

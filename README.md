@@ -117,7 +117,16 @@ You can use below code to load applications `browser` `pdf-viewer` `js-video-pla
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
 (require 'eaf-js-video-player)
+...
 ```
+
+#### 5. Hooray!
+
+Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that is if you have `demo` installed, of course) to see if everything works properly, and enjoy the new possibilities of Emacs.
+
+I **highly** encourage you to read the [Wiki](#Wiki) and [FAQ](#FAQ) if you have any questions.
+
+Also, I encourage periodically `git pull` **and** run `install-eaf.py` again to update EAF, applications and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug)
 
 ### Dependency List
 
@@ -234,7 +243,7 @@ If we missed your package, please make a PR to add it to the list.
 
 ### For any installation and configuration assistance, please read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first!
 
-If you encounter a problem with EAF, and it occured after pulling the latest commit, please check the [Discussions](https://github.com/emacs-eaf/emacs-application-framework/discussions/527) page first.
+If you encounter a problem with EAF, and it occurred after pulling the latest commit, please check the [Mandatory Procedures to Keep Your EAF Up-To-Date](https://github.com/emacs-eaf/emacs-application-framework/discussions/527?sort=new) page **first**.
 
 For any other problems, please use `emacs -q` and load a minimal setup with only EAF to verify that the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your Emacs config.
 
