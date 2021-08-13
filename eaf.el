@@ -1128,16 +1128,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                       (eaf--get-app-module-path app-name)
                       args)
       (eaf--update-modeline-icon))
-    (eaf--preview-display-buffer app-name buffer))
-  (eaf--post-open-actions url app-name args))
-
-(defun eaf--post-open-actions (url app-name args)
-  "The function to run after `eaf--open-internal', taking the same URL, APP-NAME and ARGS."
-  (cond ((and args (equal app-name "pdf-viewer"))
-         (let ((office-pdf (string-match "office-pdf" args)))
-           (when office-pdf
-             (with-current-buffer (file-name-nondirectory url)
-               (rename-buffer (concat "[Converted] " (substring args 0 (- office-pdf 1))) t)))))))
+    (eaf--preview-display-buffer app-name buffer)))
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
