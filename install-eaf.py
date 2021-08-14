@@ -108,11 +108,13 @@ def add_or_update_app(app: str, app_spec_dict):
             print("[EAF] Clean {}'s local changed for pull code automatically.".format(app))
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
-        output_lines = run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False, get_result=True)
-        for output in output_lines:
-            print(output)
-            if "Already up to date." in output:
-                updated = False
+
+        output_lines = run_command(["git", "fetch" "--dry-run"], path=path, ensure_pass=False, get_result=True)
+        if (len(output_lines) == 0):
+            updated = False
+            print("[EAF] eaf-{} already up to data.".format(app))
+        else:
+            run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
     elif args.app_git_full_clone:
         run_command(["git", "clone", "--branch", "master", url, path])
     else:
@@ -218,7 +220,7 @@ def install_app_deps(distro, deps_dict):
                     if 'npm_rebuild' in deps_dict and deps_dict['npm_rebuild']:
                         npm_rebuild_apps.append(app_path)
 
-    print("[EAF] Installing dependencies for chosen applications")
+    print("\n[EAF] Installing dependencies for chosen applications")
     if not args.ignore_sys_deps and sys.platform == "linux" and len(sys_deps) > 0:
         print("[EAF] Installing system dependencies for installed applications")
         install_sys_deps(distro, sys_deps)
