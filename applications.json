@@ -116,8 +116,8 @@
         "type": "app",
         "github": "https://github.com/emacs-eaf/eaf-org-previewer.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-org-previewer.git",
-        "github_ssh": "git@github.com:emacs-eaf/eaf-previewer.git",
-        "gitee_ssh": "git@gitee.com:emacs-eaf/eaf-previewer.git"
+        "github_ssh": "git@github.com:emacs-eaf/eaf-org-previewer.git",
+        "gitee_ssh": "git@gitee.com:emacs-eaf/eaf-org-previewer.git"
     },
     "pdf-viewer": {
         "name": "EAF PDF Viewer",

@@ -42,7 +42,7 @@ def yes_no(question, default_yes=False, default_no=False):
 
 
 def git_repos_sync():
-    with open(os.path.join(script_path, 'eaf-sources.json')) as f:
+    with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
     for app_name, app_spec_dict in app_dict.items():
         path = os.path.join(tempfile.gettempdir(), "sync-eaf-resourcs", app_name)
