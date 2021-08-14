@@ -410,8 +410,8 @@ Please send PR if it works.
 Please fill an issue if it still doesn't work."
   :type 'list)
 
-(defcustom eaf-start-python-process-when-require nil
-  "Start EAF python process when require `eaf', default is turn off.
+(defcustom eaf-start-python-process-when-require t
+  "Start EAF python process when require `eaf', default is turn on.
 
 Turn on this option will improve start speed."
   :type 'boolean)
