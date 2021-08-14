@@ -163,7 +163,7 @@ def yes_no(question, default_yes=False, default_no=False):
 
 def install_app_deps(distro, deps_dict):
     print("[EAF] Installing application dependencies")
-    with open(os.path.join(script_path, 'applications.json')) as f:
+    with open(os.path.join(script_path, 'eaf-sources.json')) as f:
         app_dict = json.load(f)
 
     prev_app_choices = []
@@ -199,6 +199,9 @@ def install_app_deps(distro, deps_dict):
                 install_this_app = yes_no("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ", default_no=True)
             elif use_prev_choices and app_name in prev_app_choices:
                 install_this_app = True
+
+        if app_spec_dict["type"] != "app":
+                install_this_app = False
 
         if args.install_all_apps or install_this_app:
             prev_app_choices.append(app_name)
