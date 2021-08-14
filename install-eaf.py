@@ -113,11 +113,11 @@ def add_or_update_app(app: str, app_spec_dict):
             updated = False
             print("[EAF]", app, "already up-to-date")
         else:
-            run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
+            run_command(["git", "pull", "origin", "HEAD"], path=path, ensure_pass=False)
     elif args.app_git_full_clone:
-        run_command(["git", "clone", "--branch", "master", url, path])
+        run_command(["git", "clone", "--single-branch", url, path])
     else:
-        run_command(["git", "clone", "--depth", "1", "--branch", "master", url, path])
+        run_command(["git", "clone", "--depth", "1", "--single-branch", url, path])
     return updated
 
 def get_distro():
@@ -190,6 +190,8 @@ def install_app_deps(distro, deps_dict):
     vue_install_apps = []
     npm_rebuild_apps = []
     for app_name, app_spec_dict in app_dict.items():
+        if app_spec_dict["type"] != "app":
+            continue
         install_this_app = False
         if not args.install_all_apps:
             if len(args.install_app) > 0 and app_name in args.install_app:

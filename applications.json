@@ -1,6 +1,6 @@
 {
     "emacs-application-framework": {
-        "name": "EAF (Emace Application Framework)",
+        "name": "EAF (Emacs Application Framework)",
         "type": "core",
         "github": "https://github.com/emacs-eaf/emacs-application-framework.git",
         "gitee": "https://gitee.com/emacs-eaf/emacs-application-framework.git",
