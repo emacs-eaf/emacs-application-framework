@@ -40,14 +40,13 @@ NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     print("[EAF] Running", ' '.join(command), "@", path)
     if get_result:
-        process = subprocess.Popen(command, stdin = subprocess.PIPE, stderr = subprocess.PIPE,
-                                   stdout = subprocess.PIPE, universal_newlines=True, text=True, cwd=path)
+        process = subprocess.Popen(command, stdin = subprocess.PIPE, stdout = subprocess.PIPE,
+                                   universal_newlines=True, text=True, cwd=path)
     else:
-        process = subprocess.Popen(command, stdin = subprocess.PIPE, stderr = subprocess.PIPE,
+        process = subprocess.Popen(command, stdin = subprocess.PIPE,
                                    universal_newlines=True, text=True, cwd=path)
     process.wait()
     if process.returncode != 0 and ensure_pass:
-        print(process.stderr)
         sys.exit(process.returncode)
     if get_result:
         return process.stdout.readlines()
