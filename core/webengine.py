@@ -64,14 +64,15 @@ class BrowserView(QWebEngineView):
 
         self.search_term = ""
 
-        self.marker_js_raw = self.read_js_content("marker.js")
-        self.get_focus_text_js = self.read_js_content("get_focus_text.js")
-        self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
-        self.clear_focus_js = self.read_js_content("clear_focus.js")
-        self.select_input_text_js = self.read_js_content("select_input_text.js")
-        self.caret_browsing_js_raw = self.read_js_content("caret_browsing.js")
-        self.get_selection_text_js = self.read_js_content("get_selection_text.js")
-        self.focus_input_js = self.read_js_content("focus_input.js")
+        self.buildin_js_dir = os.path.join(os.path.dirname(__file__), "js")
+
+        self.marker_js_raw = None
+        self.get_focus_text_js = None
+        self.set_focus_text_raw = None
+        self.clear_focus_js = None
+        self.select_input_text_js = None
+        self.get_selection_text_js = None
+        self.focus_input_js = None
 
         self.scroll_behavior = get_emacs_var("eaf-browser-scroll-behavior")
         self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
@@ -118,7 +119,7 @@ class BrowserView(QWebEngineView):
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
-        return open(os.path.join(os.path.dirname(__file__), "js", js_file), "r").read()
+        return open(os.path.join(self.buildin_js_dir, js_file), "r").read()
 
     def filter_url(self, url):
         ''' Filter url, avoid duplicate url for the same keyword.'''
@@ -366,6 +367,9 @@ class BrowserView(QWebEngineView):
     @interactive
     def get_selection_text(self):
         ''' Get the selected text.'''
+        if self.get_selection_text_js == None:
+            self.get_selection_text_js = self.read_js_content("get_selection_text.js")
+
         return self.execute_js(self.get_selection_text_js)
 
     @interactive(insert_or_do=True)
@@ -423,6 +427,9 @@ class BrowserView(QWebEngineView):
 
     def select_input_text(self):
         ''' Select input text.'''
+        if self.select_input_text_js == None:
+            self.select_input_text_js = self.read_js_content("select_input_text.js")
+
         self.eval_js(self.select_input_text_js)
 
     @interactive
@@ -431,6 +438,9 @@ class BrowserView(QWebEngineView):
         return self.url().toString().replace(" ", "%20")
 
     def load_marker_file(self):
+        if self.marker_js_raw == None:
+            self.marker_js_raw = self.read_js_content("marker.js")
+
         self.eval_js(self.marker_js_raw.replace("%1", get_emacs_var("eaf-marker-letters")))
 
     def cleanup_links_dom(self):
@@ -515,22 +525,34 @@ class BrowserView(QWebEngineView):
 
     def get_focus_text(self):
         ''' Get the focus text.'''
+        if self.get_focus_text_js == None:
+            self.get_focus_text_js = self.read_js_content("get_focus_text.js")
+
         return self.execute_js(self.get_focus_text_js)
 
     @interactive
     def set_focus_text(self, new_text):
         ''' Set the focus text.'''
+        if self.set_focus_text_raw == None:
+            self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
+
         self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
     @interactive(insert_or_do=True)
     def focus_input(self):
         ''' input in focus.'''
+        if self.focus_input_js == None:
+            self.focus_input_js = self.read_js_content("focus_input.js")
+
         self.execute_js(self.focus_input_js)
 
     @interactive
     def clear_focus(self):
         ''' Clear the focus.'''
+        if self.clear_focus_js == None:
+            self.clear_focus_js = self.read_js_content("clear_focus.js")
+
         self.eval_js(self.clear_focus_js)
 
     @interactive
