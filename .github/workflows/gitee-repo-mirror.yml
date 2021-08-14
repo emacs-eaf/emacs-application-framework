@@ -1,0 +1,24 @@
+name: Gitee repos mirror periodic job
+on:
+  push: 
+    branches: [ master ]
+  pull_request: 
+    branches: [ master ]
+  #schedule:
+  #  # 每天北京时间9点跑
+  #  - cron:  '0 1 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror the Github organization repos to Gitee.
+        uses: Yikun/hub-mirror-action@master
+        with:
+          src: github/loyalpartner
+          dst: gitee/bbblili
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          static_list: "emacs-application-framework"
+          debug: true
+
+
