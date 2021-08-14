@@ -109,10 +109,10 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
-        output_lines = run_command(["git", "fetch" "--dry-run"], path=path, ensure_pass=False, get_result=True)
+        output_lines = run_command(["git", "fetch", "--dry-run"], path=path, ensure_pass=False, get_result=True)
         if (len(output_lines) == 0):
             updated = False
-            print("[EAF] eaf-{} already up to data.".format(app))
+            print("[EAF] eaf-{} is already up-to-date.".format(app))
         else:
             run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False)
     elif args.app_git_full_clone:
