@@ -99,6 +99,9 @@ def add_or_update_app(app: str, app_spec_dict):
     url = ""
     path = os.path.join("app", app)
     if args.use_gitee:
+        if 'gitee' not in app_spec_dict:
+            print("[EAF] There is no Gitee URL set for", app)
+            exit(1)
         url = app_spec_dict['gitee']
     else:
         url = app_spec_dict['github']
