@@ -2,6 +2,7 @@
     "emacs-application-framework": {
         "name": "EAF (Emacs Application Framework)",
         "type": "core",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/emacs-application-framework.git",
         "gitee": "https://gitee.com/emacs-eaf/emacs-application-framework.git",
         "github_ssh": "git@github.com:emacs-eaf/emacs-application-framework.git",
@@ -10,6 +11,7 @@
     "airshare": {
         "name": "EAF Airshare",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-airshare.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-airshare.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-airshare.git",
@@ -18,6 +20,7 @@
     "browser": {
         "name": "EAF Browser",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-browser.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-browser.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-browser.git",
@@ -26,6 +29,7 @@
     "camera": {
         "name": "EAF Camera",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-camera.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-camera.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-camera.git",
@@ -34,6 +38,7 @@
     "demo": {
         "name": "EAF Demo",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-demo.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-demo.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-demo.git",
@@ -42,6 +47,7 @@
     "file-browser": {
         "name": "EAF File Browser",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-file-browser.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-file-browser.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-file-browser.git",
@@ -50,6 +56,7 @@
     "file-manager": {
         "name": "EAF File Manager",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-file-manager.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-file-manager.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-file-manager.git",
@@ -58,6 +65,7 @@
     "file-sender": {
         "name": "EAF File Sender",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-file-sender.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-file-sender.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-file-sender.git",
@@ -66,6 +74,7 @@
     "image-viewer": {
         "name": "EAF Image Viewer",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-image-viewer.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-image-viewer.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-image-viewer.git",
@@ -74,6 +83,7 @@
     "js-video-player": {
         "name": "EAF Video Player (JS)",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-js-video-player.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-js-video-player.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-js-video-player.git",
@@ -82,6 +92,7 @@
     "jupyter": {
         "name": "EAF Jupyter",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-jupyter.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-jupyter.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-jupyter.git",
@@ -90,6 +101,7 @@
     "markdown-previewer": {
         "name": "EAF Markdown Previewer",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-markdown-previewer.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-markdown-previewer.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-markdown-previewer.git",
@@ -98,6 +110,7 @@
     "mindmap": {
         "name": "EAF Mindmap",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-mindmap.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-mindmap.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-mindmap.git",
@@ -106,6 +119,7 @@
     "music-player": {
         "name": "EAF Music Player",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-music-player.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-music-player.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-music-player.git",
@@ -114,6 +128,7 @@
     "org-previewer": {
         "name": "EAF Org Previewer",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-org-previewer.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-org-previewer.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-org-previewer.git",
@@ -122,6 +137,7 @@
     "pdf-viewer": {
         "name": "EAF PDF Viewer",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-pdf-viewer.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-pdf-viewer.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-pdf-viewer.git",
@@ -130,6 +146,7 @@
     "system-monitor": {
         "name": "EAF System Monitor",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-system-monitor.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-system-monitor.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-system-monitor.git",
@@ -138,6 +155,7 @@
     "terminal": {
         "name": "EAF Terminal",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-terminal.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-terminal.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-terminal.git",
@@ -146,6 +164,7 @@
     "video-player": {
         "name": "EAF Video Player",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-video-player.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-video-player.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-video-player.git",
@@ -154,6 +173,7 @@
     "vue-demo": {
         "name": "EAF Vue Demo",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-vue-demo.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-vue-demo.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-vue-demo.git",
@@ -162,6 +182,7 @@
     "netease-cloud-music": {
         "name": "EAF NetEase Cloud Music",
         "type": "app",
+        "git_branch": "master",
         "github": "https://github.com/emacs-eaf/eaf-netease-cloud-music.git",
         "gitee": "https://gitee.com/emacs-eaf/eaf-netease-cloud-music.git",
         "github_ssh": "git@github.com:emacs-eaf/eaf-netease-cloud-music.git",
