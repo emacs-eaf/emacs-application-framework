@@ -167,6 +167,28 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/package.json` or `
 
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
+## 按键绑定
+
+### 全局按键绑定
+
+  | Key   | Event                       |
+  | :--   | :--                         |
+  | `C-h m` | eaf-describe-bindings       |
+  | `C-c b` | eaf-open-bookmark           |
+  | `C-c e` | eaf-open-external           |
+  | `C-c i` | eaf-import-chrome-bookmarks |
+  | `M-/`   | eaf-get-path-or-url         |
+  | `M-'`   | eaf-toggle-fullscreen       |
+  | `M-[`   | eaf-share-path-or-url       |
+
+### 底部编辑窗口按键绑定
+
+  | Key     | Event                              |
+  | :--     | :--                                |
+  | `C-c C-c` | eaf-edit-buffer-confirm            |
+  | `C-c C-k` | eaf-edit-buffer-cancel             |
+  | `C-c C-t` | eaf-edit-buffer-switch-to-org-mode |
+
 ## Wiki
 强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)。
 

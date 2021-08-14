@@ -169,6 +169,28 @@ You can check `app/name/package.json` and `app/name/dependencies.json` for EAF a
 
 - EAF Browser and PDF Viewer support Emacs built-in bookmark operation, with `M-x bookmark-set` (defaulted to `C-x r m`) and `M-x bookmark-bmenu-list` (defaulted to `C-x r l`).
 
+## Keybindings
+
+### Global Keybindings
+
+  | Key   | Event                       |
+  | :--   | :--                         |
+  | `C-h m` | eaf-describe-bindings       |
+  | `C-c b` | eaf-open-bookmark           |
+  | `C-c e` | eaf-open-external           |
+  | `C-c i` | eaf-import-chrome-bookmarks |
+  | `M-/`   | eaf-get-path-or-url         |
+  | `M-'`   | eaf-toggle-fullscreen       |
+  | `M-[`   | eaf-share-path-or-url       |
+
+### Bottom Pop Edit Buffer Keybindings
+
+  | Key     | Event                              |
+  | :--     | :--                                |
+  | `C-c C-c` | eaf-edit-buffer-confirm            |
+  | `C-c C-k` | eaf-edit-buffer-cancel             |
+  | `C-c C-t` | eaf-edit-buffer-switch-to-org-mode |
+
 ## Wiki
 
 It is **highly** suggested to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first before using EAF.
