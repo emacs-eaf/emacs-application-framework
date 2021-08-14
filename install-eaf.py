@@ -39,11 +39,18 @@ NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     print("[EAF] Running", ' '.join(command), "@", path)
+
+    # Use LC_ALL=C to make sure command output use English.
+    # Then we can use English keyword to check command output.
+    english_env = os.environ.copy()
+    english_env['LC_ALL'] = 'C'
+
     if get_result:
-        process = subprocess.Popen(command, stdin = subprocess.PIPE, stdout = subprocess.PIPE,
-                                   universal_newlines=True, text=True, cwd=path)
+        process = subprocess.Popen(command, env = english_env, stdin = subprocess.PIPE,
+                                   universal_newlines=True, text=True, cwd=path,
+                                   stdout = subprocess.PIPE)
     else:
-        process = subprocess.Popen(command, stdin = subprocess.PIPE,
+        process = subprocess.Popen(command, env = english_env, stdin = subprocess.PIPE,
                                    universal_newlines=True, text=True, cwd=path)
     process.wait()
     if process.returncode != 0 and ensure_pass:
@@ -97,7 +104,7 @@ def add_or_update_app(app: str, app_spec_dict):
         url = app_spec_dict['github']
 
     if os.path.exists(path):
-        print("\n[EAF] Updating", app, "to newest version...")
+        print("[EAF] Updating", app, "to newest version...")
     else:
         print("\n[EAF] Adding", app, "application to EAF...")
 
@@ -108,12 +115,12 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
-        output_lines = run_command(["git", "fetch", "--dry-run"], path=path, ensure_pass=False, get_result=True)
-        if (len(output_lines) == 0):
-            updated = False
-            print("[EAF]", app, "already up-to-date")
-        else:
-            run_command(["git", "pull", "origin", "HEAD"], path=path, ensure_pass=False)
+        output_lines = run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False, get_result=True)
+        for output in output_lines:
+            print(output)
+            if "Already up to date." in output:
+                updated = False
+
     elif args.app_git_full_clone:
         run_command(["git", "clone", "--single-branch", url, path])
     else:
