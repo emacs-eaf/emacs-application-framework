@@ -1,12 +1,9 @@
 name: Gitee repos mirror periodic job
 on:
-  push: 
-    branches: [ master ]
-  pull_request: 
-    branches: [ master ]
-  #schedule:
-  #  # 每天北京时间9点跑
-  #  - cron:  '0 1 * * *'
+  push:
+  schedule:
+    # 每天北京时间9点跑
+    - cron:  '0 1 * * *'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,5 +17,3 @@ jobs:
           dst_token: ${{ secrets.GITEE_TOKEN }}
           static_list: "emacs-application-framework"
           debug: true
-
-
