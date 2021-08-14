@@ -410,6 +410,12 @@ Please send PR if it works.
 Please fill an issue if it still doesn't work."
   :type 'list)
 
+(defcustom eaf-start-python-process-when-require nil
+  "Start EAF python process when require `eaf', default is turn off.
+
+Turn on this option will improve start speed."
+  :type 'boolean)
+
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -530,8 +536,6 @@ A hashtable, key is url and value is title.")
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (cond
-   ((not eaf--first-start-app-buffers)
-    (user-error "[EAF] Please initiate EAF with eaf-open-... functions only"))
    ((eaf-epc-live-p eaf-epc-process)
     (user-error "[EAF] Process is already running")))
 
@@ -562,6 +566,14 @@ A hashtable, key is url and value is title.")
                    eaf-internal-process-prog eaf-internal-process-args)))
     (set-process-query-on-exit-flag eaf-internal-process nil))
   (message "[EAF] Process starting..."))
+
+(run-with-idle-timer
+     1 nil
+     #'(lambda ()
+         ;; Start EAF python process when load `eaf'.
+         ;; It will improve start speed.
+         (when eaf-start-python-process-when-require
+           (eaf-start-process))))
 
 (defvar eaf-stop-process-hook nil)
 
