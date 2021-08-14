@@ -13,6 +13,8 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 parser = argparse.ArgumentParser()
 parser.add_argument("--force", action="store_true",
                     help='force sync even when there is no updates')
+parser.add_argument("--github-action", action="store_true",
+                    help='Use it when run script in github action.')
 args = parser.parse_args()
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
@@ -40,14 +42,16 @@ def yes_no(question, default_yes=False, default_no=False):
     else:
         return key.lower() == 'y'
 
-
-def git_repos_sync():
+def git_repos_sync(gitee_info):
     with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
     for app_name, app_spec_dict in app_dict.items():
         path = os.path.join(tempfile.gettempdir(), "sync-eaf-resourcs", app_name)
         github_url = app_spec_dict["github"]
-        gitee_ssh_url = app_spec_dict["gitee_ssh"]
+        if gitee_info:
+            gitee_url = str.replace(app_spec_dict["gitee"], "https://gitee.com", gitee_info)
+        else:
+            gitee_url = app_spec_dict["gitee_ssh"]
         updated = True
         print("[EAF] * Sync EAF {0} repo.".format(app_name))
         print("[EAF] ** Github to local: {0} -> {1}".format(github_url, path))
@@ -66,17 +70,41 @@ def git_repos_sync():
             run_command(["git", "clone", "--branch", "master", github_url, path])
 
         if updated or args.force:
-            print("[EAF] ** Local to gitee ({0} -> {1})".format(path, gitee_ssh_url))
-            run_command(["git", "push", "-f", gitee_ssh_url], path=path)
+            print("[EAF] ** Local to gitee ({0} -> {1})".format(path, gitee_url))
+            run_command(["git", "push", "-f", gitee_url], path=path)
 
 def main():
+    gitee_info = False
     try:
         print("[EAF] If you don't know what you're doing with this script, don't do it!")
-        result = yes_no("[EAF] Continue? y/N ", default_no=True)
+        if args.github_action:
+            ## gitee_info get from environment variable GITEE_INFO.
+            ## GITEE_INFO can config in: "https://github.com" -> "Settings" -> "Secrets" -> "New repository secret"
+            ##
+            ## 1. NAME: GITEE_INFO
+            ## 2. Value:
+            ##
+            ##    https://<gitee-username>:<gitee-token>@gitee.com
+            ##
+            ## NOTE:
+            ## 1. <gitee-username> is the username of gitee.com
+            ## 2. <gitee-token> can create in: "https://gitee.com" -> "设置" -> "私人令牌".
+            try:
+                gitee_info = os.environ["GITEE_INFO"]
+            except KeyError:
+                gitee_info = False
+            if gitee_info and len(gitee_info) > 0:
+                result = True
+            else:
+                print("[EAF] Gitee info is not found, exiting...")
+                sys.exit()
+        else:
+            result = yes_no("[EAF] Continue? y/N ", default_no=True)
+
         if result:
             print("[EAF] Sure. This will probably fail anyways...")
             print("[EAF] sync-eaf-resources.py started")
-            git_repos_sync()
+            git_repos_sync(gitee_info)
         else:
             print("[EAF] Wise decision. Exiting...")
             sys.exit()
