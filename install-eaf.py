@@ -115,7 +115,7 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
-        output_lines = run_command(["git", "pull", "origin", "master"], path=path, ensure_pass=False, get_result=True)
+        output_lines = run_command(["git", "pull"], path=path, ensure_pass=False, get_result=True)
         for output in output_lines:
             print(output)
             if "Already up to date." in output:
