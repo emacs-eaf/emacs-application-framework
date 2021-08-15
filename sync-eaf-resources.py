@@ -13,8 +13,12 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 parser = argparse.ArgumentParser()
 parser.add_argument("--force", action="store_true",
                     help='force sync even when there is no updates')
-parser.add_argument("--github-action", action="store_true",
-                    help='Use it when run script in github action.')
+parser.add_argument("--really_run", action="store_true",
+                    help='Really run this script.')
+parser.add_argument("--mirror-username", type=str,
+                    help='The username of mirror.')
+parser.add_argument("--mirror-password", type=str,
+                    help='The password of mirror.')
 args = parser.parse_args()
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False, print_command=True):
@@ -50,86 +54,73 @@ def yes_no(question, default_yes=False, default_no=False):
     else:
         return key.lower() == 'y'
 
-def git_repos_sync(gitee_info):
+def git_repos_sync(mirror_username, mirror_password):
     with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
     for app_name, app_spec_dict in app_dict.items():
         path = os.path.join(tempfile.gettempdir(), "sync-eaf-resourcs", app_name)
-        git_branch = app_spec_dict["git_branch"]
-        github_url = app_spec_dict["github"]
-        if gitee_info:
-            gitee_url = str.replace(app_spec_dict["gitee"], "https://gitee.com", gitee_info)
-        else:
-            gitee_url = app_spec_dict["gitee_ssh"]
+        branch = app_spec_dict["branch"]
+        url = app_spec_dict["url"].format(username = mirror_username, password = mirror_password)
+        mirror_url = app_spec_dict["mirror_url"].format(username = mirror_username, password = mirror_password)
         updated = True
-        print("[EAF] * Sync EAF {0} repo.".format(app_name))
-        print("[EAF] ** Github -> local")
-        if os.path.exists(path):
-            run_command(["git", "clean", "-df"], path=path)
-            run_command(["git", "remote", "rm", "origin"], path=path)
-            run_command(["git", "remote", "add", "origin", github_url], path=path)
-            run_command(["git", "reset", "--hard"], path=path)
-            output_lines = run_command(["git", "pull", "origin", git_branch], path=path, ensure_pass=False, get_result=True)
-            for output in output_lines:
-                print(output)
-            if "Already up to date." in output:
-                updated = False
-        else:
-            run_command(["git", "clone", "--branch", git_branch, github_url, path])
-
-        if updated or args.force:
-            print("[EAF] ** Local -> gitee")
-            if gitee_info:
-                ## When run script in github action, do not print command and output,
-                ## for command and output may include gitee username and password.
-                print("[EAF] Running git push -f <gitee_url>")
-                run_command(["git", "push", "-f", gitee_url], path=path, print_command=False, get_result=True)
+        if url and mirror_url:
+            print("[EAF] * Sync EAF {0} repo.".format(app_name))
+            print("[EAF] ** Upstream -> Local-dir")
+            if os.path.exists(path):
+                run_command(["git", "clean", "-df"], path=path)
+                run_command(["git", "remote", "rm", "origin"], path=path)
+                run_command(["git", "remote", "add", "origin", url], path=path)
+                run_command(["git", "reset", "--hard"], path=path)
+                output_lines = run_command(["git", "pull", "origin", branch], path=path, ensure_pass=False, get_result=True)
+                for output in output_lines:
+                    print(output)
+                    if "Already up to date." in output:
+                        updated = False
             else:
-                run_command(["git", "push", "-f", gitee_url], path=path)
+                run_command(["git", "clone", "--branch", branch, url, path])
+
+            if updated or args.force:
+                print("[EAF] ** Local-dir -> Mirror")
+                ## When run script in github action, do not print command and output,
+                ## for command and output may include mirror username and password.
+                print("[EAF] Running git push -f <mirror_url>")
+                run_command(["git", "push", "-f", mirror_url], path=path, print_command=False, get_result=True)
+        else:
+            print("[EAF] No url or mirror_url can be found. do nothing!")
 
 def main():
-    gitee_info = False
     try:
-        if args.github_action:
-            ## When run this script in git action, https will be used, to deal with
-            ## the problem of gitee username and password inputing, string "https://gitee.com"
-            ## in git-url will be replaced with:
+        if args.really_run:
+            ## The url of mirror must include string: "{username}" and "{password}",
+            ## Which will be replaced to real values when run this script in github-action.
             ##
-            ##    https://<gitee-username>:<gitee-token>@gitee.com
-            ##
-            ## Variable gitee_info record gitee username and password, its value come from
-            ## environment variable "GITEE_INFO", which can be configed in:
+            ## The values of username and password come from environment variable:
+            ## "EAF_MIRROR_USERNAME" and "EAF_MIRROR_PASSWORD", which can be configed in:
             ## "https://github.com" -> "Settings" -> "Secrets" -> "New repository secret"
-            ##
-            ## 1. NAME: GITEE_INFO
-            ## 2. Value:
-            ##
-            ##    https://<gitee-username>:<gitee-token>@gitee.com
-            ##
-            ## NOTE:
-            ## 1. <gitee-username> is the username of gitee.com
-            ## 2. <gitee-token> can create in: "https://gitee.com" -> "设置" -> "私人令牌".
+            result = True
             try:
-                gitee_info = os.environ["GITEE_INFO"]
+                mirror_username = args.mirror_username or os.environ["EAF_MIRROR_USERNAME"]
+                mirror_password = args.mirror_password or os.environ["EAF_MIRROR_PASSWORD"]
             except KeyError:
-                gitee_info = False
-            if gitee_info and len(gitee_info) > 0:
-                result = True
-            else:
-                print("[EAF] Gitee info is not found, exiting...")
-                sys.exit()
+                mirror_username = False
+                mirror_password = False
         else:
-            print("[EAF] If you don't know what you're doing with this script, don't do it!")
-            result = yes_no("[EAF] Continue? y/N ", default_no=True)
-            print("[EAF] Sure. This will probably fail anyways...")
+            print("[EAF] Do nothing, exiting...")
+            sys.exit()
+
+        if mirror_username and mirror_password and len(mirror_username) > 0 and len(mirror_password) > 0:
+            result = True
+        else:
+            result = False
+            print("[EAF] No username or password of mirror, exiting...")
+            sys.exit()
 
         if result:
             print("[EAF] sync-eaf-resources.py started")
             print("[EAF] -----------------------------\n")
-            git_repos_sync(gitee_info)
+            git_repos_sync(mirror_username, mirror_password)
             print("\n[EAF] -----------------------------")
         else:
-            print("[EAF] Wise decision. Exiting...")
             sys.exit()
         print("[EAF] sync-eaf-resources.py finished ?!")
     except KeyboardInterrupt:

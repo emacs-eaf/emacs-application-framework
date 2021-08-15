@@ -21,5 +21,6 @@ jobs:
 
       - name: 'Working'
         env:
-          GITEE_INFO: ${{ secrets.GITEE_INFO }}
-        run: python sync-eaf-resources.py --github-action
+          EAF_MIRROR_USERNAME: ${{ secrets.EAF_MIRROR_USERNAME }}
+          EAF_MIRROR_PASSWORD: ${{ secrets.EAF_MIRROR_PASSWORD }}
+        run: python sync-eaf-resources.py --really_run
