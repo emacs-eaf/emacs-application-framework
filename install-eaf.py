@@ -30,7 +30,7 @@ parser.add_argument("--app-git-full-clone", action="store_true",
 parser.add_argument("--app-drop-local-edit", action="store_true",
                     help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
 parser.add_argument("--use-gitee", action="store_true",
-                    help='use gitee mirror instead of github')
+                    help='use gitee mirror instead of default url.')
 parser.add_argument("--force-install", action="store_true",
                     help="force install app deps even when app is already up-to-date")
 args = parser.parse_args()
@@ -99,12 +99,12 @@ def add_or_update_app(app: str, app_spec_dict):
     url = ""
     path = os.path.join("app", app)
     if args.use_gitee:
-        if 'gitee' not in app_spec_dict:
-            print("[EAF] There is no Gitee URL set for", app)
+        if 'mirror_url' not in app_spec_dict:
+            print("[EAF] There is no gitee mirror URL set in applications.json", app)
             exit(1)
-        url = app_spec_dict['gitee']
+        url = app_spec_dict['mirror_url'].format(username="", password="")
     else:
-        url = app_spec_dict['github']
+        url = app_spec_dict['url']
 
     if os.path.exists(path):
         print("[EAF] Updating", app, "to newest version...")
