@@ -1,4 +1,0 @@
-*.gif filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-core/js/dark_mode.js linguist-vendored
-core/js/caret_browsing.js linguist-vendored
