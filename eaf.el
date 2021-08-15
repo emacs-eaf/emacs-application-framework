@@ -1068,21 +1068,19 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
   (setq eaf--webengine-include-private-codec webengine-include-private-codec)
 
-  ;; Only call `eaf--open-internal' when `eaf--first-start-app-buffers' 
-  (unless eaf--first-start-app-buffers
-    (let* ((first-buffer-info (pop eaf--first-start-app-buffers))
-           (first-start-url (nth 0 first-buffer-info))
-           (first-start-app-name (nth 1 first-buffer-info))
-           (first-start-args (nth 2 first-buffer-info)))
-      (when (and (string-equal first-start-app-name "video-player")
-                 eaf--webengine-include-private-codec)
-        (setq first-start-app-name "js-video-player"))
-      ;; Start first app.
-      (eaf--open-internal first-start-url first-start-app-name first-start-args))
+  (let* ((first-buffer-info (pop eaf--first-start-app-buffers))
+         (first-start-url (nth 0 first-buffer-info))
+         (first-start-app-name (nth 1 first-buffer-info))
+         (first-start-args (nth 2 first-buffer-info)))
+    (when (and (string-equal first-start-app-name "video-player")
+               eaf--webengine-include-private-codec)
+      (setq first-start-app-name "js-video-player"))
+    ;; Start first app.
+    (eaf--open-internal first-start-url first-start-app-name first-start-args))
 
-    (dolist (buffer-info eaf--first-start-app-buffers)
-      (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info)))
-    (setq eaf--first-start-app-buffers nil)))
+  (dolist (buffer-info eaf--first-start-app-buffers)
+    (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info)))
+  (setq eaf--first-start-app-buffers nil))
 
 (defun eaf--update-buffer-details (buffer-id title url)
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
