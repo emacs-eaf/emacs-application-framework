@@ -26,7 +26,7 @@ from PyQt5 import QtWebEngineWidgets as NeverUsed # noqa
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
-from PyQt5.QtNetwork import QNetworkProxy
+from PyQt5.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt5.QtWidgets import QApplication
 from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_var, get_emacs_config_dir, to_camel_case
 from core.view import View
@@ -83,6 +83,9 @@ class EAF(object):
         # Pass epc port and webengine codec information to Emacs when first start EAF.
         self.webengine_include_codec = self.webengine_include_private_codec()
         eval_in_emacs('eaf--first-start', [self.server.server_address[1]])
+
+        # Disable use system proxy, avoid page slow when no network connected.
+        QNetworkProxyFactory.setUseSystemConfiguration(False)
 
         # Set Network proxy.
         proxy_host = get_emacs_var("eaf-proxy-host")
