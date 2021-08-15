@@ -760,9 +760,6 @@ This variable is used for the management purpose.")
          :sentinel
          (lambda (process message)
            (eaf-epc-server-sentinel process message connect-function)))))
-    (unless port
-      ;; notify port number to the parent process via STDOUT.
-      (message "%s\n" (process-contact main-process :service)))
     (push (cons main-process
                 (make-eaf-epc-server
                  :name name :process main-process
