@@ -777,7 +777,8 @@ class BrowserBuffer(Buffer):
             image_path = os.path.join(os.path.expanduser(self.download_path), "image.png")
             touch(image_path)
             with open(image_path, "wb") as f:
-                f.write(base64.decodestring(download_data.split(",")[1].encode("utf-8")))
+                b64bytes = download_data.split(",")[1].encode("utf-8")
+                f.write(base64.b64decode(b64bytes))
 
             message_to_emacs("Save image: " + image_path)
         else:

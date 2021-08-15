@@ -31,8 +31,8 @@ parser.add_argument("--app-drop-local-edit", action="store_true",
                     help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
 parser.add_argument("--use-gitee", action="store_true",
                     help='use gitee mirror instead of github')
-parser.add_argument("--force-install-app", action="store_true",
-                    help="force install app deps even when app is not updated")
+parser.add_argument("--force-install", action="store_true",
+                    help="force install app deps even when app is already up-to-date")
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
@@ -219,7 +219,7 @@ def install_app_deps(distro, deps_dict):
             updated = add_or_update_app(app_name, app_spec_dict)
             app_path = os.path.join(script_path, "app", app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
-            if (updated or args.force_install_app) and os.path.exists(app_dep_path):
+            if (updated or args.force_install) and os.path.exists(app_dep_path):
                 with open(os.path.join(app_dep_path)) as f:
                     deps_dict = json.load(f)
                 if not args.ignore_sys_deps and sys.platform == "linux" and distro in deps_dict:
