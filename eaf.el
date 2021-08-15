@@ -564,8 +564,7 @@ A hashtable, key is url and value is title.")
             (apply 'start-process
                    eaf-name eaf-name
                    eaf-internal-process-prog eaf-internal-process-args)))
-    (set-process-query-on-exit-flag eaf-internal-process nil))
-  (message "[EAF] Process starting..."))
+    (set-process-query-on-exit-flag eaf-internal-process nil)))
 
 (run-with-idle-timer
      1 nil
