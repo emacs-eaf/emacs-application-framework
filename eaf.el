@@ -535,44 +535,41 @@ A hashtable, key is url and value is title.")
 
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
-  (cond
-   ((eaf-epc-live-p eaf-epc-process)
-    (user-error "[EAF] Process is already running")))
+  (unless (eaf-epc-live-p eaf-epc-process)
+    ;; start epc server and set `eaf-server-port'
+    (eaf--start-epc-server)
+    (let* ((eaf-args (append
+                      (list eaf-python-file)
+                      (eaf-get-render-size)
+                      (list (number-to-string eaf-server-port))
+                      )))
 
-  ;; start epc server and set `eaf-server-port'
-  (eaf--start-epc-server)
-  (let* ((eaf-args (append
-                    (list eaf-python-file)
-                    (eaf-get-render-size)
-                    (list (number-to-string eaf-server-port))
-                    )))
+      ;; Folow system DPI.
+      (eaf--follow-system-dpi)
 
-    ;; Folow system DPI.
-    (eaf--follow-system-dpi)
+      ;; Set process arguments.
+      (if eaf-enable-debug
+          (progn
+            (setq eaf-internal-process-prog "gdb")
+            (setq eaf-internal-process-args (append (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command) eaf-args)))
+        (setq eaf-internal-process-prog eaf-python-command)
+        (setq eaf-internal-process-args eaf-args))
 
-    ;; Set process arguments.
-    (if eaf-enable-debug
-        (progn
-          (setq eaf-internal-process-prog "gdb")
-          (setq eaf-internal-process-args (append (list "-batch" "-ex" "run" "-ex" "bt" "--args" eaf-python-command) eaf-args)))
-      (setq eaf-internal-process-prog eaf-python-command)
-      (setq eaf-internal-process-args eaf-args))
-
-    ;; Start python process.
-    (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p))))
-      (setq eaf-internal-process
-            (apply 'start-process
-                   eaf-name eaf-name
-                   eaf-internal-process-prog eaf-internal-process-args)))
-    (set-process-query-on-exit-flag eaf-internal-process nil)))
+      ;; Start python process.
+      (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p))))
+        (setq eaf-internal-process
+              (apply 'start-process
+                     eaf-name eaf-name
+                     eaf-internal-process-prog eaf-internal-process-args)))
+      (set-process-query-on-exit-flag eaf-internal-process nil))))
 
 (run-with-idle-timer
-     1 nil
-     #'(lambda ()
-         ;; Start EAF python process when load `eaf'.
-         ;; It will improve start speed.
-         (when eaf-start-python-process-when-require
-           (eaf-start-process))))
+ 1 nil
+ #'(lambda ()
+     ;; Start EAF python process when load `eaf'.
+     ;; It will improve start speed.
+     (when eaf-start-python-process-when-require
+       (eaf-start-process))))
 
 (defvar eaf-stop-process-hook nil)
 
