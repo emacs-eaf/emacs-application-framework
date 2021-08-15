@@ -510,7 +510,5 @@ if __name__ == "__main__":
 
     eaf = EAF(sys.argv[1:])
 
-    print("EAF process starting...")
-
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())
