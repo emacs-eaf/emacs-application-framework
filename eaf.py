@@ -61,7 +61,8 @@ class EAF(object):
 
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
-        self.server.logger.setLevel(logging.DEBUG)
+        # self.server = ThreadingEPCServer(('localhost', 0)
+        # self.server.logger.setLevel(logging.DEBUG)
         self.server.allow_reuse_address = True
 
         eaf_config_dir = get_emacs_config_dir()
@@ -70,9 +71,11 @@ class EAF(object):
         if not os.path.exists(eaf_config_dir):
             os.makedirs(eaf_config_dir);
 
-        ch = logging.FileHandler(filename=os.path.join(eaf_config_dir, 'epc_log.txt'), mode='w')
-        ch.setLevel(logging.DEBUG)
-        self.server.logger.addHandler(ch)
+        # ch = logging.FileHandler(filename=os.path.join(eaf_config_dir, 'epc_log.txt'), mode='w')
+        # formatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(lineno)04d | %(message)s')
+        # ch.setFormatter(formatter)
+        # ch.setLevel(logging.DEBUG)
+        # self.server.logger.addHandler(ch)
 
         self.server.register_instance(self) # register instance functions let elisp side call
 
