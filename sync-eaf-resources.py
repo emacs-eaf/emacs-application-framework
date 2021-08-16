@@ -57,7 +57,7 @@ def yes_no(question, default_yes=False, default_no=False):
 def add_auth_info_to_url(url, username, password):
     url = url or ""
     new_url = str.replace(url, "https://gitee.com", "https://{0}:{1}@gitee.com".format(username, password))
-    if url == new_url: # Fail to auto info to url.
+    if url == new_url: # Fail to insert auth info into url.
         return False
     else:
         return new_url
@@ -90,9 +90,7 @@ def git_repos_sync(mirror_username, mirror_password):
 
             if updated or args.force:
                 print("[EAF] ** Local-dir -> Mirror")
-                ## When run script in github action, do not print command and output,
-                ## for command and output may include mirror username and password.
-                print("[EAF] Running git push -f {}".format(mirror_url))
+                print("[EAF] Running git push -f {}".format(add_auth_info_to_url(mirror_url, "***", "***")))
                 run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True)
         else:
             print("[EAF] WARN: url or mirror_url of EAF {} may have some problem, please check them!".format(app_name))
@@ -100,11 +98,16 @@ def git_repos_sync(mirror_username, mirror_password):
 def main():
     try:
         if args.really_run:
-            ## The url of mirror must include string: "{username}" and "{password}",
-            ## Which will be replaced to real values when run this script in github-action.
+            ## Before push to mirror url, username and password of mirror
+            ## will be inserted into this url.
             ##
-            ## The values of username and password come from environment variable:
-            ## "EAF_MIRROR_USERNAME" and "EAF_MIRROR_PASSWORD", which can be configed in:
+            ## Username and password of mirror come from arguments or
+            ## environment variable:
+            ##
+            ## 1. EAF_MIRROR_USERNAME
+            ## 2. EAF_MIRROR_PASSWORD
+            ##
+            ## In github-action platform, they can be configed in:
             ## "https://github.com" -> "Settings" -> "Secrets" -> "New repository secret"
             result = True
             try:
