@@ -19,6 +19,8 @@ parser.add_argument("--mirror-username", type=str,
                     help='The username of mirror.')
 parser.add_argument("--mirror-password", type=str,
                     help='The password or token of mirror.')
+parser.add_argument("--mirror-use-ssh", action="store_true",
+                    help='push to mirror by ssh url, which can be run without password.')
 args = parser.parse_args()
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False, print_command=True):
@@ -62,7 +64,15 @@ def add_auth_info_to_url(url, username, password):
     else:
         return new_url
 
-def git_repos_sync(mirror_username, mirror_password):
+def convert_https_url_to_ssh(url):
+    url = url or ""
+    new_url = str.replace(url, "https://gitee.com/", "git@gitee.com:")
+    if url == new_url: # Fail to convert https url to ssh url.
+        return False
+    else:
+        return new_url
+
+def git_repos_sync(mirror_username, mirror_password, mirror_use_ssh):
     with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
     for app_name, app_spec_dict in app_dict.items():
@@ -70,7 +80,10 @@ def git_repos_sync(mirror_username, mirror_password):
         branch = app_spec_dict["branch"]
         url = app_spec_dict["url"]
         mirror_url = app_spec_dict["mirror_url"]
-        mirror_url_with_auth_info = add_auth_info_to_url(mirror_url, mirror_username, mirror_password)
+        if mirror_use_ssh:
+            mirror_url_with_auth_info = convert_https_url_to_ssh(mirror_url)
+        else:
+            mirror_url_with_auth_info = add_auth_info_to_url(mirror_url, mirror_username, mirror_password)
         updated = True
         print("[EAF] * Sync EAF {0} repo.".format(app_name))
         if url and mirror_url_with_auth_info:
@@ -90,7 +103,7 @@ def git_repos_sync(mirror_username, mirror_password):
 
             if updated or args.force:
                 print("[EAF] ** Local-dir -> Mirror")
-                print("[EAF] Running git push -f {}".format(add_auth_info_to_url(mirror_url, "***", "***")))
+                print("[EAF] Running git push -f <push url of mirror>")
                 run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True)
         else:
             print("[EAF] WARN: url or mirror_url of EAF {} may have some problem, please check them!".format(app_name))
@@ -120,17 +133,22 @@ def main():
             print("[EAF] Do nothing, exiting...")
             sys.exit()
 
-        if mirror_username and mirror_password and len(mirror_username) > 0 and len(mirror_password) > 0:
+        if args.mirror_use_ssh:
             result = True
+            mirror_use_ssh = True
         else:
-            result = False
-            print("[EAF] No username or password of mirror, exiting...")
-            sys.exit()
+            mirror_use_ssh = False
+            if mirror_username and mirror_password and len(mirror_username) > 0 and len(mirror_password) > 0:
+                result = True
+            else:
+                result = False
+                print("[EAF] No username or password of mirror, exiting...")
+                sys.exit()
 
         if result:
             print("[EAF] sync-eaf-resources.py started")
             print("[EAF] -----------------------------\n")
-            git_repos_sync(mirror_username, mirror_password)
+            git_repos_sync(mirror_username, mirror_password, mirror_use_ssh)
             print("\n[EAF] -----------------------------")
         else:
             sys.exit()
