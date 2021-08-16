@@ -194,8 +194,10 @@ def install_app_deps(distro, deps_dict):
             args.install_all_apps = yes_no("[EAF] Install all available EAF applications? (Y/n): ", default_yes=True)
 
     if not args.install_all_apps and use_prev_choices:
-        app_dict = {k: app_dict[k] for k in prev_app_choices}
-
+        for k in prev_app_choices:
+            if k in app_dict:
+                app_dict[k] = app_dict[k]
+                
     sys_deps = []
     py_deps = []
     npm_install_apps = []
