@@ -137,6 +137,7 @@ class View(QWidget):
         self.graphics_view.horizontalScrollBar().setValue(0)
 
     def reparent(self):
+        # print("Reparent: ", self.buffer.url)
         qwindow = self.windowHandle()
 
         if platform.system() != "Darwin":
@@ -145,4 +146,5 @@ class View(QWidget):
         qwindow.setPosition(QPoint(self.x, self.y))
 
     def destroy_view(self):
+        # print("Destroy: ", self.buffer.url)
         self.destroy()

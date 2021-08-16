@@ -224,9 +224,6 @@ class EAF(object):
         ''' Update views.'''
         view_infos = args.split(",")
 
-        # Show cursor anyway.
-        QtWidgets.qApp.restoreOverrideCursor()
-
         # Do something if buffer's all view hide after update_views operation.
         old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
         new_view_buffer_ids = list(set(map(lambda v: v.split(":")[0], view_infos)))
@@ -237,15 +234,16 @@ class EAF(object):
         # such as QGraphicsVideoItem will report "Internal data stream error" error.
         for old_view_buffer_id in old_view_buffer_ids:
             if old_view_buffer_id not in new_view_buffer_ids:
-                self.buffer_dict[old_view_buffer_id].all_views_hide()
+                if old_view_buffer_id in self.buffer_dict:
+                    self.buffer_dict[old_view_buffer_id].all_views_hide()
 
         # Remove old key from view dict and destroy old view.
         for key in list(self.view_dict):
             if key not in view_infos:
-                self.view_dict[key].destroy_view()
-                self.view_dict.pop(key, None)
+                self.destroy_view_later(key)
 
-        # Create new view and update in view dict.
+        # NOTE:
+        # Create new view and REPARENT view to Emacs window.
         if view_infos != ['']:
             for view_info in view_infos:
                 if view_info not in self.view_dict:
@@ -259,7 +257,8 @@ class EAF(object):
         if view_infos != ['']:
             for new_view_buffer_id in new_view_buffer_ids:
                 if new_view_buffer_id not in old_view_buffer_ids:
-                    self.buffer_dict[new_view_buffer_id].some_view_show()
+                    if new_view_buffer_id in self.buffer_dict:
+                        self.buffer_dict[new_view_buffer_id].some_view_show()
 
         # Adjust buffer size along with views change.
         # Note: just buffer that option `fit_to_view' is False need to adjust,
@@ -280,6 +279,47 @@ class EAF(object):
                 # Send resize signal to buffer.
                 buffer.resize_view()
 
+        # NOTE:
+        # When you do switch buffer or kill buffer in Emacs, will call Python function 'update_views.
+        # Screen will flick if destroy old view BEFORE reparent new view.
+        #
+        # So we call function 'destroy_view_now' at last to make sure destroy old view AFTER reparent new view.
+        # Then screen won't flick.
+        self.destroy_view_now()
+
+    def destroy_view_later(self, key):
+        '''Just record view id in global list 'destroy_view_list', and not destroy old view immediately.'''
+        global destroy_view_list
+
+        destroy_view_list.append(key)
+
+    def destroy_view_now(self):
+        '''Destroy all old view immediately.'''
+        global destroy_view_list
+
+        for key in destroy_view_list:
+            if key in self.view_dict:
+                self.view_dict[key].destroy_view()
+            self.view_dict.pop(key, None)
+
+        destroy_view_list = []
+
+    @PostGui()
+    def kill_buffer(self, buffer_id):
+        ''' Kill all view based on buffer_id and clean buffer from buffer dict.'''
+        # Kill all view base on buffer_id.
+        for key in list(self.view_dict):
+            if buffer_id == self.view_dict[key].buffer_id:
+                self.destroy_view_later(key)
+
+        # Clean buffer from buffer dict.
+        if buffer_id in self.buffer_dict:
+            # Save buffer session.
+            self.save_buffer_session(self.buffer_dict[buffer_id])
+
+            self.buffer_dict[buffer_id].destroy_buffer()
+            self.buffer_dict.pop(buffer_id, None)
+
     @PostGui()
     def kill_emacs(self):
         ''' Kill all buffurs from buffer dict.'''
@@ -289,23 +329,6 @@ class EAF(object):
 
         for buffer_id in tmp_buffer_dict:
             self.kill_buffer(buffer_id)
-
-    @PostGui()
-    def kill_buffer(self, buffer_id):
-        ''' Kill all view based on buffer_id and clean buffer from buffer dict.'''
-        # Kill all view base on buffer_id.
-        for key in list(self.view_dict):
-            if buffer_id == self.view_dict[key].buffer_id:
-                self.view_dict[key].destroy_view()
-                self.view_dict.pop(key, None)
-
-        # Clean buffer from buffer dict.
-        if buffer_id in self.buffer_dict:
-            # Save buffer session.
-            self.save_buffer_session(self.buffer_dict[buffer_id])
-
-            self.buffer_dict[buffer_id].destroy_buffer()
-            self.buffer_dict.pop(buffer_id, None)
 
     @PostGui()
     def execute_function(self, buffer_id, function_name, event_string):
@@ -504,6 +527,8 @@ if __name__ == "__main__":
     proxy_string = ""
 
     emacs_width = emacs_height = 0
+
+    destroy_view_list = []
 
     hardware_acceleration_args = []
     if platform.system() != "Windows":
