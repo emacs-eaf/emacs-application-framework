@@ -573,11 +573,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def enable_dark_mode(self):
         ''' Dark mode support.'''
-        if get_emacs_var("eaf-emacs-theme-background-color") == "#000000":
-            # When background is black, need adjust contrast to 120.
-            self.eval_js("""DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 120, sepia: 10});""")
-        else:
-            self.eval_js("""DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});""")
+        self.eval_js("""DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});""")
 
     @interactive(insert_or_do=True)
     def disable_dark_mode(self):

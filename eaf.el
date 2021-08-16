@@ -1315,13 +1315,27 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   ""
   :type 'string)
 
-(defcustom eaf-emacs-theme-background-color (eaf-get-theme-background-color)
-  ""
-  :type 'string)
-
 (defcustom eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)
   ""
   :type 'string)
+
+(defvar eaf-emacs-theme-background-color nil)
+(defun eaf-emacs-theme-background-color ()
+  (let ((dark-mode
+         (symbol-value
+          (intern (format "eaf-%s-dark-mode" eaf--buffer-app-name))))
+        (background-color (eaf-get-theme-background-color)))
+    (setq eaf-emacs-theme-background-color
+          (if eaf--buffer-app-name
+              (if dark-mode
+                  (cond ((equal eaf--buffer-app-name "browser")
+                         ;; NOTE: this is darkreader's background
+                         ;; color, when darkreader's background is
+                         ;; changed, this color should be edited too.
+                         "#242525")
+                        (t background-color))
+                "white"))
+          background-color)))
 
 (advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
