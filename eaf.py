@@ -84,8 +84,7 @@ class EAF(object):
         self.server_thread.start()
 
         # Pass epc port and webengine codec information to Emacs when first start EAF.
-        self.webengine_include_codec = self.webengine_include_private_codec()
-        eval_in_emacs('eaf--first-start', [self.server.server_address[1]])
+        eval_in_emacs('eaf--first-start', [self.server.server_address[1], self.webengine_include_private_codec()])
 
         # Disable use system proxy, avoid page slow when no network connected.
         QNetworkProxyFactory.setUseSystemConfiguration(False)
@@ -169,13 +168,10 @@ class EAF(object):
             self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
 
     @PostGui()
-    def new_buffer(self, buffer_id, url, app_name, module_path, arguments):
+    def new_buffer(self, buffer_id, url, module_path, arguments):
         ''' New buffer.
         new_buffer just clone of create_buffer with @PostGui elisp call asynchronously.
         '''
-        if app_name == "video-playe"  and self.webengine_include_codec:
-            app_name = "js-video-play"
-
         self.create_buffer(buffer_id, url, module_path, arguments)
 
     def create_buffer(self, buffer_id, url, module_path, arguments):
