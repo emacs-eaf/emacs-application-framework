@@ -35,7 +35,6 @@ EAF is an extensible framework. It comes with a number of useful applications, a
 - [Browser](https://github.com/emacs-eaf/eaf-browser): Full-featured browser
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): The fastest PDF reader
 - [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal
-- [JS Video Player](https://github.com/emacs-eaf/eaf-js-video-player): Video player based on video.js
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video player base on Qt
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown file previewer in Emacs
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org file previewer in Emacs
