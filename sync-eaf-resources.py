@@ -13,12 +13,12 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 parser = argparse.ArgumentParser()
 parser.add_argument("--force", action="store_true",
                     help='force sync even when there is no updates')
-parser.add_argument("--really_run", action="store_true",
+parser.add_argument("--really-run", action="store_true",
                     help='Really run this script.')
 parser.add_argument("--mirror-username", type=str,
                     help='The username of mirror.')
 parser.add_argument("--mirror-password", type=str,
-                    help='The password of mirror.')
+                    help='The password or token of mirror.')
 args = parser.parse_args()
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False, print_command=True):
@@ -54,17 +54,26 @@ def yes_no(question, default_yes=False, default_no=False):
     else:
         return key.lower() == 'y'
 
+def add_auth_info_to_url(url, username, password):
+    url = url or ""
+    new_url = str.replace(url, "https://gitee.com", "https://{0}:{1}@gitee.com".format(username, password))
+    if url == new_url: # Fail to auto info to url.
+        return False
+    else:
+        return new_url
+
 def git_repos_sync(mirror_username, mirror_password):
     with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
     for app_name, app_spec_dict in app_dict.items():
         path = os.path.join(tempfile.gettempdir(), "sync-eaf-resourcs", app_name)
         branch = app_spec_dict["branch"]
-        url = app_spec_dict["url"].format(username = mirror_username, password = mirror_password)
-        mirror_url = app_spec_dict["mirror_url"].format(username = mirror_username, password = mirror_password)
+        url = app_spec_dict["url"]
+        mirror_url = app_spec_dict["mirror_url"]
+        mirror_url_with_auth_info = add_auth_info_to_url(mirror_url, mirror_username, mirror_password)
         updated = True
-        if url and mirror_url:
-            print("[EAF] * Sync EAF {0} repo.".format(app_name))
+        print("[EAF] * Sync EAF {0} repo.".format(app_name))
+        if url and mirror_url_with_auth_info:
             print("[EAF] ** Upstream -> Local-dir")
             if os.path.exists(path):
                 run_command(["git", "clean", "-df"], path=path)
@@ -83,10 +92,10 @@ def git_repos_sync(mirror_username, mirror_password):
                 print("[EAF] ** Local-dir -> Mirror")
                 ## When run script in github action, do not print command and output,
                 ## for command and output may include mirror username and password.
-                print("[EAF] Running git push -f <mirror_url>")
-                run_command(["git", "push", "-f", mirror_url], path=path, print_command=False, get_result=True)
+                print("[EAF] Running git push -f {}".format(mirror_url))
+                run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True)
         else:
-            print("[EAF] No url or mirror_url can be found. do nothing!")
+            print("[EAF] WARN: url or mirror_url of EAF {} may have some problem, please check them!".format(app_name))
 
 def main():
     try:
@@ -122,7 +131,7 @@ def main():
             print("\n[EAF] -----------------------------")
         else:
             sys.exit()
-        print("[EAF] sync-eaf-resources.py finished ?!")
+        print("[EAF] sync-eaf-resources.py finished!")
     except KeyboardInterrupt:
         print("[EAF] sync-eaf-resources.py aborted!")
         sys.exit()

@@ -23,4 +23,4 @@ jobs:
         env:
           EAF_MIRROR_USERNAME: ${{ secrets.EAF_MIRROR_USERNAME }}
           EAF_MIRROR_PASSWORD: ${{ secrets.EAF_MIRROR_PASSWORD }}
-        run: python sync-eaf-resources.py --really_run
+        run: python sync-eaf-resources.py --really-run
