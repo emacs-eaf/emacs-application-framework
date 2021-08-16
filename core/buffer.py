@@ -188,7 +188,8 @@ class Buffer(QGraphicsScene):
     def add_widget(self, widget):
         ''' Add widget.'''
         # Init background color before addWidget.
-        self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
+        if not hasattr(self, "background_color"):
+            self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
 
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
