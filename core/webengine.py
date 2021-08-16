@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, to_camel_case
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, to_camel_case
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -271,6 +271,12 @@ class BrowserView(QWebEngineView):
 
         eval_in_emacs('eaf-activate-emacs-window', [])
 
+    def open_url_new_buffer_other_window(self, url):
+        ''' Open url in a new tab.'''
+        open_url_in_new_tab_other_window(url)
+
+        eval_in_emacs('eaf-activate-emacs-window', [])
+
     def open_url_background_buffer(self, url):
         ''' Open url in background tab.'''
         open_url_in_background_tab(url)
@@ -476,9 +482,14 @@ class BrowserView(QWebEngineView):
         if link: self.open_url(link)
 
     def _open_link_new_buffer(self, marker):
-        ''' Open the link at the markre in a new buffer.'''
+        ''' Open the link at the marker in a new buffer.'''
         link = self.get_marker_link(marker)
         if link: self.open_url_new_buffer(link)
+
+    def _open_link_new_buffer_other_window(self, marker):
+        ''' Open the link at the marker in a new buffer in other window.'''
+        link = self.get_marker_link(marker)
+        if link: self.open_url_new_buffer_other_window(link)
 
     def _open_link_background_buffer(self, marker):
         ''' Open link at the marker in the background.'''
@@ -874,6 +885,8 @@ class BrowserBuffer(Buffer):
             self.buffer_widget._open_link(result_content.strip())
         elif callback_tag == "open_link_new_buffer":
             self.buffer_widget._open_link_new_buffer(result_content.strip())
+        elif callback_tag == "open_link_new_buffer_other_window":
+            self.buffer_widget._open_link_new_buffer_other_window(result_content.strip())
         elif callback_tag == "jump_link_background_buffer":
             self.buffer_widget._open_link_background_buffer(result_content.strip())
         elif callback_tag == "copy_link":
@@ -900,6 +913,7 @@ class BrowserBuffer(Buffer):
         ''' Cancel input message.'''
         if callback_tag == "open_link" or \
            callback_tag == "open_link_new_buffer" or \
+           callback_tag == "open_link_new_buffer_other_window" or \
            callback_tag == "jump_link_background_buffer" or \
            callback_tag == "select_marker_text" or \
            callback_tag == "caret_at_line" or \
@@ -1089,6 +1103,12 @@ class BrowserBuffer(Buffer):
         ''' Open Link in New Buffer.'''
         self.buffer_widget.get_link_markers()
         self.send_input_message("Open Link in New Buffer: ", "open_link_new_buffer");
+
+    @interactive(insert_or_do=True)
+    def open_link_new_buffer_other_window(self):
+        ''' Open Link in New Buffer in Other Window.'''
+        self.buffer_widget.get_link_markers()
+        self.send_input_message("Open Link in New Buffer in Other Window: ", "open_link_new_buffer_other_window");
 
     @interactive(insert_or_do=True)
     def open_link_background_buffer(self):
