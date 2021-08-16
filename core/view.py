@@ -59,17 +59,14 @@ class View(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.graphics_view = QGraphicsView(buffer, self)
 
-        # Set background color.
-        # When fit_to_view is True, QGraphicsView will fill color around app view.
-        # We fill color with buffer's attribute "background_color".
-        if hasattr(self.buffer, "background_color") and self.buffer.background_color:
-            self.graphics_view.setBackgroundBrush(QBrush(self.buffer.background_color))
-
         # Remove border from QGraphicsView.
         self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
         self.graphics_view.setFrameStyle(QFrame.NoFrame)
+
+        # Fill background color.
+        self.graphics_view.setBackgroundBrush(QBrush(buffer.background_color))
 
         # Add graphics view.
         self.layout.addWidget(self.graphics_view)
@@ -131,7 +128,7 @@ class View(QWidget):
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
-        
+
         if platform.system() in ["Windows", "Darwin"]:
             eval_in_emacs('eaf-activate-emacs-window', [])
 

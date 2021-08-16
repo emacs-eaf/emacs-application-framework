@@ -20,13 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtGui import QCursor
-from PyQt5.QtGui import QFocusEvent
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
+from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
 from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QApplication, qApp
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_var
 import abc
 import string
 
@@ -190,8 +187,15 @@ class Buffer(QGraphicsScene):
 
     def add_widget(self, widget):
         ''' Add widget.'''
+        # Init background color before addWidget.
+        self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
+
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
+
+        # Set web page background.
+        if hasattr(self.buffer_widget, "web_page"):
+            self.buffer_widget.web_page.setBackgroundColor(self.background_color)
 
         self.buffer_widget.installEventFilter(self)
 

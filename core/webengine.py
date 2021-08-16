@@ -653,14 +653,10 @@ class BrowserBuffer(Buffer):
         self.caret_browsing_exit_flag = True
         self.caret_browsing_mark_activated = False
         self.caret_browsing_search_text = ""
-        self.light_mode_mask_color = QColor("#FFFFFF")
-        self.dark_mode_mask_color = QColor("#242525")
         self.is_dark_mode_enabled = self.dark_mode_is_enabled()
 
         self.current_url = ""
         self.request_url = ""
-
-        self.init_background_color()
 
         self.buffer_widget.web_page.windowCloseRequested.connect(self.close_buffer)
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
@@ -746,13 +742,6 @@ class BrowserBuffer(Buffer):
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         return False
-
-    def init_background_color(self):
-        ''' Initialize the background colour.'''
-        if self.dark_mode_is_enabled():
-            self.buffer_widget.web_page.setBackgroundColor(self.dark_mode_mask_color)
-        else:
-            self.buffer_widget.web_page.setBackgroundColor(self.light_mode_mask_color)
 
     def handle_fullscreen_request(self, request):
         ''' Handle fullscreen request.'''
