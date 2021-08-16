@@ -1,5 +1,5 @@
 ---
-name: EAF Feature request
+name: Feature request
 about: Suggest an idea for the Emacs Application Framework
 title: ''
 labels: ''
