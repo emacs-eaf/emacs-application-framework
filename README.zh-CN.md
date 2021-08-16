@@ -33,7 +33,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 - [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于Chromium渲染引擎
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Emacs里面渲染速度最快的PDF查看器
 - [Terminal](https://github.com/emacs-eaf/eaf-terminal): 支持图形绘制的全功能终端模拟器
-- [JS Video Player](https://github.com/emacs-eaf/eaf-js-video-player): 基于plyr.js的视频播放器
+- [JS Video Player](https://github.com/emacs-eaf/eaf-js-video-player): 基于Video.js的视频播放器
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): 基于Qt的视频播放器
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown文档实时预览程序，完美兼容Github样式
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org文件实时预览程序
