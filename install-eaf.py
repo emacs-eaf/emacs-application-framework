@@ -29,8 +29,10 @@ parser.add_argument("--app-git-full-clone", action="store_true",
                     help='apps to conduct a full clone to preserve git logs')
 parser.add_argument("--app-drop-local-edit", action="store_true",
                     help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
+parser.add_argument("--use-mirror", action="store_true",
+                    help='use mirror url instead of default url.')
 parser.add_argument("--use-gitee", action="store_true",
-                    help='use gitee mirror instead of default url.')
+                    help='alias of --use-mirror.')
 parser.add_argument("--force-install", action="store_true",
                     help="force install app deps even when app is already up-to-date")
 args = parser.parse_args()
@@ -98,11 +100,11 @@ def install_vue_install(app_path_list):
 def add_or_update_app(app: str, app_spec_dict):
     url = ""
     path = os.path.join("app", app)
-    if args.use_gitee:
+    if args.use_mirror or args.use_gitee: # use_gitee is alias of use_mirror.
         if 'mirror_url' not in app_spec_dict:
             print("[EAF] There is no gitee mirror URL set in applications.json", app)
             exit(1)
-        url = app_spec_dict['mirror_url'].format(username="", password="")
+        url = app_spec_dict['mirror_url']
     else:
         url = app_spec_dict['url']
 
