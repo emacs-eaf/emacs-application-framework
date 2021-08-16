@@ -1,4 +1,4 @@
-name: EAF sync resources.
+name: Sync EAF repos with mirror
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: 'Working'
+      - name: 'Syncing'
         env:
           EAF_MIRROR_USERNAME: ${{ secrets.EAF_MIRROR_USERNAME }}
           EAF_MIRROR_PASSWORD: ${{ secrets.EAF_MIRROR_PASSWORD }}
