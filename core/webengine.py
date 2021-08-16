@@ -775,15 +775,16 @@ class BrowserBuffer(Buffer):
 
             message_to_emacs("Save image: " + image_path)
         else:
-            self.try_start_aria2_daemon()
+            if hasattr(self, "try_start_aria2_daemon"):
+                self.try_start_aria2_daemon()
 
-            from core.pyaria2 import Jsonrpc
+                from core.pyaria2 import Jsonrpc
 
-            download_url = download_item.url().toString()
-            jsonrpc = Jsonrpc('localhost', 6800)
-            resp = jsonrpc.addUris(download_url)
+                download_url = download_item.url().toString()
+                jsonrpc = Jsonrpc('localhost', 6800)
+                resp = jsonrpc.addUris(download_url)
 
-            message_to_emacs("Downloading: " + download_url)
+                message_to_emacs("Downloading: " + download_url)
 
     def _save_as_pdf(self):
         parsed = urlparse(self.url)
