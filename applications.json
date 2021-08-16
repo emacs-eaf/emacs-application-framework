@@ -62,13 +62,6 @@
         "url": "https://github.com/emacs-eaf/eaf-image-viewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-image-viewer.git"
     },
-    "js-video-player": {
-        "name": "EAF Video Player (JS)",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-js-video-player.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-js-video-player.git"
-    },
     "jupyter": {
         "name": "EAF Jupyter",
         "type": "app",

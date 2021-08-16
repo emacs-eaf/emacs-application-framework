@@ -84,7 +84,7 @@ class EAF(object):
         self.server_thread.start()
 
         # Pass epc port and webengine codec information to Emacs when first start EAF.
-        eval_in_emacs('eaf--first-start', [self.server.server_address[1], self.webengine_include_private_codec()])
+        eval_in_emacs('eaf--first-start', [self.server.server_address[1]])
 
         # Disable use system proxy, avoid page slow when no network connected.
         QNetworkProxyFactory.setUseSystemConfiguration(False)
@@ -144,13 +144,6 @@ class EAF(object):
             return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE, text=True).stdout
         else:
             return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE).stdout
-
-    def webengine_include_private_codec(self):
-        ''' Return bool of whether the QtWebEngineProcess include private codec. '''
-        if platform.system() in ["Windows", "Darwin"]:
-            return False
-        path = os.path.join(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath), "QtWebEngineProcess")
-        return self.get_command_result("ldd {} | grep libavformat".format(path)) != ""
 
     @PostGui()
     def update_buffer_with_url(self, module_path, buffer_url, update_data):

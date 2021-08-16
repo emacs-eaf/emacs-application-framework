@@ -324,8 +324,6 @@ been initialized."
 (defvar eaf--first-start-app-buffers nil
   "Contains a list of '(buffer-url buffer-app-name buffer-args).")
 
-(defvar eaf--webengine-include-private-codec nil)
-
 (defvar eaf-last-frame-width 0)
 
 (defvar eaf-last-frame-height 0)
@@ -1051,7 +1049,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
        (kill-buffer buffer)
        (throw 'found-eaf t)))))
 
-(defun eaf--first-start (eaf-epc-port webengine-include-private-codec)
+(defun eaf--first-start (eaf-epc-port)
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
@@ -1064,19 +1062,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                          :connection (eaf-epc-connect "localhost" eaf-epc-port)
                          ))
   (eaf-epc-init-epc-layer eaf-epc-process)
-
-  ;; If webengine-include-private-codec and app name is "video-player", replace by "js-video-player".
-  (setq eaf--webengine-include-private-codec webengine-include-private-codec)
-
-  (let* ((first-buffer-info (pop eaf--first-start-app-buffers))
-         (first-start-url (nth 0 first-buffer-info))
-         (first-start-app-name (nth 1 first-buffer-info))
-         (first-start-args (nth 2 first-buffer-info)))
-    (when (and (string-equal first-start-app-name "video-player")
-               eaf--webengine-include-private-codec)
-      (setq first-start-app-name "js-video-player"))
-    ;; Start first app.
-    (eaf--open-internal first-start-url first-start-app-name first-start-args))
 
   (dolist (buffer-info eaf--first-start-app-buffers)
     (eaf--open-internal (nth 0 buffer-info) (nth 1 buffer-info) (nth 2 buffer-info)))
@@ -1164,16 +1149,9 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--get-app-for-extension (extension-name)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
-  (let ((app-name
-         (cl-loop for (app . ext) in eaf-app-extensions-alist
+  (cl-loop for (app . ext) in eaf-app-extensions-alist
                   if (member extension-name (symbol-value ext))
-                  return app)))
-    (if (string-equal app-name "video-player")
-        ;; Use Browser play video if QWebEngine include private codec.
-        (if eaf--webengine-include-private-codec
-            "js-video-player"
-          "video-player")
-      app-name)))
+                  return app))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
