@@ -1,24 +1,22 @@
 [English](./README.md) | 简体中文
 
 <p align="center">
-  <img width="250" height="250" src="./img/EAF_Logo.png">
+  <img style='height: auto; width: 80%; object-fit: contain' src="./img/EAF_Banner_Transparent.png">
+  <br>新一代的Emacs图形应用框架，通过扩展Emacs的多媒体能力，达到 Live in Emacs 的终极目标
 </p>
 
-# Emacs Application Framework
-Emacs Application Framework (EAF) 是新一代的Emacs图形应用框架，通过扩展Emacs的多媒体能力，最终达到 Live in Emacs 的终极目标。
-
-EAF可以在多个操作系统下工作，包括Linux、Windows、macOS和FreeBSD。
-
-## EAF 愿景
+## 愿景
 Emacs距今已经有45年的发展历史，比现在人们用的操作系统都老。在这45年中，全世界最顶级的黑客在贡献自己的智慧和想象力，一起构建了Emacs这个伟大的开发者工具生态。
 
 当你是一个需要使用十几门编程语言的黑客和键盘流信仰者，Emacs绝对是你的不二之选。
 
 Emacs的劣势也是因为它太古老了，导致在多线程和图形扩展能力已经无法跟上时代的步伐，在很多地方发展落后于IDEA和VSCode。
 
-EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过EAF框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
+EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过Emacs Application Framework (EAF)框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
 
 ## 应用列表
+EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
+
 | 浏览器                                       | PDF阅读器 |
 | :--------:                                       | :----:                                                      |
 | <img src="./img/browser.png" width="400"> | <img src="./img/pdf-viewer.png" width="400"> |
@@ -27,8 +25,6 @@ EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生
 | :--------:                                            | :----:                                                |
 | <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
 |                                                       |                                                       |
-
-EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你也可以开发自己的Qt5应用并集成在Emacs中。
 
 - [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于Chromium渲染引擎
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Emacs里面渲染速度最快的PDF查看器
@@ -49,6 +45,10 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 - [Airshare](https://github.com/emacs-eaf/eaf-airshare): 分享文字给手机
 - [Demo](https://github.com/emacs-eaf/eaf-demo): EAF的Qt应用实例
 - [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF的Vue.js应用实例
+
+通过EAF，你可以自由开发自己的Qt5/Vue.js应用并集成在Emacs中。
+
+EAF可以在多个操作系统下工作，包括Linux和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
 - 由[MatthewZMD](https://github.com/MatthewZMD)在EmacsConf2020的演讲和demo。
@@ -114,7 +114,6 @@ chmod +x ./install-eaf.py
 ```Elisp
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
-(require 'eaf-js-video-player)
 ```
 
 #### 5. 下载完成！
@@ -224,9 +223,6 @@ EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具
 
 ### 浏览器崩溃
 请不要用pip安装PyQt5, pip的版本有bug，请从操作系统软件仓库安装PyQt5。
-
-### 为什么EAF的js-video-player在Windows和Mac下无法播放视频文件？
-`js-video-player`需要qtwebengine编译时链接到ffmpeg，才能支持额外的编码如`h264/aac`.
 
 ### 为什么通过Linux窗口管理器使用EAF无法接收输入信息？
 EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、Xfce、LXDE、Sway、i3、QTile、Xpra、EXWM.

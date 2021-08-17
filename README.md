@@ -1,25 +1,23 @@
 English | [简体中文](./README.zh-CN.md)
 
 <p align="center">
-  <img width="250" height="250" src="./img/EAF_Logo.png">
+  <img style='height: auto; width: 80%; object-fit: contain' src="./img/EAF_Banner_Transparent.png">
+  <br>A free/libre and open-source extensible framework that revolutionizes the graphical capabilities of Emacs, <br>the key to ultimately <i>Live in Emacs</i>
 </p>
 
-# Emacs Application Framework
-Emacs Application Framework (EAF) is a GUI application framework for Emacs that revolutionizes its multimedia and graphical capabilities to ultimately *Live in Emacs*.
+## Vision
+Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world have been contributing their intelligence and imagination, together they constructed the most comprehensive and rich ecosystem that you can find in any software to date.
 
-EAF supports Linux, Windows, macOS, and FreeBSD.
+If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility, and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
 
-## EAF Vision
-Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world have been contributing their intelligence and imagination, together constructed the most comprehensive and rich ecosystem that you can find in any software to date.
+However, one of the greatest disadvantages of Emacs is how *old* it is. Emacs lacks performance as it doesn't have proper multithreading and modern graphical support that you can expect on many GUI applications today (such as IDEA or VSCode), resulting in the extensibility of Emacs being limited when it shouldn't have to be.
 
-If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
-
-However, one of the greatest disadvantages of Emacs is how *old* it is. Emacs lacks performance as it doesn't have proper multithreading and modern graphical support that you can expect on many GUI applications today (such as IDEA or VSCode), resulting in the extensibility of Emacs to be limited when it shouldn't have to be.
-
-The vision of the EAF project is that, while retaining the culture and the ecosystem of Emacs, use Python, Qt5, and JavaScript to extend Emacs' graphical capabilities, with the hope to ultimately *Live in Emacs*.
+The vision of the Emacs Application Framework (EAF) project is that, while retaining the culture and the ecosystem of Emacs, use Python, Qt5, and JavaScript to extend Emacs' graphical capabilities, with the hope to ultimately *Live in Emacs*.
 
 
 ## Applications
+
+EAF is an extensible framework, it comes with a number of useful applications already:
 
 | Browser                                          | Pdf Viewer |
 | :--------:                                       | :----:                                                      |
@@ -30,27 +28,29 @@ The vision of the EAF project is that, while retaining the culture and the ecosy
 | <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
 |                                                       |                                                       |
 
-EAF is an extensible framework. It comes with a number of useful applications, and you can develop any Qt5 application and integrate it into Emacs.
-
 - [Browser](https://github.com/emacs-eaf/eaf-browser): Full-featured browser
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): The fastest PDF reader
 - [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video player base on Qt
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown file previewer in Emacs
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org file previewer in Emacs
-- [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and audio visual
+- [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and an audio visualization
 - [File Manager](https://github.com/emacs-eaf/eaf-file-manager): File manager, support file real-time preview
 - [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): Mindmap with full-featured keyboard operation
 - [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): Jupyter in Emacs
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Picture viewer, supporting real-time zoom rotation
 - [Camera](https://github.com/emacs-eaf/eaf-camera): Use camera in Emacs
 - [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): System monitor base on Vue.js
-- [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): EAF frontend for netease cloud music
+- [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): EAF frontend for NetEase cloud music
 - [File Browser](https://github.com/emacs-eaf/eaf-file-browser): Browse file in mobile phone
 - [File Sender](https://github.com/emacs-eaf/eaf-file-sender): Share file between Emacs and mobile phone
 - [Airshare](https://github.com/emacs-eaf/eaf-airshare): Share text between Emacs and mobile phone
 - [Demo](https://github.com/emacs-eaf/eaf-demo): EAF Application demo base on Qt
 - [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF Application demo base on Vue.js
+
+In theory, you can use EAF to integrate any Qt5/Vue.js application into Emacs.
+
+EAF supports Linux and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 - EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
@@ -110,12 +110,11 @@ From here on, you can either add the full path to the EAF installation directory
 
 #### 4. Load EAF apps:
 
-You can use below code to load applications `browser` `pdf-viewer` `js-video-player`, more applications please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications):
+You can use below code to load applications `browser` and `pdf-viewer` that you installed, please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications) for the full list:
 
 ```Elisp
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
-(require 'eaf-js-video-player)
 ...
 ```
 
@@ -125,7 +124,7 @@ Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that i
 
 I **highly** encourage you to read the [Wiki](#Wiki) and [FAQ](#FAQ) if you have any questions.
 
-Also, I encourage periodically `git pull` **and** run `install-eaf.py` again to update EAF, applications and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug)
+Also, I encourage periodically `git pull` **and** run `install-eaf.py` again to update EAF, applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug)
 
 ### Dependency List
 
@@ -133,7 +132,7 @@ Also, I encourage periodically `git pull` **and** run `install-eaf.py` again to 
 | :--------                      | :------                                               |
 | python-epc                     | EPC for Python                                        |
 | python-pyqt5, python-pyqt5-sip | Essential GUI library                                 |
-| python-pyqtwebengine           | Chromium based web rendering engine                   |
+| python-pyqtwebengine           | Chromium-based web rendering engine                   |
 | wmctrl                         | Activate Emacs window input focus                     |
 | pygetwindow                    | Activate Emacs window input focus on WSL from Windows |
 | mac-app-frontmost              | Monitor frontmost app on macOS                        |
@@ -194,7 +193,7 @@ You can check `app/name/package.json` and `app/name/dependencies.json` for EAF a
 
 It is **highly** suggested to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first before using EAF.
 
-Wiki consists of documentations on:
+The wiki consists of documentations on:
 * Keybindings
 * Customization
 * Design
@@ -207,8 +206,8 @@ There also are some helpful tips to make EAF work with Docker, Helm, etc.
 ### How does EAF work?
 EAF implements three major functionalities:
 1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
-2. Listen to EAF buffer's keyboard event flow and control the keyboard input of PyQt program via Python EPC.
-3. Create a window compositer to make a PyQt program window adapt Emacs' Window/Buffer design.
+2. Listen to EAF buffer's keyboard event flow and control the keyboard input of the PyQt program via Python EPC.
+3. Create a window composite to make a PyQt program window adapt Emacs' Window/Buffer design.
 
 Learn more from the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)!
 
@@ -216,7 +215,7 @@ Learn more from the [Wiki](https://github.com/emacs-eaf/emacs-application-framew
 1. EAF and EXWM share a common goal: enhance collaboration between the standard GNU Emacs with other GUI tools.
 2. EXWM is an X11 Window Manager, it manages and controls other software using a keyboard, but it cannot modify, customize and extend the behavior of other software.
 3. EAF is *not* a Window Manager, it utilizes the windows managing capabilities of Emacs to display its applications.
-4. The intention of EAF is to provide a framework to write PyQt5 applications that extends the multimedia experience of Emacs. From the perspective of Emacs' buffer/mode design, EAF is not different from any other package, with the former uses Qt for drawing contents while the latter uses Emacs' built-in text libraries instead.
+4. EAF intends to provide a framework to write PyQt5 applications that extends the multimedia experience of Emacs. From the perspective of Emacs' buffer/mode design, EAF is not different from any other package, with the former uses Qt for drawing contents while the latter uses Emacs' built-in text libraries instead.
 5. Through EAF's design, one can use Elisp to control Python and vice versa, and even able to use Elisp to control JavaScript in EAF Browser. EAF enables Emacs to the world of **multi-language scripting**.
 
 Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
@@ -225,20 +224,17 @@ Both projects are similar in terms of interface, but they are two completely dif
 Currently, macOS is only partially supported and needs a lot of testing, not all functions can work normally, please check the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/macOS) for details.
 
 ### Browser crashes
-Please DO NOT install PyQt5 through pip, pip version has bug, please install PyQt5 from the OS software repository.
-
-### EAF js-video-player can't play some video on Windows and Mac. Why?
-`js-video-player` requires that qtwebengine built against ffmpeg to support proprietary codecs like `h264/aac`.
+Please DO NOT install PyQt5 through pip, pip version has a bug, please install PyQt5 from the OS software repository.
 
 ### Why doesn't EAF receive input events on Linux Window Manager?
-EAF confirms that the desktop environment or window manager you can work includes: KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
+EAF confirms that the desktop environment or window manager you can work with includes: KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
 
 We suspect there are some issues with how all the Window Managers implement their x11 protocols.
 
 One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
 
 ### Proxy
-If you need to use proxy to access internet, one can configure the proxy settings.
+If you need to use a proxy to access the internet, one can configure the proxy settings.
 
 ```Elisp
 (setq eaf-proxy-type "http")
@@ -246,7 +242,7 @@ If you need to use proxy to access internet, one can configure the proxy setting
 (setq eaf-proxy-port "1080")
 ```
 
-If you use Socks5 as local proxy, one can set proxy type with:
+If you use Socks5 as a local proxy, one can set proxy type with:
 
 ```Elisp
 (setq eaf-proxy-type "socks5")
@@ -270,9 +266,9 @@ For any other problems, please use `emacs -q` and load a minimal setup with only
 
 If the problem persists, please report it [here](https://github.com/emacs-eaf/emacs-application-framework/issues/new) with `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
 
-If you got segfault error, please use the following way to collect crash information:
+If you get a segfault error, please use the following way to collect crash information:
 1. Install gdb and turn on option `eaf-enable-debug`
-2. Use command `eaf-stop-process` stop current process
+2. Use the command `eaf-stop-process` to stop the current process
 3. Restart eaf, send issue with `*eaf*` buffer content when next crash
 
 ## Join Us
