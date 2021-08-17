@@ -35,14 +35,14 @@ import os
 import platform
 import sqlite3
 
+MOUSE_LEFT_BUTTON = 1
+MOUSE_WHEEL_BUTTON = 4
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
-MOUSE_WHEEL_BUTTON = 4
 
 class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
-    url_hovered = ""
 
     def __init__(self, buffer_id):
         super(QWebEngineView, self).__init__()
@@ -58,7 +58,8 @@ class BrowserView(QWebEngineView):
         self.cookie_storage = BrowserCookieStorage(self.config_dir)
         self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
 
-        self.page().linkHovered.connect(self.linkHovered)
+        self.url_hovered = ""
+        self.page().linkHovered.connect(self.link_hovered)
 
         self.selectionChanged.connect(self.select_text_change)
 
@@ -253,11 +254,16 @@ class BrowserView(QWebEngineView):
                 event.accept()
                 return True
 
-            elif event.button() == MOUSE_WHEEL_BUTTON:
+            elif event.button() == MOUSE_LEFT_BUTTON:
                 modifiers = QApplication.keyboardModifiers()
                 if modifiers == Qt.ControlModifier:
                     self.open_url_new_buffer_other_window(self.url_hovered)
                     return True
+
+            elif event.button() == MOUSE_WHEEL_BUTTON:
+                self.open_url_new_buffer_other_window(self.url_hovered)
+                return True
+
 
         if event.type() == QEvent.Wheel:
             modifiers = QApplication.keyboardModifiers()
@@ -269,7 +275,7 @@ class BrowserView(QWebEngineView):
 
         return super(QWebEngineView, self).eventFilter(obj, event)
 
-    def linkHovered(self, url):
+    def link_hovered(self, url):
         if url:
             self.url_hovered = url
             message_to_emacs(url)
