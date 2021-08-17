@@ -70,7 +70,7 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
 
     ```Emacs-lisp
     (quelpa '(eaf :fetcher github
-                  :repo  "manateelazycat/emacs-application-framework"
+                  :repo  "emacs-eaf/emacs-application-framework"
                   :files ("*")))
     ```
 
