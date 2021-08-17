@@ -75,6 +75,8 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
 
 #### 2. 安装EAF依赖，
 
+调用Elisp函数`M-x eaf-install`或者手动在Terminal跑`install-eaf.py`安装脚本：
+
 ```Bash
 cd emacs-application-framework
 chmod +x ./install-eaf.py
