@@ -1,0 +1,23 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "READ FIRST ☛ Mandatory Procedures to Keep Your EAF Up-To-Date"
+    url: https://github.com/emacs-eaf/emacs-application-framework/discussions/527?sort=new
+    about: Read first if you're not a new user, your problem might be addressed already.
+  - name: "APP SUPPORT ☛ App Repository"
+    url: https://github.com/orgs/emacs-eaf/repositories
+    about: Please search, ask and answer EAF Application specific issue in its own repository.
+  - name: "SUPPORT ☛ The Discussions feature of this repository"
+    url: https://github.com/emacs-eaf/emacs-application-framework/discussions
+    about: Please search, ask and answer questions here.
+  - name: "SUPPORT ☛ Emacs China"
+    url: https://emacs-china.org/
+    about: Another place to search, ask and answer questions.
+  - name: "SUPPORT ☛ Emacs Reddit"
+    url: https://www.reddit.com/r/emacs
+    about: Another place to search, ask and answer questions.
+  - name: "EAF FAQ"
+    url: https://github.com/emacs-eaf/emacs-application-framework#faq
+    about: It might be that many others had the same question.
+  - name: "EAF Wiki"
+    url: https://github.com/emacs-eaf/emacs-application-framework/wiki
+    about: The fine wiki may also be of use.
