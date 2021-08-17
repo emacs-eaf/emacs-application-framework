@@ -126,7 +126,6 @@ class Buffer(QGraphicsScene):
 
     def base_class_name(self):
         return self.__class__.__bases__[0].__name__
-
     def build_all_methods(self, origin_class):
         ''' Build all methods.'''
         method_list = [func for func in dir(origin_class) if callable(getattr(origin_class, func)) and not func.startswith("__")]
@@ -196,7 +195,7 @@ class Buffer(QGraphicsScene):
 
         # Set web page background.
         if hasattr(self.buffer_widget, "web_page"):
-            self.buffer_widget.web_page.setBackgroundColor(self.background_color)
+            self.init_web_page_background()
 
         self.buffer_widget.installEventFilter(self)
 
