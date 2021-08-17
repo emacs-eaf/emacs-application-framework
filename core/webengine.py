@@ -37,10 +37,12 @@ import sqlite3
 
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
+MOUSE_WHEEL_BUTTON = 4
 
 class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
+    url_hovered = ""
 
     def __init__(self, buffer_id):
         super(QWebEngineView, self).__init__()
@@ -55,6 +57,8 @@ class BrowserView(QWebEngineView):
         self.cookie_store = self.page().profile().cookieStore()
         self.cookie_storage = BrowserCookieStorage(self.config_dir)
         self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
+
+        self.page().linkHovered.connect(self.linkHovered)
 
         self.selectionChanged.connect(self.select_text_change)
 
@@ -249,6 +253,12 @@ class BrowserView(QWebEngineView):
                 event.accept()
                 return True
 
+            elif event.button() == MOUSE_WHEEL_BUTTON:
+                modifiers = QApplication.keyboardModifiers()
+                if modifiers == Qt.ControlModifier:
+                    self.open_url_new_buffer_other_window(self.url_hovered)
+                    return True
+
         if event.type() == QEvent.Wheel:
             modifiers = QApplication.keyboardModifiers()
             if modifiers == Qt.ControlModifier:
@@ -258,6 +268,12 @@ class BrowserView(QWebEngineView):
                     self.zoom_out()
 
         return super(QWebEngineView, self).eventFilter(obj, event)
+
+    def linkHovered(self, url):
+        if url:
+            self.url_hovered = url
+            message_to_emacs(url)
+        return True
 
     def open_url(self, url):
         ''' Configure current url.'''
