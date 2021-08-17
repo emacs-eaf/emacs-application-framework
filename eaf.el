@@ -1071,7 +1071,12 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "Function for updating buffer details with its BUFFER-ID, TITLE and URL."
   (when (eaf--called-from-wsl-on-windows-p)
     (eaf-monitor-configuration-change))
-  (when (> (length title) 0)
+  (when (and (> (length title) 0)
+             ;; NOTE: When run eaf-browser, this function will be
+             ;; called twice, buffer name will be changed twice too,
+             ;; To prevent mode-line flickr, we do not change buffer
+             ;; name when when title is equal url.
+             (not (equal title url)))
     (catch 'found-eaf
       (dolist (window (window-list))
         (let ((buffer (window-buffer window)))
