@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, to_camel_case
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, to_camel_case
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -256,13 +256,14 @@ class BrowserView(QWebEngineView):
 
             elif event.button() == MOUSE_LEFT_BUTTON:
                 modifiers = QApplication.keyboardModifiers()
-                if modifiers == Qt.ControlModifier:
+                if modifiers == Qt.ControlModifier and self.url_hovered:
                     self.open_url_new_buffer_other_window(self.url_hovered)
                     return True
 
             elif event.button() == MOUSE_WHEEL_BUTTON:
-                self.open_url_new_buffer_other_window(self.url_hovered)
-                return True
+                if self.url_hovered:
+                    self.open_url_new_buffer_other_window(self.url_hovered)
+                    return True
 
 
         if event.type() == QEvent.Wheel:
@@ -276,9 +277,13 @@ class BrowserView(QWebEngineView):
         return super(QWebEngineView, self).eventFilter(obj, event)
 
     def link_hovered(self, url):
+        self.url_hovered = url
+
         if url:
-            self.url_hovered = url
             message_to_emacs(url)
+        else:
+            clear_emacs_message()
+
         return True
 
     def open_url(self, url):
