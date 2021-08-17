@@ -252,7 +252,8 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。
 
-* **[obr-viz](https://github.com/swhalemwo/obr-viz)**: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+* ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
 
 ## 反馈问题
 

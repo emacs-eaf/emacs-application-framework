@@ -257,6 +257,7 @@ A list of other community packages that use EAF to enhance their graphical exper
 If we missed your package, please make a PR to add it to the list.
 
 * ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+* ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
 
 ## Report bug
 
