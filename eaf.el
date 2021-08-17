@@ -1037,6 +1037,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
 
+(defun eaf--clear-message ()
+  "Clear Emacs' echo area ."
+  (message nil))
+
 (defun eaf--set-emacs-var (name value)
   "Set Lisp variable NAME with VALUE on the Emacs side."
   (set (intern name) value))
