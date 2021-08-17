@@ -182,6 +182,9 @@ def install_app_deps(distro, deps_dict):
     if os.path.exists(prev_app_choices_file) and os.stat(prev_app_choices_file).st_size > 0:
         with open(prev_app_choices_file) as f:
             prev_app_choices = json.load(f)
+        for app in prev_app_choices:
+            if app not in app_dict:
+                prev_app_choices.remove(app)
 
     use_prev_choices = False
     if not args.install_all_apps and len(args.install_app) == 0:
@@ -194,10 +197,9 @@ def install_app_deps(distro, deps_dict):
             args.install_all_apps = yes_no("[EAF] Install all available EAF applications? (Y/n): ", default_yes=True)
 
     if not args.install_all_apps and use_prev_choices:
-        for k in prev_app_choices:
-            if k in app_dict:
-                app_dict[k] = app_dict[k]
-                
+        app_dict = {k: app_dict[k] for k in prev_app_choices}
+
+
     sys_deps = []
     py_deps = []
     npm_install_apps = []
