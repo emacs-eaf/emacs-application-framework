@@ -8,4 +8,4 @@ updates:
   - package-ecosystem: "npm" # See https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates#package-ecosystem
     directory: "/" # Location of package manifests
     schedule:
-      interval: "yearly"
+      interval: "monthly"
