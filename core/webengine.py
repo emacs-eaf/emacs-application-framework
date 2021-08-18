@@ -246,12 +246,21 @@ class BrowserView(QWebEngineView):
                 eval_in_emacs('eaf-activate-emacs-window', [])
 
             if event.button() == MOUSE_FORWARD_BUTTON:
-                self.forward()
+                modifiers = QApplication.keyboardModifiers()
+                if modifiers == Qt.ControlModifier:
+                    self.switch_to_next_webpage_buffer()
+                else:
+                    self.forward()
 
                 event.accept()
                 return True
+
             elif event.button() == MOUSE_BACK_BUTTON:
-                self.back()
+                modifiers = QApplication.keyboardModifiers()
+                if modifiers == Qt.ControlModifier:
+                    self.switch_to_previous_webpage_buffer()
+                else:
+                    self.back()
 
                 event.accept()
                 return True
@@ -310,6 +319,18 @@ class BrowserView(QWebEngineView):
     def open_url_background_buffer(self, url):
         ''' Open url in background tab.'''
         open_url_in_background_tab(url)
+
+        eval_in_emacs('eaf-activate-emacs-window', [])
+
+    def switch_to_next_webpage_buffer(self):
+        ''' Switch to next web page buffer.'''
+        eval_in_emacs('eaf-next-buffer-same-app', [])
+
+        eval_in_emacs('eaf-activate-emacs-window', [])
+
+    def switch_to_previous_webpage_buffer(self):
+        ''' Switch to previous web page buffer.'''
+        eval_in_emacs('eaf-previous-buffer-same-app', [])
 
         eval_in_emacs('eaf-activate-emacs-window', [])
 

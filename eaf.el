@@ -1448,6 +1448,26 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
        (eaf--match-app-extension-p (downcase ext))
        (not (member ext eaf-find-file-ext-blacklist))))
 
+(defun eaf-next-buffer-same-app ()
+  "Switch to the next buffer of the same EAF app with the current buffer."
+  (interactive)
+  (let ((origin-buff (current-buffer)) (app-name mode-name)
+        (new-buff nil) (finished nil))
+    (while (not finished)
+      (setq new-buff (next-buffer))
+      (when (or (equal new-buff origin-buff) (equal app-name mode-name))
+        (setq finished t)))))
+
+(defun eaf-previous-buffer-same-app ()
+  "Switch to the previous buffer of the same EAF app with the current buffer."
+  (interactive)
+  (let ((origin-buff (current-buffer)) (app-name mode-name)
+        (new-buff nil) (finished nil))
+    (while (not finished)
+      (setq new-buff (previous-buffer))
+      (when (or (equal new-buff origin-buff) (equal app-name mode-name))
+        (setq finished t)))))
+
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; FIXME: In the code below we should use `save-selected-window' (or even
