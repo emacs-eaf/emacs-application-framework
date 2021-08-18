@@ -76,6 +76,13 @@
         "url": "https://github.com/emacs-eaf/eaf-markdown-previewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-markdown-previewer.git"
     },
+    "mermaid": {
+        "name": "EAF Mermaid",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-mermaid.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-mermaid.git"
+    },
     "mindmap": {
         "name": "EAF Mindmap",
         "type": "app",
