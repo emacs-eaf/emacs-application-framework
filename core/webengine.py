@@ -82,6 +82,8 @@ class BrowserView(QWebEngineView):
         self.scroll_behavior = get_emacs_var("eaf-browser-scroll-behavior")
         self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
 
+        self.show_hover_link = get_emacs_var("eaf-webengine-show-hover-link")
+
     def load_css(self, path, name):
         path = QFile(path)
         if not path.open(QFile.ReadOnly | QtCore.QFile.Text):
@@ -279,10 +281,11 @@ class BrowserView(QWebEngineView):
     def link_hovered(self, url):
         self.url_hovered = url
 
-        if url:
-            message_to_emacs(url)
-        else:
-            clear_emacs_message()
+        if self.show_hover_link:
+            if url:
+                message_to_emacs(url)
+            else:
+                clear_emacs_message()
 
         return True
 

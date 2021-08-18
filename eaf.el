@@ -355,6 +355,9 @@ been initialized."
   ""
   :type 'string)
 
+(defcustom eaf-webengine-show-hover-link nil
+  ""
+  :type 'boolean)
 
 (defcustom eaf-find-file-ext-blacklist '("md" "org" "html" "htm")
   "A blacklist of extensions to avoid when opening `find-file' file using EAF."
@@ -1159,8 +1162,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf--get-app-for-extension (extension-name)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
   (cl-loop for (app . ext) in eaf-app-extensions-alist
-                  if (member extension-name (symbol-value ext))
-                  return app))
+           if (member extension-name (symbol-value ext))
+           return app))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
