@@ -264,7 +264,7 @@ class BrowserView(QWebEngineView):
 
             elif event.button() == MOUSE_WHEEL_BUTTON:
                 if self.url_hovered:
-                    self.open_url_new_buffer(self.url_hovered)
+                    self.open_url_new_buffer_other_window(self.url_hovered)
                     return True
 
 
