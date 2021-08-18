@@ -12,7 +12,7 @@ Emacs距今已经有45年的发展历史，比现在人们用的操作系统都�
 
 Emacs的劣势也是因为它太古老了，导致在多线程和图形扩展能力已经无法跟上时代的步伐，在很多地方发展落后于IDEA和VSCode。
 
-EAF的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过Emacs Application Framework (EAF)框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
+Emacs Application Framework (EAF)的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过EAF框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
 
 ## 应用列表
 EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
@@ -124,7 +124,7 @@ chmod +x ./install-eaf.py
 
 如果你有任何使用上的问题，强烈建议读一下[Wiki](#Wiki)以及[常用问题](#常用问题)部分。
 
-我也建议你时常`git pull` **并且** 运行`install-eaf.py`来更新EAF，各种应用与依赖。如果你使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分页面。
+建议你时常`git pull` **并且** 运行`install-eaf.py`来更新各个EAF应用及其依赖。如果使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分。
 
 ### 依赖列表
 
@@ -138,7 +138,7 @@ chmod +x ./install-eaf.py
 | mac-app-frontmost              | 获取macOS当前app名称                     |
 | nodejs                         | 下载依赖与应用交互                       |
 
-EAF应用的额外依赖，具体请在其对应的 `app/name/package.json` or `app/name/dependencies.json` 中查看。
+EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json` 和 `app/name/package.json` 中查看。
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |

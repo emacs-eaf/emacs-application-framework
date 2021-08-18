@@ -140,7 +140,7 @@ Also, I encourage periodically `git pull` **and** run `install-eaf.py` again to 
 | mac-app-frontmost              | Monitor frontmost app on macOS                        |
 | nodejs                         | Installs dependencies, and for app communications     |
 
-You can check `app/name/package.json` and `app/name/dependencies.json` for EAF application dependencies.
+You can check `app/name/dependencies.json` and `app/name/package.json` for application level dependencies.
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
