@@ -174,6 +174,9 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
   "EAF mode hook."
   :type 'hook)
 
+(defcustom eaf-mode-line-format mode-line-format
+  "`mode-line-format' used by eaf-mode.")
+
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
@@ -805,6 +808,7 @@ keybinding variable to eaf-app-binding-alist."
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (set (make-local-variable 'eaf--buffer-args) args)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
+      (setq-local mode-line-format eaf-mode-line-format)
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
 
@@ -1095,6 +1099,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id buffer-id))
               (setq mode-name (concat "EAF/" eaf--buffer-app-name))
+              (setq-local mode-line-format eaf-mode-line-format)
               (setq-local eaf--bookmark-title title)
               (setq-local eaf--buffer-url url)
               (rename-buffer (format eaf-buffer-title-format title) t)
