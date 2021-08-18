@@ -257,12 +257,12 @@ class BrowserView(QWebEngineView):
             elif event.button() == MOUSE_LEFT_BUTTON:
                 modifiers = QApplication.keyboardModifiers()
                 if modifiers == Qt.ControlModifier and self.url_hovered:
-                    self.open_url_new_buffer_other_window(self.url_hovered)
+                    self.open_url_new_buffer(self.url_hovered)
                     return True
 
             elif event.button() == MOUSE_WHEEL_BUTTON:
                 if self.url_hovered:
-                    self.open_url_new_buffer_other_window(self.url_hovered)
+                    self.open_url_new_buffer(self.url_hovered)
                     return True
 
 
