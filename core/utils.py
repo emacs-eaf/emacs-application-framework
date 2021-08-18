@@ -236,6 +236,9 @@ def eval_in_emacs(method_name, args):
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
 
+def delay_message_to_emacs(message, delay):
+    eval_in_emacs('eaf--show-message', [message, delay])
+
 def clear_emacs_message():
     eval_in_emacs('eaf--clear-message', [])
 

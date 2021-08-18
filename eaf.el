@@ -1033,9 +1033,21 @@ of `eaf--buffer-app-name' inside the EAF buffer."
            (select-window buffer-window)))
        (throw 'found-eaf t)))))
 
-(defun eaf--show-message (format-string)
-  "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
-  (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
+(defvar eaf--show-message-timer nil
+  "Timer used by `eaf--show-message'")
+
+(defun eaf--show-message (format-string &optional delay)
+  "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING.
+delay DELAY seconds to message."
+  (if (not delay)
+      (message "[EAF/%s] %s" eaf--buffer-app-name format-string)
+    (when (timerp eaf--show-message-timer)
+      (cancel-timer eaf--show-message-timer))
+    (setq eaf--show-message-timer
+          (run-with-timer
+           delay nil
+           (lambda ()
+             (message "[EAF/%s] %s" eaf--buffer-app-name format-string))))))
 
 (defun eaf--clear-message ()
   "Clear Emacs' echo area ."
