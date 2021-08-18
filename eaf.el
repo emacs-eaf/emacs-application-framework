@@ -1035,7 +1035,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
-  (message "[EAF/%s] %s" eaf--buffer-app-name format-string))
+  (let ((fmt (if eaf--buffer-app-name
+                 (concat "[EAF/" eaf--buffer-app-name "] %s")
+               "[EAF] %s")))
+    (message fmt format-string)))
 
 (defun eaf--clear-message ()
   "Clear Emacs' echo area ."
