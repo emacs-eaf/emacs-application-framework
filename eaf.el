@@ -1372,20 +1372,11 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
-  (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
-      ;; When switch app focus in WM, such as, i3 or qtile.
-      ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
-      ;;
-      ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-      (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "do_nothing" (key-description (this-command-keys-vector)))
-
-    ;; When press Alt + Tab in DE, such as KDE.
-    ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
-    ;;
-    ;; So we use wmctrl activate on Emacs window after Alt + Tab operation.
-    (if (executable-find "wmctrl")
-        (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
-      (message "Please install wmctrl to active Emacs window."))))
+  ;; try to call to `do_nothing` from an EAF buffer first to gain window focus
+  (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "do_nothing" (key-description (this-command-keys-vector)))
+  ;; then also activate the window by `wmctrl' when possible
+  (when (executable-find "wmctrl")
+      (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))))
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs macOS window."
