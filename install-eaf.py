@@ -31,6 +31,8 @@ parser.add_argument("--app-git-full-clone", action="store_true",
                     help='apps to conduct a full clone to preserve git logs')
 parser.add_argument("--app-drop-local-edit", action="store_true",
                     help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
+parser.add_argument("--app-save-local-edit", action="store_true",
+                    help='different with --app-drop-local-edit option, this option will do git stash before reset.')
 parser.add_argument("--use-mirror", action="store_true",
                     help='use mirror url instead of default url.')
 parser.add_argument("--use-gitee", action="store_true",
@@ -121,6 +123,10 @@ def add_or_update_app(app: str, app_spec_dict):
     updated = True
     if os.path.exists(path):
         if args.app_drop_local_edit:
+            print("[EAF] Clean {}'s local changed for pull code automatically.".format(app))
+            run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
+            run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
+        elif args.app_save_local_edit:
             print("[EAF] Clean {}'s local changed for pull code automatically.".format(app))
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
             run_command(["git", "stash", "save", "[{}] Auto stashed by install-eaf.py".format(time)], path=path, ensure_pass=False)
