@@ -177,9 +177,6 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 (defcustom eaf-mode-line-format mode-line-format
   "`mode-line-format' used by eaf-mode.")
 
-(defcustom eaf-header-line-format header-line-format
-  "`header-line-format' used by eaf-mode.")
-
 (defcustom eaf-frame-title-format frame-title-format
   "`frame-title-format' used by eaf-mode.")
 
@@ -257,9 +254,8 @@ Within EAF buffers the variable `eaf--buffer-app-name' holds the
 name of the current app. Each app can setup app hooks by using
 `eaf-<app-name>-hook'. This hook runs after the app buffer has
 been initialized."
-  ;; Let eaf can set its mode-line, header-line and frame-title.
+  ;; Let eaf can set its mode-line and frame-title.
   (setq-local mode-line-format eaf-mode-line-format)
-  (setq-local header-line-format eaf-header-line-format)
   (setq-local frame-title-format eaf-frame-title-format)
   ;; Split window combinations proportionally.
   (setq-local window-combination-resize t)
