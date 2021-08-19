@@ -1310,7 +1310,13 @@ class BrowserBuffer(Buffer):
         else:
             self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
 
+    @abstract
+    def init_app(self):
+        pass
+
     def load_index_html(self, app_file):
+        self.buffer_widget.loadFinished.connect(self.init_app)
+
         self.index_file_dir = os.path.join(os.path.dirname(app_file), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
 
