@@ -237,6 +237,13 @@ Currently, macOS is only partially supported and needs a lot of testing, not all
 ### Browser crashes
 Please DO NOT install PyQt5 through pip, pip version has a bug, please install PyQt5 from the OS software repository.
 
+### Why doesn't EAF receive input events on Linux Window Manager?
+EAF confirms that the desktop environment or window manager you can work with includes: KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
+
+We suspect there are some issues with how all the Window Managers implement their x11 protocols.
+
+One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
+
 ### Proxy
 If you need to use a proxy to access the internet, one can configure the proxy settings.
 

@@ -230,6 +230,13 @@ EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具
 ### 浏览器崩溃
 请不要用pip安装PyQt5, pip的版本有bug，请从操作系统软件仓库安装PyQt5。
 
+### 为什么通过Linux窗口管理器使用EAF无法接收输入信息？
+EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、Xfce、LXDE、Sway、i3、QTile、Xpra、EXWM.
+
+我们认为不同的窗口管理器对于X11协议的支持不够完善才导致这样的问题。
+
+现在的解决方案是将命令`wmctrl -m`中Name的值加入`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
+
 ### 代理
 可以通过下面设置来通过代理访问互联网：
 
