@@ -203,6 +203,10 @@ Wiki囊括了各种你想了解的EAF相关文档，包括了：
 ## 常用问题
 
 ### EAF是怎么工作的？
+<p align="center">
+  <img style='height: auto; width: 100%; object-fit: contain' src="./img/framework.png">
+</p>
+
 EAF主要实现这几个功能：
 1. 利用QWindow的Reparent技术来实现PyQt应用进程的窗口粘贴到Emacs对应的Buffer区域
 2. 通过Python EPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯

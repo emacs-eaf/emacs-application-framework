@@ -208,6 +208,10 @@ There also are some helpful tips to make EAF work with Docker, Helm, etc.
 ## FAQ
 
 ### How does EAF work?
+<p align="center">
+  <img style='height: auto; width: 100%; object-fit: contain' src="./img/framework.png">
+</p>
+
 EAF implements three major functionalities:
 1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
 2. Listen to EAF buffer's keyboard event flow and control the keyboard input of the PyQt program via Python EPC.
