@@ -6,13 +6,15 @@ English | [简体中文](./README.zh-CN.md)
 </p>
 
 ## Vision
-Emacs, the extensible *text editor*, is more than 45 years old, older than most operating systems people use today, as old as the first UNIX system. During the 45 years of development, the brightest hackers from all over the world have been contributing their intelligence and imagination, together they constructed the most comprehensive and rich ecosystem that you can find in any software to date.
+Emacs, the extensible *text editor*, is more than 45 years old. It is older than virtually all operating systems people use today, almost as old as the first UNIX system. During the decades of development, the world's brightest hackers have contributed their intelligence and creativity, together they've constructed the most comprehensive and richest ecosystem that you can find in any software to date.
 
-If you are a hacker who works with numerous programming languages, who desires maximum freedom, extensibility, and introspectivity into your tools, and into keyboard/text centrism, Emacs will be your best bet.
+If you are a hacker who works with numerous languages and text, who's keyboard driven and desires maximum freedom, extensibility, and introspectivity over your tool, maybe to the extent of *living* in it, Emacs will be your best bet.
 
-However, one of the greatest disadvantages of Emacs is how *old* it is. Emacs lacks performance as it doesn't have proper multithreading and modern graphical support that you can expect on many GUI applications today (such as IDEA or VSCode), resulting in the extensibility of Emacs being limited when it shouldn't have to be.
+Unfortunately, this 45 years of age is also one of the greatest disadvantages of Emacs. Comparing with modern software, Emacs lacks performance, Emacs Lisp lacks performance, it doesn't have proper multithreading and its graphical capabilities are seriously limited. It is far from what you'd expect from every GUI applications today (such as IDEA or VSCode). You may think that Emacs, as a text-centric editor, doesn't need them, but have you ever run into a situation, you sit comfortably typing commands and doing your Emacs sorcery, but can't stop to ponder: *what if* Emacs has a real browser? *what if* this PDF or video file can be viewed efficiently without leaving Emacs?
 
-The vision of the Emacs Application Framework (EAF) project is that, while retaining the culture and the ecosystem of Emacs, use Python, Qt5, and JavaScript to extend Emacs' graphical capabilities, with the hope to ultimately *Live in Emacs*.
+Emacs, although infinitely extensible in text, is very limited in graphics. It shouldn't have to be this way. However, Emacs Lisp is *the* integral part of the Emacs culture, it carries decades of history with itself, it is what makes Emacs special. It is irreplaceable.
+
+The vision of the Emacs Application Framework (EAF) project is that, while fully preserving the rich history, culture and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt5, and even JavaScript. EAF extends Emacs to the world of modern graphics, it will be the key to ultimately *Live in Emacs*.
 
 
 ## Applications
