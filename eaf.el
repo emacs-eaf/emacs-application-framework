@@ -1323,7 +1323,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (when (and eaf-browser-fullscreen-move-cursor-corner
              (or (string= eaf--buffer-app-name "browser")
                  (string= eaf--buffer-app-name "js-video-player")))
-    (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
+    (eaf-call-async "execute_function" eaf--buffer-id "do_nothing" (key-description (this-command-keys-vector)))))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
@@ -1377,7 +1377,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
       ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
       ;;
       ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-      (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
+      (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "do_nothing" (key-description (this-command-keys-vector)))
 
     ;; When press Alt + Tab in DE, such as KDE.
     ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
