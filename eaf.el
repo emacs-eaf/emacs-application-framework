@@ -407,7 +407,6 @@ Turn off this option will improve EAF new page creation speed."
     "LG3D"                              ;QTile
     "Xpra"                              ;Windows WSL
     "EXWM"                              ;EXWM
-    "Xfwm4"                             ;Xfce4
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 
@@ -1323,7 +1322,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (when (and eaf-browser-fullscreen-move-cursor-corner
              (or (string= eaf--buffer-app-name "browser")
                  (string= eaf--buffer-app-name "js-video-player")))
-    (eaf-call-async "execute_function" eaf--buffer-id "do_nothing" (key-description (this-command-keys-vector)))))
+    (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
@@ -1373,10 +1372,20 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
   ;; try to call to `do_nothing` from an EAF buffer first to gain window focus
-  (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "do_nothing" (key-description (this-command-keys-vector)))
-  ;; then also activate the window by `wmctrl' when possible
-  (when (executable-find "wmctrl")
-      (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))))
+  (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
+      ;; When switch app focus in WM, such as, i3 or qtile.
+      ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
+      ;;
+      ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
+      (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
+
+    ;; Try to call to `do_nothing` from an EAF buffer first to gain window focus, such as Xfce4
+    (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "do_nothing" (key-description (this-command-keys-vector)))
+    
+    ;; then also activate the window by `wmctrl' when possible
+    (when (executable-find "wmctrl")
+      (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid))))
+    ))
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs macOS window."
