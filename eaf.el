@@ -180,6 +180,16 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 (defcustom eaf-frame-title-format frame-title-format
   "`frame-title-format' used by eaf-mode.")
 
+(defcustom eaf-mode-line-face-specs nil
+  "Add face specs to mode-line face in eaf-mode buffer.
+
+User can try the below eaf configure:
+
+  (setq eaf-mode-line-format \"\")
+  (setq eaf-mode-line-face-specs (list :height 0.1 :background \"orange\"))
+
+to know the job of this variable.")
+
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
@@ -261,6 +271,10 @@ been initialized."
   (setq-local window-combination-resize t)
   ;; Disable cursor in eaf buffer.
   (setq-local cursor-type nil)
+
+  ;; Change mode-line face in eaf-mode buffer.
+  (when eaf-mode-line-face-specs
+    (face-remap-add-relative 'mode-line eaf-mode-line-face-specs))
 
   (set (make-local-variable 'eaf--buffer-id) (eaf--generate-id))
   (setq-local bookmark-make-record-function #'eaf--bookmark-make-record)
