@@ -251,6 +251,8 @@ Within EAF buffers the variable `eaf--buffer-app-name' holds the
 name of the current app. Each app can setup app hooks by using
 `eaf-<app-name>-hook'. This hook runs after the app buffer has
 been initialized."
+  ;; Let eaf can set its mode-line.
+  (setq-local mode-line-format eaf-mode-line-format)
   ;; Split window combinations proportionally.
   (setq-local window-combination-resize t)
   ;; Disable cursor in eaf buffer.
@@ -808,7 +810,6 @@ keybinding variable to eaf-app-binding-alist."
       (set (make-local-variable 'eaf--buffer-app-name) app-name)
       (set (make-local-variable 'eaf--buffer-args) args)
       (run-hooks (intern (format "eaf-%s-hook" app-name)))
-      (setq-local mode-line-format eaf-mode-line-format)
       (setq mode-name (concat "EAF/" app-name)))
     eaf-buffer))
 
@@ -1099,7 +1100,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                    (derived-mode-p 'eaf-mode)
                    (equal eaf--buffer-id buffer-id))
               (setq mode-name (concat "EAF/" eaf--buffer-app-name))
-              (setq-local mode-line-format eaf-mode-line-format)
               (setq-local eaf--bookmark-title title)
               (setq-local eaf--buffer-url url)
               (rename-buffer (format eaf-buffer-title-format title) t)
