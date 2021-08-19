@@ -401,25 +401,6 @@ Turn off this option will improve EAF new page creation speed."
   "The desktop name, set by function `eaf--get-current-desktop-name'."
   :type 'string)
 
-(defcustom eaf-wm-focus-fix-wms
-  `(
-    "i3"                                ;i3
-    "LG3D"                              ;QTile
-    "Xpra"                              ;Windows WSL
-    "EXWM"                              ;EXWM
-    "Xfwm4"                             ;Xfce4
-    )
-  "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
-
-EAF confirms that the desktop environment or window manager you can work includes:
-KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
-
-If your window manager can't receive input event, you can try add `NAME' of command `wmctrl -m' to this list.
-
-Please send PR if it works.
-Please fill an issue if it still doesn't work."
-  :type 'list)
-
 (defcustom eaf-start-python-process-when-require t
   "Start EAF python process when require `eaf', default is turn on.
 
