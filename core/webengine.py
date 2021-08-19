@@ -1310,7 +1310,6 @@ class BrowserBuffer(Buffer):
         else:
             self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
 
-    @abstract
     def init_app(self):
         pass
 
