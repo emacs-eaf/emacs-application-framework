@@ -177,6 +177,9 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 (defcustom eaf-mode-line-format mode-line-format
   "`mode-line-format' used by eaf-mode.")
 
+(defcustom eaf-header-line-format header-line-format
+  "`header-line-format' used by eaf-mode.")
+
 (defvar eaf-mode-map*
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-h m") #'eaf-describe-bindings)
@@ -251,8 +254,9 @@ Within EAF buffers the variable `eaf--buffer-app-name' holds the
 name of the current app. Each app can setup app hooks by using
 `eaf-<app-name>-hook'. This hook runs after the app buffer has
 been initialized."
-  ;; Let eaf can set its mode-line.
+  ;; Let eaf can set its mode-line and header-line.
   (setq-local mode-line-format eaf-mode-line-format)
+  (setq-local header-line-format eaf-header-line-format)
   ;; Split window combinations proportionally.
   (setq-local window-combination-resize t)
   ;; Disable cursor in eaf buffer.
