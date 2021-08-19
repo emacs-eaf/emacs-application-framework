@@ -1044,7 +1044,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (catch 'found-eaf
     (eaf-for-each-eaf-buffer
      (when (string= eaf--buffer-id focus-buffer-id)
-       (let ((buffer-window (get-buffer-window buffer)))
+       (let ((buffer-window (get-buffer-window buffer 'visible)))
          (when buffer-window
            (select-window buffer-window)))
        (throw 'found-eaf t)))))
