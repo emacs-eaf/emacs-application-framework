@@ -7,6 +7,8 @@ import sys
 import subprocess
 from shutil import which
 import json
+import datetime
+import time
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -108,6 +110,9 @@ def add_or_update_app(app: str, app_spec_dict):
     else:
         url = app_spec_dict['url']
 
+    branch = app_spec_dict['branch']
+    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
     if os.path.exists(path):
         print("[EAF] Updating", app, "to newest version...")
     else:
@@ -118,6 +123,9 @@ def add_or_update_app(app: str, app_spec_dict):
         if args.app_drop_local_edit:
             print("[EAF] Clean {}'s local changed for pull code automatically.".format(app))
             run_command(["git", "clean", "-df"], path=path, ensure_pass=False)
+            run_command(["git", "stash", "save", "[{}] Auto stashed by install-eaf.py".format(time)], path=path, ensure_pass=False)
+            run_command(["git", "reset", "--hard"], path=path, ensure_pass=False)
+            run_command(["git", "checkout", branch], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
         output_lines = run_command(["git", "pull"], path=path, ensure_pass=False, get_result=True)
