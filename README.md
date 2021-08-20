@@ -79,7 +79,7 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
                   :files ("*")))
     ```
 
-#### 2. Install EAF dependencies
+#### 2. Install/Update EAF applications and dependencies
 
 You can use `M-x eaf-install` or manually run the `install-eaf.py` script in the EAF directory:
 
@@ -131,7 +131,7 @@ Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that i
 
 I **highly** encourage you to read the [Wiki](#Wiki) and [FAQ](#FAQ) if you have any questions.
 
-Also, I encourage periodically `git pull` **and** run `install-eaf.py` again to update EAF, applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug)
+Also, you should regularly `git pull` **and** run `install-eaf.py` again to update EAF, its applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug).
 
 ### Dependency List
 
