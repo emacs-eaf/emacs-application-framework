@@ -725,9 +725,9 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (eaf-call-async "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
-(defun eaf--make-proxy-function (fun)
-  "Define elisp command which can call python function string FUN."
-  (let ((sym (intern (format "eaf-proxy-%s" fun))))
+(defun eaf--make-py-proxy-function (fun)
+  "Define elisp command which can call Python function string FUN."
+  (let ((sym (intern (format "eaf-py-proxy-%s" fun))))
     (unless (fboundp sym)
       (defalias sym
         (lambda nil
@@ -744,15 +744,25 @@ Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
 to edit EAF keybindings!" fun fun)))
     sym))
 
-(defun eaf--call-js-function (fun &optional args)
-  (lambda nil
-    (interactive)
-    (unless args
-      (setq args ""))
-    ;; Ensure this is only called from EAF buffer
-    (when (derived-mode-p 'eaf-mode)
-      (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") args)
-      )))
+(defun eaf--make-js-proxy-function (fun &optional args)
+  "Define elisp command which can call JavaScript function string FUN."
+  (let ((sym (intern (format "eaf-js-proxy-%s" fun))))
+    (unless (fboundp sym)
+      (defalias sym
+        (lambda nil
+          (interactive)
+          (unless args
+            (setq args ""))
+          ;; Ensure this is only called from EAF buffer
+          (when (derived-mode-p 'eaf-mode)
+            (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") args)
+            ))
+        (format
+         "Proxy function to call \"%s\" on the JavaScript side.
+
+Please ONLY use `eaf-bind-key' and use the unprefixed command name (\"%s\")
+to edit EAF keybindings!" fun fun)))
+    sym))
 
 (defun eaf--gen-keybinding-map (keybinding &optional no-inherit-eaf-mode-map*)
   "Configure the `eaf-mode-map' from KEYBINDING, one of the eaf-.*-keybinding variables."
@@ -773,12 +783,12 @@ to edit EAF keybindings!" fun fun)))
 
                          ;; If command prefix with js_, call JavaScript function directly.
                          ((string-prefix-p "js_" fun)
-                          (eaf--call-js-function fun))
+                          (eaf--make-js-proxy-function fun))
 
                          ;; If command is not built-in function and not include char '-'
                          ;; it's command in python side, build elisp proxy function to call it.
                          (t
-                          (eaf--make-proxy-function fun))
+                          (eaf--make-py-proxy-function fun))
                          ))
                    finally return map))))
 
