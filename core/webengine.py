@@ -521,7 +521,7 @@ class BrowserView(QWebEngineView):
         self.load_marker_file()
         link = self.execute_js("Marker.gotoMarker('%s', Marker.getMarkerAction)" % str(marker))
         self.cleanup_links_dom()
-        if link is None or link.startswith("eaf::"):
+        if link is None or type(link).__name__ == "QVariant" or link.startswith("eaf::"):
             print(link)
             return False
         else:

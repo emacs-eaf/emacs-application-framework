@@ -126,6 +126,7 @@ class Buffer(QGraphicsScene):
 
     def base_class_name(self):
         return self.__class__.__bases__[0].__name__
+
     def build_all_methods(self, origin_class):
         ''' Build all methods.'''
         method_list = [func for func in dir(origin_class) if callable(getattr(origin_class, func)) and not func.startswith("__")]
