@@ -191,14 +191,18 @@ def install_app_deps(distro, deps_dict):
     with open(os.path.join(script_path, 'applications.json')) as f:
         app_dict = json.load(f)
 
-    prev_app_choices = []
+    app_dir = os.path.join(script_path, "app")
+
+    # TODO REMOVE ME: Delete obsolete file, we don't use it anymore
     prev_app_choices_file = os.path.join(script_path, '.eaf-installed-apps.json')
-    if os.path.exists(prev_app_choices_file) and os.stat(prev_app_choices_file).st_size > 0:
-        with open(prev_app_choices_file) as f:
-            prev_app_choices = json.load(f)
-        for app in prev_app_choices:
-            if app not in app_dict:
-                prev_app_choices.remove(app)
+    if os.path.exists(prev_app_choices_file):
+        print(prev_app_choices_file, "is obsolete, removing...")
+        os.remove(prev_app_choices_file)
+
+    prev_app_choices = [f for f in os.listdir(app_dir) if os.path.isdir(os.path.join(app_dir, f))]
+    for app in prev_app_choices:
+        if app not in app_dict:
+            prev_app_choices.remove(app)
 
     use_prev_choices = False
     if not args.install_all_apps and len(args.install_app) == 0:
@@ -237,7 +241,7 @@ def install_app_deps(distro, deps_dict):
         if args.install_all_apps or install_this_app:
             prev_app_choices.append(app_name)
             updated = add_or_update_app(app_name, app_spec_dict)
-            app_path = os.path.join(script_path, "app", app_name)
+            app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
             if (updated or args.force_install) and os.path.exists(app_dep_path):
                 with open(os.path.join(app_dep_path)) as f:
