@@ -186,13 +186,16 @@ def yes_no(question, default_yes=False, default_no=False):
     else:
         return key.lower() == 'y'
 
-def install_app_deps(distro, deps_dict):
-    print("[EAF] Installing application dependencies")
+def get_all_apps_info():
     with open(os.path.join(script_path, 'applications.json')) as f:
-        app_dict = json.load(f)
+        info = json.load(f)
+    apps_info = {}
+    for app_name, app_spec_dict in info.items():
+        if app_spec_dict["type"] == "app":
+            apps_info[app_name] = app_spec_dict
+    return apps_info
 
-    app_dir = os.path.join(script_path, "app")
-
+def get_installed_apps(app_dir):
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
 
@@ -202,10 +205,23 @@ def install_app_deps(distro, deps_dict):
         print(prev_app_choices_file, "is obsolete, removing...")
         os.remove(prev_app_choices_file)
 
-    prev_app_choices = [f for f in os.listdir(app_dir) if os.path.isdir(os.path.join(app_dir, f))]
-    for app in prev_app_choices:
-        if app not in app_dict:
-            prev_app_choices.remove(app)
+    apps_installed = [f for f in os.listdir(app_dir) if os.path.isdir(os.path.join(app_dir, f))]
+    for app in apps_installed:
+        git_dir = os.path.join(app_dir, app, ".git")
+        if app not in get_all_apps_info().keys():
+            apps_installed.remove(app)
+        if not os.path.isdir(git_dir):
+            print("[EAF] *WARN* 'app/{}' is not installed by install-eaf.py, please check it manually.".format(app))
+            apps_installed.remove(app)
+
+    return apps_installed
+
+def install_app_deps(distro, deps_dict):
+    print("[EAF] Installing application dependencies")
+    app_dict = get_all_apps_info()
+
+    app_dir = os.path.join(script_path, "app")
+    prev_app_choices = get_installed_apps(app_dir)
 
     use_prev_choices = False
     if not args.install_all_apps and len(args.install_app) == 0:
@@ -242,7 +258,6 @@ def install_app_deps(distro, deps_dict):
                 install_this_app = False
 
         if args.install_all_apps or install_this_app:
-            prev_app_choices.append(app_name)
             updated = add_or_update_app(app_name, app_spec_dict)
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
@@ -278,7 +293,7 @@ def install_app_deps(distro, deps_dict):
 
     print("[EAF] Finished installing application dependencies")
     print("[EAF] Please ensure the following are added to your init.el:")
-    for app in prev_app_choices:
+    for app in get_installed_apps(app_dir):
         print("(require 'eaf-{})".format(app))
     print("[EAF] Please regularly run this script to update applications and dependencies,")
     print("[EAF]  this includes every time you git pull the latest EAF changes.")
