@@ -277,6 +277,8 @@ def install_app_deps(distro, deps_dict):
     print("[EAF] Please ensure the following are added to your init.el:")
     for app in prev_app_choices:
         print("(require 'eaf-{})".format(app))
+    print("[EAF] Please regularly run this script to update applications and dependencies,")
+    print("[EAF]  this includes every time you git pull the latest EAF changes.")
 
 def main():
     try:
