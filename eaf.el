@@ -413,6 +413,9 @@ Turn off this option will improve EAF new page creation speed."
 EAF confirms that the desktop environment or window manager you can work includes:
 KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
 
+In which, KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway works well default,
+i3, QTile, Xpra, EXWM need move cursor to corner to get focus of Window manager.
+
 If your window manager can't receive input event, you can try add `NAME' of command `wmctrl -m' to this list.
 
 Please send PR if it works.
@@ -1371,7 +1374,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
-  ;; try to call to `do_nothing` from an EAF buffer first to gain window focus
   (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
       ;; When switch app focus in WM, such as, i3 or qtile.
       ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
@@ -1379,13 +1381,10 @@ So multiple EAF buffers visiting the same file do not sync with each other."
       ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
       (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
 
-    ;; Try to call to `do_nothing` from an EAF buffer first to gain window focus, such as Xfce4
-    (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "do_nothing" (key-description (this-command-keys-vector)))
-    
-    ;; then also activate the window by `wmctrl' when possible
-    (when (executable-find "wmctrl")
-      (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid))))
-    ))
+    ;; Activate the window by `wmctrl' when possible
+    (if (executable-find "wmctrl")
+        (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
+      (message "Please install wmctrl to active Emacs window."))))
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs macOS window."

@@ -179,12 +179,6 @@ class Buffer(QGraphicsScene):
         screen = qApp.primaryScreen()
         QCursor().setPos(screen, screen.size().width(), screen.size().height())
 
-    def do_nothing(self):
-        '''
-        Do nothing
-        '''
-        return True
-
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''
         self.aspect_ratio = aspect_ratio
