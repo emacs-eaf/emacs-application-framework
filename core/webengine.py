@@ -1313,14 +1313,17 @@ class BrowserBuffer(Buffer):
     def init_app(self):
         pass
 
-    def load_index_html(self, app_file):
+    def load_index_html(self, app_file, convert_path = True):
         self.buffer_widget.loadFinished.connect(self.init_app)
 
         self.index_file_dir = os.path.join(os.path.dirname(app_file), "dist")
         self.index_file = os.path.join(self.index_file_dir, "index.html")
 
         with open(self.index_file, "r") as f:
-            html = self.convert_index_html(f.read(), self.index_file_dir)
+            if convert_path:
+                html = self.convert_index_html(f.read(), self.index_file_dir)
+            else:
+                html = f.read()
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
     def convert_index_html(self, index_file_content, dist_dir):
