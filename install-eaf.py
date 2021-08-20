@@ -193,6 +193,9 @@ def install_app_deps(distro, deps_dict):
 
     app_dir = os.path.join(script_path, "app")
 
+    if not os.path.exists(app_dir):
+        os.makedirs(app_dir)
+
     # TODO REMOVE ME: Delete obsolete file, we don't use it anymore
     prev_app_choices_file = os.path.join(script_path, '.eaf-installed-apps.json')
     if os.path.exists(prev_app_choices_file):
@@ -272,10 +275,6 @@ def install_app_deps(distro, deps_dict):
             install_npm_rebuild(npm_rebuild_apps)
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
-
-    prev_app_choices = list(set(prev_app_choices))
-    with open(prev_app_choices_file, 'w') as f:
-        json.dump(list(set(prev_app_choices)), f)
 
     print("[EAF] Finished installing application dependencies")
     print("[EAF] Please ensure the following are added to your init.el:")
