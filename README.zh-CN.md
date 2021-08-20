@@ -153,7 +153,7 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json`
 | Org预览          | `M-x eaf-open` 输入Org文件                                                  |
 | 摄像头程序       | `M-x eaf-open-camera`                                                       |
 | 终端模拟器       | `M-x eaf-open-terminal`                                                     |
-| 文件管理器  | `M-x eaf-open-file-manager`                                         |
+| 文件管理器  | `M-x eaf-open-in-file-manager`                                         |
 | 二维码下载文件   | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`           |
 | 二维码在线浏览器 | `M-x eaf-file-browser-qrcode`                                               |
 | 无线分享         | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |

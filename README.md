@@ -160,7 +160,7 @@ You can check `app/name/dependencies.json` and `app/name/package.json` for appli
 | Org Previewer       | `M-x eaf-open` Org File                                                |
 | Camera              | `M-x eaf-open-camera`                                                  |
 | Terminal            | `M-x eaf-open-terminal`                                                |
-| File Manager   | `M-x eaf-open-file-manager`                                    |
+| File Manager   | `M-x eaf-open-in-file-manager`                                    |
 | File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`      |
 | File Browser        | `M-x eaf-file-browser-qrcode`                                          |
 | Airshare            | `M-x eaf-open-airshare`                                                |
