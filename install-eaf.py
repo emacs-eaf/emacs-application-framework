@@ -243,8 +243,6 @@ def install_app_deps(distro, deps_dict):
     vue_install_apps = []
     npm_rebuild_apps = []
     for app_name, app_spec_dict in app_dict.items():
-        if app_spec_dict["type"] != "app":
-            continue
         install_this_app = False
         if not args.install_all_apps:
             if len(args.install_app) > 0 and app_name in args.install_app:
@@ -253,9 +251,6 @@ def install_app_deps(distro, deps_dict):
                 install_this_app = yes_no("[EAF] " + app_spec_dict["name"] + ". Install? (y/N): ", default_no=True)
             elif use_prev_choices and app_name in prev_app_choices:
                 install_this_app = True
-
-        if app_spec_dict["type"] != "app":
-                install_this_app = False
 
         if args.install_all_apps or install_this_app:
             updated = add_or_update_app(app_name, app_spec_dict)
