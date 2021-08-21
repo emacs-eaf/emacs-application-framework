@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Aug 17 11:10:28 2021 (-0400)
+;; Last-Updated: Sat Aug 21 02:04:00 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -585,7 +585,7 @@ A hashtable, key is url and value is title.")
 
 (defvar eaf-stop-process-hook nil)
 
-(defun eaf-stop-process (&optional restart)
+(defun eaf-kill-process (&optional restart)
   "Stop EAF process and kill all EAF buffers.
 
 If RESTART is non-nil, cached URL and app-name will not be cleared."
@@ -620,7 +620,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   ;; Kill process after kill buffer, make application can save session data.
   (eaf--kill-python-process))
 
-(defalias 'eaf-kill-process #'eaf-stop-process)
+(defalias 'eaf-stop-process #'eaf-kill-process)
 
 (defun eaf--kill-python-process ()
   "Kill EAF background python process."
@@ -653,7 +653,7 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
    (push `(,eaf--buffer-url ,eaf--buffer-app-name ,eaf--buffer-args) eaf--first-start-app-buffers))
 
   ;; Stop EAF process.
-  (eaf-stop-process t)
+  (eaf-kill-process t)
 
   ;; Start EAF process, EAF will restore page in `eaf--first-start-app-buffers'.
   (eaf-start-process))
@@ -1547,12 +1547,15 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
 ;;;###autoload
-(defun eaf-install ()
+(defun eaf-install-and-update ()
   "An interactive function that run install-eaf.py to install EAF apps and dependencies."
   (interactive)
   (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
          (default-directory eaf-dir))
     (shell-command (concat eaf-python-command " install-eaf.py" "&"))))
+
+(define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
+  "Please use M-x eaf-install-and-update instead.")
 
 ;; Use `eaf-open' in `dired-find-file' and `dired-find-alternate-file'
 (defun eaf--dired-find-file-advisor (orig-fn)

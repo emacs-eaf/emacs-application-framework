@@ -81,7 +81,7 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
 
 #### 2. Install/Update EAF applications and dependencies
 
-You can use `M-x eaf-install` or manually run the `install-eaf.py` script in the EAF directory:
+You can use `M-x eaf-install-and-update` or manually run the `install-eaf.py` script in the EAF directory:
 
 ```Bash
 cd emacs-application-framework
