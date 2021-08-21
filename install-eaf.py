@@ -251,58 +251,61 @@ def print_emacs_config_example(app_dir):
         print("(require 'eaf-{})".format(app))
 
 def get_user_choice(apps_installed):
-    pending_apps = {}
+    pending_apps_info_list = []
     if args.install_all_apps:
-        pending_apps = get_all_apps_info()
+        pending_apps_info_list = [get_all_apps_info()]
     elif len(args.install_app) > 0:
-        pending_apps = get_need_install_apps_info(args.install_app)
+        pending_apps_info_list = [get_need_install_apps_info(args.install_app),
+                                  get_installed_apps_info(apps_installed)]
     elif len(apps_installed) == 0:
-        pending_apps = get_new_selected_apps_info(apps_installed)
+        pending_apps_info_list = [get_new_selected_apps_info(apps_installed)]
     elif len(apps_installed) > 0 and args.select_new:
         print("[EAF] Found these existing EAF applications:")
         for app in apps_installed:
             print("[EAF]", app)
         print("[EAF]")
         if yes_no("[EAF] => Do you want to install new apps? (y/N): ", default_no=True):
-            pending_apps = get_new_selected_apps_info(apps_installed)
+            pending_apps_info_list = [get_new_selected_apps_info(apps_installed),
+                                      get_installed_apps_info(apps_installed)]
     elif len(apps_installed) > 0:
-        pending_apps = get_installed_apps_info(apps_installed)
+        pending_apps_info_list = [get_installed_apps_info(apps_installed)]
         important_message.append("[EAF] Run 'python3 install_eaf.py --select-new' to add another apps when you update EAF.")
     else:
-        pending_apps = {}
+        pending_apps_info_list = []
         
-    return pending_apps
+    return pending_apps_info_list
 
 def install_app_deps(distro, deps_dict):
     print("[EAF] Installing application dependencies")
 
     app_dir = os.path.join(script_path, "app")
     apps_installed = get_installed_apps(app_dir)
-    pending_apps = get_user_choice(apps_installed)
+    pending_apps_info_list = get_user_choice(apps_installed)
 
     sys_deps = []
     py_deps = []
     npm_install_apps = []
     vue_install_apps = []
     npm_rebuild_apps = []
-    for app_name, app_spec_dict in pending_apps.items():
-        updated = add_or_update_app(app_name, app_spec_dict)
-        app_path = os.path.join(app_dir, app_name)
-        app_dep_path = os.path.join(app_path, 'dependencies.json')
-        if (updated or args.force_install) and os.path.exists(app_dep_path):
-            with open(os.path.join(app_dep_path)) as f:
-                deps_dict = json.load(f)
-            if not args.ignore_sys_deps and sys.platform == "linux" and distro in deps_dict:
-                sys_deps.extend(deps_dict[distro])
-            if not args.ignore_py_deps and 'pip' in deps_dict and sys.platform in deps_dict['pip']:
-                py_deps.extend(deps_dict['pip'][sys.platform])
-            if not args.ignore_node_deps:
-                if 'npm_install' in deps_dict and deps_dict['npm_install']:
-                    npm_install_apps.append(app_path)
-                if 'vue_install' in deps_dict and deps_dict['vue_install']:
-                    vue_install_apps.append(app_path)
-                if 'npm_rebuild' in deps_dict and deps_dict['npm_rebuild']:
-                    npm_rebuild_apps.append(app_path)
+    for pending_apps_info in pending_apps_info_list:
+        for app_name, app_spec_dict in pending_apps_info.items():
+            updated = add_or_update_app(app_name, app_spec_dict)
+            app_path = os.path.join(app_dir, app_name)
+            app_dep_path = os.path.join(app_path, 'dependencies.json')
+            if (updated or args.force_install) and os.path.exists(app_dep_path):
+                with open(os.path.join(app_dep_path)) as f:
+                    deps_dict = json.load(f)
+                if not args.ignore_sys_deps and sys.platform == "linux" and distro in deps_dict:
+                    sys_deps.extend(deps_dict[distro])
+                if not args.ignore_py_deps and 'pip' in deps_dict and sys.platform in deps_dict['pip']:
+                    py_deps.extend(deps_dict['pip'][sys.platform])
+                if not args.ignore_node_deps:
+                    if 'npm_install' in deps_dict and deps_dict['npm_install']:
+                        npm_install_apps.append(app_path)
+                    if 'vue_install' in deps_dict and deps_dict['vue_install']:
+                        vue_install_apps.append(app_path)
+                    if 'npm_rebuild' in deps_dict and deps_dict['npm_rebuild']:
+                        npm_rebuild_apps.append(app_path)
 
     print("\n[EAF] Installing dependencies for chosen applications")
     if not args.ignore_sys_deps and sys.platform == "linux" and len(sys_deps) > 0:
