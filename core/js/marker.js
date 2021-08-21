@@ -177,6 +177,8 @@ try {
 
   Marker.generateMarker = (selectors) => {
     let style = document.createElement('style');
+    let offsetX = "%2";
+    let offsetY = "%3";
     document.head.appendChild(style);
     style.type = 'text/css';
     style.setAttribute('class', 'eaf-style');
@@ -245,7 +247,7 @@ z-index: 2140000001;\
         let marker = document.createElement('div');
         let rect = selectors[i].getBoundingClientRect();
         marker.setAttribute('class', 'eaf-marker');
-        marker.setAttribute('style', 'left: ' + rect.x + 'px; top: ' + rect.y + 'px;');
+        marker.setAttribute('style', 'left: ' + (rect.x + parseInt(offsetX)) + 'px; top: ' + (rect.y + parseInt(offsetY)) + 'px;');
         marker.setAttribute('pointed-link', cssSelector(selectors[i]));
         markerContainer.appendChild(marker);
       }

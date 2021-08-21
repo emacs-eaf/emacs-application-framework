@@ -498,7 +498,7 @@ class BrowserView(QWebEngineView):
         if self.marker_js_raw == None:
             self.marker_js_raw = self.read_js_content("marker.js")
 
-        self.eval_js(self.marker_js_raw.replace("%1", get_emacs_var("eaf-marker-letters")))
+        self.eval_js(self.marker_js_raw.replace("%1", get_emacs_var("eaf-marker-letters")).replace("%2", str(self.buffer.marker_offset_x())).replace("%3", str(self.buffer.marker_offset_y())))
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''
@@ -1348,6 +1348,12 @@ class BrowserBuffer(Buffer):
     def init_web_page_background(self):
         # Web page background follow Emacs's background.
         self.buffer_widget.web_page.setBackgroundColor(self.background_color)
+
+    def marker_offset_x(self):
+        return 0
+
+    def marker_offset_y(self):
+        return 0
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
