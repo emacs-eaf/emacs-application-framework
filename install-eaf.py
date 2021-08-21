@@ -20,10 +20,8 @@ parser.add_argument("--install-core-deps", action="store_true",
                     help='only install core dependencies')
 parser.add_argument("--ignore-core-deps", action="store_true",
                     help='ignore core dependencies')
-parser.add_argument("--install-app", nargs='+', default=[],
+parser.add_argument("--install-app", nargs=argparse.REMAINDER,
                     help='only install apps listed here')
-parser.add_argument("--select-new", action="store_true",
-                    help='Select and install new apps when user update EAF.')
 parser.add_argument("--ignore-sys-deps", action="store_true",
                     help='ignore system dependencies')
 parser.add_argument("--ignore-py-deps", action="store_true",
@@ -252,14 +250,24 @@ def print_emacs_config_example(app_dir):
 
 def get_user_choice(apps_installed):
     pending_apps_info_list = []
+    select_app = False
+    install_app = False
+
+    if args.install_app is None:
+        install_app = False
+    elif len(args.install_app) == 0:
+        select_app = True
+    else:
+        install_app = args.install_app
+
     if args.install_all_apps:
         pending_apps_info_list = [get_all_apps_info()]
-    elif len(args.install_app) > 0:
-        pending_apps_info_list = [get_need_install_apps_info(args.install_app),
+    elif install_app:
+        pending_apps_info_list = [get_need_install_apps_info(install_app),
                                   get_installed_apps_info(apps_installed)]
     elif len(apps_installed) == 0:
         pending_apps_info_list = [get_new_selected_apps_info(apps_installed)]
-    elif len(apps_installed) > 0 and args.select_new:
+    elif len(apps_installed) > 0 and select_app:
         print("[EAF] Found these existing EAF applications:")
         for app in apps_installed:
             print("[EAF]", app)
@@ -269,7 +277,7 @@ def get_user_choice(apps_installed):
                                       get_installed_apps_info(apps_installed)]
     elif len(apps_installed) > 0:
         pending_apps_info_list = [get_installed_apps_info(apps_installed)]
-        important_message.append("[EAF] Run 'python3 install_eaf.py --select-new' to add another apps when you update EAF.")
+        important_message.append("[EAF] Run 'python3 install_eaf.py --install-app' to add another apps when you update EAF.")
     else:
         pending_apps_info_list = []
         
@@ -336,7 +344,7 @@ def main():
         with open(os.path.join(script_path, 'dependencies.json')) as f:
             deps_dict = json.load(f)
 
-        if (not args.ignore_core_deps and len(args.install_app) == 0) or args.install_core_deps:
+        if (not args.ignore_core_deps and (args.install_app is None or len(args.install_app) == 0)) or args.install_core_deps:
             print("[EAF] ------------------------------------------")
             install_core_deps(distro, deps_dict)
             print("[EAF] ------------------------------------------")
