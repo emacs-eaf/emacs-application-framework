@@ -263,7 +263,7 @@ def get_install_apps(apps_installed):
     if args.install_new_apps or len(apps_installed) == 0:
         pending_apps_dict_list.append(get_new_apps_dict(apps_installed))
     elif not args.install_new_apps:
-        important_messages.append("[EAF] Use the flag '--install-new-apps' to add other apps when you update EAF.")
+        important_messages.append("[EAF] Use the flag '--install-new-apps' to install previously uninstalled or new apps.")
 
     return pending_apps_dict_list
 
