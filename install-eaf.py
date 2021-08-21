@@ -10,8 +10,19 @@ import json
 import datetime
 import time
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 script_path = os.path.dirname(os.path.realpath(__file__))
-important_message = []
+important_message = ["[EAF] Run 'git pull ; python3 install-eaf.py' to update EAF, its applications and relating dependencies."]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
@@ -277,10 +288,10 @@ def get_user_choice(apps_installed):
                                       get_installed_apps_info(apps_installed)]
     elif len(apps_installed) > 0:
         pending_apps_info_list = [get_installed_apps_info(apps_installed)]
-        important_message.append("[EAF] Run 'python3 install_eaf.py --install-app' to add another apps when you update EAF.")
+        important_message.append("[EAF] Run 'python3 install-eaf.py --install-app' to add another apps when you update EAF.")
     else:
         pending_apps_info_list = []
-        
+
     return pending_apps_info_list
 
 def install_app_deps(distro, deps_dict):
@@ -332,11 +343,13 @@ def install_app_deps(distro, deps_dict):
 
     print("[EAF] Finished installing application dependencies")
     print("[EAF] Please ensure the following are added to your init.el:")
+
     print_emacs_config_example(app_dir)
+
     print("[EAF] Please regularly run this script to update applications and dependencies,")
     print("[EAF]  this includes every time you git pull the latest EAF changes.")
     for msg in important_message:
-        print(msg)
+        print(bcolors.WARNING + msg + bcolors.ENDC)
 
 def main():
     try:
