@@ -9,23 +9,6 @@ from shutil import which
 import json
 import datetime
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-script_path = os.path.dirname(os.path.realpath(__file__))
-important_message = [
-    "[EAF] Please run both 'git pull' and 'install-eaf.py' (M-x eaf-install) to update EAF,",
-    "[EAF]  its applications & dependencies."
-]
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
                     help='install all available applications')
@@ -34,7 +17,7 @@ parser.add_argument("--install-core-deps", action="store_true",
 parser.add_argument("--install-app", nargs='+', default=[],
                     help='only install apps listed here')
 parser.add_argument("--install-new-apps", action="store_true",
-                    help='only install previously uninstalled new applications')
+                    help='also install previously uninstalled or new applications')
 parser.add_argument("--force-install", action="store_true",
                     help="force install app dependencies even if apps are already up-to-date")
 parser.add_argument("--ignore-core-deps", action="store_true",
@@ -58,6 +41,33 @@ parser.add_argument("--use-gitee", action="store_true",
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+def get_available_apps_dict():
+    with open(os.path.join(script_path, 'applications.json')) as f:
+        info = json.load(f)
+    apps_dict = {}
+    for app_name, app_spec_dict in info.items():
+        if app_spec_dict["type"] == "app":
+            apps_dict[app_name] = app_spec_dict
+    return apps_dict
+
+available_apps_dict = get_available_apps_dict()
+
+important_messages = [
+    "[EAF] Please run both 'git pull' and 'install-eaf.py' (M-x eaf-install-and-update) to update EAF, applications and their dependencies."
+]
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     print("[EAF] Running", ' '.join(command), "@", path)
@@ -174,12 +184,13 @@ def get_distro():
         distro = "dnf"
     elif which("pkg"):
         distro = "pkg"
+    elif which("brew"):
+        distro = "brew"
     elif sys.platform == "linux":
         print("[EAF] Unsupported Linux distribution/package manager.")
         print(" Please see dependencies.json for list of dependencies.")
         sys.exit(1)
-    elif which("brew"):
-        distro = "brew"
+
     return distro
 
 def install_core_deps(distro, deps_dict):
@@ -202,106 +213,83 @@ def yes_no(question, default_yes=False, default_no=False):
     else:
         return key.lower() == 'y'
 
-def get_all_apps_info():
-    with open(os.path.join(script_path, 'applications.json')) as f:
-        info = json.load(f)
-    apps_info = {}
-    for app_name, app_spec_dict in info.items():
-        if app_spec_dict["type"] == "app":
-            apps_info[app_name] = app_spec_dict
-    return apps_info
-
 def get_installed_apps(app_dir):
-    if not os.path.exists(app_dir):
-        os.makedirs(app_dir)
-
-    # TODO REMOVE ME: Delete obsolete file, we don't use it anymore
-    prev_app_choices_file = os.path.join(script_path, '.eaf-installed-apps.json')
-    if os.path.exists(prev_app_choices_file):
-        print(prev_app_choices_file, "is obsolete, removing...")
-        os.remove(prev_app_choices_file)
-
     apps_installed = [f for f in os.listdir(app_dir) if os.path.isdir(os.path.join(app_dir, f))]
     for app in apps_installed:
         git_dir = os.path.join(app_dir, app, ".git")
-        if app not in get_all_apps_info().keys():
+        if app not in get_available_apps_dict().keys():
             apps_installed.remove(app)
         if not os.path.isdir(git_dir):
-            print("[EAF] *WARN* 'app/{}' is not installed by install-eaf.py, please check it manually.".format(app))
+            important_messages.append("[EAF] *WARN* 'app/{}' is not a git repo installed by install-eaf.py!".format(app))
             apps_installed.remove(app)
 
     return apps_installed
 
-def get_installed_apps_info(apps_installed):
-    all_apps_info = get_all_apps_info()
-    return {app_name: all_apps_info[app_name] for app_name in apps_installed}
+def get_installed_apps_dict(apps_installed):
+    return {app_name: available_apps_dict[app_name] for app_name in apps_installed}
 
-def get_new_selected_apps_info(apps_installed):
-    all_apps_info = get_all_apps_info()
-    not_installed_apps_info = {}
-    new_selected_apps_info = {}
+def get_new_apps_dict(apps_installed):
+    not_installed_apps_dict = {}
+    new_apps_dict = {}
     num = 1
-    for app_name, app_spec_dict in all_apps_info.items():
+    for app_name, app_spec_dict in available_apps_dict.items():
         if app_name not in apps_installed:
-            not_installed_apps_info[app_name] = app_spec_dict
-    for app_name, app_spec_dict in not_installed_apps_info.items():
-        indicator = "({}/{})".format(num, len(not_installed_apps_info))
-        if yes_no("[EAF] " + indicator + " " + app_name + ". Install? (y/N): ", default_no=True):
-            new_selected_apps_info[app_name] = app_spec_dict
+            not_installed_apps_dict[app_name] = app_spec_dict
+    for app_name, app_spec_dict in not_installed_apps_dict.items():
+        indicator = "({}/{})".format(num, len(not_installed_apps_dict))
+        if yes_no("[EAF] " + indicator + " " + app_name + ". Install? (Y/n): ", default_yes=True):
+            new_apps_dict[app_name] = app_spec_dict
         num = num + 1
-    return new_selected_apps_info
+    return new_apps_dict
 
-def get_need_install_apps_info(apps_need_install):
-    all_apps_info = get_all_apps_info()
-    need_install_apps_info = {}
-    for app_name, app_spec_dict in all_apps_info.items():
+def get_specific_install_apps_dict(apps_need_install):
+    need_install_apps_dict = {}
+    for app_name, app_spec_dict in available_apps_dict.items():
         if app_name in apps_need_install:
-            need_install_apps_info[app_name] = app_spec_dict
-    return need_install_apps_info
+            need_install_apps_dict[app_name] = app_spec_dict
+    return need_install_apps_dict
 
-def print_emacs_config_example(app_dir):
+def print_sample_config(app_dir):
     for app in get_installed_apps(app_dir):
         print("(require 'eaf-{})".format(app))
 
-def get_user_choice(apps_installed):
-    pending_apps_info_list = []
+def get_install_apps(apps_installed):
     if args.install_all_apps:
-        pending_apps_info_list = [get_all_apps_info()]
-    elif len(args.install_app) > 0:
-        pending_apps_info_list = [get_need_install_apps_info(args.install_app),
-                                  get_installed_apps_info(apps_installed)]
-    elif len(apps_installed) == 0:
-        pending_apps_info_list = [get_new_selected_apps_info(apps_installed)]
-    elif len(apps_installed) > 0 and args.install_new_apps:
-        print("[EAF] Found these existing EAF applications:")
-        for app in apps_installed:
-            print("[EAF]", app)
-        print("[EAF]")
-        if yes_no("[EAF] => Do you want to install new apps? (y/N): ", default_no=True):
-            pending_apps_info_list = [get_new_selected_apps_info(apps_installed),
-                                      get_installed_apps_info(apps_installed)]
-    elif len(apps_installed) > 0:
-        pending_apps_info_list = [get_installed_apps_info(apps_installed)]
-        important_message.append("[EAF] Use the flag '--install-new-apps' to add another apps when you update EAF.")
-    else:
-        pending_apps_info_list = []
+        return [get_available_apps_dict()]
+    if len(args.install_app) > 0:
+        return [get_specific_install_apps_dict(args.install_app)]
 
-    return pending_apps_info_list
+    pending_apps_dict_list = [get_installed_apps_dict(apps_installed)]
+    if args.install_new_apps or len(apps_installed) == 0:
+        pending_apps_dict_list.append(get_new_apps_dict(apps_installed))
+    elif not args.install_new_apps:
+        important_messages.append("[EAF] Use the flag '--install-new-apps' to add other apps when you update EAF.")
+
+    return pending_apps_dict_list
 
 def install_app_deps(distro, deps_dict):
     print("[EAF] Installing application dependencies")
 
     app_dir = os.path.join(script_path, "app")
+    if not os.path.exists(app_dir):
+        os.makedirs(app_dir)
+
+    # TODO: REMOVE ME: Delete obsolete file, we don't use it anymore
+    prev_app_choices_file = os.path.join(script_path, '.eaf-installed-apps.json')
+    if os.path.exists(prev_app_choices_file):
+        print(prev_app_choices_file, "is obsolete, removing...")
+        os.remove(prev_app_choices_file)
+
     apps_installed = get_installed_apps(app_dir)
-    pending_apps_info_list = get_user_choice(apps_installed)
+    pending_apps_dict_list = get_install_apps(apps_installed)
 
     sys_deps = []
     py_deps = []
     npm_install_apps = []
     vue_install_apps = []
     npm_rebuild_apps = []
-    for pending_apps_info in pending_apps_info_list:
-        for app_name, app_spec_dict in pending_apps_info.items():
+    for pending_apps_dict in pending_apps_dict_list:
+        for app_name, app_spec_dict in pending_apps_dict.items():
             updated = add_or_update_app(app_name, app_spec_dict)
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
@@ -320,12 +308,12 @@ def install_app_deps(distro, deps_dict):
                     if 'npm_rebuild' in deps_dict and deps_dict['npm_rebuild']:
                         npm_rebuild_apps.append(app_path)
 
-    print("\n[EAF] Installing dependencies for chosen applications")
+    print("\n[EAF] Installing dependencies for installed applications")
     if not args.ignore_sys_deps and sys.platform == "linux" and len(sys_deps) > 0:
-        print("[EAF] Installing system dependencies for installed applications")
+        print("[EAF] Installing system dependencies")
         install_sys_deps(distro, sys_deps)
     if not args.ignore_py_deps and len(py_deps) > 0:
-        print("[EAF] Installing python dependencies for installed applications")
+        print("[EAF] Installing python dependencies")
         install_py_deps(py_deps)
     if not args.ignore_node_deps:
         if len(npm_install_apps) > 0:
@@ -335,12 +323,12 @@ def install_app_deps(distro, deps_dict):
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
 
-    print("[EAF] Finished installing application dependencies")
+    print("[EAF] Finished installing applications and their dependencies")
     print("[EAF] Please ensure the following are added to your init.el:")
 
-    print_emacs_config_example(app_dir)
+    print_sample_config(app_dir)
 
-    for msg in important_message:
+    for msg in important_messages:
         print(bcolors.WARNING + msg + bcolors.ENDC)
 
 def main():
