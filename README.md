@@ -91,7 +91,7 @@ chmod +x ./install-eaf.py
 
 There are many useful flags available for `install-eaf.py`, check it yourself using `--help`.
 
-#### 3. Load EAF:
+#### 3. Load EAF Core
 
 From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
@@ -115,7 +115,7 @@ From here on, you can either add the full path to the EAF installation directory
       (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
     ```
 
-#### 4. Load EAF apps:
+#### 4. Load EAF Apps
 
 You can use below code to load applications `browser` and `pdf-viewer` that you installed, please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications) for the full list:
 
@@ -131,7 +131,7 @@ Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that i
 
 I **highly** encourage you to read the [Wiki](#Wiki) and [FAQ](#FAQ) if you have any questions.
 
-Also, you should regularly `git pull` **and** run `install-eaf.py` again to update EAF, its applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug).
+Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug).
 
 ### Dependency List
 

@@ -59,7 +59,7 @@ EAF可以在多个操作系统下工作，包括Linux和Windows，macOS和FreeBS
 
 ## 安装
 
-#### 1. 下载EAF:
+#### 1. 下载EAF
 
 ```Bash
 git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
@@ -73,7 +73,7 @@ git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-fra
                   :files ("*")))
     ```
 
-#### 2. 安装EAF依赖，
+#### 2. 安装EAF依赖
 
 调用Elisp函数`M-x eaf-install-and-update`或者手动在Terminal跑`install-eaf.py`安装脚本：
 
@@ -85,7 +85,7 @@ chmod +x ./install-eaf.py
 
 `install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
 
-#### 3. 加载EAF
+#### 3. 加载EAF核心
 
 从这里开始，你可以把EAF加入Emacs的 ```load-path```，然后在 `init.el` 中写入:
 
@@ -109,7 +109,7 @@ chmod +x ./install-eaf.py
       (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
     ```
 
-#### 4. 加载EAF应用:
+#### 4. 加载EAF应用
 
 你可以用下面的代码来加载一部分EAF应用，比如浏览器、PDF阅读器和视频播放器，更多的应用请查看 [应用列表](https://github.com/emacs-eaf/emacs-application-framework#applications):
 
@@ -124,7 +124,7 @@ chmod +x ./install-eaf.py
 
 如果你有任何使用上的问题，强烈建议读一下[Wiki](#Wiki)以及[常用问题](#常用问题)部分。
 
-建议你时常`git pull` **并且** 运行`install-eaf.py`来更新各个EAF应用及其依赖。如果使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分。
+建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。如果使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分。
 
 ### 依赖列表
 
