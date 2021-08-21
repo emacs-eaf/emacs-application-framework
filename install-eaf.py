@@ -11,6 +11,7 @@ import datetime
 import time
 
 script_path = os.path.dirname(os.path.realpath(__file__))
+important_message = []
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
@@ -21,6 +22,8 @@ parser.add_argument("--ignore-core-deps", action="store_true",
                     help='ignore core dependencies')
 parser.add_argument("--install-app", nargs='+', default=[],
                     help='only install apps listed here')
+parser.add_argument("--select-new", action="store_true",
+                    help='Select and install new apps when user update EAF.')
 parser.add_argument("--ignore-sys-deps", action="store_true",
                     help='ignore system dependencies')
 parser.add_argument("--ignore-py-deps", action="store_true",
@@ -222,10 +225,17 @@ def get_installed_apps_info(apps_installed):
 
 def get_new_selected_apps_info(apps_installed):
     all_apps_info = get_all_apps_info()
+    not_installed_apps_info = {}
     new_selected_apps_info = {}
+    num = 1
     for app_name, app_spec_dict in all_apps_info.items():
-        if app_name not in apps_installed and yes_no("[EAF] " + app_name + ". Install? (y/N): ", default_no=True):
+        if app_name not in apps_installed:
+            not_installed_apps_info[app_name] = app_spec_dict
+    for app_name, app_spec_dict in not_installed_apps_info.items():
+        indicator = "({}/{})".format(num, len(not_installed_apps_info))
+        if yes_no("[EAF] " + indicator + " " + app_name + ". Install? (y/N): ", default_no=True):
             new_selected_apps_info[app_name] = app_spec_dict
+        num = num + 1
     return new_selected_apps_info
 
 def get_need_install_apps_info(apps_need_install):
@@ -236,6 +246,10 @@ def get_need_install_apps_info(apps_need_install):
             need_install_apps_info[app_name] = app_spec_dict
     return need_install_apps_info
 
+def print_emacs_config_example(app_dir):
+    for app in get_installed_apps(app_dir):
+        print("(require 'eaf-{})".format(app))
+
 def get_user_choice(apps_installed):
     pending_apps = {}
     if args.install_all_apps:
@@ -244,13 +258,15 @@ def get_user_choice(apps_installed):
         pending_apps = get_need_install_apps_info(args.install_app)
     elif len(apps_installed) == 0:
         pending_apps = get_new_selected_apps_info(apps_installed)
-    elif len(apps_installed) > 0:
+    elif len(apps_installed) > 0 and args.select_new:
         print("[EAF] Found these existing EAF applications:")
         for app in apps_installed:
             print("[EAF]", app)
         print("[EAF]")
         if yes_no("[EAF] => Do you want to install new apps? (y/N): ", default_no=True):
             pending_apps = get_new_selected_apps_info(apps_installed)
+    elif len(apps_installed) > 0:
+        important_message.append("[EAF] Run 'python3 install_eaf.py --select-new' to add another apps when you update EAF.")
     else:
         pending_apps = get_installed_apps_info(apps_installed)
         
@@ -304,10 +320,11 @@ def install_app_deps(distro, deps_dict):
 
     print("[EAF] Finished installing application dependencies")
     print("[EAF] Please ensure the following are added to your init.el:")
-    for app in get_installed_apps(app_dir):
-        print("(require 'eaf-{})".format(app))
+    print_emacs_config_example(app_dir)
     print("[EAF] Please regularly run this script to update applications and dependencies,")
     print("[EAF]  this includes every time you git pull the latest EAF changes.")
+    for msg in important_message:
+        print(msg)
 
 def main():
     try:
