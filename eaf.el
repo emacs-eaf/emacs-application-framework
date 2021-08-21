@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Aug 21 02:04:00 2021 (-0400)
+;; Last-Updated: Sat Aug 21 03:04:59 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -1548,7 +1548,9 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 ;;;###autoload
 (defun eaf-install-and-update ()
-  "An interactive function that run install-eaf.py to install EAF apps and dependencies."
+  "Interactively run `install-eaf.py' to install/update EAF apps.
+
+For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
   (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
          (default-directory eaf-dir))
