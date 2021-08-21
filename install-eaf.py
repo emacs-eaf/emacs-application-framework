@@ -14,7 +14,7 @@ parser.add_argument("--install-all-apps", action="store_true",
                     help='install/update all available applications')
 parser.add_argument("--install-core-deps", action="store_true",
                     help='only install/update core dependencies')
-parser.add_argument("--install-app", nargs='+', default=[],
+parser.add_argument("--install", nargs='+', default=[],
                     help='only install/update apps listed here')
 parser.add_argument("--install-new-apps", action="store_true",
                     help='also install previously uninstalled or new applications')
@@ -176,7 +176,7 @@ def get_distro():
     distro = ""
     if which("pacman"):
         distro = "pacman"
-        if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install_app) == 0) or args.install_core_deps:
+        if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
             run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
     elif which("apt"):
         distro = "apt"
@@ -256,8 +256,8 @@ def print_sample_config(app_dir):
 def get_install_apps(apps_installed):
     if args.install_all_apps:
         return [get_available_apps_dict()]
-    if len(args.install_app) > 0:
-        return [get_specific_install_apps_dict(args.install_app)]
+    if len(args.install) > 0:
+        return [get_specific_install_apps_dict(args.install)]
 
     pending_apps_dict_list = [get_installed_apps_dict(apps_installed)]
     if args.install_new_apps or len(apps_installed) == 0:
@@ -337,7 +337,7 @@ def main():
         with open(os.path.join(script_path, 'dependencies.json')) as f:
             deps_dict = json.load(f)
 
-        if (not args.ignore_core_deps and len(args.install_app) == 0) or args.install_core_deps:
+        if (not args.ignore_core_deps and len(args.install) == 0) or args.install_core_deps:
             print("[EAF] ------------------------------------------")
             install_core_deps(distro, deps_dict)
             print("[EAF] ------------------------------------------")
