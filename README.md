@@ -71,14 +71,6 @@ EAF supports Linux and Windows, while macOS and FreeBSD support are in beta, som
 git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
-- Alternatively, you can use a [Quelpa recipe](https://github.com/quelpa/quelpa)
-
-    ```Emacs-lisp
-    (quelpa '(eaf :fetcher github
-                  :repo  "emacs-eaf/emacs-application-framework"
-                  :files ("*")))
-    ```
-
 #### 2. Install/Update EAF applications and dependencies
 
 You can use `M-x eaf-install-and-update` or manually run the `install-eaf.py` script in the EAF directory:

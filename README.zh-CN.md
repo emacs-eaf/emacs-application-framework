@@ -65,14 +65,6 @@ EAF可以在多个操作系统下工作，包括Linux和Windows，macOS和FreeBS
 git clone --depth=1 -b master https://github.com/emacs-eaf/emacs-application-framework.git ~/.emacs.d/site-lisp/emacs-application-framework/
 ```
 
-- 你也可以通过[Quelpa](https://github.com/quelpa/quelpa)来下载
-
-    ```Emacs-lisp
-    (quelpa '(eaf :fetcher github
-                  :repo  "enacs-eaf/emacs-application-framework"
-                  :files ("*")))
-    ```
-
 #### 2. 安装EAF依赖
 
 调用Elisp函数`M-x eaf-install-and-update`或者手动在Terminal跑`install-eaf.py`安装脚本：
