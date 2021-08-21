@@ -8,7 +8,6 @@ import subprocess
 from shutil import which
 import json
 import datetime
-import time
 
 class bcolors:
     HEADER = '\033[95m'
@@ -22,37 +21,40 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 script_path = os.path.dirname(os.path.realpath(__file__))
-important_message = ["[EAF] Run 'git pull ; python3 install-eaf.py' to update EAF, its applications and relating dependencies."]
+important_message = [
+    "[EAF] Please run both 'git pull' and 'install-eaf.py' (M-x eaf-install) to update EAF,",
+    "[EAF]  its applications & dependencies."
+]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
                     help='install all available applications')
 parser.add_argument("--install-core-deps", action="store_true",
                     help='only install core dependencies')
-parser.add_argument("--ignore-core-deps", action="store_true",
-                    help='ignore core dependencies')
 parser.add_argument("--install-app", nargs='+', default=[],
                     help='only install apps listed here')
-parser.add_argument("--select-new", action="store_true",
-                    help='Select and install new apps when user update EAF.')
+parser.add_argument("--install-new-apps", action="store_true",
+                    help='only install previously uninstalled new applications')
+parser.add_argument("--force-install", action="store_true",
+                    help="force install app dependencies even if apps are already up-to-date")
+parser.add_argument("--ignore-core-deps", action="store_true",
+                    help='ignore core dependencies')
 parser.add_argument("--ignore-sys-deps", action="store_true",
                     help='ignore system dependencies')
 parser.add_argument("--ignore-py-deps", action="store_true",
                     help='ignore python dependencies')
 parser.add_argument("--ignore-node-deps", action="store_true",
                     help='ignore node dependencies')
-parser.add_argument("--app-git-full-clone", action="store_true",
-                    help='apps to conduct a full clone to preserve git logs')
+parser.add_argument("--git-full-clone", action="store_true",
+                    help='during installation, conduct a full clone to preserve git logs')
 parser.add_argument("--app-drop-local-edit", action="store_true",
-                    help='app repos installed will be cleaned and hard reset to origin/master (EAF developers be careful!!!).')
+                    help='during installation, local changes to app repos will be hard reset')
 parser.add_argument("--app-save-local-edit", action="store_true",
-                    help='different with --app-drop-local-edit option, this option will do git stash before reset.')
+                    help='compared with --app-drop-local-edit, this option will stash your changes')
 parser.add_argument("--use-mirror", action="store_true",
-                    help='use mirror url instead of default url.')
+                    help='use mirror url instead of default url')
 parser.add_argument("--use-gitee", action="store_true",
-                    help='alias of --use-mirror.')
-parser.add_argument("--force-install", action="store_true",
-                    help="force install app deps even when app is already up-to-date")
+                    help='alias of --use-mirror')
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
@@ -154,7 +156,7 @@ def add_or_update_app(app: str, app_spec_dict):
             if "Already up to date." in output:
                 updated = False
 
-    elif args.app_git_full_clone:
+    elif args.git_full_clone:
         run_command(["git", "clone", "--single-branch", url, path])
     else:
         run_command(["git", "clone", "--depth", "1", "--single-branch", url, path])
@@ -270,7 +272,7 @@ def get_user_choice(apps_installed):
                                   get_installed_apps_info(apps_installed)]
     elif len(apps_installed) == 0:
         pending_apps_info_list = [get_new_selected_apps_info(apps_installed)]
-    elif len(apps_installed) > 0 and args.select_new:
+    elif len(apps_installed) > 0 and args.install_new_apps:
         print("[EAF] Found these existing EAF applications:")
         for app in apps_installed:
             print("[EAF]", app)
@@ -280,7 +282,7 @@ def get_user_choice(apps_installed):
                                       get_installed_apps_info(apps_installed)]
     elif len(apps_installed) > 0:
         pending_apps_info_list = [get_installed_apps_info(apps_installed)]
-        important_message.append("[EAF] Run 'python3 install-eaf.py --select-new' to add another apps when you update EAF.")
+        important_message.append("[EAF] Use the flag '--install-new-apps' to add another apps when you update EAF.")
     else:
         pending_apps_info_list = []
 
@@ -338,8 +340,6 @@ def install_app_deps(distro, deps_dict):
 
     print_emacs_config_example(app_dir)
 
-    print("[EAF] Please regularly run this script to update applications and dependencies,")
-    print("[EAF]  this includes every time you git pull the latest EAF changes.")
     for msg in important_message:
         print(bcolors.WARNING + msg + bcolors.ENDC)
 
