@@ -11,15 +11,15 @@ import datetime
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
-                    help='install all available applications')
+                    help='install/update all available applications')
 parser.add_argument("--install-core-deps", action="store_true",
                     help='only install core dependencies')
 parser.add_argument("--install-app", nargs='+', default=[],
-                    help='only install apps listed here')
+                    help='only install/update apps listed here')
 parser.add_argument("--install-new-apps", action="store_true",
                     help='also install previously uninstalled or new applications')
 parser.add_argument("--force-install", action="store_true",
-                    help="force install app dependencies even if apps are already up-to-date")
+                    help="force install/update app dependencies even if apps are already up-to-date")
 parser.add_argument("--ignore-core-deps", action="store_true",
                     help='ignore core dependencies')
 parser.add_argument("--ignore-sys-deps", action="store_true",
@@ -133,7 +133,7 @@ def add_or_update_app(app: str, app_spec_dict):
     if args.use_mirror or args.use_gitee: # use_gitee is alias of use_mirror.
         if 'mirror_url' not in app_spec_dict:
             print("[EAF] There is no gitee mirror URL set in applications.json", app)
-            exit(1)
+            sys.exit(1)
         url = app_spec_dict['mirror_url']
     else:
         url = app_spec_dict['url']
@@ -160,7 +160,7 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "checkout", branch], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
-        output_lines = run_command(["git", "pull"], path=path, ensure_pass=False, get_result=True)
+        output_lines = run_command(["git", "pull"], path=path, get_result=True)
         for output in output_lines:
             print(output.rstrip())
             if "Already up to date." in output:
