@@ -266,9 +266,10 @@ def get_user_choice(apps_installed):
         if yes_no("[EAF] => Do you want to install new apps? (y/N): ", default_no=True):
             pending_apps = get_new_selected_apps_info(apps_installed)
     elif len(apps_installed) > 0:
+        pending_apps = get_installed_apps_info(apps_installed)
         important_message.append("[EAF] Run 'python3 install_eaf.py --select-new' to add another apps when you update EAF.")
     else:
-        pending_apps = get_installed_apps_info(apps_installed)
+        pending_apps = {}
         
     return pending_apps
 
