@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
                     help='install/update all available applications')
 parser.add_argument("--install-core-deps", action="store_true",
-                    help='only install core dependencies')
+                    help='only install/update core dependencies')
 parser.add_argument("--install-app", nargs='+', default=[],
                     help='only install/update apps listed here')
 parser.add_argument("--install-new-apps", action="store_true",
