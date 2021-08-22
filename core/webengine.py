@@ -569,7 +569,7 @@ class BrowserView(QWebEngineView):
     def _caret_at_line(self, marker):
         '''Enable caret by marker'''
         self.load_marker_file()
-        self.execute_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
+        self.eval_js("Marker.gotoMarker('%s', (e) => window.getSelection().collapse(e, 0))" % str(marker))
         self.cleanup_links_dom()
 
         self.eval_js("CaretBrowsing.setInitialCursor(true);")
@@ -607,7 +607,7 @@ class BrowserView(QWebEngineView):
         if self.focus_input_js == None:
             self.focus_input_js = self.read_js_content("focus_input.js")
 
-        self.execute_js(self.focus_input_js)
+        self.eval_js(self.focus_input_js)
 
     @interactive
     def clear_focus(self):
@@ -1306,9 +1306,9 @@ class BrowserBuffer(Buffer):
     def execute_js_function(self, function_name, function_arguments):
         ''' Execute JavaScript function.'''
         if function_arguments == "":
-            self.buffer_widget.execute_js('''{}()'''.format(to_camel_case(function_name)))
+            self.buffer_widget.eval_js('''{}()'''.format(to_camel_case(function_name)))
         else:
-            self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
+            self.buffer_widget.eval_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
 
     def init_app(self):
         pass
