@@ -33,6 +33,17 @@
         "py38-qt5-sip",
         "py38-qt5-webengine"
     ],
+    "zypper": [
+        "wmctrl",
+        "nodejs16",
+        "npm16",
+        "glib2-devel",
+        "python38-qt5",
+        "python38-qt5-sip",
+        "python38-qtwebengine-qt5",
+        "python38-pygit2",
+        "libqt5-qtwebengine"
+    ],
     "brew": [
         "node"
     ],
