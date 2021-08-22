@@ -710,8 +710,7 @@ class BrowserBuffer(Buffer):
          self.font_family,
          self.enable_plugin, self.enable_javascript, self.enable_scrollbar,
          self.unknown_url_scheme_policy,
-         self.download_path, self.default_zoom,
-         self.theme_background_color, self.theme_foreground_color) = get_emacs_vars(
+         self.download_path, self.default_zoom) = get_emacs_vars(
              ["eaf-browser-pc-user-agent",
               "eaf-browser-phone-user-agent",
               "eaf-browser-font-family",
@@ -720,9 +719,7 @@ class BrowserBuffer(Buffer):
               "eaf-browser-enable-scrollbar",
               "eaf-browser-unknown-url-scheme-policy",
               "eaf-browser-download-path",
-              "eaf-browser-default-zoom",
-              "eaf-emacs-theme-background-color",
-              "eaf-emacs-theme-foreground-color"])
+              "eaf-browser-default-zoom"])
 
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
