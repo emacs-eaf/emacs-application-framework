@@ -118,9 +118,10 @@ class Buffer(QGraphicsScene):
         self.aspect_ratio = 0
         self.vertical_padding_ratio = 1.0 / 8
 
-        (self.theme_background_color, self.theme_foreground_color) = get_emacs_vars([
+        (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
             "eaf-emacs-theme-background-color",
-            "eaf-emacs-theme-foreground-color"])
+            "eaf-emacs-theme-foreground-color",
+            "eaf-emacs-theme-mode"])
 
         self.enter_fullscreen_request.connect(self.enable_fullscreen)
         self.exit_fullscreen_request.connect(self.disable_fullscreen)
