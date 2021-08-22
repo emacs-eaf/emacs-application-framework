@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
 from PyQt5.QtCore import Qt, QEvent
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_var
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars
 import abc
 import string
 
@@ -109,17 +109,18 @@ class Buffer(QGraphicsScene):
         self.url = url
         self.arguments = arguments
         self.fit_to_view = fit_to_view
-
         self.title = ""
+        self.current_event_string = ""
 
         self.buffer_widget = None
-
         self.is_fullscreen = False
-
-        self.current_event_string = ""
 
         self.aspect_ratio = 0
         self.vertical_padding_ratio = 1.0 / 8
+
+        (self.theme_background_color, self.theme_foreground_color) = get_emacs_vars([
+            "eaf-emacs-theme-background-color",
+            "eaf-emacs-theme-foreground-color"])
 
         self.enter_fullscreen_request.connect(self.enable_fullscreen)
         self.exit_fullscreen_request.connect(self.disable_fullscreen)
@@ -189,7 +190,7 @@ class Buffer(QGraphicsScene):
         ''' Add widget.'''
         # Init background color before addWidget.
         if not hasattr(self, "background_color"):
-            self.background_color = QColor(get_emacs_var("eaf-emacs-theme-background-color"))
+            self.background_color = QColor(self.theme_background_color)
 
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
