@@ -53,6 +53,7 @@ class EAF(object):
         emacs_height = int(emacs_height)
 
         # Init variables.
+        self.module_dict = {}
         self.buffer_dict = {}
         self.view_dict = {}
 
@@ -173,9 +174,14 @@ class EAF(object):
         global emacs_width, emacs_height, proxy_string
 
         # Load module with app absolute path.
-        spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        if module_path in self.module_dict:
+            module = self.module_dict[module_path]
+        else:
+            start_time = time.time()
+            spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            self.module_dict[module_path] = module
 
         # Create application buffer.
         app_buffer = module.AppBuffer(buffer_id, url, arguments)
