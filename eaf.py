@@ -177,7 +177,6 @@ class EAF(object):
         if module_path in self.module_dict:
             module = self.module_dict[module_path]
         else:
-            start_time = time.time()
             spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
