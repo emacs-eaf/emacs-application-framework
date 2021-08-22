@@ -40,9 +40,6 @@ MOUSE_WHEEL_BUTTON = 4
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
 
-import time
-start_time = time.time()
-
 class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
@@ -1327,12 +1324,7 @@ class BrowserBuffer(Buffer):
     def init_app(self):
         pass
 
-    def test_time(self):
-        global start_time
-        print("WebEngine start time: ", time.time() - start_time)
-
     def load_index_html(self, app_file):
-        self.buffer_widget.loadFinished.connect(self.test_time)
         self.buffer_widget.loadFinished.connect(self.init_app)
 
         self.index_file_dir = os.path.join(os.path.dirname(app_file), "dist")
