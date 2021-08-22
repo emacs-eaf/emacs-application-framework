@@ -292,7 +292,7 @@ been initialized."
              (let ((mngr mngr))
                (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
                (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
-               (eaf-epc-define-method mngr 'get-emacs-string-vars 'get-emacs-string-vars-func)
+               (eaf-epc-define-method mngr 'get-emacs-vars 'get-emacs-vars-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -325,7 +325,7 @@ been initialized."
          (var-is-bool (prin1-to-string (booleanp var-value))))
     (list var-value var-is-bool)))
 
-(defun get-emacs-string-vars-func (&rest vars)
+(defun get-emacs-vars-func (&rest vars)
   (mapcar #'(lambda (var-name) (symbol-value (intern var-name))) vars))
 
 (defvar eaf-epc-process nil)

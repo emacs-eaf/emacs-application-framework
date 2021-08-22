@@ -233,10 +233,10 @@ def eval_in_emacs(method_name, args):
         # Call eval-in-emacs elisp function.
         epc_client.call("eval-in-emacs", args)
 
-def get_emacs_string_vars(args):
+def get_emacs_vars(args):
     global epc_client
 
-    return list(map(lambda result: result if result != [] else False, epc_client.call_sync("get-emacs-string-vars", args)))
+    return list(map(lambda result: result if result != [] else False, epc_client.call_sync("get-emacs-vars", args)))
 
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
