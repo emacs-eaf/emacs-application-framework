@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_var, get_emacs_config_dir, to_camel_case
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -39,6 +39,9 @@ MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
 MOUSE_BACK_BUTTON = 8
 MOUSE_FORWARD_BUTTON = 16
+
+import time
+start_time = time.time()
 
 class BrowserView(QWebEngineView):
 
@@ -79,10 +82,11 @@ class BrowserView(QWebEngineView):
         self.get_selection_text_js = None
         self.focus_input_js = None
 
-        self.scroll_behavior = get_emacs_var("eaf-browser-scroll-behavior")
-        self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
-
-        self.show_hover_link = get_emacs_var("eaf-webengine-show-hover-link")
+        (self.scroll_behavior, self.default_zoom, self.show_hover_link, self.marker_letters) = get_emacs_vars(
+            ["eaf-browser-scroll-behavior",
+             "eaf-browser-default-zoom",
+             "eaf-webengine-show-hover-link",
+             "eaf-marker-letters"])
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -498,7 +502,7 @@ class BrowserView(QWebEngineView):
         if self.marker_js_raw == None:
             self.marker_js_raw = self.read_js_content("marker.js")
 
-        self.eval_js(self.marker_js_raw.replace("%1", get_emacs_var("eaf-marker-letters")).replace("%2", str(self.buffer.marker_offset_x())).replace("%3", str(self.buffer.marker_offset_y())))
+        self.eval_js(self.marker_js_raw.replace("%1", self.marker_letters).replace("%2", str(self.buffer.marker_offset_x())).replace("%3", str(self.buffer.marker_offset_y())))
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''
@@ -705,8 +709,24 @@ class BrowserBuffer(Buffer):
 
         self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(self.config_dir), "browser", "zoom_data.db"))
 
-        self.pc_user_agent = get_emacs_var("eaf-browser-pc-user-agent")
-        self.phone_user_agent = get_emacs_var("eaf-browser-phone-user-agent")
+        (self.pc_user_agent, self.phone_user_agent,
+         self.font_family,
+         self.enable_plugin, self.enable_javascript, self.enable_scrollbar,
+         self.unknown_url_scheme_policy,
+         self.download_path, self.default_zoom,
+         self.theme_background_color, self.theme_foreground_color) = get_emacs_vars(
+             ["eaf-browser-pc-user-agent",
+              "eaf-browser-phone-user-agent",
+              "eaf-browser-font-family",
+              "eaf-browser-enable-plugin",
+              "eaf-browser-enable-javascript",
+              "eaf-browser-enable-scrollbar",
+              "eaf-browser-unknown-url-scheme-policy",
+              "eaf-browser-download-path",
+              "eaf-browser-default-zoom",
+              "eaf-emacs-theme-background-color",
+              "eaf-emacs-theme-foreground-color"])
+
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
@@ -727,8 +747,7 @@ class BrowserBuffer(Buffer):
 
         self.settings = QWebEngineSettings.globalSettings()
         try:
-            font_family = get_emacs_var('eaf-browser-font-family')
-            if font_family:
+            if self.font_family:
                 for ff in (
                         self.settings.StandardFont,
                         self.settings.FixedFont,
@@ -738,23 +757,21 @@ class BrowserBuffer(Buffer):
                         self.settings.FantasyFont,
                         self.settings.PictographFont
                 ):
-                    self.settings.setFontFamily(ff, font_family)
+                    self.settings.setFontFamily(ff, self.font_family)
 
             self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
-            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, get_emacs_var("eaf-browser-enable-plugin"))
-            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, get_emacs_var("eaf-browser-enable-javascript"))
-            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, get_emacs_var("eaf-browser-enable-scrollbar"))
+            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.enable_plugin)
+            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.enable_javascript)
+            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, self.enable_scrollbar)
 
-            unknown_url_scheme_policy = get_emacs_var("eaf-browser-unknown-url-scheme-policy")
-
-            if unknown_url_scheme_policy == "DisallowUnknownUrlSchemes":
+            if self.unknown_url_scheme_policy == "DisallowUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
-            elif unknown_url_scheme_policy == "AllowUnknownUrlSchemesFromUserInteraction":
+            elif self.unknown_url_scheme_policy == "AllowUnknownUrlSchemesFromUserInteraction":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowUnknownUrlSchemesFromUserInteraction)
-            elif unknown_url_scheme_policy == "AllowAllUnknownUrlSchemes":
+            elif self.unknown_url_scheme_policy == "AllowAllUnknownUrlSchemes":
                 self.settings.setUnknownUrlSchemePolicy(self.settings.AllowAllUnknownUrlSchemes)
 
         except Exception:
@@ -771,9 +788,6 @@ class BrowserBuffer(Buffer):
         self.channel = QWebChannel()
         self.channel.registerObject("pyobject", self)
         self.buffer_widget.web_page.setWebChannel(self.channel)
-
-        self.download_path = get_emacs_var("eaf-browser-download-path")
-        self.default_zoom = get_emacs_var("eaf-browser-default-zoom")
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
@@ -1313,7 +1327,12 @@ class BrowserBuffer(Buffer):
     def init_app(self):
         pass
 
+    def test_time(self):
+        global start_time
+        print("WebEngine start time: ", time.time() - start_time)
+
     def load_index_html(self, app_file):
+        self.buffer_widget.loadFinished.connect(self.test_time)
         self.buffer_widget.loadFinished.connect(self.init_app)
 
         self.index_file_dir = os.path.join(os.path.dirname(app_file), "dist")
@@ -1335,9 +1354,7 @@ class BrowserBuffer(Buffer):
         for el in root.iter('script'):
             el.attrib['src'] = "{}{}".format(dist_dir, el.attrib['src'])
         for el in root.iter('body'):
-            el.attrib['style'] = "background: {}; color: {}".format(
-                get_emacs_var("eaf-emacs-theme-background-color"),
-                get_emacs_var("eaf-emacs-theme-foreground-color"))
+            el.attrib['style'] = "background: {}; color: {}".format(self.theme_background_color, self.theme_foreground_color)
 
         return LH.tostring(root, encoding=str)
 
