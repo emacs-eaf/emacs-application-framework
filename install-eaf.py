@@ -102,6 +102,8 @@ def install_sys_deps(distro: str, deps_list):
         command = ['sudo', 'dnf', '-y', 'install']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
+    elif which("zypper"):
+        command = ['sudo', 'zypper', 'install','-y']
     command.extend(deps_list)
     return run_command(command)
 
@@ -184,6 +186,8 @@ def get_distro():
         distro = "dnf"
     elif which("pkg"):
         distro = "pkg"
+    elif which("zypper"):
+        distro = "zypper"
     elif which("brew"):
         distro = "brew"
     elif sys.platform == "linux":
