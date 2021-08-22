@@ -293,6 +293,7 @@ been initialized."
                (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
                (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
                (eaf-epc-define-method mngr 'get-emacs-vars 'get-emacs-vars-func)
+               (eaf-epc-define-method mngr 'get-emacs-face-foregrounds 'get-emacs-face-foregrounds-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -327,6 +328,19 @@ been initialized."
 
 (defun get-emacs-vars-func (&rest vars)
   (mapcar #'(lambda (var-name) (symbol-value (intern var-name))) vars))
+
+(defun get-emacs-face-foregrounds-func (&rest faces)
+  (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))
+
+(defun eaf-color-int-to-hex (int)
+  (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
+
+(defun eaf-color-name-to-hex (color)
+  (let ((components (x-color-values color)))
+    (concat "#"
+            (eaf-color-int-to-hex (nth 0 components))
+            (eaf-color-int-to-hex (nth 1 components))
+            (eaf-color-int-to-hex (nth 2 components)))))
 
 (defvar eaf-epc-process nil)
 
