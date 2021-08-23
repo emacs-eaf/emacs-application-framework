@@ -5,7 +5,7 @@ import os
 import platform
 import sys
 import subprocess
-from shutil import which
+from shutil import which, rmtree
 import json
 import datetime
 
@@ -111,6 +111,13 @@ def install_py_deps(deps_list):
     command = ['pip', 'install', '--user']
     command.extend(deps_list)
     return run_command(command)
+
+def remove_node_modules_path(app_path_list):
+    for app_path in app_path_list:
+        node_modules_path = os.path.join(app_path, "node_modules")
+        if os.path.isdir(node_modules_path):
+            rmtree(node_modules_path)
+            print("[EAF] WARN: removing {}".format(node_modules_path))
 
 def install_npm_install(app_path_list):
     for app_path in app_path_list:
@@ -320,6 +327,11 @@ def install_app_deps(distro, deps_dict):
         print("[EAF] Installing python dependencies")
         install_py_deps(py_deps)
     if not args.ignore_node_deps:
+        if args.force_install:
+            if len(npm_install_apps) > 0:
+                remove_node_modules_path(npm_install_apps)
+            if len(vue_install_apps) > 0:
+                remove_node_modules_path(vue_install_apps)
         if len(npm_install_apps) > 0:
             install_npm_install(npm_install_apps)
         if len(npm_rebuild_apps) > 0:
