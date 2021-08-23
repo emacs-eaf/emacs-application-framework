@@ -1042,7 +1042,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 (eaf-create-send-key-function "return" "RET")
 
 (eaf-create-send-sequence-function "ctrl-return" "C-RET")
-(eaf-create-send-sequence-function "ctrl-delete" "S-<delete>")
+(eaf-create-send-sequence-function "ctrl-delete" "C-<delete>")
 (eaf-create-send-sequence-function "ctrl-backspace" "C-<backspace>")
 (eaf-create-send-sequence-function "ctrl-left" "C-<left>")
 (eaf-create-send-sequence-function "ctrl-right" "C-<right>")
