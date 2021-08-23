@@ -367,7 +367,12 @@ class BrowserView(QWebEngineView):
         self.eval_js(self.read_js_content(js_file))
 
     def execute_js(self, js):
-        ''' Execute JavaScript.'''
+        ''' Execute JavaScript and get result.
+
+        NOTE:
+        Please use eval_js instead if JavaScript function haven't result return.
+        Otherwise, execute_js will block EAF!!!
+        '''
         return self.web_page.execute_javascript(js)
 
     @interactive(insert_or_do=True)
@@ -638,23 +643,22 @@ class BrowserPage(QWebEnginePage):
 
     def execute_javascript(self, script_src):
         ''' Execute JavaScript.'''
+        # Build event loop.
         self.loop = QEventLoop()
-        self.result = QVariant()
-        QTimer.singleShot(250, self.loop.quit)
 
+        # Run JavaScript code.
         self.runJavaScript(script_src, self.callback_js)
-        # To avoid the error when call the javascript function asynchronously
-        if self.loop is not None and not(self.loop.isRunning()):
-            self.loop.exec_()
 
-        self.loop = None
+        # Execute event loop, and wait event loop quit.
+        self.loop.exec()
+
+        # Return JavaScript function result.
         return self.result
 
-    def callback_js(self, res):
-        ''' Callback JS loop.'''
-        if self.loop is not None and self.loop.isRunning():
-            self.result = res
-            self.loop.quit()
+    def callback_js(self, result):
+        ''' Callback of JavaScript, call loop.quit to jump code after loop.exec.'''
+        self.result = result
+        self.loop.quit()
 
 class BrowserCookieStorage:
     def __init__(self, config_dir):
