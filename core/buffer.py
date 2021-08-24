@@ -22,10 +22,11 @@
 from PyQt5 import QtCore
 from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
-from PyQt5.QtCore import Qt, QEvent
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars
+from PyQt5.QtCore import Qt, QEvent, QThread
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_minibuffer_input
 import abc
 import string
+import time
 
 qt_key_dict = {}
 
@@ -117,6 +118,8 @@ class Buffer(QGraphicsScene):
 
         self.aspect_ratio = 0
         self.vertical_padding_ratio = 1.0 / 8
+
+        self.get_emacs_input_thread = None
 
         (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
             "eaf-emacs-theme-background-color",
@@ -248,6 +251,19 @@ class Buffer(QGraphicsScene):
         INITIAL_CONTENT is the intial content of the user response, it is only useful when INPUT_TYPE is "string".
         '''
         input_message(self.buffer_id, message, callback_tag, input_type, initial_content)
+
+        if input_type == "marker" and hasattr(self.buffer_widget, "web_page"):
+            self.start_emacs_minibuffer_input_thread(callback_tag)
+
+    def start_emacs_minibuffer_input_thread(self, callback_tag):
+        self.get_emacs_input_thread = FetchEmacsMinibufferInputThread(callback_tag, self.buffer_widget.execute_js)
+        self.get_emacs_input_thread.match_marker.connect(self.handle_input_response)
+        self.get_emacs_input_thread.start()
+
+    def stop_emacs_minibuffer_input_thread(self):
+        if self.get_emacs_input_thread != None and self.get_emacs_input_thread.isRunning():
+            self.get_emacs_input_thread.running_flag = False
+            self.get_emacs_input_thread = None
 
     @abstract
     def handle_input_response(self, callback_tag, result_content):
@@ -387,3 +403,26 @@ class Buffer(QGraphicsScene):
 
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
+
+class FetchEmacsMinibufferInputThread(QThread):
+
+    match_marker = QtCore.pyqtSignal(str, str)
+
+    def __init__(self, callback_tag, get_js_result_callback):
+        QThread.__init__(self)
+
+        self.callback_tag = callback_tag
+        self.get_js_result_callback = get_js_result_callback
+        self.running_flag = True
+
+    def run(self):
+        while self.running_flag:
+            minibuffer_input = get_emacs_minibuffer_input().strip()
+            markers = list(map(lambda x: x.lower(), self.get_js_result_callback("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
+
+            if minibuffer_input in markers:
+                self.running_flag = False
+                eval_in_emacs('exit-minibuffer', [])
+                self.match_marker.emit(self.callback_tag, minibuffer_input)
+
+            time.sleep(0.1)

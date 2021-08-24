@@ -294,6 +294,7 @@ been initialized."
                (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
                (eaf-epc-define-method mngr 'get-emacs-vars 'get-emacs-vars-func)
                (eaf-epc-define-method mngr 'get-emacs-face-foregrounds 'get-emacs-face-foregrounds-func)
+               (eaf-epc-define-method mngr 'get-emacs-minibuffer-input 'get-emacs-minibuffer-input-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -331,6 +332,9 @@ been initialized."
 
 (defun get-emacs-face-foregrounds-func (&rest faces)
   (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))
+
+(defun get-emacs-minibuffer-input-func ()
+  (minibuffer-contents-no-properties))
 
 (defun eaf-color-int-to-hex (int)
   (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
@@ -1163,7 +1167,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf-read-input (interactive-string interactive-type initial-content)
   "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
   (condition-case nil
-      (cond ((string-equal interactive-type "string")
+      (cond ((or (string-equal interactive-type "string") (string-equal interactive-type "marker"))
              (read-string interactive-string initial-content))
             ((string-equal interactive-type "file")
              (expand-file-name (read-file-name interactive-string)))
