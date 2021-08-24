@@ -378,6 +378,10 @@ been initialized."
   ""
   :type 'string)
 
+(defcustom eaf-marker-fontsize 11.5
+  "Fontsize (px) of marker."
+  :type 'number)
+
 (defcustom eaf-buffer-background-color "#000000"
   ""
   :type 'string)

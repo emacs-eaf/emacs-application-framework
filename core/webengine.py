@@ -79,11 +79,12 @@ class BrowserView(QWebEngineView):
         self.get_selection_text_js = None
         self.focus_input_js = None
 
-        (self.scroll_behavior, self.default_zoom, self.show_hover_link, self.marker_letters) = get_emacs_vars(
+        (self.scroll_behavior, self.default_zoom, self.show_hover_link, self.marker_letters, self.marker_fontsize) = get_emacs_vars(
             ["eaf-browser-scroll-behavior",
              "eaf-browser-default-zoom",
              "eaf-webengine-show-hover-link",
-             "eaf-marker-letters"])
+             "eaf-marker-letters",
+             "eaf-marker-fontsize"])
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -504,7 +505,7 @@ class BrowserView(QWebEngineView):
         if self.marker_js_raw == None:
             self.marker_js_raw = self.read_js_content("marker.js")
 
-        self.eval_js(self.marker_js_raw.replace("%1", self.marker_letters).replace("%2", str(self.buffer.marker_offset_x())).replace("%3", str(self.buffer.marker_offset_y())))
+        self.eval_js(self.marker_js_raw.replace("%1", self.marker_letters).replace("%2", str(self.buffer.marker_offset_x())).replace("%3", str(self.buffer.marker_offset_y())).replace("%4", str(self.marker_fontsize)))
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''

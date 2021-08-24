@@ -225,7 +225,7 @@ position: fixed;\
 display: block;\
 white-space: nowrap;\
 overflow: hidden;\
-font-size: 11.5px;\
+font-size: %4px;\
 background: linear-gradient(to bottom, #ffdd6e 0%, #deb050 100%);\
 padding-left: 3px;\
 padding-right: 3px;\
