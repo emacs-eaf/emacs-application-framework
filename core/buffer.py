@@ -415,12 +415,14 @@ class FetchEmacsMinibufferInputThread(QThread):
         self.get_js_result_callback = get_js_result_callback
         self.running_flag = True
 
+        self.markers = list(map(lambda x: x.lower(),
+                                self.get_js_result_callback("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
+
     def run(self):
         while self.running_flag:
             minibuffer_input = get_emacs_minibuffer_input().strip()
-            markers = list(map(lambda x: x.lower(), self.get_js_result_callback("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
 
-            if minibuffer_input in markers:
+            if minibuffer_input in self.markers:
                 self.running_flag = False
                 eval_in_emacs('exit-minibuffer', [])
                 self.match_marker.emit(self.callback_tag, minibuffer_input)
