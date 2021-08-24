@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, eval_get_result_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -302,7 +302,12 @@ class BrowserView(QWebEngineView):
 
     def open_url(self, url):
         ''' Configure current url.'''
-        self.setUrl(QUrl(url))
+        is_valid_url = eval_get_result_in_emacs('eaf-is-valid-web-url', [url])
+        if is_valid_url:
+            self.setUrl(QUrl(url))
+        else:
+            search_url = eval_get_result_in_emacs('eaf--create-search-url', [url])
+            self.setUrl(QUrl(search_url))
 
         eval_in_emacs('eaf-activate-emacs-window', [])
 
