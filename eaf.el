@@ -374,7 +374,11 @@ been initialized."
   "Directory where eaf will store configuration files."
   :type 'directory)
 
-(defcustom eaf-marker-letters "ASDFHJKLWEOPCNM"
+(defcustom eaf-marker-letters "ASDHJKLWEOPCNM"
+  ""
+  :type 'string)
+
+(defcustom eaf-marker-finish-letters "F "
   ""
   :type 'string)
 
@@ -1168,8 +1172,32 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
             ((string-equal interactive-type "file")
              (expand-file-name (read-file-name interactive-string)))
             ((string-equal interactive-type "yes-or-no")
-             (yes-or-no-p interactive-string)))
+             (yes-or-no-p interactive-string))
+            ((string-equal interactive-type "marker-letters")
+             (eaf-read-marker-letters interactive-string initial-content)))
     (quit nil)))
+
+(defun eaf-read-marker-letters (interactive-string initial-content)
+  "Read marker letters."
+  (read-from-minibuffer
+   interactive-string nil
+   (let ((map (copy-keymap minibuffer-local-map))
+         (marker-letters
+          (string-to-list (downcase eaf-marker-letters)))
+         (marker-finish-letters
+          (string-to-list (downcase eaf-marker-finish-letters)))
+         (i ?\ ))
+     (while (< i 127)
+       (define-key map (char-to-string i)
+         `(lambda ()
+            (interactive)
+            (cond ((member ,i ',marker-letters)
+                   (self-insert-command 1))
+                  ((member ,i ',marker-finish-letters)
+                   (exit-minibuffer))
+                  (t nil))))
+       (setq i (1+ i)))
+     map)))
 
 (defun eaf--open-internal (url app-name args)
   "Open an EAF application internally with URL, APP-NAME and ARGS."

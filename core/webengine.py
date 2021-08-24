@@ -1156,25 +1156,25 @@ class BrowserBuffer(Buffer):
     def open_link(self):
         ''' Open Link through a marker.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link: ", "open_link");
+        self.send_input_message("Open Link: ", "open_link", "marker-letters");
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer(self):
         ''' Open Link in New Buffer.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in New Buffer: ", "open_link_new_buffer");
+        self.send_input_message("Open Link in New Buffer: ", "open_link_new_buffer", "marker-letters");
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer_other_window(self):
         ''' Open Link in New Buffer in Other Window.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in New Buffer in Other Window: ", "open_link_new_buffer_other_window");
+        self.send_input_message("Open Link in New Buffer in Other Window: ", "open_link_new_buffer_other_window", "marker-letters");
 
     @interactive(insert_or_do=True)
     def open_link_background_buffer(self):
         ''' Open Link in Background Buffer.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer");
+        self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer", "marker-letters");
 
     @interactive
     def copy_link(self):
