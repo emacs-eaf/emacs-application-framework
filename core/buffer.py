@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
 from PyQt5.QtCore import Qt, QEvent, QThread
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_minibuffer_input
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_minibuffer_input
 import abc
 import string
 import time
@@ -415,14 +415,15 @@ class FetchEmacsMinibufferInputThread(QThread):
         self.get_js_result_callback = get_js_result_callback
         self.running_flag = True
 
+        self.marker_quit_keys = get_emacs_var("eaf-marker-quit-keys") or ""
         self.markers = list(map(lambda x: x.lower(),
                                 self.get_js_result_callback("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
 
     def run(self):
         while self.running_flag:
-            minibuffer_input = get_emacs_minibuffer_input().strip()
+            minibuffer_input = get_emacs_minibuffer_input()
 
-            if minibuffer_input in self.markers:
+            if (len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys) or minibuffer_input in self.markers:
                 self.running_flag = False
                 eval_in_emacs('exit-minibuffer', [])
                 self.match_marker.emit(self.callback_tag, minibuffer_input)

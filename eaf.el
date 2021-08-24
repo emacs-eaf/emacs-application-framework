@@ -382,6 +382,10 @@ been initialized."
   ""
   :type 'string)
 
+(defcustom eaf-marker-quit-keys " "
+  ""
+  :type 'string)
+
 (defcustom eaf-marker-fontsize 11.5
   "Fontsize (px) of marker."
   :type 'number)
