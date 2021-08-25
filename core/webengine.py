@@ -906,7 +906,7 @@ class BrowserBuffer(Buffer):
         self.close_page.emit(self.buffer_widget.get_url())
 
         # Load blank page to stop video playing, such as youtube.com.
-        self.buffer_widget.open_url("about:blank")
+        self.buffer_widget.setUrl(QUrl("about:blank"))
 
         if self.buffer_widget is not None:
             # NOTE: We need delete QWebEnginePage manual, otherwise QtWebEngineProcess won't quit.
