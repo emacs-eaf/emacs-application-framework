@@ -254,16 +254,6 @@ def get_emacs_vars(args):
 
     return list(map(lambda result: result if result != [] else False, epc_client.call_sync("get-emacs-vars", args)))
 
-def get_emacs_face_foregrounds(args):
-    global epc_client
-
-    return epc_client.call_sync("get-emacs-face-foregrounds", args)
-
-def get_emacs_minibuffer_input():
-    global epc_client
-
-    return epc_client.call_sync("get-emacs-minibuffer-input", [])
-
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
 

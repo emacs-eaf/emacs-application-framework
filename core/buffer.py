@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
 from PyQt5.QtCore import Qt, QEvent, QThread
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_minibuffer_input
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_func_result
 import abc
 import string
 import time
@@ -421,7 +421,7 @@ class FetchEmacsMinibufferInputThread(QThread):
 
     def run(self):
         while self.running_flag:
-            minibuffer_input = get_emacs_minibuffer_input()
+            minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
 
             marker_input_quit = len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
             marker_input_finish = minibuffer_input in self.markers

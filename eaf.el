@@ -293,8 +293,6 @@ been initialized."
                (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
                (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
                (eaf-epc-define-method mngr 'get-emacs-vars 'get-emacs-vars-func)
-               (eaf-epc-define-method mngr 'get-emacs-face-foregrounds 'get-emacs-face-foregrounds-func)
-               (eaf-epc-define-method mngr 'get-emacs-minibuffer-input 'get-emacs-minibuffer-input-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -330,11 +328,8 @@ been initialized."
 (defun get-emacs-vars-func (&rest vars)
   (mapcar #'(lambda (var-name) (symbol-value (intern var-name))) vars))
 
-(defun get-emacs-face-foregrounds-func (&rest faces)
+(defun get-emacs-face-foregrounds (&rest faces)
   (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))
-
-(defun get-emacs-minibuffer-input-func ()
-  (minibuffer-contents-no-properties))
 
 (defun eaf-color-int-to-hex (int)
   (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
