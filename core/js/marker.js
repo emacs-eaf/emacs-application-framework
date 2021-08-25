@@ -153,7 +153,7 @@ try {
   }
 
   function generateKeys(markerContainer) {
-    let lettersString = "%1";
+    let lettersString = "%{marker_letters}";
     let letters = lettersString.split("");
     let nodeNum = markerContainer.children.length;
     let keyLen = nodeNum == 1 ? 1 : Math.ceil(Math.log(nodeNum)/Math.log(letters.length));
@@ -177,8 +177,8 @@ try {
 
   Marker.generateMarker = (selectors) => {
     let style = document.createElement('style');
-    let offsetX = "%2";
-    let offsetY = "%3";
+    let offsetX = "%{marker_offset_x}";
+    let offsetY = "%{marker_offset_y}";
     document.head.appendChild(style);
     style.type = 'text/css';
     style.setAttribute('class', 'eaf-style');
@@ -225,7 +225,7 @@ position: fixed;\
 display: block;\
 white-space: nowrap;\
 overflow: hidden;\
-font-size: %4px;\
+font-size: %{marker_fontsize}px;\
 background: linear-gradient(to bottom, #ffdd6e 0%, #deb050 100%);\
 padding-left: 3px;\
 padding-right: 3px;\

@@ -1,5 +1,5 @@
 (function() {
-    let newText = "%1";
+    let newText = "%{new_text_base64}";
     const activeElement = document.activeElement;
 
     if (window.location.href.startsWith("https://web.telegram.org/")) {
