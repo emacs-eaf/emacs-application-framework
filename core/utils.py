@@ -233,7 +233,7 @@ def eval_in_emacs(method_name, args):
         # Call eval-in-emacs elisp function.
         epc_client.call("eval-in-emacs", args)
 
-def eval_get_result_in_emacs(method_name, args):
+def get_emacs_func_result(method_name, args):
     global epc_client
 
     if epc_client == None:
@@ -245,7 +245,7 @@ def eval_get_result_in_emacs(method_name, args):
 
         args.insert(0, method_name)
 
-        # Call eval-in-emacs elisp function.
+        # Call eval-in-emacs elisp function synchronously and return the result
         return epc_client.call_sync("eval-in-emacs", args)
 
 def get_emacs_vars(args):
