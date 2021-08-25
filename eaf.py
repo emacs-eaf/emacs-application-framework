@@ -410,13 +410,17 @@ class EAF(object):
             if buffer.buffer_id == buffer_id:
                 buffer.handle_input_response(callback_tag, callback_result)
 
+                buffer.stop_search_input_monitor_thread()
+
     @PostGui()
     def cancel_input_response(self, buffer_id, callback_tag):
         ''' Cancel input message for specified buffer.'''
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.cancel_input_response(callback_tag)
+                
                 buffer.stop_marker_input_monitor_thread()
+                buffer.stop_search_input_monitor_thread()
 
     @PostGui()
     def update_focus_text(self, buffer_id, new_text):

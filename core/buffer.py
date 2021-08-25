@@ -120,6 +120,7 @@ class Buffer(QGraphicsScene):
         self.vertical_padding_ratio = 1.0 / 8
 
         self.fetch_markder_input_thread = None
+        self.fetch_search_input_thread = None
 
         (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
             "eaf-emacs-theme-background-color",
@@ -254,6 +255,8 @@ class Buffer(QGraphicsScene):
 
         if input_type == "marker" and hasattr(self.buffer_widget, "web_page"):
             self.start_marker_input_monitor_thread(callback_tag)
+        elif input_type == "search":
+            self.start_search_input_monitor_thread(callback_tag)
 
     def start_marker_input_monitor_thread(self, callback_tag):
         self.fetch_markder_input_thread = FetchMarkerInputThread(callback_tag, self.buffer_widget.execute_js)
@@ -261,6 +264,16 @@ class Buffer(QGraphicsScene):
         self.fetch_markder_input_thread.start()
 
     def stop_marker_input_monitor_thread(self):
+        if self.fetch_markder_input_thread != None and self.fetch_markder_input_thread.isRunning():
+            self.fetch_markder_input_thread.running_flag = False
+            self.fetch_markder_input_thread = None
+
+    def start_search_input_monitor_thread(self, callback_tag):
+        self.fetch_markder_input_thread = FetchSearchInputThread(callback_tag)
+        self.fetch_markder_input_thread.search_changed.connect(self.handle_input_response)
+        self.fetch_markder_input_thread.start()
+
+    def stop_search_input_monitor_thread(self):
         if self.fetch_markder_input_thread != None and self.fetch_markder_input_thread.isRunning():
             self.fetch_markder_input_thread.running_flag = False
             self.fetch_markder_input_thread = None
@@ -436,5 +449,31 @@ class FetchMarkerInputThread(QThread):
                 eval_in_emacs('exit-minibuffer', [])
                 message_to_emacs("Selected marker.")
                 self.match_marker.emit(self.callback_tag, minibuffer_input)
+
+            time.sleep(0.1)
+
+class FetchSearchInputThread(QThread):
+
+    search_changed = QtCore.pyqtSignal(str, str)
+
+    def __init__(self, callback_tag):
+        QThread.__init__(self)
+
+        self.search_string = ""
+        self.callback_tag = callback_tag
+        self.running_flag = True
+
+    def run(self):
+        while self.running_flag:
+            in_minibuffer = get_emacs_func_result("minibufferp", [])
+
+            if in_minibuffer:
+                minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
+
+                if minibuffer_input != self.search_string:
+                    self.search_changed.emit(self.callback_tag, minibuffer_input)
+                    self.search_string = minibuffer_input
+            else:
+                self.running_flag = False
 
             time.sleep(0.1)

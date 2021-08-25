@@ -1166,7 +1166,9 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf-read-input (interactive-string interactive-type initial-content)
   "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
   (condition-case nil
-      (cond ((or (string-equal interactive-type "string") (string-equal interactive-type "marker"))
+      (cond ((or (string-equal interactive-type "string")
+                 (string-equal interactive-type "marker")
+                 (string-equal interactive-type "search"))
              (read-string interactive-string initial-content))
             ((string-equal interactive-type "file")
              (expand-file-name (read-file-name interactive-string)))
