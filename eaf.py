@@ -416,7 +416,7 @@ class EAF(object):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.cancel_input_response(callback_tag)
-                buffer.stop_emacs_minibuffer_input_thread()
+                buffer.stop_marker_input_monitor_thread()
 
     @PostGui()
     def update_focus_text(self, buffer_id, new_text):

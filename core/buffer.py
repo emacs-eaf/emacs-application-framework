@@ -119,7 +119,7 @@ class Buffer(QGraphicsScene):
         self.aspect_ratio = 0
         self.vertical_padding_ratio = 1.0 / 8
 
-        self.get_emacs_input_thread = None
+        self.fetch_markder_input_thread = None
 
         (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
             "eaf-emacs-theme-background-color",
@@ -253,17 +253,17 @@ class Buffer(QGraphicsScene):
         input_message(self.buffer_id, message, callback_tag, input_type, initial_content)
 
         if input_type == "marker" and hasattr(self.buffer_widget, "web_page"):
-            self.start_emacs_minibuffer_input_thread(callback_tag)
+            self.start_marker_input_monitor_thread(callback_tag)
 
-    def start_emacs_minibuffer_input_thread(self, callback_tag):
-        self.get_emacs_input_thread = FetchEmacsMinibufferInputThread(callback_tag, self.buffer_widget.execute_js)
-        self.get_emacs_input_thread.match_marker.connect(self.handle_input_response)
-        self.get_emacs_input_thread.start()
+    def start_marker_input_monitor_thread(self, callback_tag):
+        self.fetch_markder_input_thread = FetchMarkerInputThread(callback_tag, self.buffer_widget.execute_js)
+        self.fetch_markder_input_thread.match_marker.connect(self.handle_input_response)
+        self.fetch_markder_input_thread.start()
 
-    def stop_emacs_minibuffer_input_thread(self):
-        if self.get_emacs_input_thread != None and self.get_emacs_input_thread.isRunning():
-            self.get_emacs_input_thread.running_flag = False
-            self.get_emacs_input_thread = None
+    def stop_marker_input_monitor_thread(self):
+        if self.fetch_markder_input_thread != None and self.fetch_markder_input_thread.isRunning():
+            self.fetch_markder_input_thread.running_flag = False
+            self.fetch_markder_input_thread = None
 
     @abstract
     def handle_input_response(self, callback_tag, result_content):
@@ -404,7 +404,7 @@ class Buffer(QGraphicsScene):
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
 
-class FetchEmacsMinibufferInputThread(QThread):
+class FetchMarkerInputThread(QThread):
 
     match_marker = QtCore.pyqtSignal(str, str)
 
