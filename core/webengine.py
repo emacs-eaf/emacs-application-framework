@@ -399,7 +399,7 @@ class BrowserView(QWebEngineView):
     @interactive
     def scroll_up_page(self):
         ''' Scroll page up.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/2, behavior: '" + self.scroll_behavior + "'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/1.1, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive
     def insert_or_scroll_up_page(self):
