@@ -505,7 +505,11 @@ class BrowserView(QWebEngineView):
         if self.marker_js_raw == None:
             self.marker_js_raw = self.read_js_content("marker.js")
 
-        self.eval_js(self.marker_js_raw.replace("%1", self.marker_letters).replace("%2", str(self.buffer.marker_offset_x())).replace("%3", str(self.buffer.marker_offset_y())).replace("%4", str(self.marker_fontsize)))
+        self.eval_js(self.marker_js_raw
+                     .replace("%{marker_letters}", self.marker_letters)
+                     .replace("%{marker_offset_x}", str(self.buffer.marker_offset_x()))
+                     .replace("%{marker_offset_y}", str(self.buffer.marker_offset_y()))
+                     .replace("%{marker_fontsize}", str(self.marker_fontsize)))
 
     def cleanup_links_dom(self):
         ''' Clean up links.'''
@@ -604,7 +608,7 @@ class BrowserView(QWebEngineView):
         if self.set_focus_text_raw == None:
             self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
 
-        self.set_focus_text_js = self.set_focus_text_raw.replace("%1", string_to_base64(new_text));
+        self.set_focus_text_js = self.set_focus_text_raw.replace("%{new_text_base64}", string_to_base64(new_text));
         self.eval_js(self.set_focus_text_js)
 
     @interactive(insert_or_do=True)
