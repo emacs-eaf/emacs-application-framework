@@ -416,7 +416,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_down_page(self):
         ''' Scroll down a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/2, behavior: '" + self.scroll_behavior + "'})")
+        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/1.1, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive(insert_or_do=True)
     def scroll_to_begin(self):
