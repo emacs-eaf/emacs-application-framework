@@ -271,6 +271,7 @@ class Buffer(QGraphicsScene):
     def start_search_input_monitor_thread(self, callback_tag):
         self.fetch_markder_input_thread = FetchSearchInputThread(callback_tag)
         self.fetch_markder_input_thread.search_changed.connect(self.handle_input_response)
+        self.fetch_markder_input_thread.search_finish.connect(self.handle_search_finish)
         self.fetch_markder_input_thread.start()
 
     def stop_search_input_monitor_thread(self):
@@ -288,6 +289,18 @@ class Buffer(QGraphicsScene):
 
     @abstract
     def cancel_input_response(self, callback_tag):
+        pass
+
+    @abstract
+    def handle_search_forward(self, callback_tag):
+        pass
+
+    @abstract
+    def handle_search_backward(self, callback_tag):
+        pass
+
+    @abstract
+    def handle_search_finish(self, callback_tag):
         pass
 
     @abstract
@@ -455,6 +468,7 @@ class FetchMarkerInputThread(QThread):
 class FetchSearchInputThread(QThread):
 
     search_changed = QtCore.pyqtSignal(str, str)
+    search_finish = QtCore.pyqtSignal(str)
 
     def __init__(self, callback_tag):
         QThread.__init__(self)
@@ -474,6 +488,7 @@ class FetchSearchInputThread(QThread):
                     self.search_changed.emit(self.callback_tag, minibuffer_input)
                     self.search_string = minibuffer_input
             else:
+                self.search_finish.emit(self.callback_tag)
                 self.running_flag = False
 
             time.sleep(0.1)

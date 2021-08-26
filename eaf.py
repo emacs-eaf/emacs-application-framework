@@ -418,9 +418,21 @@ class EAF(object):
         for buffer in list(self.buffer_dict.values()):
             if buffer.buffer_id == buffer_id:
                 buffer.cancel_input_response(callback_tag)
-                
+
                 buffer.stop_marker_input_monitor_thread()
                 buffer.stop_search_input_monitor_thread()
+
+    @PostGui()
+    def handle_search_forward(self, buffer_id, callback_tag):
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                buffer.handle_search_forward(callback_tag)
+
+    @PostGui()
+    def handle_search_backward(self, buffer_id, callback_tag):
+        for buffer in list(self.buffer_dict.values()):
+            if buffer.buffer_id == buffer_id:
+                buffer.handle_search_backward(callback_tag)
 
     @PostGui()
     def update_focus_text(self, buffer_id, new_text):
