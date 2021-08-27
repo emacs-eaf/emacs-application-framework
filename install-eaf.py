@@ -95,7 +95,7 @@ def run_command(command, path=script_path, ensure_pass=True, get_result=False):
 def install_sys_deps(distro: str, deps_list):
     command = []
     if distro == 'pacman':
-        command = ['yay', '-Sy', '--noconfirm', '--needed']
+        command = ['sudo', 'pacman', '-Sy', '--noconfirm']
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif which("dnf"):
@@ -186,7 +186,7 @@ def get_distro():
     if which("pacman"):
         distro = "pacman"
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
-            run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
+            run_command(['sudo', 'pacman', '-Sy', '--noconfirm'])
     elif which("apt"):
         distro = "apt"
     elif which("dnf"):
