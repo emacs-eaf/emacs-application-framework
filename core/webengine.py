@@ -787,9 +787,15 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.zoom_reset()
 
         # Build webchannel object.
+        QtCore.qInstallMessageHandler(self.filter_instant_message)
         self.channel = QWebChannel()
         self.channel.registerObject("pyobject", self)
         self.buffer_widget.web_page.setWebChannel(self.channel)
+
+    def filter_instant_message(self, *args):
+        # Disable QWebChannel warnings.
+        if not args[-1].endswith('value updates in HTML will be broken!'):
+            print("".join(list(map(str, args[2:]))))
 
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
