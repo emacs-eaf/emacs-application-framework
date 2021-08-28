@@ -1319,12 +1319,19 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
-    def execute_js_function(self, function_name, function_arguments):
-        ''' Execute JavaScript function.'''
+    def eval_js_function(self, function_name, function_arguments):
+        ''' Eval JavaScript function.'''
         if function_arguments == "":
             self.buffer_widget.eval_js('''{}()'''.format(to_camel_case(function_name)))
         else:
             self.buffer_widget.eval_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
+
+    def execute_js_function(self, function_name, function_arguments):
+        ''' Execute JavaScript function and return result.'''
+        if function_arguments == "":
+            return self.buffer_widget.execute_js('''{}()'''.format(to_camel_case(function_name)))
+        else:
+            return self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
 
     def init_app(self):
         pass

@@ -780,7 +780,7 @@ to edit EAF keybindings!" fun fun)))
             (setq args ""))
           ;; Ensure this is only called from EAF buffer
           (when (derived-mode-p 'eaf-mode)
-            (eaf-call-async "execute_js_function" eaf--buffer-id (string-trim-left fun "js_") args)
+            (eaf-call-async "eval_js_function" eaf--buffer-id (string-trim-left fun "js_") args)
             ))
         (format
          "Proxy function to call \"%s\" on the JavaScript side.
