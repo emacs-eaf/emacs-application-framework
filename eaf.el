@@ -1093,6 +1093,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
                "[EAF] %s")))
     (message fmt format-string)))
 
+(defun eaf--show-message-no-logging (format-string)
+  "A wrapper around `message' that prepends [EAF/app-name] before FORMAT-STRING
+and does not log to the *Message* buffer."
+  (let ((fmt (if eaf--buffer-app-name
+                 (concat "[EAF/" eaf--buffer-app-name "] %s")
+               "[EAF] %s")))
+    (let ((message-log-max nil))
+      (message fmt format-string))))
+
 (defun eaf--clear-message ()
   "Clear Emacs' echo area ."
   (message nil))

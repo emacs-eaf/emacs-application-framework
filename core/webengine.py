@@ -27,7 +27,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, message_to_emacs_no_logging, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
 from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
@@ -294,7 +294,7 @@ class BrowserView(QWebEngineView):
 
         if self.show_hover_link:
             if url:
-                message_to_emacs(url)
+                message_to_emacs_no_logging(url)
             else:
                 clear_emacs_message()
 

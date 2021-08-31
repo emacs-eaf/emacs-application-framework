@@ -257,6 +257,9 @@ def get_emacs_vars(args):
 def message_to_emacs(message):
     eval_in_emacs('eaf--show-message', [message])
 
+def message_to_emacs_no_logging(message):
+    eval_in_emacs('eaf--show-message-no-logging', [message])
+
 def clear_emacs_message():
     eval_in_emacs('eaf--clear-message', [])
 
