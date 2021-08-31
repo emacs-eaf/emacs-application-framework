@@ -795,7 +795,7 @@ to edit EAF keybindings!" fun fun)))
         (let ((map (make-sparse-keymap)))
           (unless no-inherit-eaf-mode-map*
             (set-keymap-parent map eaf-mode-map*))
-          (cl-loop for (key . fun) in keybinding
+          (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
                         (cond
                          ;; If command is normal symbol, just call it directly.
