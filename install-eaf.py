@@ -94,12 +94,12 @@ def run_command(command, path=script_path, ensure_pass=True, get_result=False):
 
 def install_sys_deps(distro: str, deps_list):
     command = []
-    if distro == 'pacman':
-        command = ['sudo', 'pacman', '-Sy', '--noconfirm']
+    if which("dnf"):
+        command = ['sudo', 'dnf', '-y', 'install']
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
-    elif which("dnf"):
-        command = ['sudo', 'dnf', '-y', 'install']
+    elif distro == 'pacman':
+        command = ['sudo', 'pacman', '-Sy', '--noconfirm']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
     elif which("zypper"):
@@ -183,14 +183,14 @@ def add_or_update_app(app: str, app_spec_dict):
 
 def get_distro():
     distro = ""
-    if which("pacman"):
+    if which("dnf"):
+        distro = "dnf"
+    elif which("apt"):
+        distro = "apt"
+    elif which("pacman"):
         distro = "pacman"
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
             run_command(['sudo', 'pacman', '-Sy', '--noconfirm'])
-    elif which("apt"):
-        distro = "apt"
-    elif which("dnf"):
-        distro = "dnf"
     elif which("pkg"):
         distro = "pkg"
     elif which("zypper"):
