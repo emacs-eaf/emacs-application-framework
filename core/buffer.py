@@ -119,7 +119,7 @@ class Buffer(QGraphicsScene):
         self.aspect_ratio = 0
         self.vertical_padding_ratio = 1.0 / 8
 
-        self.fetch_markder_input_thread = None
+        self.fetch_marker_input_thread = None
         self.fetch_search_input_thread = None
 
         (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
@@ -259,25 +259,25 @@ class Buffer(QGraphicsScene):
             self.start_search_input_monitor_thread(callback_tag)
 
     def start_marker_input_monitor_thread(self, callback_tag):
-        self.fetch_markder_input_thread = FetchMarkerInputThread(callback_tag, self.buffer_widget.execute_js)
-        self.fetch_markder_input_thread.match_marker.connect(self.handle_input_response)
-        self.fetch_markder_input_thread.start()
+        self.fetch_marker_input_thread = FetchMarkerInputThread(callback_tag, self.buffer_widget.execute_js)
+        self.fetch_marker_input_thread.match_marker.connect(self.handle_input_response)
+        self.fetch_marker_input_thread.start()
 
     def stop_marker_input_monitor_thread(self):
-        if self.fetch_markder_input_thread != None and self.fetch_markder_input_thread.isRunning():
-            self.fetch_markder_input_thread.running_flag = False
-            self.fetch_markder_input_thread = None
+        if self.fetch_marker_input_thread != None and self.fetch_marker_input_thread.isRunning():
+            self.fetch_marker_input_thread.running_flag = False
+            self.fetch_marker_input_thread = None
 
     def start_search_input_monitor_thread(self, callback_tag):
-        self.fetch_markder_input_thread = FetchSearchInputThread(callback_tag)
-        self.fetch_markder_input_thread.search_changed.connect(self.handle_input_response)
-        self.fetch_markder_input_thread.search_finish.connect(self.handle_search_finish)
-        self.fetch_markder_input_thread.start()
+        self.fetch_marker_input_thread = FetchSearchInputThread(callback_tag)
+        self.fetch_marker_input_thread.search_changed.connect(self.handle_input_response)
+        self.fetch_marker_input_thread.search_finish.connect(self.handle_search_finish)
+        self.fetch_marker_input_thread.start()
 
     def stop_search_input_monitor_thread(self):
-        if self.fetch_markder_input_thread != None and self.fetch_markder_input_thread.isRunning():
-            self.fetch_markder_input_thread.running_flag = False
-            self.fetch_markder_input_thread = None
+        if self.fetch_marker_input_thread != None and self.fetch_marker_input_thread.isRunning():
+            self.fetch_marker_input_thread.running_flag = False
+            self.fetch_marker_input_thread = None
 
     @abstract
     def handle_input_response(self, callback_tag, result_content):
