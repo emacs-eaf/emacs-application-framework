@@ -253,13 +253,17 @@ class Buffer(QGraphicsScene):
         '''
         input_message(self.buffer_id, message, callback_tag, input_type, initial_content)
 
-        if input_type == "marker" and hasattr(self.buffer_widget, "web_page"):
+        if input_type == "marker" and (not hasattr(getattr(self, "fetch_marker_callback"), "abstract")):
             self.start_marker_input_monitor_thread(callback_tag)
         elif input_type == "search":
             self.start_search_input_monitor_thread(callback_tag)
 
+    @abstract
+    def fetch_marker_callback(self):
+        pass
+
     def start_marker_input_monitor_thread(self, callback_tag):
-        self.fetch_marker_input_thread = FetchMarkerInputThread(callback_tag, self.buffer_widget.execute_js)
+        self.fetch_marker_input_thread = FetchMarkerInputThread(callback_tag, self.fetch_marker_callback)
         self.fetch_marker_input_thread.match_marker.connect(self.handle_input_response)
         self.fetch_marker_input_thread.start()
 
@@ -439,19 +443,22 @@ class FetchMarkerInputThread(QThread):
 
     match_marker = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, callback_tag, get_js_result_callback):
+    def __init__(self, callback_tag, fetch_marker_callback):
         QThread.__init__(self)
 
         self.callback_tag = callback_tag
-        self.get_js_result_callback = get_js_result_callback
         self.running_flag = True
 
+        self.fetch_marker_callback = fetch_marker_callback
         self.marker_quit_keys = get_emacs_var("eaf-marker-quit-keys") or ""
-        self.markers = list(map(lambda x: x.lower(),
-                                self.get_js_result_callback("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
+        self.markers = self.fetch_marker_callback()
 
     def run(self):
         while self.running_flag:
+            ## In some cases, the markers may not be ready when fetch_marker_callback is first called,
+            ## so we need to call fetch_marker_callback multiple times.
+            if len(self.markers) == 0:
+                self.markers = self.fetch_marker_callback()
             minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
 
             marker_input_quit = len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
