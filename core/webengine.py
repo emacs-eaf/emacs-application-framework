@@ -792,6 +792,10 @@ class BrowserBuffer(Buffer):
         self.channel.registerObject("pyobject", self)
         self.buffer_widget.web_page.setWebChannel(self.channel)
 
+    def fetch_marker_callback(self):
+        return list(map(lambda x: x.lower(),
+                        self.buffer_widget.execute_js("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
+
     def filter_instant_message(self, *args):
         # Disable QWebChannel warnings.
         if not args[-1].endswith('value updates in HTML will be broken!'):
