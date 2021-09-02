@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sat Aug 21 03:04:59 2021 (-0400)
+;; Last-Updated: Thu Sep  2 12:22:26 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -120,7 +120,7 @@ start with letters or digits; it excludes any subdirectory named `RCS'
 or `CVS', and any subdirectory that contains a file named `.nosearch'."
   (let (dirs
         attrs
-        (pending (list default-directory)))
+        (pending (list (file-name-directory (locate-library "eaf")))))
     ;; This loop does a breadth-first tree walk on DIR's subtree,
     ;; putting each subdir into DIRS as its contents are examined.
     (while pending
