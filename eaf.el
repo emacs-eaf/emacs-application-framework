@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Sep  2 12:22:26 2021 (-0400)
+;; Last-Updated: Thu Sep  2 12:34:04 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -1409,13 +1409,13 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   ""
   :type 'string)
 
-(advice-add 'load-theme :around #'eaf-monitor-load-theme)
 (defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
   "Update `eaf-emacs-theme-mode' after execute `load-theme'."
   (apply orig-fun arg args)
   (setq eaf-emacs-theme-mode (eaf-get-theme-mode))
   (setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
   (setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
+(advice-add 'load-theme :around #'eaf-monitor-load-theme)
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."
@@ -1626,16 +1626,16 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
-(defun eaf--isearch-forward-advisor (origin-fn &rest regexp-p no-recursive-edit)
+(defun eaf--isearch-forward-advisor (orig-fun &optional arg &rest args)
   (if eaf-search-input-active-p
       (eaf-call-async "handle_search_forward" eaf-search-input-buffer-id eaf-search-input-callback-tag)
-    (apply origin-fn regexp-p no-recursive-edit)))
+    (apply orig-fun arg args)))
 (advice-add #'isearch-forward :around #'eaf--isearch-forward-advisor)
 
-(defun eaf--isearch-backward-advisor (origin-fn &rest regexp-p no-recursive-edit)
+(defun eaf--isearch-backward-advisor (orig-fun &optional arg &rest args)
   (if eaf-search-input-active-p
       (eaf-call-async "handle_search_backward" eaf-search-input-buffer-id eaf-search-input-callback-tag)
-    (apply origin-fn regexp-p no-recursive-edit)))
+    (apply orig-fun arg args)))
 (advice-add #'isearch-backward :around #'eaf--isearch-backward-advisor)
 
 (provide 'eaf)
