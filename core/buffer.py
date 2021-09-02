@@ -243,7 +243,7 @@ class Buffer(QGraphicsScene):
 
         CALLBACK_TAG is the reference tag when handle_input_message is invoked.
 
-        INPUT_TYPE must be one of "string", "file", or "yes-or-no".
+        INPUT_TYPE must be one of "string", "file", "yes-or-no", "marker" or "search".
 
         INITIAL_CONTENT is the intial content of the user response, it is only useful when INPUT_TYPE is "string".
         '''
