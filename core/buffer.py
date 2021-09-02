@@ -200,10 +200,6 @@ class Buffer(QGraphicsScene):
         self.buffer_widget = widget
         self.addWidget(self.buffer_widget)
 
-        # Set web page background.
-        if hasattr(self.buffer_widget, "web_page"):
-            self.init_web_page_background()
-
         self.buffer_widget.installEventFilter(self)
 
         self.buffer_widget.buffer = self

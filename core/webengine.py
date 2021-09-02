@@ -792,6 +792,12 @@ class BrowserBuffer(Buffer):
         self.channel.registerObject("pyobject", self)
         self.buffer_widget.web_page.setWebChannel(self.channel)
 
+    def add_widget(self, widget):
+        super(BrowserBuffer, self).add_widget(widget)
+        # Set web page background.
+        if hasattr(self.buffer_widget, "web_page"):
+            self.init_web_page_background()
+
     def fetch_marker_callback(self):
         return list(map(lambda x: x.lower(),
                         self.buffer_widget.execute_js("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
