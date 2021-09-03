@@ -745,6 +745,13 @@ When called interactively, copy to ‘kill-ring’."
         (eaf-call-sync "call_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
+(defun eaf-get-other-window-path ()
+  (save-window-excursion
+    (other-window 1)
+    (if (derived-mode-p 'eaf-mode)
+        (eaf-call-sync "call_function" eaf--buffer-id "get_url")
+      default-directory)))
+
 (defun eaf-toggle-fullscreen ()
   "Toggle fullscreen."
   (interactive)
@@ -1190,7 +1197,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                  (string-equal interactive-type "search"))
              (read-string interactive-string initial-content))
             ((string-equal interactive-type "file")
-             (expand-file-name (read-file-name interactive-string)))
+             (expand-file-name (read-file-name interactive-string initial-content)))
             ((string-equal interactive-type "yes-or-no")
              (yes-or-no-p interactive-string)))
     (quit nil)))
