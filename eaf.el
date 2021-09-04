@@ -745,16 +745,6 @@ When called interactively, copy to ‘kill-ring’."
         (eaf-call-sync "call_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
-(defun eaf-get-other-window-path ()
-  (save-window-excursion
-    (other-window 1)
-    (let ((window-path (if (derived-mode-p 'eaf-mode)
-                           (eaf-call-sync "call_function" eaf--buffer-id "get_url")
-                         default-directory)))
-      (if (file-regular-p window-path)
-          (file-name-directory window-path)
-        window-path))))
-
 (defun eaf-toggle-fullscreen ()
   "Toggle fullscreen."
   (interactive)
