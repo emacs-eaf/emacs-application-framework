@@ -1587,6 +1587,15 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
 (advice-add 'watch-other-window-internal :around
             #'eaf--watch-other-window-internal)
 
+(defun eaf--split-window-advisor (orig-fn &rest args)
+  (let ((new-window (apply orig-fn args)))
+    (when (and (derived-mode-p 'eaf-mode)
+               (windowp new-window))
+      (with-selected-window new-window
+        (funcall-interactively #'previous-buffer)))))
+(advice-add 'split-window-below :around #'eaf--split-window-advisor)
+(advice-add 'split-window-right :around #'eaf--split-window-advisor)
+
 ;; Make EAF as default app for supported extensions.
 ;; Use `eaf-open' in `find-file'
 (defun eaf--find-file-advisor (orig-fn file &rest args)
