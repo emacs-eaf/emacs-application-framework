@@ -1169,28 +1169,37 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defvar eaf-search-input-buffer-id nil)
 (defvar eaf-search-input-callback-tag nil)
 
-(defun eaf--input-message (input-buffer-id interactive-string callback-tag interactive-type initial-content)
+(defun eaf--input-message (input-buffer-id interactive-string callback-tag interactive-type initial-content collection)
   "Handles input message INTERACTIVE-STRING on the Python side given INPUT-BUFFER-ID and CALLBACK-TYPE."
   (when (string-equal interactive-type "search")
     (setq eaf-search-input-active-p t)
     (setq eaf-search-input-buffer-id input-buffer-id)
     (setq eaf-search-input-callback-tag callback-tag))
 
-  (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive-type initial-content)))
+  (let* ((input-message (eaf-read-input (concat "[EAF/" eaf--buffer-app-name "] " interactive-string) interactive-type initial-content collection)))
     (if input-message
         (eaf-call-async "handle_input_response" input-buffer-id callback-tag input-message)
       (eaf-call-async "cancel_input_response" input-buffer-id callback-tag))
     (setq eaf-search-input-active-p nil)))
 
-(defun eaf-read-input (interactive-string interactive-type initial-content)
-  "EAF's multi-purpose read-input function which read an INTERACTIVE-STRING with INITIAL-CONTENT, determines the function base on INTERACTIVE-TYPE."
+(defun eaf-read-input (interactive-string interactive-type initial-content collection)
+  "EAF's multi-purpose read-or-completing input function which
+read or completing an INTERACTIVE-STRING with INITIAL-CONTENT and
+COLLECTION, determines the function base on INTERACTIVE-TYPE."
   (condition-case nil
       (cond ((or (string-equal interactive-type "string")
                  (string-equal interactive-type "marker")
                  (string-equal interactive-type "search"))
-             (read-string interactive-string initial-content))
+             (if (listp collection)
+                 (completing-read interactive-string collection nil nil initial-content)
+               (read-string interactive-string initial-content)))
             ((string-equal interactive-type "file")
-             (expand-file-name (read-file-name interactive-string initial-content)))
+             (expand-file-name
+              (if (listp collection)
+                  (read-file-name interactive-string
+                                  (completing-read interactive-string collection
+                                                   nil nil initial-content))
+                (read-file-name interactive-string initial-content))))
             ((string-equal interactive-type "yes-or-no")
              (yes-or-no-p interactive-string)))
     (quit nil)))

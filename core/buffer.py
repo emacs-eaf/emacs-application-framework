@@ -236,7 +236,7 @@ class Buffer(QGraphicsScene):
         ''' Get key event widgets.'''
         return [self.buffer_widget]
 
-    def send_input_message(self, message, callback_tag, input_type="string", initial_content=""):
+    def send_input_message(self, message, callback_tag, input_type="string", initial_content="", collection=None):
         ''' Send an input message to Emacs side for the user to respond.
 
         MESSAGE is a message string that would be sent to the user.
@@ -245,9 +245,11 @@ class Buffer(QGraphicsScene):
 
         INPUT_TYPE must be one of "string", "file", "yes-or-no", "marker" or "search".
 
-        INITIAL_CONTENT is the intial content of the user response, it is only useful when INPUT_TYPE is "string".
+        INITIAL_CONTENT is the intial content of the user response, it is only useful when INPUT_TYPE is "string" and "file".
+
+        COLLECTION is a list of candicates, it is only useful when INPUT_TYPE is "string" and "file"
         '''
-        input_message(self.buffer_id, message, callback_tag, input_type, initial_content)
+        input_message(self.buffer_id, message, callback_tag, input_type, initial_content, collection)
 
         if input_type == "marker" and (not hasattr(getattr(self, "fetch_marker_callback"), "abstract")):
             self.start_marker_input_monitor_thread(callback_tag)

@@ -281,8 +281,8 @@ def open_url_in_new_tab_other_window(url):
 def translate_text(text):
     eval_in_emacs('eaf-translate-text', [text])
 
-def input_message(buffer_id, message, callback_tag, input_type, input_content):
-    eval_in_emacs('eaf--input-message', [buffer_id, message, callback_tag, input_type, input_content])
+def input_message(buffer_id, message, callback_tag, input_type, input_content, collection):
+    eval_in_emacs('eaf--input-message', [buffer_id, message, callback_tag, input_type, input_content, collection])
 
 def focus_emacs_buffer(message):
     eval_in_emacs('eaf-focus-buffer', [message])
