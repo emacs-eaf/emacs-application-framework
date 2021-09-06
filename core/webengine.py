@@ -799,8 +799,11 @@ class BrowserBuffer(Buffer):
             self.init_web_page_background()
 
     def fetch_marker_callback(self):
-        return list(map(lambda x: x.lower(),
-                        self.buffer_widget.execute_js("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
+        try:
+            return list(map(lambda x: x.lower(),
+                            self.buffer_widget.execute_js("Array.from(document.getElementsByClassName(\"eaf-marker\")).map(function(e) { return e.id });")))
+        except Exception:
+            return None
 
     def filter_instant_message(self, *args):
         # Disable QWebChannel warnings.
