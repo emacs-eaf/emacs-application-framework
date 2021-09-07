@@ -37,7 +37,7 @@
     ("EAF/pdf-viewer" all-the-icons-octicon "file-pdf" :v-adjust 0.0 :face all-the-icons-dred)
     ("EAF/image-viewer" all-the-icons-octicon "file-media" :v-adjust 0.0 :face all-the-icons-orange)
     ("EAF/markdown-previewer" all-the-icons-octicon "markdown" :v-adjust 0.0 :face all-the-icons-lblue)
-    ("EAF/js-video-player" all-the-icons-faicon "film" :face all-the-icons-blue)
+    ("EAF/video-player" all-the-icons-faicon "film" :face all-the-icons-blue)
     ("EAF/camera" all-the-icons-faicon "camera-retro" :height 1.0 :v-adjust -0.1)
     ("EAF/music-player" all-the-icons-faicon "music" :height 1.0 :v-adjust -0.1)
     ("EAF/terminal" all-the-icons-faicon "terminal" :v-adjust 0.2)
@@ -57,7 +57,7 @@
     (when arg-overrides (setq args (append `(,(car args)) arg-overrides (cdr args))))
     (if (and (car icon) args)
         (apply (car icon) args)
-      (message (concat "[" mode-name "] all-the-icons not found for this application!")))))
+      (message (concat "[" mode-name "] all-the-icons not specified!")))))
 
 (when (require 'all-the-icons-ibuffer nil 'noerror)
   (define-ibuffer-column icon

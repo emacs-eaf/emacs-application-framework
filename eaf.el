@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Thu Sep  2 12:34:04 2021 (-0400)
+;; Last-Updated: Tue Sep  7 12:35:28 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -1383,8 +1383,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (setq-local eaf-fullscreen-p t)
   (eaf-monitor-configuration-change)
   (when (and eaf-browser-fullscreen-move-cursor-corner
-             (or (string= eaf--buffer-app-name "browser")
-                 (string= eaf--buffer-app-name "js-video-player")))
+             (string= eaf--buffer-app-name "browser"))
     (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
 ;; Update and load the theme
