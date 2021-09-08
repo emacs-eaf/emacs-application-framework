@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2020-05-17 12:31:12
 ;; Version: 0.5
-;; Last-Updated: Wed Aug 11 17:04:08 2021 (-0400)
+;; Last-Updated: Wed Sep  8 12:00:50 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -67,19 +67,19 @@ Enable this when the you want to ensure the PDF link in the org file can be
   (with-current-buffer (current-buffer)
     (when (derived-mode-p 'org-mode)
       (save-buffer)
-      (let* ((pdf-name (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))
+      (let* ((export (org-latex-export-to-pdf))
+             (pdf-name (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))
              (pdf-name-with-ext (concat pdf-name ".pdf"))
              (eaf-pdf-buffer (get-buffer pdf-name-with-ext))
              (pdf-full-path (concat (file-name-directory (buffer-file-name)) pdf-name-with-ext)))
-        (message (concat "Trying to open " pdf-name-with-ext))
-        (delete-file (concat pdf-name ".tex"))
-        (delete-other-windows)
-        (split-window-right)
-        (other-window 1)
-        (if (and eaf-pdf-buffer
-                 (with-current-buffer eaf-pdf-buffer
-                   (derived-mode-p 'eaf-mode)))
-            (switch-to-buffer eaf-pdf-buffer)
+        (when export
+          (message (concat "Trying to open " pdf-name-with-ext))
+          (delete-file (concat pdf-name ".tex"))
+          (delete-other-windows)
+          (split-window-right)
+          (other-window 1)
+          (when (get-buffer pdf-name-with-ext)
+            (kill-buffer pdf-name-with-ext))
           (eaf-open pdf-full-path))))))
 
 (defvar eaf-org-override-pdf-links-list
