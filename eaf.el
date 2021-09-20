@@ -370,6 +370,9 @@ been initialized."
   "Name of EAF buffer."
   :type 'string)
 
+(defcustom eaf-apps nil
+  "List of applications to install")
+
 (defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python.exe" "python3")
   "The Python interpreter used to run eaf.py."
   :type 'string)
@@ -1650,6 +1653,26 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'isearch-backward :around #'eaf--isearch-backward-advisor)
 (when (and (ignore-errors (require 'counsel)) (featurep 'counsel))
   (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
+
+;; Automatic installation
+(defvar eaf-version-file "eaf-version-file.txt")
+
+(defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
+(defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
+
+(defvar eaf-commit (let ((default-directory eaf-source-dir)) (shell-command-to-string "git rev-parse HEAD" )))
+
+(defcustom eaf-force-compile nil)
+
+(unless
+    (and (not eaf-force-compile)
+	 (string= eaf-commit
+		  (with-temp-buffer
+		    (insert-file-contents eaf-version-file)
+		    (buffer-string))))
+  (eaf-install-and-update)
+  (with-temp-file eaf-version-file
+    (insert eaf-commit)))
 
 (provide 'eaf)
 
