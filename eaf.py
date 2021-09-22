@@ -536,14 +536,6 @@ class EAF(object):
                     if buf.url in session_dict[buf.module_path]:
                         buf.restore_session_data(session_dict[buf.module_path][buf.url])
 
-                        print("Session restored: ", buf.buffer_id, buf.module_path, self.session_file)
-                    else:
-                        print("Session is not restored, as no data about %s." % (buf.url))
-                else:
-                    print("Session is not restored, as no data present in session file.")
-        else:
-            print("Session is not restored, as %s cannot be found." % (self.session_file))
-
     def cleanup(self):
         '''Do some cleanup before exit python process.'''
         close_epc_client()
