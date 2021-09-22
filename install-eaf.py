@@ -99,7 +99,7 @@ def install_sys_deps(distro: str, deps_list):
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif distro == 'pacman':
-        command = ['sudo', 'pacman', '-Sy', '--noconfirm']
+        command = ['yay', '-Sy', '--noconfirm', '--needed']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
     elif which("zypper"):
@@ -190,7 +190,7 @@ def get_distro():
     elif which("pacman"):
         distro = "pacman"
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
-            run_command(['sudo', 'pacman', '-Sy', '--noconfirm'])
+            run_command(['sudo', 'pacman', '-Sy', '--noconfirm', '--needed', 'yay'])
     elif which("pkg"):
         distro = "pkg"
     elif which("zypper"):
