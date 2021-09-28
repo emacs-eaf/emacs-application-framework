@@ -195,8 +195,13 @@ class BrowserView(QWebEngineView):
                 self.buffer.caret_toggle_mark()
             else:
                 self.buffer.caret_exit()
-        if self.web_page.hasSelection():
-            self.triggerPageAction(self.web_page.Unselect)
+
+        # Need wrap hasSelection, otherwise close web page will cause webengine crash.
+        try:
+            if self.web_page.hasSelection():
+                self.triggerPageAction(self.web_page.Unselect)
+        except:
+            pass
 
     def select_text_change(self):
         ''' Change selected text.'''
