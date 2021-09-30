@@ -92,8 +92,9 @@
           (propertize icon 'face new-face))))))
 
 (defun eaf-all-the-icons-update-icon ()
-  (when (and doom-modeline-mode doom-modeline-icon doom-modeline-major-mode-icon)
-    (setq-local doom-modeline--buffer-file-icon (eaf-all-the-icons-icon mode-name))))
+  "You should custom modeline icon with (eaf-all-the-icons-icon mode-name).
+
+This function nothing to do default.")
 
 (eval-when-compile
   (when (require 'all-the-icons-ivy-rich nil 'noerror)
