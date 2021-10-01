@@ -113,6 +113,9 @@ A bookmark handler function is used as
 A new app can use this to configure extensions which should
 handled by it.")
 
+(defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
+(defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
+
 (defun eaf-add-subdirs-to-load-path ()
   "Recursively add all subdirectories of `default-directory' to `load-path'.
 More precisely, this uses only the subdirectories whose names
@@ -120,7 +123,7 @@ start with letters or digits; it excludes any subdirectory named `RCS'
 or `CVS', and any subdirectory that contains a file named `.nosearch'."
   (let (dirs
         attrs
-        (pending (list (file-name-directory (locate-library "eaf")))))
+        (pending (list eaf-build-dir)))
     ;; This loop does a breadth-first tree walk on DIR's subtree,
     ;; putting each subdir into DIRS as its contents are examined.
     (while pending
@@ -1602,9 +1605,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
         (apply fn file nil)
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
-
-(defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
-(defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
 
 (defcustom eaf-byte-compile-apps t)
 
