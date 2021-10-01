@@ -1246,7 +1246,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
-  "A wrapper around `file-name-extension' that downcases the extension of the FILE."
+  "A wrapper around `file-name-extension' that downcases the extension of the file-remote-p"
   (downcase (file-name-extension file)))
 
 (defun eaf--called-from-wsl-on-windows-p ()
@@ -1610,6 +1610,8 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
 (defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
 
+(defcustom eaf-byte-compile-apps t)
+
 ;;;###autoload
 (defun eaf-install-and-update ()
   "Interactively run `install-eaf.py' to install/update EAF apps.
@@ -1617,7 +1619,11 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
   (let* ((default-directory eaf-source-dir))
-    (shell-command (concat eaf-python-command " install-eaf.py" "&"))))
+    (shell-command (concat eaf-python-command " install-eaf.py" "&")))
+  (if (not (string= eaf-source-dir eaf-build-dir))
+      (copy-directory (expand-file-name "apps" eaf-source-dir) eaf-build-dir))
+  (if eaf-byte-compile-apps
+      (byte-recompile-directory eaf-build-dir)))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
   "Please use M-x eaf-install-and-update instead.")
