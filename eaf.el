@@ -1607,14 +1607,16 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
+(defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
+(defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
+
 ;;;###autoload
 (defun eaf-install-and-update ()
   "Interactively run `install-eaf.py' to install/update EAF apps.
 
 For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
-  (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
-         (default-directory eaf-dir))
+  (let* ((default-directory eaf-source-dir))
     (shell-command (concat eaf-python-command " install-eaf.py" "&"))))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
@@ -1655,9 +1657,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
   (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
 
 ;; Automatic installation
-
-(defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
-(defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
 
 (defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir)
 
