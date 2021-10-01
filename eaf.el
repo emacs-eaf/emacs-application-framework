@@ -1646,24 +1646,31 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'isearch-backward :around #'eaf--isearch-backward-advisor)
 
 ;; Automatic installation
-(defvar eaf-version-file "eaf-version-file.txt")
 
 (defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
 (defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
 
-(defvar eaf-commit (let ((default-directory eaf-source-dir)) (shell-command-to-string "git rev-parse HEAD" )))
+(defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir)
+
+(defun eaf-get-version ()
+  (or (package-get-version) ;; Melpa
+      (let ((default-directory eaf-source-dir))
+	(shell-command-to-string "git rev-parse HEAD" )) ;; Git
+      ))
+
+(defvar eaf-version (eaf-get-version))
 
 (defcustom eaf-force-compile nil)
 
 (unless
     (and (not eaf-force-compile)
-	 (string= eaf-commit
+	 (string= eaf-version
 		  (with-temp-buffer
 		    (insert-file-contents eaf-version-file)
 		    (buffer-string))))
   (eaf-install-and-update)
   (with-temp-file eaf-version-file
-    (insert eaf-commit)))
+    (insert eaf-version)))
 
 (provide 'eaf)
 
