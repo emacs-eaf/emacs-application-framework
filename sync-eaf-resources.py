@@ -104,7 +104,7 @@ def git_repos_sync(mirror_username, mirror_password, mirror_use_ssh):
             if updated or args.force:
                 print("[EAF] ** Local-dir -> Mirror")
                 print("[EAF] Running git push -f <push url of mirror>")
-                run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True)
+                run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True, ensure_pass=False)
         else:
             print("[EAF] WARN: url or mirror_url of EAF {} may have some problem, please check them!".format(app_name))
 
