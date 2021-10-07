@@ -200,7 +200,8 @@ def get_distro():
     elif sys.platform == "linux":
         print("[EAF] Unsupported Linux distribution/package manager.")
         print(" Please see dependencies.json for list of dependencies.")
-        sys.exit(1)
+        if not (args.ignore_core_deps or args.ignore_sys_deps):
+            sys.exit(1)
 
     return distro
 
