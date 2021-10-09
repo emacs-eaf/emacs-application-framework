@@ -18,7 +18,7 @@ parser.add_argument("--install", nargs='+', default=[],
                     help='only install/update apps listed here')
 parser.add_argument("--install-new-apps", action="store_true",
                     help='also install previously uninstalled or new applications')
-parser.add_argument("--force-install", action="store_true",
+parser.add_argument("--force", action="store_true",
                     help="force install/update app dependencies even if apps are already up-to-date")
 parser.add_argument("--ignore-core-deps", action="store_true",
                     help='ignore core dependencies')
@@ -305,7 +305,7 @@ def install_app_deps(distro, deps_dict):
             updated = add_or_update_app(app_name, app_spec_dict)
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
-            if (updated or args.force_install) and os.path.exists(app_dep_path):
+            if (updated or args.force) and os.path.exists(app_dep_path):
                 with open(os.path.join(app_dep_path)) as f:
                     deps_dict = json.load(f)
                 if not args.ignore_sys_deps and sys.platform == "linux" and distro in deps_dict:
@@ -328,7 +328,7 @@ def install_app_deps(distro, deps_dict):
         print("[EAF] Installing python dependencies")
         install_py_deps(py_deps)
     if not args.ignore_node_deps:
-        if args.force_install:
+        if args.force:
             if len(npm_install_apps) > 0:
                 remove_node_modules_path(npm_install_apps)
             if len(vue_install_apps) > 0:
