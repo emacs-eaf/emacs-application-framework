@@ -1091,6 +1091,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
            (select-window buffer-window)))
        (throw 'found-eaf t)))))
 
+(defun eaf-get-buffer (buffer-id)
+  "Find the buffer given the BUFFER-ID."
+  (catch 'found-eaf
+    (eaf-for-each-eaf-buffer
+     (when (string= eaf--buffer-id buffer-id)
+       (throw 'found-eaf buffer))
+     nil)))
+
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (let ((fmt (if eaf--buffer-app-name
