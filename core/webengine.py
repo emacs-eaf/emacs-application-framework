@@ -32,6 +32,7 @@ from functools import partial
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
 import os
+import time
 import platform
 import sqlite3
 
@@ -190,6 +191,8 @@ class BrowserView(QWebEngineView):
         ''' Quit action.'''
         if self.search_term != "":
             self._search_text("")
+            time.sleep(0.1)
+
         if self.buffer.caret_browsing_mode:
             if self.buffer.caret_browsing_mark_activated:
                 self.buffer.caret_toggle_mark()
@@ -198,8 +201,7 @@ class BrowserView(QWebEngineView):
 
         # Need wrap hasSelection, otherwise close web page will cause webengine crash.
         try:
-            if self.web_page.hasSelection():
-                self.triggerPageAction(self.web_page.Unselect)
+            self.triggerPageAction(self.web_page.Unselect)
         except:
             pass
 
