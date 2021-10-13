@@ -164,10 +164,16 @@ class BrowserView(QWebEngineView):
     def _search_text(self, text, is_backward = False):
         if self.search_term != text:
             self.search_term = text
+
         if is_backward:
             self.web_page.findText(self.search_term, self.web_page.FindBackward)
         else:
             self.web_page.findText(self.search_term)
+
+        # Clean web page selection if search text is empty.
+        if len(self.search_term) == 0:
+            # singleShot with 0ms means below code will run on the next event loop.
+            QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
 
     @interactive
     def search_text_forward(self):
@@ -188,20 +194,15 @@ class BrowserView(QWebEngineView):
     @interactive
     def action_quit(self):
         ''' Quit action.'''
+        # Clean search selections if search text is not empty.
         if self.search_term != "":
             self._search_text("")
+
         if self.buffer.caret_browsing_mode:
             if self.buffer.caret_browsing_mark_activated:
                 self.buffer.caret_toggle_mark()
             else:
                 self.buffer.caret_exit()
-
-        # Need wrap hasSelection, otherwise close web page will cause webengine crash.
-        try:
-            if self.web_page.hasSelection():
-                self.triggerPageAction(self.web_page.Unselect)
-        except:
-            pass
 
     def select_text_change(self):
         ''' Change selected text.'''
