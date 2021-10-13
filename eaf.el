@@ -1081,16 +1081,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
               (symbol-name command)
             `(quote ,command))))
 
-(defun eaf-focus-buffer (focus-buffer-id)
-  "Focus the buffer given the FOCUS-BUFFER-ID."
-  (catch 'found-eaf
-    (eaf-for-each-eaf-buffer
-     (when (string= eaf--buffer-id focus-buffer-id)
-       (let ((buffer-window (get-buffer-window buffer 'visible)))
-         (when buffer-window
-           (select-window buffer-window)))
-       (throw 'found-eaf t)))))
-
 (defun eaf-get-buffer (buffer-id)
   "Find the buffer given the BUFFER-ID."
   (catch 'found-eaf
@@ -1098,6 +1088,12 @@ of `eaf--buffer-app-name' inside the EAF buffer."
      (when (string= eaf--buffer-id buffer-id)
        (throw 'found-eaf buffer))
      nil)))
+
+(defun eaf-focus-buffer (buffer-id)
+  "Focus the buffer given the BUFFER-ID."
+  (let* ((buffer (eaf-get-buffer buffer-id))
+         (window (if buffer (get-buffer-window buffer 'visible) nil)))
+    (when window (select-window window) t)))
 
 (defun eaf--show-message (format-string)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
@@ -1123,13 +1119,10 @@ and does not log to the *Message* buffer."
   "Set Lisp variable NAME with VALUE on the Emacs side."
   (set (intern name) value))
 
-(defun eaf-request-kill-buffer (kill-buffer-id)
-  "Function for requesting to kill the given buffer with KILL-BUFFER-ID."
-  (catch 'found-eaf
-    (eaf-for-each-eaf-buffer
-     (when (string= eaf--buffer-id kill-buffer-id)
-       (kill-buffer buffer)
-       (throw 'found-eaf t)))))
+(defun eaf-request-kill-buffer (buffer-id)
+  "Function for requesting to kill the given buffer with BUFFER-ID."
+  (let* ((buffer (eaf-get-buffer buffer-id)))
+    (when buffer (kill-buffer buffer) t)))
 
 (defun eaf--first-start (eaf-epc-port)
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
