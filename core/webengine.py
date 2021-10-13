@@ -170,11 +170,6 @@ class BrowserView(QWebEngineView):
         else:
             self.web_page.findText(self.search_term)
 
-        # Clean web page selection if search text is empty.
-        if len(self.search_term) == 0:
-            # singleShot with 0ms means below code will run on the next event loop.
-            QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
-
     @interactive
     def search_text_forward(self):
         ''' Forward Search Text.'''
@@ -203,6 +198,14 @@ class BrowserView(QWebEngineView):
                 self.buffer.caret_toggle_mark()
             else:
                 self.buffer.caret_exit()
+
+        # Clean web page selection if search text is empty.
+        try:
+            if self.web_page.hasSelection():
+                # singleShot with 0ms means below code will run on the next event loop.
+                QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
+        except:
+            pass
 
     def select_text_change(self):
         ''' Change selected text.'''
