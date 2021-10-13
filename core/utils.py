@@ -284,8 +284,8 @@ def translate_text(text):
 def input_message(buffer_id, message, callback_tag, input_type, input_content):
     eval_in_emacs('eaf--input-message', [buffer_id, message, callback_tag, input_type, input_content])
 
-def focus_emacs_buffer(message):
-    eval_in_emacs('eaf-focus-buffer', [message])
+def focus_emacs_buffer(buffer_id):
+    eval_in_emacs('eaf-focus-buffer', [buffer_id])
 
 def atomic_edit(buffer_id, focus_text):
     eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
