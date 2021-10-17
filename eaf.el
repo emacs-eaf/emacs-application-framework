@@ -437,6 +437,7 @@ Turn off this option will improve EAF new page creation speed."
     "LG3D"                              ;QTile
     "Xpra"                              ;Windows WSL
     "EXWM"                              ;EXWM
+    "Xfwm4"                             ;Xfce
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 
