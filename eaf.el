@@ -1617,7 +1617,7 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (let* ((default-directory eaf-source-dir))
     (shell-command (concat eaf-python-command " install-eaf.py" "&")))
   (if (not (string= eaf-source-dir eaf-build-dir))
-      (copy-directory (expand-file-name "apps" eaf-source-dir) eaf-build-dir))
+      (copy-directory (expand-file-name "app" eaf-source-dir) eaf-build-dir))
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir)))
 
