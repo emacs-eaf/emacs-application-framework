@@ -1631,11 +1631,15 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
     (shell-command-sentinel process signal)))
 
 (defun eaf--post-install ()
+  (message "Copying app directory")
   (if (not (string= eaf-source-dir eaf-build-dir))
       (copy-directory (expand-file-name "app" eaf-source-dir) eaf-build-dir))
+  (message "Byte-compiling")
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir))
-  (eaf-add-app-dirs-to-load-path))
+  (message "Updating load path")
+  (eaf-add-app-dirs-to-load-path)
+  (message "Done"))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
   "Please use M-x eaf-install-and-update instead.")
