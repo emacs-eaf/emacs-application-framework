@@ -1610,7 +1610,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
-(defcustom eaf-byte-compile-apps t)
+(defcustom eaf-byte-compile-apps t "") 
 
 ;;;###autoload
 (defun eaf-install-and-update ()
@@ -1664,7 +1664,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 ;; Automatic installation
 
-(defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir)
+(defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir) "")
 
 (defun eaf-get-version ()
   (or (package-get-version) ;; Melpa
@@ -1672,12 +1672,13 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 	(shell-command-to-string "git rev-parse HEAD" )) ;; Git
       ))
 
-(defvar eaf-version (eaf-get-version))
+(defvar eaf-version (eaf-get-version) "")
 
-(defcustom eaf-force-compile nil)
+(defcustom eaf-force-compile nil "")
 
 (unless
     (and (not eaf-force-compile)
+	 (file-exists-p eaf-version-file)
 	 (string= eaf-version
 		  (with-temp-buffer
 		    (insert-file-contents eaf-version-file)
