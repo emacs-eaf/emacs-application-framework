@@ -157,7 +157,7 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
 
 (defun eaf-add-app-dirs-to-load-path ()
   "Add EAF app directories where .el exists to `load-path'."
-  (let ((default-directory (file-name-directory (locate-library "eaf"))))
+  (let ((default-directory eaf-build-dir))
     (add-to-list 'load-path default-directory)
     (eaf-add-subdirs-to-load-path)
     (dolist (path load-path)
@@ -1619,7 +1619,8 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (if (not (string= eaf-source-dir eaf-build-dir))
       (copy-directory (expand-file-name "app" eaf-source-dir) eaf-build-dir))
   (if eaf-byte-compile-apps
-      (byte-recompile-directory eaf-build-dir)))
+      (byte-recompile-directory eaf-build-dir))
+  (eaf-add-app-dirs-to-load-path))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
   "Please use M-x eaf-install-and-update instead.")
