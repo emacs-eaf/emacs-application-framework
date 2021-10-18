@@ -1614,8 +1614,23 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
-  (let* ((default-directory eaf-source-dir))
-    (shell-command (concat eaf-python-command " install-eaf.py")))
+  (let* ((default-directory eaf-source-dir)
+	 (output-buffer (generate-new-buffer "*EAF installation*"))
+	 (proc
+	  (progn
+	    (async-shell-command (concat eaf-python-command " install-eaf.py")
+				 output-buffer)
+	    (get-buffer-process output-buffer))))
+    (if (process-live-p proc)
+	(set-process-sentinel proc #'eaf--post-install-sentinel)
+      (eaf--post-install))))
+
+(defun eaf--post-install-sentinel (process signal)
+  (when (memq (process-status process) '(exit signal))
+    (eaf--post-install)
+    (shell-command-sentinel process signal)))
+
+(defun eaf--post-install ()
   (if (not (string= eaf-source-dir eaf-build-dir))
       (copy-directory (expand-file-name "app" eaf-source-dir) eaf-build-dir))
   (if eaf-byte-compile-apps
