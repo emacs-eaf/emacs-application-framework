@@ -1542,6 +1542,13 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
       (when (or (equal new-buff origin-buff) (equal app-name mode-name))
         (setq finished t)))))
 
+(defun eaf-share-path-or-url ()
+  "Share the current file path or web URL as QRCode."
+  (interactive)
+  (if (ignore-errors (require 'eaf-airshare))
+      (eaf-open (eaf-get-path-or-url) "airshare")
+    (message "You should install EAF application 'airshare' first.")))
+
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; FIXME: In the code below we should use `save-selected-window' (or even
