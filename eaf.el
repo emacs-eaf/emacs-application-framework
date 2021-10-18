@@ -1686,11 +1686,10 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 (defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir) "")
 
-(defun eaf-get-version ()
+(defvar eaf-version 
   (or (package-get-version) ;; Melpa
       (let ((default-directory eaf-source-dir))
-	(shell-command-to-string "git rev-parse HEAD" )) ;; Git
-      ))
+	(shell-command-to-string "git rev-parse HEAD" )))) ;; Git
 
 (defvar eaf-version (eaf-get-version) "")
 
