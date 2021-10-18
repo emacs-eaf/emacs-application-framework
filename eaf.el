@@ -1640,7 +1640,7 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
       (copy-directory (expand-file-name "app" eaf-source-dir) eaf-build-dir))
   (message "Byte-compiling")
   (if eaf-byte-compile-apps
-      (byte-recompile-directory eaf-build-dir))
+      (byte-recompile-directory eaf-build-dir 0))
   (message "Updating load path")
   (eaf-add-app-dirs-to-load-path)
   (message "Done"))
