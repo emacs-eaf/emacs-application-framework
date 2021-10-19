@@ -68,6 +68,8 @@ class BrowserView(QWebEngineView):
         self.load_cookie()
 
         self.search_term = ""
+        self.search_mode_forward = False
+        self.search_mode_backward = False
 
         self.buildin_js_dir = os.path.join(os.path.dirname(__file__), "js")
 
@@ -177,6 +179,8 @@ class BrowserView(QWebEngineView):
     @interactive
     def search_text_forward(self):
         ''' Forward Search Text.'''
+        self.search_mode_forward = True
+        self.search_mode_backward = False
         if self.search_term == "":
             self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
         else:
@@ -185,16 +189,36 @@ class BrowserView(QWebEngineView):
     @interactive
     def search_text_backward(self):
         ''' Backward Search Text.'''
+        self.search_mode_backward = True
+        self.search_mode_forward = False
         if self.search_term == "":
             self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
         else:
             self._search_text(self.search_term, True)
 
     @interactive
+    def edit_atomic_or_search_text(self):
+        ''' Edit the atomic text or search text.'''
+        if self.search_mode_forward:
+            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward",
+                                           "string", self.search_term)
+        elif self.search_mode_backward:
+            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward",
+                                           "string", self.search_term)
+        else:
+            text = self.get_focus_text()
+            if text != None:
+                atomic_edit(self.buffer_id, text)
+            else:
+                message_to_emacs("No active input element.")
+
+    @interactive
     def action_quit(self):
         ''' Quit action.'''
         # Clean search selections if search text is not empty.
         if self.search_term != "":
+            self.search_mode_forward = False
+            self.search_mode_backward = False
             self._search_text("")
 
         if self.buffer.caret_browsing_mode:
@@ -1232,14 +1256,6 @@ class BrowserBuffer(Buffer):
                 zoom_factor = float(row[0])
 
             self.buffer_widget.setZoomFactor(zoom_factor)
-
-    def atomic_edit(self):
-        ''' Edit the focus text.'''
-        text = self.buffer_widget.get_focus_text()
-        if text != None:
-            atomic_edit(self.buffer_id, text)
-        else:
-            message_to_emacs("No active input element.")
 
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
