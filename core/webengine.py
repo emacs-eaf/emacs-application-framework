@@ -161,14 +161,21 @@ class BrowserView(QWebEngineView):
         except Exception:
             return title
 
+    def callback_text_search(self, found):
+        ''' Callback of text search'''
+        if self.search_term != "" and (not found):
+            message_to_emacs("No ocurrence of \"" + self.search_term + "\" is found.")
+
     def _search_text(self, text, is_backward = False):
         if self.search_term != text:
             self.search_term = text
 
         if is_backward:
-            self.web_page.findText(self.search_term, self.web_page.FindBackward)
+            self.web_page.findText(self.search_term, self.web_page.FindBackward,
+                                   self.callback_text_search)
         else:
-            self.web_page.findText(self.search_term)
+            self.web_page.findText(self.search_term, self.web_page.FindFlags(),
+                                   self.callback_text_search)
 
         # singleShot with 0ms means below code will run on the next event loop.
         if len(self.search_term) == 0:
@@ -178,7 +185,7 @@ class BrowserView(QWebEngineView):
     def search_text_forward(self):
         ''' Forward Search Text.'''
         if self.search_term == "":
-            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward")
+            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward", "search")
         else:
             self._search_text(self.search_term)
 
@@ -186,7 +193,7 @@ class BrowserView(QWebEngineView):
     def search_text_backward(self):
         ''' Backward Search Text.'''
         if self.search_term == "":
-            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward")
+            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward", "search")
         else:
             self._search_text(self.search_term, True)
 
