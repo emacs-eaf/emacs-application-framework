@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Tue Sep  7 12:35:28 2021 (-0400)
+;; Last-Updated: Sun Oct 24 01:42:08 2021 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -1217,7 +1217,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
-  (when (and (ignore-errors (require 'all-the-icons) (featurep 'eaf-all-the-icons)))
+  (when (and (ignore-errors (require 'all-the-icons)) (featurep 'eaf-all-the-icons))
     (declare-function eaf-all-the-icons-update-icon "eaf-all-the-icons.el")
     (eaf-all-the-icons-update-icon)))
 
@@ -1644,12 +1644,17 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
       (eaf-call-async "handle_search_forward" eaf-search-input-buffer-id eaf-search-input-callback-tag)
     (apply orig-fun arg args)))
 (advice-add #'isearch-forward :around #'eaf--isearch-forward-advisor)
+(when (and (ignore-errors (require 'swiper)) (featurep 'swiper))
+  (advice-add #'swiper :around #'eaf--isearch-forward-advisor)
+  (advice-add #'swiper-isearch :around #'eaf--isearch-forward-advisor))
 
 (defun eaf--isearch-backward-advisor (orig-fun &optional arg &rest args)
   (if eaf-search-input-active-p
       (eaf-call-async "handle_search_backward" eaf-search-input-buffer-id eaf-search-input-callback-tag)
     (apply orig-fun arg args)))
 (advice-add #'isearch-backward :around #'eaf--isearch-backward-advisor)
+(when (and (ignore-errors (require 'counsel)) (featurep 'counsel))
+  (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
 
 (provide 'eaf)
 
