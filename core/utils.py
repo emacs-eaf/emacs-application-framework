@@ -254,11 +254,8 @@ def get_emacs_vars(args):
 
     return list(map(lambda result: result if result != [] else False, epc_client.call_sync("get-emacs-vars", args)))
 
-def message_to_emacs(message):
-    eval_in_emacs('eaf--show-message', [message])
-
-def message_to_emacs_no_logging(message):
-    eval_in_emacs('eaf--show-message-no-logging', [message])
+def message_to_emacs(message, prefix=True, logging=True):
+    eval_in_emacs('eaf--show-message', [message, prefix, logging])
 
 def clear_emacs_message():
     eval_in_emacs('eaf--clear-message', [])
