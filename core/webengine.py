@@ -186,16 +186,12 @@ class BrowserView(QWebEngineView):
         ''' Forward Search Text.'''
         if self.search_term == "":
             self.buffer.send_input_message("Forward Search Text: ", "search_text_forward", "search")
-        else:
-            self._search_text(self.search_term)
 
     @interactive
     def search_text_backward(self):
         ''' Backward Search Text.'''
         if self.search_term == "":
             self.buffer.send_input_message("Backward Search Text: ", "search_text_backward", "search")
-        else:
-            self._search_text(self.search_term, True)
 
     @interactive
     def action_quit(self):
@@ -1024,6 +1020,19 @@ class BrowserBuffer(Buffer):
            callback_tag == "copy_code" or \
            callback_tag == "edit_url":
             self.buffer_widget.cleanup_links_dom()
+
+    def handle_search_forward(self, callback_tag):
+        if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
+            self.buffer_widget._search_text(self.buffer_widget.search_term)
+
+    def handle_search_backward(self, callback_tag):
+        if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
+            self.buffer_widget._search_text(self.buffer_widget.search_term, True)
+
+    def handle_search_finish(self, callback_tag):
+        if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
+            self.buffer_widget._search_text("")
+            QTimer().singleShot(0, lambda : self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Unselect))
 
     def caret_toggle_browsing(self):
         ''' Init caret browsing.'''
