@@ -178,7 +178,7 @@ class BrowserView(QWebEngineView):
                                    self.callback_text_search)
 
         # singleShot with 0ms means below code will run on the next event loop.
-        if len(self.search_term) == 0:
+        if text == "":
             QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
 
     @interactive
@@ -197,21 +197,13 @@ class BrowserView(QWebEngineView):
     def action_quit(self):
         ''' Quit action.'''
         # Clean search selections if search text is not empty.
-        if self.search_term != "":
-            self._search_text("")
+        self._search_text("")
 
         if self.buffer.caret_browsing_mode:
             if self.buffer.caret_browsing_mark_activated:
                 self.buffer.caret_toggle_mark()
             else:
                 self.buffer.caret_exit()
-
-        # Clean text selection if any
-        try:
-            if self.web_page.hasSelection():
-                self.triggerPageAction(self.web_page.Unselect)
-        except:
-            pass
 
     def select_text_change(self):
         ''' Change selected text.'''
@@ -1020,6 +1012,8 @@ class BrowserBuffer(Buffer):
            callback_tag == "copy_code" or \
            callback_tag == "edit_url":
             self.buffer_widget.cleanup_links_dom()
+        elif callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
+            self.buffer_widget._search_text("")
 
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
@@ -1032,7 +1026,6 @@ class BrowserBuffer(Buffer):
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
             self.buffer_widget._search_text("")
-            QTimer().singleShot(0, lambda : self.buffer_widget.triggerPageAction(self.buffer_widget.web_page.Unselect))
 
     def caret_toggle_browsing(self):
         ''' Init caret browsing.'''
