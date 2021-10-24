@@ -1096,21 +1096,16 @@ of `eaf--buffer-app-name' inside the EAF buffer."
          (window (if buffer (get-buffer-window buffer 'visible) nil)))
     (when window (select-window window) t)))
 
-(defun eaf--show-message (format-string)
+(defun eaf--show-message (format-string eaf-prefix logging)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
-  (let ((fmt (if eaf--buffer-app-name
-                 (concat "[EAF/" eaf--buffer-app-name "] %s")
-               "[EAF] %s")))
-    (message fmt format-string)))
-
-(defun eaf--show-message-no-logging (format-string)
-  "A wrapper around `message' that prepends [EAF/app-name] before FORMAT-STRING
-and does not log to the *Message* buffer."
-  (let ((fmt (if eaf--buffer-app-name
-                 (concat "[EAF/" eaf--buffer-app-name "] %s")
-               "[EAF] %s")))
-    (let ((message-log-max nil))
-      (message fmt format-string))))
+  (let* ((eaf-prefix (if (equal eaf-prefix "TRUE") t nil))
+         (logging (if (equal logging "TRUE") t nil))
+         (fmt (cond ((not eaf-prefix) "%s")
+                    (eaf--buffer-app-name (concat "[EAF/" eaf--buffer-app-name "] %s"))
+                    (t "[EAF] %s"))))
+    (if logging (message fmt format-string)
+      (let ((message-log-max nil))
+        (message fmt format-string)))))
 
 (defun eaf--clear-message ()
   "Clear Emacs' echo area ."
