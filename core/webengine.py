@@ -164,9 +164,17 @@ class BrowserView(QWebEngineView):
         if self.search_term != "" and (not found):
             message_to_emacs("No ocurrence of \"" + self.search_term + "\" is found.", False)
 
+    def clean_search_and_select(self):
+        self.search_term = ""
+        self.web_page.findText("")
+        QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
+
+    def clean_search(self):
+        self.search_term = ""
+        self.web_page.findText("")
+
     def _search_text(self, text, is_backward = False):
-        if self.search_term != text:
-            self.search_term = text
+        self.search_term = text
 
         if is_backward:
             self.web_page.findText(self.search_term, self.web_page.FindBackward,
@@ -175,27 +183,21 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term, self.web_page.FindFlags(),
                                    self.callback_text_search)
 
-        # singleShot with 0ms means below code will run on the next event loop.
-        if text == "":
-            QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
-
     @interactive
     def search_text_forward(self):
         ''' Forward Search Text.'''
-        if self.search_term == "":
-            self.buffer.send_input_message("Forward Search Text: ", "search_text_forward", "search")
+        self.buffer.send_input_message("Forward Search Text: ", "search_text_forward", "search")
 
     @interactive
     def search_text_backward(self):
         ''' Backward Search Text.'''
-        if self.search_term == "":
-            self.buffer.send_input_message("Backward Search Text: ", "search_text_backward", "search")
+        self.buffer.send_input_message("Backward Search Text: ", "search_text_backward", "search")
 
     @interactive
     def action_quit(self):
         ''' Quit action.'''
         # Clean search selections if search text is not empty.
-        self._search_text("")
+        self.clean_search_and_select()
 
         if self.buffer.caret_browsing_mode:
             if self.buffer.caret_browsing_mark_activated:
@@ -1011,7 +1013,7 @@ class BrowserBuffer(Buffer):
            callback_tag == "edit_url":
             self.buffer_widget.cleanup_links_dom()
         elif callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
-            self.buffer_widget._search_text("")
+            self.buffer_widget.clean_search_and_select()
 
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
@@ -1023,7 +1025,7 @@ class BrowserBuffer(Buffer):
 
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
-            self.buffer_widget._search_text("")
+            self.buffer_widget.clean_search()
 
     def caret_toggle_browsing(self):
         ''' Init caret browsing.'''
