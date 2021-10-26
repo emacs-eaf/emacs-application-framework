@@ -803,24 +803,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                        (cond
-                         ;; If command is normal symbol, just call it directly.
-                         ((symbolp fun)
-                          fun)
+                                  (cond
+                                   ;; If command is normal symbol, just call it directly.
+                                   ((symbolp fun)
+                                    fun)
 
-                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                         ((string-match "-" fun)
-                          (intern fun))
+                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                                   ((string-match "-" fun)
+                                    (intern fun))
 
-                         ;; If command prefix with js_, call JavaScript function directly.
-                         ((string-prefix-p "js_" fun)
-                          (eaf--make-js-proxy-function fun))
+                                   ;; If command prefix with js_, call JavaScript function directly.
+                                   ((string-prefix-p "js_" fun)
+                                    (eaf--make-js-proxy-function fun))
 
-                         ;; If command is not built-in function and not include char '-'
-                         ;; it's command in python side, build elisp proxy function to call it.
-                         (t
-                          (eaf--make-py-proxy-function fun))
-                         ))
+                                   ;; If command is not built-in function and not include char '-'
+                                   ;; it's command in python side, build elisp proxy function to call it.
+                                   (t
+                                    (eaf--make-py-proxy-function fun))
+                                   ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
@@ -1089,6 +1089,11 @@ of `eaf--buffer-app-name' inside the EAF buffer."
      (when (string= eaf--buffer-id buffer-id)
        (throw 'found-eaf buffer))
      nil)))
+
+(defun eaf-get-window-size-by-buffer-id (buffer-id)
+  (let ((buffer (eaf-get-buffer buffer-id)))
+    (when buffer
+      (eaf-get-window-allocation (get-buffer-window buffer)))))
 
 (defun eaf-focus-buffer (buffer-id)
   "Focus the buffer given the BUFFER-ID."
