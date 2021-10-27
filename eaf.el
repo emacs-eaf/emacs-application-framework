@@ -1222,16 +1222,12 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf-all-the-icons-update-icon)))
 
 (defun eaf-goto-left-tab ()
-  "Go to left tab when awesome-tab exists."
-  (interactive)
-  (when (ignore-errors (require 'awesome-tab))
-    (awesome-tab-backward-tab)))
+  "Go to left tab, you need re-implement this interface yourself."
+  (interactive))
 
 (defun eaf-goto-right-tab ()
-  "Go to right tab when awesome-tab exists."
-  (interactive)
-  (when (ignore-errors (require 'awesome-tab))
-    (awesome-tab-forward-tab)))
+  "Go to right tab, you need re-implement this interface yourself."
+  (interactive))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
