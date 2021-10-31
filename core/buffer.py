@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
 from PyQt5.QtCore import Qt, QEvent, QThread
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_func_result
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_func_result, get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background
 import abc
 import string
 import time
@@ -122,10 +122,9 @@ class Buffer(QGraphicsScene):
         self.fetch_marker_input_thread = None
         self.fetch_search_input_thread = None
 
-        (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
-            "eaf-emacs-theme-background-color",
-            "eaf-emacs-theme-foreground-color",
-            "eaf-emacs-theme-mode"])
+        self.theme_mode = get_emacs_theme_mode()
+        self.theme_foreground_color = get_emacs_theme_foreground()
+        self.theme_background_color = get_emacs_theme_background()
 
         self.enter_fullscreen_request.connect(self.enable_fullscreen)
         self.exit_fullscreen_request.connect(self.disable_fullscreen)

@@ -233,6 +233,15 @@ def eval_in_emacs(method_name, args):
         # Call eval-in-emacs elisp function.
         epc_client.call("eval-in-emacs", args)
 
+def get_emacs_theme_mode():
+    return get_emacs_func_result("eaf-get-theme-mode", [])
+
+def get_emacs_theme_background():
+    return get_emacs_func_result("eaf-get-theme-background-color", [])
+
+def get_emacs_theme_foreground():
+    return get_emacs_func_result("eaf-get-theme-foreground-color", [])
+
 def get_emacs_func_result(method_name, args):
     global epc_client
 

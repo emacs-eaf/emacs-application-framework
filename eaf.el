@@ -1399,26 +1399,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
 
-(defcustom eaf-emacs-theme-mode (eaf-get-theme-mode)
-  ""
-  :type 'string)
-
-(defcustom eaf-emacs-theme-background-color (eaf-get-theme-background-color)
-  ""
-  :type 'string)
-
-(defcustom eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)
-  ""
-  :type 'string)
-
-(defun eaf-monitor-load-theme (orig-fun &optional arg &rest args)
-  "Update `eaf-emacs-theme-mode' after execute `load-theme'."
-  (apply orig-fun arg args)
-  (setq eaf-emacs-theme-mode (eaf-get-theme-mode))
-  (setq eaf-emacs-theme-background-color (eaf-get-theme-background-color))
-  (setq eaf-emacs-theme-foreground-color (eaf-get-theme-foreground-color)))
-(advice-add 'load-theme :around #'eaf-monitor-load-theme)
-
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."
   (if (string-empty-p eaf-wm-name)
