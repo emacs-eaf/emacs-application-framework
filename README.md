@@ -279,6 +279,11 @@ If you get a segfault error, please use the following way to collect crash infor
 2. Use the command `eaf-stop-process` to stop the current process
 3. Restart eaf, send issue with `*eaf*` buffer content when next crash
 
+## Contributor
+<a href = "https://github.com/emacs-eaf/emacs-application-framework/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=emacs-eaf/emacs-application-framework"/>
+</a>
+
 ## Join Us
 Do you want to make Emacs a real "operating system"?
 

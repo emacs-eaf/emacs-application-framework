@@ -270,6 +270,11 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 2. 使用命令 `eaf-stop-process` 停止EAF进程
 3. 重新打开EAF, 并在下次崩溃时发送 `*eaf*` 的内容
 
+## 贡献者
+<a href = "https://github.com/emacs-eaf/emacs-application-framework/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=emacs-eaf/emacs-application-framework"/>
+</a>
+
 ## 加入我们
 你想把Emacs开发成一个操作系统吗？
 
