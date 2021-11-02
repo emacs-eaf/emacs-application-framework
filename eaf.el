@@ -1123,7 +1123,10 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 (defun eaf-request-kill-buffer (buffer-id)
   "Function for requesting to kill the given buffer with BUFFER-ID."
   (let* ((buffer (eaf-get-buffer buffer-id)))
-    (when buffer (kill-buffer buffer) t)))
+    (when buffer
+      (kill-buffer buffer)
+      (eaf-goto-right-tab)
+      t)))
 
 (defun eaf--first-start (eaf-epc-port)
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
