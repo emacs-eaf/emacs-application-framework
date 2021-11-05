@@ -79,6 +79,8 @@
 (require 'subr-x)
 (require 'bookmark)
 
+(declare-function straight--symlink-recursively "straight")
+
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/emacs-eaf/emacs-application-framework/issues/734.
 for more information.
@@ -115,6 +117,34 @@ handled by it.")
 
 (defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
 (defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
+
+(defcustom eaf-apps-to-install nil
+  "List of applications to install"
+  :group 'eaf
+  :type '(set
+	  (const :tag "EAF Airshare" eaf-airshare)
+	  (const :tag "EAF Browser" eaf-browser)
+	  (const :tag "EAF Camera" eaf-camera)
+	  (const :tag "EAF Demo" eaf-demo)
+	  (const :tag "EAF File Browser" eaf-file-browser)
+	  (const :tag "EAF File Manager" eaf-file-manager)
+	  (const :tag "EAF File Sender" eaf-file-sender)
+	  (const :tag "EAF Image Viewer" eaf-image-viewer)
+	  (const :tag "EAF Jupyter" eaf-jupyter)
+	  (const :tag "EAF Markdown Previewer" eaf-markdown-previewer)
+	  (const :tag "EAF Mermaid" eaf-mermaid)
+	  (const :tag "EAF Mindmap" eaf-mindmap)
+	  (const :tag "EAF Music Player" eaf-music-player)
+	  (const :tag "EAF Org Previewer" eaf-org-previewer)
+	  (const :tag "EAF PDF Viewer" eaf-pdf-viewer)
+	  (const :tag "EAF System Monitor" eaf-system-monitor)
+	  (const :tag "EAF Terminal" eaf-terminal)
+	  (const :tag "EAF Video Player" eaf-video-player)
+	  (const :tag "EAF Vue Demo" eaf-vue-demo)
+	  (const :tag "EAF NetEase Cloud Music" eaf-netease-cloud-music)
+	  (const :tag "EAF RSS Reader" eaf-rss-reader)
+))
+
 
 (defun eaf-add-subdirs-to-load-path ()
   "Recursively add all subdirectories of `default-directory' to `load-path'.
@@ -372,9 +402,6 @@ been initialized."
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
   :type 'string)
-
-(defcustom eaf-apps nil
-  "List of applications to install")
 
 (defcustom eaf-python-command (if (memq system-type '(cygwin windows-nt ms-dos)) "python.exe" "python3")
   "The Python interpreter used to run eaf.py."
@@ -1613,16 +1640,19 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (defcustom eaf-byte-compile-apps t "") 
 
 ;;;###autoload
-(defun eaf-install-and-update ()
+(defun eaf-install-and-update (&rest apps)
   "Interactively run `install-eaf.py' to install/update EAF apps.
 
 For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
   (let* ((default-directory eaf-source-dir)
 	 (output-buffer (generate-new-buffer "*EAF installation*"))
+	 (apps (or apps eaf-apps-to-install))
 	 (proc
 	  (progn
-	    (async-shell-command (concat eaf-python-command " install-eaf.py")
+	    (async-shell-command (concat
+				  eaf-python-command " install-eaf.py" " --install "
+				  (mapconcat 'symbol-name apps " "))
 				 output-buffer)
 	    (get-buffer-process output-buffer))))
     (if (process-live-p proc)
@@ -1634,10 +1664,17 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
     (eaf--post-install)
     (shell-command-sentinel process signal)))
 
+(defun eaf--symlink-directory (old new)
+  (if (fboundp 'straight--symlink-recursively)
+      (straight--symlink-recursively old new)
+    (make-symbolic-link old new)))
+
 (defun eaf--post-install ()
-  (message "Copying app directory")
+  (message "Symlinking app directory")
   (if (not (string= eaf-source-dir eaf-build-dir))
-      (copy-directory (expand-file-name "app" eaf-source-dir) eaf-build-dir))
+      (eaf--symlink-directory
+       (expand-file-name "app" eaf-source-dir)
+       eaf-build-dir))
   (message "Byte-compiling")
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir 0))
@@ -1688,20 +1725,21 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 (defvar eaf-version 
   (or (and (package-installed-p 'eaf) (package-get-version))
-      ;; Above is for Melpa (but doesn't work, because it picks the version
-      ;; header)
+      ;; Above is for tagged version numbers if the package is installed with package.el
       (let ((default-directory eaf-source-dir))
 	(shell-command-to-string "git rev-parse HEAD" )))) ;; Git
 
 (defcustom eaf-force-compile nil "")
+(defcustom eaf-no-auto-install nil "")
 
 (unless
-    (and (not eaf-force-compile)
-	 (file-exists-p eaf-version-file)
-	 (string= eaf-version
-		  (with-temp-buffer
-		    (insert-file-contents eaf-version-file)
-		    (buffer-string))))
+    (or eaf-no-auto-install
+	(and (not eaf-force-compile)
+	     (file-exists-p eaf-version-file)
+	     (string= eaf-version
+		      (with-temp-buffer
+			(insert-file-contents eaf-version-file)
+			(buffer-string)))))
   (eaf-install-and-update)
   (with-temp-file eaf-version-file
     (insert eaf-version)))
