@@ -1170,11 +1170,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
               (eaf--update-modeline-icon)
               (throw 'found-eaf t))))))))
 
-(defun eaf-translate-text (text)
-  "Use sdcv to translate selected TEXT."
-  (when (featurep 'sdcv)
-    (sdcv-search-input+ text)))
-
 (defvar eaf-search-input-active-p nil)
 (defvar eaf-search-input-buffer-id nil)
 (defvar eaf-search-input-callback-tag nil)
@@ -1226,11 +1221,17 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf-goto-left-tab ()
   "Go to left tab, you need re-implement this interface yourself."
-  (interactive))
+  (interactive)
+  (message "Go to left tab, you need re-implement eaf-goto-left-tab yourself."))
 
 (defun eaf-goto-right-tab ()
   "Go to right tab, you need re-implement this interface yourself."
-  (interactive))
+  (interactive)
+  (message "Go to right tab, you need re-implement eaf-goto-right-tab yourself."))
+
+(defun eaf-translate-text (text)
+  "Translate selected TEXT."
+  (message "You need re-implement eaf-translate-text yourself."))
 
 (defun eaf--non-remote-default-directory ()
   "Return `default-directory' itself if is not part of remote, otherwise return $HOME."
