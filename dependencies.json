@@ -22,6 +22,7 @@
         "glib2-devel",
         "python3-qt5",
         "python3-pyqt5-sip",
+        "python3-qt5-webengine",
         "pyqtwebengine-devel",
         "python3-pygit2"
     ],
