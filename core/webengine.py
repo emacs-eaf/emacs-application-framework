@@ -1273,7 +1273,7 @@ class BrowserBuffer(Buffer):
 
     @interactive(insert_or_do=True)
     def duplicate_page(self):
-        duplicate_page_in_new_tab(self.current_url)
+        duplicate_page_in_new_tab(self.url)
 
     @interactive(insert_or_do=True)
     def open_browser(self):
