@@ -20,8 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QVariant, QTimer, QFile
-from PyQt5.QtGui import QColor, QScreen
+from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QVariant, QTimer, QFile, QPointF, QPoint
+from PyQt5.QtGui import QColor, QScreen, QWheelEvent
 from PyQt5.QtNetwork import QNetworkCookie
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -385,30 +385,62 @@ class BrowserView(QWebEngineView):
         '''
         return self.web_page.execute_javascript(js)
 
+    def scroll_wheel(self, x_offset, y_offset):
+        pos = self.rect().center()
+        global_pos = self.mapToGlobal(pos)
+
+        event = QWheelEvent(
+            QPointF(pos),
+            QPointF(global_pos),
+            QPoint(x_offset, y_offset),
+            QPoint(x_offset, y_offset),
+            Qt.NoButton,
+            Qt.NoModifier,
+            Qt.NoScrollPhase,
+            False
+        )
+        for widget in self.buffer.get_key_event_widgets():
+            QApplication.sendEvent(widget, event)
+
     @interactive(insert_or_do=True)
     def scroll_left(self):
         ''' Scroll to left side.'''
-        self.eval_js("document.scrollingElement.scrollBy(-35, 0)")
+        self.scroll_wheel(-35, 0)
 
     @interactive(insert_or_do=True)
     def scroll_right(self):
         ''' Scroll to right side.'''
-        self.eval_js("document.scrollingElement.scrollBy(35, 0)")
+        self.scroll_wheel(35, 0)
 
     @interactive(insert_or_do=True)
     def scroll_up(self):
         ''' Scroll up.'''
-        self.eval_js("document.scrollingElement.scrollBy(0, 50)")
+        self.scroll_wheel(0, -50)
 
     @interactive(insert_or_do=True)
     def scroll_down(self):
         ''' Scroll down.'''
-        self.eval_js("document.scrollingElement.scrollBy(0, -50)")
+        self.scroll_wheel(0, 50)
 
     @interactive
     def scroll_up_page(self):
         ''' Scroll page up.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: window.innerHeight/1.1, behavior: '" + self.scroll_behavior + "'})")
+        self.scroll_wheel(0, -self.rect().height())
+
+    @interactive(insert_or_do=True)
+    def scroll_down_page(self):
+        ''' Scroll down a page.'''
+        self.scroll_wheel(0, self.rect().height())
+
+    @interactive(insert_or_do=True)
+    def scroll_to_begin(self):
+        ''' Scroll to the beginning.'''
+        self.scroll_wheel(0, 1000000)
+
+    @interactive(insert_or_do=True)
+    def scroll_to_bottom(self):
+        ''' Scroll to the bottom.'''
+        self.scroll_wheel(0, -1000000)
 
     @interactive
     def insert_or_scroll_up_page(self):
@@ -421,21 +453,6 @@ class BrowserView(QWebEngineView):
             self.buffer.fake_key_event(self.buffer.current_event_string)
         else:
             self.scroll_up_page()
-
-    @interactive(insert_or_do=True)
-    def scroll_down_page(self):
-        ''' Scroll down a page.'''
-        self.eval_js("document.scrollingElement.scrollBy({left: 0, top: -window.innerHeight/1.1, behavior: '" + self.scroll_behavior + "'})")
-
-    @interactive(insert_or_do=True)
-    def scroll_to_begin(self):
-        ''' Scroll to the beginning.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: 0, behavior: '" + self.scroll_behavior + "'})")
-
-    @interactive(insert_or_do=True)
-    def scroll_to_bottom(self):
-        ''' Scroll to the bottom.'''
-        self.eval_js("document.scrollingElement.scrollTo({left: 0, top: document.body.scrollHeight, behavior: '" + self.scroll_behavior + "'})")
 
     @interactive
     def get_selection_text(self):
