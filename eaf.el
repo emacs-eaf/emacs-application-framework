@@ -1125,7 +1125,6 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (let* ((buffer (eaf-get-buffer buffer-id)))
     (when buffer
       (kill-buffer buffer)
-      (eaf-goto-right-tab)
       t)))
 
 (defun eaf--first-start (eaf-epc-port)
