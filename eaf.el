@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Nov 21 03:02:06 2021 (-0500)
+;; Last-Updated: Sun Nov 21 03:38:17 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -296,8 +296,8 @@ been initialized."
            (lambda (mngr)
              (let ((mngr mngr))
                (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
-               (eaf-epc-define-method mngr 'get-emacs-var 'get-emacs-var-func)
-               (eaf-epc-define-method mngr 'get-emacs-vars 'get-emacs-vars-func)
+               (eaf-epc-define-method mngr 'get-emacs-var 'eaf--get-emacs-var-func)
+               (eaf-epc-define-method mngr 'get-emacs-vars 'eaf--get-emacs-vars-func)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
@@ -322,7 +322,7 @@ been initialized."
                     (t arg))))
           (cdr args))))
 
-(defun get-emacs-var-func (var-name)
+(defun eaf--get-emacs-var-func (var-name)
   (let* ((var-symbol (intern var-name))
          (var-value (symbol-value var-symbol))
          ;; We need convert result of booleanp to string.
@@ -330,8 +330,8 @@ been initialized."
          (var-is-bool (prin1-to-string (booleanp var-value))))
     (list var-value var-is-bool)))
 
-(defun get-emacs-vars-func (&rest vars)
-  (mapcar #'get-emacs-var-func vars))
+(defun eaf--get-emacs-vars-func (&rest vars)
+  (mapcar #'eaf--get-emacs-var-func vars))
 
 (defun get-emacs-face-foregrounds (&rest faces)
   (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))
