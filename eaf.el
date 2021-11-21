@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Oct 24 01:42:08 2021 (-0400)
+;; Last-Updated: Sun Nov 21 03:02:06 2021 (-0500)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -331,7 +331,7 @@ been initialized."
     (list var-value var-is-bool)))
 
 (defun get-emacs-vars-func (&rest vars)
-  (mapcar #'(lambda (var-name) (symbol-value (intern var-name))) vars))
+  (mapcar #'get-emacs-var-func vars))
 
 (defun get-emacs-face-foregrounds (&rest faces)
   (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))

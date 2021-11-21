@@ -258,11 +258,6 @@ def get_emacs_func_result(method_name, args):
         result = epc_client.call_sync("eval-in-emacs", args)
         return result if result != [] else False
 
-def get_emacs_vars(args):
-    global epc_client
-
-    return list(map(lambda result: result if result != [] else False, epc_client.call_sync("get-emacs-vars", args)))
-
 def message_to_emacs(message, prefix=True, logging=True):
     eval_in_emacs('eaf--show-message', [message, prefix, logging])
 
@@ -328,15 +323,23 @@ def list_string_to_list(list_string):
     list_var = literal_eval(str(list_var))
     return list_var
 
+def convert_emacs_bool(symbol_value, symbol_is_boolean):
+    if symbol_is_boolean == "t":
+        return symbol_value == True
+    else:
+        return symbol_value
+
+def get_emacs_vars(args):
+    global epc_client
+
+    return list(map(lambda result: convert_emacs_bool(result[0], result[1]) if result != [] else False, epc_client.call_sync("get-emacs-vars", args)))
+
 def get_emacs_var(var_name):
     global epc_client
 
     (symbol_value, symbol_is_boolean) = epc_client.call_sync("get-emacs-var", [var_name])
 
-    if symbol_is_boolean == "t":
-        return symbol_value == True
-    else:
-        return symbol_value
+    return convert_emacs_bool(symbol_value, symbol_is_boolean)
 
 emacs_config_dir = ""
 
