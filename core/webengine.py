@@ -76,6 +76,7 @@ class BrowserView(QWebEngineView):
         self.select_input_text_js = None
         self.get_selection_text_js = None
         self.focus_input_js = None
+        self.simulated_wheel_event = False
 
         (self.scroll_behavior, self.default_zoom, self.show_hover_link, self.marker_letters, self.marker_fontsize) = get_emacs_vars(
             ["eaf-browser-scroll-behavior",
@@ -249,7 +250,10 @@ class BrowserView(QWebEngineView):
             event_type += [QEvent.Wheel]
 
         if event.type() in event_type:
-            focus_emacs_buffer(self.buffer_id)
+            if self.simulated_wheel_event:
+               self.simulated_wheel_event = False
+            else:
+                focus_emacs_buffer(self.buffer_id)
 
         if event.type() == QEvent.MouseButtonPress:
 
@@ -386,6 +390,8 @@ class BrowserView(QWebEngineView):
         return self.web_page.execute_javascript(js)
 
     def scroll_wheel(self, x_offset, y_offset):
+        self.simulated_wheel_event = True
+
         pos = self.rect().center()
         global_pos = self.mapToGlobal(pos)
 
@@ -399,6 +405,7 @@ class BrowserView(QWebEngineView):
             Qt.NoScrollPhase,
             False
         )
+
         for widget in self.buffer.get_key_event_widgets():
             QApplication.sendEvent(widget, event)
 
@@ -415,12 +422,12 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_up(self):
         ''' Scroll up.'''
-        self.scroll_wheel(0, -50)
+        self.scroll_wheel(0, -100)
 
     @interactive(insert_or_do=True)
     def scroll_down(self):
         ''' Scroll down.'''
-        self.scroll_wheel(0, 50)
+        self.scroll_wheel(0, 100)
 
     @interactive
     def scroll_up_page(self):
