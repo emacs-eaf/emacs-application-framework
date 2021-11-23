@@ -366,7 +366,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def zoom_reset(self):
         ''' Reset the magnification.'''
-        self.setZoomFactor(self.default_zoom)
+        self.setZoomFactor(float(self.default_zoom))
 
     def eval_js(self, js):
         ''' Run JavaScript.'''
