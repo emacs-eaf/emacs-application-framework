@@ -1451,10 +1451,13 @@ So multiple EAF buffers visiting the same file do not sync with each other."
         (eq system-type 'berkeley-unix))
     (eaf--activate-emacs-linux-window buffer_id))))
 
-(defun eaf--change-default-directory (directory)
+(defun eaf--change-default-directory (buffer-id directory)
   "Change default directory to DIRECTORY."
-  (when (file-accessible-directory-p (or (file-name-directory directory) directory))
-    (setq-local default-directory directory)))
+  (let ((buffer (eaf-get-buffer buffer-id)))
+    (when buffer
+      (with-current-buffer buffer
+        (when (file-accessible-directory-p (or (file-name-directory directory) directory))
+         (setq-local default-directory directory))))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
