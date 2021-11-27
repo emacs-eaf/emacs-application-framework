@@ -135,11 +135,6 @@ class EAF(object):
         else:
             self.enable_proxy()
 
-    def build_emacs_server_connect(self, port):
-        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.connect(('127.0.0.1', port))
-        return conn
-
     def get_command_result(self, command):
         ''' Execute the command and return the result. '''
         if version_info >= (3,7):
