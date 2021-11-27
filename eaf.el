@@ -414,6 +414,14 @@ been initialized."
   "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
   :type 'string)
 
+(defcustom eaf-proxy-blacklist nil
+  "Proxy Blacklist used by EAF Browser."
+  :type 'list)
+
+(defcustom eaf-proxy-whilelist nil
+  "Proxy Bypass list used by EAF Browser."
+  :type 'list)
+
 (defcustom eaf-enable-debug nil
   "If you got segfault error, please turn this option.
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."

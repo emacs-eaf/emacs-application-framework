@@ -26,9 +26,10 @@ from PyQt5 import QtWebEngineWidgets as NeverUsed # noqa
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QLibraryInfo, QTimer
-from PyQt5.QtNetwork import QNetworkProxy, QNetworkProxyFactory
+from PyQt5.QtNetwork import QNetworkProxyFactory
 from PyQt5.QtWidgets import QApplication
 from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_vars, get_emacs_config_dir, to_camel_case
+from core.black_white_proxy import BlackWhileListRequestInterceptor
 from core.view import View
 from epc.server import ThreadingEPCServer
 from sys import version_info
@@ -97,7 +98,6 @@ class EAF(object):
             "eaf-proxy-type"])
 
         self.proxy = (proxy_type, proxy_host, proxy_port)
-        self.is_proxy = False
 
         if proxy_type != "" and proxy_host != "" and proxy_port != "":
             self.enable_proxy()
@@ -106,31 +106,17 @@ class EAF(object):
         global proxy_string
 
         proxy_string = "{0}://{1}:{2}".format(self.proxy[0], self.proxy[1], self.proxy[2])
-
-        proxy = QNetworkProxy()
-        if self.proxy[0] == "socks5":
-            proxy.setType(QNetworkProxy.Socks5Proxy)
-        elif self.proxy[0] == "http":
-            proxy.setType(QNetworkProxy.HttpProxy)
-        proxy.setHostName(self.proxy[1])
-        proxy.setPort(int(self.proxy[2]))
-
-        self.is_proxy = True
-        QNetworkProxy.setApplicationProxy(proxy)
+        BlackWhileListRequestInterceptor.is_proxy = True
 
     def disable_proxy(self):
         global proxy_string
 
         proxy_string = ""
 
-        proxy = QNetworkProxy()
-        proxy.setType(QNetworkProxy.NoProxy)
-
-        self.is_proxy = False
-        QNetworkProxy.setApplicationProxy(proxy)
+        BlackWhileListRequestInterceptor.is_proxy = False
 
     def toggle_proxy(self):
-        if self.is_proxy:
+        if BlackWhileListRequestInterceptor.is_proxy:
             self.disable_proxy()
         else:
             self.enable_proxy()

@@ -29,6 +29,7 @@ from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
 from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
 from functools import partial
+from core.black_white_proxy import BlackWhileListRequestInterceptor
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 import base64
 import os
@@ -751,7 +752,9 @@ class BrowserBuffer(Buffer):
          self.font_family,
          self.enable_plugin, self.enable_javascript, self.enable_scrollbar,
          self.unknown_url_scheme_policy,
-         self.download_path, self.default_zoom) = get_emacs_vars(
+         self.download_path, self.default_zoom,
+         proxy_host, proxy_port, proxy_type,
+         proxy_blacklist, proxy_whitelist) = get_emacs_vars(
              ["eaf-browser-pc-user-agent",
               "eaf-browser-phone-user-agent",
               "eaf-browser-font-family",
@@ -760,10 +763,19 @@ class BrowserBuffer(Buffer):
               "eaf-browser-enable-scrollbar",
               "eaf-browser-unknown-url-scheme-policy",
               "eaf-browser-download-path",
-              "eaf-browser-default-zoom"])
+              "eaf-browser-default-zoom",
+              "eaf-proxy-host",
+              "eaf-proxy-port",
+              "eaf-proxy-type",
+              "eaf-proxy-blacklist",
+              "eaf-proxy-whilelist"])
+
+        proxy = (proxy_type, proxy_host, proxy_port)
+        black_white_interceptor = BlackWhileListRequestInterceptor(proxy, proxy_blacklist, proxy_whitelist, self.buffer_widget)
 
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+        self.profile.defaultProfile().setUrlRequestInterceptor(black_white_interceptor)
 
         self.caret_js_ready = False
         self.caret_browsing_mode = False
