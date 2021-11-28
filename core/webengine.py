@@ -78,9 +78,8 @@ class BrowserView(QWebEngineView):
         self.focus_input_js = None
         self.simulated_wheel_event = False
 
-        (self.scroll_behavior, self.default_zoom, self.show_hover_link, self.marker_letters, self.marker_fontsize) = get_emacs_vars(
-            ["eaf-browser-scroll-behavior",
-             "eaf-browser-default-zoom",
+        (self.default_zoom, self.show_hover_link, self.marker_letters, self.marker_fontsize) = get_emacs_vars(
+            ["eaf-browser-default-zoom",
              "eaf-webengine-show-hover-link",
              "eaf-marker-letters",
              "eaf-marker-fontsize"])
