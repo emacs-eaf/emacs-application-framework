@@ -92,7 +92,17 @@ def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     else:
         return None
 
+def prune_existing_sys_deps(deps_list):
+    remove_deps = []
+    for dep in deps_list:
+        if "node" in dep and which("node"):
+            remove_deps.append(dep)
+        elif "npm" in dep and which("npm"):
+            remove_deps.append(dep)
+    return list(set(deps_list) - set(remove_deps))
+
 def install_sys_deps(distro: str, deps_list):
+    deps_list = prune_existing_sys_deps(deps_list)
     command = []
     if which("dnf"):
         command = ['sudo', 'dnf', '-y', 'install']
@@ -153,7 +163,7 @@ def add_or_update_app(app: str, app_spec_dict):
     if os.path.exists(path):
         print("[EAF] Updating", app, "to newest version...")
     else:
-        print("\n[EAF] Adding", app, "application to EAF...")
+        print("[EAF] Adding", app, "application to EAF...")
 
     updated = True
     if os.path.exists(path):
@@ -170,6 +180,8 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
         output_lines = run_command(["git", "pull"], path=path, get_result=True)
+        if output_lines is None:
+            raise Exception("git pull failed!")
         for output in output_lines:
             print(output.rstrip())
             if "Already up to date." in output:

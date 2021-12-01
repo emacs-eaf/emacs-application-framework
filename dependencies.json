@@ -3,7 +3,9 @@
         "wmctrl",
         "python-pyqt5",
         "python-pyqt5-sip",
-        "python-pyqtwebengine"
+        "python-pyqtwebengine",
+        "nodejs",
+        "npm"
     ],
     "apt": [
         "wmctrl",
