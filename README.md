@@ -59,11 +59,14 @@ In theory, you can use EAF to integrate any Qt5/Vue.js application into Emacs.
 EAF supports Linux and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
-- EAF talk & demo at EmacsConf2020, presented to you by [MatthewZMD](https://github.com/MatthewZMD)
-- Homepage (Q&A included): https://emacsconf.org/2020/talks/34/
-- Youtube link:
+A talk presented at the [EmacsConf2020](https://emacsconf.org/2020/talks/34/) that dwells into the internals of EAF.
 
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
+
+## EmacsConf2021 - Emacs Application Framework: A 2021 Update
+A talk presented at the [EmacsConf2021](https://emacsconf.org/2021/talks/eaf/) that gives a summary of EAF progress throughout the 2021 year.
+
+[![EmacsConf2021 - Emacs Application Framework: A 2021 Update](https://img.youtube.com/vi/bh37zbefZk4/0.jpg)](https://www.youtube.com/watch?v=bh37zbefZk4)
 
 ## Install
 #### 1. Download EAF

@@ -52,11 +52,14 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 EAF可以在多个操作系统下工作，包括Linux和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
-- 由[MatthewZMD](https://github.com/MatthewZMD)在EmacsConf2020的演讲和demo。
-- 官网（内附Q&A）: https://emacsconf.org/2020/talks/34/
-- Youtube链接:
+EmacsConf2020的[EAF演讲](https://emacsconf.org/2020/talks/34/)。
 
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
+
+## EmacsConf2021 - Emacs Application Framework: A 2021 Update（暂无中文字幕）
+EmacsConf2021的[EAF演讲](https://emacsconf.org/2021/talks/eaf/)。
+
+[![EmacsConf2021 - Emacs Application Framework: A 2021 Update](https://img.youtube.com/vi/bh37zbefZk4/0.jpg)](https://www.youtube.com/watch?v=bh37zbefZk4)
 
 ## 安装
 
