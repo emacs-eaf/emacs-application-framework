@@ -55,11 +55,16 @@ class PostGui(QtCore.QObject):
         self.through_thread.emit(args, kwargs)
 
     def on_signal_received(self, args, kwargs):
-        if self.inclass:
-            obj, args = args[0], args[1:]
-            self._func(obj, *args, **kwargs)
-        else:
-            self._func(*args, **kwargs)
+        try:
+            if self.inclass:
+                obj, args = args[0], args[1:]
+                self._func(obj, *args, **kwargs)
+            else:
+                self._func(*args, **kwargs)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+
 
 def touch(path):
     if not os.path.exists(path):
