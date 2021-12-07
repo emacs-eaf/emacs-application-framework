@@ -1724,10 +1724,10 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir) "")
 
 (defvar eaf-version 
-  (or (and (package-installed-p 'eaf) (package-get-version))
+  ;(or (and (package-installed-p 'eaf) (package-get-version))
       ;; Above is for tagged version numbers if the package is installed with package.el
-      (let ((default-directory eaf-source-dir))
-	(shell-command-to-string "git rev-parse HEAD" )))) ;; Git
+  (let ((default-directory eaf-source-dir))
+    (shell-command-to-string "git rev-parse HEAD" ))); ) ;; Git
 
 (defcustom eaf-force-compile nil "")
 (defcustom eaf-no-auto-install nil "")
