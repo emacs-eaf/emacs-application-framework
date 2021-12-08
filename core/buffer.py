@@ -452,7 +452,7 @@ class FetchMarkerInputThread(QThread):
         while self.running_flag:
             ## In some cases, the markers may not be ready when fetch_marker_callback is first called,
             ## so we need to call fetch_marker_callback multiple times.
-            if len(self.markers) == 0:
+            if self.markers is None or len(self.markers) == 0:
                 self.markers = self.fetch_marker_callback()
             minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
 
