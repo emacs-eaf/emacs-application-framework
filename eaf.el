@@ -118,32 +118,26 @@ handled by it.")
 (defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
 (defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
 
+;; Helper functions for generating the defcustom entry for the list of apps
+(defun eaf--alist-to-defcustom-const (entry)
+  "Map an alist for an app to an entry for the defcustom set"
+  `(const :tag ,(cdr (assoc 'name entry)) ,(car entry)))
+
+(defun eaf--json-to-defcustom-set ()
+  "Generate the 'set choice for the defcustom entry"
+  (let ((apps-alist
+	 (with-temp-buffer
+	   (insert-file-contents "applications.json")
+	   (goto-char 0)
+	   (json-parse-buffer :object-type 'alist))))
+    (cons 'set (mapcar 'eaf--alist-to-defcustom-const (cdr apps-alist)))))
+
+
 (defcustom eaf-apps-to-install nil
   "List of applications to install"
   :group 'eaf
-  :type '(set
-	  (const :tag "EAF Airshare" airshare)
-	  (const :tag "EAF Browser" browser)
-	  (const :tag "EAF Camera" camera)
-	  (const :tag "EAF Demo" demo)
-	  (const :tag "EAF File Browser" file-browser)
-	  (const :tag "EAF File Manager" file-manager)
-	  (const :tag "EAF File Sender" file-sender)
-	  (const :tag "EAF Image Viewer" image-viewer)
-	  (const :tag "EAF Jupyter" jupyter)
-	  (const :tag "EAF Markdown Previewer" markdown-previewer)
-	  (const :tag "EAF Mermaid" mermaid)
-	  (const :tag "EAF Mindmap" mindmap)
-	  (const :tag "EAF Music Player" music-player)
-	  (const :tag "EAF Org Previewer" org-previewer)
-	  (const :tag "EAF PDF Viewer" pdf-viewer)
-	  (const :tag "EAF System Monitor" system-monitor)
-	  (const :tag "EAF Terminal" terminal)
-	  (const :tag "EAF Video Player" video-player)
-	  (const :tag "EAF Vue Demo" vue-demo)
-	  (const :tag "EAF NetEase Cloud Music" netease-cloud-music)
-	  (const :tag "EAF RSS Reader" rss-reader)
-))
+  :type (eaf--json-to-defcustom-set))
+
 
 
 (defun eaf-add-subdirs-to-load-path ()
