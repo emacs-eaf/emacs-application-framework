@@ -955,7 +955,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
             (with-current-buffer (window-buffer window)
               (when (derived-mode-p 'eaf-mode)
                 ;; When `eaf-fullscreen-p' is non-nil, and only the EAF window is present, use frame size
-                (if (and eaf-fullscreen-p (equal (length (window-list frame)) 1))
+                (if (and eaf-fullscreen-p (equal (length (cl-remove-if #'window-dedicated-p (window-list frame))) 1))
                     (push (format "%s:%s:%s:%s:%s:%s"
                                   eaf--buffer-id
                                   (eaf-get-emacs-xid frame)
