@@ -605,13 +605,14 @@ A hashtable, key is url and value is title.")
       ;; Start python process.
       (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p))))
         (setq eaf-internal-process
-              (if eaf--mac-enable-rosetta
+              (if (and (eq system-type 'darwin)
+                       eaf--mac-enable-rosetta)
                   (apply 'start-process
                          eaf-name eaf-name
                          "arch" (append (list "-x86_64" eaf-internal-process-prog) eaf-internal-process-args))
-                  (apply 'start-process
-                         eaf-name eaf-name
-                         eaf-internal-process-prog eaf-internal-process-args))))
+                (apply 'start-process
+                       eaf-name eaf-name
+                       eaf-internal-process-prog eaf-internal-process-args))))
       (set-process-query-on-exit-flag eaf-internal-process nil))))
 
 (run-with-idle-timer
@@ -1465,7 +1466,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     (when buffer
       (with-current-buffer buffer
         (when (file-accessible-directory-p (or (file-name-directory directory) directory))
-         (setq-local default-directory directory))))))
+          (setq-local default-directory directory))))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eaf-get-view-info ()
