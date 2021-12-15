@@ -473,9 +473,6 @@ This variable is for debug purpose.")
 (defun eaf-epc-server-process-name (uid)
   (format "eaf-epc-server:%s" uid))
 
-(defun eaf-epc-server-buffer-name (uid)
-  (format " *%s*" (eaf-epc-server-process-name uid)))
-
 (defun eaf-epc-stop-epc (mngr)
   "Disconnect the connection for the server."
   (let* ((proc (eaf-epc-manager-server-process mngr))
