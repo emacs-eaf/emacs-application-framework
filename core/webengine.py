@@ -1404,7 +1404,7 @@ class BrowserBuffer(Buffer):
 
     def execute_js_code(self, js_code):
         ''' Execute JavaScript code and return result.'''
-        return self.buffer_widget.eval_js(js_code)
+        return self.buffer_widget.execute_js(js_code)
 
     def init_app(self):
         pass
