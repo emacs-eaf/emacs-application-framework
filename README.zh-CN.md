@@ -251,6 +251,8 @@ EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2�
 (setq eaf-proxy-type "socks5")
 ```
 
+基于规则的自定义代理请查看[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%A7%84%E5%88%99%E4%BB%A3%E7%90%86)
+
 ## EAF社区
 
 下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。

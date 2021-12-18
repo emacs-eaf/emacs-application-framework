@@ -258,6 +258,8 @@ If you use Socks5 as a local proxy, one can set proxy type with:
 (setq eaf-proxy-type "socks5")
 ```
 
+Customize rule proxy please check [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Customize-Rule-Proxy)
+
 ## EAF in the community
 
 A list of other community packages that use EAF to enhance their graphical experiences!
