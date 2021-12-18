@@ -361,6 +361,30 @@ class EAF(object):
                 message_to_emacs("Cannot execute JavaScript function: " + to_camel_case(function_name) + " (" + buffer_id + ")")
                 return None
 
+    @PostGui()
+    def eval_js_code(self, buffer_id, js_code):
+        ''' Eval JavaScript code and do not return anything. '''
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            try:
+                buffer = self.buffer_dict[buffer_id]
+                buffer.eval_js_code(js_code)
+            except AttributeError:
+                import traceback
+                traceback.print_exc()
+                message_to_emacs("Cannot execute JavaScript code: " + js_code + " (" + buffer_id + ")")
+
+    def execute_js_code(self, buffer_id, js_code):
+        ''' Execute JavaScript code and do not return anything. '''
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            try:
+                buffer = self.buffer_dict[buffer_id]
+                return buffer.execute_js_code(js_code)
+            except AttributeError:
+                import traceback
+                traceback.print_exc()
+                message_to_emacs("Cannot execute JavaScript code: " + js_code + " (" + buffer_id + ")")
+                return None
+
     def call_function(self, buffer_id, function_name):
         ''' Call function and return the result. '''
         if buffer_id in self.buffer_dict:
