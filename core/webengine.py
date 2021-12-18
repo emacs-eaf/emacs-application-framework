@@ -723,12 +723,6 @@ class BrowserCookieStorage:
         cookie_store.deleteAllCookies()
         open(self.cookie_file, 'w').close()
 
-class HistoryPage():
-    def __init__(self, title, url, hit):
-        self.title = title
-        self.url = url
-        self.hit = float(hit)
-
 class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
