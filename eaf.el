@@ -1554,7 +1554,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "up"
+        (eaf-call-async "scroll_other_buffer" eaf--buffer-id "up"
                         (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
@@ -1566,7 +1566,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info) "down"
+        (eaf-call-async "scroll_other_buffer" eaf--buffer-id "down"
                         (if arg "line" "page"))
         (other-window -1))
     (other-window -1)
@@ -1579,7 +1579,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   (other-window +1)
   (if (derived-mode-p 'eaf-mode)
       (progn
-        (eaf-call-async "scroll_other_buffer" (eaf-get-view-info)
+        (eaf-call-async "scroll_other_buffer" eaf--buffer-id
                         (if (string-equal direction "up") "up" "down")
                         (if line "line" "page"))
         (other-window -1))

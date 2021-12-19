@@ -151,11 +151,9 @@ class EAF(object):
                 break
 
     @PostGui()
-    def scroll_other_buffer(self, view_info, scroll_direction, scroll_type):
+    def scroll_other_buffer(self, buffer_id, scroll_direction, scroll_type):
         ''' Scroll to other buffer '''
-        (buffer_id, _, _, _, _) = view_info.split(":")
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
+        self.call_buffer_func(buffer_id, "scroll_other_buffer", scroll_direction, scroll_type)
 
     @PostGui()
     def new_buffer(self, buffer_id, url, module_path, arguments):
@@ -324,6 +322,25 @@ class EAF(object):
         for buffer_id in tmp_buffer_dict:
             self.kill_buffer(buffer_id)
 
+    def call_buffer_func(self, buffer_id, func_name, *args, **kwargs):
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            try:
+                getattr(self.buffer_dict[buffer_id], func_name)(*args, **kwargs)
+            except AttributeError:
+                import traceback
+                traceback.print_exc()
+                message_to_emacs("Got error with : " + func_name + " (" + buffer_id + ")")
+
+    def call_buffer_func_with_result(self, buffer_id, func_name, *args, **kwargs):
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            try:
+                return getattr(self.buffer_dict[buffer_id], func_name)(*args, **kwargs)
+            except AttributeError:
+                import traceback
+                traceback.print_exc()
+                message_to_emacs("Got error with : " + func_name + " (" + buffer_id + ")")
+                return None
+
     @PostGui()
     def execute_function(self, buffer_id, function_name, event_string):
         ''' Execute function and do not return anything. '''
@@ -340,72 +357,28 @@ class EAF(object):
     @PostGui()
     def eval_js_function(self, buffer_id, function_name, function_arguments):
         ''' Eval JavaScript function and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                buffer = self.buffer_dict[buffer_id]
-                buffer.eval_js_function(function_name, function_arguments)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot execute JavaScript function: " + to_camel_case(function_name) + " (" + buffer_id + ")")
+        self.call_buffer_func(buffer_id, "eval_js_function", function_name, function_arguments)
 
     def execute_js_function(self, buffer_id, function_name, function_arguments):
         ''' Execute JavaScript function and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                buffer = self.buffer_dict[buffer_id]
-                return buffer.execute_js_function(function_name, function_arguments)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot execute JavaScript function: " + to_camel_case(function_name) + " (" + buffer_id + ")")
-                return None
+        return self.call_buffer_func_with_result(buffer_id, "execute_js_function", function_name, function_arguments)
 
     @PostGui()
     def eval_js_code(self, buffer_id, js_code):
         ''' Eval JavaScript code and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                buffer = self.buffer_dict[buffer_id]
-                buffer.eval_js_code(js_code)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot execute JavaScript code: " + js_code + " (" + buffer_id + ")")
+        self.call_buffer_func(buffer_id, "eval_js_code", js_code)
 
     def execute_js_code(self, buffer_id, js_code):
         ''' Execute JavaScript code and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                buffer = self.buffer_dict[buffer_id]
-                return buffer.execute_js_code(js_code)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot execute JavaScript code: " + js_code + " (" + buffer_id + ")")
-                return None
+        return self.call_buffer_func_with_result(buffer_id, "execute_js_code", js_code)
 
     def call_function(self, buffer_id, function_name):
         ''' Call function and return the result. '''
-        if buffer_id in self.buffer_dict:
-            try:
-                return str(self.buffer_dict[buffer_id].call_function(function_name))
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot call function: " + function_name)
-                return ""
+        return self.call_buffer_func_with_result(buffer_id, "call_function", function_name)
 
     def call_function_with_args(self, buffer_id, function_name, *args, **kwargs):
         ''' Call function with arguments and return the result. '''
-        if buffer_id in self.buffer_dict:
-            try:
-                return str(self.buffer_dict[buffer_id].call_function_with_args(function_name, *args, **kwargs))
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot call function: " + function_name)
-                return ""
+        return self.call_buffer_func_with_result(buffer_id, "call_function_with_args", function_name, *args, **kwargs)
 
     def get_emacs_wsl_window_id(self):
         if platform.system() == "Windows":
@@ -419,20 +392,17 @@ class EAF(object):
     @PostGui()
     def action_quit(self, buffer_id):
         ''' Execute action_quit() for specified buffer.'''
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].action_quit()
+        self.call_buffer_func(buffer_id, "action_quit")
 
     @PostGui()
     def send_key(self, buffer_id, event_string):
         ''' Send event to buffer when found match buffer.'''
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].fake_key_event(event_string)
+        self.call_buffer_func(buffer_id, "fake_key_event", event_string)
 
     @PostGui()
     def send_key_sequence(self, buffer_id, event_string):
         ''' Send event to buffer when found match buffer.'''
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].fake_key_sequence(event_string)
+        self.call_buffer_func(buffer_id, "fake_key_sequence", event_string)
 
     @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
