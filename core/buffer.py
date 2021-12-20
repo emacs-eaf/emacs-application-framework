@@ -156,7 +156,7 @@ class Buffer(QGraphicsScene):
         ''' Build insert or do.'''
         def _do ():
             if self.is_focus():
-                self.send_key_event(self.current_event_string)
+                self.send_key(self.current_event_string)
             else:
                 getattr(self, method_name)()
         setattr(self, "insert_or_{}".format(method_name), _do)
@@ -350,10 +350,10 @@ class Buffer(QGraphicsScene):
         return getattr(self, function_name)(*args, **kwargs)
 
     @abstract
-    def send_key_event_filter(self, event_string):
+    def send_key_filter(self, event_string):
         pass
 
-    def send_key_event(self, event_string):
+    def send_key(self, event_string):
         ''' Fake key event.'''
         # Init.
         text = event_string
@@ -381,7 +381,7 @@ class Buffer(QGraphicsScene):
         for widget in self.get_key_event_widgets():
             QApplication.sendEvent(widget, key_press)
 
-        self.send_key_event_filter(event_string)
+        self.send_key_filter(event_string)
 
     def send_key_sequence(self, event_string):
         ''' Fake key sequence.'''

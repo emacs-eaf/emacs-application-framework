@@ -57,6 +57,13 @@ class EAF(object):
         self.buffer_dict = {}
         self.view_dict = {}
 
+        for name in ["scroll_other_buffer", "eval_js_function", "eval_js_code", "action_quit", "send_key", "send_key_sequence",
+                     "handle_search_forward", "handle_search_backward"]:
+            self.build_buffer_function(name)
+
+        for name in ["execute_js_function", "execute_js_code", "call_function", "call_function_with_args"]:
+            self.build_buffer_return_function(name)
+
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
 
@@ -149,11 +156,6 @@ class EAF(object):
             if buffer.module_path == module_path and buffer.url == buffer_url:
                 buffer.update_with_data(update_data)
                 break
-
-    @PostGui()
-    def scroll_other_buffer(self, buffer_id, scroll_direction, scroll_type):
-        ''' Scroll to other buffer '''
-        self.call_buffer_func(buffer_id, "scroll_other_buffer", scroll_direction, scroll_type)
 
     @PostGui()
     def new_buffer(self, buffer_id, url, module_path, arguments):
@@ -322,24 +324,35 @@ class EAF(object):
         for buffer_id in tmp_buffer_dict:
             self.kill_buffer(buffer_id)
 
-    def call_buffer_func(self, buffer_id, func_name, *args, **kwargs):
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                getattr(self.buffer_dict[buffer_id], func_name)(*args, **kwargs)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Got error with : " + func_name + " (" + buffer_id + ")")
+    def build_buffer_function(self, name):
+        @PostGui()
+        def _do(*args):
+            buffer_id = args[0]
 
-    def call_buffer_func_with_result(self, buffer_id, func_name, *args, **kwargs):
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                return getattr(self.buffer_dict[buffer_id], func_name)(*args, **kwargs)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Got error with : " + func_name + " (" + buffer_id + ")")
-                return None
+            if type(buffer_id) == str and buffer_id in self.buffer_dict:
+                try:
+                    getattr(self.buffer_dict[buffer_id], name)(*args[1:])
+                except AttributeError:
+                    import traceback
+                    traceback.print_exc()
+                    message_to_emacs("Got error with : " + name + " (" + buffer_id + ")")
+
+        setattr(self, name, _do)
+
+    def build_buffer_return_function(self, name):
+        def _do(*args):
+            buffer_id = args[0]
+
+            if type(buffer_id) == str and buffer_id in self.buffer_dict:
+                try:
+                    return getattr(self.buffer_dict[buffer_id], name)(*args[1:])
+                except AttributeError:
+                    import traceback
+                    traceback.print_exc()
+                    message_to_emacs("Got error with : " + name + " (" + buffer_id + ")")
+                    return None
+
+        setattr(self, name, _do)
 
     @PostGui()
     def execute_function(self, buffer_id, function_name, event_string):
@@ -354,32 +367,6 @@ class EAF(object):
                 traceback.print_exc()
                 message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
 
-    @PostGui()
-    def eval_js_function(self, buffer_id, function_name, function_arguments):
-        ''' Eval JavaScript function and do not return anything. '''
-        self.call_buffer_func(buffer_id, "eval_js_function", function_name, function_arguments)
-
-    def execute_js_function(self, buffer_id, function_name, function_arguments):
-        ''' Execute JavaScript function and do not return anything. '''
-        return self.call_buffer_func_with_result(buffer_id, "execute_js_function", function_name, function_arguments)
-
-    @PostGui()
-    def eval_js_code(self, buffer_id, js_code):
-        ''' Eval JavaScript code and do not return anything. '''
-        self.call_buffer_func(buffer_id, "eval_js_code", js_code)
-
-    def execute_js_code(self, buffer_id, js_code):
-        ''' Execute JavaScript code and do not return anything. '''
-        return self.call_buffer_func_with_result(buffer_id, "execute_js_code", js_code)
-
-    def call_function(self, buffer_id, function_name):
-        ''' Call function and return the result. '''
-        return self.call_buffer_func_with_result(buffer_id, "call_function", function_name)
-
-    def call_function_with_args(self, buffer_id, function_name, *args, **kwargs):
-        ''' Call function with arguments and return the result. '''
-        return self.call_buffer_func_with_result(buffer_id, "call_function_with_args", function_name, *args, **kwargs)
-
     def get_emacs_wsl_window_id(self):
         if platform.system() == "Windows":
             return gw.getActiveWindow()._hWnd
@@ -388,21 +375,6 @@ class EAF(object):
         if platform.system() == "Windows":
             w = gw.getWindowsWithTitle(frame_title)
             w[0].activate()
-
-    @PostGui()
-    def action_quit(self, buffer_id):
-        ''' Execute action_quit() for specified buffer.'''
-        self.call_buffer_func(buffer_id, "action_quit")
-
-    @PostGui()
-    def send_key(self, buffer_id, event_string):
-        ''' Send event to buffer when found match buffer.'''
-        self.call_buffer_func(buffer_id, "send_key_event", event_string)
-
-    @PostGui()
-    def send_key_sequence(self, buffer_id, event_string):
-        ''' Send event to buffer when found match buffer.'''
-        self.call_buffer_func(buffer_id, "send_key_sequence", event_string)
 
     @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
@@ -422,18 +394,6 @@ class EAF(object):
 
                 buffer.stop_marker_input_monitor_thread()
                 buffer.stop_search_input_monitor_thread()
-
-    @PostGui()
-    def handle_search_forward(self, buffer_id, callback_tag):
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.handle_search_forward(callback_tag)
-
-    @PostGui()
-    def handle_search_backward(self, buffer_id, callback_tag):
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.handle_search_backward(callback_tag)
 
     @PostGui()
     def update_focus_text(self, buffer_id, new_text):
