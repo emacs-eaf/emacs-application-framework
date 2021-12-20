@@ -145,10 +145,10 @@ class EAF(object):
     @PostGui()
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
         ''' Update buffer with url '''
-        for buffer in list(self.buffer_dict.values()):
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            buffer = self.buffer_dict[buffer_id]
             if buffer.module_path == module_path and buffer.url == buffer_url:
                 buffer.update_with_data(update_data)
-                break
 
     @PostGui()
     def new_buffer(self, buffer_id, url, module_path, arguments):
@@ -372,21 +372,21 @@ class EAF(object):
     @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
         ''' Handle input message for specified buffer.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.handle_input_response(callback_tag, callback_result)
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            buffer = self.buffer_dict[buffer_id]
 
-                buffer.stop_search_input_monitor_thread()
+            buffer.handle_input_response(callback_tag, callback_result)
+            buffer.stop_search_input_monitor_thread()
 
     @PostGui()
     def cancel_input_response(self, buffer_id, callback_tag):
         ''' Cancel input message for specified buffer.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.cancel_input_response(callback_tag)
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            buffer = self.buffer_dict[buffer_id]
 
-                buffer.stop_marker_input_monitor_thread()
-                buffer.stop_search_input_monitor_thread()
+            buffer.cancel_input_response(callback_tag)
+            buffer.stop_marker_input_monitor_thread()
+            buffer.stop_search_input_monitor_thread()
 
     @PostGui()
     def mac_handle_emacs_focus_in(self):
