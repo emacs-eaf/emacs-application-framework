@@ -389,30 +389,6 @@ class EAF(object):
                 buffer.stop_search_input_monitor_thread()
 
     @PostGui()
-    def update_multiple_sub_nodes(self, buffer_id, new_text):
-        ''' Update multiplt sub nodes.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                for line in str(new_text).split("\n"):
-                    buffer.add_texted_sub_node(line)
-
-    @PostGui()
-    def update_multiple_brother_nodes(self, buffer_id, new_text):
-        ''' Update multiplt brother nodes.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                for line in str(new_text).split("\n"):
-                    buffer.add_texted_brother_node(line)
-
-    @PostGui()
-    def update_multiple_middle_nodes(self, buffer_id, new_text):
-        ''' Update multiplt middle nodes.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                for line in str(new_text).split("\n"):
-                    buffer.add_texted_middle_node(line)
-
-    @PostGui()
     def mac_handle_emacs_focus_in(self):
         for key in list(self.view_dict):
             self.view_dict[key].mac_handle_emacs_focus_in()
