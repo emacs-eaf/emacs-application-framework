@@ -397,12 +397,12 @@ class EAF(object):
     @PostGui()
     def send_key(self, buffer_id, event_string):
         ''' Send event to buffer when found match buffer.'''
-        self.call_buffer_func(buffer_id, "fake_key_event", event_string)
+        self.call_buffer_func(buffer_id, "send_key_event", event_string)
 
     @PostGui()
     def send_key_sequence(self, buffer_id, event_string):
         ''' Send event to buffer when found match buffer.'''
-        self.call_buffer_func(buffer_id, "fake_key_sequence", event_string)
+        self.call_buffer_func(buffer_id, "send_key_sequence", event_string)
 
     @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
