@@ -145,6 +145,14 @@ class View(QWidget):
 
         qwindow.setPosition(QPoint(self.x, self.y))
 
+    def handle_emacs_focus_in(self):
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+        self.show()
+
+    def handle_emacs_focus_out(self):
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+        self.hide()
+
     def destroy_view(self):
         # print("Destroy: ", self.buffer.url)
         self.destroy()

@@ -468,6 +468,16 @@ class EAF(object):
                 for line in str(new_text).split("\n"):
                     buffer.add_texted_middle_node(line)
 
+    @PostGui()
+    def handle_emacs_focus_in(self):
+        for key in list(self.view_dict):
+            self.view_dict[key].handle_emacs_focus_in()
+
+    @PostGui()
+    def handle_emacs_focus_out(self):
+        for key in list(self.view_dict):
+            self.view_dict[key].handle_emacs_focus_out()
+
     def open_devtools_tab(self, web_page):
         ''' Open devtools tab'''
         self.devtools_page = web_page
