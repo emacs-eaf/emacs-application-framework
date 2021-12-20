@@ -757,8 +757,8 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
       (if (called-interactively-p 'any)
-          (message "%s" (kill-new (eaf-call-sync "call_function" eaf--buffer-id "get_url")))
-        (eaf-call-sync "call_function" eaf--buffer-id "get_url"))
+          (message "%s" (kill-new (eaf-call-sync "execute_function" eaf--buffer-id "get_url")))
+        (eaf-call-sync "execute_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
 (defun eaf-toggle-fullscreen ()

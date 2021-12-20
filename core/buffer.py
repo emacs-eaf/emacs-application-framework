@@ -341,11 +341,11 @@ class Buffer(QGraphicsScene):
         ''' Execute JavaScript function and return result.'''
         return None
 
-    def call_function(self, function_name):
+    def execute_function(self, function_name):
         ''' Call function.'''
         return getattr(self, function_name)()
 
-    def call_function_with_args(self, function_name, *args, **kwargs):
+    def execute_function_with_args(self, function_name, *args, **kwargs):
         ''' Call function with arguments.'''
         return getattr(self, function_name)(*args, **kwargs)
 

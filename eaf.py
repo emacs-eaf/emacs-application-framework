@@ -61,7 +61,7 @@ class EAF(object):
                      "handle_search_forward", "handle_search_backward", "set_focus_text"]:
             self.build_buffer_function(name)
 
-        for name in ["execute_js_function", "execute_js_code", "call_function", "call_function_with_args"]:
+        for name in ["execute_js_function", "execute_js_code", "execute_function", "execute_function_with_args"]:
             self.build_buffer_return_function(name)
 
         # Init EPC client port.
