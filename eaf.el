@@ -764,7 +764,7 @@ When called interactively, copy to ‘kill-ring’."
 (defun eaf-toggle-fullscreen ()
   "Toggle fullscreen."
   (interactive)
-  (eaf-call-async "execute_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
+  (eaf-call-async "eval_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
 (defun eaf--make-py-proxy-function (fun)
   "Define elisp command which can call Python function string FUN."
@@ -775,7 +775,7 @@ When called interactively, copy to ‘kill-ring’."
           (interactive)
           ;; Ensure this is only called from EAF buffer
           (if (derived-mode-p 'eaf-mode)
-              (eaf-call-async "execute_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
+              (eaf-call-async "eval_function" eaf--buffer-id fun (key-description (this-command-keys-vector)))
             (message "%s command can only be called in an EAF buffer!" sym)))
         (format
          "Proxy function to call \"%s\" on the Python side.
@@ -1389,7 +1389,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (eaf-monitor-configuration-change)
   (when (and eaf-browser-fullscreen-move-cursor-corner
              (string= eaf--buffer-app-name "browser"))
-    (eaf-call-async "execute_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
+    (eaf-call-async "eval_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
@@ -1427,7 +1427,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
           ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
           ;;
           ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-          (eaf-call-async "execute_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
+          (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
 
         ;; Activate the window by `wmctrl' when possible
         (if (executable-find "wmctrl")
