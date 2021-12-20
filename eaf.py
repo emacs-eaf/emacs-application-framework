@@ -142,13 +142,6 @@ class EAF(object):
         else:
             self.enable_proxy()
 
-    def get_command_result(self, command):
-        ''' Execute the command and return the result. '''
-        if version_info >= (3,7):
-            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE, text=True).stdout
-        else:
-            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE).stdout
-
     @PostGui()
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
         ''' Update buffer with url '''
