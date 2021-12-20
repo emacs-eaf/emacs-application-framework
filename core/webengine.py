@@ -637,6 +637,8 @@ class BrowserView(QWebEngineView):
     @interactive
     def set_focus_text(self, new_text):
         ''' Set the focus text.'''
+        new_text = base64.b64decode(new_text).decode("utf-8")
+
         if self.set_focus_text_raw == None:
             self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
 

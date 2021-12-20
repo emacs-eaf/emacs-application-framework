@@ -58,7 +58,7 @@ class EAF(object):
         self.view_dict = {}
 
         for name in ["scroll_other_buffer", "eval_js_function", "eval_js_code", "action_quit", "send_key", "send_key_sequence",
-                     "handle_search_forward", "handle_search_backward"]:
+                     "handle_search_forward", "handle_search_backward", "set_focus_text"]:
             self.build_buffer_function(name)
 
         for name in ["execute_js_function", "execute_js_code", "call_function", "call_function_with_args"]:
@@ -394,15 +394,6 @@ class EAF(object):
 
                 buffer.stop_marker_input_monitor_thread()
                 buffer.stop_search_input_monitor_thread()
-
-    @PostGui()
-    def update_focus_text(self, buffer_id, new_text):
-        ''' Update focus text for specified buffer.'''
-        import base64
-
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.set_focus_text(base64.b64decode(new_text).decode("utf-8"))
 
     @PostGui()
     def update_multiple_sub_nodes(self, buffer_id, new_text):
