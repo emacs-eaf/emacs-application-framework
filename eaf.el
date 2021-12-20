@@ -923,7 +923,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
             (eaf--mac-focus-in)
           (eaf--mac-focus-out)))
       (setq eaf--mac-focus-change-timer nil))
-    
+
     (defun eaf--mac-focus-change ()
       "Manage Emacs's focus change."
       (setq eaf--mac-focus-change-timer
@@ -931,12 +931,12 @@ Including title-bar, menu-bar, offset depends on window system, and border."
               (run-at-time 0.06 nil #'eaf--mac-focus-change-handler))))
 
     (defun eaf--mac-focus-in ()
-      (eaf-call-async "handle_emacs_focus_in")
+      (eaf-call-async "mac_handle_emacs_focus_in")
       (set-window-configuration
        (frame-parameter (selected-frame) 'eaf--mac-frame)))
 
     (defun eaf--mac-focus-out (&optional frame)
-      (eaf-call-async "handle_emacs_focus_out")
+      (eaf-call-async "mac_handle_emacs_focus_out")
       (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame
                            (current-window-configuration)))
 
