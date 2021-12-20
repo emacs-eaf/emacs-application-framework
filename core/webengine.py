@@ -456,7 +456,7 @@ class BrowserView(QWebEngineView):
         Otherwise, scroll page up.
         '''
         if self.buffer.is_focus() or self.buffer.is_fullscreen:
-            self.buffer.fake_key_event(self.buffer.current_event_string)
+            self.buffer.send_key_event(self.buffer.current_event_string)
         else:
             self.scroll_up_page()
 
