@@ -364,11 +364,12 @@ been initialized."
     "Execute EAF Python process under Rosetta2"
     :type 'boolean)
 
-  (defvar eaf--mac-switch-to-python nil
-    "Record if Emacs switchs to Python process")
+  (defvar eaf--mac-focus-change-timer nil
+    "Use timer to ignore spurious focus events.
 
-  (defvar eaf--mac-has-focus t
-    "Record if Emacs has focus"))
+See
+https://old.reddit.com/r/emacs/comments/\
+kxsgtn/ignore_spurious_focus_events_for/"))
 
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
@@ -913,45 +914,34 @@ Including title-bar, menu-bar, offset depends on window system, and border."
 
 (eval-when-compile
   (when (eq system-type 'darwin)
+
+    (defun eaf--mac-focus-change-handler ()
+      ;; ignore errors related to
+      ;; (wrong-type-argument eaf-epc-manager nil)
+      (ignore-errors
+        (if (frame-focus-state)
+            (eaf--mac-focus-in)
+          (eaf--mac-focus-out)))
+      (setq eaf--mac-focus-change-timer nil))
+    
     (defun eaf--mac-focus-change ()
-      "Manage Emacs's focus change"
-      (cond
-       ((string= "Python\n" (shell-command-to-string "app-frontmost --name"))
-        (setq eaf--mac-switch-to-python t))
-
-       ((string= "Emacs\n" (shell-command-to-string "app-frontmost --name"))
-        (cond
-         (eaf--mac-switch-to-python
-          (setq eaf--mac-switch-to-python nil))
-         ((not eaf--mac-has-focus)
-          (run-with-timer 0.1 nil #'eaf--mac-focus-in)
-          )
-         (eaf--mac-has-focus
-          (eaf--mac-focus-out))))
-       (t (eaf--mac-focus-out))))
-
-    (defun eaf--mac-replace-eaf-buffers ()
-      (dolist (window (window-list))
-        (select-window window)
-        (when (eq major-mode 'eaf-mode)
-          (get-buffer-create "*eaf temp*")
-          (switch-to-buffer "*eaf temp*" t))))
+      "Manage Emacs's focus change."
+      (setq eaf--mac-focus-change-timer
+            (unless eaf--mac-focus-change-timer
+              (run-at-time 0.06 nil #'eaf--mac-focus-change-handler))))
 
     (defun eaf--mac-focus-in ()
-      (setq eaf--mac-has-focus t)
-      (ignore-errors
-        (set-window-configuration (frame-parameter (selected-frame) 'eaf--mac-frame))
-        (bury-buffer "*eaf temp*")))
+      (eaf-call-async "handle_emacs_focus_in")
+      (set-window-configuration
+       (frame-parameter (selected-frame) 'eaf--mac-frame)))
 
     (defun eaf--mac-focus-out (&optional frame)
-      (when eaf--mac-has-focus
-        (setq eaf--mac-has-focus nil)
-        (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame (current-window-configuration))
-        (eaf--mac-replace-eaf-buffers)))
+      (eaf-call-async "handle_emacs_focus_out")
+      (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame
+                           (current-window-configuration)))
 
     (add-function :after after-focus-change-function #'eaf--mac-focus-change)
-    (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)
-    ))
+    (add-to-list 'delete-frame-functions #'eaf--mac-focus-out)))
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
