@@ -89,7 +89,7 @@ chmod +x ./install-eaf.py
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 (require 'eaf)
 ```
-
+- 如果你使用virtual/conda环境或者想使用`python3`而不是`python`执行命令，请将`eaf-python-command`设成`/usr/bin/python3/`。
 - 或者，如果你使用[use-package](https://github.com/jwiegley/use-package)，下面有一个简单的配置文件供你参考:
 
     ```Elisp

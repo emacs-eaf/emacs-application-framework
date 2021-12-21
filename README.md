@@ -96,6 +96,7 @@ From here on, you can either add the full path to the EAF installation directory
 (require 'eaf)
 ```
 
+- If you use virtual/conda environment, or you simply want to use `python3` instead of `python` executable, you might want to set `eaf-python-command` to something like `/usr/bin/python3/`.
 - Alternatively, if you use [use-package](https://github.com/jwiegley/use-package), you can use the following *sample* configuration for your convenience.
 
     ```Elisp
