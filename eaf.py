@@ -234,9 +234,12 @@ class EAF(object):
         if view_infos != ['']:
             for view_info in view_infos:
                 if view_info not in self.view_dict:
-                    (buffer_id, _, _, _, _, _) = view_info.split(":")
-                    view = View(self.buffer_dict[buffer_id], view_info)
-                    self.view_dict[view_info] = view
+                    (buffer_id, emacs_xid, _, _, _, _) = view_info.split(":")
+                    if emacs_xid == "nil":
+                        print("Error: Emacs frame ID return nil. Are you running Emacs in a terminal window? Try running as a GUI application instead.")
+                    else:
+                        view = View(self.buffer_dict[buffer_id], view_info)
+                        self.view_dict[view_info] = view
 
         # Call some_view_show interface when buffer's view switch back.
         # Note, this must call after new view create, otherwise some buffer,
