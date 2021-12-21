@@ -988,15 +988,15 @@ kxsgtn/ignore_spurious_focus_events_for/")
       (set-window-configuration
        (frame-parameter (selected-frame) 'eaf--mac-frame)))
 
-    (defun eaf--mac-unsafe-focus-out ()
+    (defun eaf--mac-unsafe-focus-out (&optional frame)
       (eaf-call-async "mac_handle_emacs_focus_out")
-      (set-frame-parameter (selected-frame) 'eaf--mac-frame
+      (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame
                            (current-window-configuration)))
 
-    (defun eaf--mac-delete-frame-handler ()
+    (defun eaf--mac-delete-frame-handler (frame)
       (if eaf--mac-safe-focus-change
-          (eaf--mac-focus-out)
-        (eaf--mac-unsafe-focus-out)))
+          (eaf--mac-focus-out frame)
+        (eaf--mac-unsafe-focus-out frame)))
 
     (add-function :after after-focus-change-function #'eaf--mac-focus-change)
     (add-to-list 'delete-frame-functions #'eaf--mac-delete-frame-handler)))
