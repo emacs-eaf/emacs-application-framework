@@ -906,9 +906,10 @@ Including title-bar, menu-bar, offset depends on window system, and border."
     0))
 
 (eval-when-compile
-  (when (eq system-type 'darwin)
+  (when (or (eq system-type 'darwin)
+            (eq system-type 'pgtk)) ;pgtk branch use same topest window strategy as macOS
 
-    (defcustom eaf--mac-safe-focus-change t
+    (defcustom eaf--stay-on-top-safe-focus-change t
       "Whether to verify the active application on Emacs frame focus change.
 
 Only set this to nil if you do not use the mouse inside EAF buffers.
@@ -916,90 +917,90 @@ The benefit of setting this to nil is that application switching
 is a lot faster but could be buggy."
       :type 'boolean)
 
-    (defvar eaf--mac-switch-to-python nil
+    (defvar eaf--stay-on-top-switch-to-python nil
       "Record if Emacs should switch to Python process.")
 
-    (defvar eaf--mac-has-focus t
+    (defvar eaf--stay-on-top-has-focus t
       "Record if Emacs has focus.")
 
-    (defvar eaf--mac-unsafe-focus-change-timer nil
+    (defvar eaf--stay-on-top-unsafe-focus-change-timer nil
       "Use timer to ignore spurious focus events.
 
-This is only used when `eaf--mac-safe-focus-change' is nil.
+This is only used when `eaf--stay-on-top-safe-focus-change' is nil.
 
 See
 https://old.reddit.com/r/emacs/comments/\
 kxsgtn/ignore_spurious_focus_events_for/")
 
-    (defun eaf--mac-unsafe-focus-change-handler ()
+    (defun eaf--stay-on-top-unsafe-focus-change-handler ()
       ;; ignore errors related to
       ;; (wrong-type-argument eaf-epc-manager nil)
       (ignore-errors
         (if (frame-focus-state)
-            (eaf--mac-unsafe-focus-in)
-          (eaf--mac-unsafe-focus-out)))
-      (setq eaf--mac-unsafe-focus-change-timer nil))
+            (eaf--stay-on-top-unsafe-focus-in)
+          (eaf--stay-on-top-unsafe-focus-out)))
+      (setq eaf--stay-on-top-unsafe-focus-change-timer nil))
 
-    (defun eaf--mac-focus-change ()
+    (defun eaf--stay-on-top-focus-change ()
       "Manage Emacs's focus change."
-      (if eaf--mac-safe-focus-change
+      (if eaf--stay-on-top-safe-focus-change
           (let ((front (shell-command-to-string "app-frontmost --name")))
             (cond
              ((string= "Python\n" front)
-              (setq eaf--mac-switch-to-python t))
+              (setq eaf--stay-on-top-switch-to-python t))
 
              ((string= "Emacs\n" front)
               (cond
-               (eaf--mac-switch-to-python
-                (setq eaf--mac-switch-to-python nil))
-               ((not eaf--mac-has-focus)
-                (run-with-timer 0.1 nil #'eaf--mac-focus-in))
-               (eaf--mac-has-focus
-                (eaf--mac-focus-out))))
-             (t (eaf--mac-focus-out))))
-        (setq eaf--mac-unsafe-focus-change-timer
-              (unless eaf--mac-unsafe-focus-change-timer
+               (eaf--stay-on-top-switch-to-python
+                (setq eaf--stay-on-top-switch-to-python nil))
+               ((not eaf--stay-on-top-has-focus)
+                (run-with-timer 0.1 nil #'eaf--stay-on-top-focus-in))
+               (eaf--stay-on-top-has-focus
+                (eaf--stay-on-top-focus-out))))
+             (t (eaf--stay-on-top-focus-out))))
+        (setq eaf--stay-on-top-unsafe-focus-change-timer
+              (unless eaf--stay-on-top-unsafe-focus-change-timer
                 (run-at-time 0.06 nil
-                             #'eaf--mac-unsafe-focus-change-handler)))))
+                             #'eaf--stay-on-top-unsafe-focus-change-handler)))))
 
-    (defun eaf--mac-replace-eaf-buffers ()
+    (defun eaf--stay-on-top-replace-eaf-buffers ()
       (dolist (window (window-list))
         (select-window window)
         (when (eq major-mode 'eaf-mode)
           (get-buffer-create "*eaf temp*")
           (switch-to-buffer "*eaf temp*" t))))
 
-    (defun eaf--mac-focus-in ()
-      (setq eaf--mac-has-focus t)
+    (defun eaf--stay-on-top-focus-in ()
+      (setq eaf--stay-on-top-has-focus t)
       (ignore-errors
         (set-window-configuration
-         (frame-parameter (selected-frame) 'eaf--mac-frame))
+         (frame-parameter (selected-frame) 'eaf--stay-on-top-frame))
         (bury-buffer "*eaf temp*")))
 
-    (defun eaf--mac-focus-out (&optional frame)
-      (when eaf--mac-has-focus
-        (setq eaf--mac-has-focus nil)
+    (defun eaf--stay-on-top-focus-out (&optional frame)
+      (when eaf--stay-on-top-has-focus
+        (setq eaf--stay-on-top-has-focus nil)
         (set-frame-parameter (or frame (selected-frame))
-                             'eaf--mac-frame (current-window-configuration))
-        (eaf--mac-replace-eaf-buffers)))
+                             'eaf--stay-on-top-frame (current-window-configuration))
+        (eaf--stay-on-top-replace-eaf-buffers)))
 
-    (defun eaf--mac-unsafe-focus-in ()
+    (defun eaf--stay-on-top-unsafe-focus-in ()
       (eaf-call-async "mac_handle_emacs_focus_in")
       (set-window-configuration
-       (frame-parameter (selected-frame) 'eaf--mac-frame)))
+       (frame-parameter (selected-frame) 'eaf--stay-on-top-frame)))
 
-    (defun eaf--mac-unsafe-focus-out (&optional frame)
+    (defun eaf--stay-on-top-unsafe-focus-out (&optional frame)
       (eaf-call-async "mac_handle_emacs_focus_out")
-      (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame
+      (set-frame-parameter (or frame (selected-frame)) 'eaf--stay-on-top-frame
                            (current-window-configuration)))
 
-    (defun eaf--mac-delete-frame-handler (frame)
-      (if eaf--mac-safe-focus-change
-          (eaf--mac-focus-out frame)
-        (eaf--mac-unsafe-focus-out frame)))
+    (defun eaf--stay-on-top-delete-frame-handler (frame)
+      (if eaf--stay-on-top-safe-focus-change
+          (eaf--stay-on-top-focus-out frame)
+        (eaf--stay-on-top-unsafe-focus-out frame)))
 
-    (add-function :after after-focus-change-function #'eaf--mac-focus-change)
-    (add-to-list 'delete-frame-functions #'eaf--mac-delete-frame-handler)))
+    (add-function :after after-focus-change-function #'eaf--stay-on-top-focus-change)
+    (add-to-list 'delete-frame-functions #'eaf--stay-on-top-delete-frame-handler)))
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
@@ -1458,6 +1459,9 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
+
+(defun eaf-emacs-is-pgtk-version ()
+  (eq system-type 'pgtk))
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."

@@ -23,7 +23,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_result
 import platform
 import os
 
@@ -35,9 +35,11 @@ class View(QWidget):
         self.buffer = buffer
 
         # Init widget attributes.
-        if platform.system() == "Darwin":
+        if platform.system() == "Darwin" or get_emacs_func_result("eaf-emacs-is-pgtk-version", []):
+            # macOS or pgtk branch use Toppest window strategy.
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         else:
+            # Linux、Windows、BSD platform, just remove window border.
             self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.setAttribute(Qt.WA_X11DoNotAcceptFocus, True)
@@ -140,7 +142,7 @@ class View(QWidget):
         # print("Reparent: ", self.buffer.url)
         qwindow = self.windowHandle()
 
-        if platform.system() != "Darwin":
+        if platform.system() != "Darwin" and (not get_emacs_func_result("eaf-emacs-is-pgtk-version", [])):
             qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
 
         qwindow.setPosition(QPoint(self.x, self.y))
