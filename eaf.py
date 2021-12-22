@@ -389,14 +389,14 @@ class EAF(object):
             buffer.stop_search_input_monitor_thread()
 
     @PostGui()
-    def mac_handle_emacs_focus_in(self):
+    def show_top_views(self):
         for key in list(self.view_dict):
-            self.view_dict[key].mac_handle_emacs_focus_in()
+            self.view_dict[key].try_show_top_view()
 
     @PostGui()
-    def mac_handle_emacs_focus_out(self):
+    def hide_top_views(self):
         for key in list(self.view_dict):
-            self.view_dict[key].mac_handle_emacs_focus_out()
+            self.view_dict[key].try_hide_top_view()
 
     def open_devtools_tab(self, web_page):
         ''' Open devtools tab'''

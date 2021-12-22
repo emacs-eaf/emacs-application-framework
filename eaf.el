@@ -550,6 +550,11 @@ A hashtable, key is url and value is title.")
   "Call Python EPC function METHOD and ARGS synchronously."
   (eaf-epc-call-sync eaf-epc-process (read method) args))
 
+(defun eaf--called-from-wsl-on-windows-p ()
+  "Check whether eaf is called by Emacs on WSL and is running on Windows."
+  (and (eq system-type 'gnu/linux)
+       (string-match-p ".exe" eaf-python-command)))
+
 (defun eaf-get-emacs-xid (frame)
   "Get Emacs FRAME xid."
   (if (eaf--called-from-wsl-on-windows-p)
@@ -905,10 +910,21 @@ Including title-bar, menu-bar, offset depends on window system, and border."
       (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
     0))
 
-(eval-when-compile
-  (when (or (eq system-type 'darwin)
-            (eq system-type 'pgtk)) ;pgtk branch use same topest window strategy as macOS
+(defun eaf-emacs-not-use-reparent-technology ()
+  "When Emacs running in macOS、Wayland native or terminal environment,
+we can't use 'cross-process reparent' technicality like we does in X11, XWayland or Windows.
 
+In this situation, we use 'stay on top' technicality that show EAF window when Emacs get focus, hide EAF window when Emacs lost focus.
+
+'Stay on top' technicality is not perfect like 'cross-process reparent' technicality,
+provide at least one way to let everyone experience EAF. ;)"
+  (or (eq system-type 'darwin)                ;macOS
+      (eq system-type 'pgtk)                  ;Wayland native
+      (not (stringp (eaf-get-emacs-xid nil))) ;Terminal emulator
+      ))
+
+(eval-when-compile
+  (when (eaf-emacs-not-use-reparent-technology)
     (defcustom eaf--stay-on-top-safe-focus-change t
       "Whether to verify the active application on Emacs frame focus change.
 
@@ -985,12 +1001,12 @@ kxsgtn/ignore_spurious_focus_events_for/")
         (eaf--stay-on-top-replace-eaf-buffers)))
 
     (defun eaf--stay-on-top-unsafe-focus-in ()
-      (eaf-call-async "mac_handle_emacs_focus_in")
+      (eaf-call-async "show_top_views")
       (set-window-configuration
        (frame-parameter (selected-frame) 'eaf--stay-on-top-frame)))
 
     (defun eaf--stay-on-top-unsafe-focus-out (&optional frame)
-      (eaf-call-async "mac_handle_emacs_focus_out")
+      (eaf-call-async "hide_top_views")
       (set-frame-parameter (or frame (selected-frame)) 'eaf--stay-on-top-frame
                            (current-window-configuration)))
 
@@ -1308,11 +1324,6 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   "A wrapper around `file-name-extension' that downcases the extension of the FILE."
   (downcase (file-name-extension file)))
 
-(defun eaf--called-from-wsl-on-windows-p ()
-  "Check whether eaf is called by Emacs on WSL and is running on Windows."
-  (and (eq system-type 'gnu/linux)
-       (string-match-p ".exe" eaf-python-command)))
-
 (defun eaf--translate-wsl-url-to-windows (path)
   "Translate from a WSL PATH to a Windows path."
   (replace-regexp-in-string "/mnt/\\([a-zA-Z]\\)" "\\1:" path))
@@ -1459,9 +1470,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
 
 (defun eaf-get-theme-foreground-color ()
   (format "%s" (frame-parameter nil 'foreground-color)))
-
-(defun eaf-emacs-is-pgtk-version ()
-  (eq system-type 'pgtk))
 
 (defun eaf--get-current-desktop-name ()
   "Get current desktop name by `wmctrl'."

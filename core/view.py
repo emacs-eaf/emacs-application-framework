@@ -35,11 +35,9 @@ class View(QWidget):
         self.buffer = buffer
 
         # Init widget attributes.
-        if platform.system() == "Darwin" or get_emacs_func_result("eaf-emacs-is-pgtk-version", []):
-            # macOS or pgtk branch use Toppest window strategy.
+        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         else:
-            # Linux、Windows、BSD platform, just remove window border.
             self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.setAttribute(Qt.WA_X11DoNotAcceptFocus, True)
@@ -49,7 +47,6 @@ class View(QWidget):
         # Init attributes.
         self.view_info = view_info
         (self.buffer_id, self.emacs_xid, self.x, self.y, self.width, self.height) = view_info.split(":")
-        self.emacs_xid = int(self.emacs_xid)
         self.x = int(self.x)
         self.y = int(self.y)
         self.width = int(self.width)
@@ -142,18 +139,20 @@ class View(QWidget):
         # print("Reparent: ", self.buffer.url)
         qwindow = self.windowHandle()
 
-        if platform.system() != "Darwin" and (not get_emacs_func_result("eaf-emacs-is-pgtk-version", [])):
-            qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
+        if not get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+            qwindow.setParent(QWindow.fromWinId(int(self.emacs_xid)))
 
         qwindow.setPosition(QPoint(self.x, self.y))
 
-    def mac_handle_emacs_focus_in(self):
-        self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
-        self.show()
+    def try_show_top_view(self):
+        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+            self.show()
 
-    def mac_handle_emacs_focus_out(self):
-        self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
-        self.hide()
+    def try_hide_top_view(self):
+        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            self.hide()
 
     def destroy_view(self):
         # print("Destroy: ", self.buffer.url)
