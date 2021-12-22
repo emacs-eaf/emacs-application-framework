@@ -918,9 +918,9 @@ In this situation, we use 'stay on top' technicality that show EAF window when E
 
 'Stay on top' technicality is not perfect like 'cross-process reparent' technicality,
 provide at least one way to let everyone experience EAF. ;)"
-  (or (eq system-type 'darwin)                ;macOS
-      (eq system-type 'pgtk)                  ;Wayland native
-      (not (stringp (eaf-get-emacs-xid nil))) ;Terminal emulator
+  (or (eq system-type 'darwin)          ;macOS
+      (eq system-type 'pgtk)            ;Wayland native
+      (not (display-graphic-p))         ;Terminal emulator
       ))
 
 (eval-when-compile
