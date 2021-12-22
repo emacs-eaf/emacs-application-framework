@@ -181,7 +181,7 @@ try {
     let offsetY = "%{marker_offset_y}";
     document.head.appendChild(style);
     style.type = 'text/css';
-    style.setAttribute('class', 'eaf-style');
+    style.setAttribute('class', 'eaf-style darkreader');
     style.appendChild(document.createTextNode('\
 .eaf-mark {\
 background: none;\
