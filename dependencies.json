@@ -17,6 +17,8 @@
         "python3-pyqt5.qtwebengine",
         "python3-pygit2"
     ],
+    "emerge": [
+    ],
     "dnf": [
         "wmctrl",
         "nodejs",

@@ -104,7 +104,9 @@ def prune_existing_sys_deps(deps_list):
 def install_sys_deps(distro: str, deps_list):
     deps_list = prune_existing_sys_deps(deps_list)
     command = []
-    if which("dnf"):
+    if which("emerge"):
+        command = ['sudo ', 'emerge', '--ask', '--ask']
+    elif which("dnf"):
         command = ['sudo', 'dnf', '-y', 'install']
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
@@ -115,6 +117,7 @@ def install_sys_deps(distro: str, deps_list):
     elif which("zypper"):
         command = ['sudo', 'zypper', 'install','-y']
     command.extend(deps_list)
+    print(command)
     return run_command(command)
 
 def install_py_deps(deps_list):
@@ -195,7 +198,9 @@ def add_or_update_app(app: str, app_spec_dict):
 
 def get_distro():
     distro = ""
-    if which("dnf"):
+    if which("emerge"):
+        distro = "emerge"
+    elif which("dnf"):
         distro = "dnf"
     elif which("apt"):
         distro = "apt"
