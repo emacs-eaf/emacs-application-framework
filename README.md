@@ -56,7 +56,7 @@ EAF is very extensible, it already comes with a number of useful applications by
 
 In theory, you can use EAF to integrate any Qt5/Vue.js application into Emacs.
 
-EAF supports Linux and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
+EAF supports Linux X11、Linux Wayland and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
 A talk presented at the [EmacsConf2020](https://emacsconf.org/2020/talks/34/) that dwells into the internals of EAF.

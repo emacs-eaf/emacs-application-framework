@@ -49,7 +49,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 
 通过EAF，你可以自由开发自己的Qt5/Vue.js应用并集成在Emacs中。
 
-EAF可以在多个操作系统下工作，包括Linux和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
+EAF可以在多个操作系统下工作，包括Linux X11，Linux Wayland和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
 
 ## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
 EmacsConf2020的[EAF演讲](https://emacsconf.org/2020/talks/34/)。
