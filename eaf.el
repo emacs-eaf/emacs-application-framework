@@ -919,7 +919,8 @@ In this situation, we use 'stay on top' technicality that show EAF window when E
 'Stay on top' technicality is not perfect like 'cross-process reparent' technicality,
 provide at least one way to let everyone experience EAF. ;)"
   (or (eq system-type 'darwin)          ;macOS
-      (eq window-system 'pgtk)          ;Wayland native
+      (and (eq window-system 'pgtk)     ;Wayland native
+           (string-equal (getenv "XDG_SESSION_TYPE") "wayland"))
       (not (display-graphic-p))         ;Terminal emulator
       ))
 
