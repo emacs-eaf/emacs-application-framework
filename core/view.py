@@ -35,7 +35,9 @@ class View(QWidget):
         self.buffer = buffer
 
         # Init widget attributes.
-        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+        if get_emacs_func_result("eaf-emacs-running-in-wayland-native", []):
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.BypassWindowManagerHint)
+        elif get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         else:
             self.setWindowFlags(Qt.FramelessWindowHint)
