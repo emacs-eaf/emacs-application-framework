@@ -920,7 +920,7 @@ In this situation, we use 'stay on top' technicality that show EAF window when E
 provide at least one way to let everyone experience EAF. ;)"
   (or (eq system-type 'darwin)          ;macOS
       (and (eq window-system 'pgtk)     ;Wayland native
-           (boundp 'pgtk-backend-display-class)
+           (fboundp 'pgtk-backend-display-class)
            (string-equal (pgtk-backend-display-class) "GdkWaylandDisplay"))
       (not (display-graphic-p))         ;Terminal emulator
       ))
