@@ -811,24 +811,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                                  (cond
-                                   ;; If command is normal symbol, just call it directly.
-                                   ((symbolp fun)
-                                    fun)
+                        (cond
+                         ;; If command is normal symbol, just call it directly.
+                         ((symbolp fun)
+                          fun)
 
-                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                                   ((string-match "-" fun)
-                                    (intern fun))
+                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                         ((string-match "-" fun)
+                          (intern fun))
 
-                                   ;; If command prefix with js_, call JavaScript function directly.
-                                   ((string-prefix-p "js_" fun)
-                                    (eaf--make-js-proxy-function fun))
+                         ;; If command prefix with js_, call JavaScript function directly.
+                         ((string-prefix-p "js_" fun)
+                          (eaf--make-js-proxy-function fun))
 
-                                   ;; If command is not built-in function and not include char '-'
-                                   ;; it's command in python side, build elisp proxy function to call it.
-                                   (t
-                                    (eaf--make-py-proxy-function fun))
-                                   ))
+                         ;; If command is not built-in function and not include char '-'
+                         ;; it's command in python side, build elisp proxy function to call it.
+                         (t
+                          (eaf--make-py-proxy-function fun))
+                         ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
@@ -926,22 +926,24 @@ provide at least one way to let everyone experience EAF. ;)"
 
 (eval-when-compile
   (when (eaf-emacs-not-use-reparent-technology)
-    (defcustom eaf--stay-on-top-safe-focus-change t
-      "Whether to verify the active application on Emacs frame focus change.
+    (cond
+     ((eq system-type 'darwin)
+      (defcustom eaf--stay-on-top-safe-focus-change t
+        "Whether to verify the active application on Emacs frame focus change.
 
 Only set this to nil if you do not use the mouse inside EAF buffers.
 The benefit of setting this to nil is that application switching
 is a lot faster but could be buggy."
-      :type 'boolean)
+        :type 'boolean)
 
-    (defvar eaf--stay-on-top-switch-to-python nil
-      "Record if Emacs should switch to Python process.")
+      (defvar eaf--stay-on-top-switch-to-python nil
+        "Record if Emacs should switch to Python process.")
 
-    (defvar eaf--stay-on-top-has-focus t
-      "Record if Emacs has focus.")
+      (defvar eaf--stay-on-top-has-focus t
+        "Record if Emacs has focus.")
 
-    (defvar eaf--stay-on-top-unsafe-focus-change-timer nil
-      "Use timer to ignore spurious focus events.
+      (defvar eaf--stay-on-top-unsafe-focus-change-timer nil
+        "Use timer to ignore spurious focus events.
 
 This is only used when `eaf--stay-on-top-safe-focus-change' is nil.
 
@@ -949,75 +951,77 @@ See
 https://old.reddit.com/r/emacs/comments/\
 kxsgtn/ignore_spurious_focus_events_for/")
 
-    (defun eaf--stay-on-top-unsafe-focus-change-handler ()
-      ;; ignore errors related to
-      ;; (wrong-type-argument eaf-epc-manager nil)
-      (ignore-errors
-        (if (frame-focus-state)
-            (eaf--stay-on-top-unsafe-focus-in)
-          (eaf--stay-on-top-unsafe-focus-out)))
-      (setq eaf--stay-on-top-unsafe-focus-change-timer nil))
+      (defun eaf--stay-on-top-unsafe-focus-change-handler ()
+        ;; ignore errors related to
+        ;; (wrong-type-argument eaf-epc-manager nil)
+        (ignore-errors
+          (if (frame-focus-state)
+              (eaf--stay-on-top-unsafe-focus-in)
+            (eaf--stay-on-top-unsafe-focus-out)))
+        (setq eaf--stay-on-top-unsafe-focus-change-timer nil))
 
-    (defun eaf--stay-on-top-focus-change ()
-      "Manage Emacs's focus change."
-      (if eaf--stay-on-top-safe-focus-change
-          (let ((front (shell-command-to-string "app-frontmost --name")))
-            (cond
-             ((string= "Python\n" front)
-              (setq eaf--stay-on-top-switch-to-python t))
-
-             ((string= "Emacs\n" front)
+      (defun eaf--stay-on-top-focus-change ()
+        "Manage Emacs's focus change."
+        (if eaf--stay-on-top-safe-focus-change
+            (let ((front (shell-command-to-string "app-frontmost --name")))
               (cond
-               (eaf--stay-on-top-switch-to-python
-                (setq eaf--stay-on-top-switch-to-python nil))
-               ((not eaf--stay-on-top-has-focus)
-                (run-with-timer 0.1 nil #'eaf--stay-on-top-focus-in))
-               (eaf--stay-on-top-has-focus
-                (eaf--stay-on-top-focus-out))))
-             (t (eaf--stay-on-top-focus-out))))
-        (setq eaf--stay-on-top-unsafe-focus-change-timer
-              (unless eaf--stay-on-top-unsafe-focus-change-timer
-                (run-at-time 0.06 nil
-                             #'eaf--stay-on-top-unsafe-focus-change-handler)))))
+               ((string= "Python\n" front)
+                (setq eaf--stay-on-top-switch-to-python t))
 
-    (defun eaf--stay-on-top-replace-eaf-buffers ()
-      (dolist (window (window-list))
-        (select-window window)
-        (when (eq major-mode 'eaf-mode)
-          (get-buffer-create "*eaf temp*")
-          (switch-to-buffer "*eaf temp*" t))))
+               ((string= "Emacs\n" front)
+                (cond
+                 (eaf--stay-on-top-switch-to-python
+                  (setq eaf--stay-on-top-switch-to-python nil))
+                 ((not eaf--stay-on-top-has-focus)
+                  (run-with-timer 0.1 nil #'eaf--stay-on-top-focus-in))
+                 (eaf--stay-on-top-has-focus
+                  (eaf--stay-on-top-focus-out))))
+               (t (eaf--stay-on-top-focus-out))))
+          (setq eaf--stay-on-top-unsafe-focus-change-timer
+                (unless eaf--stay-on-top-unsafe-focus-change-timer
+                  (run-at-time 0.06 nil
+                               #'eaf--stay-on-top-unsafe-focus-change-handler)))))
 
-    (defun eaf--stay-on-top-focus-in ()
-      (setq eaf--stay-on-top-has-focus t)
-      (ignore-errors
+      (defun eaf--stay-on-top-replace-eaf-buffers ()
+        (dolist (window (window-list))
+          (select-window window)
+          (when (eq major-mode 'eaf-mode)
+            (get-buffer-create "*eaf temp*")
+            (switch-to-buffer "*eaf temp*" t))))
+
+      (defun eaf--stay-on-top-focus-in ()
+        (setq eaf--stay-on-top-has-focus t)
+        (ignore-errors
+          (set-window-configuration
+           (frame-parameter (selected-frame) 'eaf--stay-on-top-frame))
+          (bury-buffer "*eaf temp*")))
+
+      (defun eaf--stay-on-top-focus-out (&optional frame)
+        (when eaf--stay-on-top-has-focus
+          (setq eaf--stay-on-top-has-focus nil)
+          (set-frame-parameter (or frame (selected-frame))
+                               'eaf--stay-on-top-frame (current-window-configuration))
+          (eaf--stay-on-top-replace-eaf-buffers)))
+
+      (defun eaf--stay-on-top-unsafe-focus-in ()
+        (eaf-call-async "show_top_views")
         (set-window-configuration
-         (frame-parameter (selected-frame) 'eaf--stay-on-top-frame))
-        (bury-buffer "*eaf temp*")))
+         (frame-parameter (selected-frame) 'eaf--stay-on-top-frame)))
 
-    (defun eaf--stay-on-top-focus-out (&optional frame)
-      (when eaf--stay-on-top-has-focus
-        (setq eaf--stay-on-top-has-focus nil)
-        (set-frame-parameter (or frame (selected-frame))
-                             'eaf--stay-on-top-frame (current-window-configuration))
-        (eaf--stay-on-top-replace-eaf-buffers)))
+      (defun eaf--stay-on-top-unsafe-focus-out (&optional frame)
+        (eaf-call-async "hide_top_views")
+        (set-frame-parameter (or frame (selected-frame)) 'eaf--stay-on-top-frame
+                             (current-window-configuration)))
 
-    (defun eaf--stay-on-top-unsafe-focus-in ()
-      (eaf-call-async "show_top_views")
-      (set-window-configuration
-       (frame-parameter (selected-frame) 'eaf--stay-on-top-frame)))
+      (defun eaf--stay-on-top-delete-frame-handler (frame)
+        (if eaf--stay-on-top-safe-focus-change
+            (eaf--stay-on-top-focus-out frame)
+          (eaf--stay-on-top-unsafe-focus-out frame)))
 
-    (defun eaf--stay-on-top-unsafe-focus-out (&optional frame)
-      (eaf-call-async "hide_top_views")
-      (set-frame-parameter (or frame (selected-frame)) 'eaf--stay-on-top-frame
-                           (current-window-configuration)))
-
-    (defun eaf--stay-on-top-delete-frame-handler (frame)
-      (if eaf--stay-on-top-safe-focus-change
-          (eaf--stay-on-top-focus-out frame)
-        (eaf--stay-on-top-unsafe-focus-out frame)))
-
-    (add-function :after after-focus-change-function #'eaf--stay-on-top-focus-change)
-    (add-to-list 'delete-frame-functions #'eaf--stay-on-top-delete-frame-handler)))
+      (add-function :after after-focus-change-function #'eaf--stay-on-top-focus-change)
+      (add-to-list 'delete-frame-functions #'eaf--stay-on-top-delete-frame-handler))
+     (t
+      (message "Wayland native code is not supported yet.")))))
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
