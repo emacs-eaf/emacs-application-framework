@@ -1,9 +1,10 @@
 {
     "pacman": [
         "wmctrl",
+        "python",
         "python-pyqt5",
         "python-pyqt5-sip",
-        "python-pyqtwebengine",
+        "python-pyqt5-webengine",
         "nodejs",
         "npm"
     ],
