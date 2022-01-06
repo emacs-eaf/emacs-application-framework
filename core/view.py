@@ -101,7 +101,7 @@ class View(QWidget):
             horizontal_padding = (widget_width - view_width) / 2
             vertical_padding = self.buffer.vertical_padding_ratio * widget_height
 
-            self.buffer.buffer_widget.resize(view_width, view_height)
+            self.buffer.buffer_widget.resize(int(view_width), int(view_height))
 
             self.layout.setContentsMargins(
                 horizontal_padding, vertical_padding,
