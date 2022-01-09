@@ -1548,14 +1548,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
           (setq-local default-directory directory))))))
 
 ;;;;;;;;;;;;;;;;;;;; Utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun eaf-get-view-info ()
-  (let* ((window-allocation (eaf-get-window-allocation (selected-window)))
-         (x (nth 0 window-allocation))
-         (y (nth 1 window-allocation))
-         (w (nth 2 window-allocation))
-         (h (nth 3 window-allocation)))
-    (format "%s:%s:%s:%s:%s" eaf--buffer-id x y w h)))
-
 (defun eaf-generate-keymap-doc (var)
   "This command use for generate keybindings document Wiki."
   (interactive "vEAF keybinding variable: ")
