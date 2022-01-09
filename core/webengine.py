@@ -421,12 +421,12 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_up(self):
         ''' Scroll up.'''
-        self.scroll_wheel(0, -100)
+        self.scroll_wheel(0, -400)
 
     @interactive(insert_or_do=True)
     def scroll_down(self):
         ''' Scroll down.'''
-        self.scroll_wheel(0, 100)
+        self.scroll_wheel(0, 400)
 
     @interactive
     def scroll_up_page(self):
