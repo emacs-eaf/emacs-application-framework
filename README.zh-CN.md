@@ -51,13 +51,12 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 
 EAF可以在多个操作系统下工作，包括Linux X11，Linux Wayland和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
 
-## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF（暂无中文字幕）
-EmacsConf2020的[EAF演讲](https://emacsconf.org/2020/talks/34/)。
+## EmacsConf
+EmacsConf2020的[Extend Emacs to Modern GUI Applications with EAF](https://emacsconf.org/2020/talks/34/)。
 
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
-## EmacsConf2021 - Emacs Application Framework: A 2021 Update（暂无中文字幕）
-EmacsConf2021的[EAF演讲](https://emacsconf.org/2021/talks/eaf/)。
+EmacsConf2021的[Emacs Application Framework: A 2021 Update](https://emacsconf.org/2021/talks/eaf/)。
 
 [![EmacsConf2021 - Emacs Application Framework: A 2021 Update](https://img.youtube.com/vi/bh37zbefZk4/0.jpg)](https://www.youtube.com/watch?v=bh37zbefZk4)
 
@@ -121,7 +120,7 @@ chmod +x ./install-eaf.py
 
 恭喜，到这一步你已成功下载好了EAF！你可以通过`M-x eaf-open-demo`（前提是你下载了`demo`应用）看看EAF是否可以成功运行了。
 
-如果你有任何使用上的问题，强烈建议读一下[Wiki](#Wiki)以及[常用问题](#常用问题)部分。
+如果你有任何使用上的问题，强烈建议读一下[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)以及[常用问题](#常用问题)部分。
 
 建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。如果使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分。
 

@@ -58,13 +58,12 @@ In theory, you can use EAF to integrate any Qt5/Vue.js application into Emacs.
 
 EAF supports Linux X11、Linux Wayland and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
 
-## EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF
-A talk presented at the [EmacsConf2020](https://emacsconf.org/2020/talks/34/) that dwells into the internals of EAF.
+## EmacsConf
+[Extend Emacs to Modern GUI Applications with EAF](https://emacsconf.org/2020/talks/34/) that dwells into the internals of EAF.
 
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
-## EmacsConf2021 - Emacs Application Framework: A 2021 Update
-A talk presented at the [EmacsConf2021](https://emacsconf.org/2021/talks/eaf/) that gives a summary of EAF progress throughout the 2021 year.
+[Emacs Application Framework: A 2021 Update](https://emacsconf.org/2021/talks/eaf/) that gives a summary of EAF progress throughout the 2021 year.
 
 [![EmacsConf2021 - Emacs Application Framework: A 2021 Update](https://img.youtube.com/vi/bh37zbefZk4/0.jpg)](https://www.youtube.com/watch?v=bh37zbefZk4)
 
@@ -129,7 +128,7 @@ You can use below code to load applications `browser` and `pdf-viewer` that you 
 
 Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that is if you have `demo` installed, of course) to see if everything works properly, and enjoy the new possibilities of Emacs.
 
-I **highly** encourage you to read the [Wiki](#Wiki) and [FAQ](#FAQ) if you have any questions.
+I **highly** encourage you to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) and [FAQ](#FAQ) if you have any questions.
 
 Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug).
 
