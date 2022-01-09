@@ -201,11 +201,3 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json`
 
 [一起疯吧!](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
 
-## 打赏
-如果我的作品让你的生活充满快乐，欢迎请我喝瓶啤酒，哈哈哈哈
-
-### ManateeLazyCat
-<p float="left">
-    <img src="./img/alipay.jpg" width="188">
-    <img src="./img/wechat.jpg" width="200">
-</p>
