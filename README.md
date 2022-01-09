@@ -128,7 +128,7 @@ You can use below code to load applications `browser` and `pdf-viewer` that you 
 
 Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that is if you have `demo` installed, of course) to see if everything works properly, and enjoy the new possibilities of Emacs.
 
-I **highly** encourage you to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) and [FAQ](#FAQ) if you have any questions.
+I **highly** encourage you to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) and [FAQ](https://github.com/emacs-eaf/emacs-application-framework#FAQ) if you have any questions.
 
 Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug).
 
@@ -194,71 +194,6 @@ You can check `app/name/dependencies.json` and `app/name/package.json` for appli
   | `C-c C-c` | eaf-edit-buffer-confirm            |
   | `C-c C-k` | eaf-edit-buffer-cancel             |
   | `C-c C-t` | eaf-edit-buffer-switch-to-org-mode |
-
-## Wiki
-
-It is **highly** suggested to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first before using EAF.
-
-The wiki consists of documentations on:
-* Keybindings
-* Customization
-* Design
-* TODOLIST
-
-There also are some helpful tips to make EAF work with Docker, Helm, etc.
-
-## FAQ
-
-### How does EAF work?
-<p align="center">
-  <img style='height: auto; width: 100%; object-fit: contain' src="./img/framework.png">
-</p>
-
-EAF implements three major functionalities:
-1. Integrate PyQt program window into Emacs frame using QWindow Reparent technology.
-2. Listen to EAF buffer's keyboard event flow and control the keyboard input of the PyQt program via Python EPC.
-3. Create a window composite to make a PyQt program window adapt Emacs' Window/Buffer design.
-
-Learn more from the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)!
-
-### EAF vs EXWM?
-1. EAF and EXWM share a common goal: enhance collaboration between the standard GNU Emacs with other GUI tools.
-2. EXWM is an X11 Window Manager, it manages and controls other software using a keyboard, but it cannot modify, customize and extend the behavior of other software.
-3. EAF is *not* a Window Manager, it utilizes the windows managing capabilities of Emacs to display its applications.
-4. EAF intends to provide a framework to write PyQt5 applications that extends the multimedia experience of Emacs. From the perspective of Emacs' buffer/mode design, EAF is not different from any other package, with the former uses Qt for drawing contents while the latter uses Emacs' built-in text libraries instead.
-5. Through EAF's design, one can use Elisp to control Python and vice versa, and even able to use Elisp to control JavaScript in EAF Browser. EAF enables Emacs to the world of **multi-language scripting**.
-
-Both projects are similar in terms of interface, but they are two completely different projects with different goals in mind. Sometimes one may find EAF is more suitable than EXWM, sometimes it's the other way around. Please do not meaninglessly compare them.
-
-### macOS
-Currently, macOS is only partially supported and needs a lot of testing, not all functions can work normally, please check the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/macOS) for details.
-
-### Browser crashes
-Please DO NOT install PyQt5 through pip, pip version has a bug, please install PyQt5 from the OS software repository.
-
-### Why doesn't EAF receive input events on Linux Window Manager?
-EAF confirms that the desktop environment or window manager you can work with includes: KDE, Gnome2, Gnome3, Mate, Xfce, LXDE, Sway, i3, QTile, Xpra, EXWM.
-
-We suspect there are some issues with how all the Window Managers implement their x11 protocols.
-
-One workaround is to name of command `wmctrl -m` to the elisp list `eaf-wm-focus-fix-wms`. Fill an issue if it still doesn't work.
-
-### Proxy
-If you need to use a proxy to access the internet, one can configure the proxy settings.
-
-```Elisp
-(setq eaf-proxy-type "http")
-(setq eaf-proxy-host "127.0.0.1")
-(setq eaf-proxy-port "1080")
-```
-
-If you use Socks5 as a local proxy, one can set proxy type with:
-
-```Elisp
-(setq eaf-proxy-type "socks5")
-```
-
-Customize rule proxy please check [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Customize-Rule-Proxy)
 
 ## EAF in the community
 

@@ -120,7 +120,7 @@ chmod +x ./install-eaf.py
 
 恭喜，到这一步你已成功下载好了EAF！你可以通过`M-x eaf-open-demo`（前提是你下载了`demo`应用）看看EAF是否可以成功运行了。
 
-如果你有任何使用上的问题，强烈建议读一下[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)以及[常用问题](#常用问题)部分。
+如果你有任何使用上的问题，强烈建议读一下[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)以及[常用问题](https://github.com/emacs-eaf/emacs-application-framework/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)部分。
 
 建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。如果使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分。
 
@@ -186,71 +186,6 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json`
   | `C-c C-c` | eaf-edit-buffer-confirm            |
   | `C-c C-k` | eaf-edit-buffer-cancel             |
   | `C-c C-t` | eaf-edit-buffer-switch-to-org-mode |
-
-## Wiki
-强烈建议使用EAF之前浏览一遍[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)。
-
-Wiki囊括了各种你想了解的EAF相关文档，包括了：
-1. 按键绑定
-2. 自定义选项
-3. 架构设计
-4. 任务列表
-
-你还会在Wiki发现很多有用的技巧，如Docker，Helm等，
-
-## 常用问题
-
-### EAF是怎么工作的？
-<p align="center">
-  <img style='height: auto; width: 100%; object-fit: contain' src="./img/framework.png">
-</p>
-
-EAF主要实现这几个功能：
-1. 利用QWindow的Reparent技术来实现PyQt应用进程的窗口粘贴到Emacs对应的Buffer区域
-2. 通过Python EPC来实现Emacs进程和Python进程的控制指令和跨进程消息通讯
-3. 通过Qt5的QGraphicsScene来实现镜像窗口，以对应Emacs的Buffer/Window模型
-
-若想了解更多EAF设计背景，请看[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
-
-### EAF vs EXWM?
-1. EAF和EXWM的共同点都是：“提升Emacs和别的程序的协作效率“
-2. EXWM是一个X11窗口管理器，通过X11协议来控制Emacs和其他程序，但是EXWM只是管理其他程序，但是它并不会修改应用程序的内在行为。
-3. EAF不是一个窗口管理器，EAF只是依赖Emacs自身的窗口管理功能显示自己
-4. EAF的目标是通过PyQt创造新的应用来扩展Emacs的多媒体能力。从Emacs本身的Buffer/Mode设计上看，它和你平常用的 `xx-mode` 插件没有啥区别，只是它用Qt来绘制内容，而不是Emacs自身的文本库来绘制内容
-5. EAF通过造轮子的方式，把大多数程序员常用的应用写出来以后，达到Live in Emacs的最终目标
-6. 基于EAF的架构设计，我们可以通过Elisp来控制Python，JavaScript和其他命令行工具，实现多语言扩展Emacs的编程模型。在坚持Emacs黑客文化和Elisp社区兼容性的前提下，让Emacs的多媒体能力能够跟上时代的发展
-
-或许EAF和EXWM看起来有点相似，但它们在设计和理念上是两个完全不同的项目。所以请大家多多学习X11和Qt的区别，理解技术的本质，避免无意义的比较和争论。
-
-### macOS
-EAF当前只能部分支持macOS，不是所有功能都可以正常工作，具体的情况请查看[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/macOS)。
-
-### 浏览器崩溃
-请不要用pip安装PyQt5, pip的版本有bug，请从操作系统软件仓库安装PyQt5。
-
-### 为什么通过Linux窗口管理器使用EAF无法接收输入信息？
-EAF确认可以工作的桌面环境或者窗口管理器包括：KDE、Gnome2、Gnome3、Mate、Xfce、LXDE、Sway、i3、QTile、Xpra、EXWM.
-
-我们认为不同的窗口管理器对于X11协议的支持不够完善才导致这样的问题。
-
-现在的解决方案是将命令`wmctrl -m`中Name的值加入`eaf-wm-focus-fix-wms`，如果还有问题，请在Github提出issue。
-
-### 代理
-可以通过下面设置来通过代理访问互联网：
-
-```Elisp
-(setq eaf-proxy-type "http")
-(setq eaf-proxy-host "127.0.0.1")
-(setq eaf-proxy-port "1080")
-```
-
-如果你使用Socks5代理，你可以设置代理类型为：
-
-```Elisp
-(setq eaf-proxy-type "socks5")
-```
-
-基于规则的自定义代理请查看[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki/%E8%87%AA%E5%AE%9A%E4%B9%89%E8%A7%84%E5%88%99%E4%BB%A3%E7%90%86)
 
 ## EAF社区
 
