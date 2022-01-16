@@ -100,7 +100,7 @@ From here on, you can either add the full path to the EAF installation directory
 
     ```Elisp
     (use-package eaf
-      :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+      :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
       :custom
       ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
       (eaf-browser-continue-where-left-off t)
@@ -210,4 +210,3 @@ Do you want to live in Emacs more comfortably?
 Do you want to revolutionize the capabilities of Emacs?
 
 [Let's hack together!](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
-

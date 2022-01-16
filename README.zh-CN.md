@@ -93,7 +93,7 @@ chmod +x ./install-eaf.py
 
     ```Elisp
     (use-package eaf
-      :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+      :load-path "~/.emacs.d/site-lisp/emacs-application-framework"
       :custom
       ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
       (eaf-browser-continue-where-left-off t)
@@ -200,4 +200,3 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json`
 想要创建下一个激动人心的Emacs插件吗？
 
 [一起疯吧!](https://github.com/emacs-eaf/emacs-application-framework/wiki/Hacking)
-
