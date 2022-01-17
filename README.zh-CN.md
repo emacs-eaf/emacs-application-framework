@@ -26,6 +26,11 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 | <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
 |                                                       |                                                       |
 
+| <a href="https://emacsconf.org/2020/talks/34/">用EAF扩展Emacs图形应用</a>                            | <a href="https://emacsconf.org/2021/talks/eaf/">Emacs Application Framework: 2021更新</a>                              |
+| :--------:                                            | :----:                                                |
+| [<img src="https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg" width=400>](https://www.youtube.com/watch?v=HK_f8KTuR0s) | [<img src="https://img.youtube.com/vi/bh37zbefZk4/0.jpg" width=400>](https://www.youtube.com/watch?v=bh37zbefZk4) |
+|                                                       |                                                       |
+
 - [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于Chromium渲染引擎
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Emacs里面渲染速度最快的PDF查看器
 - [Terminal](https://github.com/emacs-eaf/eaf-terminal): 支持图形绘制的全功能终端模拟器
@@ -50,12 +55,6 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 通过EAF，你可以自由开发自己的Qt5/Vue.js应用并集成在Emacs中。
 
 EAF可以在多个操作系统下工作，包括Linux X11，Linux Wayland和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
-
-## EmacsConf
-| <a href="https://emacsconf.org/2020/talks/34/">用EAF扩展Emacs图形应用</a>                            | <a href="https://emacsconf.org/2021/talks/eaf/">Emacs Application Framework: 2021更新</a>                              |
-| :--------:                                            | :----:                                                |
-| [<img src="https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg" width=400>](https://www.youtube.com/watch?v=HK_f8KTuR0s) | [<img src="https://img.youtube.com/vi/bh37zbefZk4/0.jpg" width=400>](https://www.youtube.com/watch?v=bh37zbefZk4) |
-|                                                       |                                                       |
 
 ## 安装
 
