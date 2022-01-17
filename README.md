@@ -20,7 +20,7 @@ Emacs, although infinitely extensible in text, is very limited in graphics. It s
 The vision of the Emacs Application Framework (EAF) project is that, while fully retaining the rich history, culture and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt5, and even JavaScript. EAF extends Emacs to the world of modern graphics, but still preserving the extensibility and customizability of Emacs, it will be the key to ultimately *Live in Emacs*.
 
 
-## Applications
+## Features
 
 EAF is very extensible, it already comes with a number of useful applications by default:
 
@@ -59,11 +59,10 @@ EAF is very extensible, it already comes with a number of useful applications by
 - [Demo](https://github.com/emacs-eaf/eaf-demo): EAF Application demo base on Qt
 - [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF Application demo base on Vue.js
 
-In theory, you can use EAF to integrate any Qt5/Vue.js application into Emacs.
-
-EAF supports Linux X11、Linux Wayland and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
-
 ## Install
+
+EAF supports Linux (X11 and Wayland), Windows, macOS and FreeBSD, The installation method is very simple.
+
 #### 1. Download EAF
 
 ```Bash

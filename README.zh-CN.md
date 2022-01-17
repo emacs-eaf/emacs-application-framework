@@ -14,7 +14,7 @@ Emacs的劣势也是因为它太古老了，导致在多线程和图形扩展能
 
 Emacs Application Framework (EAF)的愿景是在保留Emacs古老的黑客文化和庞大的开发者插件生态前提下，通过EAF框架扩展Emacs的多线程和图形渲染能力，实现Live In Emacs的理想。
 
-## 应用列表
+## EAF有哪些功能？
 EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 
 | 浏览器                                       | PDF阅读器 |
@@ -52,11 +52,9 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 - [Demo](https://github.com/emacs-eaf/eaf-demo): EAF的Qt应用实例
 - [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF的Vue.js应用实例
 
-通过EAF，你可以自由开发自己的Qt5/Vue.js应用并集成在Emacs中。
-
-EAF可以在多个操作系统下工作，包括Linux X11，Linux Wayland和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
-
 ## 安装
+
+EAF可以在多个操作系统下工作，包括Linux (X11和Wayland), Windows，macOS和FreeBSD，安装方法非常简单。
 
 #### 1. 下载EAF
 
