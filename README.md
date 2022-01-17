@@ -61,7 +61,7 @@ EAF is very extensible, it already comes with a number of useful applications by
 
 ## Install
 
-EAF supports Linux (X11 and Wayland), Windows, macOS and FreeBSD, The installation method is very simple.
+EAF supports Linux (X11 and Wayland), Windows, macOS and FreeBSD, the installation method is very simple.
 
 #### 1. Download EAF
 
@@ -164,7 +164,7 @@ For any other problems, please use `emacs -q` and load a minimal setup with only
 If the problem persists, please report it [here](https://github.com/emacs-eaf/emacs-application-framework/issues/new) with `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
 
 If you get a segfault error, please use the following way to collect crash information:
-1. Install gdb and turn on option `eaf-enable-debug`
+1. Install gdb and turn on option `(setq eaf-enable-debug t)`
 2. Use the command `eaf-stop-process` to stop the current process
 3. Restart eaf, send issue with `*eaf*` buffer content when next crash
 

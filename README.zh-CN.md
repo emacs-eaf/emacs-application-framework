@@ -155,7 +155,7 @@ chmod +x ./install-eaf.py
 如果`emacs -q`环境下问题依旧，请到[这里](https://github.com/emacs-eaf/emacs-application-framework/issues/new)反馈, 并附带 `*eaf*` 窗口的内容给我们提交issue，那里面有很多线索可以帮助我们排查问题。。
 
 如果你遇到崩溃的问题, 请用下面的方式来收集崩溃信息:
-1. 先安装gdb并打开选项 `eaf-enable-debug`
+1. 先安装gdb并打开选项 `(setq eaf-enable-debug t)`
 2. 使用命令 `eaf-stop-process` 停止EAF进程
 3. 重新打开EAF, 并在下次崩溃时发送 `*eaf*` 的内容
 
