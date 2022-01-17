@@ -59,11 +59,11 @@ In theory, you can use EAF to integrate any Qt5/Vue.js application into Emacs.
 EAF supports Linux X11、Linux Wayland and Windows, while macOS and FreeBSD support are in beta, some applications may not work normally.
 
 ## EmacsConf
-[Extend Emacs to Modern GUI Applications with EAF](https://emacsconf.org/2020/talks/34/) that dwells into the internals of EAF.
+[Extend Emacs to Modern GUI Applications with EAF](https://emacsconf.org/2020/talks/34/)
 
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
-[Emacs Application Framework: A 2021 Update](https://emacsconf.org/2021/talks/eaf/) that gives a summary of EAF progress throughout the 2021 year.
+[Emacs Application Framework: A 2021 Update](https://emacsconf.org/2021/talks/eaf/)
 
 [![EmacsConf2021 - Emacs Application Framework: A 2021 Update](https://img.youtube.com/vi/bh37zbefZk4/0.jpg)](https://www.youtube.com/watch?v=bh37zbefZk4)
 
@@ -129,21 +129,7 @@ Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that i
 
 I **highly** encourage you to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) and [FAQ](https://github.com/emacs-eaf/emacs-application-framework/wiki/FAQ) if you have any questions.
 
-Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies. If you encounter a bug while using it, see the instruction on how to [Report bug](#report-bug).
-
-### Dependency List
-
-| Package                        | Description                                           |
-| :--------                      | :------                                               |
-| python-epc                     | EPC for Python                                        |
-| python-pyqt5, python-pyqt5-sip | Essential GUI library                                 |
-| python-pyqtwebengine           | Chromium-based web rendering engine                   |
-| wmctrl                         | Activate Emacs window input focus                     |
-| pygetwindow                    | Activate Emacs window input focus on WSL from Windows |
-| mac-app-frontmost              | Monitor frontmost app on macOS                        |
-| nodejs                         | Installs dependencies, and for app communications     |
-
-You can check `app/name/dependencies.json` and `app/name/package.json` for application level dependencies.
+Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies.
 
 ## Launch EAF Applications
 | Application Name    | Launch                                                                 |
@@ -172,15 +158,6 @@ You can check `app/name/dependencies.json` and `app/name/package.json` for appli
 
 - EAF Browser and PDF Viewer support Emacs built-in bookmark operation, with `M-x bookmark-set` (defaulted to `C-x r m`) and `M-x bookmark-bmenu-list` (defaulted to `C-x r l`).
 
-## EAF in the community
-
-A list of other community packages that use EAF to enhance their graphical experiences!
-
-If we missed your package, please make a PR to add it to the list.
-
-* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
-* ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
-
 ## Report bug
 
 ### For any installation and configuration assistance, please read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first!
@@ -195,6 +172,15 @@ If you get a segfault error, please use the following way to collect crash infor
 1. Install gdb and turn on option `eaf-enable-debug`
 2. Use the command `eaf-stop-process` to stop the current process
 3. Restart eaf, send issue with `*eaf*` buffer content when next crash
+
+## EAF in the community
+
+A list of other community packages that use EAF to enhance their graphical experiences!
+
+If we missed your package, please make a PR to add it to the list.
+
+* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+* ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
 
 ## Contributor
 <a href = "https://github.com/emacs-eaf/emacs-application-framework/graphs/contributors">

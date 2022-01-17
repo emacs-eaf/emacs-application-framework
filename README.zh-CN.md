@@ -52,11 +52,11 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 EAF可以在多个操作系统下工作，包括Linux X11，Linux Wayland和Windows，macOS和FreeBSD在beta测试中，部分应用不一定能完美运行。
 
 ## EmacsConf
-EmacsConf2020的[Extend Emacs to Modern GUI Applications with EAF](https://emacsconf.org/2020/talks/34/)。
+[Extend Emacs to Modern GUI Applications with EAF](https://emacsconf.org/2020/talks/34/)。
 
 [![EmacsConf2020 - Extend Emacs to Modern GUI Applications with EAF](https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg)](https://www.youtube.com/watch?v=HK_f8KTuR0s)
 
-EmacsConf2021的[Emacs Application Framework: A 2021 Update](https://emacsconf.org/2021/talks/eaf/)。
+[Emacs Application Framework: A 2021 Update](https://emacsconf.org/2021/talks/eaf/)。
 
 [![EmacsConf2021 - Emacs Application Framework: A 2021 Update](https://img.youtube.com/vi/bh37zbefZk4/0.jpg)](https://www.youtube.com/watch?v=bh37zbefZk4)
 
@@ -121,21 +121,7 @@ chmod +x ./install-eaf.py
 
 如果你有任何使用上的问题，强烈建议读一下[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)以及[常用问题](https://github.com/emacs-eaf/emacs-application-framework/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)部分。
 
-建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。如果使用中遇到任何问题，请先阅读[反馈问题](#反馈问题)部分。
-
-### 依赖列表
-
-| 包名                           | 解释                                     |
-| :--------                      | :------                                  |
-| python-epc                     | EPC Python端                             |
-| python-pyqt5, python-pyqt5-sip | GUI图形库                                |
-| python-pyqtwebengine           | 基于Chromium的浏览器引擎                 |
-| wmctrl                         | 激活Emacs窗口输入焦点                    |
-| pygetwindow                    | 从Windows中eaf激活WSL中Emacs窗口输入焦点 |
-| mac-app-frontmost              | 获取macOS当前app名称                     |
-| nodejs                         | 下载依赖与应用交互                       |
-
-EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json` 和 `app/name/package.json` 中查看。
+建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。
 
 ## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
@@ -164,13 +150,6 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json`
 
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
-## EAF社区
-
-下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。
-
-* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
-* ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
-
 ## 反馈问题
 
 ### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)!!!
@@ -185,6 +164,13 @@ EAF应用的额外依赖，具体请在其对应的 `app/name/dependencies.json`
 1. 先安装gdb并打开选项 `eaf-enable-debug`
 2. 使用命令 `eaf-stop-process` 停止EAF进程
 3. 重新打开EAF, 并在下次崩溃时发送 `*eaf*` 的内容
+
+## EAF社区
+
+下面列表列展示了EAF在Emacs社区的应用。如果我们遗漏你的应用，欢迎提交PR来加到下面列表中。
+
+* ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
+* ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
 
 ## 贡献者
 <a href = "https://github.com/emacs-eaf/emacs-application-framework/graphs/contributors">
