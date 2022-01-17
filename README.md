@@ -122,11 +122,8 @@ You can use below code to load applications `browser` and `pdf-viewer` that you 
 
 Congratulations, you just installed EAF! You can try `M-x eaf-open-demo` (that is if you have `demo` installed, of course) to see if everything works properly, and enjoy the new possibilities of Emacs.
 
-I **highly** encourage you to read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) and [FAQ](https://github.com/emacs-eaf/emacs-application-framework/wiki/FAQ) if you have any questions.
+Below are launch commands of EAF Applications:
 
-Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies.
-
-## Launch EAF Applications
 | Application Name    | Launch                                                                 |
 | :--------           | :----                                                                  |
 | Browser             | `M-x eaf-open-browser` Search or Goto URL                              |
@@ -153,9 +150,12 @@ Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-ins
 
 - EAF Browser and PDF Viewer support Emacs built-in bookmark operation, with `M-x bookmark-set` (defaulted to `C-x r m`) and `M-x bookmark-bmenu-list` (defaulted to `C-x r l`).
 
+## Upgrade
+Also, you should regularly `git pull` **and** run `install-eaf.py` (`M-x eaf-install-and-update`) to update EAF, its applications, and relating dependencies.
+
 ## Report bug
 
-### For any installation and configuration assistance, please read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first!
+### For any installation and configuration assistance, please read the [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) and [FAQ](https://github.com/emacs-eaf/emacs-application-framework/wiki/FAQ).
 
 If you encounter a problem with EAF, and it occurred after pulling the latest commit, please check the [Mandatory Procedures to Keep Your EAF Up-To-Date](https://github.com/emacs-eaf/emacs-application-framework/discussions/527?sort=new) page **first**.
 

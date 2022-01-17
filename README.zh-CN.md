@@ -113,11 +113,8 @@ chmod +x ./install-eaf.py
 
 恭喜，到这一步你已成功下载好了EAF！你可以通过`M-x eaf-open-demo`（前提是你下载了`demo`应用）看看EAF是否可以成功运行了。
 
-如果你有任何使用上的问题，强烈建议读一下[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)以及[常用问题](https://github.com/emacs-eaf/emacs-application-framework/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)部分。
+下面是EAF应用的启动命令:
 
-建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。
-
-## EAF应用启动命令
 | 应用名称         | 启动命令                                                                    |
 | :--------        | :----                                                                       |
 | 浏览器           | `M-x eaf-open-browser` 在浏览器中打开或搜索                                 |
@@ -144,9 +141,12 @@ chmod +x ./install-eaf.py
 
 - EAF浏览器以及PDF浏览器支持Emacs内置书签操作，通过使用`M-x bookmark-set`（默认`C-x r m`）以及`M-x bookmark-bmenu-list`（默认`C-x r l`）。
 
+## 更新
+建议你时常`git pull` **并且** 运行`install-eaf.py` (`M-x eaf-install-and-update`)来更新各个EAF应用及其依赖。
+
 ## 反馈问题
 
-### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)!!!
+### 反馈安装和配置问题之前，请一定先阅读[Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)以及[常用问题](https://github.com/emacs-eaf/emacs-application-framework/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)。
 
 如果你使用中遇到任何问题，并且问题是`git pull`后出现的，请先阅读[Mandatory Procedures to Keep Your EAF Up-To-Date](https://github.com/emacs-eaf/emacs-application-framework/discussions/527?sort=new)页面。
 
