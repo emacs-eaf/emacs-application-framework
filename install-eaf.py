@@ -101,6 +101,15 @@ def prune_existing_sys_deps(deps_list):
             remove_deps.append(dep)
     return list(set(deps_list) - set(remove_deps))
 
+def get_archlinux_aur_helper():
+    command = None
+    for helper in ["pacaur", "yay", "yaourt"]:
+        if which(helper):
+            command = helper
+            break
+
+    return command
+
 def install_sys_deps(distro: str, deps_list):
     deps_list = prune_existing_sys_deps(deps_list)
     command = []
@@ -109,7 +118,8 @@ def install_sys_deps(distro: str, deps_list):
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif distro == 'pacman':
-        command = ['yay', '-Sy', '--noconfirm', '--needed']
+        aur_helper = get_archlinux_aur_helper()
+        command = [aur_helper, '-Sy', '--noconfirm', '--needed']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
     elif which("zypper"):
@@ -201,8 +211,10 @@ def get_distro():
         distro = "apt"
     elif which("pacman"):
         distro = "pacman"
+        aur_helper = get_archlinux_aur_helper()
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
-            run_command(['yay', '-Sy', '--noconfirm', '--needed'])
+            run_command([aur_helper, '-Sy', '--noconfirm', '--needed'])
+
     elif which("pkg"):
         distro = "pkg"
     elif which("zypper"):
