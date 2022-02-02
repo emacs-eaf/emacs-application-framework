@@ -103,12 +103,15 @@ def prune_existing_sys_deps(deps_list):
 
 def get_archlinux_aur_helper():
     command = None
-    for helper in ["pacaur", "yay", "yaourt"]:
+    for helper in ["pacaur", "yay", "yaourt", "paru"]:
         if which(helper):
             command = helper
             break
-
-    return command
+    if command:
+        return command
+    else:
+        print("Please install one of AUR's helper.", file=std.err)
+        sys.exit(1)
 
 def install_sys_deps(distro: str, deps_list):
     deps_list = prune_existing_sys_deps(deps_list)
