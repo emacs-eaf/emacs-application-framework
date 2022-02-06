@@ -78,11 +78,14 @@ class BrowserView(QWebEngineView):
         self.focus_input_js = None
         self.simulated_wheel_event = False
 
-        (self.default_zoom, self.show_hover_link, self.marker_letters, self.marker_fontsize) = get_emacs_vars(
+        (self.default_zoom, self.show_hover_link,
+         self.marker_letters, self.marker_fontsize,
+         self.scroll_step) = get_emacs_vars(
             ["eaf-browser-default-zoom",
              "eaf-webengine-show-hover-link",
              "eaf-marker-letters",
-             "eaf-marker-fontsize"])
+             "eaf-marker-fontsize",
+             "eaf-browser-scroll-step"])
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -421,12 +424,12 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def scroll_up(self):
         ''' Scroll up.'''
-        self.scroll_wheel(0, -400)
+        self.scroll_wheel(0, -self.scroll_step)
 
     @interactive(insert_or_do=True)
     def scroll_down(self):
         ''' Scroll down.'''
-        self.scroll_wheel(0, 400)
+        self.scroll_wheel(0, self.scroll_step)
 
     @interactive
     def scroll_up_page(self):
