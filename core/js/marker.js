@@ -320,7 +320,7 @@ z-index: 2140000001;\
                 moveCursorToEnd(node); // move cursor to the end of line after focus.
             }
         } else if(node.href != undefined && node.href != '' && node.getAttribute('href') != '' &&
-                  node.getAttribute('class' != 'toggle')){
+                  node.getAttribute('class') != 'toggle'){
             if (node.href.includes('javascript:void') || node.getAttribute('href') == '#'){
                 action = "eaf::[href]click";
                 node.click();
