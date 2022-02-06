@@ -473,12 +473,10 @@ class FetchMarkerInputThread(QThread):
                 self.running_flag = False
                 eval_in_emacs('exit-minibuffer', [])
                 message_to_emacs("Quit marker selection.")
-                self.match_marker.emit(self.callback_tag, minibuffer_input)
             elif marker_input_finish:
                 self.running_flag = False
                 eval_in_emacs('exit-minibuffer', [])
                 message_to_emacs("Marker selected.")
-                self.match_marker.emit(self.callback_tag, minibuffer_input)
 
             time.sleep(0.1)
 
