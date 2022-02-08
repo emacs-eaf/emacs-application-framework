@@ -183,7 +183,12 @@ class Buffer(QGraphicsScene):
         Move cursor to bottom right corner of screen.
         '''
         screen = qApp.primaryScreen()
-        QCursor().setPos(screen, screen.size().width(), screen.size().height())
+        try:
+            QCursor().setPos(screen, screen.size().width(), screen.size().height())
+        except:
+            # Moves the cursor the primary screen to the global screen position (x, y).
+            # Sometimes, setPos(QScreen, Int, Int) API don't exists.
+            QCursor().setPos(screen.size().width(), screen.size().height())
 
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''
