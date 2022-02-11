@@ -19,21 +19,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QVariant, QTimer, QFile, QPointF, QPoint
-from PyQt5.QtGui import QColor, QScreen, QWheelEvent
-from PyQt5.QtNetwork import QNetworkCookie
+from PyQt5 import QtCore
+from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint
+from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtWebChannel import QWebChannel
 from core.buffer import Buffer
-from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, abstract, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
-from functools import partial
-from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
+from core.utils import touch, string_to_base64, popen_and_call, call_and_check_code, interactive, eval_in_emacs, message_to_emacs, clear_emacs_message, open_url_in_background_tab, duplicate_page_in_new_tab, open_url_in_new_tab, open_url_in_new_tab_other_window, focus_emacs_buffer, atomic_edit, get_emacs_config_dir, to_camel_case, get_emacs_vars
+from urllib.parse import urlparse, parse_qs
 import base64
 import os
 import platform
-import sqlite3
 
 MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
@@ -141,6 +137,8 @@ class BrowserView(QWebEngineView):
         else:
             filtered = dict((k, v) for k, v in qd.items())
 
+        from urllib.parse import urlunparse, urlencode
+        
         return urlunparse([
             parsed.scheme,
             parsed.netloc,
@@ -392,6 +390,8 @@ class BrowserView(QWebEngineView):
         return self.web_page.execute_javascript(js)
 
     def scroll_wheel(self, x_offset, y_offset):
+        from PyQt5.QtGui import QWheelEvent
+        
         self.simulated_wheel_event = True
 
         pos = self.rect().center()
@@ -716,6 +716,8 @@ class BrowserCookieStorage:
         ''' Load cookies.'''
         with open(self.cookie_file, 'rb+') as store:
             cookies = store.read()
+            from PyQt5.QtNetwork import QNetworkCookie
+            
             return QNetworkCookie.parseCookies(cookies)
 
     def save_cookie(self, cookie):
@@ -928,6 +930,8 @@ class BrowserBuffer(Buffer):
         self.send_input_message("Save current webpage as PDF?", "save_as_pdf", "yes-or-no")
 
     def _save_as_single_file(self):
+        from functools import partial
+        
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
         file_path = os.path.join(os.path.expanduser(self.download_path), "{}.html".format(parsed.netloc))
@@ -1466,6 +1470,8 @@ class BrowserBuffer(Buffer):
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
+        import sqlite3
+        
         self._conn = sqlite3.connect(dbpath)
         self._conn.execute("""
         CREATE TABLE IF NOT EXISTS ZoomSize

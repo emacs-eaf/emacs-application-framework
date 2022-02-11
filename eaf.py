@@ -24,22 +24,15 @@
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
 from PyQt5 import QtWebEngineWidgets as NeverUsed # noqa
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_vars, get_emacs_config_dir, to_camel_case
-from core.view import View
+from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
-from sys import version_info
-import importlib
 import json
-import logging
 import os
 import platform
-import socket
-import subprocess
 import threading
+
 if platform.system() == "Windows":
     import pygetwindow as gw
 
@@ -69,9 +62,11 @@ class EAF(object):
 
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
+        self.server.allow_reuse_address = True
+        
+        # import logging
         # self.server = ThreadingEPCServer(('localhost', 0)
         # self.server.logger.setLevel(logging.DEBUG)
-        self.server.allow_reuse_address = True
 
         eaf_config_dir = get_emacs_config_dir()
         self.session_file = os.path.join(eaf_config_dir, "session.json")
@@ -160,6 +155,8 @@ class EAF(object):
     def create_buffer(self, buffer_id, url, module_path, arguments):
         ''' Create buffer.
         create_buffer can't wrap with @PostGui, because need call by createNewWindow signal of browser.'''
+        import importlib
+        
         global emacs_width, emacs_height, proxy_string
 
         # Load module with app absolute path.
@@ -209,6 +206,8 @@ class EAF(object):
     @PostGui()
     def update_views(self, args):
         ''' Update views.'''
+        from core.view import View
+
         view_infos = args.split(",")
 
         # Do something if buffer's all view hide after update_views operation.

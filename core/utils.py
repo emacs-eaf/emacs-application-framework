@@ -19,24 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
-from PyQt5.QtGui import QClipboard
-from PyQt5.QtWidgets import QApplication
-from epc.client import EPCClient
-from functools import wraps
-from ast import literal_eval
-import base64
-import functools
-import os
-import socket
-import subprocess
-import sys
-import threading
-import re
+from PyQt5.QtCore import QObject, pyqtSignal
 
-class PostGui(QtCore.QObject):
+class PostGui(QObject):
 
-    through_thread = QtCore.pyqtSignal(object, object)
+    through_thread = pyqtSignal(object, object)
 
     def __init__(self, inclass=True):
         super(PostGui, self).__init__()
@@ -45,8 +32,10 @@ class PostGui(QtCore.QObject):
 
     def __call__(self, func):
         self._func = func
+        
+        from functools import wraps
 
-        @functools.wraps(func)
+        @wraps(func)
         def obj_call(*args, **kwargs):
             self.emit_signal(args, kwargs)
         return obj_call
@@ -67,6 +56,8 @@ class PostGui(QtCore.QObject):
 
 
 def touch(path):
+    import os
+    
     if not os.path.exists(path):
         basedir = os.path.dirname(path)
 
@@ -80,6 +71,8 @@ def get_free_port():
     """
     Determines a free port using sockets.
     """
+    import socket
+    
     free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     free_socket.bind(('0.0.0.0', 0))
     free_socket.listen(5)
@@ -90,18 +83,23 @@ def get_free_port():
 
 def is_port_in_use(port):
     import socket
+    
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
 def string_to_base64(text):
+    import base64
     return str(base64.b64encode(str(text).encode("utf-8")), "utf-8")
 
 def get_local_ip():
     try:
+        import socket
+
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         return s.getsockname()[0]
     except OSError:
+        import sys
         print("Network is unreachable")
         sys.exit()
 
@@ -113,10 +111,14 @@ def popen_and_call(popen_args, on_exit, stdout_file=None):
     would give to subprocess.Popen.
     """
     def run_in_thread(on_exit, popen_args):
+        import subprocess
+
         proc = subprocess.Popen(popen_args, stdout=stdout_file)
         proc.wait()
         on_exit()
         return
+    import threading
+
     thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
     thread.start()
     # returns immediately after the thread starts
@@ -130,9 +132,14 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
     would give to subprocess.Popen.
     """
     def run_in_thread(on_exit, popen_args):
+        import subprocess
+
         retcode = subprocess.call(popen_args, stdout=stdout_file)
         on_exit(retcode)
         return
+    
+    import threading
+
     thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
     thread.start()
     # returns immediately after the thread starts
@@ -140,6 +147,9 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
 
 def get_clipboard_text():
     ''' Get text from system clipboard.'''
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtGui import QClipboard
+
     clipboard = QApplication.clipboard()
     text = clipboard.text()
     if text:
@@ -152,6 +162,9 @@ def get_clipboard_text():
 
 def set_clipboard_text(text):
     ''' Set text to system clipboard.'''
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtGui import QClipboard
+    
     clipboard = QApplication.clipboard()
     clipboard.setText(text)
 
@@ -164,10 +177,13 @@ def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
     Defines an interactive command invoked from Emacs.
     """
     def wrap(f, insert_or_do = insert_or_do, msg_emacs = msg_emacs, new_name = new_name):
+        from functools import wraps
+        
         f.interactive = True
         f.insert_or_do = insert_or_do
         f.msg_emacs = msg_emacs
         f.new_name = new_name
+        
         @wraps(f)
         def wrapped_f(*args, **kwargs):
             return f(*args, **kwargs)
@@ -187,6 +203,8 @@ def abstract(f):
     We don't use abs.abstractmethod cause we don't need strict
     implementation check.
     """
+    from functools import wraps
+    
     f.abstract = True
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -196,6 +214,8 @@ def abstract(f):
 epc_client = None
 
 def init_epc_client(emacs_server_port):
+    from epc.client import EPCClient
+    
     global epc_client
 
     if epc_client == None:
@@ -296,38 +316,6 @@ def focus_emacs_buffer(buffer_id):
 def atomic_edit(buffer_id, focus_text):
     eval_in_emacs('eaf--atomic-edit', [buffer_id, focus_text])
 
-def list_string_to_list(list_string):
-    '''Convert the list string from emacs var to list type.'''
-    list_var = list_string.removeprefix('(').removesuffix(')')
-    quote = 0
-    extra_char_num = 0
-    for x in range(len(list_var)):
-        x += extra_char_num
-        if list_var[x] == '"':
-            if quote == 1:
-                quote = 0
-            else:
-                quote = 1
-
-        if (list_var[x] == '(') and (quote == 0):
-            list_var = list_var[:x] + '[' + list_var[x + 1:]
-        elif (list_var[x] == ')') and (quote == 0):
-            list_var = list_var[:x] + ']' + list_var[x + 1:]
-        elif (list_var[x] == ' ') and (quote == 0):
-            list_var = list_var[:x] + '{split}' + list_var[x + 1:]
-            extra_char_num += 6
-        elif (list_var[x] == '.') and (quote == 0):
-            list_var = list_var[:x] + '' + list_var[x + 2:]
-            extra_char_num -= 2
-
-    list_var = str(list_var.split('{split}')).replace("', '[", "', ['").replace("]'", "']").replace("'[", "['").replace("'\"", "'").replace("\"'", "'")
-
-    if list_var[0] == "'" and list_var[1] == "[":
-        list_var = "['" + list_var[2:]
-
-    list_var = literal_eval(str(list_var))
-    return list_var
-
 def convert_emacs_bool(symbol_value, symbol_is_boolean):
     if symbol_is_boolean == "t":
         return symbol_value == True
@@ -349,6 +337,8 @@ def get_emacs_var(var_name):
 emacs_config_dir = ""
 
 def get_emacs_config_dir():
+    import os
+    
     global emacs_config_dir
 
     if emacs_config_dir == "":

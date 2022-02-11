@@ -19,13 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
-from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
+from PyQt5.QtGui import QPainter, QWindow, QBrush
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_result
-import platform
-import os
 
 class View(QWidget):
 
@@ -110,6 +107,8 @@ class View(QWidget):
     def eventFilter(self, obj, event):
         # import time
         # print(time.time(), event.type())
+        
+        import platform
 
         if event.type() in [QEvent.ShortcutOverride]:
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
@@ -128,6 +127,8 @@ class View(QWidget):
 
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
+        import platform
+        
         self.reparent()
 
         if platform.system() in ["Windows", "Darwin"]:

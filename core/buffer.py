@@ -19,14 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
-from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
+from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal
+from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
-from PyQt5.QtCore import Qt, QEvent, QThread
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_func_result, get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_var, get_emacs_func_result, get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background
 import abc
 import string
-import time
 
 qt_key_dict = {}
 
@@ -99,9 +97,9 @@ qt_text_dict = {
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
 
-    aspect_ratio_change = QtCore.pyqtSignal()
-    enter_fullscreen_request = QtCore.pyqtSignal()
-    exit_fullscreen_request = QtCore.pyqtSignal()
+    aspect_ratio_change = pyqtSignal()
+    enter_fullscreen_request = pyqtSignal()
+    exit_fullscreen_request = pyqtSignal()
 
     def __init__(self, buffer_id, url, arguments, fit_to_view):
         super(QGraphicsScene, self).__init__()
@@ -451,7 +449,7 @@ class Buffer(QGraphicsScene):
 
 class FetchMarkerInputThread(QThread):
 
-    match_marker = QtCore.pyqtSignal(str, str)
+    match_marker = pyqtSignal(str, str)
 
     def __init__(self, callback_tag, fetch_marker_callback):
         QThread.__init__(self)
@@ -483,12 +481,13 @@ class FetchMarkerInputThread(QThread):
                 eval_in_emacs('exit-minibuffer', [])
                 message_to_emacs("Marker selected.")
 
+            import time
             time.sleep(0.1)
 
 class FetchSearchInputThread(QThread):
 
-    search_changed = QtCore.pyqtSignal(str, str)
-    search_finish = QtCore.pyqtSignal(str)
+    search_changed = pyqtSignal(str, str)
+    search_finish = pyqtSignal(str)
 
     def __init__(self, callback_tag):
         QThread.__init__(self)
@@ -510,6 +509,7 @@ class FetchSearchInputThread(QThread):
             else:
                 self.stop()
 
+            import time
             time.sleep(0.1)
 
     def stop(self):

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
+from shutil import which, rmtree
 import argparse
+import datetime
+import json
 import os
 import platform
-import sys
 import subprocess
-from shutil import which, rmtree
-import json
-import datetime
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
