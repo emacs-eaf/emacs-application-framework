@@ -971,20 +971,22 @@ kxsgtn/ignore_spurious_focus_events_for/")
       (defun eaf--mac-focus-change ()
         "Manage Emacs's focus change."
         (if eaf--mac-safe-focus-change
-            (let ((front (shell-command-to-string "app-frontmost --name")))
-              (cond
-               ((string= "Python\n" front)
-                (setq eaf--mac-switch-to-python t))
+            (if (executable-find "app-frontmost")
+                (let ((front (shell-command-to-string "app-frontmost --name")))
+                  (cond
+                   ((string= "Python\n" front)
+                    (setq eaf--mac-switch-to-python t))
 
-               ((string= "Emacs\n" front)
-                (cond
-                 (eaf--mac-switch-to-python
-                  (setq eaf--mac-switch-to-python nil))
-                 ((not eaf--mac-has-focus)
-                  (run-with-timer 0.1 nil #'eaf--mac-focus-in))
-                 (eaf--mac-has-focus
-                  (eaf--mac-focus-out))))
-               (t (eaf--mac-focus-out))))
+                   ((string= "Emacs\n" front)
+                    (cond
+                     (eaf--mac-switch-to-python
+                      (setq eaf--mac-switch-to-python nil))
+                     ((not eaf--mac-has-focus)
+                      (run-with-timer 0.1 nil #'eaf--mac-focus-in))
+                     (eaf--mac-has-focus
+                      (eaf--mac-focus-out))))
+                   (t (eaf--mac-focus-out))))
+              (message "Please install app-frontmost from https://pypi.org/project/mac-app-frontmost/ to make EAF works with macOS platform."))
           (setq eaf--mac-unsafe-focus-change-timer
                 (unless eaf--mac-unsafe-focus-change-timer
                   (run-at-time 0.06 nil
