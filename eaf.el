@@ -396,7 +396,7 @@ been initialized."
   ""
   :type 'boolean)
 
-(defcustom eaf-find-file-ext-blacklist '("md" "org" "html" "htm")
+(defcustom eaf-find-file-ext-blacklist '("md" "org" "html" "htm" "epub")
   "A blacklist of extensions to avoid when opening `find-file' file using EAF."
   :type 'cons)
 
