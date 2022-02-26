@@ -464,7 +464,7 @@ Consider a headline with property PROPERTY as parent headline."
 (defun eaf-interleave--pdf-viewer-current-page (url)
   "get current page index."
   (let ((id (buffer-local-value 'eaf--buffer-id (eaf-interleave--find-buffer url))))
-    (string-to-number (eaf-call-sync "call_function" id "current_page"))))
+    (string-to-number (eaf-call-sync "execute_function" id "current_page"))))
 
 (defun eaf-interleave--pdf-viewer-goto-page (url page)
   "goto page"

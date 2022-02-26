@@ -19,13 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QEvent, QPoint
-from PyQt5.QtGui import QPainter, QWindow, QBrush, QColor
+from PyQt5.QtGui import QPainter, QWindow, QBrush
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer
-import platform
-import os
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_result
 
 class View(QWidget):
 
@@ -35,7 +32,9 @@ class View(QWidget):
         self.buffer = buffer
 
         # Init widget attributes.
-        if platform.system() == "Darwin":
+        if get_emacs_func_result("eaf-emacs-running-in-wayland-native", []):
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.BypassWindowManagerHint)
+        elif get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         else:
             self.setWindowFlags(Qt.FramelessWindowHint)
@@ -47,7 +46,6 @@ class View(QWidget):
         # Init attributes.
         self.view_info = view_info
         (self.buffer_id, self.emacs_xid, self.x, self.y, self.width, self.height) = view_info.split(":")
-        self.emacs_xid = int(self.emacs_xid)
         self.x = int(self.x)
         self.y = int(self.y)
         self.width = int(self.width)
@@ -100,7 +98,7 @@ class View(QWidget):
             horizontal_padding = (widget_width - view_width) / 2
             vertical_padding = self.buffer.vertical_padding_ratio * widget_height
 
-            self.buffer.buffer_widget.resize(view_width, view_height)
+            self.buffer.buffer_widget.resize(int(view_width), int(view_height))
 
             self.layout.setContentsMargins(
                 horizontal_padding, vertical_padding,
@@ -109,6 +107,8 @@ class View(QWidget):
     def eventFilter(self, obj, event):
         # import time
         # print(time.time(), event.type())
+        
+        import platform
 
         if event.type() in [QEvent.ShortcutOverride]:
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
@@ -127,6 +127,8 @@ class View(QWidget):
 
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
+        import platform
+        
         self.reparent()
 
         if platform.system() in ["Windows", "Darwin"]:
@@ -140,10 +142,20 @@ class View(QWidget):
         # print("Reparent: ", self.buffer.url)
         qwindow = self.windowHandle()
 
-        if platform.system() != "Darwin":
-            qwindow.setParent(QWindow.fromWinId(self.emacs_xid))
+        if not get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+            qwindow.setParent(QWindow.fromWinId(int(self.emacs_xid)))
 
         qwindow.setPosition(QPoint(self.x, self.y))
+
+    def try_show_top_view(self):
+        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+            self.show()
+
+    def try_hide_top_view(self):
+        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            self.hide()
 
     def destroy_view(self):
         # print("Destroy: ", self.buffer.url)

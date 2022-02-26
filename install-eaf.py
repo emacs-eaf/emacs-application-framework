@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
+from shutil import which, rmtree
 import argparse
+import datetime
+import json
 import os
 import platform
-import sys
 import subprocess
-from shutil import which, rmtree
-import json
-import datetime
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
@@ -92,14 +92,37 @@ def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     else:
         return None
 
+def prune_existing_sys_deps(deps_list):
+    remove_deps = []
+    for dep in deps_list:
+        if "node" in dep and which("node"):
+            remove_deps.append(dep)
+        elif "npm" in dep and which("npm"):
+            remove_deps.append(dep)
+    return list(set(deps_list) - set(remove_deps))
+
+def get_archlinux_aur_helper():
+    command = None
+    for helper in ["pacaur", "yay", "yaourt", "paru"]:
+        if which(helper):
+            command = helper
+            break
+    if command:
+        return command
+    else:
+        print("Please install one of AUR's helper.", file=std.err)
+        sys.exit(1)
+
 def install_sys_deps(distro: str, deps_list):
+    deps_list = prune_existing_sys_deps(deps_list)
     command = []
     if which("dnf"):
         command = ['sudo', 'dnf', '-y', 'install']
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif distro == 'pacman':
-        command = ['yay', '-Sy', '--noconfirm', '--needed']
+        aur_helper = get_archlinux_aur_helper()
+        command = [aur_helper, '-Sy', '--noconfirm', '--needed']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
     elif which("zypper"):
@@ -153,7 +176,7 @@ def add_or_update_app(app: str, app_spec_dict):
     if os.path.exists(path):
         print("[EAF] Updating", app, "to newest version...")
     else:
-        print("\n[EAF] Adding", app, "application to EAF...")
+        print("[EAF] Adding", app, "application to EAF...")
 
     updated = True
     if os.path.exists(path):
@@ -170,6 +193,8 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
         output_lines = run_command(["git", "pull"], path=path, get_result=True)
+        if output_lines is None:
+            raise Exception("git pull failed!")
         for output in output_lines:
             print(output.rstrip())
             if "Already up to date." in output:
@@ -189,8 +214,10 @@ def get_distro():
         distro = "apt"
     elif which("pacman"):
         distro = "pacman"
+        aur_helper = get_archlinux_aur_helper()
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
-            run_command(['yay', '-Sy', '--noconfirm', '--needed'])
+            run_command([aur_helper, '-Sy', '--noconfirm', '--needed'])
+
     elif which("pkg"):
         distro = "pkg"
     elif which("zypper"):

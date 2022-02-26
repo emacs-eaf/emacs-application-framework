@@ -1,9 +1,12 @@
 {
     "pacman": [
         "wmctrl",
+        "python",
         "python-pyqt5",
         "python-pyqt5-sip",
-        "python-pyqtwebengine"
+        "python-pyqt5-webengine",
+        "nodejs",
+        "npm"
     ],
     "apt": [
         "wmctrl",
@@ -22,6 +25,7 @@
         "glib2-devel",
         "python3-qt5",
         "python3-pyqt5-sip",
+        "python3-qt5-webengine",
         "pyqtwebengine-devel",
         "python3-pygit2"
     ],

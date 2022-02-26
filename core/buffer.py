@@ -19,14 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
-from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QBrush, QColor
+from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal
+from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
-from PyQt5.QtCore import Qt, QEvent, QThread
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_vars, get_emacs_var, get_emacs_func_result
+from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_var, get_emacs_func_result, get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background
 import abc
 import string
-import time
 
 qt_key_dict = {}
 
@@ -99,9 +97,9 @@ qt_text_dict = {
 class Buffer(QGraphicsScene):
     __metaclass__ = abc.ABCMeta
 
-    aspect_ratio_change = QtCore.pyqtSignal()
-    enter_fullscreen_request = QtCore.pyqtSignal()
-    exit_fullscreen_request = QtCore.pyqtSignal()
+    aspect_ratio_change = pyqtSignal()
+    enter_fullscreen_request = pyqtSignal()
+    exit_fullscreen_request = pyqtSignal()
 
     def __init__(self, buffer_id, url, arguments, fit_to_view):
         super(QGraphicsScene, self).__init__()
@@ -122,10 +120,9 @@ class Buffer(QGraphicsScene):
         self.fetch_marker_input_thread = None
         self.fetch_search_input_thread = None
 
-        (self.theme_background_color, self.theme_foreground_color, self.theme_mode) = get_emacs_vars([
-            "eaf-emacs-theme-background-color",
-            "eaf-emacs-theme-foreground-color",
-            "eaf-emacs-theme-mode"])
+        self.theme_mode = get_emacs_theme_mode()
+        self.theme_foreground_color = get_emacs_theme_foreground()
+        self.theme_background_color = get_emacs_theme_background()
 
         self.enter_fullscreen_request.connect(self.enable_fullscreen)
         self.exit_fullscreen_request.connect(self.disable_fullscreen)
@@ -157,7 +154,7 @@ class Buffer(QGraphicsScene):
         ''' Build insert or do.'''
         def _do ():
             if self.is_focus():
-                self.fake_key_event(self.current_event_string)
+                self.send_key(self.current_event_string)
             else:
                 getattr(self, method_name)()
         setattr(self, "insert_or_{}".format(method_name), _do)
@@ -184,7 +181,12 @@ class Buffer(QGraphicsScene):
         Move cursor to bottom right corner of screen.
         '''
         screen = qApp.primaryScreen()
-        QCursor().setPos(screen, screen.size().width(), screen.size().height())
+        try:
+            QCursor().setPos(screen, screen.size().width(), screen.size().height())
+        except:
+            # Moves the cursor the primary screen to the global screen position (x, y).
+            # Sometimes, setPos(QScreen, Int, Int) API don't exists.
+            QCursor().setPos(screen.size().width(), screen.size().height())
 
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''
@@ -269,15 +271,15 @@ class Buffer(QGraphicsScene):
             self.fetch_marker_input_thread = None
 
     def start_search_input_monitor_thread(self, callback_tag):
-        self.fetch_marker_input_thread = FetchSearchInputThread(callback_tag)
-        self.fetch_marker_input_thread.search_changed.connect(self.handle_input_response)
-        self.fetch_marker_input_thread.search_finish.connect(self.handle_search_finish)
-        self.fetch_marker_input_thread.start()
+        self.fetch_search_input_thread = FetchSearchInputThread(callback_tag)
+        self.fetch_search_input_thread.search_changed.connect(self.handle_input_response)
+        self.fetch_search_input_thread.search_finish.connect(self.handle_search_finish)
+        self.fetch_search_input_thread.start()
 
     def stop_search_input_monitor_thread(self):
-        if self.fetch_marker_input_thread != None and self.fetch_marker_input_thread.isRunning():
-            self.fetch_marker_input_thread.running_flag = False
-            self.fetch_marker_input_thread = None
+        if self.fetch_search_input_thread != None and self.fetch_search_input_thread.isRunning():
+            self.fetch_search_input_thread.stop()
+            self.fetch_search_input_thread = None
 
     @abstract
     def handle_input_response(self, callback_tag, result_content):
@@ -318,7 +320,7 @@ class Buffer(QGraphicsScene):
     def update_with_data(self, update_data):
         pass
 
-    def execute_function(self, function_name):
+    def eval_function(self, function_name):
         ''' Execute function.'''
         getattr(self, function_name)()
 
@@ -332,19 +334,29 @@ class Buffer(QGraphicsScene):
         ''' Execute JavaScript function and return result.'''
         return None
 
-    def call_function(self, function_name):
+    @abstract
+    def eval_js_code(self, function_name, function_arguments):
+        ''' Eval JavaScript function.'''
+        pass
+
+    @abstract
+    def execute_js_code(self, function_name, function_arguments):
+        ''' Execute JavaScript function and return result.'''
+        return None
+
+    def execute_function(self, function_name):
         ''' Call function.'''
         return getattr(self, function_name)()
 
-    def call_function_with_args(self, function_name, *args, **kwargs):
+    def execute_function_with_args(self, function_name, *args, **kwargs):
         ''' Call function with arguments.'''
         return getattr(self, function_name)(*args, **kwargs)
 
     @abstract
-    def fake_key_event_filter(self, event_string):
+    def send_key_filter(self, event_string):
         pass
 
-    def fake_key_event(self, event_string):
+    def send_key(self, event_string):
         ''' Fake key event.'''
         # Init.
         text = event_string
@@ -372,9 +384,9 @@ class Buffer(QGraphicsScene):
         for widget in self.get_key_event_widgets():
             QApplication.sendEvent(widget, key_press)
 
-        self.fake_key_event_filter(event_string)
+        self.send_key_filter(event_string)
 
-    def fake_key_sequence(self, event_string):
+    def send_key_sequence(self, event_string):
         ''' Fake key sequence.'''
         event_list = event_string.split("-")
 
@@ -437,7 +449,7 @@ class Buffer(QGraphicsScene):
 
 class FetchMarkerInputThread(QThread):
 
-    match_marker = QtCore.pyqtSignal(str, str)
+    match_marker = pyqtSignal(str, str)
 
     def __init__(self, callback_tag, fetch_marker_callback):
         QThread.__init__(self)
@@ -453,7 +465,7 @@ class FetchMarkerInputThread(QThread):
         while self.running_flag:
             ## In some cases, the markers may not be ready when fetch_marker_callback is first called,
             ## so we need to call fetch_marker_callback multiple times.
-            if len(self.markers) == 0:
+            if self.markers is None or len(self.markers) == 0:
                 self.markers = self.fetch_marker_callback()
             minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
 
@@ -464,19 +476,18 @@ class FetchMarkerInputThread(QThread):
                 self.running_flag = False
                 eval_in_emacs('exit-minibuffer', [])
                 message_to_emacs("Quit marker selection.")
-                self.match_marker.emit(self.callback_tag, minibuffer_input)
             elif marker_input_finish:
                 self.running_flag = False
                 eval_in_emacs('exit-minibuffer', [])
                 message_to_emacs("Marker selected.")
-                self.match_marker.emit(self.callback_tag, minibuffer_input)
 
+            import time
             time.sleep(0.1)
 
 class FetchSearchInputThread(QThread):
 
-    search_changed = QtCore.pyqtSignal(str, str)
-    search_finish = QtCore.pyqtSignal(str)
+    search_changed = pyqtSignal(str, str)
+    search_finish = pyqtSignal(str)
 
     def __init__(self, callback_tag):
         QThread.__init__(self)
@@ -496,7 +507,11 @@ class FetchSearchInputThread(QThread):
                     self.search_changed.emit(self.callback_tag, minibuffer_input)
                     self.search_string = minibuffer_input
             else:
-                self.search_finish.emit(self.callback_tag)
-                self.running_flag = False
+                self.stop()
 
+            import time
             time.sleep(0.1)
+
+    def stop(self):
+        self.search_finish.emit(self.callback_tag)
+        self.running_flag = False
