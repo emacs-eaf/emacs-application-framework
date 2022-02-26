@@ -1724,6 +1724,9 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (when (and (ignore-errors (require 'counsel)) (featurep 'counsel))
   (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
 
+;; Don't promt user when exist EAF python process.
+(setq confirm-kill-processes nil)
+
 (provide 'eaf)
 
 ;;; eaf.el ends here
