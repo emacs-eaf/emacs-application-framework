@@ -24,22 +24,15 @@
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
 from PyQt5 import QtWebEngineWidgets as NeverUsed # noqa
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QLibraryInfo, QTimer
 from PyQt5.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt5.QtWidgets import QApplication
-from core.utils import PostGui, string_to_base64, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, list_string_to_list, get_emacs_vars, get_emacs_config_dir, to_camel_case
-from core.view import View
+from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
-from sys import version_info
-import importlib
 import json
-import logging
 import os
 import platform
-import socket
-import subprocess
 import threading
+
 if platform.system() == "Windows":
     import pygetwindow as gw
 
@@ -57,14 +50,23 @@ class EAF(object):
         self.buffer_dict = {}
         self.view_dict = {}
 
+        for name in ["scroll_other_buffer", "eval_js_function", "eval_js_code", "action_quit", "send_key", "send_key_sequence",
+                     "handle_search_forward", "handle_search_backward", "set_focus_text"]:
+            self.build_buffer_function(name)
+
+        for name in ["execute_js_function", "execute_js_code", "execute_function", "execute_function_with_args"]:
+            self.build_buffer_return_function(name)
+
         # Init EPC client port.
         init_epc_client(int(emacs_server_port))
 
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
+        self.server.allow_reuse_address = True
+        
+        # import logging
         # self.server = ThreadingEPCServer(('localhost', 0)
         # self.server.logger.setLevel(logging.DEBUG)
-        self.server.allow_reuse_address = True
 
         eaf_config_dir = get_emacs_config_dir()
         self.session_file = os.path.join(eaf_config_dir, "session.json")
@@ -135,32 +137,13 @@ class EAF(object):
         else:
             self.enable_proxy()
 
-    def build_emacs_server_connect(self, port):
-        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.connect(('127.0.0.1', port))
-        return conn
-
-    def get_command_result(self, command):
-        ''' Execute the command and return the result. '''
-        if version_info >= (3,7):
-            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE, text=True).stdout
-        else:
-            return subprocess.run(command, check=False, shell=True, stdout=subprocess.PIPE).stdout
-
     @PostGui()
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
         ''' Update buffer with url '''
-        for buffer in list(self.buffer_dict.values()):
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            buffer = self.buffer_dict[buffer_id]
             if buffer.module_path == module_path and buffer.url == buffer_url:
                 buffer.update_with_data(update_data)
-                break
-
-    @PostGui()
-    def scroll_other_buffer(self, view_info, scroll_direction, scroll_type):
-        ''' Scroll to other buffer '''
-        (buffer_id, _, _, _, _) = view_info.split(":")
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].scroll_other_buffer(scroll_direction, scroll_type)
 
     @PostGui()
     def new_buffer(self, buffer_id, url, module_path, arguments):
@@ -172,6 +155,8 @@ class EAF(object):
     def create_buffer(self, buffer_id, url, module_path, arguments):
         ''' Create buffer.
         create_buffer can't wrap with @PostGui, because need call by createNewWindow signal of browser.'''
+        import importlib
+        
         global emacs_width, emacs_height, proxy_string
 
         # Load module with app absolute path.
@@ -221,6 +206,8 @@ class EAF(object):
     @PostGui()
     def update_views(self, args):
         ''' Update views.'''
+        from core.view import View
+
         view_infos = args.split(",")
 
         # Do something if buffer's all view hide after update_views operation.
@@ -329,64 +316,48 @@ class EAF(object):
         for buffer_id in tmp_buffer_dict:
             self.kill_buffer(buffer_id)
 
+    def build_buffer_function(self, name):
+        @PostGui()
+        def _do(*args):
+            buffer_id = args[0]
+
+            if type(buffer_id) == str and buffer_id in self.buffer_dict:
+                try:
+                    getattr(self.buffer_dict[buffer_id], name)(*args[1:])
+                except AttributeError:
+                    import traceback
+                    traceback.print_exc()
+                    message_to_emacs("Got error with : " + name + " (" + buffer_id + ")")
+
+        setattr(self, name, _do)
+
+    def build_buffer_return_function(self, name):
+        def _do(*args):
+            buffer_id = args[0]
+
+            if type(buffer_id) == str and buffer_id in self.buffer_dict:
+                try:
+                    return getattr(self.buffer_dict[buffer_id], name)(*args[1:])
+                except AttributeError:
+                    import traceback
+                    traceback.print_exc()
+                    message_to_emacs("Got error with : " + name + " (" + buffer_id + ")")
+                    return None
+
+        setattr(self, name, _do)
+
     @PostGui()
-    def execute_function(self, buffer_id, function_name, event_string):
+    def eval_function(self, buffer_id, function_name, event_string):
         ''' Execute function and do not return anything. '''
         if type(buffer_id) == str and buffer_id in self.buffer_dict:
             try:
                 buffer = self.buffer_dict[buffer_id]
                 buffer.current_event_string = event_string
-                buffer.execute_function(function_name)
+                buffer.eval_function(function_name)
             except AttributeError:
                 import traceback
                 traceback.print_exc()
                 message_to_emacs("Cannot execute function: " + function_name + " (" + buffer_id + ")")
-
-    @PostGui()
-    def eval_js_function(self, buffer_id, function_name, function_arguments):
-        ''' Eval JavaScript function and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                buffer = self.buffer_dict[buffer_id]
-                buffer.eval_js_function(function_name, function_arguments)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot execute JavaScript function: " + to_camel_case(function_name) + " (" + buffer_id + ")")
-
-    def execute_js_function(self, buffer_id, function_name, function_arguments):
-        ''' Execute JavaScript function and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            try:
-                buffer = self.buffer_dict[buffer_id]
-                return buffer.execute_js_function(function_name, function_arguments)
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot execute JavaScript function: " + to_camel_case(function_name) + " (" + buffer_id + ")")
-                return None
-
-    def call_function(self, buffer_id, function_name):
-        ''' Call function and return the result. '''
-        if buffer_id in self.buffer_dict:
-            try:
-                return str(self.buffer_dict[buffer_id].call_function(function_name))
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot call function: " + function_name)
-                return ""
-
-    def call_function_with_args(self, buffer_id, function_name, *args, **kwargs):
-        ''' Call function with arguments and return the result. '''
-        if buffer_id in self.buffer_dict:
-            try:
-                return str(self.buffer_dict[buffer_id].call_function_with_args(function_name, *args, **kwargs))
-            except AttributeError:
-                import traceback
-                traceback.print_exc()
-                message_to_emacs("Cannot call function: " + function_name)
-                return ""
 
     def get_emacs_wsl_window_id(self):
         if platform.system() == "Windows":
@@ -398,86 +369,33 @@ class EAF(object):
             w[0].activate()
 
     @PostGui()
-    def action_quit(self, buffer_id):
-        ''' Execute action_quit() for specified buffer.'''
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].action_quit()
-
-    @PostGui()
-    def send_key(self, buffer_id, event_string):
-        ''' Send event to buffer when found match buffer.'''
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].fake_key_event(event_string)
-
-    @PostGui()
-    def send_key_sequence(self, buffer_id, event_string):
-        ''' Send event to buffer when found match buffer.'''
-        if buffer_id in self.buffer_dict:
-            self.buffer_dict[buffer_id].fake_key_sequence(event_string)
-
-    @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
         ''' Handle input message for specified buffer.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.handle_input_response(callback_tag, callback_result)
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            buffer = self.buffer_dict[buffer_id]
 
-                buffer.stop_search_input_monitor_thread()
+            buffer.handle_input_response(callback_tag, callback_result)
+            buffer.stop_search_input_monitor_thread()
 
     @PostGui()
     def cancel_input_response(self, buffer_id, callback_tag):
         ''' Cancel input message for specified buffer.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.cancel_input_response(callback_tag)
+        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            buffer = self.buffer_dict[buffer_id]
 
-                buffer.stop_marker_input_monitor_thread()
-                buffer.stop_search_input_monitor_thread()
-
-    @PostGui()
-    def handle_search_forward(self, buffer_id, callback_tag):
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.handle_search_forward(callback_tag)
+            buffer.cancel_input_response(callback_tag)
+            buffer.stop_marker_input_monitor_thread()
+            buffer.stop_search_input_monitor_thread()
 
     @PostGui()
-    def handle_search_backward(self, buffer_id, callback_tag):
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.handle_search_backward(callback_tag)
+    def show_top_views(self):
+        for key in list(self.view_dict):
+            self.view_dict[key].try_show_top_view()
 
     @PostGui()
-    def update_focus_text(self, buffer_id, new_text):
-        ''' Update focus text for specified buffer.'''
-        import base64
-
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                buffer.set_focus_text(base64.b64decode(new_text).decode("utf-8"))
-
-    @PostGui()
-    def update_multiple_sub_nodes(self, buffer_id, new_text):
-        ''' Update multiplt sub nodes.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                for line in str(new_text).split("\n"):
-                    buffer.add_texted_sub_node(line)
-
-    @PostGui()
-    def update_multiple_brother_nodes(self, buffer_id, new_text):
-        ''' Update multiplt brother nodes.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                for line in str(new_text).split("\n"):
-                    buffer.add_texted_brother_node(line)
-
-    @PostGui()
-    def update_multiple_middle_nodes(self, buffer_id, new_text):
-        ''' Update multiplt middle nodes.'''
-        for buffer in list(self.buffer_dict.values()):
-            if buffer.buffer_id == buffer_id:
-                for line in str(new_text).split("\n"):
-                    buffer.add_texted_middle_node(line)
+    def hide_top_views(self):
+        for key in list(self.view_dict):
+            self.view_dict[key].try_hide_top_view()
 
     def open_devtools_tab(self, web_page):
         ''' Open devtools tab'''

@@ -2,9 +2,6 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import json
-import requests
-
 class Jsonrpc(object):
 
     MUTI_METHOD = 'system.multicall'
@@ -31,6 +28,9 @@ class Jsonrpc(object):
         return p
 
     def _post(self, action, params, onSuccess, onFail=None):
+        import requests
+        import json
+        
         if onFail is None:
             onFail = Jsonrpc._defaultErrorHandle
         paramsObject = self._genParams(action, *params)
