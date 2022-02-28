@@ -10,9 +10,6 @@
   ],
   "emerge": [
     "x11-misc/wmctrl",
-    "net-libs/nodejs",
-    "dev-python/PyQt5",
-    "dev-python/PyQt5-sip",
     "dev-python/PyQtWebEngine"
   ],
   "apt": [
