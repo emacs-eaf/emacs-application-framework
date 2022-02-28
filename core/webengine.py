@@ -689,17 +689,26 @@ class BrowserPage(QWebEnginePage):
 
     def execute_javascript(self, script_src):
         ''' Execute JavaScript.'''
-        # Build event loop.
-        self.loop = QEventLoop()
-
-        # Run JavaScript code.
-        self.runJavaScript(script_src, self.callback_js)
-
-        # Execute event loop, and wait event loop quit.
-        self.loop.exec()
-
-        # Return JavaScript function result.
-        return self.result
+        if hasattr(self, "loop") and self.loop.isRunning():
+            # NOTE:
+            # 
+            # Just return None is QEventLoop is busy, such as press 'j' key not release on webpage.
+            # Otherwise will got error 'RecursionError: maximum recursion depth exceeded while calling a Python object'.
+            # 
+            # And don't warry, API 'execute_javascript' is works well for programming purpse since we just call this interface occasionally.
+            return None
+        else:
+            # Build event loop.
+            self.loop = QEventLoop()
+            
+            # Run JavaScript code.
+            self.runJavaScript(script_src, self.callback_js)
+            
+            # Execute event loop, and wait event loop quit.
+            self.loop.exec()
+            
+            # Return JavaScript function result.
+            return self.result
 
     def callback_js(self, result):
         ''' Callback of JavaScript, call loop.quit to jump code after loop.exec.'''
