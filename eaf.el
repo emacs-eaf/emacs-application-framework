@@ -1727,7 +1727,9 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
       (eaf--post-install))))
 
 (defun eaf--post-install-sentinel (process signal)
+  (message "%s" signal)
   (when (memq (process-status process) '(exit signal))
+    (message "Running post install")
     (eaf--post-install)
     (shell-command-sentinel process signal)))
 
@@ -1745,6 +1747,8 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (message "Byte-compiling")
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir 0))
+  (message "Cleaning load path")
+  
   (message "Updating load path")
   (eaf-add-app-dirs-to-load-path)
   (message "Done"))
