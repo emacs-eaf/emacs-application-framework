@@ -176,9 +176,9 @@ def add_or_update_app(app: str, app_spec_dict):
     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
     if os.path.exists(path):
-        print("[EAF] Updating", app, "to newest version...")
+        print("\n[EAF] Updating", app, "to newest version...")
     else:
-        print("[EAF] Adding", app, "application to EAF...")
+        print("\n[EAF] Adding", app, "application to EAF...")
 
     updated = True
     if os.path.exists(path):
