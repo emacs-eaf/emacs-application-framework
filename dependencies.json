@@ -10,6 +10,7 @@
   ],
   "emerge": [
     "x11-misc/wmctrl",
+    "dev-libs/glib",
     "dev-python/PyQtWebEngine"
   ],
   "apt": [
