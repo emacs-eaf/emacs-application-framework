@@ -118,6 +118,8 @@ def install_sys_deps(distro: str, deps_list):
     command = []
     if which("dnf"):
         command = ['sudo', 'dnf', '-y', 'install']
+    elif distro == 'emerge':
+        command = ['sudo', 'emerge']
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif distro == 'pacman':
@@ -210,6 +212,8 @@ def get_distro():
     distro = ""
     if which("dnf"):
         distro = "dnf"
+    elif which("emerge"):
+        distro = "emerge"
     elif which("apt"):
         distro = "apt"
     elif which("pacman"):
