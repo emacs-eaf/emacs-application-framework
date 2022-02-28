@@ -353,7 +353,7 @@ class EAF(object):
             try:
                 buffer = self.buffer_dict[buffer_id]
                 buffer.current_event_string = event_string
-                buffer.eval_function(function_name)
+                getattr(buffer, function_name)()
             except AttributeError:
                 import traceback
                 traceback.print_exc()

@@ -320,10 +320,6 @@ class Buffer(QGraphicsScene):
     def update_with_data(self, update_data):
         pass
 
-    def eval_function(self, function_name):
-        ''' Execute function.'''
-        getattr(self, function_name)()
-
     @abstract
     def eval_js_function(self, function_name, function_arguments):
         ''' Eval JavaScript function.'''
