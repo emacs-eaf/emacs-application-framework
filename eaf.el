@@ -147,6 +147,7 @@ start with letters or digits; it excludes any subdirectory named `RCS'
 or `CVS', and any subdirectory that contains a file named `.nosearch'."
   (let (dirs
         attrs
+	normal-top-level-add-subdirs-inode-list
         (pending (list eaf-build-dir)))
     ;; This loop does a breadth-first tree walk on DIR's subtree,
     ;; putting each subdir into DIRS as its contents are examined.
@@ -159,8 +160,10 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
                                 (w32-untranslated-canonical-name this-dir))))
         ;; The Windows version doesn't report meaningful inode numbers, so
         ;; use the canonicalized absolute file name of the directory instead.
+	(message "%s: %s" this-dir contents)
         (setq attrs (or canonicalized
                         (nthcdr 10 (file-attributes this-dir))))
+	(message "%s %s" attrs normal-top-level-add-subdirs-inode-list)
         (unless (member attrs normal-top-level-add-subdirs-inode-list)
           (push attrs normal-top-level-add-subdirs-inode-list)
           (dolist (file contents)
@@ -187,7 +190,8 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
     (dolist (path load-path)
       (when (or (string-match-p "/node_modules" path)
                 (string-match-p "/dist" path))
-        (setq load-path (delete path load-path))))))
+        (setq load-path (delete path load-path))))
+    (setq load-path (cl-remove-duplicates load-path))))
 
 (eaf-add-app-dirs-to-load-path)
 
@@ -1726,12 +1730,11 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
 	(set-process-sentinel proc #'eaf--post-install-sentinel)
       (eaf--post-install))))
 
-(defun eaf--post-install-sentinel (process signal)
-  (message "%s" signal)
+(defun eaf--post-install-sentinel (process string-signal)
   (when (memq (process-status process) '(exit signal))
     (message "Running post install")
     (eaf--post-install)
-    (shell-command-sentinel process signal)))
+    (shell-command-sentinel process string-signal)))
 
 (defun eaf--symlink-directory (old new)
   (if (fboundp 'straight--symlink-recursively)
