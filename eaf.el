@@ -160,11 +160,9 @@ or `CVS', and any subdirectory that contains a file named `.nosearch'."
                                 (w32-untranslated-canonical-name this-dir))))
         ;; The Windows version doesn't report meaningful inode numbers, so
         ;; use the canonicalized absolute file name of the directory instead.
-	(message "%s: %s" this-dir contents)
-        (setq attrs (or canonicalized
+	(setq attrs (or canonicalized
                         (nthcdr 10 (file-attributes this-dir))))
-	(message "%s %s" attrs normal-top-level-add-subdirs-inode-list)
-        (unless (member attrs normal-top-level-add-subdirs-inode-list)
+	(unless (member attrs normal-top-level-add-subdirs-inode-list)
           (push attrs normal-top-level-add-subdirs-inode-list)
           (dolist (file contents)
             (and
@@ -1750,9 +1748,6 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (message "Byte-compiling")
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir 0))
-  (message "Cleaning load path")
-  (setq load-path
-	(cl-remove-if (lambda (s) (string-prefix-p (directory-file-name eaf-build-dir) s)) load-path))
   (message "Updating load path")
   (eaf-add-app-dirs-to-load-path)
   (message "Done"))
