@@ -1748,7 +1748,8 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir 0))
   (message "Cleaning load path")
-  
+  (setq load-path
+	(cl-remove-if-not (lambda s (string-match s eaf-build-dir)) load-path))
   (message "Updating load path")
   (eaf-add-app-dirs-to-load-path)
   (message "Done"))
