@@ -454,6 +454,9 @@ Please fill an issue if it still doesn't work."
 Turn on this option will improve start speed."
   :type 'boolean)
 
+(defcustom eaf-byte-compile-apps nil 
+  "If this option turn on, EAF will byte-compile elisp code.") 
+
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -1673,8 +1676,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
         (apply fn file nil)
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
-
-(defcustom eaf-byte-compile-apps nil "") 
 
 ;;;###autoload
 (defun eaf-install-and-update (&rest apps)
