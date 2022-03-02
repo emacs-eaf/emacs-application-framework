@@ -79,6 +79,8 @@
 (require 'subr-x)
 (require 'bookmark)
 
+(declare-function straight--symlink-recursively "straight")
+
 (define-obsolete-function-alias 'eaf-setq 'setq "Version 0.5, Commit d8abd23"
   "See https://github.com/emacs-eaf/emacs-application-framework/issues/734.
 for more information.
@@ -113,6 +115,28 @@ A bookmark handler function is used as
 A new app can use this to configure extensions which should
 handled by it.")
 
+(defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
+(defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
+
+;; Helper functions for generating the defcustom entry for the list of apps
+(defun eaf--alist-to-defcustom-const (entry)
+  "Map an alist for an app to an entry for the defcustom set"
+  `(const :tag ,(cdr (assoc 'name entry)) ,(car entry)))
+
+(defun eaf--json-to-defcustom-set ()
+  "Generate the 'set choice for the defcustom entry"
+  (let ((apps-alist
+	 (with-temp-buffer
+	   (insert-file-contents "applications.json")
+	   (goto-char 0)
+	   (json-parse-buffer :object-type 'alist))))
+    (cons 'set (mapcar 'eaf--alist-to-defcustom-const (cdr apps-alist)))))
+
+(defcustom eaf-apps-to-install nil
+  "List of applications to install"
+  :group 'eaf
+  :type (eaf--json-to-defcustom-set))
+
 (defun eaf-add-subdirs-to-load-path (search-dir)
   (interactive)
   (let* ((dir (file-name-as-directory search-dir)))
@@ -135,7 +159,7 @@ handled by it.")
         (eaf-add-subdirs-to-load-path subdir-path)))))
 
 ;; Add EAF app directories where .el exists to `load-path'.
-(eaf-add-subdirs-to-load-path (file-name-directory (locate-library "eaf")))
+(eaf-add-subdirs-to-load-path eaf-build-dir)
 
 (require 'eaf-epc)
 
@@ -1650,15 +1674,51 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
+(defcustom eaf-byte-compile-apps nil "") 
+
 ;;;###autoload
-(defun eaf-install-and-update ()
+(defun eaf-install-and-update (&rest apps)
   "Interactively run `install-eaf.py' to install/update EAF apps.
 
 For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
-  (let* ((eaf-dir (file-name-directory (locate-library "eaf")))
-         (default-directory eaf-dir))
-    (shell-command (concat eaf-python-command " install-eaf.py" "&"))))
+  (let* ((default-directory eaf-source-dir)
+	 (output-buffer (generate-new-buffer "*EAF installation*"))
+	 (apps (or apps eaf-apps-to-install))
+	 (proc
+	  (progn
+	    (async-shell-command (concat
+				  eaf-python-command " install-eaf.py" " --install "
+				  (mapconcat 'symbol-name apps " "))
+				 output-buffer)
+	    (get-buffer-process output-buffer))))
+    (if (process-live-p proc)
+	(set-process-sentinel proc #'eaf--post-install-sentinel)
+      (eaf--post-install))))
+
+(defun eaf--post-install-sentinel (process string-signal)
+  (when (memq (process-status process) '(exit signal))
+    (message "Running post install")
+    (eaf--post-install)
+    (shell-command-sentinel process string-signal)))
+
+(defun eaf--symlink-directory (old new)
+  (if (fboundp 'straight--symlink-recursively)
+      (straight--symlink-recursively old new)
+    (make-symbolic-link old new)))
+
+(defun eaf--post-install ()
+  (when (not (string= eaf-source-dir eaf-build-dir))
+    (message "Symlinking app directory")
+    (eaf--symlink-directory
+     (expand-file-name "app" eaf-source-dir)
+     (expand-file-name "app" eaf-build-dir)))
+  (when eaf-byte-compile-apps
+     (message "Byte-compiling")
+     (byte-recompile-directory eaf-build-dir 0))
+  (message "Updating load path")
+  (eaf-add-subdirs-to-load-path eaf-build-dir)
+  (message "Done"))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
   "Please use M-x eaf-install-and-update instead.")
