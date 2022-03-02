@@ -132,7 +132,6 @@ handled by it.")
 	   (json-parse-buffer :object-type 'alist))))
     (cons 'set (mapcar 'eaf--alist-to-defcustom-const (cdr apps-alist)))))
 
-
 (defcustom eaf-apps-to-install nil
   "List of applications to install"
   :group 'eaf

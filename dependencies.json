@@ -1,73 +1,75 @@
 {
-    "pacman": [
-        "wmctrl",
-        "python",
-        "python-pyqt5",
-        "python-pyqt5-sip",
-        "python-pyqt5-webengine",
-        "nodejs",
-        "npm"
+  "pacman": [
+    "wmctrl",
+    "python",
+    "python-pyqt5",
+    "python-pyqt5-sip",
+    "python-pyqt5-webengine",
+    "nodejs",
+    "npm"
+  ],
+  "emerge": [
+    "x11-misc/wmctrl",
+    "dev-libs/glib",
+    "dev-python/PyQtWebEngine"
+  ],
+  "apt": [
+    "wmctrl",
+    "nodejs",
+    "npm",
+    "libglib2.0-dev",
+    "python3-pyqt5",
+    "python3-sip",
+    "python3-pyqt5.qtwebengine"
+  ],
+  "dnf": [
+    "wmctrl",
+    "nodejs",
+    "npm",
+    "glib2-devel",
+    "python3-qt5",
+    "python3-pyqt5-sip",
+    "python3-qt5-webengine",
+    "pyqtwebengine-devel"
+  ],
+  "pkg": [
+    "wmctrl",
+    "node",
+    "npm",
+    "glib",
+    "py38-qt5-sip",
+    "py38-qt5-webengine"
+  ],
+  "zypper": [
+    "wmctrl",
+    "nodejs16",
+    "npm16",
+    "glib2-devel",
+    "python38-qt5",
+    "python38-qt5-sip",
+    "python38-qtwebengine-qt5",
+    "libqt5-qtwebengine"
+  ],
+  "brew": [
+    "node"
+  ],
+  "pip": {
+    "linux": [
+      "epc",
+      "lxml"
     ],
-    "apt": [
-        "wmctrl",
-        "nodejs",
-        "npm",
-        "libglib2.0-dev",
-        "python3-pyqt5",
-        "python3-sip",
-        "python3-pyqt5.qtwebengine",
-        "python3-pygit2"
+    "win32": [
+      "pyqt5",
+      "pyqt5-sip",
+      "pyqtwebengine",
+      "pygetwindow"
     ],
-    "dnf": [
-        "wmctrl",
-        "nodejs",
-        "npm",
-        "glib2-devel",
-        "python3-qt5",
-        "python3-pyqt5-sip",
-        "python3-qt5-webengine",
-        "pyqtwebengine-devel",
-        "python3-pygit2"
-    ],
-    "pkg": [
-        "wmctrl",
-        "node",
-        "npm",
-        "glib",
-        "py38-qt5-sip",
-        "py38-qt5-webengine"
-    ],
-    "zypper": [
-        "wmctrl",
-        "nodejs16",
-        "npm16",
-        "glib2-devel",
-        "python38-qt5",
-        "python38-qt5-sip",
-        "python38-qtwebengine-qt5",
-        "python38-pygit2",
-        "libqt5-qtwebengine"
-    ],
-    "brew": [
-        "node"
-    ],
-    "pip": {
-        "linux": [
-            "epc",
-            "lxml"
-        ],
-        "win32": [
-            "pyqt5",
-            "pyqt5-sip",
-            "pyqtwebengine",
-            "pygetwindow"
-        ],
-        "darwin": [
-            "epc",
-            "pyqt5",
-            "pyqt5-sip",
-            "pyqtwebengine",
-            "mac-app-frontmost"
-        ]
-    }
+    "darwin": [
+      "epc",
+      "pyqt5",
+      "pyqt5-sip",
+      "pyqtwebengine",
+      "mac-app-frontmost"
+    ]
+  }
 }

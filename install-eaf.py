@@ -118,6 +118,8 @@ def install_sys_deps(distro: str, deps_list):
     command = []
     if which("dnf"):
         command = ['sudo', 'dnf', '-y', 'install']
+    elif distro == 'emerge':
+        command = ['sudo', 'emerge']
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif distro == 'pacman':
@@ -174,9 +176,9 @@ def add_or_update_app(app: str, app_spec_dict):
     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
     if os.path.exists(path):
-        print("[EAF] Updating", app, "to newest version...")
+        print("\n[EAF] Updating", app, "to newest version...")
     else:
-        print("[EAF] Adding", app, "application to EAF...")
+        print("\n[EAF] Adding", app, "application to EAF...")
 
     updated = True
     if os.path.exists(path):
@@ -210,6 +212,8 @@ def get_distro():
     distro = ""
     if which("dnf"):
         distro = "dnf"
+    elif which("emerge"):
+        distro = "emerge"
     elif which("apt"):
         distro = "apt"
     elif which("pacman"):
