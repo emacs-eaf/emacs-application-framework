@@ -127,7 +127,7 @@ handled by it.")
   "Generate the 'set choice for the defcustom entry"
   (let ((apps-alist
          (with-temp-buffer
-           (insert-file-contents "applications.json")
+           (insert-file-contents (concat eaf-build-dir "applications.json"))
            (goto-char 0)
            (json-parse-buffer :object-type 'alist))))
     (cons 'set (mapcar 'eaf--alist-to-defcustom-const (cdr apps-alist)))))
