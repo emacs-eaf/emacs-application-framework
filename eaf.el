@@ -1757,31 +1757,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (when (and (ignore-errors (require 'counsel)) (featurep 'counsel))
   (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
 
-;; Automatic installation
-
-(defvar eaf-version-file (expand-file-name "eaf-version-file.txt" eaf-build-dir) "")
-
-(defvar eaf-version 
-  ;(or (and (package-installed-p 'eaf) (package-get-version))
-      ;; Above is for tagged version numbers if the package is installed with package.el
-  (let ((default-directory eaf-source-dir))
-    (shell-command-to-string "git rev-parse HEAD" ))); ) ;; Git
-
-(defcustom eaf-force-compile nil "")
-(defcustom eaf-no-auto-install nil "")
-
-(unless
-    (or eaf-no-auto-install
-	(and (not eaf-force-compile)
-	     (file-exists-p eaf-version-file)
-	     (string= eaf-version
-		      (with-temp-buffer
-			(insert-file-contents eaf-version-file)
-			(buffer-string)))))
-  (eaf-install-and-update)
-  (with-temp-file eaf-version-file
-    (insert eaf-version)))
-
 ;; Don't promt user when exist EAF python process.
 (setq confirm-kill-processes nil)
 
