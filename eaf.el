@@ -1674,7 +1674,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
-(defcustom eaf-byte-compile-apps t "") 
+(defcustom eaf-byte-compile-apps nil "") 
 
 ;;;###autoload
 (defun eaf-install-and-update (&rest apps)
@@ -1708,14 +1708,14 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
     (make-symbolic-link old new)))
 
 (defun eaf--post-install ()
-  (message "Symlinking app directory")
-  (if (not (string= eaf-source-dir eaf-build-dir))
-      (eaf--symlink-directory
-       (expand-file-name "app" eaf-source-dir)
-       (expand-file-name "app" eaf-build-dir)))
-  (message "Byte-compiling")
-  (if eaf-byte-compile-apps
-      (byte-recompile-directory eaf-build-dir 0))
+  (when (not (string= eaf-source-dir eaf-build-dir))
+    (message "Symlinking app directory")
+    (eaf--symlink-directory
+     (expand-file-name "app" eaf-source-dir)
+     (expand-file-name "app" eaf-build-dir)))
+  (when eaf-byte-compile-apps
+     (message "Byte-compiling")
+     (byte-recompile-directory eaf-build-dir 0))
   (message "Updating load path")
   (eaf-add-subdirs-to-load-path eaf-build-dir)
   (message "Done"))
