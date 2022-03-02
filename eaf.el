@@ -126,10 +126,10 @@ handled by it.")
 (defun eaf--json-to-defcustom-set ()
   "Generate the 'set choice for the defcustom entry"
   (let ((apps-alist
-	 (with-temp-buffer
-	   (insert-file-contents "applications.json")
-	   (goto-char 0)
-	   (json-parse-buffer :object-type 'alist))))
+         (with-temp-buffer
+           (insert-file-contents "applications.json")
+           (goto-char 0)
+           (json-parse-buffer :object-type 'alist))))
     (cons 'set (mapcar 'eaf--alist-to-defcustom-const (cdr apps-alist)))))
 
 (defcustom eaf-apps-to-install nil
@@ -145,9 +145,9 @@ handled by it.")
               #'(lambda (subdir)
                   (or
                    (not (file-directory-p (concat dir subdir)))
-                   (member subdir '("." ".." 
-                                    "dist" "node_modules" "__pycache__" 
-                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) 
+                   (member subdir '("." ".."
+                                    "dist" "node_modules" "__pycache__"
+                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github"))))
               (directory-files dir)))
       (let ((subdir-path (concat dir (file-name-as-directory subdir))))
         (when (cl-some #'(lambda (subdir-file)
@@ -454,8 +454,8 @@ Please fill an issue if it still doesn't work."
 Turn on this option will improve start speed."
   :type 'boolean)
 
-(defcustom eaf-byte-compile-apps nil 
-  "If this option turn on, EAF will byte-compile elisp code.") 
+(defcustom eaf-byte-compile-apps nil
+  "If this option turn on, EAF will byte-compile elisp code.")
 
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
@@ -815,24 +815,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                                  (cond
-                                   ;; If command is normal symbol, just call it directly.
-                                   ((symbolp fun)
-                                    fun)
+                        (cond
+                         ;; If command is normal symbol, just call it directly.
+                         ((symbolp fun)
+                          fun)
 
-                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                                   ((string-match "-" fun)
-                                    (intern fun))
+                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                         ((string-match "-" fun)
+                          (intern fun))
 
-                                   ;; If command prefix with js_, call JavaScript function directly.
-                                   ((string-prefix-p "js_" fun)
-                                    (eaf--make-js-proxy-function fun))
+                         ;; If command prefix with js_, call JavaScript function directly.
+                         ((string-prefix-p "js_" fun)
+                          (eaf--make-js-proxy-function fun))
 
-                                   ;; If command is not built-in function and not include char '-'
-                                   ;; it's command in python side, build elisp proxy function to call it.
-                                   (t
-                                    (eaf--make-py-proxy-function fun))
-                                   ))
+                         ;; If command is not built-in function and not include char '-'
+                         ;; it's command in python side, build elisp proxy function to call it.
+                         (t
+                          (eaf--make-py-proxy-function fun))
+                         ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
@@ -1684,17 +1684,17 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 For a full `install-eaf.py' experience, refer to `--help' and run in a terminal."
   (interactive)
   (let* ((default-directory eaf-source-dir)
-	 (output-buffer (generate-new-buffer "*EAF installation*"))
-	 (apps (or apps eaf-apps-to-install))
-	 (proc
-	  (progn
-	    (async-shell-command (concat
-				  eaf-python-command " install-eaf.py" " --install "
-				  (mapconcat 'symbol-name apps " "))
-				 output-buffer)
-	    (get-buffer-process output-buffer))))
+         (output-buffer (generate-new-buffer "*EAF installation*"))
+         (apps (or apps eaf-apps-to-install))
+         (proc
+          (progn
+            (async-shell-command (concat
+                                  eaf-python-command " install-eaf.py" " --install "
+                                  (mapconcat 'symbol-name apps " "))
+                                 output-buffer)
+            (get-buffer-process output-buffer))))
     (if (process-live-p proc)
-	(set-process-sentinel proc #'eaf--post-install-sentinel)
+        (set-process-sentinel proc #'eaf--post-install-sentinel)
       (eaf--post-install))))
 
 (defun eaf--post-install-sentinel (process string-signal)
@@ -1709,14 +1709,17 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
     (make-symbolic-link old new)))
 
 (defun eaf--post-install ()
+  ;; If user use Straight package manager, then `eaf-source-dir' is not equal `eaf-build-dir'
   (when (not (string= eaf-source-dir eaf-build-dir))
     (message "Symlinking app directory")
     (eaf--symlink-directory
      (expand-file-name "app" eaf-source-dir)
      (expand-file-name "app" eaf-build-dir)))
+  
   (when eaf-byte-compile-apps
-     (message "Byte-compiling")
-     (byte-recompile-directory eaf-build-dir 0))
+    (message "Byte-compiling")
+    (byte-recompile-directory eaf-build-dir 0))
+  
   (message "Updating load path")
   (eaf-add-subdirs-to-load-path eaf-build-dir)
   (message "Done"))
