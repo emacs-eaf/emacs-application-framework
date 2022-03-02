@@ -1339,7 +1339,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
-  "A wrapper around `file-name-extension' that downcases the extension of the file-remote-p"
+  "A wrapper around `file-name-extension' that downcases the extension of the FILE."
   (downcase (file-name-extension file)))
 
 (defun eaf--translate-wsl-url-to-windows (path)
@@ -1784,7 +1784,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 ;; Don't promt user when exist EAF python process.
 (setq confirm-kill-processes nil)
-
 
 (provide 'eaf)
 
