@@ -138,60 +138,29 @@ handled by it.")
   :group 'eaf
   :type (eaf--json-to-defcustom-set))
 
+(defun eaf-add-subdirs-to-load-path (search-dir)
+  (interactive)
+  (let* ((dir (file-name-as-directory search-dir)))
+    (dolist (subdir
+             (cl-remove-if
+              #'(lambda (subdir)
+                  (or
+                   (not (file-directory-p (concat dir subdir)))
+                   (member subdir '("." ".." 
+                                    "dist" "node_modules" "__pycache__" 
+                                    "RCS" "CVS" "rcs" "cvs" ".git" ".github")))) 
+              (directory-files dir)))
+      (let ((subdir-path (concat dir (file-name-as-directory subdir))))
+        (when (cl-some #'(lambda (subdir-file)
+                           (and (file-regular-p (concat subdir-path subdir-file))
+                                (member (file-name-extension subdir-file) '("el" "so" "dll"))))
+                       (directory-files subdir-path))
+          (add-to-list 'load-path subdir-path t))
 
+        (eaf-add-subdirs-to-load-path subdir-path)))))
 
-(defun eaf-add-subdirs-to-load-path ()
-  "Recursively add all subdirectories of `default-directory' to `load-path'.
-More precisely, this uses only the subdirectories whose names
-start with letters or digits; it excludes any subdirectory named `RCS'
-or `CVS', and any subdirectory that contains a file named `.nosearch'."
-  (let (dirs
-        attrs
-	normal-top-level-add-subdirs-inode-list
-        (pending (list eaf-build-dir)))
-    ;; This loop does a breadth-first tree walk on DIR's subtree,
-    ;; putting each subdir into DIRS as its contents are examined.
-    (while pending
-      (push (pop pending) dirs)
-      (let* ((this-dir (car dirs))
-             (contents (directory-files this-dir))
-             (default-directory this-dir)
-             (canonicalized (if (fboundp 'w32-untranslated-canonical-name)
-                                (w32-untranslated-canonical-name this-dir))))
-        ;; The Windows version doesn't report meaningful inode numbers, so
-        ;; use the canonicalized absolute file name of the directory instead.
-	(setq attrs (or canonicalized
-                        (nthcdr 10 (file-attributes this-dir))))
-	(unless (member attrs normal-top-level-add-subdirs-inode-list)
-          (push attrs normal-top-level-add-subdirs-inode-list)
-          (dolist (file contents)
-            (and
-             ;; NOTE:
-             ;; Don't scan node_modules directories, such as EAF npm subdirectories.
-             (not (string-match-p "/node_modules" this-dir))
-             (not (string-match-p "/dist" this-dir))
-
-             (string-match "\\`[[:alnum:]]" file)
-             ;; The lower-case variants of RCS and CVS are for DOS/Windows.
-             (not (member file '("RCS" "CVS" "rcs" "cvs")))
-             (file-directory-p file)
-             (let ((expanded (expand-file-name file)))
-               (or (file-exists-p (expand-file-name ".nosearch" expanded))
-                   (setq pending (nconc pending (list expanded))))))))))
-    (normal-top-level-add-to-load-path (cdr (nreverse dirs)))))
-
-(defun eaf-add-app-dirs-to-load-path ()
-  "Add EAF app directories where .el exists to `load-path'."
-  (let ((default-directory eaf-build-dir))
-    (add-to-list 'load-path default-directory)
-    (eaf-add-subdirs-to-load-path)
-    (dolist (path load-path)
-      (when (or (string-match-p "/node_modules" path)
-                (string-match-p "/dist" path))
-        (setq load-path (delete path load-path))))
-    (setq load-path (cl-remove-duplicates load-path))))
-
-(eaf-add-app-dirs-to-load-path)
+;; Add EAF app directories where .el exists to `load-path'.
+(eaf-add-subdirs-to-load-path eaf-build-dir)
 
 (require 'eaf-epc)
 
@@ -1749,7 +1718,7 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (if eaf-byte-compile-apps
       (byte-recompile-directory eaf-build-dir 0))
   (message "Updating load path")
-  (eaf-add-app-dirs-to-load-path)
+  (eaf-add-subdirs-to-load-path eaf-build-dir)
   (message "Done"))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
