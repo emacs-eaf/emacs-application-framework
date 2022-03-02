@@ -132,7 +132,7 @@ handled by it.")
                        (directory-files subdir-path))
           (add-to-list 'load-path subdir-path t))
 
-        (add-subdirs-to-load-path subdir-path)))))
+        (eaf-add-subdirs-to-load-path subdir-path)))))
 
 ;; Add EAF app directories where .el exists to `load-path'.
 (eaf-add-subdirs-to-load-path (file-name-directory (locate-library "eaf")))
