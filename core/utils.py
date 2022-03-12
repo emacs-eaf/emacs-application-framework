@@ -258,6 +258,13 @@ def eval_in_emacs(method_name, args):
         # Call eval-in-emacs elisp function.
         epc_client.call("eval-in-emacs", args)
 
+def get_app_dark_mode(app_dark_mode_var):
+    app_dark_mode = get_emacs_var(app_dark_mode_var)
+    return (app_dark_mode == "force" or \
+            app_dark_mode == True or \
+            (app_dark_mode == "follow" and \
+             get_emacs_theme_mode() == "dark"))
+
 def get_emacs_theme_mode():
     return get_emacs_func_result("eaf-get-theme-mode", [])
 

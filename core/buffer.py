@@ -22,7 +22,10 @@
 from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal
 from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
-from core.utils import interactive, abstract, get_clipboard_text, set_clipboard_text, eval_in_emacs, message_to_emacs, input_message, get_emacs_var, get_emacs_func_result, get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background
+from core.utils import (interactive, abstract, get_clipboard_text, 
+                        set_clipboard_text, eval_in_emacs, message_to_emacs, 
+                        input_message, get_emacs_var, get_emacs_func_result, 
+                        get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background)
 import abc
 import string
 
