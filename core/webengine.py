@@ -52,6 +52,7 @@ class BrowserView(QWebEngineView):
         self.installEventFilter(self)
         self.buffer_id = buffer_id
         self.config_dir = get_emacs_config_dir()
+        self.is_button_press = False
 
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
@@ -249,7 +250,12 @@ class BrowserView(QWebEngineView):
         # if event.type() != 1:
         #     import time
         #     print(time.time(), event.type(), self.rect())
-
+        
+        if event.type() in [QEvent.MouseButtonPress]:
+            self.is_button_press = True
+        elif event.type() in [QEvent.MouseButtonRelease]:
+            self.is_button_press = False
+            
         # Focus emacs buffer when user click view.
         event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
         if platform.system() != "Darwin":

@@ -290,6 +290,15 @@ class EAF(object):
 
         destroy_view_list = []
 
+    def button_press_on_eaf_window(self):
+        for key in self.buffer_dict:
+            buffer_widget = self.buffer_dict[key].buffer_widget
+            
+            if hasattr(buffer_widget, "is_button_press") and buffer_widget.is_button_press:
+                return True
+            
+        return False    
+        
     @PostGui()
     def kill_buffer(self, buffer_id):
         ''' Kill all view based on buffer_id and clean buffer from buffer dict.'''
