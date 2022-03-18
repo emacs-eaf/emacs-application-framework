@@ -2,27 +2,27 @@ English | [简体中文](./README.zh-CN.md)
 
 <p align="center">
   <img style='height: auto; width: 80%; object-fit: contain' src="./img/EAF_Banner_Transparent.png">
-  <br>A free/libre and open-source extensible framework that revolutionizes the graphical capabilities of Emacs, <br>the key to ultimately <i>Live in Emacs</i>
+  <br>A free/libre and open-source extensible framework that revolutionizes the graphical capabilities of Emacs. <br>The key to ultimately <i>Live in Emacs</i>
 </p>
 
 ## Vision
-Emacs, the extensible *text editor*, is more than 45 years old. It is older than virtually all operating systems people use today, almost as old as the first UNIX system. During the decades of development, the world's brightest hackers have contributed their intelligence and creativity, together they've constructed the most comprehensive and richest ecosystem that you can find in any software to date.
+Emacs, the extensible *text editor*, is more than 45 years old. It is older than virtually all operating systems people use today, almost as old as the first UNIX system. During the decades of development, the world's brightest hackers have contributed their intelligence and creativity. Together they've constructed the most comprehensive and richest ecosystem that you can find in any software to date.
 
 If you are a hacker who works with numerous languages and text, who's keyboard-driven and desires maximum freedom, extensibility, and introspectivity over your tool, maybe to the extent of *living* in it, Emacs will be your best bet.
 
-Unfortunately, this 45 years of age is also one of the greatest disadvantages of Emacs. Comparing with modern software, Emacs lacks performance, specifically Emacs Lisp lacks performance, it doesn't have proper multithreading and its graphical capabilities are seriously limited. It is far from what you'd expect on every GUI application today (such as IDEA or VSCode). You may think that Emacs, as a text-centric editor, doesn't need them, but have you ever run into a situation that, you sit comfortably typing commands and doing your Emacs sorcery, but can't stop to ponder:
+Unfortunately, this 45 years of age is also one of the greatest disadvantages of Emacs. Comparing with modern software, Emacs lacks performance. Specifically Emacs Lisp lacks performance. It doesn't have proper multithreading and its graphical capabilities are seriously limited. It is far from what you'd expect from any GUI application today (such as IDEA or VSCode). You may think that Emacs, as a text-centric editor, doesn't need them, but have you ever run into a situation that, you sit comfortably typing commands and doing your Emacs sorcery, but can't help but ponder:
 
     What if Emacs has a real browser?
     What if this PDF or video file can be viewed efficiently without leaving Emacs?
 
 Emacs, although infinitely extensible in text, is very limited in graphics. It shouldn't have to be this way. However, Emacs Lisp is *the* integral part of the Emacs culture, it carries decades of history with itself, it is what makes Emacs special. It is irreplaceable.
 
-The vision of the Emacs Application Framework (EAF) project is that, while fully retaining the rich history, culture and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt5, and even JavaScript. EAF extends Emacs to the world of modern graphics, but still preserving the extensibility and customizability of Emacs, it will be the key to ultimately *Live in Emacs*.
+The vision of the Emacs Application Framework (EAF) project is, while fully retaining the rich history, culture, and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt5, and even JavaScript. EAF extends Emacs to the world of modern graphics, but still preserving the extensibility and customizability of Emacs. It will be the key to ultimately *Live in Emacs*.
 
 
 ## Features
 
-EAF is very extensible, it already comes with a number of useful applications by default:
+EAF is very extensible. It already comes with a number of useful applications by default:
 
 | Browser                                          | PDF Viewer |
 | :--------:                                       | :----:                                                      |
@@ -61,7 +61,7 @@ EAF is very extensible, it already comes with a number of useful applications by
 
 ## Install
 
-EAF supports Linux (X11 and Wayland), Windows, macOS and FreeBSD, the installation method is very simple.
+EAF supports Linux (X11 and Wayland), Windows, macOS and FreeBSD. The installation method is very simple.
 
 #### 1. Download EAF
 
@@ -83,7 +83,7 @@ There are many useful flags available for `install-eaf.py`, check it yourself us
 
 #### 3. Load EAF Core
 
-From here on, you can either add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
+From here on, you can add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
 
 ```Elisp
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
@@ -110,7 +110,7 @@ From here on, you can either add the full path to the EAF installation directory
 
 #### 4. Load EAF Apps
 
-You can use below code to load applications `browser` and `pdf-viewer` that you installed, please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications) for the full list:
+You can use below code to load applications `browser` and `pdf-viewer` that you installed. Please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications) for the full list:
 
 ```Elisp
 (require 'eaf-browser)
@@ -161,7 +161,7 @@ If you encounter a problem with EAF, and it occurred after pulling the latest co
 
 For any other problems, please use `emacs -q` and load a minimal setup with only EAF to verify that the bug is reproducible. If `emacs -q` works fine, probably something is wrong with your Emacs config.
 
-If the problem persists, please report it [here](https://github.com/emacs-eaf/emacs-application-framework/issues/new) with `*eaf*` buffer content, it contains many clues that can help us locate the problem faster.
+If the problem persists, please report it [here](https://github.com/emacs-eaf/emacs-application-framework/issues/new) with the `*eaf*` buffer content. It contains many clues that can help us locate the problem faster.
 
 If you get a segfault error, please use the following way to collect crash information:
 1. Install gdb and turn on option `(setq eaf-enable-debug t)`
