@@ -974,7 +974,7 @@ kxsgtn/ignore_spurious_focus_events_for/")
             (if (executable-find "app-frontmost")
                 (let ((front (shell-command-to-string "app-frontmost --name")))
                   (cond
-                   ((string= "Python\n" front)
+                   ((member front (list "Python\n" "python3\n"))
                     (setq eaf--mac-switch-to-python t))
 
                    ((string= "Emacs\n" front)
