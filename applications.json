@@ -152,5 +152,12 @@
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-rss-reader.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-rss-reader.git"
+    },
+    "git": {
+        "name": "EAF Git Client",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-git.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git"
     }
 }
