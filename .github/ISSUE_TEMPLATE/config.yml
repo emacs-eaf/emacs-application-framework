@@ -16,7 +16,7 @@ contact_links:
     url: https://www.reddit.com/r/emacs
     about: Another place to search, ask and answer questions.
   - name: "EAF FAQ"
-    url: https://github.com/emacs-eaf/emacs-application-framework#faq
+    url: https://github.com/emacs-eaf/emacs-application-framework/wiki/FAQ
     about: It might be that many others had the same question.
   - name: "EAF Wiki"
     url: https://github.com/emacs-eaf/emacs-application-framework/wiki
