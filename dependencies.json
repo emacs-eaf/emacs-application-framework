@@ -2,6 +2,7 @@
   "pacman": [
     "wmctrl",
     "python",
+    "python-pip",
     "python-pyqt5",
     "python-pyqt5-sip",
     "python-pyqt5-webengine",
