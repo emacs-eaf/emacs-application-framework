@@ -110,7 +110,7 @@ def get_archlinux_aur_helper():
     if command:
         return command
     else:
-        print("Please install one of AUR's helper.", file=std.err)
+        print("Please install one of AUR's helper, such as 'pacaur', 'yay', 'yaourt', 'paru', etc.", file=sys.stderr)
         sys.exit(1)
 
 def install_sys_deps(distro: str, deps_list):
