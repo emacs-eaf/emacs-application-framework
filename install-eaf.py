@@ -164,21 +164,25 @@ def install_vue_install(app_path_list):
 def add_or_update_app(app: str, app_spec_dict):
     url = ""
     path = os.path.join("app", app)
+
+    if os.path.exists(path):
+        print("\n[EAF] Updating", app, "to newest version...")
+    else:
+        print("\n[EAF] Adding", app, "application to EAF...")
+
     if args.use_mirror or args.use_gitee: # use_gitee is alias of use_mirror.
         if 'mirror_url' not in app_spec_dict:
-            print("[EAF] There is no gitee mirror URL set in applications.json", app)
-            sys.exit(1)
-        url = app_spec_dict['mirror_url']
+            print("[EAF] There is no mirror URL set in applications.json for", app)
+            print("[EAF] Using default URL...")
+            url = app_spec_dict['url']
+        else:
+            url = app_spec_dict['mirror_url']
     else:
         url = app_spec_dict['url']
 
     branch = app_spec_dict['branch']
     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
-    if os.path.exists(path):
-        print("\n[EAF] Updating", app, "to newest version...")
-    else:
-        print("\n[EAF] Adding", app, "application to EAF...")
 
     updated = True
     if os.path.exists(path):
