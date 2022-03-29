@@ -63,14 +63,14 @@
             "epc",
             "pyqt6",
             "pyqt6-sip",
-            "pyqtwebengine",
+            "PyQt6-WebEngine",
             "pygetwindow"
         ],
         "darwin": [
             "epc",
             "pyqt6",
             "pyqt6-sip",
-            "pyqtwebengine",
+            "PyQt6-WebEngine",
             "mac-app-frontmost"
         ]
     }
