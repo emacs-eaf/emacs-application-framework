@@ -19,9 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QEvent, QPoint
-from PyQt5.QtGui import QPainter, QWindow, QBrush
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
+from PyQt6.QtCore import Qt, QEvent, QPoint
+from PyQt6.QtGui import QPainter, QWindow, QBrush
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_result
 
 class View(QWidget):
@@ -33,13 +33,13 @@ class View(QWidget):
 
         # Init widget attributes.
         if get_emacs_func_result("eaf-emacs-running-in-wayland-native", []):
-            self.setWindowFlags(Qt.FramelessWindowHint | Qt.BypassWindowManagerHint)
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.BypassWindowManagerHint)
         elif get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
-            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.NoDropShadowWindowHint)
         else:
-            self.setWindowFlags(Qt.FramelessWindowHint)
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
 
-        self.setAttribute(Qt.WA_X11DoNotAcceptFocus, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_X11DoNotAcceptFocus, True)
         self.setContentsMargins(0, 0, 0, 0)
         self.installEventFilter(self)
 
@@ -58,10 +58,10 @@ class View(QWidget):
         self.graphics_view = QGraphicsView(buffer, self)
 
         # Remove border from QGraphicsView.
-        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
-        self.graphics_view.setFrameStyle(QFrame.NoFrame)
+        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.graphics_view.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform | QPainter.RenderHint.TextAntialiasing)
+        self.graphics_view.setFrameStyle(QFrame.Shape.NoFrame)
 
         # Fill background color.
         self.graphics_view.setBackgroundBrush(QBrush(buffer.background_color))
@@ -81,7 +81,7 @@ class View(QWidget):
         # Fit content to view rect just when buffer fit_to_view option is enable.
         if self.buffer.fit_to_view:
             if event.oldSize().isValid():
-                self.graphics_view.fitInView(self.graphics_view.scene().sceneRect(), Qt.KeepAspectRatio)
+                self.graphics_view.fitInView(self.graphics_view.scene().sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
                 QWidget.resizeEvent(self, event)
 
     def adjust_aspect_ratio(self):
@@ -110,13 +110,13 @@ class View(QWidget):
         
         import platform
 
-        if event.type() in [QEvent.ShortcutOverride]:
+        if event.type() in [QEvent.Type.ShortcutOverride]:
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
 
         # Focus emacs buffer when user click view.
-        event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
+        event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
-            event_type += [QEvent.Wheel]
+            event_type += [QEvent.Type.Wheel]
 
         if event.type() in event_type:
             focus_emacs_buffer(self.buffer_id)
@@ -149,12 +149,12 @@ class View(QWidget):
 
     def try_show_top_view(self):
         if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
-            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
             self.show()
 
     def try_hide_top_view(self):
         if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
-            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
             self.hide()
 
     def destroy_view(self):

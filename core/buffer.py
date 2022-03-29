@@ -19,9 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QEvent, QThread, pyqtSignal
-from PyQt5.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
-from PyQt5.QtWidgets import QGraphicsScene, QApplication, qApp
+from PyQt6.QtCore import Qt, QEvent, QThread, pyqtSignal
+from PyQt6.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
+from PyQt6.QtWidgets import QGraphicsScene, QApplication
 from core.utils import (interactive, abstract, get_clipboard_text, 
                         set_clipboard_text, eval_in_emacs, message_to_emacs, 
                         input_message, get_emacs_var, get_emacs_func_result, 
@@ -34,63 +34,63 @@ qt_key_dict = {}
 # Build char event.
 for char in string.ascii_lowercase:
     upper_char = char.upper()
-    qt_key_dict[char] = eval("Qt.Key_{}".format(upper_char))
-    qt_key_dict[upper_char] = eval("Qt.Key_{}".format(upper_char))
+    qt_key_dict[char] = eval("Qt.Key.Key_{}".format(upper_char))
+    qt_key_dict[upper_char] = eval("Qt.Key.Key_{}".format(upper_char))
 
 # Build number event.
 for number in range(0, 10):
-    qt_key_dict[str(number)] = eval("Qt.Key_{}".format(number))
+    qt_key_dict[str(number)] = eval("Qt.Key.Key_{}".format(number))
 
 qt_key_dict.update({
-    ''':''': Qt.Key_Colon,
-    ''';''': Qt.Key_Semicolon,
-    '''.''': Qt.Key_Period,
-    ''',''': Qt.Key_Comma,
-    '''+''': Qt.Key_Plus,
-    '''-''': Qt.Key_Minus,
-    '''=''': Qt.Key_Equal,
-    '''_''': Qt.Key_Underscore,
-    '''[''': Qt.Key_BracketLeft,
-    ''']''': Qt.Key_BracketRight,
-    '''(''': Qt.Key_BraceLeft,
-    ''')''': Qt.Key_BraceRight,
-    '''{''': Qt.Key_ParenLeft,
-    '''}''': Qt.Key_ParenRight,
-    '''<''': Qt.Key_Less,
-    '''>''': Qt.Key_Greater,
-    '''@''': Qt.Key_At,
-    '''\\''': Qt.Key_Backslash,
-    '''|''': Qt.Key_Bar,
-    '''/''': Qt.Key_Slash,
-    '''#''': Qt.Key_NumberSign,
-    '''$''': Qt.Key_Dollar,
-    '''?''': Qt.Key_Question,
-    '''"''': Qt.Key_QuoteDbl,
-    '''`''': Qt.Key_QuoteLeft,
-    '''%''': Qt.Key_Percent,
-    '''^''': Qt.Key_AsciiCircum,
-    '''&''': Qt.Key_Ampersand,
-    '''*''': Qt.Key_Asterisk,
-    '''~''': Qt.Key_AsciiTilde,
-    '''!''': Qt.Key_Exclam,
-    '''\'''': Qt.Key_Apostrophe,
-    '''SPC''': Qt.Key_Space,
-    '''RET''': Qt.Key_Return,
-    '''DEL''': Qt.Key_Backspace,
-    '''TAB''': Qt.Key_Tab,
-    '''<backtab>''': Qt.Key_Backtab,
-    '''<home>''': Qt.Key_Home,
-    '''<end>''': Qt.Key_End,
-    '''<left>''': Qt.Key_Left,
-    '''<right>''': Qt.Key_Right,
-    '''<up>''': Qt.Key_Up,
-    '''<down>''': Qt.Key_Down,
-    '''<prior>''': Qt.Key_PageUp,
-    '''<next>''': Qt.Key_PageDown,
-    '''<delete>''': Qt.Key_Delete,
-    '''<backspace>''': Qt.Key_Backspace,
-    '''<return>''': Qt.Key_Return,
-    '''<escape>''': Qt.Key_Escape
+    ''':''': Qt.Key.Key_Colon,
+    ''';''': Qt.Key.Key_Semicolon,
+    '''.''': Qt.Key.Key_Period,
+    ''',''': Qt.Key.Key_Comma,
+    '''+''': Qt.Key.Key_Plus,
+    '''-''': Qt.Key.Key_Minus,
+    '''=''': Qt.Key.Key_Equal,
+    '''_''': Qt.Key.Key_Underscore,
+    '''[''': Qt.Key.Key_BracketLeft,
+    ''']''': Qt.Key.Key_BracketRight,
+    '''(''': Qt.Key.Key_BraceLeft,
+    ''')''': Qt.Key.Key_BraceRight,
+    '''{''': Qt.Key.Key_ParenLeft,
+    '''}''': Qt.Key.Key_ParenRight,
+    '''<''': Qt.Key.Key_Less,
+    '''>''': Qt.Key.Key_Greater,
+    '''@''': Qt.Key.Key_At,
+    '''\\''': Qt.Key.Key_Backslash,
+    '''|''': Qt.Key.Key_Bar,
+    '''/''': Qt.Key.Key_Slash,
+    '''#''': Qt.Key.Key_NumberSign,
+    '''$''': Qt.Key.Key_Dollar,
+    '''?''': Qt.Key.Key_Question,
+    '''"''': Qt.Key.Key_QuoteDbl,
+    '''`''': Qt.Key.Key_QuoteLeft,
+    '''%''': Qt.Key.Key_Percent,
+    '''^''': Qt.Key.Key_AsciiCircum,
+    '''&''': Qt.Key.Key_Ampersand,
+    '''*''': Qt.Key.Key_Asterisk,
+    '''~''': Qt.Key.Key_AsciiTilde,
+    '''!''': Qt.Key.Key_Exclam,
+    '''\'''': Qt.Key.Key_Apostrophe,
+    '''SPC''': Qt.Key.Key_Space,
+    '''RET''': Qt.Key.Key_Return,
+    '''DEL''': Qt.Key.Key_Backspace,
+    '''TAB''': Qt.Key.Key_Tab,
+    '''<backtab>''': Qt.Key.Key_Backtab,
+    '''<home>''': Qt.Key.Key_Home,
+    '''<end>''': Qt.Key.Key_End,
+    '''<left>''': Qt.Key.Key_Left,
+    '''<right>''': Qt.Key.Key_Right,
+    '''<up>''': Qt.Key.Key_Up,
+    '''<down>''': Qt.Key.Key_Down,
+    '''<prior>''': Qt.Key.Key_PageUp,
+    '''<next>''': Qt.Key.Key_PageDown,
+    '''<delete>''': Qt.Key.Key_Delete,
+    '''<backspace>''': Qt.Key.Key_Backspace,
+    '''<return>''': Qt.Key.Key_Return,
+    '''<escape>''': Qt.Key.Key_Escape
 })
 
 qt_text_dict = {
@@ -183,7 +183,7 @@ class Buffer(QGraphicsScene):
         '''
         Move cursor to bottom right corner of screen.
         '''
-        screen = qApp.primaryScreen()
+        screen = QApplication.instance().primaryScreen()
         try:
             QCursor().setPos(screen, screen.size().width(), screen.size().height())
         except:
@@ -359,7 +359,7 @@ class Buffer(QGraphicsScene):
         ''' Fake key event.'''
         # Init.
         text = event_string
-        modifier = Qt.NoModifier
+        modifier = Qt.KeyboardModifier.NoModifier
 
         # Get key text.
         if event_string in qt_text_dict:
@@ -368,17 +368,17 @@ class Buffer(QGraphicsScene):
         if event_string in ["TAB", "<backtab>"]:
             text = ""
             if event_string == "<backtab>":
-                modifier = Qt.ShiftModifier
+                modifier = Qt.KeyboardModifier.ShiftModifier
         elif event_string.isupper():
-            modifier = Qt.ShiftModifier
+            modifier = Qt.KeyboardModifier.ShiftModifier
 
         # print("Press: ", event_string)
 
         # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
         try:
-            key_press = QKeyEvent(QEvent.KeyPress, qt_key_dict[event_string], modifier, text)
+            key_press = QKeyEvent(QEvent.Type.KeyPress, qt_key_dict[event_string], modifier, text)
         except:
-            key_press = QKeyEvent(QEvent.KeyPress, Qt.Key_unknown, modifier, text)
+            key_press = QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_unknown, modifier, text)
 
         for widget in self.get_key_event_widgets():
             QApplication.sendEvent(widget, key_press)
@@ -396,19 +396,19 @@ class Buffer(QGraphicsScene):
                 if len(last_char) == 1:
                     last_key = last_char.lower()
 
-                modifiers = Qt.NoModifier
+                modifiers = Qt.KeyboardModifier.NoModifier
 
                 for modifier in event_list[0:-1]:
                     if modifier == "C":
-                        modifiers |= Qt.ControlModifier
+                        modifiers |= Qt.KeyboardModifier.ControlModifier
                     elif modifier == "M":
-                        modifiers |= Qt.AltModifier
+                        modifiers |= Qt.KeyboardModifier.AltModifier
                     elif modifier == "S":
-                        modifiers |= Qt.ShiftModifier
+                        modifiers |= Qt.KeyboardModifier.KeyboardModifier.ShiftModifier
                     elif modifier == "s":
-                        modifiers |= Qt.MetaModifier
+                        modifiers |= Qt.KeyboardModifier.MetaModifier
 
-                QApplication.sendEvent(widget, QKeyEvent(QEvent.KeyPress, qt_key_dict[last_key], modifiers, last_key))
+                QApplication.sendEvent(widget, QKeyEvent(QEvent.Type.KeyPress, qt_key_dict[last_key], modifiers, last_key))
 
     def get_url(self):
         ''' Get url.'''
@@ -440,7 +440,7 @@ class Buffer(QGraphicsScene):
     def focus_widget(self, event=None):
         '''Focus buffer widget.'''
         if event is None:
-            event = QFocusEvent(QEvent.FocusIn, Qt.MouseFocusReason)
+            event = QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.MouseFocusReason)
         QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
 
         # Activate emacs window when call focus widget, avoid first char is not

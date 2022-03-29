@@ -17,7 +17,7 @@ Unfortunately, this 45 years of age is also one of the greatest disadvantages of
 
 Emacs, although infinitely extensible in text, is very limited in graphics. It shouldn't have to be this way. However, Emacs Lisp is *the* integral part of the Emacs culture, it carries decades of history with itself, it is what makes Emacs special. It is irreplaceable.
 
-The vision of the Emacs Application Framework (EAF) project is, while fully retaining the rich history, culture, and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt5, and even JavaScript. EAF extends Emacs to the world of modern graphics, but still preserving the extensibility and customizability of Emacs. It will be the key to ultimately *Live in Emacs*.
+The vision of the Emacs Application Framework (EAF) project is, while fully retaining the rich history, culture, and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt6, and even JavaScript. EAF extends Emacs to the world of modern graphics, but still preserving the extensibility and customizability of Emacs. It will be the key to ultimately *Live in Emacs*.
 
 
 ## Features

@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 
 class PostGui(QObject):
 
@@ -147,8 +147,8 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
 
 def get_clipboard_text():
     ''' Get text from system clipboard.'''
-    from PyQt5.QtWidgets import QApplication
-    from PyQt5.QtGui import QClipboard
+    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtGui import QClipboard
 
     clipboard = QApplication.clipboard()
     text = clipboard.text()
@@ -162,8 +162,8 @@ def get_clipboard_text():
 
 def set_clipboard_text(text):
     ''' Set text to system clipboard.'''
-    from PyQt5.QtWidgets import QApplication
-    from PyQt5.QtGui import QClipboard
+    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtGui import QClipboard
     
     clipboard = QApplication.clipboard()
     clipboard.setText(text)

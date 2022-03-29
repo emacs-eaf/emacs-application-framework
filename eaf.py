@@ -22,10 +22,10 @@
 # NOTE
 # QtWebEngine will throw error "ImportError: QtWebEngineWidgets must be imported before a QCoreApplication instance is created"
 # So we import browser module before start Qt application instance to avoid this error, but we never use this module.
-from PyQt5 import QtWebEngineWidgets as NeverUsed # noqa
+from PyQt6 import QtWebEngineWidgets as NeverUsed # noqa
 
-from PyQt5.QtNetwork import QNetworkProxy, QNetworkProxyFactory
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtNetwork import QNetworkProxy, QNetworkProxyFactory
+from PyQt6.QtWidgets import QApplication
 from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
 import json
@@ -111,9 +111,9 @@ class EAF(object):
 
         proxy = QNetworkProxy()
         if self.proxy[0] == "socks5":
-            proxy.setType(QNetworkProxy.Socks5Proxy)
+            proxy.setType(QNetworkProxy.ProxyType.Socks5Proxy)
         elif self.proxy[0] == "http":
-            proxy.setType(QNetworkProxy.HttpProxy)
+            proxy.setType(QNetworkProxy.ProxyType.HttpProxy)
         proxy.setHostName(self.proxy[1])
         proxy.setPort(int(self.proxy[2]))
 
@@ -126,7 +126,7 @@ class EAF(object):
         proxy_string = ""
 
         proxy = QNetworkProxy()
-        proxy.setType(QNetworkProxy.NoProxy)
+        proxy.setType(QNetworkProxy.ProxyType.NoProxy)
 
         self.is_proxy = False
         QNetworkProxy.setApplicationProxy(proxy)
@@ -489,4 +489,4 @@ if __name__ == "__main__":
     eaf = EAF(sys.argv[1:])
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

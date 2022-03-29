@@ -572,8 +572,11 @@ A hashtable, key is url and value is title.")
                ;; XWayland need to set QT_AUTO_SCREEN_SCALE_FACTOR=0
                ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
                (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")))
-        ;; Set EAF application scale factor.
+
+        ;; Make sure EAF application scale support 4k screen.
         (setenv "QT_SCALE_FACTOR" "1")
+        (setenv "QT_FONT_DPI" "96")
+
         ;; Use XCB for input event transfer.
         (setenv "QT_QPA_PLATFORM" "xcb"))
     (setq process-environment
@@ -1715,11 +1718,11 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
     (eaf--symlink-directory
      (expand-file-name "app" eaf-source-dir)
      (expand-file-name "app" eaf-build-dir)))
-  
+
   (when eaf-byte-compile-apps
     (message "Byte-compiling")
     (byte-recompile-directory eaf-build-dir 0))
-  
+
   (message "Updating load path")
   (eaf-add-subdirs-to-load-path eaf-build-dir)
   (message "Done"))

@@ -19,11 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint
-from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt6 import QtCore
+from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint
+from PyQt6.QtWebChannel import QWebChannel
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
+from PyQt6.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
 from core.utils import (touch, string_to_base64, popen_and_call, 
                         call_and_check_code, interactive, 
@@ -92,7 +93,7 @@ class BrowserView(QWebEngineView):
 
     def load_css(self, path, name):
         path = QFile(path)
-        if not path.open(QFile.ReadOnly | QtCore.QFile.Text):
+        if not path.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             return
         css = path.readAll().data().decode("utf-8")
         SCRIPT = """
@@ -175,7 +176,7 @@ class BrowserView(QWebEngineView):
     def clean_search_and_select(self):
         self.search_term = ""
         self.web_page.findText("")
-        QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.Unselect))
+        QTimer().singleShot(0, lambda : self.triggerPageAction(self.web_page.WebAction.Unselect))
 
     def clean_search(self):
         self.search_term = ""
@@ -223,7 +224,7 @@ class BrowserView(QWebEngineView):
         # Only translate text when not in caret mode.
         if not self.buffer.caret_browsing_mode:
             modifiers = QApplication.keyboardModifiers()
-            if modifiers == Qt.ControlModifier and self.selectedText().strip() != "":
+            if modifiers == Qt.KeyboardModifier.ControlModifier and self.selectedText().strip() != "":
                 self.translate_selected_text.emit(self.selectedText())
 
     def load_cookie(self):
@@ -237,7 +238,7 @@ class BrowserView(QWebEngineView):
 
     def event(self, event):
         ''' Catch event.'''
-        if event.type() == QEvent.ChildAdded:
+        if event.type() == QEvent.Type.ChildAdded:
             obj = event.child()
             if isinstance(obj, QWidget):
                 obj.installEventFilter(self)
@@ -251,15 +252,15 @@ class BrowserView(QWebEngineView):
         #     import time
         #     print(time.time(), event.type(), self.rect())
         
-        if event.type() in [QEvent.MouseButtonPress]:
+        if event.type() in [QEvent.Type.MouseButtonPress]:
             self.is_button_press = True
-        elif event.type() in [QEvent.MouseButtonRelease]:
+        elif event.type() in [QEvent.Type.MouseButtonRelease]:
             self.is_button_press = False
             
         # Focus emacs buffer when user click view.
-        event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
+        event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
-            event_type += [QEvent.Wheel]
+            event_type += [QEvent.Type.Wheel]
 
         if event.type() in event_type:
             if self.simulated_wheel_event:
@@ -267,14 +268,14 @@ class BrowserView(QWebEngineView):
             else:
                 focus_emacs_buffer(self.buffer_id)
 
-        if event.type() == QEvent.MouseButtonPress:
+        if event.type() == QEvent.Type.MouseButtonPress:
 
             if platform.system() == "Darwin":
                 eval_in_emacs('eaf-activate-emacs-window', [])
 
             if event.button() == MOUSE_FORWARD_BUTTON:
                 modifiers = QApplication.keyboardModifiers()
-                if modifiers == Qt.ControlModifier:
+                if modifiers == Qt.KeyboardModifier.ControlModifier:
                     self.switch_to_next_webpage_buffer()
                 else:
                     self.forward()
@@ -284,7 +285,7 @@ class BrowserView(QWebEngineView):
 
             elif event.button() == MOUSE_BACK_BUTTON:
                 modifiers = QApplication.keyboardModifiers()
-                if modifiers == Qt.ControlModifier:
+                if modifiers == Qt.KeyboardModifier.ControlModifier:
                     self.switch_to_previous_webpage_buffer()
                 else:
                     self.back()
@@ -294,7 +295,7 @@ class BrowserView(QWebEngineView):
 
             elif event.button() == MOUSE_LEFT_BUTTON:
                 modifiers = QApplication.keyboardModifiers()
-                if modifiers == Qt.ControlModifier and self.url_hovered:
+                if modifiers == Qt.KeyboardModifier.ControlModifier and self.url_hovered:
                     self.open_url_background_buffer(self.url_hovered)
                     return True
 
@@ -304,9 +305,9 @@ class BrowserView(QWebEngineView):
                     return True
 
 
-        if event.type() == QEvent.Wheel:
+        if event.type() == QEvent.Type.Wheel:
             modifiers = QApplication.keyboardModifiers()
-            if modifiers == Qt.ControlModifier:
+            if modifiers == Qt.KeyboardModifier.ControlModifier:
                 if event.angleDelta().y() > 0:
                     self.zoom_in()
                 else:
@@ -402,7 +403,7 @@ class BrowserView(QWebEngineView):
         return self.web_page.execute_javascript(js)
 
     def scroll_wheel(self, x_offset, y_offset):
-        from PyQt5.QtGui import QWheelEvent
+        from PyQt6.QtGui import QWheelEvent
         
         self.simulated_wheel_event = True
 
@@ -414,9 +415,9 @@ class BrowserView(QWebEngineView):
             QPointF(global_pos),
             QPoint(x_offset, y_offset),
             QPoint(x_offset, y_offset),
-            Qt.NoButton,
-            Qt.NoModifier,
-            Qt.NoScrollPhase,
+            Qt.MouseButton.NoButton,
+            Qt.KeyboardModifier.NoModifier,
+            Qt.ScrollPhase.NoScrollPhase,
             False
         )
 
@@ -737,7 +738,7 @@ class BrowserCookieStorage:
         ''' Load cookies.'''
         with open(self.cookie_file, 'rb+') as store:
             cookies = store.read()
-            from PyQt5.QtNetwork import QNetworkCookie
+            from PyQt6.QtNetwork import QNetworkCookie
             
             return QNetworkCookie.parseCookies(cookies)
 
@@ -806,34 +807,34 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
 
-        self.settings = QWebEngineSettings.globalSettings()
+        self.settings = self.buffer_widget.settings()
         try:
             if self.font_family:
                 for ff in (
-                        self.settings.StandardFont,
-                        self.settings.FixedFont,
-                        self.settings.SerifFont,
-                        self.settings.SansSerifFont,
-                        self.settings.CursiveFont,
-                        self.settings.FantasyFont,
-                        self.settings.PictographFont
+                        self.settings.FontFamily.StandardFont,
+                        self.settings.FontFamily.FixedFont,
+                        self.settings.FontFamily.SerifFont,
+                        self.settings.FontFamily.SansSerifFont,
+                        self.settings.FontFamily.CursiveFont,
+                        self.settings.FontFamily.FantasyFont,
+                        self.settings.FontFamily.PictographFont
                 ):
                     self.settings.setFontFamily(ff, self.font_family)
 
-            self.settings.setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
-            self.settings.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
-            self.settings.setAttribute(QWebEngineSettings.FocusOnNavigationEnabled, True)
-            self.settings.setAttribute(QWebEngineSettings.PlaybackRequiresUserGesture, False)
-            self.settings.setAttribute(QWebEngineSettings.PluginsEnabled, self.enable_plugin)
-            self.settings.setAttribute(QWebEngineSettings.JavascriptEnabled, self.enable_javascript)
-            self.settings.setAttribute(QWebEngineSettings.ShowScrollBars, self.enable_scrollbar)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.FullScreenSupportEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.DnsPrefetchEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.FocusOnNavigationEnabled, True)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, self.enable_plugin)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, self.enable_javascript)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, self.enable_scrollbar)
 
             if self.unknown_url_scheme_policy == "DisallowUnknownUrlSchemes":
-                self.settings.setUnknownUrlSchemePolicy(self.settings.DisallowUnknownUrlSchemes)
+                self.settings.setUnknownUrlSchemePolicy(self.settings.UnknownUrlSchemePolicy.DisallowUnknownUrlSchemes)
             elif self.unknown_url_scheme_policy == "AllowUnknownUrlSchemesFromUserInteraction":
-                self.settings.setUnknownUrlSchemePolicy(self.settings.AllowUnknownUrlSchemesFromUserInteraction)
+                self.settings.setUnknownUrlSchemePolicy(self.settings.UnknownUrlSchemePolicy.AllowUnknownUrlSchemesFromUserInteraction)
             elif self.unknown_url_scheme_policy == "AllowAllUnknownUrlSchemes":
-                self.settings.setUnknownUrlSchemePolicy(self.settings.AllowAllUnknownUrlSchemes)
+                self.settings.setUnknownUrlSchemePolicy(self.settings.UnknownUrlSchemePolicy.AllowAllUnknownUrlSchemes)
 
         except Exception:
             import traceback
