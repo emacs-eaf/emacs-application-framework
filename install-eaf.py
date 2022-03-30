@@ -341,7 +341,7 @@ def install_app_deps(distro, deps_dict):
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
             if (updated or args.force) and os.path.exists(app_dep_path):
-                with open(os.path.join(app_dep_path)) as f:
+                with open(app_dep_path) as f:
                     deps_dict = json.load(f)
                 if not args.ignore_sys_deps and sys.platform == "linux" and distro in deps_dict:
                     sys_deps.extend(deps_dict[distro])
