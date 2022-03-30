@@ -61,6 +61,7 @@
         ],
         "win32": [
             "epc",
+            "lxml",
             "pyqt6",
             "pyqt6-sip",
             "PyQt6-WebEngine",
@@ -68,6 +69,7 @@
         ],
         "darwin": [
             "epc",
+            "lxml",
             "pyqt6",
             "pyqt6-sip",
             "PyQt6-WebEngine",
