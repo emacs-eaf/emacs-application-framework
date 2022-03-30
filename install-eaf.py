@@ -384,7 +384,7 @@ def install_app_deps(distro, deps_dict):
         print(bcolors.WARNING + msg + bcolors.ENDC)
         
 def print_symlink_info(distro):
-    print(bcolors.OKCYAN + "\nDear EAF user, libQt6WebEngineCore.so.6 of PyQt6 (PIP Version) has bug that will cause EAF crash when you login website, you need install Qt6-WebEngine package from your operating system, and symlink libQt6WebEngineCore.so.6 file to PyQt6 library path to fix this problem manually:\n" + bcolors.ENDC)
+    print(bcolors.OKCYAN + "\nDear EAF user, PyQt6-WebEngine will cause EAF crash because of libQt6WebEngineCore.so.6, you need run below command to fix this problem manually:\n" + bcolors.ENDC)
     
     if distro == "dnf":
         print("Install package 'qt6-qtwebengine-libs' then run command 'sudo ln -sf /usr/lib64/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
