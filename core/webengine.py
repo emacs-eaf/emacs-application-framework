@@ -186,7 +186,7 @@ class BrowserView(QWebEngineView):
         self.search_term = text
 
         if is_backward:
-            self.web_page.findText(self.search_term, self.web_page.FindBackward,
+            self.web_page.findText(self.search_term, self.web_page.FindFlag.FindBackward,
                                    self.callback_text_search)
         else:
             self.web_page.findText(self.search_term, self.web_page.FindFlags(),
@@ -495,47 +495,47 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def copy_text(self):
         ''' Copy selected text.'''
-        self.triggerPageAction(self.web_page.Copy)
+        self.triggerPageAction(self.web_page.WebAction.Copy)
         if self.buffer.caret_browsing_mode and self.buffer.caret_browsing_mark_activated:
             self.buffer.caret_exit()
 
     @interactive()
     def yank_text(self):
         ''' Paste selected text.'''
-        self.triggerPageAction(self.web_page.Paste)
+        self.triggerPageAction(self.web_page.WebAction.Paste)
         message_to_emacs("Yank selected text.")
 
     @interactive()
     def kill_text(self):
         ''' Cut selected text.'''
-        self.triggerPageAction(self.web_page.Cut)
+        self.triggerPageAction(self.web_page.WebAction.Cut)
         message_to_emacs("Kill selected text.")
 
     @interactive
     def undo_action(self):
         ''' Undo action.'''
-        self.triggerPageAction(self.web_page.Undo)
+        self.triggerPageAction(self.web_page.WebAction.Undo)
 
     @interactive
     def redo_action(self):
         ''' Redo action.'''
-        self.triggerPageAction(self.web_page.Redo)
+        self.triggerPageAction(self.web_page.WebAction.Redo)
 
     @interactive
     def exit_fullscreen(self):
         ''' Exit full screen.'''
-        self.triggerPageAction(self.web_page.ExitFullScreen)
+        self.triggerPageAction(self.web_page.WebAction.ExitFullScreen)
 
     @interactive(insert_or_do=True)
     def view_source(self):
         ''' View source.'''
-        self.triggerPageAction(self.web_page.ViewSource)
+        self.triggerPageAction(self.web_page.WebAction.ViewSource)
 
     def select_all(self):
         ''' Select all text.'''
         # We need window focus before select all text.
         self.eval_js("window.focus()")
-        self.triggerPageAction(self.web_page.SelectAll)
+        self.triggerPageAction(self.web_page.WebAction.SelectAll)
 
     def select_input_text(self):
         ''' Select input text.'''
