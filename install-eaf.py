@@ -387,17 +387,17 @@ def print_symlink_info(distro):
     print(bcolors.OKCYAN + "\nDear EAF user, PyQt6-WebEngine will cause EAF crash because of libQt6WebEngineCore.so.6, you need run below command to fix this problem manually:\n" + bcolors.ENDC)
     
     if distro == "dnf":
-        print("Install package 'qt6-qtwebengine-libs' then run command 'sudo ln -sf /usr/lib64/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+        print("sudo dnf -y install qt6-qtwebengine-libs; sudo ln -sf /usr/lib64/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
     elif distro == "emerge":
         print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
     elif distro == "apt":
-        print("Install package 'libqt6webenginecore6' then run command 'sudo ln -sf /usr/lib/x86_64-linux-gnu/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+        print("sudo apt -y install libqt6webenginecore6 ; sudo ln -sf /usr/lib/x86_64-linux-gnu/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
     elif distro == "pacman":
-        print("Install package 'qt6-webengine' then run command 'sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+        print("sudo pacman -S qt6-webengine ; sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
     elif distro == "pkg":
         print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
     elif distro == "zypper":    # Suse
-        print("Install package 'libQt6WebEngineCore6' then run command 'sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+        print("sudo zypper install -y libQt6WebEngineCore6 ; sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
     elif distro == "brew":
         print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
 
