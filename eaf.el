@@ -579,6 +579,11 @@ A hashtable, key is url and value is title.")
 
         ;; Use XCB for input event transfer.
         (setenv "QT_QPA_PLATFORM" "xcb"))
+    
+    ;; Turn on DEBUG info when `eaf-enable-debug' is non-nil.
+    (when eaf-enable-debug
+      (setenv "QT_DEUG_PLUGINS" "1"))
+    
     (setq process-environment
           (seq-filter
            (lambda (var)
