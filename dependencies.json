@@ -43,7 +43,7 @@
       "lxml",
       "pyqt6",
       "pyqt6-sip",
-      "PyQt6-WebEngine"
+      "PyQt6-WebEngine",
     ],
     "win32": [
       "epc",
