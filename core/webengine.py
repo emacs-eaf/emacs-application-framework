@@ -25,12 +25,12 @@ from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
-from core.utils import (touch, string_to_base64, popen_and_call, 
-                        call_and_check_code, interactive, 
-                        eval_in_emacs, message_to_emacs, clear_emacs_message, 
-                        open_url_in_background_tab, duplicate_page_in_new_tab, 
-                        open_url_in_new_tab, open_url_in_new_tab_other_window, 
-                        focus_emacs_buffer, atomic_edit, get_emacs_config_dir, 
+from core.utils import (touch, string_to_base64, popen_and_call,
+                        call_and_check_code, interactive,
+                        eval_in_emacs, message_to_emacs, clear_emacs_message,
+                        open_url_in_background_tab, duplicate_page_in_new_tab,
+                        open_url_in_new_tab, open_url_in_new_tab_other_window,
+                        focus_emacs_buffer, atomic_edit, get_emacs_config_dir,
                         to_camel_case, get_emacs_vars)
 from urllib.parse import urlparse, parse_qs
 import base64
@@ -57,16 +57,16 @@ class BrowserView(QWebEngineView):
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
 
-        self.cookie_store = self.page().profile().cookieStore()
-        self.cookie_storage = BrowserCookieStorage(self.config_dir)
-        self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
-
         self.url_hovered = ""
         self.page().linkHovered.connect(self.link_hovered)
 
         self.selectionChanged.connect(self.select_text_change)
 
-        self.load_cookie()
+        # Cookie init.
+        self.cookie_store = self.page().profile().cookieStore() # get cookie store
+        self.cookie_store.deleteAllCookies()                    # delete all cookies when QWebEngineView init, don't call this when page load
+        self.cookie_store.cookieAdded.connect(self.add_cookie)  # save cookie to disk when captured cookieAdded signal
+        self.loadStarted.connect(self.load_cookie)              # load disk cookie to QWebEngineView instance when page start load
 
         self.search_term = ""
 
@@ -89,6 +89,66 @@ class BrowserView(QWebEngineView):
              "eaf-marker-letters",
              "eaf-marker-fontsize",
              "eaf-browser-scroll-step"])
+
+    def load_cookie(self):
+        host_name = self.url().host()
+        cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
+
+        # When start load page, EAF will try to load cookie for current site.
+        if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
+            import json
+            from PyQt5.QtNetwork import QNetworkCookie
+
+            cookie_dict = {}
+            with open(cookie_file) as f:
+                cookie_dict = json.load(f)
+
+            # Load cookie into CookieStorage make sure site login sucessfully.
+            # We need load every (name, value) tuple into CookieStorage.
+            for name, value in cookie_dict.items():
+                cookie = QNetworkCookie(name.encode("utf-8"), value.encode("utf-8"))
+                self.cookie_store.setCookie(cookie, self.url())
+
+    def add_cookie(self, cookie):
+        # If cookie is session cookie (use for session logic), not save cookie to disk.
+        if not cookie.isSessionCookie():
+            import json
+
+            cookie_file = os.path.join(self.config_dir, "browser", "cookie", cookie.domain())
+            cookie_dict = {}
+
+            # Read old cookie of current site.
+            if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
+                with open(cookie_file) as f:
+                    cookie_dict = json.load(f)
+            else:
+                touch(cookie_file)
+
+            # Update cookie value.
+            cookie_name = cookie.name().data().decode("utf-8")
+            cookie_value = cookie.value().data().decode("utf-8")
+            cookie_dict[cookie_name] = cookie_value
+
+            # Save newest cookie to disk.
+            with open(cookie_file, "w") as f:
+                f.write(json.dumps(cookie_dict))
+
+    def delete_all_cookies(self):
+        import shutil
+
+        cookie_dir = os.path.join(self.config_dir, "browser", "cookie")
+
+        # Delete cookie directory to make all site won't login sucessfully.
+        if os.path.exists(cookie_dir):
+            shutil.rmtree(cookie_dir)
+
+    def delete_cookie(self):
+        host_name = self.url().host()
+        cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
+
+        # Remove cookie file match domain of current site, EAF won't login at next time load same site.
+        if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
+            os.remove(cookie_file)
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -145,7 +205,7 @@ class BrowserView(QWebEngineView):
             filtered = dict((k, v) for k, v in qd.items())
 
         from urllib.parse import urlunparse, urlencode
-        
+
         return urlunparse([
             parsed.scheme,
             parsed.netloc,
@@ -226,11 +286,6 @@ class BrowserView(QWebEngineView):
             if modifiers == Qt.ControlModifier and self.selectedText().strip() != "":
                 self.translate_selected_text.emit(self.selectedText())
 
-    def load_cookie(self):
-        ''' Load cookies.'''
-        for cookie in self.cookie_storage.load_cookie():
-            self.cookie_store.setCookie(cookie)
-
     def createWindow(self, window_type):
         ''' Create new browser window.'''
         return self.create_new_window()
@@ -250,12 +305,12 @@ class BrowserView(QWebEngineView):
         # if event.type() != 1:
         #     import time
         #     print(time.time(), event.type(), self.rect())
-        
+
         if event.type() in [QEvent.MouseButtonPress]:
             self.is_button_press = True
         elif event.type() in [QEvent.MouseButtonRelease]:
             self.is_button_press = False
-            
+
         # Focus emacs buffer when user click view.
         event_type = [QEvent.MouseButtonPress, QEvent.MouseButtonRelease, QEvent.MouseButtonDblClick]
         if platform.system() != "Darwin":
@@ -403,7 +458,7 @@ class BrowserView(QWebEngineView):
 
     def scroll_wheel(self, x_offset, y_offset):
         from PyQt5.QtGui import QWheelEvent
-        
+
         self.simulated_wheel_event = True
 
         pos = self.rect().center()
@@ -703,22 +758,22 @@ class BrowserPage(QWebEnginePage):
         ''' Execute JavaScript.'''
         if hasattr(self, "loop") and self.loop.isRunning():
             # NOTE:
-            # 
+            #
             # Just return None is QEventLoop is busy, such as press 'j' key not release on webpage.
             # Otherwise will got error 'RecursionError: maximum recursion depth exceeded while calling a Python object'.
-            # 
+            #
             # And don't warry, API 'execute_javascript' is works well for programming purpse since we just call this interface occasionally.
             return None
         else:
             # Build event loop.
             self.loop = QEventLoop()
-            
+
             # Run JavaScript code.
             self.runJavaScript(script_src, self.callback_js)
-            
+
             # Execute event loop, and wait event loop quit.
             self.loop.exec()
-            
+
             # Return JavaScript function result.
             return self.result
 
@@ -726,35 +781,6 @@ class BrowserPage(QWebEnginePage):
         ''' Callback of JavaScript, call loop.quit to jump code after loop.exec.'''
         self.result = result
         self.loop.quit()
-
-class BrowserCookieStorage:
-    def __init__(self, config_dir):
-        self.cookie_file = os.path.join(config_dir, "browser", "cookie", "cookie")
-
-        touch(self.cookie_file)
-
-    def load_cookie(self):
-        ''' Load cookies.'''
-        with open(self.cookie_file, 'rb+') as store:
-            cookies = store.read()
-            from PyQt5.QtNetwork import QNetworkCookie
-            
-            return QNetworkCookie.parseCookies(cookies)
-
-    def save_cookie(self, cookie):
-        ''' Save cookies.'''
-        with open(self.cookie_file, 'wb+') as store:
-            store.write(cookie + b'\n' if cookie is not None else b'')
-
-    def add_cookie(self, cookie):
-        ''' Add cookies.'''
-        raw = cookie.toRawForm()
-        self.save_cookie(raw)
-
-    def clear_cookies(self, cookie_store):
-        ''' Clear cookies.'''
-        cookie_store.deleteAllCookies()
-        open(self.cookie_file, 'w').close()
 
 class BrowserBuffer(Buffer):
 
@@ -952,7 +978,7 @@ class BrowserBuffer(Buffer):
 
     def _save_as_single_file(self):
         from functools import partial
-        
+
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
         file_path = os.path.join(os.path.expanduser(self.download_path), "{}.html".format(parsed.netloc))
@@ -1492,7 +1518,7 @@ class BrowserBuffer(Buffer):
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         import sqlite3
-        
+
         self._conn = sqlite3.connect(dbpath)
         self._conn.execute("""
         CREATE TABLE IF NOT EXISTS ZoomSize
