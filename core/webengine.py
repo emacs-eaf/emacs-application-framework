@@ -169,12 +169,12 @@ class BrowserView(QWebEngineView):
         """ % (name, css)
 
         script = QWebEngineScript()
-        self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+        self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
         script.setName(name)
         script.setSourceCode(SCRIPT)
-        script.setInjectionPoint(QWebEngineScript.DocumentReady)
+        script.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentReady)
         script.setRunsOnSubFrames(True)
-        script.setWorldId(QWebEngineScript.ApplicationWorld)
+        script.setWorldId(QWebEngineScript.ScriptWorldId.ApplicationWorld)
         self.web_page.scripts().insert(script)
 
     def remove_css(self, name, immediately):
@@ -186,7 +186,7 @@ class BrowserView(QWebEngineView):
         })()
          """ % (name)
         if immediately:
-            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ApplicationWorld)
+            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
 
         script = self.web_page.scripts().findScript(name)
         self.web_page.scripts().remove(script)
@@ -737,19 +737,33 @@ class BrowserView(QWebEngineView):
 
         self.eval_js(self.clear_focus_js)
 
-    @interactive
-    def load_dark_mode_js(self):
-        self.eval_js('''if (typeof DarkReader === 'undefined') {{ {} }} '''.format(self.dark_mode_js))
-
+    def init_dark_mode_js(self, module_path, selection_color="auto"):
+        js_string = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read() 
+        
+        if selection_color != "auto":
+            js_string = js_string.replace("selectionColor: 'auto'", "selectionColor: '" + selection_color + "'")
+            
+        js_string += """DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});"""
+        
+        self.dark_mode_inject_js = QWebEngineScript()
+        self.dark_mode_inject_js.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentCreation)
+        self.dark_mode_inject_js.setWorldId(QWebEngineScript.ScriptWorldId.MainWorld)
+        self.dark_mode_inject_js.setName("dark_mode_inject.js")
+        self.dark_mode_inject_js.setRunsOnSubFrames(True)
+        self.dark_mode_inject_js.setSourceCode(js_string)
+        
+        if self.buffer.dark_mode_is_enabled():
+            self.enable_dark_mode()
+        
     @interactive(insert_or_do=True)
     def enable_dark_mode(self):
         ''' Dark mode support.'''
-        self.eval_js("""DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});""")
+        self.page().scripts().insert(self.dark_mode_inject_js)        
 
     @interactive(insert_or_do=True)
     def disable_dark_mode(self):
         ''' Remove dark mode support.'''
-        self.eval_js("""DarkReader.disable();""")
+        self.page().scripts().remove(self.dark_mode_inject_js)        
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -1391,11 +1405,13 @@ class BrowserBuffer(Buffer):
     @interactive
     def toggle_dark_mode(self):
         self.is_dark_mode_enabled = not self.is_dark_mode_enabled
-        self.buffer_widget.load_dark_mode_js()
+        
         if self.is_dark_mode_enabled:
             self.buffer_widget.enable_dark_mode()
         else:
             self.buffer_widget.disable_dark_mode()
+            
+        self.buffer_widget.reload()
 
     @interactive(insert_or_do=True)
     def history_forward(self):
