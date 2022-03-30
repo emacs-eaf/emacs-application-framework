@@ -58,16 +58,16 @@ class BrowserView(QWebEngineView):
         self.web_page = BrowserPage()
         self.setPage(self.web_page)
 
-        self.cookie_store = self.page().profile().cookieStore()
-        self.cookie_storage = BrowserCookieStorage(self.config_dir)
-        self.cookie_store.cookieAdded.connect(self.cookie_storage.add_cookie)
-
         self.url_hovered = ""
         self.page().linkHovered.connect(self.link_hovered)
 
         self.selectionChanged.connect(self.select_text_change)
 
-        self.load_cookie()
+        # Cookie init.
+        self.cookie_store = self.page().profile().cookieStore() # get cookie store
+        self.cookie_store.deleteAllCookies()                    # delete all cookies when QWebEngineView init, don't call this when page load
+        self.cookie_store.cookieAdded.connect(self.add_cookie)  # save cookie to disk when captured cookieAdded signal
+        self.loadStarted.connect(self.load_cookie)              # load disk cookie to QWebEngineView instance when page start load
 
         self.search_term = ""
 
@@ -90,6 +90,66 @@ class BrowserView(QWebEngineView):
              "eaf-marker-letters",
              "eaf-marker-fontsize",
              "eaf-browser-scroll-step"])
+        
+    def load_cookie(self):
+        host_name = self.url().host()
+        cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
+        
+        # When start load page, EAF will try to load cookie for current site.
+        if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
+            import json
+            from PyQt6.QtNetwork import QNetworkCookie
+            
+            cookie_dict = {}
+            with open(cookie_file) as f:
+                cookie_dict = json.load(f)
+            
+            # Load cookie into CookieStorage make sure site login sucessfully.
+            # We need load every (name, value) tuple into CookieStorage.
+            for name, value in cookie_dict.items():
+                cookie = QNetworkCookie(name.encode("utf-8"), value.encode("utf-8"))
+                self.cookie_store.setCookie(cookie, self.url())
+                
+    def add_cookie(self, cookie):
+        # If cookie is session cookie (use for session logic), not save cookie to disk.
+        if not cookie.isSessionCookie():
+            import json
+            
+            cookie_file = os.path.join(self.config_dir, "browser", "cookie", cookie.domain())
+            cookie_dict = {}
+            
+            # Read old cookie of current site.
+            if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
+                with open(cookie_file) as f:
+                    cookie_dict = json.load(f)
+            else:
+                touch(cookie_file)
+            
+            # Update cookie value.
+            cookie_name = cookie.name().data().decode("utf-8")
+            cookie_value = cookie.value().data().decode("utf-8")
+            cookie_dict[cookie_name] = cookie_value
+            
+            # Save newest cookie to disk.
+            with open(cookie_file, "w") as f:
+                f.write(json.dumps(cookie_dict))
+            
+    def delete_all_cookies(self):
+        import shutil
+        
+        cookie_dir = os.path.join(self.config_dir, "browser", "cookie")
+        
+        # Delete cookie directory to make all site won't login sucessfully.
+        if os.path.exists(cookie_dir):
+            shutil.rmtree(cookie_dir)
+        
+    def delete_cookie(self):
+        host_name = self.url().host()
+        cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
+        
+        # Remove cookie file match domain of current site, EAF won't login at next time load same site.
+        if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
+            os.remove(cookie_file)
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -226,11 +286,6 @@ class BrowserView(QWebEngineView):
             modifiers = QApplication.keyboardModifiers()
             if modifiers == Qt.KeyboardModifier.ControlModifier and self.selectedText().strip() != "":
                 self.translate_selected_text.emit(self.selectedText())
-
-    def load_cookie(self):
-        ''' Load cookies.'''
-        for cookie in self.cookie_storage.load_cookie():
-            self.cookie_store.setCookie(cookie)
 
     def createWindow(self, window_type):
         ''' Create new browser window.'''
@@ -727,35 +782,6 @@ class BrowserPage(QWebEnginePage):
         ''' Callback of JavaScript, call loop.quit to jump code after loop.exec.'''
         self.result = result
         self.loop.quit()
-
-class BrowserCookieStorage:
-    def __init__(self, config_dir):
-        self.cookie_file = os.path.join(config_dir, "browser", "cookie", "cookie")
-
-        touch(self.cookie_file)
-
-    def load_cookie(self):
-        ''' Load cookies.'''
-        with open(self.cookie_file, 'rb+') as store:
-            cookies = store.read()
-            from PyQt6.QtNetwork import QNetworkCookie
-            
-            return QNetworkCookie.parseCookies(cookies)
-
-    def save_cookie(self, cookie):
-        ''' Save cookies.'''
-        with open(self.cookie_file, 'wb+') as store:
-            store.write(cookie + b'\n' if cookie is not None else b'')
-
-    def add_cookie(self, cookie):
-        ''' Add cookies.'''
-        raw = cookie.toRawForm()
-        self.save_cookie(raw)
-
-    def clear_cookies(self, cookie_store):
-        ''' Clear cookies.'''
-        cookie_store.deleteAllCookies()
-        open(self.cookie_file, 'w').close()
 
 class BrowserBuffer(Buffer):
 
