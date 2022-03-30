@@ -382,6 +382,24 @@ def install_app_deps(distro, deps_dict):
 
     for msg in important_messages:
         print(bcolors.WARNING + msg + bcolors.ENDC)
+        
+def print_symlink_info(distro):
+    print(bcolors.OKCYAN + "\nDear EAF user, libQt6WebEngineCore.so.6 of PyQt6 (PIP Version) has bug that will cause EAF crash when you login website, you need install Qt6-WebEngine package from your operating system, and symlink libQt6WebEngineCore.so.6 file to PyQt6 library path to fix this problem manually:\n" + bcolors.ENDC)
+    
+    if distro == "dnf":
+        print("Install package 'qt6-qtwebengine-libs' then run command 'sudo ln -sf /usr/lib64/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    elif distro == "emerge":
+        print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    elif distro == "apt":
+        print("Install package 'libqt6webenginecore6' then run command 'sudo ln -sf /usr/lib/x86_64-linux-gnu/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    elif distro == "pacman":
+        print("Install package 'qt6-webengine' then run command 'sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    elif distro == "pkg":
+        print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    elif distro == "zypper":    # Suse
+        print("Install package 'libQt6WebEngineCore6' then run command 'sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    elif distro == "brew":
+        print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
 
 def main():
     try:
@@ -400,6 +418,8 @@ def main():
             print("[EAF] ------------------------------------------")
 
         print("[EAF] install-eaf.py finished.")
+        
+        print_symlink_info(distro)
     except KeyboardInterrupt:
         print("[EAF] install-eaf.py aborted!")
         sys.exit()
