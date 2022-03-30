@@ -66,7 +66,7 @@ def get_available_apps_dict():
 available_apps_dict = get_available_apps_dict()
 
 important_messages = [
-    "[EAF] Please run both 'git pull' and 'install-eaf.py' (M-x eaf-install-and-update) to update EAF, applications and their dependencies."
+    "[EAF] Please run 'git pull ; ./install-eaf.py' (M-x eaf-install-and-update) to update EAF, applications and their dependencies."
 ]
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
@@ -376,15 +376,12 @@ def install_app_deps(distro, deps_dict):
             install_vue_install(vue_install_apps)
 
     print("[EAF] Finished installing applications and their dependencies")
-    print("[EAF] Please ensure the following are added to your init.el:")
+    print("\n[EAF] Please ensure the following are added to your init.el:")
 
     print_sample_config(app_dir)
 
-    for msg in important_messages:
-        print(bcolors.WARNING + msg + bcolors.ENDC)
-        
 def print_symlink_info(distro):
-    print(bcolors.OKCYAN + "\nDear EAF user, PyQt6-WebEngine will cause EAF crash because of libQt6WebEngineCore.so.6, you need run below command to fix this problem manually:\n" + bcolors.ENDC)
+    print(bcolors.OKCYAN + "\nDear EAF user, PyQt6-WebEngine will cause EAF crash because of libQt6WebEngineCore.so.6, you need run below command to fix this problem manually:" + bcolors.ENDC)
     
     if distro == "dnf":
         print("sudo dnf -y install qt6-qtwebengine-libs; sudo ln -sf /usr/lib64/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
@@ -417,7 +414,10 @@ def main():
             install_app_deps(distro, deps_dict)
             print("[EAF] ------------------------------------------")
 
-        print("[EAF] install-eaf.py finished.")
+        print("[EAF] install-eaf.py finished.\n")
+        
+        for msg in important_messages:
+            print(msg)
         
         print_symlink_info(distro)
     except KeyboardInterrupt:
