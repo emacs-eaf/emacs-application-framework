@@ -1,38 +1,32 @@
 {
   "pacman": [
     "wmctrl",
-    "python",
-    "python-pip",
     "nodejs",
     "npm"
   ],
   "emerge": [
     "x11-misc/wmctrl",
-    "dev-libs/glib"
+    "net-libs/nodejs"
   ],
   "apt": [
     "wmctrl",
     "nodejs",
-    "npm",
-    "libglib2.0-dev"
+    "npm"
   ],
   "dnf": [
     "wmctrl",
     "nodejs",
-    "npm",
-    "glib2-devel"
+    "npm"
   ],
   "pkg": [
     "wmctrl",
     "node",
-    "npm",
-    "glib"
+    "npm"
   ],
   "zypper": [
     "wmctrl",
     "nodejs16",
-    "npm16",
-    "glib2-devel"
+    "npm16"
   ],
   "brew": [
     "node"
