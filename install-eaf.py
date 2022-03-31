@@ -321,12 +321,6 @@ def install_app_deps(distro, deps_dict):
     if not os.path.exists(app_dir):
         os.makedirs(app_dir)
 
-    # TODO: REMOVE ME: Delete obsolete file, we don't use it anymore
-    prev_app_choices_file = os.path.join(script_path, '.eaf-installed-apps.json')
-    if os.path.exists(prev_app_choices_file):
-        print(prev_app_choices_file, "is obsolete, removing...")
-        os.remove(prev_app_choices_file)
-
     apps_installed = get_installed_apps(app_dir)
     pending_apps_dict_list = get_install_apps(apps_installed)
 
