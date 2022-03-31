@@ -199,6 +199,19 @@ def add_or_update_app(app: str, app_spec_dict):
             run_command(["git", "checkout", branch], path=path, ensure_pass=False)
             run_command(["git", "reset", "--hard", "origin"], path=path, ensure_pass=False)
 
+        branch_outputs = run_command(["git", "branch"], path=path, get_result=True)
+        if branch_outputs is None:
+            raise Exception("Not in git app!")
+        exist_branch = False
+        for b in branch_outputs:
+            if branch in b:
+                exist_branch = True
+                break
+        if not exist_branch:
+            run_command(["git", "config", "remote.origin.fetch", "+refs/heads/"+branch+":refs/remotes/origin/"+branch], path=path)
+            run_command(["git", "fetch", "origin"], path=path)
+        run_command(["git", "checkout", branch], path=path)
+
         output_lines = run_command(["git", "pull"], path=path, get_result=True)
         if output_lines is None:
             raise Exception("git pull failed!")
@@ -208,9 +221,9 @@ def add_or_update_app(app: str, app_spec_dict):
                 updated = False
 
     elif args.git_full_clone:
-        run_command(["git", "clone", "--single-branch", url, path])
+        run_command(["git", "clone", "-b", branch, url, path])
     else:
-        run_command(["git", "clone", "--depth", "1", "--single-branch", url, path])
+        run_command(["git", "clone", "-b", branch, "--depth", "1", url, path])
     return updated
 
 def get_distro():
