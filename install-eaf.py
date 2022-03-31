@@ -400,12 +400,12 @@ def symlink_webengine_library(distro):
         pass
 
     if webengine_library_path == "":
-        print(bcolors.OKCYAN + "{} is incomplete, will cause EAF browser crash".format(python_library_path) + bcolors.ENDC)
-        print(bcolors.OKCYAN + "To fix this problem, please install package that include {} from your operating system repository, and symlink {} to {}".format(
-            library_name, library_name, python_library_path) + bcolors.ENDC)
+        important_messages.append("[EAF] Failed to identify {}, EAF Browser may crash".format(python_library_path))
+        important_messages.append("[EAF] To fix this problem, please install package that includes {} from your OS repository, then symlink {} to {}".format(
+            library_name, library_name, python_library_path))
     else:
         if os.path.getsize(webengine_library_path) != os.path.getsize(python_library_path):
-            print("[EAF] Fix EAF browser crash cause by {}: sudo ln -sf {} {}".format(library_name, webengine_library_path, python_library_path))
+            print("[EAF] Fix EAF Browser crash cause by {}: sudo ln -sf {} {}".format(library_name, webengine_library_path, python_library_path))
             symlink_process = subprocess.Popen("sudo ln -sf {} {}".format(webengine_library_path, python_library_path),
                                                shell=True, text=True,
                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
