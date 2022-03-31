@@ -254,6 +254,8 @@ def install_core_deps(distro, deps_dict):
             install_py_deps(deps_dict["pip"][distro])
         else:
             install_py_deps(deps_dict["pip"][sys.platform])
+
+    symlink_webengine_library(distro)
     print("[EAF] Finished installing core dependencies")
 
 def yes_no(question, default_yes=False, default_no=False):
@@ -384,36 +386,37 @@ def install_app_deps(distro, deps_dict):
     print("\n[EAF] Please ensure the following are added to your init.el:")
 
     print_sample_config(app_dir)
-        
+
 def symlink_webengine_library(distro):
-    if distro != "pacman":
-        library_name = "libQt6WebEngineCore.so.6"
-        python_library_dir = site.getsitepackages()[0]
-        python_library_path = os.path.join(python_library_dir, "PyQt6", "Qt6", "lib", library_name)
-        
-        process = subprocess.Popen(''' echo "$(ldconfig -p | grep {} | tr ' ' '\n' | grep /)" '''.format(library_name),
-                                   shell=True, text=True, 
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        process.wait()
-        
-        webengine_library_path = ""
-        try:
-            webengine_library_path =  process.stdout.readlines()[0].split()[0]
-        except:
-            pass
-        
-        if webengine_library_path == "":
-            print(bcolors.OKCYAN + "{} is incomplete, will cause EAF browser crash".format(python_library_path) + bcolors.ENDC)
-            print(bcolors.OKCYAN + "To fix this problem, please install package that include {} from your operating system repository, and symlink {} to {}".format(
-                library_name, library_name, python_library_path) + bcolors.ENDC)
-        else:
-            if os.path.getsize(webengine_library_path) != os.path.getsize(python_library_path):
-                print("[EAF] Fix EAF browser crash cause by {}: sudo ln -sf {} {}".format(library_name, webengine_library_path, python_library_path))
-                symlink_process = subprocess.Popen("sudo ln -sf {} {}".format(webengine_library_path, python_library_path), 
-                                                   shell=True, text=True,
-                                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                symlink_process.wait()
-                print("[EAF] Finished {} symlink.".format(library_name))
+    if distro == "pacman":
+        return
+    library_name = "libQt6WebEngineCore.so.6"
+    python_library_dir = site.getsitepackages()[0]
+    python_library_path = os.path.join(python_library_dir, "PyQt6", "Qt6", "lib", library_name)
+
+    process = subprocess.Popen(''' echo "$(ldconfig -p | grep {} | tr ' ' '\n' | grep /)" '''.format(library_name),
+                               shell=True, text=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
+
+    webengine_library_path = ""
+    try:
+        webengine_library_path =  process.stdout.readlines()[0].split()[0]
+    except:
+        pass
+
+    if webengine_library_path == "":
+        print(bcolors.OKCYAN + "{} is incomplete, will cause EAF browser crash".format(python_library_path) + bcolors.ENDC)
+        print(bcolors.OKCYAN + "To fix this problem, please install package that include {} from your operating system repository, and symlink {} to {}".format(
+            library_name, library_name, python_library_path) + bcolors.ENDC)
+    else:
+        if os.path.getsize(webengine_library_path) != os.path.getsize(python_library_path):
+            print("[EAF] Fix EAF browser crash cause by {}: sudo ln -sf {} {}".format(library_name, webengine_library_path, python_library_path))
+            symlink_process = subprocess.Popen("sudo ln -sf {} {}".format(webengine_library_path, python_library_path),
+                                               shell=True, text=True,
+                                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            symlink_process.wait()
+            print("[EAF] Finished {} symlink.".format(library_name))
 
 def main():
     try:
@@ -432,9 +435,7 @@ def main():
             print("[EAF] ------------------------------------------")
 
         print("[EAF] install-eaf.py finished.\n")
-        
-        symlink_webengine_library(distro)
-        
+
         for msg in important_messages:
             print(bcolors.WARNING + msg + bcolors.ENDC)
     except KeyboardInterrupt:
