@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import platform
+import site
 import subprocess
 import sys
 
@@ -379,24 +380,35 @@ def install_app_deps(distro, deps_dict):
     print("\n[EAF] Please ensure the following are added to your init.el:")
 
     print_sample_config(app_dir)
-
-def print_symlink_info(distro):
-    print(bcolors.OKCYAN + "\nDear EAF user, PyQt6-WebEngine will cause EAF crash because of libQt6WebEngineCore.so.6, you need run below command to fix this problem manually:" + bcolors.ENDC)
+        
+def symlink_webengine_library():
+    library_name = "libQt6WebEngineCore.so.6"
+    python_library_dir = site.getsitepackages()[0]
+    python_library_path = os.path.join(python_library_dir, "PyQt6", "Qt6", "lib", library_name)
     
-    if distro == "dnf":
-        print("sudo dnf -y install qt6-qtwebengine-libs; sudo ln -sf /usr/lib64/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
-    elif distro == "emerge":
-        print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
-    elif distro == "apt":
-        print("sudo apt -y install libqt6webenginecore6 ; sudo ln -sf /usr/lib/x86_64-linux-gnu/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
-    elif distro == "pacman":
-        print("sudo pacman -S qt6-webengine ; sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
-    elif distro == "pkg":
-        print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
-    elif distro == "zypper":    # Suse
-        print("sudo zypper install -y libQt6WebEngineCore6 ; sudo ln -sf /usr/lib/libQt6WebEngineCore.so.6 /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6")
-    elif distro == "brew":
-        print("Install package that include file 'libQt6WebEngineCore.so.6', then symlink to /usr/lib/python3.10/site-packages/PyQt6/Qt6/lib/libQt6WebEngineCore.so.6'")
+    process = subprocess.Popen(''' echo "$(ldconfig -p | grep {} | tr ' ' '\n' | grep /)" '''.format(library_name),
+                               shell=True, text=True, 
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process.wait()
+    
+    webengine_library_path = ""
+    try:
+        webengine_library_path =  process.stdout.readlines()[0].split()[0]
+    except:
+        pass
+    
+    if webengine_library_path == "":
+        print(bcolors.OKCYAN + "{} is incomplete, will cause EAF browser crash".format(python_library_path) + bcolors.ENDC)
+        print(bcolors.OKCYAN + "To fix this problem, please install package that include {} from your operating system repository, and symlink {} to {}".format(
+            library_name, library_name, python_library_path) + bcolors.ENDC)
+    else:
+        if os.path.getsize(webengine_library_path) != os.path.getsize(python_library_path):
+            print("[EAF] Fix EAF browser crash cause by {}: sudo ln -sf {} {}".format(library_name, webengine_library_path, python_library_path))
+            symlink_process = subprocess.Popen("sudo ln -sf {} {}".format(webengine_library_path, python_library_path), 
+                                               shell=True, text=True,
+                                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            symlink_process.wait()
+            print("[EAF] Finished {} symlink.".format(library_name))
 
 def main():
     try:
@@ -416,10 +428,10 @@ def main():
 
         print("[EAF] install-eaf.py finished.\n")
         
-        for msg in important_messages:
-            print(msg)
+        symlink_webengine_library()
         
-        print_symlink_info(distro)
+        for msg in important_messages:
+            print(bcolors.WARNING + msg + bcolors.ENDC)
     except KeyboardInterrupt:
         print("[EAF] install-eaf.py aborted!")
         sys.exit()
