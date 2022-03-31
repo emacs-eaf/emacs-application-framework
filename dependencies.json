@@ -2,7 +2,10 @@
   "pacman": [
     "wmctrl",
     "nodejs",
-    "npm"
+    "npm",
+    "python-pyqt6",
+    "python-pyqt6-sip",
+    "python-pyqt6-webengine"
   ],
   "emerge": [
     "x11-misc/wmctrl",
@@ -32,6 +35,10 @@
     "node"
   ],
   "pip": {
+    "pacman": [
+      "epc",
+      "lxml"
+    ],
     "linux": [
       "epc",
       "lxml",
