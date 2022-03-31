@@ -2,133 +2,133 @@
     "emacs-application-framework": {
         "name": "EAF (Emacs Application Framework)",
         "type": "core",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/emacs-application-framework.git",
         "mirror_url": "https://gitee.com/emacs-eaf/emacs-application-framework.git"
     },
     "airshare": {
         "name": "EAF Airshare",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-airshare.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-airshare.git"
     },
     "browser": {
         "name": "EAF Browser",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-browser.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-browser.git"
     },
     "camera": {
         "name": "EAF Camera",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-camera.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-camera.git"
     },
     "demo": {
         "name": "EAF Demo",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-demo.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-demo.git"
     },
     "file-browser": {
         "name": "EAF File Browser",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-file-browser.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-browser.git"
     },
     "file-manager": {
         "name": "EAF File Manager",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-file-manager.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-manager.git"
     },
     "file-sender": {
         "name": "EAF File Sender",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-file-sender.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-sender.git"
     },
     "image-viewer": {
         "name": "EAF Image Viewer",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-image-viewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-image-viewer.git"
     },
     "jupyter": {
         "name": "EAF Jupyter",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-jupyter.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-jupyter.git"
     },
     "markdown-previewer": {
         "name": "EAF Markdown Previewer",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-markdown-previewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-markdown-previewer.git"
     },
     "mermaid": {
         "name": "EAF Mermaid",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-mermaid.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-mermaid.git"
     },
     "mindmap": {
         "name": "EAF Mindmap",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-mindmap.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-mindmap.git"
     },
     "music-player": {
         "name": "EAF Music Player",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-music-player.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-music-player.git"
     },
     "org-previewer": {
         "name": "EAF Org Previewer",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-org-previewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-org-previewer.git"
     },
     "pdf-viewer": {
         "name": "EAF PDF Viewer",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-pdf-viewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-pdf-viewer.git"
     },
     "system-monitor": {
         "name": "EAF System Monitor",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-system-monitor.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-system-monitor.git"
     },
     "terminal": {
         "name": "EAF Terminal",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-terminal.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-terminal.git"
     },
     "video-player": {
         "name": "EAF Video Player",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-video-player.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-video-player.git"
     },
@@ -142,21 +142,21 @@
     "netease-cloud-music": {
         "name": "EAF NetEase Cloud Music",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-netease-cloud-music.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-netease-cloud-music.git"
     },
     "rss-reader": {
         "name": "EAF RSS Reader",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-rss-reader.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-rss-reader.git"
     },
     "git": {
         "name": "EAF Git Client",
         "type": "app",
-        "branch": "master",
+        "branch": "qt5-legacy",
         "url": "https://github.com/emacs-eaf/eaf-git.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git"
     }
