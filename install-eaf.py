@@ -210,9 +210,14 @@ def add_or_update_app(app: str, app_spec_dict):
         if not exist_branch:
             run_command(["git", "config", "remote.origin.fetch", "+refs/heads/"+branch+":refs/remotes/origin/"+branch], path=path)
             run_command(["git", "fetch", "origin"], path=path)
-        run_command(["git", "checkout", branch], path=path)
 
-        output_lines = run_command(["git", "pull"], path=path, get_result=True)
+        current_branch_outputs = run_command(["git", "symbolic-ref", "HEAD"], path=path, get_result=True)
+        if current_branch_outputs is None:
+            raise Exception("git symbolic-ref failed!")
+        elif branch not in current_branch_outputs[0]:
+            run_command(["git", "checkout", branch], path=path)
+
+        output_lines = run_command(["git", "pull", "origin", branch], path=path, get_result=True)
         if output_lines is None:
             raise Exception("git pull failed!")
         for output in output_lines:
