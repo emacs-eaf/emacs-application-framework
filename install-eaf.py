@@ -208,12 +208,16 @@ def add_or_update_app(app: str, app_spec_dict):
                 break
         if not exist_branch:
             run_command(["git", "config", "remote.origin.fetch", "+refs/heads/"+branch+":refs/remotes/origin/"+branch], path=path)
-            run_command(["git", "fetch", "origin"], path=path)
+            if args.git_full_clone:
+                run_command(["git", "fetch", "origin", branch], path=path)
+            else:
+                run_command(["git", "fetch", "origin", branch, "--depth", "1"], path=path)
 
         current_branch_outputs = run_command(["git", "symbolic-ref", "HEAD"], path=path, get_result=True)
         if current_branch_outputs is None:
             raise Exception("git symbolic-ref failed!")
-        elif branch not in current_branch_outputs[0]:
+        current_branch = current_branch_outputs[0]
+        if branch not in current_branch:
             run_command(["git", "checkout", branch], path=path)
 
         output_lines = run_command(["git", "pull", "origin", branch], path=path, get_result=True)
@@ -222,7 +226,7 @@ def add_or_update_app(app: str, app_spec_dict):
         for output in output_lines:
             print(output.rstrip())
             if "Already up to date." in output:
-                updated = False
+                updated = False if branch in current_branch else True
 
     elif args.git_full_clone:
         run_command(["git", "clone", "-b", branch, url, path])
