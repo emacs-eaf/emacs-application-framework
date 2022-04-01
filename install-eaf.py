@@ -399,8 +399,8 @@ def main():
     try:
         print(bcolors.WARNING + "WARNING: You are using the qt5-legacy branch supporting Qt5!" + bcolors.ENDC)
         print(bcolors.WARNING + "WARNING: This branch tries to preserve a working EAF with Qt5 for those who cannot install Qt6 on their system due to various reasons." + bcolors.ENDC)
-        print(bcolors.WARNING + "WARNING: Because of the vast incompatibility between Qt5 and Qt6, we cannot guarantee this branch to work forever, and it will always be an afterthought when we implement any new features.")
-        print(bcolors.WARNING + "WARNING: Patches will only be applied to this branch if it is backward compatible.")
+        print(bcolors.WARNING + "WARNING: Because of the vast incompatibility between Qt5 and Qt6, we cannot guarantee this branch to work forever, and it will always be an afterthought when we implement any new features." + bcolors.ENDC)
+        print(bcolors.WARNING + "WARNING: Patches will only be applied to this branch if it is backward compatible." + bcolors.ENDC)
         print(bcolors.WARNING + "WARNING: Please upgrade to Qt6 and use the master branch as soon as possible!" + bcolors.ENDC)
 
         distro = get_distro()
@@ -422,8 +422,8 @@ def main():
 
         print(bcolors.WARNING + "WARNING: You are using the qt5-legacy branch supporting Qt5!" + bcolors.ENDC)
         print(bcolors.WARNING + "WARNING: This branch tries to preserve a working EAF with Qt5 for those who cannot install Qt6 on their system due to various reasons." + bcolors.ENDC)
-        print(bcolors.WARNING + "WARNING: Because of the vast incompatibility between Qt5 and Qt6, we cannot guarantee this branch to work forever, and it will always be an afterthought when we implement any new features.")
-        print(bcolors.WARNING + "WARNING: Patches will only be applied to this branch if it is backward compatible.")
+        print(bcolors.WARNING + "WARNING: Because of the vast incompatibility between Qt5 and Qt6, we cannot guarantee this branch to work forever, and it will always be an afterthought when we implement any new features." + bcolors.ENDC)
+        print(bcolors.WARNING + "WARNING: Patches will only be applied to this branch if it is backward compatible." + bcolors.ENDC)
         print(bcolors.WARNING + "WARNING: Please upgrade to Qt6 and use the master branch as soon as possible!" + bcolors.ENDC)
 
         print("[EAF] install-eaf.py finished.")
