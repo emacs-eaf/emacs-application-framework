@@ -26,12 +26,12 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt6.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
-from core.utils import (touch, string_to_base64, popen_and_call, 
-                        call_and_check_code, interactive, 
-                        eval_in_emacs, message_to_emacs, clear_emacs_message, 
-                        open_url_in_background_tab, duplicate_page_in_new_tab, 
-                        open_url_in_new_tab, open_url_in_new_tab_other_window, 
-                        focus_emacs_buffer, atomic_edit, get_emacs_config_dir, 
+from core.utils import (touch, string_to_base64, popen_and_call,
+                        call_and_check_code, interactive,
+                        eval_in_emacs, message_to_emacs, clear_emacs_message,
+                        open_url_in_background_tab, duplicate_page_in_new_tab,
+                        open_url_in_new_tab, open_url_in_new_tab_other_window,
+                        focus_emacs_buffer, atomic_edit, get_emacs_config_dir,
                         to_camel_case, get_emacs_vars)
 from urllib.parse import urlparse, parse_qs
 import base64
@@ -90,63 +90,63 @@ class BrowserView(QWebEngineView):
              "eaf-marker-letters",
              "eaf-marker-fontsize",
              "eaf-browser-scroll-step"])
-        
+
     def load_cookie(self):
         host_name = self.url().host()
         cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
-        
+
         # When start load page, EAF will try to load cookie for current site.
         if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
             import json
             from PyQt6.QtNetwork import QNetworkCookie
-            
+
             cookie_dict = {}
             with open(cookie_file) as f:
                 cookie_dict = json.load(f)
-            
+
             # Load cookie into CookieStorage make sure site login sucessfully.
             # We need load every (name, value) tuple into CookieStorage.
             for name, value in cookie_dict.items():
                 cookie = QNetworkCookie(name.encode("utf-8"), value.encode("utf-8"))
                 self.cookie_store.setCookie(cookie, self.url())
-                
+
     def add_cookie(self, cookie):
         # If cookie is session cookie (use for session logic), not save cookie to disk.
         if not cookie.isSessionCookie():
             import json
-            
+
             cookie_file = os.path.join(self.config_dir, "browser", "cookie", cookie.domain())
             cookie_dict = {}
-            
+
             # Read old cookie of current site.
             if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
                 with open(cookie_file) as f:
                     cookie_dict = json.load(f)
             else:
                 touch(cookie_file)
-            
+
             # Update cookie value.
             cookie_name = cookie.name().data().decode("utf-8")
             cookie_value = cookie.value().data().decode("utf-8")
             cookie_dict[cookie_name] = cookie_value
-            
+
             # Save newest cookie to disk.
             with open(cookie_file, "w") as f:
                 f.write(json.dumps(cookie_dict))
-            
+
     def delete_all_cookies(self):
         import shutil
-        
+
         cookie_dir = os.path.join(self.config_dir, "browser", "cookie")
-        
+
         # Delete cookie directory to make all site won't login sucessfully.
         if os.path.exists(cookie_dir):
             shutil.rmtree(cookie_dir)
-        
+
     def delete_cookie(self):
         host_name = self.url().host()
         cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
-        
+
         # Remove cookie file match domain of current site, EAF won't login at next time load same site.
         if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
             os.remove(cookie_file)
@@ -206,7 +206,7 @@ class BrowserView(QWebEngineView):
             filtered = dict((k, v) for k, v in qd.items())
 
         from urllib.parse import urlunparse, urlencode
-        
+
         return urlunparse([
             parsed.scheme,
             parsed.netloc,
@@ -249,8 +249,7 @@ class BrowserView(QWebEngineView):
             self.web_page.findText(self.search_term, self.web_page.FindFlag.FindBackward,
                                    self.callback_text_search)
         else:
-            self.web_page.findText(self.search_term, self.web_page.FindFlags(),
-                                   self.callback_text_search)
+            self.web_page.findText(self.search_term, resultCallback = self.callback_text_search)
 
     @interactive
     def search_text_forward(self):
@@ -306,12 +305,12 @@ class BrowserView(QWebEngineView):
         # if event.type() != 1:
         #     import time
         #     print(time.time(), event.type(), self.rect())
-        
+
         if event.type() in [QEvent.Type.MouseButtonPress]:
             self.is_button_press = True
         elif event.type() in [QEvent.Type.MouseButtonRelease]:
             self.is_button_press = False
-            
+
         # Focus emacs buffer when user click view.
         event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
@@ -459,7 +458,7 @@ class BrowserView(QWebEngineView):
 
     def scroll_wheel(self, x_offset, y_offset):
         from PyQt6.QtGui import QWheelEvent
-        
+
         self.simulated_wheel_event = True
 
         pos = self.rect().center()
@@ -738,32 +737,32 @@ class BrowserView(QWebEngineView):
         self.eval_js(self.clear_focus_js)
 
     def init_dark_mode_js(self, module_path, selection_color="auto"):
-        js_string = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read() 
-        
+        js_string = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
+
         if selection_color != "auto":
             js_string = js_string.replace("selectionColor: 'auto'", "selectionColor: '" + selection_color + "'")
-            
+
         js_string += """DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});"""
-        
+
         self.dark_mode_inject_js = QWebEngineScript()
         self.dark_mode_inject_js.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentCreation)
         self.dark_mode_inject_js.setWorldId(QWebEngineScript.ScriptWorldId.MainWorld)
         self.dark_mode_inject_js.setName("dark_mode_inject.js")
         self.dark_mode_inject_js.setRunsOnSubFrames(True)
         self.dark_mode_inject_js.setSourceCode(js_string)
-        
+
         if self.buffer.dark_mode_is_enabled():
             self.enable_dark_mode()
-        
+
     @interactive(insert_or_do=True)
     def enable_dark_mode(self):
         ''' Dark mode support.'''
-        self.page().scripts().insert(self.dark_mode_inject_js)        
+        self.page().scripts().insert(self.dark_mode_inject_js)
 
     @interactive(insert_or_do=True)
     def disable_dark_mode(self):
         ''' Remove dark mode support.'''
-        self.page().scripts().remove(self.dark_mode_inject_js)        
+        self.page().scripts().remove(self.dark_mode_inject_js)
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -773,22 +772,22 @@ class BrowserPage(QWebEnginePage):
         ''' Execute JavaScript.'''
         if hasattr(self, "loop") and self.loop.isRunning():
             # NOTE:
-            # 
+            #
             # Just return None is QEventLoop is busy, such as press 'j' key not release on webpage.
             # Otherwise will got error 'RecursionError: maximum recursion depth exceeded while calling a Python object'.
-            # 
+            #
             # And don't warry, API 'execute_javascript' is works well for programming purpse since we just call this interface occasionally.
             return None
         else:
             # Build event loop.
             self.loop = QEventLoop()
-            
+
             # Run JavaScript code.
             self.runJavaScript(script_src, self.callback_js)
-            
+
             # Execute event loop, and wait event loop quit.
             self.loop.exec()
-            
+
             # Return JavaScript function result.
             return self.result
 
@@ -993,7 +992,7 @@ class BrowserBuffer(Buffer):
 
     def _save_as_single_file(self):
         from functools import partial
-        
+
         parsed = urlparse(self.url)
         qd = parse_qs(parsed.query, keep_blank_values=True)
         file_path = os.path.join(os.path.expanduser(self.download_path), "{}.html".format(parsed.netloc))
@@ -1405,12 +1404,12 @@ class BrowserBuffer(Buffer):
     @interactive
     def toggle_dark_mode(self):
         self.is_dark_mode_enabled = not self.is_dark_mode_enabled
-        
+
         if self.is_dark_mode_enabled:
             self.buffer_widget.enable_dark_mode()
         else:
             self.buffer_widget.disable_dark_mode()
-            
+
         self.buffer_widget.reload()
 
     @interactive(insert_or_do=True)
@@ -1535,7 +1534,7 @@ class BrowserBuffer(Buffer):
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         import sqlite3
-        
+
         self._conn = sqlite3.connect(dbpath)
         self._conn.execute("""
         CREATE TABLE IF NOT EXISTS ZoomSize
