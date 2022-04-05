@@ -277,7 +277,8 @@ def install_core_deps(distro, deps_dict):
         else:
             install_py_deps(deps_dict["pip"][sys.platform])
 
-    symlink_webengine_library(distro)
+    if platform.system() != "Windows":
+        symlink_webengine_library(distro)
     print("[EAF] Finished installing core dependencies")
 
 def yes_no(question, default_yes=False, default_no=False):
