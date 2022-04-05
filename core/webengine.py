@@ -1518,6 +1518,9 @@ class BrowserBuffer(Buffer):
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         import sqlite3
+        
+        if not os.path.exists(os.path.dirname(dbpath)):
+            os.makedirs(os.path.dirname(dbpath))
 
         self._conn = sqlite3.connect(dbpath)
         self._conn.execute("""
