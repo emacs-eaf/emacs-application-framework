@@ -26,6 +26,7 @@ from PyQt6 import QtWebEngineWidgets as NeverUsed # noqa
 
 from PyQt6.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QTimer
 from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
 import json
@@ -410,6 +411,9 @@ class EAF(object):
         ''' Open devtools tab'''
         self.devtools_page = web_page
         eval_in_emacs('eaf-open-devtool-page', [])
+        
+        # We need adjust web window size after open developer tool.
+        QTimer().singleShot(1000, lambda : eval_in_emacs('eaf-monitor-configuration-change', []))
 
     def save_buffer_session(self, buf):
         ''' Save buffer session to file.'''
