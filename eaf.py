@@ -47,7 +47,6 @@ class EAF(object):
         emacs_height = int(emacs_height)
 
         # Init variables.
-        self.module_dict = {}
         self.buffer_dict = {}
         self.view_dict = {}
 
@@ -160,14 +159,13 @@ class EAF(object):
         
         global emacs_width, emacs_height, proxy_string
 
-        # Load module with app absolute path.
-        if module_path in self.module_dict:
-            module = self.module_dict[module_path]
-        else:
-            spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            self.module_dict[module_path] = module
+        # Always load module with app absolute path.
+        # 
+        # Don't cache module in memory, 
+        # this is very convenient for EAF to load the latest application code in real time without the need for kill EAF process.
+        spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
 
         # Create application buffer.
         app_buffer = module.AppBuffer(buffer_id, url, arguments)
