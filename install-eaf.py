@@ -134,7 +134,7 @@ def install_sys_deps(distro: str, deps_list):
     return run_command(command)
 
 def install_py_deps(deps_list):
-    command = ['pip', 'install', '--user']
+    command = ['pip', 'install', '--user', '-U']
     command.extend(deps_list)
     return run_command(command)
 
