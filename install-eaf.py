@@ -5,7 +5,6 @@ import argparse
 import datetime
 import json
 import os
-import platform
 import subprocess
 import sys
 
@@ -40,7 +39,7 @@ parser.add_argument("--use-gitee", action="store_true",
                     help='alias of --use-mirror')
 args = parser.parse_args()
 
-NPM_CMD = "npm.cmd" if platform.system() == "Windows" else "npm"
+NPM_CMD = "npm.cmd" if sys.platform == "win32" else "npm"
 
 class bcolors:
     HEADER = '\033[95m'
@@ -116,7 +115,7 @@ def get_archlinux_aur_helper():
 def install_sys_deps(distro: str, deps_list):
     deps_list = prune_existing_sys_deps(deps_list)
     command = []
-    if which("dnf"):
+    if distro == 'dnf':
         command = ['sudo', 'dnf', '-y', 'install']
     elif distro == 'emerge':
         command = ['sudo', 'emerge']
@@ -236,7 +235,9 @@ def add_or_update_app(app: str, app_spec_dict):
 
 def get_distro():
     distro = ""
-    if which("dnf"):
+    if sys.platform != "linux":
+        pass
+    elif which("dnf"):
         distro = "dnf"
     elif which("emerge"):
         distro = "emerge"
