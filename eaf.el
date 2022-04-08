@@ -1689,7 +1689,8 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
          (proc
           (progn
             (async-shell-command (concat
-                                  eaf-python-command " install-eaf.py" " --install "
+                                  eaf-python-command " install-eaf.py"
+                                  (when (length> apps 0) " --install ")
                                   (mapconcat 'symbol-name apps " "))
                                  output-buffer)
             (get-buffer-process output-buffer))))
