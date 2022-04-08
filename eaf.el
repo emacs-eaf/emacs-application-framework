@@ -7,7 +7,7 @@
 ;; Copyright (C) 2018, Andy Stewart, all rights reserved.
 ;; Created: 2018-06-15 14:10:12
 ;; Version: 0.5
-;; Last-Updated: Sun Nov 21 03:38:17 2021 (-0500)
+;; Last-Updated: Fri Apr  8 12:23:33 2022 (-0400)
 ;;           By: Mingde (Matthew) Zeng
 ;; URL: https://github.com/emacs-eaf/emacs-application-framework
 ;; Keywords:
@@ -579,11 +579,11 @@ A hashtable, key is url and value is title.")
 
         ;; Use XCB for input event transfer.
         (setenv "QT_QPA_PLATFORM" "xcb"))
-    
+
     ;; Turn on DEBUG info when `eaf-enable-debug' is non-nil.
     (when eaf-enable-debug
       (setenv "QT_DEUG_PLUGINS" "1"))
-    
+
     (setq process-environment
           (seq-filter
            (lambda (var)
@@ -1698,7 +1698,7 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
           (progn
             (async-shell-command (concat
                                   eaf-python-command " install-eaf.py"
-                                  (when (length> apps 0) " --install ")
+                                  (when (and apps (> (length apps) 0)) " --install ")
                                   (mapconcat 'symbol-name apps " "))
                                  output-buffer)
             (get-buffer-process output-buffer))))
