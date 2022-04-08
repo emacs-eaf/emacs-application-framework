@@ -271,7 +271,14 @@ def install_core_deps(distro, deps_dict):
         if len(core_deps) > 0:
             install_sys_deps(distro, core_deps)
     if (not args.ignore_py_deps or sys.platform != "linux") and sys.platform in deps_dict["pip"]:
-        install_py_deps(deps_dict["pip"][sys.platform])
+        if distro in deps_dict["pip"]:
+            # The priority of the distribution is higher than "linux".
+            install_py_deps(deps_dict["pip"][distro])
+        else:
+            install_py_deps(deps_dict["pip"][sys.platform])
+
+    if sys.platform != "win32" and sys.platform != "cygwin":
+        symlink_webengine_library(distro)
     print("[EAF] Finished installing core dependencies")
 
 def yes_no(question, default_yes=False, default_no=False):
