@@ -857,6 +857,10 @@ keybinding variable to eaf-app-binding-alist."
          (url-directory (or (file-name-directory url) url)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
+      
+      ;; Don't promt user when exist EAF python process.
+      (setq-local confirm-kill-processes nil)
+
       (when (file-accessible-directory-p url-directory)
         (setq-local default-directory url-directory)
 
@@ -1761,9 +1765,6 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (advice-add #'isearch-backward :around #'eaf--isearch-backward-advisor)
 (when (and (ignore-errors (require 'counsel)) (featurep 'counsel))
   (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
-
-;; Don't promt user when exist EAF python process.
-(setq confirm-kill-processes nil)
 
 (provide 'eaf)
 
