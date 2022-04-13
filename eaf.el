@@ -1294,6 +1294,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
              (read-string interactive-string initial-content))
             ((string-equal interactive-type "file")
              (expand-file-name (read-file-name interactive-string initial-content)))
+            ((string-equal interactive-type "directory")
+             (expand-file-name (read-directory-name interactive-string initial-content)))
             ((string-equal interactive-type "yes-or-no")
              (yes-or-no-p interactive-string))
             ((string-equal interactive-type "list")
