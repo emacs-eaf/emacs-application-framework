@@ -110,7 +110,7 @@ From here on, you can add the full path to the EAF installation directory to you
 
 #### 4. Load EAF Apps
 
-You can use below code to load applications `browser` and `pdf-viewer` that you installed. Please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#applications) for the full list:
+You can use below code to load applications `browser` and `pdf-viewer` that you installed. Please check [Applications](https://github.com/emacs-eaf/emacs-application-framework#features) for the full list:
 
 ```Elisp
 (require 'eaf-browser)
