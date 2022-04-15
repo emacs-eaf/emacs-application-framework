@@ -40,6 +40,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 - [Music Player](https://github.com/emacs-eaf/eaf-music-player): 音乐播放器，支持播放列表对齐渲染和实时音频反馈
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): 新闻阅读器，支持Html内容渲染
 - [File Manager](https://github.com/emacs-eaf/eaf-file-manager): 双栏文件管理器，支持文件实时预览
+- [Git Client](https://github.com/emacs-eaf/eaf-git): Emacs中最快的Git客户端
 - [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): 全键盘操作的思维导图
 - [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): 在Emacs里面运行Jupyter！
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): 支持实时缩放的图片查看器

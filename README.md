@@ -47,6 +47,7 @@ EAF is very extensible. It already comes with a number of useful applications by
 - [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and an audio visualization
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS reader, rendering html content in expected
 - [File Manager](https://github.com/emacs-eaf/eaf-file-manager): File manager, support file real-time preview
+- [Git Client](https://github.com/emacs-eaf/eaf-git): Fastest git client in Emacs
 - [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): Mindmap with full-featured keyboard operation
 - [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): Jupyter in Emacs
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Picture viewer, supporting real-time zoom rotation
