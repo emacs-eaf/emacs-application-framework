@@ -85,11 +85,11 @@ class BrowserView(QWebEngineView):
         (self.default_zoom, self.show_hover_link,
          self.marker_letters, self.marker_fontsize,
          self.scroll_step) = get_emacs_vars(
-            ["eaf-browser-default-zoom",
+            ["eaf-webengine-default-zoom",
              "eaf-webengine-show-hover-link",
              "eaf-marker-letters",
              "eaf-marker-fontsize",
-             "eaf-browser-scroll-step"])
+             "eaf-webengine-scroll-step"])
 
     def load_cookie(self):
         host_name = self.url().host()
@@ -818,15 +818,15 @@ class BrowserBuffer(Buffer):
          self.enable_plugin, self.enable_javascript, self.enable_scrollbar,
          self.unknown_url_scheme_policy,
          self.download_path, self.default_zoom) = get_emacs_vars(
-             ["eaf-browser-pc-user-agent",
-              "eaf-browser-phone-user-agent",
-              "eaf-browser-font-family",
-              "eaf-browser-enable-plugin",
-              "eaf-browser-enable-javascript",
-              "eaf-browser-enable-scrollbar",
-              "eaf-browser-unknown-url-scheme-policy",
-              "eaf-browser-download-path",
-              "eaf-browser-default-zoom"])
+             ["eaf-webengine-pc-user-agent",
+              "eaf-webengine-phone-user-agent",
+              "eaf-webengine-font-family",
+              "eaf-webengine-enable-plugin",
+              "eaf-webengine-enable-javascript",
+              "eaf-webengine-enable-scrollbar",
+              "eaf-webengine-unknown-url-scheme-policy",
+              "eaf-webengine-download-path",
+              "eaf-webengine-default-zoom"])
 
         self.profile = QWebEngineProfile(self.buffer_widget)
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
