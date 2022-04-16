@@ -409,6 +409,46 @@ been initialized."
   "Proxy Type used by EAF Browser.  The value is either \"http\" or \"socks5\"."
   :type 'string)
 
+(defcustom eaf-webengine-default-zoom 1.0
+  "Set the default zoom factor for EAF Browser."
+  :type 'float)
+
+(defcustom eaf-webengine-scroll-step 400
+  "Set the scroll step for EAF Browser, increase/decrease for bigger/smaller steps."
+  :type 'float)
+
+(defcustom eaf-webengine-pc-user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0"
+  "Simulate a PC User-Agent for EAF Browser."
+  :type 'string)
+
+(defcustom eaf-webengine-phone-user-agent "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1"
+  "Simulate a Phone User-Agent for EAF Browser."
+  :type 'string)
+
+(defcustom eaf-webengine-font-family ""
+  "Set font family for EAF Browser."
+  :type 'string)
+
+(defcustom eaf-webengine-enable-plugin t
+  "If non-nil, enable QtWebEngine plugins for EAF Browser."
+  :type 'boolean)
+
+(defcustom eaf-webengine-enable-javascript t
+  "If non-nil, enable javascript for EAF Browser."
+  :type 'boolean)
+
+(defcustom eaf-webengine-enable-scrollbar nil
+  "If non-nil, enable scroll bar for EAF Browser."
+  :type 'boolean)
+
+(defcustom eaf-webengine-unknown-url-scheme-policy "AllowUnknownUrlSchemesFromUserInteraction"
+  "Allowed options: DisallowUnknownUrlSchemes, AllowUnknownUrlSchemesFromUserInteraction, or AllowAllUnknownUrlSchemes."
+  :type 'string)
+
+(defcustom eaf-webengine-download-path "~/Downloads"
+  "Set the download path for EAF Browser."
+  :type 'string)
+
 (defcustom eaf-enable-debug nil
   "If you got segfault error, please turn this option.
 Then EAF will start by gdb, please send new issue with `*eaf*' buffer content when next crash."
@@ -865,7 +905,7 @@ keybinding variable to eaf-app-binding-alist."
          (url-directory (or (file-name-directory url) url)))
     (with-current-buffer eaf-buffer
       (eaf-mode)
-      
+
       ;; Don't promt user when exist EAF python process.
       (setq-local confirm-kill-processes nil)
 
