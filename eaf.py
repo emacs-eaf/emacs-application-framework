@@ -140,10 +140,10 @@ class EAF(object):
     @PostGui()
     def update_buffer_with_url(self, module_path, buffer_url, update_data):
         ''' Update buffer with url '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
-            buffer = self.buffer_dict[buffer_id]
+        for buffer in list(self.buffer_dict.values()):
             if buffer.module_path == module_path and buffer.url == buffer_url:
                 buffer.update_with_data(update_data)
+                break
 
     @PostGui()
     def new_buffer(self, buffer_id, url, module_path, arguments):
