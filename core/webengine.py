@@ -813,16 +813,22 @@ class BrowserBuffer(Buffer):
 
         self.zoom_data = ZoomSizeDb(os.path.join(os.path.dirname(self.config_dir), "browser", "zoom_data.db"))
 
-        (self.pc_user_agent, self.phone_user_agent,
+        (self.pc_user_agent,
+         self.phone_user_agent,
          self.font_family,
-         self.enable_plugin, self.enable_javascript, self.enable_scrollbar,
+         self.enable_plugin,
+         self.enable_javascript,
+         self.enable_javascript_access_clipboard,
+         self.enable_scrollbar,
          self.unknown_url_scheme_policy,
-         self.download_path, self.default_zoom) = get_emacs_vars(
+         self.download_path,
+         self.default_zoom) = get_emacs_vars(
              ["eaf-webengine-pc-user-agent",
               "eaf-webengine-phone-user-agent",
               "eaf-webengine-font-family",
               "eaf-webengine-enable-plugin",
               "eaf-webengine-enable-javascript",
+              "eaf-webengine-enable-javascript-access-clipboard",
               "eaf-webengine-enable-scrollbar",
               "eaf-webengine-unknown-url-scheme-policy",
               "eaf-webengine-download-path",
@@ -866,6 +872,7 @@ class BrowserBuffer(Buffer):
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, self.enable_plugin)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, self.enable_javascript)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, self.enable_javascript_access_clipboard)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, self.enable_scrollbar)
 
             if self.unknown_url_scheme_policy == "DisallowUnknownUrlSchemes":
