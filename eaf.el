@@ -437,6 +437,10 @@ been initialized."
   "If non-nil, enable javascript for EAF Browser."
   :type 'boolean)
 
+(defcustom eaf-webengine-enable-javascript-access-clipboard t
+  "If non-nil, enable javascript access user clipboard for EAF Browser."
+  :type 'boolean)
+
 (defcustom eaf-webengine-enable-scrollbar nil
   "If non-nil, enable scroll bar for EAF Browser."
   :type 'boolean)
