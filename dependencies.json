@@ -2,10 +2,7 @@
   "pacman": [
     "wmctrl",
     "nodejs",
-    "npm",
-    "python-pyqt6",
-    "python-pyqt6-sip",
-    "python-pyqt6-webengine"
+    "npm"
   ],
   "emerge": [
     "x11-misc/wmctrl",
@@ -35,32 +32,33 @@
     "node"
   ],
   "pip": {
-    "pacman": [
-      "epc",
-      "lxml"
-    ],
     "linux": [
       "epc",
       "lxml",
-      "pyqt6",
-      "pyqt6-sip",
-      "PyQt6-WebEngine"
+      "PyQt6==6.2.0",
+      "PyQt6-Qt6==6.2.0",
+      "PyQt6-sip==13.3.1",
+      "PyQt6-WebEngine==6.2.0",
+      "PyQt6-WebEngine-Qt6==6.2.0"
     ],
     "win32": [
       "epc",
       "lxml",
-      "pyqt6",
-      "pyqt6-sip",
-      "PyQt6-WebEngine",
-      "pygetwindow"
+      "PyQt6==6.2.0",
+      "PyQt6-Qt6==6.2.0",
+      "PyQt6-sip==13.3.1",
+      "PyQt6-WebEngine==6.2.0",
+      "PyQt6-WebEngine-Qt6==6.2.0"
     ],
     "darwin": [
       "epc",
       "lxml",
-      "pyqt6",
-      "pyqt6-sip",
-      "PyQt6-WebEngine",
-      "mac-app-frontmost"
+      "mac-app-frontmost",
+      "PyQt6==6.2.0",
+      "PyQt6-Qt6==6.2.0",
+      "PyQt6-sip==13.3.1",
+      "PyQt6-WebEngine==6.2.0",
+      "PyQt6-WebEngine-Qt6==6.2.0"
     ]
   }
 }
