@@ -442,7 +442,7 @@ class BrowserView(QWebEngineView):
     def eval_js(self, js):
         ''' Run JavaScript.'''
         self.web_page.runJavaScript(js)
-
+        
     def eval_js_file(self, js_file):
         ''' Run JavaScript from JS file.'''
         self.eval_js(self.read_js_content(js_file))
@@ -455,6 +455,27 @@ class BrowserView(QWebEngineView):
         Otherwise, execute_js will block EAF!!!
         '''
         return self.web_page.execute_javascript(js)
+    
+    def eval_js_function(self, *args):
+        import json
+        
+        function_name = args[0]
+        function_args = args[1:]
+        
+        format_string = ""
+        
+        for index, arg in enumerate(function_args):
+            if type(arg) == str:
+                format_string += '\"{}\"'.format(arg)
+            else:
+                format_string += '{}'.format(json.dumps(arg))
+                
+            if index != len(function_args) - 1:
+                format_string += ","
+                
+        format_string = function_name + "(" + format_string + ");"
+        
+        self.web_page.runJavaScript(format_string)
 
     def scroll_wheel(self, x_offset, y_offset):
         from PyQt6.QtGui import QWheelEvent
