@@ -837,6 +837,7 @@ class BrowserBuffer(Buffer):
         (self.pc_user_agent,
          self.phone_user_agent,
          self.font_family,
+         self.font_size,
          self.enable_plugin,
          self.enable_javascript,
          self.enable_javascript_access_clipboard,
@@ -847,6 +848,7 @@ class BrowserBuffer(Buffer):
              ["eaf-webengine-pc-user-agent",
               "eaf-webengine-phone-user-agent",
               "eaf-webengine-font-family",
+              "eaf-webengine-font-size",
               "eaf-webengine-enable-plugin",
               "eaf-webengine-enable-javascript",
               "eaf-webengine-enable-javascript-access-clipboard",
@@ -875,6 +877,8 @@ class BrowserBuffer(Buffer):
 
         self.settings = self.buffer_widget.settings()
         try:
+            self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFontSize, self.font_size)
+            
             if self.font_family:
                 for ff in (
                         self.settings.FontFamily.StandardFont,
