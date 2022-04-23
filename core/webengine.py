@@ -837,7 +837,10 @@ class BrowserBuffer(Buffer):
         (self.pc_user_agent,
          self.phone_user_agent,
          self.font_family,
+         self.fixed_font_family,
+         self.serif_font_family,
          self.font_size,
+         self.fixed_font_size,
          self.enable_plugin,
          self.enable_javascript,
          self.enable_javascript_access_clipboard,
@@ -848,7 +851,10 @@ class BrowserBuffer(Buffer):
              ["eaf-webengine-pc-user-agent",
               "eaf-webengine-phone-user-agent",
               "eaf-webengine-font-family",
+              "eaf-webengine-fixed-font-family",
+              "eaf-webengine-serif-font-family",
               "eaf-webengine-font-size",
+              "eaf-webengine-fixed-font-size",
               "eaf-webengine-enable-plugin",
               "eaf-webengine-enable-javascript",
               "eaf-webengine-enable-javascript-access-clipboard",
@@ -877,19 +883,26 @@ class BrowserBuffer(Buffer):
 
         self.settings = self.buffer_widget.settings()
         try:
-            self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFontSize, self.font_size)
             
             if self.font_family:
                 for ff in (
                         self.settings.FontFamily.StandardFont,
-                        self.settings.FontFamily.FixedFont,
-                        self.settings.FontFamily.SerifFont,
-                        self.settings.FontFamily.SansSerifFont,
                         self.settings.FontFamily.CursiveFont,
                         self.settings.FontFamily.FantasyFont,
-                        self.settings.FontFamily.PictographFont
-                ):
+                        self.settings.FontFamily.PictographFont):
                     self.settings.setFontFamily(ff, self.font_family)
+                    
+            if self.fixed_font_family:
+                self.settings.setFontFamily(self.settings.FontFamily.FixedFont, self.fixed_font_family)
+
+            if self.serif_font_family:
+                for ff in (
+                        self.settings.FontFamily.SerifFont,
+                        self.settings.FontFamily.SansSerifFont):
+                    self.settings.setFontFamily(ff, self.serif_font_family)
+                    
+            self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFontSize, self.font_size)
+            self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFixedFontSize, self.fixed_font_size)
 
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.FullScreenSupportEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.DnsPrefetchEnabled, True)

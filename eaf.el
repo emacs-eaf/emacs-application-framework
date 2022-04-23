@@ -433,6 +433,18 @@ been initialized."
   "Set font size for EAF Browser."
   :type 'integer)
 
+(defcustom eaf-webengine-fixed-font-family ""
+  "Set fixed font family for EAF Browser."
+  :type 'string)
+
+(defcustom eaf-webengine-fixed-font-size 16
+  "Set fixed font size for EAF Browser."
+  :type 'integer)
+
+(defcustom eaf-webengine-serif-font-family ""
+  "Set serif font family for EAF Browser."
+  :type 'string)
+
 (defcustom eaf-webengine-enable-plugin t
   "If non-nil, enable QtWebEngine plugins for EAF Browser."
   :type 'boolean)
