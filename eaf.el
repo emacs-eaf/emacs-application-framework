@@ -1691,6 +1691,13 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
       (eaf-open (eaf-get-path-or-url) "airshare")
     (message "You should install EAF application 'airshare' first.")))
 
+(defun eaf-open-devtool-page ()
+  "Use EAF Browser to open the devtools page."
+  (delete-other-windows)
+  (split-window (selected-window) (/ (nth 3 (eaf-get-window-allocation (selected-window))) 2) nil t)
+  (other-window 1)
+  (eaf-open "about:blank" "browser" "devtools"))
+
 ;;;;;;;;;;;;;;;;;;;; Advice ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; FIXME: In the code below we should use `save-selected-window' (or even
