@@ -93,6 +93,8 @@ class BrowserView(QWebEngineView):
     def load_cookie(self):
         host_name = self.url().host()
         cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
+        
+        # print("Load cookie from: ", cookie_file)
 
         # When start load page, EAF will try to load cookie for current site.
         if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
@@ -108,13 +110,24 @@ class BrowserView(QWebEngineView):
             for name, value in cookie_dict.items():
                 cookie = QNetworkCookie(name.encode("utf-8"), value.encode("utf-8"))
                 self.cookie_store.setCookie(cookie, self.url())
+                
+                # print("Load cookie: ", name, value, self.url())
 
     def add_cookie(self, cookie):
         # If cookie is session cookie (use for session logic), not save cookie to disk.
+        # print("Add cookie: ", cookie.isSessionCookie(), cookie.name().data().decode("utf-8"), cookie.value().data().decode("utf-8"), self.url())
+        
         if not cookie.isSessionCookie():
             import json
 
-            cookie_file = os.path.join(self.config_dir, "browser", "cookie", cookie.domain())
+            # We need remove "." prefix from cookie domain to avoid login failed in next time.
+            # 
+            # Some website, such as github.com, it will add "." prefix in cookie domain when login.
+            cookie_domain = cookie.domain()
+            if cookie_domain.startswith("."):
+                cookie_domain = cookie_domain[len("."):]
+            
+            cookie_file = os.path.join(self.config_dir, "browser", "cookie", cookie_domain)
             cookie_dict = {}
 
             # Read old cookie of current site.
@@ -128,6 +141,10 @@ class BrowserView(QWebEngineView):
             cookie_name = cookie.name().data().decode("utf-8")
             cookie_value = cookie.value().data().decode("utf-8")
             cookie_dict[cookie_name] = cookie_value
+            
+            # print("\n")
+            # print(cookie_file, cookie_dict)
+            # print("\n")
 
             # Save newest cookie to disk.
             with open(cookie_file, "w") as f:
