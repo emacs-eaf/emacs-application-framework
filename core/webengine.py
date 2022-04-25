@@ -65,7 +65,6 @@ class BrowserView(QWebEngineView):
 
         # Cookie init.
         self.cookie_store = self.page().profile().cookieStore() # get cookie store
-        self.cookie_store.deleteAllCookies()                    # delete all cookies when QWebEngineView init, don't call this when page load
         self.cookie_store.cookieAdded.connect(self.add_cookie)  # save cookie to disk when captured cookieAdded signal
         self.loadStarted.connect(self.load_cookie)              # load disk cookie to QWebEngineView instance when page start load
 
@@ -92,81 +91,37 @@ class BrowserView(QWebEngineView):
              "eaf-webengine-scroll-step"])
 
     def load_cookie(self):
-        host_name = self.url().host()
-        cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
-        
-        # print("Load cookie from: ", cookie_file)
-
-        # When start load page, EAF will try to load cookie for current site.
-        if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
-            import json
+        cookie_dir = os.path.join(self.config_dir, "browser", "cookie", self.url().host())
+        if os.path.exists(cookie_dir) and os.path.isdir(cookie_dir):
             from PyQt6.QtNetwork import QNetworkCookie
-
-            cookie_dict = {}
-            with open(cookie_file) as f:
-                cookie_dict = json.load(f)
-
-            # Load cookie into CookieStorage make sure site login sucessfully.
-            # We need load every (name, value) tuple into CookieStorage.
-            for name, value in cookie_dict.items():
-                cookie = QNetworkCookie(name.encode("utf-8"), value.encode("utf-8"))
-                self.cookie_store.setCookie(cookie, self.url())
-                
-                # print("Load cookie: ", name, value, self.url())
+            
+            for root, dirs, files in os.walk(cookie_dir, topdown=False):
+                for name in files:
+                    with open(os.path.join(root, name), "rb") as f:
+                        for cookie in QNetworkCookie.parseCookies(f.read()):
+                            self.cookie_store.setCookie(cookie)
 
     def add_cookie(self, cookie):
-        # If cookie is session cookie (use for session logic), not save cookie to disk.
-        # print("Add cookie: ", cookie.isSessionCookie(), cookie.name().data().decode("utf-8"), cookie.value().data().decode("utf-8"), self.url())
-        
         if not cookie.isSessionCookie():
-            import json
-
-            # We need remove "." prefix from cookie domain to avoid login failed in next time.
-            # 
-            # Some website, such as github.com, it will add "." prefix in cookie domain when login.
-            cookie_domain = cookie.domain()
-            if cookie_domain.startswith("."):
-                cookie_domain = cookie_domain[len("."):]
-            
-            cookie_file = os.path.join(self.config_dir, "browser", "cookie", cookie_domain)
-            cookie_dict = {}
-
-            # Read old cookie of current site.
-            if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
-                with open(cookie_file) as f:
-                    cookie_dict = json.load(f)
-            else:
-                touch(cookie_file)
-
-            # Update cookie value.
             cookie_name = cookie.name().data().decode("utf-8")
-            cookie_value = cookie.value().data().decode("utf-8")
-            cookie_dict[cookie_name] = cookie_value
-            
-            # print("\n")
-            # print(cookie_file, cookie_dict)
-            # print("\n")
+            cookie_file = os.path.join(self.config_dir, "browser", "cookie", self.url().host(), cookie_name)
+            touch(cookie_file)
 
             # Save newest cookie to disk.
-            with open(cookie_file, "w") as f:
-                f.write(json.dumps(cookie_dict))
+            with open(cookie_file, "wb") as f:
+                f.write(cookie.toRawForm())
 
     def delete_all_cookies(self):
-        import shutil
-
         cookie_dir = os.path.join(self.config_dir, "browser", "cookie")
-
-        # Delete cookie directory to make all site won't login sucessfully.
         if os.path.exists(cookie_dir):
+            import shutil
             shutil.rmtree(cookie_dir)
 
     def delete_cookie(self):
-        host_name = self.url().host()
-        cookie_file = os.path.join(self.config_dir, "browser", "cookie", host_name)
-
-        # Remove cookie file match domain of current site, EAF won't login at next time load same site.
-        if os.path.exists(cookie_file) and os.path.isfile(cookie_file):
-            os.remove(cookie_file)
+        cookie_dir = os.path.join(self.config_dir, "browser", "cookie", self.url().host())
+        if os.path.exists(cookie_dir):
+            import shutil
+            shutil.rmtree(cookie_dir)
 
     def load_css(self, path, name):
         path = QFile(path)
