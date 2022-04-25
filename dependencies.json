@@ -6,6 +6,7 @@
   ],
   "emerge": [
     "x11-misc/wmctrl",
+    "dev-python/gssapi",
     "net-libs/nodejs"
   ],
   "apt": [
