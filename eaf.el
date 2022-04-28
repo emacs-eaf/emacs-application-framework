@@ -825,7 +825,10 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
       (if (called-interactively-p 'any)
-          (message "%s" (kill-new (eaf-call-sync "execute_function" eaf--buffer-id "get_url")))
+	  (message "%s" (let ((url (eaf-call-sync "execute_function" eaf--buffer-id "get_url")))
+			  (kill-new url)
+			  (if (version< "29.0" emacs-version)
+			      url)))
         (eaf-call-sync "execute_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
@@ -1542,7 +1545,9 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (let ((confirm-function (cdr (assoc eaf-edit-confirm-action eaf-edit-confirm-function-alist))))
     (if confirm-function
         (funcal confirm-function)
-      (eaf-call-async "set_focus_text" eaf--buffer-id (eaf--encode-string (kill-new (buffer-string))))))
+      (eaf-call-async "set_focus_text" eaf--buffer-id (eaf--encode-string (progn (kill-new (buffer-string))
+										 (if (version< "29.0" emacs-version)
+										     (buffer-string)))))))
 
   ;; Close confirm window.
   (kill-buffer)
