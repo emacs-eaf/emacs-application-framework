@@ -99,7 +99,9 @@ qt_key_dict.update({
 qt_text_dict = {
     "SPC": " ",
     "<return>": "RET",
-    "<backspace>": ""
+    "<backspace>": "",
+    "<backtab>": "",
+    "TAB": ""
 }
 
 class Buffer(QGraphicsScene):
@@ -370,10 +372,8 @@ class Buffer(QGraphicsScene):
         if event_string in qt_text_dict:
             text = qt_text_dict[event_string]
 
-        if event_string in ["TAB", "<backtab>"]:
-            text = ""
-            if event_string == "<backtab>":
-                modifier = Qt.ShiftModifier
+        if event_string == "<backtab>":
+            modifier = Qt.KeyboardModifier.ShiftModifier
         elif event_string.isupper():
             modifier = Qt.ShiftModifier
 
