@@ -99,9 +99,18 @@ qt_key_dict.update({
 qt_text_dict = {
     "SPC": " ",
     "<return>": "RET",
-    "<backspace>": "",
     "<backtab>": "",
-    "TAB": ""
+    "<home>": "",
+    "<end>": "",
+    "<left>": "",
+    "<right>": "",
+    "<up>": "",
+    "<down>": "",
+    "<prior>": "",
+    "<next>": "",
+    "<delete>": "",
+    "<backspace>": "",
+    "<escape>": ""
 }
 
 class Buffer(QGraphicsScene):
