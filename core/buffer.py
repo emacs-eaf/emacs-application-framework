@@ -93,8 +93,13 @@ qt_key_dict.update({
     '''<escape>''': Qt.Key_Escape
 })
 
+# NOTE:
+# We need convert return or backspace to correct text, 
+# otherwise EAF browser will crash when user type return/backspace key. 
 qt_text_dict = {
-    "SPC": " "
+    "SPC": " ",
+    "<return>": "RET",
+    "<backspace>": ""
 }
 
 class Buffer(QGraphicsScene):
@@ -372,7 +377,7 @@ class Buffer(QGraphicsScene):
         elif event_string.isupper():
             modifier = Qt.ShiftModifier
 
-        # print("Press: ", event_string)
+        # print("Press: ", event_string, modifier, text)
 
         # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
         try:
