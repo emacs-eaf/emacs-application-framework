@@ -1702,7 +1702,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
 (defun eaf-open-devtool-page ()
   "Use EAF Browser to open the devtools page."
   (delete-other-windows)
-  (split-window (selected-window) (/ (nth 3 (eaf-get-window-allocation (selected-window))) 2) nil t)
+  (split-window (selected-window) (* (nth 3 (eaf-get-window-allocation (selected-window))) 0.618) nil t)
   (other-window 1)
   (eaf-open "about:blank" "browser" "devtools"))
 
