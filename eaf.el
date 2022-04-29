@@ -818,6 +818,13 @@ buffer."
     (let ((this-command cmd))
       (call-interactively cmd))))
 
+(defun eaf-copy-to-clipboard (string)
+  (if (version< "29.0" emacs-version)
+      (progn
+        (kill-new string)
+        string)
+    (kill-new string)))
+
 (defun eaf-get-path-or-url ()
   "Get the current file path or web URL.
 
@@ -825,12 +832,7 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (if (derived-mode-p 'eaf-mode)
       (if (called-interactively-p 'any)
-	  (message "%s" (let ((url (eaf-call-sync "execute_function" eaf--buffer-id "get_url")))
-			  (if (version< "29.0" emacs-version)
-			      (progn
-				(kill-new url)
-				url)
-			    (kill-new url))))
+          (message "%s" (eaf-copy-to-clipboard (eaf-call-sync "execute_function" eaf--buffer-id "get_url")))
         (eaf-call-sync "execute_function" eaf--buffer-id "get_url"))
     (user-error "This command can only be called in an EAF buffer!")))
 
@@ -1482,7 +1484,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
   ;; Open URL with EAF application
   (if (eaf-epc-live-p eaf-epc-process)
       (let (exists-eaf-buffer)
-        ;; Try to open buffer
+        ;; Try to open buffer           ; ;
         (catch 'found-eaf
           (eaf-for-each-eaf-buffer
            (when (and (string= eaf--buffer-url url)
@@ -1490,8 +1492,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
              (setq exists-eaf-buffer buffer)
              (throw 'found-eaf t))))
 
-        ;; Switch to existing buffer,
-        ;; if no match buffer found, call `eaf--open-internal'.
+;; Switch to existing buffer,
+;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
                  (not always-new))
             (progn
@@ -1547,10 +1549,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (let ((confirm-function (cdr (assoc eaf-edit-confirm-action eaf-edit-confirm-function-alist))))
     (if confirm-function
         (funcal confirm-function)
-      (eaf-call-async "set_focus_text" eaf--buffer-id (eaf--encode-string (if (version< "29.0" emacs-version)
-									      (progn (kill-new (buffer-string))
-										     (buffer-string))
-									    (kill-new (buffer-string)))))))
+      (eaf-call-async "set_focus_text" eaf--buffer-id (eaf--encode-string (eaf-copy-to-clipboard (buffer-string))))))
 
   ;; Close confirm window.
   (kill-buffer)
