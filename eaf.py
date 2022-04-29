@@ -233,8 +233,12 @@ class EAF(object):
             for view_info in view_infos:
                 if view_info not in self.view_dict:
                     (buffer_id, _, _, _, _, _) = view_info.split(":")
-                    view = View(self.buffer_dict[buffer_id], view_info)
-                    self.view_dict[view_info] = view
+                    try:
+                        view = View(self.buffer_dict[buffer_id], view_info)
+                        self.view_dict[view_info] = view
+                    except KeyError:
+                        eval_in_emacs('eaf--rebuild-buffer', [])
+                        message_to_emacs("Buffer id '{}' not exists, rebuild EAF buffer.".format(buffer_id))
 
         # Call some_view_show interface when buffer's view switch back.
         # Note, this must call after new view create, otherwise some buffer,

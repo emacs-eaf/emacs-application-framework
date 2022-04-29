@@ -1378,15 +1378,25 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf--open-internal (url app-name args)
   "Open an EAF application internally with URL, APP-NAME and ARGS."
   (let* ((buffer (eaf--create-buffer url app-name args)))
-    (with-current-buffer buffer
-      (eaf-call-async "new_buffer" eaf--buffer-id
-                      (if (eaf--called-from-wsl-on-windows-p)
-                          (eaf--translate-wsl-url-to-windows url)
-                        url)
-                      (eaf--get-app-module-path app-name)
-                      args)
-      (eaf--update-modeline-icon))
-    (eaf--preview-display-buffer app-name buffer)))
+    (eaf--open-new-buffer buffer)))
+
+(defun eaf--open-new-buffer (buffer)
+  (with-current-buffer buffer
+    (eaf-call-async "new_buffer"
+                    eaf--buffer-id
+                    (if (eaf--called-from-wsl-on-windows-p)
+                        (eaf--translate-wsl-url-to-windows eaf--buffer-url)
+                      eaf--buffer-url)
+                    (eaf--get-app-module-path eaf--buffer-app-name)
+                    eaf--buffer-args)
+    (eaf--update-modeline-icon)
+    (eaf--preview-display-buffer eaf--buffer-app-name buffer)))
+
+(defun eaf--rebuild-buffer ()
+  (when (derived-mode-p 'eaf-mode)
+    (eaf-start-process)
+    (eaf--open-new-buffer (current-buffer))
+    (eaf-monitor-configuration-change)))
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
@@ -1492,8 +1502,8 @@ When called interactively, URL accepts a file that can be opened by EAF."
              (setq exists-eaf-buffer buffer)
              (throw 'found-eaf t))))
 
-;; Switch to existing buffer,
-;; if no match buffer found, call `eaf--open-internal'.
+        ;; Switch to existing buffer,
+        ;; if no match buffer found, call `eaf--open-internal'.
         (if (and exists-eaf-buffer
                  (not always-new))
             (progn
