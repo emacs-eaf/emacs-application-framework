@@ -1603,7 +1603,7 @@ class CookiesManager(object):
         cookies_domain = os.listdir(self.cookies_dir)
 
         for domain in filter(self.domain_matching, cookies_domain):
-            from PyQt5.QtNetwork import QNetworkCookie
+            from PyQt6.QtNetwork import QNetworkCookie
 
             domain_dir = os.path.join(self.cookies_dir, domain)
 
@@ -1636,7 +1636,7 @@ class CookiesManager(object):
 
     def delete_cookie(self):
         ''' Delete all cookie used by current site except session cookies.'''
-        from PyQt5.QtNetwork import QNetworkCookie
+        from PyQt6.QtNetwork import QNetworkCookie
         import shutil
 
         cookies_domain = os.listdir(self.cookies_dir)
