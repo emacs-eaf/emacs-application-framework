@@ -51,7 +51,6 @@ class BrowserView(QWebEngineView):
 
         self.installEventFilter(self)
         self.buffer_id = buffer_id
-        self.config_dir = get_emacs_config_dir()
         self.is_button_press = False
 
         self.web_page = BrowserPage()
@@ -63,9 +62,7 @@ class BrowserView(QWebEngineView):
         self.selectionChanged.connect(self.select_text_change)
 
         # Cookie init.
-        self.cookie_store = self.page().profile().cookieStore() # get cookie store
-        self.cookie_store.cookieAdded.connect(self.add_cookie)  # save cookie to disk when captured cookieAdded signal
-        self.loadStarted.connect(self.load_cookie)              # load disk cookie to QWebEngineView instance when page start load
+        self.cookies_manager = CookiesManager(self)
 
         self.search_term = ""
 
@@ -89,38 +86,11 @@ class BrowserView(QWebEngineView):
              "eaf-marker-fontsize",
              "eaf-browser-scroll-step"])
 
-    def load_cookie(self):
-        cookie_dir = os.path.join(self.config_dir, "browser", "cookie", self.url().host())
-        if os.path.exists(cookie_dir) and os.path.isdir(cookie_dir):
-            from PyQt5.QtNetwork import QNetworkCookie
-            
-            for root, dirs, files in os.walk(cookie_dir, topdown=False):
-                for name in files:
-                    with open(os.path.join(root, name), "rb") as f:
-                        for cookie in QNetworkCookie.parseCookies(f.read()):
-                            self.cookie_store.setCookie(cookie)
-
-    def add_cookie(self, cookie):
-        if not cookie.isSessionCookie():
-            cookie_name = cookie.name().data().decode("utf-8")
-            cookie_file = os.path.join(self.config_dir, "browser", "cookie", self.url().host(), cookie_name)
-            touch(cookie_file)
-
-            # Save newest cookie to disk.
-            with open(cookie_file, "wb") as f:
-                f.write(cookie.toRawForm())
-
     def delete_all_cookies(self):
-        cookie_dir = os.path.join(self.config_dir, "browser", "cookie")
-        if os.path.exists(cookie_dir):
-            import shutil
-            shutil.rmtree(cookie_dir)
+        self.cookies_manager.delete_all_cookies()
 
     def delete_cookie(self):
-        cookie_dir = os.path.join(self.config_dir, "browser", "cookie", self.url().host())
-        if os.path.exists(cookie_dir):
-            import shutil
-            shutil.rmtree(cookie_dir)
+        self.cookies_manager.delete_cookie()
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -1490,7 +1460,7 @@ class BrowserBuffer(Buffer):
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         import sqlite3
-        
+
         if not os.path.exists(os.path.dirname(dbpath)):
             os.makedirs(os.path.dirname(dbpath))
 
@@ -1530,3 +1500,127 @@ class ZoomSizeDb(object):
         WHERE Host=?
         """, (host,))
         self._conn.commit()
+
+
+class CookiesManager(object):
+    def __init__(self, browser_view):
+        self.browser_view = browser_view
+
+        self.cookies_dir = os.path.join(get_emacs_config_dir(), "browser", "cookies")
+
+        # Both session and persistent cookies are stored in memory
+        self.browser_view.page().profile().setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.NoPersistentCookies)
+
+        self.cookie_store = self.browser_view.page().profile().cookieStore()
+
+        self.cookie_store.cookieAdded.connect(self.add_cookie)      # save cookie to disk when captured cookieAdded signal
+        self.cookie_store.cookieRemoved.connect(self.remove_cookie) # remove cookie stored on disk when captured cookieRemoved signal
+        self.browser_view.loadStarted.connect(self.load_cookie)     # load disk cookie to QWebEngineView instance when page start load
+
+
+    def add_cookie(self, cookie):
+        '''Store cookie on disk.'''
+        cookie_domain = cookie.domain()
+
+        if cookie_domain.startswith("."):
+            cookie_domain = cookie_domain[1:]
+
+        if not cookie.isSessionCookie():
+            cookie_name = cookie.name().data().decode("utf-8")
+            cookie_file = os.path.join(self.cookies_dir, cookie_domain, cookie_name)
+            touch(cookie_file)
+
+            # Save newest cookie to disk.
+            with open(cookie_file, "wb") as f:
+                f.write(cookie.toRawForm())
+
+    def load_cookie(self):
+        ''' Load cookie file from disk.'''
+        if not os.path.exists(self.cookies_dir):
+            return
+
+        cookies_domain = os.listdir(self.cookies_dir)
+
+        for domain in filter(self.domain_matching, cookies_domain):
+            from PyQt5.QtNetwork import QNetworkCookie
+
+            domain_dir = os.path.join(self.cookies_dir, domain)
+
+            for cookie_file in os.listdir(domain_dir):
+                with open(os.path.join(domain_dir, cookie_file), "rb") as f:
+                    for cookie in QNetworkCookie.parseCookies(f.read()):
+                        self.cookie_store.setCookie(cookie)
+
+    def remove_cookie(self, cookie):
+        ''' Delete cookie file.'''
+        cookie_domain = cookie.domain()
+
+        if cookie_domain.startswith("."):
+            cookie_domain = cookie_domain[1:]
+
+        if not cookie.isSessionCookie():
+            cookie_name = cookie.name().data().decode("utf-8")
+            cookie_file = os.path.join(self.cookies_dir, cookie_domain, cookie_name)
+
+            if os.path.exists(cookie_file):
+                os.remove(cookie_file)
+
+
+    def delete_all_cookies(self):
+        ''' Simply delete all cookies stored on memory and disk.'''
+        self.cookie_store.deleteAllCookies()
+        if os.path.exists(self.cookies_dir):
+            import shutil
+            shutil.rmtree(self.cookies_dir)
+
+    def delete_cookie(self):
+        ''' Delete all cookie used by current site except session cookies.'''
+        from PyQt5.QtNetwork import QNetworkCookie
+        import shutil
+
+        cookies_domain = os.listdir(self.cookies_dir)
+
+        for domain in filter(self.get_relate_domains, cookies_domain):
+            domain_dir = os.path.join(self.cookies_dir, domain)
+
+            for cookie_file in os.listdir(domain_dir):
+                with open(os.path.join(domain_dir, cookie_file), "rb") as f:
+                    for cookie in QNetworkCookie.parseCookies(f.read()):
+                        self.cookie_store.deleteCookie(cookie)
+            shutil.rmtree(domain_dir)
+
+    def domain_matching(self, cookie_domain):
+        ''' Check if a given cookie's domain is matching for host string.'''
+        host_string = self.browser_view.url().host()
+        if cookie_domain == host_string:
+            # The domain string and the host string are identical
+            return True
+
+        if len(host_string) < len(cookie_domain):
+            # For obvious reasons, the host string cannot be a suffix if the domain
+	    # is shorter than the domain string
+            return False
+
+        if host_string.endswith(cookie_domain) and host_string.removesuffix(cookie_domain)[-1] == '.':
+            # The domain string should be a suffix of the host string,
+            # The last character of the host string that is not included in the
+	    # domain string should be a %x2E (".") character.
+            return True
+
+        return False
+
+    def get_relate_domains(self, cookie_domain):
+        ''' Check whether the cookie domain is located under the same root host as the current URL host.'''
+        import tld, re
+        host_string = self.browser_view.url().host()
+        base_domain = tld.get_fld(host_string, fix_protocol=True, fail_silently=True)
+        if not base_domain:
+            # check whether host string is an IP address
+            if re.compile('^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$').match(host_string) and host_string == cookie_domain:
+                return True
+            return  False
+        if cookie_domain == base_domain:
+            return True
+        if cookie_domain.endswith(base_domain) and cookie_domain.removesuffix(base_domain)[-1] == '.':
+            return True
+        return False
