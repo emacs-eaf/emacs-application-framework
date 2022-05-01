@@ -35,6 +35,7 @@
   "pip": {
     "linux": [
       "epc",
+      "tld",
       "lxml",
       "PyQt6",
       "PyQt6-Qt6",
@@ -44,6 +45,7 @@
     ],
     "win32": [
       "epc",
+      "tld",
       "lxml",
       "PyQt6",
       "PyQt6-Qt6",
@@ -53,6 +55,7 @@
     ],
     "darwin": [
       "epc",
+      "tld",
       "lxml",
       "mac-app-frontmost",
       "PyQt6",
