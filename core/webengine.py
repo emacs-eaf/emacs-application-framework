@@ -1548,7 +1548,12 @@ class CookiesManager(object):
             for cookie_file in os.listdir(domain_dir):
                 with open(os.path.join(domain_dir, cookie_file), "rb") as f:
                     for cookie in QNetworkCookie.parseCookies(f.read()):
-                        self.cookie_store.setCookie(cookie)
+                        name = cookie.name().data().decode("utf-8")
+                        if name.startswith("__Host-") and self.browser_view.url().host() == cookie.domain():
+                            cookie.setDomain('')
+                            self.cookie_store.setCookie(cookie, self.browser_view.url())
+                        else:
+                            self.cookie_store.setCookie(cookie)
 
     def remove_cookie(self, cookie):
         ''' Delete cookie file.'''
