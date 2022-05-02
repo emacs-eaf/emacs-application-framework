@@ -1526,8 +1526,7 @@ class CookiesManager(object):
             cookie_domain = cookie_domain[1:]
 
         if not cookie.isSessionCookie():
-            cookie_name = cookie.name().data().decode("utf-8")
-            cookie_file = os.path.join(self.cookies_dir, cookie_domain, cookie_name)
+            cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
             touch(cookie_file)
 
             # Save newest cookie to disk.
@@ -1559,8 +1558,7 @@ class CookiesManager(object):
             cookie_domain = cookie_domain[1:]
 
         if not cookie.isSessionCookie():
-            cookie_name = cookie.name().data().decode("utf-8")
-            cookie_file = os.path.join(self.cookies_dir, cookie_domain, cookie_name)
+            cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
 
             if os.path.exists(cookie_file):
                 os.remove(cookie_file)
@@ -1624,3 +1622,11 @@ class CookiesManager(object):
         if cookie_domain.endswith(base_domain) and cookie_domain.removesuffix(base_domain)[-1] == '.':
             return True
         return False
+
+    def _generate_cookie_filename(self, cookie):
+        ''' Gets the name of the cookie file stored on the hard disk.'''
+        name = cookie.name().data().decode("utf-8")
+        domain = cookie.domain()
+        encode_path = cookie.path().replace("/", "|")
+
+        return name + "+" + domain + "+" + encode_path
