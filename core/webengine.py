@@ -1526,8 +1526,7 @@ class CookiesManager(object):
             cookie_domain = cookie_domain[1:]
 
         if not cookie.isSessionCookie():
-            cookie_name = cookie.name().data().decode("utf-8")
-            cookie_file = os.path.join(self.cookies_dir, cookie_domain, cookie_name)
+            cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
             touch(cookie_file)
 
             # Save newest cookie to disk.
@@ -1549,7 +1548,12 @@ class CookiesManager(object):
             for cookie_file in os.listdir(domain_dir):
                 with open(os.path.join(domain_dir, cookie_file), "rb") as f:
                     for cookie in QNetworkCookie.parseCookies(f.read()):
-                        self.cookie_store.setCookie(cookie)
+                        name = cookie.name().data().decode("utf-8")
+                        if name.startswith("__Host-") and self.browser_view.url().host() == cookie.domain():
+                            cookie.setDomain('')
+                            self.cookie_store.setCookie(cookie, self.browser_view.url())
+                        else:
+                            self.cookie_store.setCookie(cookie)
 
     def remove_cookie(self, cookie):
         ''' Delete cookie file.'''
@@ -1559,8 +1563,7 @@ class CookiesManager(object):
             cookie_domain = cookie_domain[1:]
 
         if not cookie.isSessionCookie():
-            cookie_name = cookie.name().data().decode("utf-8")
-            cookie_file = os.path.join(self.cookies_dir, cookie_domain, cookie_name)
+            cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
 
             if os.path.exists(cookie_file):
                 os.remove(cookie_file)
@@ -1624,3 +1627,11 @@ class CookiesManager(object):
         if cookie_domain.endswith(base_domain) and cookie_domain.removesuffix(base_domain)[-1] == '.':
             return True
         return False
+
+    def _generate_cookie_filename(self, cookie):
+        ''' Gets the name of the cookie file stored on the hard disk.'''
+        name = cookie.name().data().decode("utf-8")
+        domain = cookie.domain()
+        encode_path = cookie.path().replace("/", "|")
+
+        return name + "+" + domain + "+" + encode_path
