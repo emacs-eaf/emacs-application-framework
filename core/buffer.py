@@ -395,7 +395,7 @@ class Buffer(QGraphicsScene):
             key_press = QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_unknown, modifier, text)
 
         for widget in self.get_key_event_widgets():
-            QApplication.sendEvent(widget, key_press)
+            QApplication.postEvent(widget, key_press)
 
         self.send_key_filter(event_string)
 
@@ -421,8 +421,11 @@ class Buffer(QGraphicsScene):
                         modifiers |= Qt.KeyboardModifier.KeyboardModifier.ShiftModifier
                     elif modifier == "s":
                         modifiers |= Qt.KeyboardModifier.MetaModifier
+                        
+                if last_key in qt_text_dict:
+                    last_key = qt_text_dict[last_key]
 
-                QApplication.sendEvent(widget, QKeyEvent(QEvent.Type.KeyPress, qt_key_dict[last_key], modifiers, last_key))
+                QApplication.postEvent(widget, QKeyEvent(QEvent.Type.KeyPress, qt_key_dict[last_key], modifiers, last_key))
 
     def get_url(self):
         ''' Get url.'''
@@ -455,7 +458,7 @@ class Buffer(QGraphicsScene):
         '''Focus buffer widget.'''
         if event is None:
             event = QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.MouseFocusReason)
-        QApplication.sendEvent(self.buffer_widget.focusProxy(), event)
+        QApplication.postEvent(self.buffer_widget.focusProxy(), event)
 
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
