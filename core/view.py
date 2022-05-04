@@ -100,9 +100,7 @@ class View(QWidget):
 
             self.buffer.buffer_widget.resize(int(view_width), int(view_height))
 
-            self.layout.setContentsMargins(
-                horizontal_padding, vertical_padding,
-                horizontal_padding, vertical_padding)
+            self.layout.setContentsMargins(int(horizontal_padding), int(vertical_padding), int(horizontal_padding), int(vertical_padding))
 
     def eventFilter(self, obj, event):
         # import time
