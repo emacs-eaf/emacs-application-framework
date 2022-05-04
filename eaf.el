@@ -636,7 +636,8 @@ A hashtable, key is url and value is title.")
   (setenv "QT_FONT_DPI" "96")
 
   ;; Use XCB for input event transfer.
-  (setenv "QT_QPA_PLATFORM" "xcb")
+  (unless (eq system-type 'darwin)
+    (setenv "QT_QPA_PLATFORM" "xcb"))
 
   ;; Turn on DEBUG info when `eaf-enable-debug' is non-nil.
   (when eaf-enable-debug
