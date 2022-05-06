@@ -384,7 +384,7 @@ class BrowserView(QWebEngineView):
     def eval_js(self, js):
         ''' Run JavaScript.'''
         self.web_page.runJavaScript(js)
-        
+
     def eval_js_file(self, js_file):
         ''' Run JavaScript from JS file.'''
         self.eval_js(self.read_js_content(js_file))
@@ -397,26 +397,26 @@ class BrowserView(QWebEngineView):
         Otherwise, execute_js will block EAF!!!
         '''
         return self.web_page.execute_javascript(js)
-    
+
     def eval_js_function(self, *args):
         import json
-        
+
         function_name = args[0]
         function_args = args[1:]
-        
+
         format_string = ""
-        
+
         for index, arg in enumerate(function_args):
             if type(arg) == str:
                 format_string += '\"{}\"'.format(arg)
             else:
                 format_string += '{}'.format(json.dumps(arg))
-                
+
             if index != len(function_args) - 1:
                 format_string += ","
-                
+
         format_string = function_name + "(" + format_string + ");"
-        
+
         self.web_page.runJavaScript(format_string)
 
     def scroll_wheel(self, x_offset, y_offset):
@@ -825,7 +825,7 @@ class BrowserBuffer(Buffer):
 
         self.settings = self.buffer_widget.settings()
         try:
-            
+
             if self.font_family:
                 for ff in (
                         self.settings.FontFamily.StandardFont,
@@ -833,7 +833,7 @@ class BrowserBuffer(Buffer):
                         self.settings.FontFamily.FantasyFont,
                         self.settings.FontFamily.PictographFont):
                     self.settings.setFontFamily(ff, self.font_family)
-                    
+
             if self.fixed_font_family:
                 self.settings.setFontFamily(self.settings.FontFamily.FixedFont, self.fixed_font_family)
 
@@ -842,7 +842,7 @@ class BrowserBuffer(Buffer):
                         self.settings.FontFamily.SerifFont,
                         self.settings.FontFamily.SansSerifFont):
                     self.settings.setFontFamily(ff, self.serif_font_family)
-                    
+
             self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFontSize, self.font_size)
             self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFixedFontSize, self.fixed_font_size)
 
@@ -1562,7 +1562,6 @@ class ZoomSizeDb(object):
         """, (host,))
         self._conn.commit()
 
-
 class CookiesManager(object):
     def __init__(self, browser_view):
         self.browser_view = browser_view
@@ -1582,10 +1581,6 @@ class CookiesManager(object):
     def add_cookie(self, cookie):
         '''Store cookie on disk.'''
         cookie_domain = cookie.domain()
-
-        if cookie_domain.startswith("."):
-            cookie_domain = cookie_domain[1:]
-
         if not cookie.isSessionCookie():
             cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
             touch(cookie_file)
@@ -1599,9 +1594,9 @@ class CookiesManager(object):
         if not os.path.exists(self.cookies_dir):
             return
 
-        cookies_domain = os.listdir(self.cookies_dir)
+        all_cookies_domain = os.listdir(self.cookies_dir)
 
-        for domain in filter(self.domain_matching, cookies_domain):
+        for domain in filter(self.domain_matching, all_cookies_domain):
             from PyQt6.QtNetwork import QNetworkCookie
 
             domain_dir = os.path.join(self.cookies_dir, domain)
@@ -1609,26 +1604,21 @@ class CookiesManager(object):
             for cookie_file in os.listdir(domain_dir):
                 with open(os.path.join(domain_dir, cookie_file), "rb") as f:
                     for cookie in QNetworkCookie.parseCookies(f.read()):
-                        name = cookie.name().data().decode("utf-8")
-                        if name.startswith("__Host-") and self.browser_view.url().host() == cookie.domain():
-                            cookie.setDomain('')
-                            self.cookie_store.setCookie(cookie, self.browser_view.url())
+                        if not domain.startswith('.'):
+                            if self.browser_view.url().host() == domain:
+                                # restore host-only cookie
+                                cookie.setDomain('')
+                                self.cookie_store.setCookie(cookie, self.browser_view.url())
                         else:
                             self.cookie_store.setCookie(cookie)
 
     def remove_cookie(self, cookie):
         ''' Delete cookie file.'''
-        cookie_domain = cookie.domain()
-
-        if cookie_domain.startswith("."):
-            cookie_domain = cookie_domain[1:]
-
         if not cookie.isSessionCookie():
-            cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
+            cookie_file = os.path.join(self.cookies_dir, cookie.domain(), self._generate_cookie_filename(cookie))
 
             if os.path.exists(cookie_file):
                 os.remove(cookie_file)
-
 
     def delete_all_cookies(self):
         ''' Simply delete all cookies stored on memory and disk.'''
@@ -1655,20 +1645,29 @@ class CookiesManager(object):
 
     def domain_matching(self, cookie_domain):
         ''' Check if a given cookie's domain is matching for host string.'''
+
+        cookie_is_hostOnly = True
+        if cookie_domain.startswith('.'):
+            # get rid of prefixing dot when matching domains
+            cookie_domain = cookie_domain[1:]
+            cookie_is_hostOnly = False
+
         host_string = self.browser_view.url().host()
+
         if cookie_domain == host_string:
             # The domain string and the host string are identical
             return True
 
         if len(host_string) < len(cookie_domain):
             # For obvious reasons, the host string cannot be a suffix if the domain
-	    # is shorter than the domain string
+            # is shorter than the domain string
             return False
 
-        if host_string.endswith(cookie_domain) and host_string.removesuffix(cookie_domain)[-1] == '.':
+        if host_string.endswith(cookie_domain) and host_string.removesuffix(cookie_domain)[-1] == '.' and not cookie_is_hostOnly:
             # The domain string should be a suffix of the host string,
             # The last character of the host string that is not included in the
-	    # domain string should be a %x2E (".") character.
+            # domain string should be a %x2E (".") character.
+            # and cookie domain not have prefixing dot (host-only cookie is not for subdomains)
             return True
 
         return False
@@ -1676,17 +1675,26 @@ class CookiesManager(object):
     def get_relate_domains(self, cookie_domain):
         ''' Check whether the cookie domain is located under the same root host as the current URL host.'''
         import tld, re
+
         host_string = self.browser_view.url().host()
+
+        if cookie_domain.startswith('.'):
+            cookie_domain = cookie_domain[1:]
+
         base_domain = tld.get_fld(host_string, fix_protocol=True, fail_silently=True)
+
         if not base_domain:
             # check whether host string is an IP address
             if re.compile('^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$').match(host_string) and host_string == cookie_domain:
                 return True
             return  False
+
         if cookie_domain == base_domain:
             return True
+
         if cookie_domain.endswith(base_domain) and cookie_domain.removesuffix(base_domain)[-1] == '.':
             return True
+
         return False
 
     def _generate_cookie_filename(self, cookie):
