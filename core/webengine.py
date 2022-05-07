@@ -1663,7 +1663,7 @@ class CookiesManager(object):
             # is shorter than the domain string
             return False
 
-        if host_string.endswith(cookie_domain) and host_string.removesuffix(cookie_domain)[-1] == '.' and not cookie_is_hostOnly:
+        if host_string.endswith(cookie_domain) and host_string[:-len(cookie_domain)][-1] == '.' and not cookie_is_hostOnly:
             # The domain string should be a suffix of the host string,
             # The last character of the host string that is not included in the
             # domain string should be a %x2E (".") character.
@@ -1692,7 +1692,7 @@ class CookiesManager(object):
         if cookie_domain == base_domain:
             return True
 
-        if cookie_domain.endswith(base_domain) and cookie_domain.removesuffix(base_domain)[-1] == '.':
+        if cookie_domain.endswith(base_domain) and cookie_domain[:-len(base_domain)][-1] == '.':
             return True
 
         return False
