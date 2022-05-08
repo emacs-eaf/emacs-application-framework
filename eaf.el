@@ -622,33 +622,33 @@ A hashtable, key is url and value is title.")
     (frame-parameter frame 'window-id)))
 
 (defun eaf--follow-system-dpi ()
-  (cond ((eaf-emacs-running-in-wayland-native)
-         ;; Wayland native need to set QT_AUTO_SCREEN_SCALE_FACTOR=1
-         ;; otherwise Qt window only have half of screen.
-         (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "1"))
-        (t
-         ;; XWayland need to set QT_AUTO_SCREEN_SCALE_FACTOR=0
-         ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
-         (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")))
-
-  ;; Make sure EAF application scale support 4k screen.
-  (setenv "QT_SCALE_FACTOR" "1")
-  (setenv "QT_FONT_DPI" "96")
-
-  ;; Use XCB for input event transfer.
-  (unless (eq system-type 'darwin)
-    (setenv "QT_QPA_PLATFORM" "xcb"))
-
   ;; Turn on DEBUG info when `eaf-enable-debug' is non-nil.
   (when eaf-enable-debug
-    (setenv "QT_DEUG_PLUGINS" "1"))
+    (setenv "QT_DEBUG_PLUGINS" "1"))
 
-  (setq process-environment
-        (seq-filter
-         (lambda (var)
-           (and (not (string-match-p "QT_SCALE_FACTOR" var))
-                (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
-         process-environment)))
+  (unless (eq system-type 'darwin)
+    (cond
+     ((eaf-emacs-running-in-wayland-native)
+      ;; Wayland native need to set QT_AUTO_SCREEN_SCALE_FACTOR=1
+      ;; otherwise Qt window only have half of screen.
+      (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "1"))
+     (t
+      ;; XWayland need to set QT_AUTO_SCREEN_SCALE_FACTOR=0
+      ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
+      (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")))
+
+    ;; Make sure EAF application scale support 4k screen.
+    (setenv "QT_SCALE_FACTOR" "1")
+    (setenv "QT_FONT_DPI" "96")
+    ;; Use XCB for input event transfer.
+    (setenv "QT_QPA_PLATFORM" "xcb")
+
+    (setq process-environment
+          (seq-filter
+           (lambda (var)
+             (and (not (string-match-p "QT_SCALE_FACTOR" var))
+                  (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
+           process-environment))))
 
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
