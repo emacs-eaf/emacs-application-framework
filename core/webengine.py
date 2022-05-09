@@ -32,7 +32,7 @@ from core.utils import (touch, string_to_base64, popen_and_call,
                         open_url_in_background_tab, duplicate_page_in_new_tab,
                         open_url_in_new_tab, open_url_in_new_tab_other_window,
                         focus_emacs_buffer, atomic_edit, get_emacs_config_dir,
-                        to_camel_case, get_emacs_vars)
+                        to_camel_case, get_emacs_vars, PostGui)
 from urllib.parse import urlparse, parse_qs
 import base64
 import os
@@ -1511,6 +1511,16 @@ class BrowserBuffer(Buffer):
     def init_web_page_background(self):
         # Web page background follow Emacs's background.
         self.buffer_widget.web_page.setBackgroundColor(self.background_color)
+
+    @interactive(insert_or_do=True)
+    def change_url(self, url):
+        # _change_url use PostGui make sure change url in main thread.
+        self._change_url(url)
+
+    @PostGui()
+    def _change_url(self, url):
+        self.buffer_widget.stop()
+        self.buffer_widget.setUrl(QUrl(url))
 
     def marker_offset_x(self):
         return 0
