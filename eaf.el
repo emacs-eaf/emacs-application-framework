@@ -292,7 +292,7 @@ been initialized."
           (eaf-epc-server-start
            (lambda (mngr)
              (let ((mngr mngr))
-               (eaf-epc-define-method mngr 'eval-in-emacs 'eval-in-emacs-func)
+               (eaf-epc-define-method mngr 'eval-in-emacs 'eaf--eval-in-emacs-func)
                (eaf-epc-define-method mngr 'get-emacs-var 'eaf--get-emacs-var-func)
                (eaf-epc-define-method mngr 'get-emacs-vars 'eaf--get-emacs-vars-func)
                ))))
@@ -306,7 +306,7 @@ been initialized."
   (cl-loop repeat 600
            do (sleep-for 0.1)))
 
-(defun eval-in-emacs-func (&rest args)
+(defun eaf--eval-in-emacs-func (&rest args)
   (apply (read (car args))
          (mapcar
           (lambda (arg)
