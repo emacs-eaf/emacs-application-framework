@@ -301,11 +301,6 @@ been initialized."
       (error "[EAF] eaf-server failed to start")))
   eaf-server)
 
-(when noninteractive
-  ;; Start "event loop".
-  (cl-loop repeat 600
-           do (sleep-for 0.1)))
-
 (defun eaf--eval-in-emacs-func (&rest args)
   (apply (read (car args))
          (mapcar
