@@ -517,6 +517,15 @@ Turn on this option will improve start speed."
 (defcustom eaf-byte-compile-apps nil
   "If this option turn on, EAF will byte-compile elisp code.")
 
+(defcustom eaf-clean-duplicate-buffers t
+  "Clean duplicate file manager buffers."
+  :type 'boolean)
+
+(defcustom eaf-duplicate-buffer-survival-time 60
+  "If file manager buffer not show in current frame, and existence time exceeds than 60 seconds,
+EAF will remove the duplicate file manager buffer."
+  :type 'integer)
+
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -1823,6 +1832,44 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (message "Updating load path")
   (eaf-add-subdirs-to-load-path eaf-build-dir)
   (message "Done"))
+
+(defun eaf-monitor-window-buffer-change ()
+  ;; We record last visit time for EAF buffer.
+  (when (derived-mode-p 'eaf-mode)
+    (setq-local eaf--last-visit-time (current-time))))
+
+;;;###autoload
+(add-hook 'post-command-hook 'eaf-monitor-window-buffer-change)
+
+(defun eaf-clean-file-manager-buffers ()
+  (let ((now (current-time)))
+    (eaf-for-each-eaf-buffer
+     (when (and
+            ;; Must be EAF file manager buffer.
+            (string-equal eaf--buffer-app-name "file-manager")
+            (boundp 'eaf--last-visit-time)
+            ;; Not show in frame.
+            (not (memq buffer (mapcar #'window-buffer (window-list))))
+            ;; Found duplicate buffer.
+            (eaf-has-duplicate-path-buffer-p buffer)
+            ;; Existing time exceeds than `eaf-duplicate-buffer-survival-time'
+            (> (float-time (time-subtract now eaf--last-visit-time)) eaf-duplicate-buffer-survival-time))
+       ;; Just log in *messages* buffer silently, don't disturb users.
+       (let ((inhibit-message t))
+         (message "[EAF] Clean duplicate file manager buffer: %s" buffer))
+       (kill-buffer buffer)))))
+
+(when eaf-clean-duplicate-buffers
+  (run-with-timer 30 t 'eaf-clean-file-manager-buffers))
+
+(defun eaf-has-duplicate-path-buffer-p (eaf-buffer)
+  (cl-remove-if-not
+   (lambda (buffer)
+     (and
+      (not (eq buffer eaf-buffer))
+      (string-equal (with-current-buffer eaf-buffer eaf--buffer-url)
+                    (with-current-buffer buffer eaf--buffer-url))))
+   (eaf--get-eaf-buffers)))
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
   "Please use M-x eaf-install-and-update instead.")
