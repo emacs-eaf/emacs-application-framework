@@ -1855,7 +1855,8 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
        (kill-buffer buffer)))))
 
 (when eaf-clean-duplicate-buffers
-  (run-with-timer 30 t 'eaf-clean-file-manager-buffers))
+  ;; repeat task 24 * 60 * 60 times
+  (run-with-timer 30 86400 'eaf-clean-file-manager-buffers))
 
 (defun eaf-has-duplicate-path-buffer-p (eaf-buffer)
   (cl-remove-if-not
