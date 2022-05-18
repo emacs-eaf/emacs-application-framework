@@ -1828,10 +1828,22 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   (eaf-add-subdirs-to-load-path eaf-build-dir)
   (message "Done"))
 
+(defvar eaf--last-visit-buffer nil)
+
 (defun eaf-monitor-window-buffer-change ()
   ;; We record last visit time for EAF buffer.
   (when (derived-mode-p 'eaf-mode)
-    (setq-local eaf--last-visit-time (current-time))))
+    (setq-local eaf--last-visit-time (current-time)))
+  
+  ;; Clean file manager buffer when buffer or window changed.
+  (unless (eq (current-buffer)
+              eaf--last-visit-buffer)
+    (when eaf-clean-duplicate-buffers
+      (eaf-clean-file-manager-buffers)))
+
+  (unless (or (minibufferp)
+              (string-equal (buffer-name) "*Messages*"))
+    (setq eaf--last-visit-buffer (current-buffer))))
 
 ;;;###autoload
 (add-hook 'post-command-hook 'eaf-monitor-window-buffer-change)
@@ -1853,10 +1865,6 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
        (let ((inhibit-message t))
          (message "[EAF] Clean duplicate file manager buffer: %s" buffer))
        (kill-buffer buffer)))))
-
-(when eaf-clean-duplicate-buffers
-  ;; repeat task 24 * 60 * 60 times
-  (run-with-timer 30 86400 'eaf-clean-file-manager-buffers))
 
 (defun eaf-has-duplicate-path-buffer-p (eaf-buffer)
   (cl-remove-if-not
