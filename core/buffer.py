@@ -383,7 +383,7 @@ class Buffer(QGraphicsScene):
 
         if event_string == "<backtab>":
             modifier = Qt.KeyboardModifier.ShiftModifier
-        elif event_string.isupper():
+        elif len(event_string) == 1 and event_string.isupper():
             modifier = Qt.KeyboardModifier.ShiftModifier
 
         # print("Press: ", event_string, modifier, text)
