@@ -1845,7 +1845,6 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
               (string-equal (buffer-name) "*Messages*"))
     (setq eaf--last-visit-buffer (current-buffer))))
 
-;;;###autoload
 (add-hook 'post-command-hook 'eaf-monitor-window-buffer-change)
 
 (defun eaf-clean-file-manager-buffers ()
