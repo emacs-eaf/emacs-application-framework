@@ -644,8 +644,11 @@ A hashtable, key is url and value is title.")
     ;; Make sure EAF application scale support 4k screen.
     (setenv "QT_SCALE_FACTOR" "1")
     (setenv "QT_FONT_DPI" "96")
+    
     ;; Use XCB for input event transfer.
-    (setenv "QT_QPA_PLATFORM" "xcb")
+    ;; Only enable this option on Linux platform.
+    (when (eq system-type 'gnu/linux)
+      (setenv "QT_QPA_PLATFORM" "xcb"))
 
     (setq process-environment
           (seq-filter
