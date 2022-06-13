@@ -332,12 +332,12 @@ def convert_emacs_bool(symbol_value, symbol_is_boolean):
 def get_emacs_vars(args):
     global epc_client
 
-    return list(map(lambda result: convert_emacs_bool(result[0], result[1]) if result != [] else False, epc_client.call_sync("get-emacs-vars", args)))
+    return list(map(lambda result: convert_emacs_bool(result[0], result[1]) if result != [] else False, epc_client.call_sync("get-emacs-vars", args))) # type: ignore
 
 def get_emacs_var(var_name):
     global epc_client
 
-    (symbol_value, symbol_is_boolean) = epc_client.call_sync("get-emacs-var", [var_name])
+    (symbol_value, symbol_is_boolean) = epc_client.call_sync("get-emacs-var", [var_name]) # type: ignore
 
     return convert_emacs_bool(symbol_value, symbol_is_boolean)
 

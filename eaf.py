@@ -35,7 +35,7 @@ import platform
 import threading
 
 if platform.system() == "Windows":
-    import pygetwindow as gw
+    import pygetwindow as gw    # type: ignore
 
 class EAF(object):
     def __init__(self, args):
@@ -163,8 +163,8 @@ class EAF(object):
         # 
         # Don't cache module in memory, 
         # this is very convenient for EAF to load the latest application code in real time without the need for kill EAF process.
-        spec = importlib.util.spec_from_file_location("AppBuffer", module_path)
-        module = importlib.util.module_from_spec(spec)
+        spec = importlib.util.spec_from_file_location("AppBuffer", module_path) # type: ignore
+        module = importlib.util.module_from_spec(spec) # type: ignore
         spec.loader.exec_module(module)
 
         # Create application buffer.
