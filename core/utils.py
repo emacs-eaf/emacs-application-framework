@@ -156,7 +156,7 @@ def get_clipboard_text():
         return text
 
     if clipboard.supportsSelection():
-        return clipboard.text(QClipboard.Selection)
+        return clipboard.text(QClipboard.Mode.Selection)
 
     return ""
 
@@ -169,7 +169,7 @@ def set_clipboard_text(text):
     clipboard.setText(text)
 
     if clipboard.supportsSelection():
-        clipboard.setText(text, QClipboard.Selection)
+        clipboard.setText(text, QClipboard.Mode.Selection)
 
 
 def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
