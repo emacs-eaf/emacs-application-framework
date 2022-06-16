@@ -1499,6 +1499,7 @@ class BrowserBuffer(Buffer):
             el.attrib['href'] = "{}{}".format(dist_dir, el.attrib['href'])
         for el in root.iter('script'):
             el.attrib['src'] = "{}{}".format(dist_dir, el.attrib['src'])
+            el.attrib['type'] = "text/javascript"
         for el in root.iter('body'):
             el.attrib['style'] = "background: {}; color: {}".format(self.theme_background_color, self.theme_foreground_color)
 
