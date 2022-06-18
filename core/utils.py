@@ -359,3 +359,17 @@ def get_emacs_config_dir():
 def to_camel_case(string):
     components = string.split('_')
     return components[0] + ''.join(x.title() for x in components[1:])
+
+emacs_func_cache_dict = {}
+
+def get_emacs_func_cache_result(func_name, func_args):
+    global emacs_func_cache_dict
+    
+    if func_name in emacs_func_cache_dict:
+        return emacs_func_cache_dict[func_name]
+    else:
+        result = get_emacs_func_result(func_name, func_args)
+        emacs_func_cache_dict[func_name] = result
+        
+        return result
+        

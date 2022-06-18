@@ -22,7 +22,7 @@
 from PyQt6.QtCore import Qt, QEvent, QPoint
 from PyQt6.QtGui import QPainter, QWindow, QBrush
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_result
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result
 
 class View(QWidget):
 
@@ -32,9 +32,9 @@ class View(QWidget):
         self.buffer = buffer
 
         # Init widget attributes.
-        if get_emacs_func_result("eaf-emacs-running-in-wayland-native", []):
+        if get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.BypassWindowManagerHint)
-        elif get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+        elif get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.NoDropShadowWindowHint)
         else:
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
@@ -140,18 +140,18 @@ class View(QWidget):
         # print("Reparent: ", self.buffer.url)
         qwindow = self.windowHandle()
 
-        if not get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+        if not get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
             qwindow.setParent(QWindow.fromWinId(int(self.emacs_xid)))
 
         qwindow.setPosition(QPoint(self.x, self.y))
 
     def try_show_top_view(self):
-        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+        if get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
             self.show()
 
     def try_hide_top_view(self):
-        if get_emacs_func_result("eaf-emacs-not-use-reparent-technology", []):
+        if get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
             self.hide()
 
