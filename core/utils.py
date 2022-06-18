@@ -287,7 +287,7 @@ def get_emacs_func_result(method_name, args):
         args.insert(0, method_name)
 
         # Call eval-in-emacs elisp function synchronously and return the result
-        result = epc_client.call_sync("eval-in-emacs", args)
+        result = epc_client.call_sync("get-emacs-func-result", args)
         return result if result != [] else False
 
 def message_to_emacs(message, prefix=True, logging=True):

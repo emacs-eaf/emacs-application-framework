@@ -292,16 +292,17 @@ been initialized."
           (eaf-epc-server-start
            (lambda (mngr)
              (let ((mngr mngr))
-               (eaf-epc-define-method mngr 'eval-in-emacs 'eaf--eval-in-emacs-func)
-               (eaf-epc-define-method mngr 'get-emacs-var 'eaf--get-emacs-var-func)
-               (eaf-epc-define-method mngr 'get-emacs-vars 'eaf--get-emacs-vars-func)
+               (eaf-epc-define-method mngr 'eval-in-emacs 'eaf--eval-in-emacs)
+               (eaf-epc-define-method mngr 'get-emacs-func-result 'eaf--get-emacs-func-result)
+               (eaf-epc-define-method mngr 'get-emacs-var 'eaf--get-emacs-var)
+               (eaf-epc-define-method mngr 'get-emacs-vars 'eaf--get-emacs-vars)
                ))))
     (if eaf-server
         (setq eaf-server-port (process-contact eaf-server :service))
       (error "[EAF] eaf-server failed to start")))
   eaf-server)
 
-(defun eaf--eval-in-emacs-func (&rest args)
+(defun eaf--get-emacs-func-result (&rest args)
   (apply (read (car args))
          (mapcar
           (lambda (arg)
@@ -314,7 +315,22 @@ been initialized."
                     (t arg))))
           (cdr args))))
 
-(defun eaf--get-emacs-var-func (var-name)
+(defun eaf--eval-in-emacs (&rest args)
+  (apply (read (car args))
+         (mapcar
+          (lambda (arg)
+            (let ((arg (eaf--decode-string arg)))
+              (cond ((string-prefix-p "'" arg) ;; single quote
+                     (read (substring arg 1)))
+                    ((and (string-prefix-p "(" arg)
+                          (string-suffix-p ")" arg)) ;; list
+                     (split-string (substring arg 1 -1) " "))
+                    (t arg))))
+          (cdr args)))
+  ;; Return nil to avoid epc error `Got too many arguments in the reply'.
+  nil)
+
+(defun eaf--get-emacs-var (var-name)
   (let* ((var-symbol (intern var-name))
          (var-value (symbol-value var-symbol))
          ;; We need convert result of booleanp to string.
@@ -322,8 +338,8 @@ been initialized."
          (var-is-bool (prin1-to-string (booleanp var-value))))
     (list var-value var-is-bool)))
 
-(defun eaf--get-emacs-vars-func (&rest vars)
-  (mapcar #'eaf--get-emacs-var-func vars))
+(defun eaf--get-emacs-vars (&rest vars)
+  (mapcar #'eaf--get-emacs-var vars))
 
 (defun get-emacs-face-foregrounds (&rest faces)
   (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))
@@ -644,7 +660,7 @@ A hashtable, key is url and value is title.")
     ;; Make sure EAF application scale support 4k screen.
     (setenv "QT_SCALE_FACTOR" "1")
     (setenv "QT_FONT_DPI" "96")
-    
+
     ;; Use XCB for input event transfer.
     ;; Only enable this option on Linux platform.
     (when (eq system-type 'gnu/linux)
@@ -1837,7 +1853,7 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
   ;; We record last visit time for EAF buffer.
   (when (derived-mode-p 'eaf-mode)
     (setq-local eaf--last-visit-time (current-time)))
-  
+
   ;; Clean file manager buffer when buffer or window changed.
   (unless (eq (current-buffer)
               eaf--last-visit-buffer)
