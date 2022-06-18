@@ -302,31 +302,11 @@ been initialized."
       (error "[EAF] eaf-server failed to start")))
   eaf-server)
 
-(defun eaf--get-emacs-func-result (&rest args)
-  (apply (read (car args))
-         (mapcar
-          (lambda (arg)
-            (let ((arg (eaf--decode-string arg)))
-              (cond ((string-prefix-p "'" arg) ;; single quote
-                     (read (substring arg 1)))
-                    ((and (string-prefix-p "(" arg)
-                          (string-suffix-p ")" arg)) ;; list
-                     (split-string (substring arg 1 -1) " "))
-                    (t arg))))
-          (cdr args))))
+(defun eaf--get-emacs-func-result (sexp-string)
+  (eval (read sexp-string)))
 
-(defun eaf--eval-in-emacs (&rest args)
-  (apply (read (car args))
-         (mapcar
-          (lambda (arg)
-            (let ((arg (eaf--decode-string arg)))
-              (cond ((string-prefix-p "'" arg) ;; single quote
-                     (read (substring arg 1)))
-                    ((and (string-prefix-p "(" arg)
-                          (string-suffix-p ")" arg)) ;; list
-                     (split-string (substring arg 1 -1) " "))
-                    (t arg))))
-          (cdr args)))
+(defun eaf--eval-in-emacs (sexp-string)
+  (eval (read sexp-string))
   ;; Return nil to avoid epc error `Got too many arguments in the reply'.
   nil)
 

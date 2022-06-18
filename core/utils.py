@@ -231,32 +231,24 @@ def close_epc_client():
     if epc_client != None:
         epc_client.close()
 
-def convert_arg_to_str(arg):
-    if type(arg) == str:
-        return arg
-    elif type(arg) == bool:
-        arg = str(arg).upper()
-    elif type(arg) == list:
-        new_arg = ""
-        for a in arg:
-            new_arg = new_arg + " " + convert_arg_to_str(a)
-        arg = "(" + new_arg[1:] + ")"
-    return arg
-
 def eval_in_emacs(method_name, args):
     global epc_client
+    import sexpdata
+    
+    args = [sexpdata.Symbol(method_name)] + list(map(sexpdata.Quoted, args))    # type: ignore
+    sexp = sexpdata.dumps(args)
+    
+    epc_client.call("eval-in-emacs", [sexp])    # type: ignore
 
-    if epc_client == None:
-        print("Please call init_epc_client first before callling eval_in_emacs.")
-    else:
-        args = list(map(convert_arg_to_str, args))
-        # Make argument encode with Base64, avoid string quote problem pass to elisp side.
-        args = list(map(string_to_base64, args))
-
-        args.insert(0, method_name)
-
-        # Call eval-in-emacs elisp function.
-        epc_client.call("eval-in-emacs", args)
+def get_emacs_func_result(method_name, args):
+    global epc_client
+    import sexpdata
+    
+    args = [sexpdata.Symbol(method_name)] + list(map(sexpdata.Quoted, args))    # type: ignore
+    sexp = sexpdata.dumps(args)
+    
+    result = epc_client.call_sync("get-emacs-func-result", [sexp])    # type: ignore
+    return result if result != [] else False
 
 def get_app_dark_mode(app_dark_mode_var):
     app_dark_mode = get_emacs_var(app_dark_mode_var)
@@ -273,22 +265,6 @@ def get_emacs_theme_background():
 
 def get_emacs_theme_foreground():
     return get_emacs_func_result("eaf-get-theme-foreground-color", [])
-
-def get_emacs_func_result(method_name, args):
-    global epc_client
-
-    if epc_client == None:
-        print("Please call init_epc_client first before callling eval_in_emacs.")
-    else:
-        args = list(map(convert_arg_to_str, args))
-        # Make argument encode with Base64, avoid string quote problem pass to elisp side.
-        args = list(map(string_to_base64, args))
-
-        args.insert(0, method_name)
-
-        # Call eval-in-emacs elisp function synchronously and return the result
-        result = epc_client.call_sync("get-emacs-func-result", args)
-        return result if result != [] else False
 
 def message_to_emacs(message, prefix=True, logging=True):
     eval_in_emacs('eaf--show-message', [message, prefix, logging])
