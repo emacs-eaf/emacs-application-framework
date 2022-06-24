@@ -771,10 +771,6 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
   ;; Start EAF process, EAF will restore page in `eaf--first-start-app-buffers'.
   (eaf-start-process))
 
-(defun eaf--decode-string (str)
-  "Decode string STR with UTF-8 coding using Base64."
-  (decode-coding-string (base64-decode-string str) 'utf-8))
-
 (defun eaf--encode-string (str)
   "Encode string STR with UTF-8 coding using Base64."
   (base64-encode-string (encode-coding-string str 'utf-8)))
