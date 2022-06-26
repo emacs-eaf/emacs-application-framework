@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt6.QtCore import QObject, pyqtSignal
+import sexpdata
 
 class PostGui(QObject):
 
@@ -32,7 +33,7 @@ class PostGui(QObject):
 
     def __call__(self, func):
         self._func = func
-        
+
         from functools import wraps
 
         @wraps(func)
@@ -57,7 +58,7 @@ class PostGui(QObject):
 
 def touch(path):
     import os
-    
+
     if not os.path.exists(path):
         basedir = os.path.dirname(path)
 
@@ -72,7 +73,7 @@ def get_free_port():
     Determines a free port using sockets.
     """
     import socket
-    
+
     free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     free_socket.bind(('0.0.0.0', 0))
     free_socket.listen(5)
@@ -83,7 +84,7 @@ def get_free_port():
 
 def is_port_in_use(port):
     import socket
-    
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
@@ -137,7 +138,7 @@ def call_and_check_code(popen_args, on_exit, stdout_file=None):
         retcode = subprocess.call(popen_args, stdout=stdout_file)
         on_exit(retcode)
         return
-    
+
     import threading
 
     thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
@@ -164,7 +165,7 @@ def set_clipboard_text(text):
     ''' Set text to system clipboard.'''
     from PyQt6.QtWidgets import QApplication
     from PyQt6.QtGui import QClipboard
-    
+
     clipboard = QApplication.clipboard()
     clipboard.setText(text)
 
@@ -178,12 +179,12 @@ def interactive(insert_or_do = False, msg_emacs = None, new_name = None):
     """
     def wrap(f, insert_or_do = insert_or_do, msg_emacs = msg_emacs, new_name = new_name):
         from functools import wraps
-        
+
         f.interactive = True
         f.insert_or_do = insert_or_do
         f.msg_emacs = msg_emacs
         f.new_name = new_name
-        
+
         @wraps(f)
         def wrapped_f(*args, **kwargs):
             return f(*args, **kwargs)
@@ -204,7 +205,7 @@ def abstract(f):
     implementation check.
     """
     from functools import wraps
-    
+
     f.abstract = True
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -215,7 +216,7 @@ epc_client = None
 
 def init_epc_client(emacs_server_port):
     from epc.client import EPCClient
-    
+
     global epc_client
 
     if epc_client == None:
@@ -231,22 +232,29 @@ def close_epc_client():
     if epc_client != None:
         epc_client.close()
 
+
+def handle_arg_types(arg):
+    if type(arg) is str and arg.startswith("'"):
+        arg = sexpdata.Symbol(arg.partition("'")[2])
+
+    return sexpdata.Quoted(arg)
+
+
 def eval_in_emacs(method_name, args):
     global epc_client
-    import sexpdata
-    
-    args = [sexpdata.Symbol(method_name)] + list(map(sexpdata.Quoted, args))    # type: ignore
+
+    args = [sexpdata.Symbol(method_name)] + list(map(handle_arg_types, args))    # type: ignore
     sexp = sexpdata.dumps(args)
-    
+
     epc_client.call("eval-in-emacs", [sexp])    # type: ignore
+
 
 def get_emacs_func_result(method_name, args):
     global epc_client
-    import sexpdata
-    
-    args = [sexpdata.Symbol(method_name)] + list(map(sexpdata.Quoted, args))    # type: ignore
+
+    args = [sexpdata.Symbol(method_name)] + list(map(handle_arg_types, args))    # type: ignore
     sexp = sexpdata.dumps(args)
-    
+
     result = epc_client.call_sync("get-emacs-func-result", [sexp])    # type: ignore
     return result if result != [] else False
 
@@ -321,12 +329,12 @@ emacs_config_dir = ""
 
 def get_emacs_config_dir():
     import os
-    
+
     global emacs_config_dir
 
     if emacs_config_dir == "":
         emacs_config_dir = os.path.join(os.path.expanduser(get_emacs_var("eaf-config-location")), '')
-        
+
     if not os.path.exists(emacs_config_dir):
         os.makedirs(emacs_config_dir)
 
@@ -340,12 +348,11 @@ emacs_func_cache_dict = {}
 
 def get_emacs_func_cache_result(func_name, func_args):
     global emacs_func_cache_dict
-    
+
     if func_name in emacs_func_cache_dict:
         return emacs_func_cache_dict[func_name]
     else:
         result = get_emacs_func_result(func_name, func_args)
         emacs_func_cache_dict[func_name] = result
-        
+
         return result
-        

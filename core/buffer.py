@@ -22,9 +22,9 @@
 from PyQt6.QtCore import Qt, QEvent, QThread, pyqtSignal
 from PyQt6.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
 from PyQt6.QtWidgets import QGraphicsScene, QApplication
-from core.utils import (interactive, abstract, get_clipboard_text, 
-                        set_clipboard_text, eval_in_emacs, message_to_emacs, 
-                        input_message, get_emacs_var, get_emacs_func_result, 
+from core.utils import (interactive, abstract, get_clipboard_text,
+                        set_clipboard_text, eval_in_emacs, message_to_emacs,
+                        input_message, get_emacs_var, get_emacs_func_result,
                         get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background)
 import abc
 import string
@@ -94,8 +94,8 @@ qt_key_dict.update({
 })
 
 # NOTE:
-# We need convert return or backspace to correct text, 
-# otherwise EAF browser will crash when user type return/backspace key. 
+# We need convert return or backspace to correct text,
+# otherwise EAF browser will crash when user type return/backspace key.
 qt_text_dict = {
     "SPC": " ",
     "<return>": "RET",
@@ -421,7 +421,7 @@ class Buffer(QGraphicsScene):
                         modifiers |= Qt.KeyboardModifier.KeyboardModifier.ShiftModifier
                     elif modifier == "s":
                         modifiers |= Qt.KeyboardModifier.MetaModifier
-                        
+
                 if last_key in qt_text_dict:
                     last_key = qt_text_dict[last_key]
 
