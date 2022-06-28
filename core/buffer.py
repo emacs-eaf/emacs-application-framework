@@ -172,7 +172,7 @@ class Buffer(QGraphicsScene):
     def build_insert_or_do(self, method_name):
         ''' Build insert or do.'''
         def _do ():
-            if self.is_focus():
+            if self.is_focus():    # type: ignore
                 self.send_key(self.current_event_string)
             else:
                 getattr(self, method_name)()
@@ -199,7 +199,7 @@ class Buffer(QGraphicsScene):
         '''
         Move cursor to bottom right corner of screen.
         '''
-        screen = QApplication.instance().primaryScreen()
+        screen = QApplication.instance().primaryScreen()    # type: ignore
         try:
             QCursor().setPos(screen, screen.size().width(), screen.size().height())
         except:
@@ -404,7 +404,7 @@ class Buffer(QGraphicsScene):
         event_list = event_string.split("-")
 
         if len(event_list) > 1:
-            for widget in [self.buffer_widget.focusProxy()]:
+            for widget in [self.buffer_widget.focusProxy()]:    # type: ignore
                 last_char = event_list[-1]
                 last_key = last_char
                 if len(last_char) == 1:
@@ -458,7 +458,7 @@ class Buffer(QGraphicsScene):
         '''Focus buffer widget.'''
         if event is None:
             event = QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.MouseFocusReason)
-        QApplication.postEvent(self.buffer_widget.focusProxy(), event)
+        QApplication.postEvent(self.buffer_widget.focusProxy(), event)    # type: ignore
 
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
