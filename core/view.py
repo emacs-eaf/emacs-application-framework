@@ -46,13 +46,13 @@ class View(QWidget):
         # Init attributes.
         self.view_info = view_info
         (self.buffer_id, self.emacs_xid, self.x, self.y, self.width, self.height) = view_info.split(":")
-        self.x = int(self.x)
-        self.y = int(self.y)
-        self.width = int(self.width)
-        self.height = int(self.height)
+        self.x: int = int(self.x)
+        self.y: int = int(self.y)
+        self.width: int = int(self.width)
+        self.height: int = int(self.height)
 
         # Build QGraphicsView.
-        self.layout = QVBoxLayout(self)
+        self.layout: QVBoxLayout = QVBoxLayout(self)
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.graphics_view = QGraphicsView(buffer, self)
@@ -141,7 +141,7 @@ class View(QWidget):
         qwindow = self.windowHandle()
 
         if not get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
-            qwindow.setParent(QWindow.fromWinId(int(self.emacs_xid)))
+            qwindow.setParent(QWindow.fromWinId(int(self.emacs_xid)))    # type: ignore
 
         qwindow.setPosition(QPoint(self.x, self.y))
 
