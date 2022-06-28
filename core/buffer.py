@@ -485,7 +485,7 @@ class FetchMarkerInputThread(QThread):
                 self.markers = self.fetch_marker_callback()
             minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
 
-            marker_input_quit = len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
+            marker_input_quit = minibuffer_input and len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
             marker_input_finish = minibuffer_input in self.markers
 
             if marker_input_quit:
