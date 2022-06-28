@@ -418,7 +418,7 @@ class Buffer(QGraphicsScene):
                     elif modifier == "M":
                         modifiers |= Qt.KeyboardModifier.AltModifier
                     elif modifier == "S":
-                        modifiers |= Qt.KeyboardModifier.KeyboardModifier.ShiftModifier
+                        modifiers |= Qt.KeyboardModifier.KeyboardModifierMask.ShiftModifier
                     elif modifier == "s":
                         modifiers |= Qt.KeyboardModifier.MetaModifier
 
