@@ -1106,6 +1106,7 @@ kxsgtn/ignore_spurious_focus_events_for/")
           (eaf--mac-unsafe-focus-out frame)))
 
       (add-function :after after-focus-change-function #'eaf--mac-focus-change)
+      (add-hook 'eaf-stop-process-hook (lambda () (remove-function after-focus-change-function #'eaf--mac-focus-change)))
       (add-to-list 'delete-frame-functions #'eaf--mac-delete-frame-handler))
      (t
       (defun eaf--wayland-focus-change ()
@@ -1114,6 +1115,7 @@ kxsgtn/ignore_spurious_focus_events_for/")
             (eaf-call-async "show_top_views")
           (eaf-call-async "hide_top_views")))
       (add-function :after after-focus-change-function #'eaf--wayland-focus-change)
+      (add-hook 'eaf-stop-process-hook (lambda () (remove-function after-focus-change-function #'eaf--wayland-focus-change)))
       ))))
 
 (defun eaf-monitor-configuration-change (&rest _)
