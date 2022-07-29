@@ -228,10 +228,6 @@ class BrowserView(QWebEngineView):
             if modifiers == Qt.KeyboardModifier.ControlModifier and self.selectedText().strip() != "":
                 self.translate_selected_text.emit(self.selectedText())
 
-    def createWindow(self, window_type):
-        ''' Create new browser window.'''
-        return self.create_new_window()
-
     def event(self, event):
         ''' Catch event.'''
         if event.type() == QEvent.Type.ChildAdded:
