@@ -146,19 +146,19 @@ def remove_node_modules_path(app_path_list):
 
 def install_npm_install(app_path_list):
     for app_path in app_path_list:
-        command = [NPM_CMD, "install"]
+        command = [NPM_CMD, "install", "--force"]
         run_command(command, path=app_path)
 
 def install_npm_rebuild(app_path_list):
     for app_path in app_path_list:
-        command = [NPM_CMD, 'rebuild']
+        command = [NPM_CMD, "rebuild"]
         run_command(command, path=app_path)
 
 def install_vue_install(app_path_list):
     for app_path in app_path_list:
-        command = [NPM_CMD, 'install']
+        command = [NPM_CMD, "install", "--force"]
         run_command(command, path=app_path)
-        command = [NPM_CMD, 'run', 'build']
+        command = [NPM_CMD, "run", "build"]
         run_command(command, path=app_path)
 
 def add_or_update_app(app: str, app_spec_dict):
