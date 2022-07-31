@@ -377,8 +377,11 @@ class EAF(object):
 
     def activate_emacs_win32_window(self, frame_title):
         if platform.system() == "Windows":
-            w = gw.getWindowsWithTitle(frame_title)
-            w[0].activate()
+            try:
+                w = gw.getWindowsWithTitle(frame_title)
+                w[0].activate()
+            except:
+                message_to_emacs('''Emacs title is empty cause EAF can not active Emacs window, plase add (setq frame-title-format "Emacs") in your config to active Emacs window.''')
 
     @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
