@@ -439,7 +439,7 @@ def install_app_deps(distro, deps_dict):
         print(bcolors.WARNING + "\n[EAF] The following applications failed to install at the location, please run ./install-eaf.py again with `--force`!" + bcolors.ENDC)
         for app in install_failed_apps: print(bcolors.WARNING + app + bcolors.ENDC)
     if len(install_failed_sys) + len(install_failed_pys) + len(install_failed_apps) == 0:
-        print("[EAF] Successfully installing applications and their dependencies")
+        print("[EAF] Successfully installed selected applications and their dependencies")
 
 
 def main():
