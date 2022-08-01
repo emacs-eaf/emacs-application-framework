@@ -26,7 +26,7 @@ EAF是一个可编程扩展的框架，它自带一系列丰富的应用：
 | <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
 |                                                       |                                                       |
 
-| <a href="https://emacsconf.org/2020/talks/34/">用EAF扩展Emacs图形应用</a>                            | <a href="https://emacsconf.org/2021/talks/eaf/">Emacs Application Framework: 2021更新</a>                              |
+| EmacsConf 2020: <a href="https://emacsconf.org/2020/talks/34/">用EAF扩展Emacs图形应用</a> | EmacsConf 2021: <a href="https://emacsconf.org/2021/talks/eaf/">EAF 2021更新报告</a>                              |
 | :--------:                                            | :----:                                                |
 | [<img src="https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg" width=400>](https://www.youtube.com/watch?v=HK_f8KTuR0s) | [<img src="https://img.youtube.com/vi/bh37zbefZk4/0.jpg" width=400>](https://www.youtube.com/watch?v=bh37zbefZk4) |
 |                                                       |                                                       |
