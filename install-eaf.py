@@ -65,6 +65,10 @@ def get_available_apps_dict():
 
 available_apps_dict = get_available_apps_dict()
 
+install_failed_sys = []
+install_failed_pys = []
+install_failed_apps = []
+
 important_messages = [
     "[EAF] Please run 'git pull ; ./install-eaf.py' (M-x eaf-install-and-update) to update EAF, applications and their dependencies."
 ]
@@ -86,7 +90,7 @@ def run_command(command, path=script_path, ensure_pass=True, get_result=False):
                                    universal_newlines=True, text=True, cwd=path)
     process.wait()
     if process.returncode != 0 and ensure_pass:
-        sys.exit(process.returncode)
+        raise Exception(process.returncode)
     if get_result:
         return process.stdout.readlines()
     else:
@@ -130,12 +134,18 @@ def install_sys_deps(distro: str, deps_list):
     elif which("zypper"):
         command = ['sudo', 'zypper', 'install','-y']
     command.extend(deps_list)
-    return run_command(command)
+    try:
+        run_command(command)
+    except Exception:
+        install_failed_sys.append(' '.join(command))
 
 def install_py_deps(deps_list):
     command = ['pip', 'install', '--user', '-U']
     command.extend(deps_list)
-    return run_command(command)
+    try:
+        run_command(command)
+    except Exception:
+        install_failed_pys.append(' '.join(command))
 
 def remove_node_modules_path(app_path_list):
     for app_path in app_path_list:
@@ -147,19 +157,31 @@ def remove_node_modules_path(app_path_list):
 def install_npm_install(app_path_list):
     for app_path in app_path_list:
         command = [NPM_CMD, "install", "--force"]
-        run_command(command, path=app_path)
+        try:
+            run_command(command, path=app_path)
+        except Exception:
+            install_failed_apps.append(app_path)
 
 def install_npm_rebuild(app_path_list):
     for app_path in app_path_list:
         command = [NPM_CMD, "rebuild"]
-        run_command(command, path=app_path)
+        try:
+            run_command(command, path=app_path)
+        except Exception:
+            install_failed_apps.append(app_path)
 
 def install_vue_install(app_path_list):
     for app_path in app_path_list:
         command = [NPM_CMD, "install", "--force"]
-        run_command(command, path=app_path)
+        try:
+            run_command(command, path=app_path)
+        except Exception:
+            install_failed_apps.append(app_path)
         command = [NPM_CMD, "run", "build"]
-        run_command(command, path=app_path)
+        try:
+            run_command(command, path=app_path)
+        except Exception:
+            install_failed_apps.append(app_path)
 
 def add_or_update_app(app: str, app_spec_dict):
     url = ""
@@ -356,7 +378,11 @@ def install_app_deps(distro, deps_dict):
     npm_rebuild_apps = []
     for pending_apps_dict in pending_apps_dict_list:
         for app_name, app_spec_dict in pending_apps_dict.items():
-            updated = add_or_update_app(app_name, app_spec_dict)
+            updated = True
+            try:
+                updated = add_or_update_app(app_name, app_spec_dict)
+            except Exception:
+                raise Exception("There are unsaved changes in EAF " + app_name + " application. Please re-run command with --app-drop-local-edit or --app-save-local-edit")
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
             if (updated or args.force) and os.path.exists(app_dep_path):
@@ -374,7 +400,7 @@ def install_app_deps(distro, deps_dict):
                     if 'npm_rebuild' in deps_dict and deps_dict['npm_rebuild']:
                         npm_rebuild_apps.append(app_path)
 
-    print("\n[EAF] Installing dependencies for installed applications")
+    print("\n[EAF] Installing dependencies for the selected applications")
     if not args.ignore_sys_deps and sys.platform == "linux" and len(sys_deps) > 0:
         print("[EAF] Installing system dependencies")
         install_sys_deps(distro, sys_deps)
@@ -394,10 +420,27 @@ def install_app_deps(distro, deps_dict):
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
 
-    print("[EAF] Finished installing applications and their dependencies")
     print("\n[EAF] Please ensure the following are added to your init.el:")
-
     print_sample_config(app_dir)
+
+    global install_failed_sys
+    global install_failed_pys
+    global install_failed_apps
+    if len(install_failed_sys) > 0:
+        install_failed_sys = list(set(install_failed_sys))
+        print(bcolors.WARNING + "\n[EAF] The following system dependencies failed to install, please try again manually!" + bcolors.ENDC)
+        for dep in install_failed_sys: print(bcolors.WARNING + dep + bcolors.ENDC)
+    if len(install_failed_pys) > 0:
+        install_failed_pys = list(set(install_failed_pys))
+        print(bcolors.WARNING + "\n[EAF] The following Python dependencies failed to install, please try again manually!" + bcolors.ENDC)
+        for dep in install_failed_pys: print(bcolors.WARNING + dep + bcolors.ENDC)
+    if len(install_failed_apps) > 0:
+        install_failed_apps = list(set(install_failed_apps))
+        print(bcolors.WARNING + "\n[EAF] The following applications failed to install at the location, please run ./install-eaf.py again with `--force`!" + bcolors.ENDC)
+        for app in install_failed_apps: print(bcolors.WARNING + app + bcolors.ENDC)
+    if len(install_failed_sys) + len(install_failed_pys) + len(install_failed_apps) == 0:
+        print("[EAF] Successfully installing applications and their dependencies")
+
 
 def main():
     try:
