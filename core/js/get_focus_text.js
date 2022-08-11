@@ -8,7 +8,9 @@
         // QQ mail have some security mechanism that we can't fetch value of activeElement.
         // So we just return empty string make is_focus method works well in browser.py
         return "";
-    } else if (activeElement && activeElement.type == "text" && inputs.indexOf(tagName) !== -1) {
+    } else if (activeElement && 
+               inputs.indexOf(tagName) !== -1 && 
+               (activeElement.type == "text" || activeElement.type == "textarea")) {
         return activeElement.value;
     } else if (activeElement.isContentEditable) {
         // For the Rich Text Editor
