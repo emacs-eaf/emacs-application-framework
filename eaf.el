@@ -1275,6 +1275,13 @@ of `eaf--buffer-app-name' inside the EAF buffer."
          (window (if buffer (get-buffer-window buffer 'visible) nil)))
     (when window (select-window window) t)))
 
+(defvar-local eaf-buffer-input-focus nil)
+(defun eaf-update-focus-state (buffer-id state)
+  (let ((buffer (eaf-get-buffer buffer-id)))
+    (when buffer
+      (with-current-buffer buffer
+        (setq-local eaf-buffer-input-focus state)))))
+
 (defun eaf--show-message (format-string eaf-prefix logging)
   "A wrapper around `message' that prepend [EAF/app-name] before FORMAT-STRING."
   (let* ((eaf-prefix (if (equal eaf-prefix "TRUE") t nil))

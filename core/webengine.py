@@ -253,6 +253,12 @@ class BrowserView(QWebEngineView):
         event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
             event_type += [QEvent.Type.Wheel]
+            
+        # Synchronise input focus state to Elisp variable, handy for evil user.
+        if event.type() in [QEvent.Type.KeyPress, QEvent.Type.KeyRelease, 
+                            QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
+                            QEvent.Type.Wheel, QEvent.Type.ShortcutOverride, QEvent.Type.Timer]:
+            eval_in_emacs("eaf-update-focus-state", [self.buffer_id, self.buffer.is_focus()])        
 
         if event.type() in event_type:
             if self.simulated_wheel_event:
@@ -321,7 +327,7 @@ class BrowserView(QWebEngineView):
     def open_url(self, url):
         ''' Configure current url.'''
         self.setUrl(QUrl(url))
-
+        
         eval_in_emacs('eaf-activate-emacs-window', [])
 
     def open_url_new_buffer(self, url):
