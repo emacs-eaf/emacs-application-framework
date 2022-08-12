@@ -597,11 +597,11 @@ class BrowserView(QWebEngineView):
             return False
         else:
             return link
-
+        
     def _open_link(self, marker):
         ''' Jump to link according to marker.'''
         link = self.get_marker_link(marker)
-        if link: self.open_url(link)
+        if link: self.open_url(link)            
 
     def _open_link_new_buffer(self, marker):
         ''' Open the link at the marker in a new buffer.'''
@@ -1338,7 +1338,11 @@ class BrowserBuffer(Buffer):
 
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
-        return self.buffer_widget.get_focus_text() != None or self.url.startswith("devtools://")
+        input_focus = self.buffer_widget.get_focus_text() != None or self.url.startswith("devtools://")
+        
+        eval_in_emacs("eaf-update-focus-state", [self.buffer_id, input_focus])                    
+        
+        return input_focus
 
     @interactive(insert_or_do=True)
     def duplicate_page(self):
