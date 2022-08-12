@@ -254,6 +254,9 @@ class BrowserView(QWebEngineView):
         if platform.system() != "Darwin":
             event_type += [QEvent.Type.Wheel]
             
+        if event.type() in [QEvent.Type.ShortcutOverride]:
+            QTimer().singleShot(500, self.buffer.is_focus)
+            
         if event.type() in event_type:
             if self.simulated_wheel_event:
                self.simulated_wheel_event = False
