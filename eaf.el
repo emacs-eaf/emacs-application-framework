@@ -931,6 +931,11 @@ keybinding variable to eaf-app-binding-alist."
     (with-current-buffer eaf-buffer
       (eaf-mode)
 
+      (run-with-idle-timer
+       1 t
+       (lambda ()
+         (setq-local eaf-buffer-input-focus (eaf-call-sync "execute_function" eaf--buffer-id "is_focus"))))
+
       ;; Don't promt user when exist EAF python process.
       (setq-local confirm-kill-processes nil)
 
