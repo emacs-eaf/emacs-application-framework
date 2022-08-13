@@ -253,6 +253,9 @@ class BrowserView(QWebEngineView):
         event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
             event_type += [QEvent.Type.Wheel]
+
+        if event.type() == QEvent.Type.MouseButtonRelease:
+            self.buffer.is_focus()
             
         if event.type() in event_type:
             if self.simulated_wheel_event:
@@ -686,6 +689,7 @@ class BrowserView(QWebEngineView):
             self.focus_input_js = self.read_js_content("focus_input.js")
 
         self.eval_js(self.focus_input_js)
+        eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'t"])
 
     @interactive
     def clear_focus(self):
@@ -694,6 +698,7 @@ class BrowserView(QWebEngineView):
             self.clear_focus_js = self.read_js_content("clear_focus.js")
 
         self.eval_js(self.clear_focus_js)
+        eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'nil"])
 
     def init_dark_mode_js(self, module_path, selection_color="auto"):
         js_string = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
