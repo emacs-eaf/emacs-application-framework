@@ -308,7 +308,13 @@ def yes_no(question, default_yes=False, default_no=False):
         return key.lower() == 'y'
 
 def get_installed_apps(app_dir):
-    apps_installed = [f for f in os.listdir(app_dir) if os.path.isdir(os.path.join(app_dir, f))]
+    apps_installed = [
+        f
+        for f in os.listdir(app_dir)
+        if os.path.isdir(os.path.join(app_dir, f))
+        # directories not managed, or not part of, EAF
+        if f not in ("__pycache__",)
+    ]
     for app in apps_installed:
         git_dir = os.path.join(app_dir, app, ".git")
         if app not in get_available_apps_dict().keys():
