@@ -159,5 +159,11 @@
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-git.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git"
+    },
+    "2048": {
+        "name": "EAF 2048",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/metaescape/2048pyqt6.git"
     }
 }
