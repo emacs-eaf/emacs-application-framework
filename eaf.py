@@ -28,6 +28,7 @@ from PyQt6.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer
 from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
+from core.webengine import webengine_init
 from epc.server import ThreadingEPCServer
 import json
 import os
@@ -45,6 +46,8 @@ class EAF(object):
         (emacs_width, emacs_height, emacs_server_port) = args
         emacs_width = int(emacs_width)
         emacs_height = int(emacs_height)
+
+        webengine_init()
 
         # Init variables.
         self.buffer_dict = {}
@@ -494,6 +497,7 @@ if __name__ == "__main__":
             "--enable-native-gpu-memory-buffers"]
 
     app = QApplication(sys.argv + ["--disable-web-security"] + hardware_acceleration_args)
+    app.setApplicationName("eaf")
 
     eaf = EAF(sys.argv[1:])
 
