@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import pathlib
 from PyQt6 import QtCore
 from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint
 from PyQt6.QtWebChannel import QWebChannel
@@ -38,6 +39,14 @@ import base64
 import os
 import platform
 
+def webengine_init():
+    global eaf_profile
+    eaf_profile = QWebEngineProfile("Default", QApplication.instance())
+    eaf_profile.setCachePath("")
+    eaf_profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.DiskHttpCache)
+    eaf_profile.setPersistentStoragePath("")
+    eaf_profile.setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies)
+
 MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
 MOUSE_BACK_BUTTON = 8
@@ -54,7 +63,7 @@ class BrowserView(QWebEngineView):
         self.buffer_id = buffer_id
         self.is_button_press = False
 
-        self.web_page = BrowserPage()
+        self.web_page = BrowserPage(self)
         self.setPage(self.web_page)
 
         self.url_hovered = ""
@@ -63,7 +72,7 @@ class BrowserView(QWebEngineView):
         self.selectionChanged.connect(self.select_text_change)
 
         # Cookie init.
-        self.cookies_manager = CookiesManager(self)
+        # self.cookies_manager = CookiesManager(self)
 
         self.search_term = ""
 
@@ -88,10 +97,13 @@ class BrowserView(QWebEngineView):
              "eaf-webengine-scroll-step"])
 
     def delete_all_cookies(self):
-        self.cookies_manager.delete_all_cookies()
+        # self.cookies_manager.delete_all_cookies()
+        eaf_profile.cookieStore().deleteAllCookies()
 
     def delete_cookie(self):
-        self.cookies_manager.delete_cookie()
+        # self.cookies_manager.delete_cookie()
+        # eaf_profile.cookieStore().deleteCookie() # TODO: only delete cookie for this view
+        pass
 
     def load_css(self, path, name):
         path = QFile(path)
@@ -729,8 +741,8 @@ class BrowserView(QWebEngineView):
         self.page().scripts().remove(self.dark_mode_inject_js)
 
 class BrowserPage(QWebEnginePage):
-    def __init__(self):
-        QWebEnginePage.__init__(self)
+    def __init__(self, view: BrowserView):
+        QWebEnginePage.__init__(self, eaf_profile, view)
 
     def execute_javascript(self, script_src):
         ''' Execute JavaScript.'''
@@ -806,8 +818,7 @@ class BrowserBuffer(Buffer):
               "eaf-webengine-download-path",
               "eaf-webengine-default-zoom"])
 
-        self.profile = QWebEngineProfile(self.buffer_widget)
-        self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+        eaf_profile.setHttpUserAgent(self.pc_user_agent)
 
         self.caret_js_ready = False
         self.caret_browsing_mode = False
@@ -822,7 +833,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.windowCloseRequested.connect(self.close_buffer)
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
-        self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
+        eaf_profile.downloadRequested.connect(self.handle_download_request)
 
         self.settings = self.buffer_widget.settings()
         try:
@@ -1383,12 +1394,12 @@ class BrowserBuffer(Buffer):
     @interactive(insert_or_do=True)
     def toggle_device(self):
         ''' Toggle device.'''
-        user_agent = self.profile.defaultProfile().httpUserAgent()
+        user_agent = eaf_profile.httpUserAgent()
         if user_agent == self.pc_user_agent:
-            self.profile.defaultProfile().setHttpUserAgent(self.phone_user_agent)
+            eaf_profile.setHttpUserAgent(self.phone_user_agent)
             self.set_aspect_ratio(2.0 / 3)
         else:
-            self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+            eaf_profile.setHttpUserAgent(self.pc_user_agent)
             self.set_aspect_ratio(0)
 
         self.refresh_page()
