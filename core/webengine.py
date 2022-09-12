@@ -37,6 +37,7 @@ from urllib.parse import urlparse, parse_qs
 import base64
 import os
 import platform
+import pathlib
 
 MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
@@ -1499,11 +1500,13 @@ class BrowserBuffer(Buffer):
         '''
         import lxml.html as LH
 
+        base_dir = pathlib.Path(dist_dir)
+        base_url = base_dir.as_uri()
         root = LH.fromstring(index_file_content)
         for el in root.iter('link'):
-            el.attrib['href'] = "{}{}".format(dist_dir, el.attrib['href'])
+            el.attrib['href'] = "{}{}".format(base_url, el.attrib['href'])
         for el in root.iter('script'):
-            el.attrib['src'] = "{}{}".format(dist_dir, el.attrib['src'])
+            el.attrib['src'] = "{}{}".format(base_url, el.attrib['src'])
             el.attrib['type'] = "text/javascript"
         for el in root.iter('body'):
             el.attrib['style'] = "background: {}; color: {}".format(self.theme_background_color, self.theme_foreground_color)
