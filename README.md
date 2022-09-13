@@ -101,10 +101,6 @@ From here on, you can add the full path to the EAF installation directory to you
       (eaf-browser-continue-where-left-off t)
       (eaf-browser-enable-adblocker t)
       (browse-url-browser-function 'eaf-open-browser)
-      :init
-      (require 'eaf-browser)
-      (require 'eaf-pdf-viewer)
-      (require 'eaf-camera)
       :config
       (defalias 'browse-web #'eaf-open-browser)
       (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
