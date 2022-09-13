@@ -322,7 +322,7 @@ been initialized."
   (mapcar #'eaf--get-emacs-var vars))
 
 (defun get-emacs-face-foregrounds (&rest faces)
-  (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground))) faces))
+  (mapcar #'(lambda (face-name) (eaf-color-name-to-hex (face-attribute (intern face-name) :foreground nil 'default))) faces))
 
 (defun eaf-color-int-to-hex (int)
   (substring (format (concat "%0" (int-to-string 4) "X") int) (- 2)))
