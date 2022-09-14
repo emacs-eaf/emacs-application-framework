@@ -807,7 +807,10 @@ class BrowserBuffer(Buffer):
               "eaf-webengine-download-path",
               "eaf-webengine-default-zoom"])
 
-        self.profile = QWebEngineProfile(self.buffer_widget)
+        # self.profile = QWebEngineProfile(self.buffer_widget)
+        # self.profile.defaultProfile() == QWebEngineProfile.defaultProfile()
+        # The default profile can be accessed by defaultProfile(). It is a built-in profile that all web pages not specifically created with another profile belong to.
+        self.profile = QWebEngineProfile.defaultProfile()
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
 
         self.caret_js_ready = False
@@ -1720,6 +1723,9 @@ class CookiesManager(object):
         ''' Gets the name of the cookie file stored on the hard disk.'''
         name = cookie.name().data().decode("utf-8")
         domain = cookie.domain()
-        encode_path = cookie.path().replace("/", "|")
+        if os.name == "nt":
+            encode_path = cookie.path().encode("utf-8").hex()
+        else:
+            encode_path = cookie.path().replace("/", "|")
 
         return name + "+" + domain + "+" + encode_path
