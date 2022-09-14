@@ -494,6 +494,7 @@ if __name__ == "__main__":
             "--enable-native-gpu-memory-buffers"]
 
     app = QApplication(sys.argv + ["--disable-web-security"] + hardware_acceleration_args)
+    app.setApplicationName("eaf.py")
 
     eaf = EAF(sys.argv[1:])
 
