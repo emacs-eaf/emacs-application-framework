@@ -49,6 +49,7 @@
       "sexpdata",
       "tld",
       "lxml",
+      "pygetwindow",
       "PyQt6",
       "PyQt6-Qt6",
       "PyQt6-sip",
