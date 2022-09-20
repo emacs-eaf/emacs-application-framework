@@ -42,7 +42,7 @@ EAF is very extensible. It already comes with a number of useful applications by
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): The fastest PDF reader
 - [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video player base on Qt
-- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown file previewer in Emacs
+- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown document real-time previewer, perfectly compatible with github style, supports the rendering of Mermaid, Plantuml, Katex, Mathjax, etc.
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org file previewer in Emacs
 - [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and an audio visualization
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS reader, rendering html content in expected
