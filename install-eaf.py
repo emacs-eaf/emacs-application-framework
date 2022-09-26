@@ -140,7 +140,11 @@ def install_sys_deps(distro: str, deps_list):
         install_failed_sys.append(' '.join(command))
 
 def install_py_deps(deps_list):
-    command = ['pip', 'install', '--user', '-U']
+    if sys.prefix == sys.base_prefix:
+        command = ['pip', 'install', '--user', '-U']
+    else:
+        # if running on a virtual env, --user option is not valid.
+        command = ['pip', 'install', '-U']
     command.extend(deps_list)
     try:
         run_command(command)
