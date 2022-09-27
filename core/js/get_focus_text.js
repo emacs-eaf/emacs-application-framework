@@ -1,7 +1,7 @@
 (function() {
   const activeElement = document.activeElement;
   var inputs = ["input", "select", "textarea"];
-  var inputTypes = ["text", "textarea", "email", "password"];
+  var inputTypes = ["text", "textarea", "email", "password", "tel"];
   var pageUrl = window.location.href;
   var tagName = activeElement.tagName.toLowerCase();
 
