@@ -512,6 +512,12 @@ Turn on this option will improve start speed."
   "Clean duplicate file manager buffers."
   :type 'boolean)
 
+(defcustom eaf-goto-right-after-close-buffer nil
+  "EAF will switch to right buffer after close current EAF buffer if this option is enable.
+
+And you need re-implement `eaf-goto-right-tab' self."
+  :type 'boolean)
+
 (defcustom eaf-duplicate-buffer-survival-time 60
   "If file manager buffer not show in current frame, and existence time exceeds than 60 seconds,
 EAF will remove the duplicate file manager buffer."
@@ -1306,7 +1312,9 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   (let* ((buffer (eaf-get-buffer buffer-id)))
     (when buffer
       (kill-buffer buffer)
-      t)))
+
+      (when eaf-goto-right-after-close-buffer
+        (eaf-goto-right-tab)))))
 
 (defun eaf--first-start (eaf-epc-port)
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
