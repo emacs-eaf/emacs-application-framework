@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt6 import QtCore
-from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint
+from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint, pyqtSlot
 from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
@@ -74,6 +74,7 @@ class BrowserView(QWebEngineView):
         self.get_focus_text_js = None
         self.set_focus_text_raw = None
         self.clear_focus_js = None
+        self.dark_mode_js = None
         self.select_input_text_js = None
         self.get_selection_text_js = None
         self.focus_input_js = None
@@ -710,32 +711,12 @@ class BrowserView(QWebEngineView):
         eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'nil"])
 
     def init_dark_mode_js(self, module_path, selection_color="auto"):
-        js_string = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
+        self.dark_mode_js = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
 
         if selection_color != "auto":
-            js_string = js_string.replace("selectionColor: 'auto'", "selectionColor: '" + selection_color + "'")
+            self.dark_mode_js = self.dark_mode_js.replace("selectionColor: 'auto'", "selectionColor: '" + selection_color + "'")
 
-        js_string += """DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});"""
-
-        self.dark_mode_inject_js = QWebEngineScript()
-        self.dark_mode_inject_js.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentCreation)
-        self.dark_mode_inject_js.setWorldId(QWebEngineScript.ScriptWorldId.MainWorld)
-        self.dark_mode_inject_js.setName("dark_mode_inject.js")
-        self.dark_mode_inject_js.setRunsOnSubFrames(True)
-        self.dark_mode_inject_js.setSourceCode(js_string)
-
-        if self.buffer.dark_mode_is_enabled():
-            self.enable_dark_mode()
-
-    @interactive(insert_or_do=True)
-    def enable_dark_mode(self):
-        ''' Dark mode support.'''
-        self.page().scripts().insert(self.dark_mode_inject_js)
-
-    @interactive(insert_or_do=True)
-    def disable_dark_mode(self):
-        ''' Remove dark mode support.'''
-        self.page().scripts().remove(self.dark_mode_inject_js)
+        self.dark_mode_js += """DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});"""
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -938,6 +919,10 @@ class BrowserBuffer(Buffer):
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         return False
+    
+    def dark_mode_js_load(self, progress):
+        if self.dark_mode_is_enabled() and self.buffer_widget.dark_mode_js != None and progress < 100:
+            self.buffer_widget.eval_js(self.buffer_widget.dark_mode_js)
 
     def handle_fullscreen_request(self, request):
         ''' Handle fullscreen request.'''
@@ -1409,11 +1394,6 @@ class BrowserBuffer(Buffer):
     def toggle_dark_mode(self):
         self.is_dark_mode_enabled = not self.is_dark_mode_enabled
 
-        if self.is_dark_mode_enabled:
-            self.buffer_widget.enable_dark_mode()
-        else:
-            self.buffer_widget.disable_dark_mode()
-
         self.buffer_widget.reload()
 
     @interactive(insert_or_do=True)
@@ -1548,6 +1528,11 @@ class BrowserBuffer(Buffer):
     def marker_offset_y(self):
         return 0
 
+    @pyqtSlot(int)
+    def update_progress(self, progress):
+        ''' Update the Progress Bar.'''
+        self.dark_mode_js_load(progress)
+        
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         import sqlite3
