@@ -80,10 +80,11 @@ class BrowserView(QWebEngineView):
         self.focus_input_js = None
         self.simulated_wheel_event = False
 
-        (self.default_zoom, self.show_hover_link,
-         self.marker_letters, self.marker_fontsize,
-         self.scroll_step) = get_emacs_vars(
+        (self.default_zoom, self.zoom_step,
+         self.show_hover_link, self.marker_letters,
+         self.marker_fontsize, self.scroll_step) = get_emacs_vars(
             ["eaf-webengine-default-zoom",
+             "eaf-webengine-zoom-step",
              "eaf-webengine-show-hover-link",
              "eaf-marker-letters",
              "eaf-marker-fontsize",
@@ -370,7 +371,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def zoom_in(self):
         ''' Zoom in.'''
-        self.setZoomFactor(min(5, self.zoomFactor() + 0.25))
+        self.setZoomFactor(min(5, self.zoomFactor() + self.zoom_step))
         if self.default_zoom == self.zoomFactor():
             self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
         else:
@@ -379,7 +380,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def zoom_out(self):
         ''' Zoom out.'''
-        self.setZoomFactor(max(0.25, self.zoomFactor() - 0.25))
+        self.setZoomFactor(max(0.25, self.zoomFactor() - self.zoom_step))
         if self.default_zoom == self.zoomFactor():
             self.buffer.zoom_data.delete_entry(urlparse(self.buffer.current_url).hostname)
         else:
@@ -780,7 +781,8 @@ class BrowserBuffer(Buffer):
          self.enable_scrollbar,
          self.unknown_url_scheme_policy,
          self.download_path,
-         self.default_zoom) = get_emacs_vars(
+         self.default_zoom,
+         self.zoom_step) = get_emacs_vars(
              ["eaf-webengine-pc-user-agent",
               "eaf-webengine-phone-user-agent",
               "eaf-webengine-font-family",
@@ -794,7 +796,8 @@ class BrowserBuffer(Buffer):
               "eaf-webengine-enable-scrollbar",
               "eaf-webengine-unknown-url-scheme-policy",
               "eaf-webengine-download-path",
-              "eaf-webengine-default-zoom"])
+              "eaf-webengine-default-zoom",
+              "eaf-webengine-zoom-step"])
 
         # self.profile = QWebEngineProfile(self.buffer_widget)
         # self.profile.defaultProfile() == QWebEngineProfile.defaultProfile()

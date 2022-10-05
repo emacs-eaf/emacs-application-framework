@@ -404,6 +404,10 @@ been initialized."
   "Set the default zoom factor for EAF Browser."
   :type 'float)
 
+(defcustom eaf-webengine-zoom-step 0.1
+  "Set the zoom step factor for EAF Browser."
+  :type 'float)
+
 (defcustom eaf-webengine-scroll-step 400
   "Set the scroll step for EAF Browser, increase/decrease for bigger/smaller steps."
   :type 'float)
