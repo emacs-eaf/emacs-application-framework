@@ -22,7 +22,7 @@ The vision of the Emacs Application Framework (EAF) project is, while fully reta
 
 ## Features
 
-EAF is very extensible. It ships a lot of applications by default, you can freely choose anything you find interesting to install:
+EAF is very extensible. We ship a lot of applications, feel free to choose anything you find interesting to install:
 
 | Browser                                          | PDF Viewer |
 | :--------:                                       | :----:                                                      |
