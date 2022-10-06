@@ -79,34 +79,35 @@ def git_repos_sync(mirror_username, mirror_password, mirror_use_ssh):
         path = os.path.join(tempfile.gettempdir(), "sync-eaf-resourcs", app_name)
         branch = app_spec_dict["branch"]
         url = app_spec_dict["url"]
-        mirror_url = app_spec_dict["mirror_url"]
-        if mirror_use_ssh:
-            mirror_url_with_auth_info = convert_https_url_to_ssh(mirror_url)
-        else:
-            mirror_url_with_auth_info = add_auth_info_to_url(mirror_url, mirror_username, mirror_password)
-        updated = True
-        print("[EAF] * Sync EAF {0} repo.".format(app_name))
-        if url and mirror_url_with_auth_info:
-            print("[EAF] ** Upstream -> Local-dir")
-            if os.path.exists(path):
-                run_command(["git", "clean", "-df"], path=path)
-                run_command(["git", "remote", "rm", "origin"], path=path)
-                run_command(["git", "remote", "add", "origin", url], path=path)
-                run_command(["git", "reset", "--hard"], path=path)
-                output_lines = run_command(["git", "pull", "origin", branch], path=path, ensure_pass=False, get_result=True)
-                for output in output_lines:
-                    print(output)
-                    if "Already up to date." in output:
-                        updated = False
+        if "mirror_url" in app_spec_dict:
+            mirror_url = app_spec_dict["mirror_url"]
+            if mirror_use_ssh:
+                mirror_url_with_auth_info = convert_https_url_to_ssh(mirror_url)
             else:
-                run_command(["git", "clone", "--branch", branch, url, path])
+                mirror_url_with_auth_info = add_auth_info_to_url(mirror_url, mirror_username, mirror_password)
+            updated = True
+            print("[EAF] * Sync EAF {0} repo.".format(app_name))
+            if url and mirror_url_with_auth_info:
+                print("[EAF] ** Upstream -> Local-dir")
+                if os.path.exists(path):
+                    run_command(["git", "clean", "-df"], path=path)
+                    run_command(["git", "remote", "rm", "origin"], path=path)
+                    run_command(["git", "remote", "add", "origin", url], path=path)
+                    run_command(["git", "reset", "--hard"], path=path)
+                    output_lines = run_command(["git", "pull", "origin", branch], path=path, ensure_pass=False, get_result=True)
+                    for output in output_lines:
+                        print(output)
+                        if "Already up to date." in output:
+                            updated = False
+                else:
+                    run_command(["git", "clone", "--branch", branch, url, path])
 
-            if updated or args.force:
-                print("[EAF] ** Local-dir -> Mirror")
-                print("[EAF] Running git push -f <push url of mirror>")
-                run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True, ensure_pass=False)
-        else:
-            print("[EAF] WARN: url or mirror_url of EAF {} may have some problem, please check them!".format(app_name))
+                if updated or args.force:
+                    print("[EAF] ** Local-dir -> Mirror")
+                    print("[EAF] Running git push -f <push url of mirror>")
+                    run_command(["git", "push", "-f", mirror_url_with_auth_info], path=path, print_command=False, get_result=True, ensure_pass=False)
+            else:
+                print("[EAF] WARN: url or mirror_url of EAF {} may have some problem, please check them!".format(app_name))
 
 def main():
     try:
