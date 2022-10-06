@@ -267,7 +267,7 @@ class BrowserView(QWebEngineView):
 
         if event.type() == QEvent.Type.MouseButtonRelease:
             self.buffer.is_focus()
-            
+
         if event.type() in event_type:
             if self.simulated_wheel_event:
                self.simulated_wheel_event = False
@@ -335,7 +335,7 @@ class BrowserView(QWebEngineView):
     def open_url(self, url):
         ''' Configure current url.'''
         self.setUrl(QUrl(url))
-        
+
         eval_in_emacs('eaf-activate-emacs-window', [])
 
     def open_url_new_buffer(self, url):
@@ -611,11 +611,11 @@ class BrowserView(QWebEngineView):
             return False
         else:
             return link
-        
+
     def _open_link(self, marker):
         ''' Jump to link according to marker.'''
         link = self.get_marker_link(marker)
-        if link: self.open_url(link)            
+        if link: self.open_url(link)
 
     def _open_link_new_buffer(self, marker):
         ''' Open the link at the marker in a new buffer.'''
@@ -711,13 +711,19 @@ class BrowserView(QWebEngineView):
         self.eval_js(self.clear_focus_js)
         eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'nil"])
 
-    def init_dark_mode_js(self, module_path, selection_color="auto"):
+    def init_dark_mode_js(self, module_path, selection_color="auto", dark_mode_theme="dark"):
         self.dark_mode_js = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
 
         if selection_color != "auto":
             self.dark_mode_js = self.dark_mode_js.replace("selectionColor: 'auto'", "selectionColor: '" + selection_color + "'")
 
-        self.dark_mode_js += """DarkReader.setFetchMethod(window.fetch); DarkReader.enable({brightness: 100, contrast: 90, sepia: 10});"""
+        self.dark_mode_js += """DarkReader.setFetchMethod(window.fetch);"""
+
+        if dark_mode_theme == "dark":
+            self.dark_mode_js += """DarkReader.enable({brightness: 100, contrast: 90, sepia: 10, mode: 1});"""
+        else: # light theme
+            self.dark_mode_js += """DarkReader.enable({brightness: 100, contrast: 90, sepia: 10, mode: 0});"""
+
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
@@ -922,7 +928,7 @@ class BrowserBuffer(Buffer):
     def dark_mode_is_enabled(self):
         ''' Return bool of whether dark mode is enabled.'''
         return False
-    
+
     def dark_mode_js_load(self, progress):
         if self.dark_mode_is_enabled() and self.buffer_widget.dark_mode_js != None and progress < 100:
             self.buffer_widget.eval_js(self.buffer_widget.dark_mode_js)
@@ -1344,9 +1350,9 @@ class BrowserBuffer(Buffer):
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
         input_focus = self.buffer_widget.get_focus_text() != None or self.url.startswith("devtools://")
-        
-        eval_in_emacs("eaf-update-focus-state", [self.buffer_id, input_focus])                    
-        
+
+        eval_in_emacs("eaf-update-focus-state", [self.buffer_id, input_focus])
+
         return input_focus
 
     @interactive(insert_or_do=True)
@@ -1535,7 +1541,7 @@ class BrowserBuffer(Buffer):
     def update_progress(self, progress):
         ''' Update the Progress Bar.'''
         self.dark_mode_js_load(progress)
-        
+
 class ZoomSizeDb(object):
     def __init__(self, dbpath):
         import sqlite3
