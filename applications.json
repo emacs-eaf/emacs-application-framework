@@ -1,162 +1,208 @@
 {
     "emacs-application-framework": {
         "name": "EAF (Emacs Application Framework)",
+        "desc": "EAF core repo",
         "type": "core",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/emacs-application-framework.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/emacs-application-framework.git"
-    },
-    "airshare": {
-        "name": "EAF Airshare",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-airshare.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-airshare.git"
+        "mirror_url": "https://gitee.com/emacs-eaf/emacs-application-framework.git",
+        "default_install": "true"
     },
     "browser": {
         "name": "EAF Browser",
+        "desc": "A modern, customizable and extensible browser in Emacs",
         "type": "app",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-browser.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-browser.git"
-    },
-    "camera": {
-        "name": "EAF Camera",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-camera.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-camera.git"
-    },
-    "demo": {
-        "name": "EAF Demo",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-demo.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-demo.git"
-    },
-    "file-browser": {
-        "name": "EAF File Browser",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-file-browser.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-browser.git"
-    },
-    "file-manager": {
-        "name": "EAF File Manager",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-file-manager.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-manager.git"
-    },
-    "file-sender": {
-        "name": "EAF File Sender",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-file-sender.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-sender.git"
-    },
-    "image-viewer": {
-        "name": "EAF Image Viewer",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-image-viewer.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-image-viewer.git"
-    },
-    "jupyter": {
-        "name": "EAF Jupyter",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-jupyter.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-jupyter.git"
-    },
-    "markdown-previewer": {
-        "name": "EAF Markdown Previewer",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-markdown-previewer.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-markdown-previewer.git"
-    },
-    "mindmap": {
-        "name": "EAF Mindmap",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-mindmap.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-mindmap.git"
-    },
-    "music-player": {
-        "name": "EAF Music Player",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-music-player.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-music-player.git"
-    },
-    "org-previewer": {
-        "name": "EAF Org Previewer",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-org-previewer.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-org-previewer.git"
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-browser.git",
+        "default_install": "true"
     },
     "pdf-viewer": {
         "name": "EAF PDF Viewer",
+        "desc": "Fastest PDF Viewer in Emacs",
         "type": "app",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-pdf-viewer.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-pdf-viewer.git"
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-pdf-viewer.git",
+        "default_install": "true"
     },
-    "system-monitor": {
-        "name": "EAF System Monitor",
+    "music-player": {
+        "name": "EAF Music Player",
+        "desc": "Music player that supports playlist and audio visualization",
         "type": "app",
         "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-system-monitor.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-system-monitor.git"
-    },
-    "terminal": {
-        "name": "EAF Terminal",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-terminal.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-terminal.git"
-    },
-    "video-player": {
-        "name": "EAF Video Player",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-video-player.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-video-player.git"
-    },
-    "vue-demo": {
-        "name": "EAF Vue Demo",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-vue-demo.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-vue-demo.git"
-    },
-    "netease-cloud-music": {
-        "name": "EAF NetEase Cloud Music",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-netease-cloud-music.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-netease-cloud-music.git"
+        "url": "https://github.com/emacs-eaf/eaf-music-player.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-music-player.git",
+        "default_install": "false"
     },
     "rss-reader": {
         "name": "EAF RSS Reader",
+        "desc": "RSS Reader for Emacs",
         "type": "app",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-rss-reader.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-rss-reader.git"
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-rss-reader.git",
+        "default_install": "false"
+    },
+    "terminal": {
+        "name": "EAF Terminal",
+        "desc": "Full-featured terminal in Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-terminal.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-terminal.git",
+        "default_install": "false"
     },
     "git": {
-        "name": "EAF Git Client",
+        "name": "EAF Git",
+        "desc": "Fully multi-threaded git client for Emacs",
         "type": "app",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-git.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git"
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git",
+        "default_install": "false"
+    },
+    "video-player": {
+        "name": "EAF Video Player",
+        "desc": "Video Player in Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-video-player.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-video-player.git",
+        "default_install": "false"
+    },
+    "image-viewer": {
+        "name": "EAF Image Viewer",
+        "desc": "Dynanmic image viewer",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-image-viewer.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-image-viewer.git",
+        "default_install": "false"
+    },
+    "markdown-previewer": {
+        "name": "EAF Markdown Previewer",
+        "desc": "Efficient Markdown previewer",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-markdown-previewer.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-markdown-previewer.git",
+        "default_install": "false"
+    },
+    "org-previewer": {
+        "name": "EAF Org Previewer",
+        "desc": "Efficient Org-mode previewer",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-org-previewer.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-org-previewer.git",
+        "default_install": "false"
+    },
+    "file-manager": {
+        "name": "EAF File Manager",
+        "desc": "Fully multi-threaded & GUI replacement for Emacs dired-mode",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-file-manager.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-manager.git",
+        "default_install": "false"
+    },
+    "camera": {
+        "name": "EAF Camera",
+        "desc": "Camera in Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-camera.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-camera.git",
+        "default_install": "false"
+    },
+    "mindmap": {
+        "name": "EAF Mindmap",
+        "desc": "Keyboard-driven Mindmap editor",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-mindmap.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-mindmap.git",
+        "default_install": "false"
+    },
+    "netease-cloud-music": {
+        "name": "EAF NetEase Cloud Music",
+        "desc": "Play Netease Cloud Music from Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-netease-cloud-music.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-netease-cloud-music.git",
+        "default_install": "false"
+    },
+    "system-monitor": {
+        "name": "EAF System Monitor",
+        "desc": "Simple system monitor tool",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-system-monitor.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-system-monitor.git",
+        "default_install": "false"
+    },
+    "file-browser": {
+        "name": "EAF File Browser",
+        "desc": "Browse computer files on your phone",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-file-browser.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-browser.git",
+        "default_install": "false"
+    },
+    "file-sender": {
+        "name": "EAF File Sender",
+        "desc": "Share file between Emacs and mobile phone",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-file-sender.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-sender.git",
+        "default_install": "false"
+    },
+    "airshare": {
+        "name": "EAF Airshare",
+        "desc": "Share text between Emacs and your phone",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-airshare.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-airshare.git",
+        "default_install": "false"
+    },
+    "jupyter": {
+        "name": "EAF Jupyter",
+        "desc": "Jupyter client",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-jupyter.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-jupyter.git",
+        "default_install": "false"
     },
     "2048": {
         "name": "EAF 2048",
+        "desc": "An 2048 game in Emacs",
         "type": "app",
         "branch": "master",
-        "url": "https://github.com/metaescape/2048pyqt6.git"
+        "url": "https://github.com/metaescape/2048pyqt6.git",
+        "default_install": "false"
+    },
+    "demo": {
+        "name": "EAF Demo",
+        "desc": "EAF app demo based on PyQt",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-demo.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-demo.git",
+        "default_install": "false"
+    },
+    "vue-demo": {
+        "name": "EAF Vue Demo",
+        "desc": "EAF app demo base on Vue.js",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-vue-demo.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-vue-demo.git",
+        "default_install": "false"
     }
 }

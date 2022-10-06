@@ -341,7 +341,9 @@ def get_new_apps_dict(apps_installed):
             not_installed_apps_dict[app_name] = app_spec_dict
     for app_name, app_spec_dict in not_installed_apps_dict.items():
         indicator = "({}/{})".format(num, len(not_installed_apps_dict))
-        if yes_no("[EAF] " + indicator + " " + app_name + ". Install? (Y/n): ", default_yes=True):
+        prompt = "[EAF] " + indicator + " " + app_spec_dict['name'] + ". " + app_spec_dict['desc'] + " - Install?"
+        install_p = yes_no(prompt + " (Y/n): ", default_yes=True) if app_spec_dict['default_install'] == 'true' else yes_no(prompt + " (y/N): ", default_no=True)
+        if install_p:
             new_apps_dict[app_name] = app_spec_dict
         num = num + 1
     return new_apps_dict
