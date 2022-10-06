@@ -15,7 +15,7 @@ Emacs 的劣势也是因为它太古老了，导致在多线程和图形扩展�
 Emacs Application Framework (EAF)的愿景是在保留 Emacs 古老的黑客文化和庞大的开发者插件生态前提下，通过 EAF 框架扩展 Emacs 的多线程和图形渲染能力，实现 Live In Emacs 的理想。
 
 ## EAF 有哪些功能？
-EAF 是一个可编程扩展的框架，它自带一系列丰富的应用：
+EAF 是一个可编程扩展的框架，它自带一系列丰富的应用，你可以自由选择哪些下载：
 
 | 浏览器                                       | PDF 阅读器 |
 | :--------:                                       | :----:                                                      |
@@ -26,32 +26,28 @@ EAF 是一个可编程扩展的框架，它自带一系列丰富的应用：
 | <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
 |                                                       |                                                       |
 
+- [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于 Chromium 渲染引擎
+- [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Emacs 里面渲染速度最快的 PDF 查看器
+- [Music Player](https://github.com/emacs-eaf/eaf-music-player): 音乐播放器，支持播放列表对齐渲染和实时音频反馈
+- [Video Player](https://github.com/emacs-eaf/eaf-video-player): 基于 Qt 的视频播放器
+- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): 支持实时缩放的图片查看器
+- [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): 新闻阅读器，支持 Html 内容渲染
+- [Terminal](https://github.com/emacs-eaf/eaf-terminal): 支持图形绘制的全功能终端模拟器
+- [Camera](https://github.com/emacs-eaf/eaf-camera): 摄像头程序
+- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown 文档实时预览程序，完美兼容 Github 样式, 支持 Mermaid、 PlantUML、 KaTeX、 MathJax 等内容的渲染
+- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org 文件实时预览程序，支持文件实时预览
+- [Git Client](https://github.com/emacs-eaf/eaf-git): 多线程 Git 客户端
+- [File Manager](https://github.com/emacs-eaf/eaf-file-manager): 多线程文件管理器
+
+... 还有[很多](https://github.com/orgs/emacs-eaf/repositories)！
+
+### EAF在EmacsConf
+
 | EmacsConf 2020: <a href="https://emacsconf.org/2020/talks/34/">用 EAF 扩展 Emacs 图形应用</a> | EmacsConf 2021: <a href="https://emacsconf.org/2021/talks/eaf/">EAF 2021 更新报告</a>                              |
 | :--------:                                            | :----:                                                |
 | [<img src="https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg" width=400>](https://www.youtube.com/watch?v=HK_f8KTuR0s) | [<img src="https://img.youtube.com/vi/bh37zbefZk4/0.jpg" width=400>](https://www.youtube.com/watch?v=bh37zbefZk4) |
 |                                                       |                                                       |
 
-- [Browser](https://github.com/emacs-eaf/eaf-browser): 全功能的网页浏览器，基于 Chromium 渲染引擎
-- [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Emacs 里面渲染速度最快的 PDF 查看器
-- [Terminal](https://github.com/emacs-eaf/eaf-terminal): 支持图形绘制的全功能终端模拟器
-- [Video Player](https://github.com/emacs-eaf/eaf-video-player): 基于 Qt 的视频播放器
-- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown 文档实时预览程序，完美兼容 Github 样式, 支持 Mermaid、 PlantUML、 KaTeX、 MathJax 等内容的渲染
-- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org 文件实时预览程序
-- [Music Player](https://github.com/emacs-eaf/eaf-music-player): 音乐播放器，支持播放列表对齐渲染和实时音频反馈
-- [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): 新闻阅读器，支持 Html 内容渲染
-- [File Manager](https://github.com/emacs-eaf/eaf-file-manager): 双栏文件管理器，支持文件实时预览
-- [Git Client](https://github.com/emacs-eaf/eaf-git): Emacs 中最快的 Git 客户端
-- [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): 全键盘操作的思维导图
-- [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): 在 Emacs 里面运行 Jupyter！
-- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): 支持实时缩放的图片查看器
-- [Camera](https://github.com/emacs-eaf/eaf-camera): 摄像头程序
-- [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): 可视化系统监视器
-- [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): 网易云音乐前端
-- [File Browser](https://github.com/emacs-eaf/eaf-file-browser): 在手机浏览电脑文件
-- [File Sender](https://github.com/emacs-eaf/eaf-file-sender): 分享文件给手机
-- [Airshare](https://github.com/emacs-eaf/eaf-airshare): 分享文字给手机
-- [Demo](https://github.com/emacs-eaf/eaf-demo): EAF 的 Qt 应用实例
-- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF 的 Vue.js 应用实例
 
 ## 安装
 

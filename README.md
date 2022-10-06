@@ -22,7 +22,7 @@ The vision of the Emacs Application Framework (EAF) project is, while fully reta
 
 ## Features
 
-EAF is very extensible. It already comes with a number of useful applications by default:
+EAF is very extensible. It ships a lot of applications by default, you can freely choose anything you find interesting to install:
 
 | Browser                                          | PDF Viewer |
 | :--------:                                       | :----:                                                      |
@@ -33,32 +33,27 @@ EAF is very extensible. It already comes with a number of useful applications by
 | <img src="./img/music-player.png" width="400"> | <img src="./img/file-manager.png" width="400"> |
 |                                                       |                                                       |
 
+- [Browser](https://github.com/emacs-eaf/eaf-browser): A modern, customizable and extensible browser in Emacs
+- [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Fastest PDF Viewer in Emacs
+- [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player that supports playlist and audio visualization
+- [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video Player in Emacs
+- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Dynanmic image viewer
+- [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS Reader in Emacs
+- [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal in Emacs
+- [Camera](https://github.com/emacs-eaf/eaf-camera): Use camera in Emacs
+- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Real-time Markdown previewer
+- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Real-time Org-mode previewer
+- [Git Client](https://github.com/emacs-eaf/eaf-git): Fully multi-threaded git client for Emacs
+- [File Manager](https://github.com/emacs-eaf/eaf-file-manager): Fully multi-threaded replacement for dired-mode
+
+... plus [many more](https://github.com/orgs/emacs-eaf/repositories)!
+
+### EAF in EmacsConf
 | EmacsConf 2020: <a href="https://emacsconf.org/2020/talks/34/">Extend Emacs with EAF</a>                            | EmacsConf 2021: <a href="https://emacsconf.org/2021/talks/eaf/">EAF: A 2021 Update</a>                              |
 | :--------:                                            | :----:                                                |
 | [<img src="https://img.youtube.com/vi/HK_f8KTuR0s/0.jpg" width=400>](https://www.youtube.com/watch?v=HK_f8KTuR0s) | [<img src="https://img.youtube.com/vi/bh37zbefZk4/0.jpg" width=400>](https://www.youtube.com/watch?v=bh37zbefZk4) |
 |                                                       |                                                       |
 
-- [Browser](https://github.com/emacs-eaf/eaf-browser): Full-featured browser
-- [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): The fastest PDF reader
-- [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal
-- [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video player base on Qt
-- [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown document real-time previewer, perfectly compatible with github style, supports the rendering of Mermaid, Plantuml, Katex, Mathjax, etc.
-- [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org file previewer in Emacs
-- [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player, support playlist and an audio visualization
-- [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS reader, rendering html content in expected
-- [File Manager](https://github.com/emacs-eaf/eaf-file-manager): File manager, support file real-time preview
-- [Git Client](https://github.com/emacs-eaf/eaf-git): Fastest git client in Emacs
-- [Mindmap](https://github.com/emacs-eaf/eaf-mindmap): Mindmap with full-featured keyboard operation
-- [Jupyter](https://github.com/emacs-eaf/eaf-jupyter): Jupyter in Emacs
-- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Picture viewer, supporting real-time zoom rotation
-- [Camera](https://github.com/emacs-eaf/eaf-camera): Use camera in Emacs
-- [System Monitor](https://github.com/emacs-eaf/eaf-system-monitor): System monitor base on Vue.js
-- [Netease Cloud Music](https://github.com/emacs-eaf/eaf-netease-cloud-music): EAF frontend for NetEase cloud music
-- [File Browser](https://github.com/emacs-eaf/eaf-file-browser): Browse file in mobile phone
-- [File Sender](https://github.com/emacs-eaf/eaf-file-sender): Share file between Emacs and mobile phone
-- [Airshare](https://github.com/emacs-eaf/eaf-airshare): Share text between Emacs and mobile phone
-- [Demo](https://github.com/emacs-eaf/eaf-demo): EAF Application demo base on Qt
-- [Vue Demo](https://github.com/emacs-eaf/eaf-vue-demo): EAF Application demo base on Vue.js
 
 ## Install
 

@@ -35,33 +35,6 @@
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-music-player.git",
         "default_install": "false"
     },
-    "rss-reader": {
-        "name": "EAF RSS Reader",
-        "desc": "RSS Reader for Emacs",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-rss-reader.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-rss-reader.git",
-        "default_install": "false"
-    },
-    "terminal": {
-        "name": "EAF Terminal",
-        "desc": "Full-featured terminal in Emacs",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-terminal.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-terminal.git",
-        "default_install": "false"
-    },
-    "git": {
-        "name": "EAF Git",
-        "desc": "Fully multi-threaded git client for Emacs",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-git.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git",
-        "default_install": "false"
-    },
     "video-player": {
         "name": "EAF Video Player",
         "desc": "Video Player in Emacs",
@@ -80,9 +53,27 @@
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-image-viewer.git",
         "default_install": "false"
     },
+    "rss-reader": {
+        "name": "EAF RSS Reader",
+        "desc": "RSS Reader in Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-rss-reader.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-rss-reader.git",
+        "default_install": "false"
+    },
+    "terminal": {
+        "name": "EAF Terminal",
+        "desc": "Full-featured terminal in Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-terminal.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-terminal.git",
+        "default_install": "false"
+    },
     "markdown-previewer": {
         "name": "EAF Markdown Previewer",
-        "desc": "Efficient Markdown previewer",
+        "desc": "Real-time Markdown previewer",
         "type": "app",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-markdown-previewer.git",
@@ -91,20 +82,11 @@
     },
     "org-previewer": {
         "name": "EAF Org Previewer",
-        "desc": "Efficient Org-mode previewer",
+        "desc": "Real-time Org-mode previewer",
         "type": "app",
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-org-previewer.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-org-previewer.git",
-        "default_install": "false"
-    },
-    "file-manager": {
-        "name": "EAF File Manager",
-        "desc": "Fully multi-threaded & GUI replacement for Emacs dired-mode",
-        "type": "app",
-        "branch": "master",
-        "url": "https://github.com/emacs-eaf/eaf-file-manager.git",
-        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-manager.git",
         "default_install": "false"
     },
     "camera": {
@@ -114,6 +96,24 @@
         "branch": "master",
         "url": "https://github.com/emacs-eaf/eaf-camera.git",
         "mirror_url": "https://gitee.com/emacs-eaf/eaf-camera.git",
+        "default_install": "false"
+    },
+    "git": {
+        "name": "EAF Git",
+        "desc": "Fully multi-threaded git client for Emacs",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-git.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-git.git",
+        "default_install": "false"
+    },
+    "file-manager": {
+        "name": "EAF File Manager",
+        "desc": "Fully multi-threaded replacement for dired-mode",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-file-manager.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-file-manager.git",
         "default_install": "false"
     },
     "mindmap": {
