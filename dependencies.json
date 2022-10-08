@@ -38,11 +38,11 @@
       "sexpdata",
       "tld",
       "lxml",
-      "PyQt6",
-      "PyQt6-Qt6",
+      "PyQt6==6.3.1",
+      "PyQt6-Qt6==6.3.1",
       "PyQt6-sip",
-      "PyQt6-WebEngine",
-      "PyQt6-WebEngine-Qt6"
+      "PyQt6-WebEngine==6.3.1",
+      "PyQt6-WebEngine-Qt6==6.3.1"
     ],
     "win32": [
       "epc",
@@ -50,11 +50,11 @@
       "tld",
       "lxml",
       "pygetwindow",
-      "PyQt6",
-      "PyQt6-Qt6",
+      "PyQt6==6.3.1",
+      "PyQt6-Qt6==6.3.1",
       "PyQt6-sip",
-      "PyQt6-WebEngine",
-      "PyQt6-WebEngine-Qt6"
+      "PyQt6-WebEngine==6.3.1",
+      "PyQt6-WebEngine-Qt6==6.3.1"
     ],
     "darwin": [
       "epc",
@@ -62,11 +62,11 @@
       "tld",
       "lxml",
       "mac-app-frontmost",
-      "PyQt6",
-      "PyQt6-Qt6",
+      "PyQt6==6.3.1",
+      "PyQt6-Qt6==6.3.1",
       "PyQt6-sip",
-      "PyQt6-WebEngine",
-      "PyQt6-WebEngine-Qt6"
+      "PyQt6-WebEngine==6.3.1",
+      "PyQt6-WebEngine-Qt6==6.3.1"
     ]
   }
 }
