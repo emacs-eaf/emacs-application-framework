@@ -41,6 +41,7 @@ parser.add_argument("--use-gitee", action="store_true",
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if sys.platform == "win32" else "npm"
+PIP_CMD = "pip3" if which("pip3") else "pip" # mac only have pip3, so we need use pip3 instead pip 
 
 class bcolors:
     HEADER = '\033[95m'
@@ -141,10 +142,10 @@ def install_sys_deps(distro: str, deps_list):
 
 def install_py_deps(deps_list):
     if sys.prefix == sys.base_prefix:
-        command = ['pip', 'install', '--user', '-U']
+        command = [PIP_CMD, 'install', '--user', '-U']
     else:
         # if running on a virtual env, --user option is not valid.
-        command = ['pip', 'install', '-U']
+        command = [PIP_CMD, 'install', '-U']
     command.extend(deps_list)
     try:
         run_command(command)
