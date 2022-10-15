@@ -649,11 +649,19 @@ A hashtable, key is url and value is title.")
 
     ;; Make sure EAF application scale support 4k screen.
     (setenv "QT_SCALE_FACTOR" "1")
-    (setenv "QT_FONT_DPI" "96")
+
+    ;; In wayland, we use 
+    (cond
+     ((eaf-emacs-running-in-wayland-native)
+      (setenv "QT_FONT_DPI" (if (= (frame-scale-factor) 2) "192" "96")))
+     (t
+      (setenv "QT_FONT_DPI" "96")))
+
 
     ;; Use XCB for input event transfer.
     ;; Only enable this option on Linux platform.
-    (when (eq system-type 'gnu/linux)
+    (when (and (eq system-type 'gnu/linux)
+               (not (eaf-emacs-running-in-wayland-native)))
       (setenv "QT_QPA_PLATFORM" "xcb"))
 
     (setq process-environment
@@ -898,24 +906,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                        (cond
-                         ;; If command is normal symbol, just call it directly.
-                         ((symbolp fun)
-                          fun)
+                                  (cond
+                                   ;; If command is normal symbol, just call it directly.
+                                   ((symbolp fun)
+                                    fun)
 
-                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                         ((string-match "-" fun)
-                          (intern fun))
+                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                                   ((string-match "-" fun)
+                                    (intern fun))
 
-                         ;; If command prefix with js_, call JavaScript function directly.
-                         ((string-prefix-p "js_" fun)
-                          (eaf--make-js-proxy-function fun))
+                                   ;; If command prefix with js_, call JavaScript function directly.
+                                   ((string-prefix-p "js_" fun)
+                                    (eaf--make-js-proxy-function fun))
 
-                         ;; If command is not built-in function and not include char '-'
-                         ;; it's command in python side, build elisp proxy function to call it.
-                         (t
-                          (eaf--make-py-proxy-function fun))
-                         ))
+                                   ;; If command is not built-in function and not include char '-'
+                                   ;; it's command in python side, build elisp proxy function to call it.
+                                   (t
+                                    (eaf--make-py-proxy-function fun))
+                                   ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
