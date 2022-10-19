@@ -1127,9 +1127,12 @@ kxsgtn/ignore_spurious_focus_events_for/")
      (t
       (defun eaf--wayland-focus-change ()
         "Manage Emacs's focus change."
-        (if (frame-focus-state)
-            (eaf-call-async "show_top_views")
-          (eaf-call-async "hide_top_views")))
+        ;; ignore errors related to
+        ;; (wrong-type-argument eaf-epc-manager nil)
+        (ignore-errors
+          (if (frame-focus-state)
+              (eaf-call-async "show_top_views")
+            (eaf-call-async "hide_top_views"))))
       (add-function :after after-focus-change-function #'eaf--wayland-focus-change)
       (add-hook 'eaf-stop-process-hook (lambda () (remove-function after-focus-change-function #'eaf--wayland-focus-change)))
       ))))
