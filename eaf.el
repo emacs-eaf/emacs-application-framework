@@ -1157,6 +1157,10 @@ kxsgtn/ignore_spurious_focus_events_for/")
                   (let* ((window-allocation (eaf-get-window-allocation window))
                          (window-divider-right-padding (if window-divider-mode window-divider-default-right-width 0))
                          (window-divider-bottom-padding (if window-divider-mode window-divider-default-bottom-width 0))
+                         (titlebar-height (eaf--get-titlebar-height))
+                         (frame-coordinate (eaf--get-frame-coordinate))
+                         (frame-x (car frame-coordinate))
+                         (frame-y (cadr frame-coordinate))
                          (x (+ (eaf--buffer-x-position-adjust frame) (nth 0 window-allocation)))
                          (y (+ (eaf--buffer-y-postion-adjust frame) (nth 1 window-allocation)))
                          (w (nth 2 window-allocation))
@@ -1164,12 +1168,30 @@ kxsgtn/ignore_spurious_focus_events_for/")
                     (push (format "%s:%s:%s:%s:%s:%s"
                                   eaf--buffer-id
                                   (eaf-get-emacs-xid frame)
-                                  x
-                                  y
+                                  (+ x frame-x)
+                                  (+ y titlebar-height frame-y)
                                   (- w window-divider-right-padding)
                                   (- h window-divider-bottom-padding))
                           view-infos)))))))
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
+
+(defun eaf--get-frame-coordinate ()
+  (cond ((eaf-emacs-running-in-wayland-native)
+         (let* ((coordinate (mapcar #'string-to-number
+                                    (string-split
+                                     (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
+                                     ",")))
+                (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
+                (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
+           (list frame-x frame-y)))
+        (t
+         (list 0 0))))
+
+(defun eaf--get-titlebar-height ()
+  (let ((is-fullscreen-p (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))))
+    (if is-fullscreen-p
+        0
+      32)))
 
 (defun eaf--get-eaf-buffers ()
   "A function that return a list of EAF buffers."
