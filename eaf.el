@@ -650,7 +650,7 @@ A hashtable, key is url and value is title.")
     ;; Make sure EAF application scale support 4k screen.
     (setenv "QT_SCALE_FACTOR" "1")
 
-    ;; In wayland, we use 
+    ;; In wayland, we use
     (cond
      ((eaf-emacs-running-in-wayland-native)
       (setenv "QT_FONT_DPI" (if (= (frame-scale-factor) 2) "192" "96")))
@@ -1023,9 +1023,7 @@ provide at least one way to let everyone experience EAF. ;)"
       ))
 
 (defun eaf-emacs-running-in-wayland-native ()
-  (and (eq window-system 'pgtk)
-       (fboundp 'pgtk-backend-display-class)
-       (string-equal (pgtk-backend-display-class) "GdkWaylandDisplay")))
+  (eq window-system 'pgtk))
 
 (eval-when-compile
   (when (eaf-emacs-not-use-reparent-technology)
