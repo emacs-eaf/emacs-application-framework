@@ -41,7 +41,7 @@ EAF 是一个可编程扩展的框架，它自带一系列丰富的应用，你�
 
 ... 还有[很多](https://github.com/orgs/emacs-eaf/repositories)！
 
-### EAF在EmacsConf
+### EAF 在 EmacsConf
 
 | EmacsConf 2020: <a href="https://emacsconf.org/2020/talks/34/">用 EAF 扩展 Emacs 图形应用</a> | EmacsConf 2021: <a href="https://emacsconf.org/2021/talks/eaf/">EAF 2021 更新报告</a>                              |
 | :--------:                                            | :----:                                                |
@@ -70,6 +70,8 @@ chmod +x ./install-eaf.py
 ```
 
 `install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
+
+如果你使用 Wayland 环境， 你需要执行命令 `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` 并在 Gnome3 中激活 `eaf-wayland@emacs-eaf.org` 这个 Gnome-Shell 插件。
 
 #### 3. 加载 EAF 核心
 
