@@ -1176,11 +1176,15 @@ kxsgtn/ignore_spurious_focus_events_for/")
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
 
 (defun eaf--get-frame-coordinate ()
+  "We need fetch Emacs coordinate to adjust coordinate of EAF if it running on system not support cross-process reparent technology.
+
+Such as, wayland native, macOS etc."
   (cond ((eaf-emacs-running-in-wayland-native)
          (let* ((coordinate (mapcar #'string-to-number
                                     (string-split
                                      (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
                                      ",")))
+                ;; HiDPI need except by `frame-scale-factor'.
                 (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
                 (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
            (list frame-x frame-y)))
@@ -1188,9 +1192,11 @@ kxsgtn/ignore_spurious_focus_events_for/")
          (list 0 0))))
 
 (defun eaf--get-titlebar-height ()
+  "We need fetch height of window titlebar to adjust y coordinate of EAF when Emacs is not fullscreen."
   (let ((is-fullscreen-p (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))))
     (if is-fullscreen-p
         0
+      ;; `32' is titlebar of Gnome3, we need change this value in other environment.
       32)))
 
 (defun eaf--get-eaf-buffers ()
