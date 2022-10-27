@@ -906,24 +906,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                                  (cond
-                                   ;; If command is normal symbol, just call it directly.
-                                   ((symbolp fun)
-                                    fun)
+                        (cond
+                         ;; If command is normal symbol, just call it directly.
+                         ((symbolp fun)
+                          fun)
 
-                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                                   ((string-match "-" fun)
-                                    (intern fun))
+                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                         ((string-match "-" fun)
+                          (intern fun))
 
-                                   ;; If command prefix with js_, call JavaScript function directly.
-                                   ((string-prefix-p "js_" fun)
-                                    (eaf--make-js-proxy-function fun))
+                         ;; If command prefix with js_, call JavaScript function directly.
+                         ((string-prefix-p "js_" fun)
+                          (eaf--make-js-proxy-function fun))
 
-                                   ;; If command is not built-in function and not include char '-'
-                                   ;; it's command in python side, build elisp proxy function to call it.
-                                   (t
-                                    (eaf--make-py-proxy-function fun))
-                                   ))
+                         ;; If command is not built-in function and not include char '-'
+                         ;; it's command in python side, build elisp proxy function to call it.
+                         (t
+                          (eaf--make-py-proxy-function fun))
+                         ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
@@ -1193,11 +1193,14 @@ Such as, wayland native, macOS etc."
 
 (defun eaf--get-titlebar-height ()
   "We need fetch height of window titlebar to adjust y coordinate of EAF when Emacs is not fullscreen."
-  (let ((is-fullscreen-p (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))))
-    (if is-fullscreen-p
-        0
-      ;; `32' is titlebar of Gnome3, we need change this value in other environment.
-      32)))
+  (cond ((eaf-emacs-running-in-wayland-native)
+         (let ((is-fullscreen-p (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))))
+           (if is-fullscreen-p
+               0
+             ;; `32' is titlebar of Gnome3, we need change this value in other environment.
+             32)))
+        (t
+         0)))
 
 (defun eaf--get-eaf-buffers ()
   "A function that return a list of EAF buffers."
