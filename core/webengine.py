@@ -930,7 +930,8 @@ class BrowserBuffer(Buffer):
         return False
 
     def dark_mode_js_load(self, progress):
-        if self.dark_mode_is_enabled() and self.buffer_widget.dark_mode_js != None and progress < 100:
+        # is_dark_mode_enabled use for toggle dark mode.
+        if self.is_dark_mode_enabled and self.dark_mode_is_enabled() and self.buffer_widget.dark_mode_js != None and progress < 100:
             self.buffer_widget.eval_js(self.buffer_widget.dark_mode_js)
 
     def handle_fullscreen_request(self, request):
