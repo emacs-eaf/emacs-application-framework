@@ -483,19 +483,21 @@ class FetchMarkerInputThread(QThread):
             ## so we need to call fetch_marker_callback multiple times.
             if self.markers is None or len(self.markers) == 0:
                 self.markers = self.fetch_marker_callback()
-            minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
-
-            marker_input_quit = minibuffer_input and len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
-            marker_input_finish = minibuffer_input in self.markers
-
-            if marker_input_quit:
-                self.running_flag = False
-                eval_in_emacs('exit-minibuffer', [])
-                message_to_emacs("Quit marker selection.")
-            elif marker_input_finish:
-                self.running_flag = False
-                eval_in_emacs('exit-minibuffer', [])
-                message_to_emacs("Marker selected.")
+                
+            if self.markers != None:
+                minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
+                
+                marker_input_quit = minibuffer_input and len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
+                marker_input_finish = minibuffer_input in self.markers
+                
+                if marker_input_quit:
+                    self.running_flag = False
+                    eval_in_emacs('exit-minibuffer', [])
+                    message_to_emacs("Quit marker selection.")
+                elif marker_input_finish:
+                    self.running_flag = False
+                    eval_in_emacs('exit-minibuffer', [])
+                    message_to_emacs("Marker selected.")
 
             import time
             time.sleep(0.1)
