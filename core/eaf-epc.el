@@ -299,7 +299,7 @@ channel : Event channels for incoming messages."
 return eaf-epc-connection object."
   (eaf-epc-log ">> Connection start: %s:%s" host port)
   (let* ((connection-id (eaf-epc-uid))
-         (connection-name (format "epc con %s" connection-id))
+         (connection-name (format "eaf-epc con %s" connection-id))
          (connection-buf (eaf-epc-make-procbuf (format "*%s*" connection-name)))
          (connection-process
           (open-network-stream connection-name connection-buf host port))
@@ -689,7 +689,7 @@ This variable is used for the management purpose.")
   "[internal] Initialize the process and return eaf-epc-manager object."
   (eaf-epc-log "EAF-EPC-SERVER- >> Connection accept: %S" process)
   (let* ((connection-id (eaf-epc-uid))
-         (connection-name (format "epc con %s" connection-id))
+         (connection-name (format "eaf-epc con %s" connection-id))
          (channel (list connection-name nil))
          (connection (make-eaf-epc-connection
                       :name connection-name
@@ -741,7 +741,7 @@ This variable is used for the management purpose.")
   "Start TCP Server and return the main process object."
   (let*
       ((connect-function connect-function)
-       (name (format "EPC Server %s" (eaf-epc-uid)))
+       (name (format "EAF EPC Server %s" (eaf-epc-uid)))
        (buf (eaf-epc-make-procbuf (format " *%s*" name)))
        (main-process
         (make-network-process
