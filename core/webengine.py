@@ -824,6 +824,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.windowCloseRequested.connect(self.close_buffer)
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
+        self.buffer_widget.web_page.featurePermissionRequested.connect(self.permission_requested) # enable camera permission
         self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
 
         self.settings = self.buffer_widget.settings()
@@ -899,6 +900,9 @@ class BrowserBuffer(Buffer):
         if not args[-1].endswith('value updates in HTML will be broken!'):
             print("".join(list(map(str, args[2:]))))
 
+    def permission_requested(self, frame, feature):
+        self.buffer_widget.web_page.setFeaturePermission(frame, feature, QWebEnginePage.PermissionPolicy.PermissionGrantedByUser)
+            
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
         if success:
