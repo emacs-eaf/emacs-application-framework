@@ -113,7 +113,6 @@ You can use below code to load applications `browser` and `pdf-viewer` that you 
 ```Elisp
 (require 'eaf-browser)
 (require 'eaf-pdf-viewer)
-...
 ```
 
 #### 5. Hooray!
