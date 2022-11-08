@@ -488,6 +488,7 @@ Turn off this option will improve EAF new page creation speed."
     "Xpra"                              ;Windows WSL
     "EXWM"                              ;EXWM
     "Xfwm4"                             ;Xfce
+    "wlroots wm"                        ;hyprland(may work in other Wayland compositors based on wlroots)
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 
