@@ -433,7 +433,7 @@ def install_app_deps(distro, deps_dict):
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
 
-    print("\n[EAF] Please ensure the following are added to your init.el:")
+    print("\n[EAF] Please always ensure the following are added to your init.el:")
     print_sample_config(app_dir)
 
     global install_failed_sys
@@ -441,18 +441,20 @@ def install_app_deps(distro, deps_dict):
     global install_failed_apps
     if len(install_failed_sys) > 0:
         install_failed_sys = list(set(install_failed_sys))
-        print(bcolors.WARNING + "\n[EAF] The following system dependencies failed to install, please try again manually!" + bcolors.ENDC)
+        print(bcolors.WARNING + "\n[EAF] The following system dependencies failed to install:" + bcolors.ENDC)
         for dep in install_failed_sys: print(bcolors.WARNING + dep + bcolors.ENDC)
     if len(install_failed_pys) > 0:
         install_failed_pys = list(set(install_failed_pys))
-        print(bcolors.WARNING + "\n[EAF] The following Python dependencies failed to install, please try again manually!" + bcolors.ENDC)
+        print(bcolors.WARNING + "\n[EAF] The following Python dependencies failed to install:" + bcolors.ENDC)
         for dep in install_failed_pys: print(bcolors.WARNING + dep + bcolors.ENDC)
     if len(install_failed_apps) > 0:
         install_failed_apps = list(set(install_failed_apps))
-        print(bcolors.WARNING + "\n[EAF] The following applications failed to install at the location, please run ./install-eaf.py again with `--force`!" + bcolors.ENDC)
+        print(bcolors.WARNING + "\n[EAF] The following applications failed to install:" + bcolors.ENDC)
         for app in install_failed_apps: print(bcolors.WARNING + app + bcolors.ENDC)
     if len(install_failed_sys) + len(install_failed_pys) + len(install_failed_apps) == 0:
-        print("[EAF] Successfully installed selected applications and their dependencies")
+        print("[EAF] Successfully installed selected applications and their dependencies:")
+    else:
+        print("[EAF] Please rerun ./install-eaf.py with `--force`, or install them manually!")
 
 
 def main():
