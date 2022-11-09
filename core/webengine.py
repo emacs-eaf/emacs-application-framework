@@ -72,6 +72,7 @@ class BrowserView(QWebEngineView):
 
         self.marker_js_raw = None
         self.get_focus_text_js = None
+        self.get_next_page_url_js = None
         self.set_focus_text_raw = None
         self.clear_focus_js = None
         self.dark_mode_js = None
@@ -502,6 +503,14 @@ class BrowserView(QWebEngineView):
             self.buffer.send_key(self.buffer.current_event_string)
         else:
             self.scroll_up_page()
+            
+            # Try scroll to next page if reach bottom, such as, access google.com
+            if self.get_next_page_url_js == None:
+                self.get_next_page_url_js = self.read_js_content("get_next_page_url.js")
+                
+            next_page_url = self.execute_js(self.get_next_page_url_js)
+            if next_page_url and next_page_url != "":
+                self.buffer.change_url(next_page_url)
 
     @interactive
     def get_selection_text(self):
