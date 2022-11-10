@@ -21,6 +21,15 @@
       if (currentPageIndex < pageUrls.length - 2) {
         return pageUrls[currentPageIndex + 1];
       }
+    } else if (pageUrl.startsWith("https://www.baidu.com")) {
+      var pageIndexes = Array.from(document.querySelectorAll("#page")[0].children[0].children);
+      var pageUrls = pageIndexes.map(page => page.tagName);
+      
+      var currentPageIndex = pageUrls.lastIndexOf("STRONG");
+      
+      if (currentPageIndex < pageUrls.length - 2) {
+        return pageIndexes[currentPageIndex + 1].href;
+      }
     }
   }
   
