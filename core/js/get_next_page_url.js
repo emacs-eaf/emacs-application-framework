@@ -9,10 +9,17 @@
       
       var currentPageIndex = pageTypes.lastIndexOf("SPAN");
       
-      console.log(pageTypes, currentPageIndex, pages.length)
-
       if (currentPageIndex < pages.length - 2) {
         return pages[currentPageIndex + 1].children[0].href;
+      }
+    } else if (pageUrl.startsWith("https://www.bing.com")) {
+      var pageIndexes = Array.from(document.querySelectorAll(".sb_bp"));
+      var pageUrls = pageIndexes.map(page => page.href);
+      
+      var currentPageIndex = pageUrls.lastIndexOf("");
+      
+      if (currentPageIndex < pageUrls.length - 2) {
+        return pageUrls[currentPageIndex + 1];
       }
     }
   }
