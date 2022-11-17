@@ -488,7 +488,7 @@ Turn off this option will improve EAF new page creation speed."
     "Xpra"                              ;Windows WSL
     "EXWM"                              ;EXWM
     "Xfwm4"                             ;Xfce
-    "wlroots wm"                        ;hyprland(may work in other Wayland compositors based on wlroots)
+    "wlroots wm" ;hyprland(may work in other Wayland compositors based on wlroots)
     )
   "Set mouse cursor to frame bottom in these wms, to make EAF receive input event.
 
@@ -632,45 +632,48 @@ A hashtable, key is url and value is title.")
       (eaf-call-sync "get_emacs_wsl_window_id")
     (frame-parameter frame 'window-id)))
 
-(defun eaf--follow-system-dpi ()
+(defun eaf--build-process-environment ()
   ;; Turn on DEBUG info when `eaf-enable-debug' is non-nil.
-  (when eaf-enable-debug
-    (setenv "QT_DEBUG_PLUGINS" "1"))
+  (let ((environments (seq-filter
+                       (lambda (var)
+                         (and (not (string-match-p "QT_SCALE_FACTOR" var))
+                              (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
+                       process-environment)))
+    (when eaf-enable-debug
+      (add-to-list 'environments "QT_DEBUG_PLUGINS=1" t))
 
-  (unless (eq system-type 'darwin)
-    (cond
-     ((eaf-emacs-running-in-wayland-native)
-      ;; Wayland native need to set QT_AUTO_SCREEN_SCALE_FACTOR=1
-      ;; otherwise Qt window only have half of screen.
-      (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "1"))
-     (t
-      ;; XWayland need to set QT_AUTO_SCREEN_SCALE_FACTOR=0
-      ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
-      (setenv "QT_AUTO_SCREEN_SCALE_FACTOR" "0")))
+    (unless (eq system-type 'darwin)
+      (add-to-list 'environments
+                   (cond
+                    ((eaf-emacs-running-in-wayland-native)
+                     ;; Wayland native need to set QT_AUTO_SCREEN_SCALE_FACTOR=1
+                     ;; otherwise Qt window only have half of screen.
+                     "QT_AUTO_SCREEN_SCALE_FACTOR=1")
+                    (t
+                     ;; XWayland need to set QT_AUTO_SCREEN_SCALE_FACTOR=0
+                     ;; otherwise Qt which explicitly force high DPI enabling get scaled TWICE.
+                     "QT_AUTO_SCREEN_SCALE_FACTOR=0"))
+                   t)
 
-    ;; Make sure EAF application scale support 4k screen.
-    (setenv "QT_SCALE_FACTOR" "1")
+      ;; Make sure EAF application scale support 4k screen.
+      (add-to-list 'environments "QT_SCALE_FACTOR=1" t)
 
-    ;; In wayland, we use
-    (cond
-     ((eaf-emacs-running-in-wayland-native)
-      (setenv "QT_FONT_DPI" (if (= (frame-scale-factor) 2) "192" "96")))
-     (t
-      (setenv "QT_FONT_DPI" "96")))
+      ;; In wayland, we use
+      (add-to-list 'environments
+                   (cond
+                    ((eaf-emacs-running-in-wayland-native)
+                     (format "QT_FONT_DPI=%s" (if (= (frame-scale-factor) 2) "192" "96")))
+                    (t
+                     "QT_FONT_DPI=96"))
+                   t)
 
+      ;; Use XCB for input event transfer.
+      ;; Only enable this option on Linux platform.
+      (when (and (eq system-type 'gnu/linux)
+                 (not (eaf-emacs-running-in-wayland-native)))
+        (add-to-list 'environments "QT_QPA_PLATFORM=xcb" t))
 
-    ;; Use XCB for input event transfer.
-    ;; Only enable this option on Linux platform.
-    (when (and (eq system-type 'gnu/linux)
-               (not (eaf-emacs-running-in-wayland-native)))
-      (setenv "QT_QPA_PLATFORM" "xcb"))
-
-    (setq process-environment
-          (seq-filter
-           (lambda (var)
-             (and (not (string-match-p "QT_SCALE_FACTOR" var))
-                  (not (string-match-p "QT_SCREEN_SCALE_FACTOR" var))))
-           process-environment))))
+      environments)))
 
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
@@ -681,10 +684,11 @@ A hashtable, key is url and value is title.")
                       (list eaf-python-file)
                       (eaf-get-render-size)
                       (list (number-to-string eaf-server-port))
-                      )))
+                      ))
+           environments)
 
       ;; Folow system DPI.
-      (eaf--follow-system-dpi)
+      (setq environments (eaf--build-process-environment))
 
       ;; Set process arguments.
       (if eaf-enable-debug
@@ -695,7 +699,8 @@ A hashtable, key is url and value is title.")
         (setq eaf-internal-process-args eaf-args))
 
       ;; Start python process.
-      (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p))))
+      (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p)))
+            (process-environment environments))
         (setq eaf-internal-process
               (if (and (eq system-type 'darwin)
                        eaf--mac-enable-rosetta)
