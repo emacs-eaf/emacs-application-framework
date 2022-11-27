@@ -33,7 +33,7 @@ class View(QWidget):
 
         # Init widget attributes.
         if get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
-            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.BypassWindowManagerHint)
+            self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowOverridesSystemGestures | Qt.WindowType.BypassWindowManagerHint)
         elif get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.NoDropShadowWindowHint)
         else:

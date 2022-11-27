@@ -1026,88 +1026,75 @@ provide at least one way to let everyone experience EAF. ;)"
 
 (eval-when-compile
   (when (eaf-emacs-not-use-reparent-technology)
-    (cond
-     ((eq system-type 'darwin)
+    (defvar eaf--topmost-switch-to-python nil
+      "Record if Emacs should switch to Python process.")
 
-      (defvar eaf--mac-switch-to-python nil
-        "Record if Emacs should switch to Python process.")
+    (defun eaf--topmost-focus-change ()
+      "Manage Emacs's focus change."
+      (let ((front (cond ((eq system-type 'darwin)
+                          (shell-command-to-string "app-frontmost --name"))
+                         (t
+                          (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000)))))
+        (cond
+         ((member front (list "Python\n" "python3\n" "python3"))
+          (setq eaf--topmost-switch-to-python t))
+         ((member front (list "Emacs\n" "emacs"))
+          (if eaf--topmost-switch-to-python
+              (setq eaf--topmost-switch-to-python nil)
+            (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
+         (t (eaf--topmost-focus-out)))))
 
-      (defun eaf--mac-focus-change ()
-        "Manage Emacs's focus change."
-        (let ((front (shell-command-to-string "app-frontmost --name")))
-          (cond
-           ((member front (list "Python\n" "python3\n"))
-            (setq eaf--mac-switch-to-python t))
-           ((string= "Emacs\n" front)
-            (if eaf--mac-switch-to-python
-                (setq eaf--mac-switch-to-python nil)
-              (run-with-timer 0.1 nil #'eaf--mac-focus-update)))
-           (t (eaf--mac-focus-out)))))
+    (defun eaf--topmost-focus-update ()
+      "Hide all eaf buffers, and then display new eaf buffers at front."
+      (eaf--topmost-focus-out)
+      (when (frame-focus-state)
+        (dolist (window (window-list (selected-frame)))
+          (with-current-buffer (window-buffer window)
+            (when (derived-mode-p 'eaf-mode)
+              (eaf-call-async "show_buffer_view" eaf--buffer-id))))))
 
-      (defun eaf--mac-focus-update ()
-        "Hide all eaf buffers, and then display new eaf buffers at front."
-        (eaf--mac-focus-out)
-        (when (frame-focus-state)
-          (dolist (window (window-list (selected-frame)))
-            (with-current-buffer (window-buffer window)
-              (when (derived-mode-p 'eaf-mode)
-                (eaf-call-async "show_buffer_view" eaf--buffer-id))))))
+    (defun eaf--topmost-focus-out ()
+      "Prepare the screenshot and hide all eaf buffers."
+      (dolist (frame (frame-list))
+        (dolist (window (window-list frame))
+          (with-current-buffer (window-buffer window)
+            (when (derived-mode-p 'eaf-mode)
+              (eaf--clip-image window)
+              (eaf-call-sync "hide_buffer_view" eaf--buffer-id))))))
 
-      (defun eaf--mac-focus-out ()
-        "Prepare the screenshot and hide all eaf buffers."
-        (dolist (frame (frame-list))
-          (dolist (window (window-list frame))
-            (with-current-buffer (window-buffer window)
-              (when (derived-mode-p 'eaf-mode)
-                (eaf--clip-image window)
-                (eaf-call-sync "hide_buffer_view" eaf--buffer-id))))))
+    (add-to-list 'move-frame-functions #'eaf-monitor-configuration-change)
 
-      (add-to-list 'move-frame-functions #'eaf-monitor-configuration-change)
+    (defun eaf--clip-image (window)
+      "Clip the image of the qwidget."
+      (eaf-call-sync "clip_buffer" eaf--buffer-id)
+      (eaf--display-image window))
 
-      (defun eaf--clip-image (window)
-        "Clip the image of the qwidget."
-        (eaf-call-sync "clip_buffer" eaf--buffer-id)
-        (eaf--display-image window))
+    (defun eaf--display-image (window)
+      "Display the image of qwidget in eaf buffer."
+      (clear-image-cache)
+      (erase-buffer)
+      (insert-image (create-image (concat eaf-config-location eaf--buffer-id ".jpeg") 'jpeg nil
+                                  :width (window-pixel-width window)
+                                  :height (window-pixel-height window))))
 
-      (defun eaf--display-image (window)
-        "Display the image of qwidget in eaf buffer."
-        (clear-image-cache)
-        (erase-buffer)
-        (insert-image (create-image (concat eaf-config-location eaf--buffer-id ".jpeg") 'jpeg nil
-                                    :width (window-pixel-width window)
-                                    :height (window-pixel-height window))))
+    (defun eaf--topmost-delete-frame-handler (frame)
+      (eaf--topmost-focus-out))
 
-      (defun eaf--mac-delete-frame-handler (frame)
-        (eaf--mac-focus-out))
+    (defun eaf--topmost-clear-images-cache-handler ()
+      "Clear all images when quitting Emacs."
+      (shell-command-to-string (concat "rm " eaf-config-location "*.jpeg")))
 
-      (defun eaf--mac-clear-images-cache-handler ()
-        "Clear all images when quitting Emacs."
-        (shell-command-to-string (concat "rm " eaf-config-location "*.jpeg")))
+    (add-hook 'kill-emacs-hook #'eaf--topmost-clear-images-cache-handler)
 
-      (add-hook 'kill-emacs-hook #'eaf--mac-clear-images-cache-handler)
+    (add-function :after after-focus-change-function #'eaf--topmost-focus-change)
 
-      (add-function :after after-focus-change-function #'eaf--mac-focus-change)
+    (add-hook 'eaf-stop-process-hook
+              (lambda ()
+                (remove-function after-focus-change-function #'eaf--topmost-focus-change)
+                (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)))
 
-      (add-hook 'eaf-stop-process-hook
-                (lambda ()
-                  (remove-function after-focus-change-function #'eaf--mac-focus-change)
-                  (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)))
-
-      (add-to-list 'delete-frame-functions #'eaf--mac-delete-frame-handler))
-
-     (t
-      (defun eaf--wayland-focus-change ()
-        "Manage Emacs's focus change."
-        ;; ignore errors related to
-        ;; (wrong-type-argument eaf-epc-manager nil)
-        (ignore-errors
-          (if (frame-focus-state)
-              (eaf-call-async "show_top_views")
-            (eaf-call-async "hide_top_views")
-            )))
-      (add-function :after after-focus-change-function #'eaf--wayland-focus-change)
-      (add-hook 'eaf-stop-process-hook (lambda () (remove-function after-focus-change-function #'eaf--wayland-focus-change)))
-      ))))
+    (add-to-list 'delete-frame-functions #'eaf--topmost-delete-frame-handler)
+    ))
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
