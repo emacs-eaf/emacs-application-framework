@@ -158,3 +158,6 @@ class View(QWidget):
     def destroy_view(self):
         # print("Destroy: ", self.buffer.url)
         self.destroy()
+
+    def screen_shot(self):
+        return self.grab()
