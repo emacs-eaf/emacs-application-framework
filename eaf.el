@@ -1035,101 +1035,73 @@ provide at least one way to let everyone experience EAF. ;)"
   (when (eaf-emacs-not-use-reparent-technology)
     (cond
      ((eq system-type 'darwin)
-      (defcustom eaf--mac-safe-focus-change t
-        "Whether to verify the active application on Emacs frame focus change.
-
-Only set this to nil if you do not use the mouse inside EAF buffers.
-The benefit of setting this to nil is that application switching
-is a lot faster but could be buggy."
-        :type 'boolean)
 
       (defvar eaf--mac-switch-to-python nil
         "Record if Emacs should switch to Python process.")
 
-      (defvar eaf--mac-has-focus t
-        "Record if Emacs has focus.")
-
-      (defvar eaf--mac-unsafe-focus-change-timer nil
-        "Use timer to ignore spurious focus events.
-
-This is only used when `eaf--mac-safe-focus-change' is nil.
-
-See
-https://old.reddit.com/r/emacs/comments/\
-kxsgtn/ignore_spurious_focus_events_for/")
-
-      (defun eaf--mac-unsafe-focus-change-handler ()
-        ;; ignore errors related to
-        ;; (wrong-type-argument eaf-epc-manager nil)
-        (ignore-errors
-          (if (frame-focus-state)
-              (eaf--mac-unsafe-focus-in)
-            (eaf--mac-unsafe-focus-out)))
-        (setq eaf--mac-unsafe-focus-change-timer nil))
-
       (defun eaf--mac-focus-change ()
         "Manage Emacs's focus change."
-        (if eaf--mac-safe-focus-change
-            (if (executable-find "app-frontmost")
-                (let ((front (shell-command-to-string "app-frontmost --name")))
-                  (cond
-                   ((member front (list "Python\n" "python3\n"))
-                    (setq eaf--mac-switch-to-python t))
+        (let ((front (shell-command-to-string "app-frontmost --name")))
+          (cond
+           ((member front (list "Python\n" "python3\n"))
+            (setq eaf--mac-switch-to-python t))
+           ((string= "Emacs\n" front)
+            (if eaf--mac-switch-to-python
+                (setq eaf--mac-switch-to-python nil)
+              (run-with-timer 0.1 nil #'eaf--mac-focus-update)))
+           (t (eaf--mac-focus-out)))))
 
-                   ((string= "Emacs\n" front)
-                    (cond
-                     (eaf--mac-switch-to-python
-                      (setq eaf--mac-switch-to-python nil))
-                     ((not eaf--mac-has-focus)
-                      (run-with-timer 0.1 nil #'eaf--mac-focus-in))
-                     (eaf--mac-has-focus
-                      (eaf--mac-focus-out))))
-                   (t (eaf--mac-focus-out))))
-              (message "Please install app-frontmost from https://pypi.org/project/mac-app-frontmost/ to make EAF works with macOS platform."))
-          (setq eaf--mac-unsafe-focus-change-timer
-                (unless eaf--mac-unsafe-focus-change-timer
-                  (run-at-time 0.06 nil
-                               #'eaf--mac-unsafe-focus-change-handler)))))
+      (defun eaf--mac-focus-update ()
+        "Hide all eaf buffers, and then display new eaf buffers at front."
+        (eaf--mac-focus-out)
+        (when (frame-focus-state)
+          (dolist (window (window-list (selected-frame)))
+            (with-current-buffer (window-buffer window)
+              (when (derived-mode-p 'eaf-mode)
+                (eaf-call-async "show_buffer_view" eaf--buffer-id))))))
 
-      (defun eaf--mac-replace-eaf-buffers ()
-        (dolist (window (window-list))
-          (select-window window)
-          (when (eq major-mode 'eaf-mode)
-            (get-buffer-create "*eaf temp*")
-            (switch-to-buffer "*eaf temp*" t))))
+      (defun eaf--mac-focus-out ()
+        "Prepare the screenshot and hide all eaf buffers."
+        (dolist (frame (frame-list))
+          (dolist (window (window-list frame))
+            (with-current-buffer (window-buffer window)
+              (when (derived-mode-p 'eaf-mode)
+                (eaf--clip-image window)
+                (eaf-call-sync "hide_buffer_view" eaf--buffer-id))))))
 
-      (defun eaf--mac-focus-in ()
-        (setq eaf--mac-has-focus t)
-        (ignore-errors
-          (set-window-configuration
-           (frame-parameter (selected-frame) 'eaf--mac-frame))
-          (bury-buffer "*eaf temp*")))
+      (add-to-list 'move-frame-functions #'eaf-monitor-configuration-change)
 
-      (defun eaf--mac-focus-out (&optional frame)
-        (when eaf--mac-has-focus
-          (setq eaf--mac-has-focus nil)
-          (set-frame-parameter (or frame (selected-frame))
-                               'eaf--mac-frame (current-window-configuration))
-          (eaf--mac-replace-eaf-buffers)))
+      (defun eaf--clip-image (window)
+        "Clip the image of the qwidget."
+        (eaf-call-sync "clip_buffer" eaf--buffer-id)
+        (eaf--display-image window))
 
-      (defun eaf--mac-unsafe-focus-in ()
-        (eaf-call-async "show_top_views")
-        (set-window-configuration
-         (frame-parameter (selected-frame) 'eaf--mac-frame)))
-
-      (defun eaf--mac-unsafe-focus-out (&optional frame)
-        (eaf-call-async "hide_top_views")
-        (set-frame-parameter (or frame (selected-frame)) 'eaf--mac-frame
-                             (current-window-configuration)))
-
+      (defun eaf--display-image (window)
+        "Display the image of qwidget in eaf buffer."
+        (clear-image-cache)
+        (erase-buffer)
+        (insert-image (create-image (concat eaf-config-location eaf--buffer-id ".jpeg") 'jpeg nil
+                                 :width (window-pixel-width window)
+                                 :height (window-pixel-height window))))
+        
       (defun eaf--mac-delete-frame-handler (frame)
-        (if eaf--mac-safe-focus-change
-            (eaf--mac-focus-out frame)
-          (eaf--mac-unsafe-focus-out frame)))
+        (eaf--mac-focus-out))
+
+      (defun eaf--mac-clear-images-cache-handler ()
+        "Clear all images when quitting Emacs."
+        (shell-command-to-string (concat "rm " eaf-config-location "*.jpeg")))
+
+      (add-hook 'kill-emacs-hook #'eaf--mac-clear-images-cache-handler)
 
       (add-function :after after-focus-change-function #'eaf--mac-focus-change)
-      (add-hook 'eaf-stop-process-hook (lambda () (remove-function after-focus-change-function #'eaf--mac-focus-change)))
+      
+      (add-hook 'eaf-stop-process-hook
+                (lambda ()
+                  (remove-function after-focus-change-function #'eaf--mac-focus-change)
+                  (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)))
+      
       (add-to-list 'delete-frame-functions #'eaf--mac-delete-frame-handler))
+
      (t
       (defun eaf--wayland-focus-change ()
         "Manage Emacs's focus change."

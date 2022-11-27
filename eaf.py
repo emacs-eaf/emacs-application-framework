@@ -317,6 +317,32 @@ class EAF(object):
 
             self.buffer_dict[buffer_id].destroy_buffer()
             self.buffer_dict.pop(buffer_id, None)
+    
+    @PostGui()
+    def clip_buffer(self, buffer_id):
+        '''Clip the image of buffer for display.'''
+        eaf_config_dir = get_emacs_config_dir()
+        for key in list(self.view_dict):
+            view = self.view_dict[key]
+            if buffer_id == view.buffer_id:
+                image = view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
+        #eval_in_emacs('eaf--display-image', [])
+    
+    @PostGui()
+    def show_buffer_view(self, buffer_id):
+        '''Show the single buffer view.'''
+        for key in list(self.view_dict):
+            view = self.view_dict[key]
+            if buffer_id == view.buffer_id:
+               view.try_show_top_view() 
+    
+    @PostGui()
+    def hide_buffer_view(self, buffer_id):
+        '''Hide the single buffer view.'''
+        for key in list(self.view_dict):
+            view = self.view_dict[key]
+            if buffer_id == view.buffer_id:
+               view.try_hide_top_view() 
 
     @PostGui()
     def kill_emacs(self):
