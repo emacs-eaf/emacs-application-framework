@@ -2,7 +2,7 @@
   "description": "Expose a D-Bus interface to help EAF running on Wayland",
   "name": "EAF Waynland Extension",
   "shell-version": [
-    "42"
+    "43.1"
   ],
   "url": "https://github.com/emacs-eaf/emacs-application-framework",
   "uuid": "eaf-wayland@emacs-eaf.org",

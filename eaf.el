@@ -655,17 +655,10 @@ A hashtable, key is url and value is title.")
                      "QT_AUTO_SCREEN_SCALE_FACTOR=0"))
                    t)
 
+      (add-to-list 'environments "QT_FONT_DPI=96" t)
+
       ;; Make sure EAF application scale support 4k screen.
       (add-to-list 'environments "QT_SCALE_FACTOR=1" t)
-
-      ;; In wayland, we use
-      (add-to-list 'environments
-                   (cond
-                    ((eaf-emacs-running-in-wayland-native)
-                     (format "QT_FONT_DPI=%s" (if (= (frame-scale-factor) 2) "192" "96")))
-                    (t
-                     "QT_FONT_DPI=96"))
-                   t)
 
       ;; Use XCB for input event transfer.
       ;; Only enable this option on Linux platform.
@@ -912,24 +905,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                        (cond
-                         ;; If command is normal symbol, just call it directly.
-                         ((symbolp fun)
-                          fun)
+                                  (cond
+                                   ;; If command is normal symbol, just call it directly.
+                                   ((symbolp fun)
+                                    fun)
 
-                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                         ((string-match "-" fun)
-                          (intern fun))
+                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                                   ((string-match "-" fun)
+                                    (intern fun))
 
-                         ;; If command prefix with js_, call JavaScript function directly.
-                         ((string-prefix-p "js_" fun)
-                          (eaf--make-js-proxy-function fun))
+                                   ;; If command prefix with js_, call JavaScript function directly.
+                                   ((string-prefix-p "js_" fun)
+                                    (eaf--make-js-proxy-function fun))
 
-                         ;; If command is not built-in function and not include char '-'
-                         ;; it's command in python side, build elisp proxy function to call it.
-                         (t
-                          (eaf--make-py-proxy-function fun))
-                         ))
+                                   ;; If command is not built-in function and not include char '-'
+                                   ;; it's command in python side, build elisp proxy function to call it.
+                                   (t
+                                    (eaf--make-py-proxy-function fun))
+                                   ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
@@ -1081,9 +1074,9 @@ provide at least one way to let everyone experience EAF. ;)"
         (clear-image-cache)
         (erase-buffer)
         (insert-image (create-image (concat eaf-config-location eaf--buffer-id ".jpeg") 'jpeg nil
-                                 :width (window-pixel-width window)
-                                 :height (window-pixel-height window))))
-        
+                                    :width (window-pixel-width window)
+                                    :height (window-pixel-height window))))
+
       (defun eaf--mac-delete-frame-handler (frame)
         (eaf--mac-focus-out))
 
@@ -1094,12 +1087,12 @@ provide at least one way to let everyone experience EAF. ;)"
       (add-hook 'kill-emacs-hook #'eaf--mac-clear-images-cache-handler)
 
       (add-function :after after-focus-change-function #'eaf--mac-focus-change)
-      
+
       (add-hook 'eaf-stop-process-hook
                 (lambda ()
                   (remove-function after-focus-change-function #'eaf--mac-focus-change)
                   (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)))
-      
+
       (add-to-list 'delete-frame-functions #'eaf--mac-delete-frame-handler))
 
      (t
@@ -1110,7 +1103,8 @@ provide at least one way to let everyone experience EAF. ;)"
         (ignore-errors
           (if (frame-focus-state)
               (eaf-call-async "show_top_views")
-            (eaf-call-async "hide_top_views"))))
+            (eaf-call-async "hide_top_views")
+            )))
       (add-function :after after-focus-change-function #'eaf--wayland-focus-change)
       (add-hook 'eaf-stop-process-hook (lambda () (remove-function after-focus-change-function #'eaf--wayland-focus-change)))
       ))))
