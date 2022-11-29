@@ -347,11 +347,6 @@ been initialized."
 
 (defvar eaf-last-frame-height 0)
 
-(when (eq system-type 'darwin)
-  (defcustom eaf--mac-enable-rosetta nil
-    "Execute EAF Python process under Rosetta2"
-    :type 'boolean))
-
 (defcustom eaf-name "*eaf*"
   "Name of EAF buffer."
   :type 'string)
@@ -694,15 +689,7 @@ A hashtable, key is url and value is title.")
       ;; Start python process.
       (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p)))
             (process-environment environments))
-        (setq eaf-internal-process
-              (if (and (eq system-type 'darwin)
-                       eaf--mac-enable-rosetta)
-                  (apply 'start-process
-                         eaf-name eaf-name
-                         "arch" (append (list "-x86_64" eaf-internal-process-prog) eaf-internal-process-args))
-                (apply 'start-process
-                       eaf-name eaf-name
-                       eaf-internal-process-prog eaf-internal-process-args))))
+        (setq eaf-internal-process (apply 'start-process eaf-name eaf-name eaf-internal-process-prog eaf-internal-process-args)))
       (set-process-query-on-exit-flag eaf-internal-process nil))))
 
 (run-with-idle-timer
@@ -905,24 +892,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                                  (cond
-                                   ;; If command is normal symbol, just call it directly.
-                                   ((symbolp fun)
-                                    fun)
+                        (cond
+                         ;; If command is normal symbol, just call it directly.
+                         ((symbolp fun)
+                          fun)
 
-                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                                   ((string-match "-" fun)
-                                    (intern fun))
+                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                         ((string-match "-" fun)
+                          (intern fun))
 
-                                   ;; If command prefix with js_, call JavaScript function directly.
-                                   ((string-prefix-p "js_" fun)
-                                    (eaf--make-js-proxy-function fun))
+                         ;; If command prefix with js_, call JavaScript function directly.
+                         ((string-prefix-p "js_" fun)
+                          (eaf--make-js-proxy-function fun))
 
-                                   ;; If command is not built-in function and not include char '-'
-                                   ;; it's command in python side, build elisp proxy function to call it.
-                                   (t
-                                    (eaf--make-py-proxy-function fun))
-                                   ))
+                         ;; If command is not built-in function and not include char '-'
+                         ;; it's command in python side, build elisp proxy function to call it.
+                         (t
+                          (eaf--make-py-proxy-function fun))
+                         ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
