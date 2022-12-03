@@ -9,6 +9,10 @@
     // QQ mail have some security mechanism that we can't fetch value of activeElement.
     // So we just return empty string make is_focus method works well in browser.py
     return "";
+  } else if (pageUrl === "https://mail.163.com/" && activeElement) {
+    // QQ mail have some security mechanism that we can't fetch value of activeElement.
+    // So we just return empty string make is_focus method works well in browser.py
+    return "";
   } else if (activeElement &&
              inputs.indexOf(tagName) !== -1 &&
              inputTypes.indexOf(activeElement.type) !== -1
