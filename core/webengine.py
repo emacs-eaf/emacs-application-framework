@@ -428,7 +428,11 @@ class BrowserView(QWebEngineView):
 
         format_string = function_name + "(" + format_string + ");"
 
-        self.web_page.runJavaScript(format_string)
+        try:
+            self.web_page.runJavaScript(format_string)
+        except:
+            import traceback
+            traceback.print_exc()
 
     def scroll_wheel(self, x_offset, y_offset):
         from PyQt6.QtGui import QWheelEvent
