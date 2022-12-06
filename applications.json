@@ -187,6 +187,15 @@
         "url": "https://github.com/metaescape/2048pyqt6.git",
         "default_install": "false"
     },
+    "sunburst": {
+        "name": "EAF Sunburst",
+        "desc": "Radial space-filling visualization for Emacs data analyze",
+        "type": "app",
+        "branch": "master",
+        "url": "https://github.com/emacs-eaf/eaf-sunburst.git",
+        "mirror_url": "https://gitee.com/emacs-eaf/eaf-sunburst.git",
+        "default_install": "false"
+    },
     "demo": {
         "name": "EAF Demo",
         "desc": "EAF app demo based on PyQt",
