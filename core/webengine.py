@@ -1502,17 +1502,17 @@ class BrowserBuffer(Buffer):
     def init_app(self):
         pass
 
-    def load_index_html(self, app_file):
+    def load_index_html(self, app_file, index_dir="dist", join_path=False):
         self.buffer_widget.loadFinished.connect(self.init_app)
 
-        self.index_file_dir = os.path.join(os.path.dirname(app_file), "dist")
+        self.index_file_dir = os.path.join(os.path.dirname(app_file), index_dir)
         self.index_file = os.path.join(self.index_file_dir, "index.html")
 
         with open(self.index_file, "r") as f:
-            html = self.convert_index_html(f.read(), self.index_file_dir)
+            html = self.convert_index_html(f.read(), self.index_file_dir, join_path)
             self.buffer_widget.setHtml(html, QUrl("file://"))
 
-    def convert_index_html(self, index_file_content, dist_dir):
+    def convert_index_html(self, index_file_content, dist_dir, join_path):
         '''
         Convert path to absolute path and change body background.
         '''
@@ -1522,10 +1522,17 @@ class BrowserBuffer(Buffer):
         base_url = base_dir.as_uri()
         root = LH.fromstring(index_file_content)
         for el in root.iter('link'):
-            el.attrib['href'] = "{}{}".format(base_url, el.attrib['href'])
+            if join_path:
+                el.attrib['href'] = os.path.join(base_url, el.attrib["href"])
+            else:
+                el.attrib['href'] = "{}{}".format(base_url, el.attrib['href'])
         for el in root.iter('script'):
-            el.attrib['src'] = "{}{}".format(base_url, el.attrib['src'])
-            el.attrib['type'] = "text/javascript"
+            if "src" in el.attrib:
+                if join_path:
+                    el.attrib['src'] = os.path.join(base_url, el.attrib['src'])
+                else:
+                    el.attrib['src'] = "{}{}".format(base_url, el.attrib['src'])
+                el.attrib['type'] = "text/javascript"
         for el in root.iter('body'):
             el.attrib['style'] = "background: {}; color: {}".format(self.theme_background_color, self.theme_foreground_color)
 
