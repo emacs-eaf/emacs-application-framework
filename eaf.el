@@ -1782,6 +1782,14 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
+(defun eaf-ocr-buffer ()
+  (interactive)
+  (eaf-call-async "ocr_buffer" eaf--buffer-id))
+
+(defun eaf-ocr-buffer-record (result)
+  (kill-new result)
+  (message "[EAF] Have paste OCR string to kill-ring."))
+
 ;;;###autoload
 (defun eaf-install-and-update (&rest apps)
   "Interactively run `install-eaf.py' to install/update EAF apps.

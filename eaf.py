@@ -26,7 +26,7 @@ from PyQt6 import QtWebEngineWidgets as NeverUsed # noqa
 
 from PyQt6.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, QThread
 from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
 import json
@@ -49,6 +49,8 @@ class EAF(object):
         # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
+        
+        self.thread_queue = []
 
         for name in ["scroll_other_buffer", "eval_js_function", "eval_js_code", "action_quit", "send_key", "send_key_sequence",
                      "handle_search_forward", "handle_search_backward", "set_focus_text"]:
@@ -326,7 +328,29 @@ class EAF(object):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
                 image = view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
-        #eval_in_emacs('eaf--display-image', [])
+
+    @PostGui()
+    def ocr_buffer(self, buffer_id):
+        try:
+            import easyocr
+            import tempfile
+
+            for key in list(self.view_dict):
+                view = self.view_dict[key]
+                if buffer_id == view.buffer_id:
+                    message_to_emacs("Start OCR current buffer, it's need few seconds to analyze...")
+                    
+                    import tempfile
+                    image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
+                    image = view.screen_shot().save(image_path)
+                    
+                    thread = OCRThread(image_path)
+                    self.thread_queue.append(thread)
+                    thread.start()
+        except:
+            import traceback
+            traceback.print_exc()
+            message_to_emacs("Please execute command `pip3 install easyocr` to install easyocr first.")
     
     @PostGui()
     def show_buffer_view(self, buffer_id):
@@ -501,6 +525,22 @@ class EAF(object):
     def cleanup(self):
         '''Do some cleanup before exit python process.'''
         close_epc_client()
+        
+class OCRThread(QThread):
+
+    def __init__(self, image_path):
+        QThread.__init__(self)
+
+        self.image_path = image_path
+
+    def run(self):
+        import easyocr
+        reader = easyocr.Reader(['ch_sim','en']) 
+        result = reader.readtext(self.image_path)
+        eval_in_emacs("eaf-ocr-buffer-record", [''.join(list(map(lambda r: r[1], result)))])
+        
+        import os
+        os.remove(self.image_path)
 
 if __name__ == "__main__":
     import sys
