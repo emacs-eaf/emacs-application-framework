@@ -41,7 +41,7 @@ parser.add_argument("--use-gitee", action="store_true",
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if sys.platform == "win32" else "npm"
-PIP_CMD = "pip3" if which("pip3") else "pip" # mac only have pip3, so we need use pip3 instead pip 
+PIP_CMD = "pip3" if which("pip3") else "pip" # mac only have pip3, so we need use pip3 instead pip
 
 class bcolors:
     HEADER = '\033[95m'
@@ -137,7 +137,8 @@ def install_sys_deps(distro: str, deps_list):
     command.extend(deps_list)
     try:
         run_command(command)
-    except Exception:
+    except Exception as e:
+        print("Error: e")
         install_failed_sys.append(' '.join(command))
 
 def install_py_deps(deps_list):
@@ -149,7 +150,8 @@ def install_py_deps(deps_list):
     command.extend(deps_list)
     try:
         run_command(command)
-    except Exception:
+    except Exception as e:
+        print("Error:", e)
         install_failed_pys.append(' '.join(command))
 
 def remove_node_modules_path(app_path_list):
@@ -164,7 +166,8 @@ def install_npm_install(app_path_list):
         command = [NPM_CMD, "install", "--force"]
         try:
             run_command(command, path=app_path)
-        except Exception:
+        except Exception as e:
+            print("Error:", e)
             install_failed_apps.append(app_path)
 
 def install_npm_rebuild(app_path_list):
@@ -172,7 +175,8 @@ def install_npm_rebuild(app_path_list):
         command = [NPM_CMD, "rebuild"]
         try:
             run_command(command, path=app_path)
-        except Exception:
+        except Exception as e:
+            print("Error:", e)
             install_failed_apps.append(app_path)
 
 def install_vue_install(app_path_list):
@@ -180,12 +184,14 @@ def install_vue_install(app_path_list):
         command = [NPM_CMD, "install", "--force"]
         try:
             run_command(command, path=app_path)
-        except Exception:
+        except Exception as e:
+            print("Error:", e)
             install_failed_apps.append(app_path)
         command = [NPM_CMD, "run", "build"]
         try:
             run_command(command, path=app_path)
-        except Exception:
+        except Exception as e:
+            print("Error:", e)
             install_failed_apps.append(app_path)
 
 def add_or_update_app(app: str, app_spec_dict):
@@ -394,8 +400,8 @@ def install_app_deps(distro, deps_dict):
             updated = True
             try:
                 updated = add_or_update_app(app_name, app_spec_dict)
-            except Exception:
-                raise Exception("There are unsaved changes in EAF " + app_name + " application. Please re-run command with --app-drop-local-edit or --app-save-local-edit")
+            except Exception as e:
+                raise Exception("[EAF] There are unsaved changes in EAF " + app_name + " application. Please re-run command with --app-drop-local-edit or --app-save-local-edit")
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
             if (updated or args.force) and os.path.exists(app_dep_path):
@@ -433,7 +439,7 @@ def install_app_deps(distro, deps_dict):
         if len(vue_install_apps) > 0:
             install_vue_install(vue_install_apps)
 
-    print("\n[EAF] Please always ensure the following are added to your init.el:")
+    print("\n[EAF] Please always ensure the following config are added to your init.el:")
     print_sample_config(app_dir)
 
     global install_failed_sys
@@ -441,18 +447,18 @@ def install_app_deps(distro, deps_dict):
     global install_failed_apps
     if len(install_failed_sys) > 0:
         install_failed_sys = list(set(install_failed_sys))
-        print(bcolors.WARNING + "\n[EAF] The following system dependencies failed to install:" + bcolors.ENDC)
+        print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following system dependencies:" + bcolors.ENDC)
         for dep in install_failed_sys: print(bcolors.WARNING + dep + bcolors.ENDC)
     if len(install_failed_pys) > 0:
         install_failed_pys = list(set(install_failed_pys))
-        print(bcolors.WARNING + "\n[EAF] The following Python dependencies failed to install:" + bcolors.ENDC)
+        print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following Python dependencies:" + bcolors.ENDC)
         for dep in install_failed_pys: print(bcolors.WARNING + dep + bcolors.ENDC)
     if len(install_failed_apps) > 0:
         install_failed_apps = list(set(install_failed_apps))
-        print(bcolors.WARNING + "\n[EAF] The following applications failed to install:" + bcolors.ENDC)
+        print(bcolors.WARNING + "\n[EAF] Installation FAILED for following applications:" + bcolors.ENDC)
         for app in install_failed_apps: print(bcolors.WARNING + app + bcolors.ENDC)
     if len(install_failed_sys) + len(install_failed_pys) + len(install_failed_apps) == 0:
-        print("[EAF] Successfully installed selected applications and their dependencies:")
+        print("[EAF] Installation SUCCESS!")
     else:
         print("[EAF] Please rerun ./install-eaf.py with `--force`, or install them manually!")
 
