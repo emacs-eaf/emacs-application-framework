@@ -407,11 +407,11 @@ been initialized."
   "Set the scroll step for EAF Browser, increase/decrease for bigger/smaller steps."
   :type 'float)
 
-(defcustom eaf-webengine-pc-user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.126 Safari/537.36"
+(defcustom eaf-webengine-pc-user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
   "Simulate a PC User-Agent for EAF Browser."
   :type 'string)
 
-(defcustom eaf-webengine-phone-user-agent "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.126 Safari/537.36"
+(defcustom eaf-webengine-phone-user-agent "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
   "Simulate a Phone User-Agent for EAF Browser."
   :type 'string)
 
