@@ -1021,6 +1021,7 @@ provide at least one way to let everyone experience EAF. ;)"
       (let ((front (cond ((eq system-type 'darwin)
                           (shell-command-to-string "app-frontmost --name"))
                          (t
+                          (require 'dbus)
                           (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000)))))
         (cond
          ((member front (list "Python\n" "python3\n" "python3"))
@@ -1126,6 +1127,7 @@ provide at least one way to let everyone experience EAF. ;)"
 
 Such as, wayland native, macOS etc."
   (cond ((eaf-emacs-running-in-wayland-native)
+         (require 'dbus)
          (let* ((coordinate (mapcar #'string-to-number
                                     (string-split
                                      (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
