@@ -845,6 +845,21 @@ When called interactively, copy to ‘kill-ring’."
   (interactive)
   (eaf-call-async "eval_function" eaf--buffer-id "toggle_fullscreen" (key-description (this-command-keys-vector))))
 
+(defun eaf--enter-fullscreen-request ()
+  "Entering fullscreen use Emacs frame's size."
+  (message "[EAF] Enter fullscreen")
+  (setq-local eaf-fullscreen-p t)
+  (eaf-monitor-configuration-change)
+  (when (and eaf-browser-fullscreen-move-cursor-corner
+             (string= eaf--buffer-app-name "browser"))
+    (eaf-call-async "eval_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
+
+(defun eaf--exit_fullscreen_request ()
+  "Exit fullscreen."
+  (message "[EAF] Exit fullscreen")
+  (setq-local eaf-fullscreen-p nil)
+  (eaf-monitor-configuration-change))
+
 (defun eaf--make-py-proxy-function (fun)
   "Define elisp command which can call Python function string FUN."
   (let ((sym (intern (format "eaf-py-proxy-%s" fun))))
@@ -1095,7 +1110,8 @@ provide at least one way to let everyone experience EAF. ;)"
             (with-current-buffer (window-buffer window)
               (when (derived-mode-p 'eaf-mode)
                 ;; When `eaf-fullscreen-p' is non-nil, and only the EAF window is present, use frame size
-                (if (and eaf-fullscreen-p (equal (length (cl-remove-if #'window-dedicated-p (window-list frame))) 1))
+                (if (and eaf-fullscreen-p
+                         (equal (length (cl-remove-if #'window-dedicated-p (window-list frame))) 1))
                     (push (format "%s:%s:%s:%s:%s:%s"
                                   eaf--buffer-id
                                   (eaf-get-emacs-xid frame)
@@ -1573,14 +1589,6 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   ;; Close confirm window.
   (kill-buffer)
   (delete-window))
-
-(defun eaf--enter-fullscreen-request ()
-  "Entering EAF browser fullscreen use Emacs frame's size."
-  (setq-local eaf-fullscreen-p t)
-  (eaf-monitor-configuration-change)
-  (when (and eaf-browser-fullscreen-move-cursor-corner
-             (string= eaf--buffer-app-name "browser"))
-    (eaf-call-async "eval_function" eaf--buffer-id "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
 ;; Update and load the theme
 (defun eaf-get-theme-mode ()
