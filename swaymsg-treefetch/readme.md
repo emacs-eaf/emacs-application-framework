@@ -26,7 +26,7 @@ This bash script could get the rect (i.e. absolute coordinates and size) info of
 
 ### Output format
 ```bash
- <x> <y> <width> <height>
+ <x> <y>
 ```
 
 ## Swaymsg-rectfetcher
@@ -48,7 +48,7 @@ Remove every '#' before "$pecho" in the script file to get verbose output.
 ## Examples
 ```bash
 $ ./swaymsg-rectfetcher.sh emacs
-1080 1546 1800 374
+1080 1546
 $ ./swaymsg-focusfetcher.sh
 emacs
 ```
