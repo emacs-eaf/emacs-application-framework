@@ -1036,10 +1036,9 @@ provide at least one way to let everyone experience EAF. ;)"
       (let ((front (cond ((eq system-type 'darwin)
                           (shell-command-to-string "app-frontmost --name"))
 			 ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-			  (let ((default-directory eaf-build-dir))
-			    (if (executable-find "jshon")
-			      (shell-command-to-string "bash ./swaymsg-treefetch/swaymsg-focusfetcher.sh")
-			      (message "Please install jshon for swaywm support."))))
+			  (if (executable-find "jshon")
+			    (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
+			    (message "Please install jshon for swaywm support.")))
                          (t
                           (require 'dbus)
                           (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000)))))
@@ -1158,7 +1157,7 @@ Such as, wayland native, macOS etc."
                 (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
            (list frame-x frame-y)))
 	((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-	   (list (string-split (shell-command-to-string "bash ./swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
+	 (list (string-split (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs")))))
         (t
          (list 0 0))))
 
