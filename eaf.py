@@ -537,7 +537,8 @@ class OCRThread(QThread):
         import easyocr
         reader = easyocr.Reader(['ch_sim','en']) 
         result = reader.readtext(self.image_path)
-        eval_in_emacs("eaf-ocr-buffer-record", [''.join(list(map(lambda r: r[1], result)))])
+        string = ''.join(list(map(lambda r: r[1], result))).replace(" ,", ",")
+        eval_in_emacs("eaf-ocr-buffer-record", [string])
         
         import os
         os.remove(self.image_path)
