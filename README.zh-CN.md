@@ -71,9 +71,11 @@ chmod +x ./install-eaf.py
 
 `install-eaf.py`脚本有许多有用的选项，可以通过`--help`查看。
 
-如果你使用 Wayland 环境， 你需要执行命令 `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` 并在 Gnome3 中激活 `eaf-wayland@emacs-eaf.org` 这个 Gnome-Shell 插件。
-
-对于 SwayWM 的原生 wayland 支持（仍在测试）需要安装 jshon 。
+如果你使用 Wayland 环境：
+- 可用 XWayland 运行 EAF；若需要原生 wayland，如下：
+- 确保在 Emacs 中 `window-system` 变量的值是 `pgtk` 。
+  - Gnome：你需要执行命令 `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` 并在 Gnome3 中激活 `eaf-wayland@emacs-eaf.org` 这个 Gnome-Shell 插件。
+  - Sway：原生 wayland 支持（仍在测试）需要安装 jshon 。
 
 #### 3. 加载 EAF 核心
 
