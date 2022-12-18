@@ -91,4 +91,4 @@ else
 fi
 #echo $x $y $w $h
 echo $x $y
-notify-send "$x $y"
+#notify-send "$x $y"
