@@ -71,7 +71,7 @@ done;fi #"for i1" END
 if [ $br == "true" ]; then
  if [ ! -z $nm ]; then echo $nm; else echo "NOAPPID"; fi
 else
- echo ERROR: No focused window found.
+ echo ERROR-No-focused-window
 fi
 echo $nm
 #notify-send "$us $nm being focused."
