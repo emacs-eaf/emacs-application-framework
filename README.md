@@ -79,6 +79,8 @@ There are many useful flags available for `install-eaf.py`, check it yourself us
 
 If you are using Wayland environment, you need to execute the command `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` and activate the Gnome-Shell plugin `eaf-wayland@emacs-eaf.org` in Gnome3.
 
+For sway native wayland support (still in test), jshon is needed.
+
 #### 3. Load EAF Core
 
 From here on, you can add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:

@@ -73,6 +73,8 @@ chmod +x ./install-eaf.py
 
 如果你使用 Wayland 环境， 你需要执行命令 `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` 并在 Gnome3 中激活 `eaf-wayland@emacs-eaf.org` 这个 Gnome-Shell 插件。
 
+对于 SwayWM 的原生 wayland 支持（仍在测试）需要安装 jshon 。
+
 #### 3. 加载 EAF 核心
 
 从这里开始，你可以把 EAF 加入 Emacs 的 ```load-path```，然后在 `init.el` 中写入:
