@@ -77,11 +77,10 @@ chmod +x ./install-eaf.py
 
 There are many useful flags available for `install-eaf.py`, check it yourself using `--help`.
 
-If you are using Wayland environment:
-- You can run EAF using XWayland. For native Wayland support, see below.
-- Ensure the value of variable `window-system` in Emacs is `pgtk` 。
-- Gnome: you need to execute the command `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` and activate the Gnome-Shell plugin `eaf-wayland@emacs-eaf.org` in Gnome3.
-- Sway: for native wayland support (still in test), jshon is needed.
+There are three types of support for the Wayland environment:
+- XWayland: EAF can run directly under XWayland
+- Gnome3 Wayland Native: You need to execute the command `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` and activate the `eaf-wayland@emacs-eaf.org` plugin in `gnome-extensions`
+- Sway Wayland Native: [jshon](http://kmkeen.com/jshon/) needs to be installed
 
 #### 3. Load EAF Core
 
