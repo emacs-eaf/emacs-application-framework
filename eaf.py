@@ -331,26 +331,18 @@ class EAF(object):
 
     @PostGui()
     def ocr_buffer(self, buffer_id):
-        try:
-            import easyocr
-            import tempfile
+        import tempfile
 
-            for key in list(self.view_dict):
-                view = self.view_dict[key]
-                if buffer_id == view.buffer_id:
-                    message_to_emacs("Start OCR current buffer, it's need few seconds to analyze...")
-                    
-                    import tempfile
-                    image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
-                    image = view.screen_shot().save(image_path)
-                    
-                    thread = OCRThread(image_path)
-                    self.thread_queue.append(thread)
-                    thread.start()
-        except:
-            import traceback
-            traceback.print_exc()
-            message_to_emacs("Please execute command `pip3 install easyocr` to install easyocr first.")
+        for key in list(self.view_dict):
+            view = self.view_dict[key]
+            if buffer_id == view.buffer_id:
+                import tempfile
+                image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
+                image = view.screen_shot().save(image_path)
+                
+                thread = OCRThread(image_path)
+                self.thread_queue.append(thread)
+                thread.start()
     
     @PostGui()
     def show_buffer_view(self, buffer_id):
@@ -534,11 +526,36 @@ class OCRThread(QThread):
         self.image_path = image_path
 
     def run(self):
-        import easyocr
-        reader = easyocr.Reader(['ch_sim','en']) 
-        result = reader.readtext(self.image_path)
-        string = ''.join(list(map(lambda r: r[1], result))).replace(" ,", ",")
-        eval_in_emacs("eaf-ocr-buffer-record", [string])
+        try:
+            message_to_emacs("Use PaddleOCR analyze screenshot, it's need few seconds to analyze...")
+            import os
+            command_string = "python paddle_ocr.py {}".format(self.image_path)
+            cwd = os.path.join(os.path.dirname(__file__), "core")
+
+            import subprocess
+            process = subprocess.Popen(command_string, cwd=cwd, shell=True, text=True,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ret = process.wait()
+            string = process.stdout.readlines()[-1]    # type: ignore
+            
+            eval_in_emacs("eaf-ocr-buffer-record", [string])
+        except:
+            import traceback
+            traceback.print_exc()
+            
+            message_to_emacs("Use EasyOCR analyze screenshot, it's need few seconds to analyze...")
+            
+            try:
+                import easyocr
+                reader = easyocr.Reader(['ch_sim','en']) 
+                result = reader.readtext(self.image_path)
+                string = ''.join(list(map(lambda r: r[1], result))).replace(" ,", ",")
+                eval_in_emacs("eaf-ocr-buffer-record", [string])
+            except:
+                import traceback
+                traceback.print_exc()
+            
+                message_to_emacs("Please use pip3 install PaddleOCR or EasyOCR first.")
         
         import os
         os.remove(self.image_path)
