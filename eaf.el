@@ -1145,22 +1145,24 @@ provide at least one way to let everyone experience EAF. ;)"
                           view-infos)))))))
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
 
+(defun eaf--split-number (string)
+  (mapcar #'string-to-number (string-split string)))
+
 (defun eaf--get-frame-coordinate ()
   "We need fetch Emacs coordinate to adjust coordinate of EAF if it running on system not support cross-process reparent technology.
 
 Such as, wayland native, macOS etc."
   (cond ((eaf-emacs-running-in-wayland-native)
          (require 'dbus)
-         (let* ((coordinate (mapcar #'string-to-number
-                                    (string-split
-                                     (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
-                                     ",")))
+         (let* ((coordinate (eaf--split-number
+                             (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
+                             ","))
                 ;; HiDPI need except by `frame-scale-factor'.
                 (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
                 (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
            (list frame-x frame-y)))
         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-         (mapcar #'string-to-number (string-split (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs")))))
+         (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
         (t
          (list 0 0))))
 
