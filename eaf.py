@@ -27,7 +27,7 @@ from PyQt6 import QtWebEngineWidgets as NeverUsed # noqa
 from PyQt6.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer, QThread
-from core.utils import PostGui, eval_in_emacs, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
+from core.utils import PostGui, eval_in_emacs, get_emacs_var, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
 import json
 import os
@@ -540,7 +540,8 @@ class OCRThread(QThread):
         try:
             message_to_emacs("Use PaddleOCR analyze screenshot, it's need few seconds to analyze...")
             import os
-            command_string = "python paddle_ocr.py {}".format(self.image_path)
+            python_command = get_emacs_var("eaf-python-command")
+            command_string = "{} paddle_ocr.py {}".format(python_command, self.image_path)
             cwd = os.path.join(os.path.dirname(__file__), "core")
 
             import subprocess
