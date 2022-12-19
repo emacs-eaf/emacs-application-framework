@@ -518,13 +518,24 @@ class EAF(object):
         '''Do some cleanup before exit python process.'''
         close_epc_client()
         
-class OCRThread(QThread):
+OCR_ADJUST_DICT = {
+    " ,": ",",
+    "一一一": " ── "
+}
 
+class OCRThread(QThread):
+    
     def __init__(self, image_path):
         QThread.__init__(self)
 
         self.image_path = image_path
 
+    def adjust_ocr(self, ocr_string):
+        for char in OCR_ADJUST_DICT:
+            ocr_string = ocr_string.replace(char, OCR_ADJUST_DICT[char])
+            
+        return ocr_string
+        
     def run(self):
         try:
             message_to_emacs("Use PaddleOCR analyze screenshot, it's need few seconds to analyze...")
@@ -538,7 +549,7 @@ class OCRThread(QThread):
             ret = process.wait()
             string = process.stdout.readlines()[-1]    # type: ignore
             
-            eval_in_emacs("eaf-ocr-buffer-record", [string])
+            eval_in_emacs("eaf-ocr-buffer-record", [self.adjust_ocr(string)])
         except:
             import traceback
             traceback.print_exc()
@@ -549,8 +560,8 @@ class OCRThread(QThread):
                 import easyocr
                 reader = easyocr.Reader(['ch_sim','en']) 
                 result = reader.readtext(self.image_path)
-                string = ''.join(list(map(lambda r: r[1], result))).replace(" ,", ",")
-                eval_in_emacs("eaf-ocr-buffer-record", [string])
+                string = ''.join(list(map(lambda r: r[1], result)))
+                eval_in_emacs("eaf-ocr-buffer-record", [self.adjust_ocr(string)])
             except:
                 import traceback
                 traceback.print_exc()
