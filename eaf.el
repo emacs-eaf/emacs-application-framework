@@ -1078,18 +1078,21 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (defun eaf--display-image (window)
       "Display the image of qwidget in eaf buffer."
-      (clear-image-cache)
-      (erase-buffer)
-      (insert-image (create-image (concat eaf-config-location eaf--buffer-id ".jpeg") 'jpeg nil
-                                  :width (window-pixel-width window)
-                                  :height (window-pixel-height window))))
+      (let ((image-path (concat eaf-config-location eaf--buffer-id ".jpeg")))
+        (when (file-exists-p image-path)
+          (clear-image-cache)
+          (erase-buffer)
+          (insert-image (create-image image-path 'jpeg nil
+                                      :width (window-pixel-width window)
+                                      :height (window-pixel-height window))))))
 
     (defun eaf--topmost-delete-frame-handler (frame)
       (eaf--topmost-focus-out))
 
     (defun eaf--topmost-clear-images-cache-handler ()
       "Clear all images when quitting Emacs."
-      (shell-command-to-string (concat "rm " eaf-config-location "*.jpeg")))
+      (when (file-exists-p eaf-config-location)
+        (shell-command-to-string (concat "rm " eaf-config-location "*.jpeg"))))
 
     (add-hook 'kill-emacs-hook #'eaf--topmost-clear-images-cache-handler)
 
