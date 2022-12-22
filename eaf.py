@@ -331,8 +331,6 @@ class EAF(object):
 
     @PostGui()
     def ocr_buffer(self, buffer_id):
-        import tempfile
-
         for key in list(self.view_dict):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
@@ -343,7 +341,28 @@ class EAF(object):
                 thread = OCRThread(image_path)
                 self.thread_queue.append(thread)
                 thread.start()
-    
+
+    @PostGui()
+    def ocr_area(self, buffer_id):
+        for key in list(self.view_dict):
+            view = self.view_dict[key]
+            if buffer_id == view.buffer_id:
+                image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
+                screenshot_command, screenshot_args = get_emacs_vars(["eaf-screenshot-command", "eaf-screenshot-args"])
+                command_string = "{} {} {}".format(screenshot_command, " ".join(screenshot_args), image_path)
+                cwd = os.path.join(os.path.dirname(__file__), "core")
+                try:
+                    process = subprocess.Popen(command_string, cwd=cwd, shell=True, text=True,
+                                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    ret = process.wait()
+                    if ret == 0:
+                        thread = OCRThread(image_path)
+                        self.thread_queue.append(thread)
+                        thread.start()
+                except subprocess.CalledProcessError as e:
+                    print("Python error: [%d]\n{!s}\n".format(e.returncode, e.output))
+                    message_to_emacs(e.output)
+
     @PostGui()
     def show_buffer_view(self, buffer_id):
         '''Show the single buffer view.'''

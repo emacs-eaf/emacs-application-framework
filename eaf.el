@@ -523,6 +523,18 @@ And you need re-implement `eaf-goto-right-tab' self."
 EAF will remove the duplicate file manager buffer."
   :type 'integer)
 
+(defcustom eaf-screenshot-command (if (memq system-type '(cygwin windows-nt ms-dos)) "" "/usr/sbin/screencapture")
+  "The screenshot command used to by eaf.py.
+
+Absolute path is best."
+  :type 'string)
+
+(defcustom eaf-screenshot-args nil
+  "Arguments passed to 'screenshot.'
+
+For example, (setq eaf-screenshot-args (list \"-i\" \"-x\"))"
+  :type '(repeat string))
+
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -1806,6 +1818,10 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (defun eaf-ocr-buffer ()
   (interactive)
   (eaf-call-async "ocr_buffer" eaf--buffer-id))
+
+(defun eaf-ocr-area ()
+  (interactive)
+  (eaf-call-async "ocr_area" eaf--buffer-id))
 
 (defun eaf-ocr-buffer-record (result)
   (kill-new result)
