@@ -347,6 +347,7 @@ class EAF(object):
         for key in list(self.view_dict):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
+                import tempfile
                 image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
                 screenshot_command, screenshot_args = get_emacs_vars(["eaf-screenshot-command", "eaf-screenshot-args"])
                 command_string = "{} {} {}".format(screenshot_command, " ".join(screenshot_args), image_path)
