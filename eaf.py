@@ -353,6 +353,7 @@ class EAF(object):
                 command_string = "{} {} {}".format(screenshot_command, " ".join(screenshot_args), image_path)
                 cwd = os.path.join(os.path.dirname(__file__), "core")
                 try:
+                    import subprocess
                     process = subprocess.Popen(command_string, cwd=cwd, shell=True, text=True,
                                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     ret = process.wait()
