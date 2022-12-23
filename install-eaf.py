@@ -108,7 +108,7 @@ def prune_existing_sys_deps(deps_list):
 
 def get_archlinux_aur_helper():
     command = None
-    for helper in ["pacaur", "yay", "yaourt", "paru"]:
+    for helper in ["paru", "pacaur", "yay", "yaourt"]:
         if which(helper):
             command = helper
             break
