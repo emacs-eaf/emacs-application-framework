@@ -166,7 +166,6 @@ class BrowserView(QWebEngineView):
         "If title is google url, we should drop this history, it's a temp redirect url."
         try:
             parsed = urlparse(title)
-            qd = parse_qs(parsed.query, keep_blank_values=True)
             if parsed.netloc.startswith("www.google.com"):
                 return ""
             else:
@@ -509,7 +508,7 @@ class BrowserView(QWebEngineView):
             self.scroll_up_page()
             
             # Try scroll to next page if reach bottom, such as, access google.com
-            if self.get_next_page_url_js == None:
+            if self.get_next_page_url_js is None:
                 self.get_next_page_url_js = self.read_js_content("get_next_page_url.js")
                 
             next_page_url = self.execute_js(self.get_next_page_url_js)
@@ -519,7 +518,7 @@ class BrowserView(QWebEngineView):
     @interactive
     def get_selection_text(self):
         ''' Get the selected text.'''
-        if self.get_selection_text_js == None:
+        if self.get_selection_text_js is None:
             self.get_selection_text_js = self.read_js_content("get_selection_text.js")
 
         return self.execute_js(self.get_selection_text_js)
@@ -579,7 +578,7 @@ class BrowserView(QWebEngineView):
 
     def select_input_text(self):
         ''' Select input text.'''
-        if self.select_input_text_js == None:
+        if self.select_input_text_js is None:
             self.select_input_text_js = self.read_js_content("select_input_text.js")
 
         self.eval_js(self.select_input_text_js)
@@ -590,7 +589,7 @@ class BrowserView(QWebEngineView):
         return self.url().toString().replace(" ", "%20")
 
     def load_marker_file(self):
-        if self.marker_js_raw == None:
+        if self.marker_js_raw is None:
             self.marker_js_raw = self.read_js_content("marker.js")
 
         self.eval_js(self.marker_js_raw
@@ -690,7 +689,7 @@ class BrowserView(QWebEngineView):
 
     def get_focus_text(self):
         ''' Get the focus text.'''
-        if self.get_focus_text_js == None:
+        if self.get_focus_text_js is None:
             self.get_focus_text_js = self.read_js_content("get_focus_text.js")
 
         return self.execute_js(self.get_focus_text_js)
@@ -700,7 +699,7 @@ class BrowserView(QWebEngineView):
         ''' Set the focus text.'''
         new_text = base64.b64decode(new_text).decode("utf-8")
 
-        if self.set_focus_text_raw == None:
+        if self.set_focus_text_raw is None:
             self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
 
         self.set_focus_text_js = self.set_focus_text_raw.replace("%{new_text_base64}", string_to_base64(new_text));
@@ -709,7 +708,7 @@ class BrowserView(QWebEngineView):
     @interactive(insert_or_do=True)
     def focus_input(self):
         ''' input in focus.'''
-        if self.focus_input_js == None:
+        if self.focus_input_js is None:
             self.focus_input_js = self.read_js_content("focus_input.js")
 
         self.eval_js(self.focus_input_js)
@@ -718,7 +717,7 @@ class BrowserView(QWebEngineView):
     @interactive
     def clear_focus(self):
         ''' Clear the focus.'''
-        if self.clear_focus_js == None:
+        if self.clear_focus_js is None:
             self.clear_focus_js = self.read_js_content("clear_focus.js")
 
         self.eval_js(self.clear_focus_js)
@@ -948,7 +947,7 @@ class BrowserBuffer(Buffer):
 
     def dark_mode_js_load(self, progress):
         # is_dark_mode_enabled use for toggle dark mode.
-        if self.is_dark_mode_enabled and self.dark_mode_is_enabled() and self.buffer_widget.dark_mode_js != None and progress < 100:
+        if self.is_dark_mode_enabled and self.dark_mode_is_enabled() and (self.buffer_widget.dark_mode_js is not None) and progress < 100:
             self.buffer_widget.eval_js(self.buffer_widget.dark_mode_js)
 
     def handle_fullscreen_request(self, request):
@@ -986,13 +985,12 @@ class BrowserBuffer(Buffer):
 
                 download_url = download_item.url().toString()
                 jsonrpc = Jsonrpc('localhost', 6800)
-                resp = jsonrpc.addUris(download_url)
+                jsonrpc.addUris(download_url)
 
                 message_to_emacs("Downloading: " + download_url)
 
     def _save_as_pdf(self):
         parsed = urlparse(self.url)
-        qd = parse_qs(parsed.query, keep_blank_values=True)
         pdf_path = os.path.join(os.path.expanduser(self.download_path), "{}.pdf".format(parsed.netloc))
         message_to_emacs("Saving as pdf...")
         self.buffer_widget.web_page.printToPdf(pdf_path)
@@ -1006,7 +1004,6 @@ class BrowserBuffer(Buffer):
         from functools import partial
 
         parsed = urlparse(self.url)
-        qd = parse_qs(parsed.query, keep_blank_values=True)
         file_path = os.path.join(os.path.expanduser(self.download_path), "{}.html".format(parsed.netloc))
         message_to_emacs("Saving as single file...")
         args = ["monolith", self.url, "-o", file_path]
@@ -1360,14 +1357,14 @@ class BrowserBuffer(Buffer):
     def atomic_edit(self):
         ''' Edit the focus text.'''
         text = self.buffer_widget.get_focus_text()
-        if text != None:
+        if text is not None:
             atomic_edit(self.buffer_id, text)
         else:
             message_to_emacs("No active input element.")
 
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
-        input_focus = self.buffer_widget.get_focus_text() != None or self.url.startswith("devtools://")
+        input_focus = (self.buffer_widget.get_focus_text() is not None) or self.url.startswith("devtools://")
 
         eval_in_emacs("eaf-update-focus-state", [self.buffer_id, input_focus])
 
@@ -1723,7 +1720,8 @@ class CookiesManager(object):
 
     def get_relate_domains(self, cookie_domain):
         ''' Check whether the cookie domain is located under the same root host as the current URL host.'''
-        import tld, re
+        import tld
+        import re
 
         host_string = self.browser_view.url().host()
 
