@@ -723,19 +723,27 @@ class BrowserView(QWebEngineView):
         self.eval_js(self.clear_focus_js)
         eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'nil"])
 
-    def init_dark_mode_js(self, module_path, selection_color="auto", dark_mode_theme="dark"):
+    def init_dark_mode_js(self, module_path, selection_color="auto", dark_mode_theme="dark",
+                          dark_mode_custom_theme={
+                              "brightness": 100,
+                              "constrast": 100,
+                              "sepia": 0,
+                              "mode": 0,
+                              "darkSchemeBackgroundColor": "#2D2A2E",
+                              "darkSchemeForegroundColor": "#FCFCFA"}):
+        import json
         self.dark_mode_js = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
 
         if selection_color != "auto":
             self.dark_mode_js = self.dark_mode_js.replace("selectionColor: 'auto'", "selectionColor: '" + selection_color + "'")
 
-        self.dark_mode_js += """DarkReader.setFetchMethod(window.fetch);"""
+        self.dark_mode_js += """DarkReader.setFetchMethod(window.fetch);\n"""
 
         if dark_mode_theme == "dark":
-            self.dark_mode_js += """DarkReader.enable({brightness: 100, contrast: 90, sepia: 10, mode: 1});"""
+            dark_mode_custom_theme["mode"] = 1
+            self.dark_mode_js += """DarkReader.enable(%s);""" % json.dumps(dark_mode_custom_theme)
         else: # light theme
             self.dark_mode_js += """DarkReader.enable({brightness: 100, contrast: 90, sepia: 10, mode: 0});"""
-
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
