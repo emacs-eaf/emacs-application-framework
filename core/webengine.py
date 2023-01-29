@@ -741,9 +741,11 @@ class BrowserView(QWebEngineView):
 
         if dark_mode_theme == "dark":
             dark_mode_custom_theme["mode"] = 1
-            self.dark_mode_js += """DarkReader.enable(%s);""" % json.dumps(dark_mode_custom_theme)
         else: # light theme
-            self.dark_mode_js += """DarkReader.enable({brightness: 100, contrast: 90, sepia: 10, mode: 0});"""
+            dark_mode_custom_theme["mode"] = 0
+
+        self.dark_mode_js += """DarkReader.enable(%s);""" % json.dumps(dark_mode_custom_theme)
+
 
 class BrowserPage(QWebEnginePage):
     def __init__(self):
