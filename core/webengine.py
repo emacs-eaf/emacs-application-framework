@@ -726,11 +726,11 @@ class BrowserView(QWebEngineView):
     def init_dark_mode_js(self, module_path, selection_color="auto", dark_mode_theme="dark",
                           dark_mode_custom_theme={
                               "brightness": 100,
-                              "constrast": 100,
-                              "sepia": 0,
+                              "constrast": 90,
+                              "sepia": 10,
                               "mode": 0,
-                              "darkSchemeBackgroundColor": "#2D2A2E",
-                              "darkSchemeForegroundColor": "#FCFCFA"}):
+                              "darkSchemeBackgroundColor": "#242525",
+                              "darkSchemeForegroundColor": "#00CE00"}):
         import json
         self.dark_mode_js = open(os.path.join(os.path.dirname(module_path), "node_modules", "darkreader", "darkreader.js")).read()
 
