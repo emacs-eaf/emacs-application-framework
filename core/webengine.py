@@ -1464,8 +1464,9 @@ class BrowserBuffer(Buffer):
                 download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(self.download_path))
 
                 youtube_dl_args = ["youtube-dl"]
-                youtube_dl_args.append("--proxy")
-                youtube_dl_args.append(self.proxy_string)
+                if self.proxy_string != "":
+                    youtube_dl_args.append("--proxy")
+                    youtube_dl_args.append(self.proxy_string)
                 youtube_dl_args.append(url)
                 youtube_dl_args.append("-o")
                 youtube_dl_args.append(download_path)
@@ -1475,8 +1476,7 @@ class BrowserBuffer(Buffer):
                     youtube_dl_args.append("-x")
                     file_type = "audio"
 
-                with open(os.devnull, "w") as null_file:
-                    popen_and_call(youtube_dl_args, lambda : message_to_emacs("Downloaded: {0}".format(url)), null_file)
+                popen_and_call(youtube_dl_args, lambda : message_to_emacs("Downloaded: {0}".format(url)))
 
                 message_to_emacs("Downloading {0}: {1}".format(file_type, url))
             else:
