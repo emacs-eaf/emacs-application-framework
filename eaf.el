@@ -659,9 +659,8 @@ A hashtable, key is url and value is title.")
       ;; Only enable this option on Linux platform.
       (when (and (eq system-type 'gnu/linux)
                  (not (eaf-emacs-running-in-wayland-native)))
-        (add-to-list 'environments "QT_QPA_PLATFORM=xcb" t))
-
-      environments)))
+        (add-to-list 'environments "QT_QPA_PLATFORM=xcb" t)))
+    environments))
 
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
