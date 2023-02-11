@@ -1038,6 +1038,10 @@ provide at least one way to let everyone experience EAF. ;)"
                           (if (executable-find "jshon")
                               (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
                             (message "Please install jshon for swaywm support.")))
+                         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+                          (if (executable-find "jshon")
+                              (shell-command-to-string "hyprctl -j activewindow | jshon -e class -u")
+                            (message "Please install jshon for hyprland support.")))
                          (t
                           (require 'dbus)
                           (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000)))))
@@ -1162,6 +1166,10 @@ Such as, wayland native, macOS etc."
            (list frame-x frame-y)))
         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
          (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
+        ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+         (list
+		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 0"))
+		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 1"))))
         (t
          (list 0 0))))
 
