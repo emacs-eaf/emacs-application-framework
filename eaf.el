@@ -1644,7 +1644,10 @@ So multiple EAF buffers visiting the same file do not sync with each other."
           ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
           ;;
           ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-          (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))
+          (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+                 (shell-command-to-string "hyprctl dispatch focuswindow Emacs"))
+                (t
+                 (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
         ;; Activate the window by `wmctrl' when possible
         (if (executable-find "wmctrl")
