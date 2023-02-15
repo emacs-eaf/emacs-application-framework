@@ -196,6 +196,15 @@
     "mirror_url": "https://gitee.com/emacs-eaf/eaf-vue-mindmap.git",
     "default_install": "false"
   },
+  "map": {
+    "name": "EAF Map",
+    "desc": "EAF OpenStreetMap application for EAF",
+    "type": "app",
+    "branch": "master",
+    "url": "https://github.com/emacs-eaf/eaf-map.git",
+    "mirror_url": "https://gitee.com/emacs-eaf/eaf-map.git",
+    "default_install": "false"
+  },
   "demo": {
     "name": "EAF Demo",
     "desc": "EAF app demo based on PyQt",
