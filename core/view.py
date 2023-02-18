@@ -22,7 +22,7 @@
 from PyQt6.QtCore import Qt, QEvent, QPoint
 from PyQt6.QtGui import QPainter, QWindow, QBrush
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, hyprland_window_move
 
 class View(QWidget):
 
@@ -105,8 +105,12 @@ class View(QWidget):
     def eventFilter(self, obj, event):
         # import time
         # print(time.time(), event.type())
-        
+
         import platform
+        import os
+
+        if os.getenv("XDG_CURRENT_DESKTOP") == "Hyprland":
+            hyprland_window_move(self.x, self.y)
 
         if event.type() in [QEvent.Type.ShortcutOverride]:
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
@@ -126,7 +130,7 @@ class View(QWidget):
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         import platform
-        
+
         self.reparent()
 
         if platform.system() in ["Windows", "Darwin"]:
