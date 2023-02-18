@@ -249,6 +249,25 @@ def handle_arg_types(arg):
 
     return sexpdata.Quoted(arg)
 
+def hyprland_window_move(x, y):
+    import subprocess
+    import json
+
+    clients = json.loads(subprocess.check_output("hyprctl -j clients", shell=True))
+    window_info = []
+
+    for window in clients:
+        if window["title"] == "eaf.py":
+            window_info = window["at"]
+            break
+
+    if len(window_info) == 0:
+        return
+
+    [window_x, window_y] = window_info
+
+    if not (x - window_x == 0 and y - window_y == 0):
+        subprocess.check_call(f"hyprctl dispatch movewindowpixel '{x - window_x} {y - window_y}','title:^(eaf.py)$'", shell=True)
 
 def eval_in_emacs(method_name, args):
     global epc_client
