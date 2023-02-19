@@ -266,7 +266,7 @@ def hyprland_window_move(x, y):
 
     [window_x, window_y] = window_info
 
-    if not (x - window_x == 0 and y - window_y == 0):
+    if (x - window_x == 0 and y - window_y == 0) is False:
         subprocess.check_call(f"hyprctl dispatch movewindowpixel '{x - window_x} {y - window_y}','title:^(eaf.py)$'", shell=True)
 
 def eval_in_emacs(method_name, args):
