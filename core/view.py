@@ -27,6 +27,8 @@ from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_r
 class View(QWidget):
 
     def __init__(self, buffer, view_info):
+        import os
+
         super(View, self).__init__()
 
         self.buffer = buffer
@@ -50,6 +52,7 @@ class View(QWidget):
         self.y: int = int(self.y)
         self.width: int = int(self.width)
         self.height: int = int(self.height)
+        self.desktop = os.getenv("XDG_CURRENT_DESKTOP")
 
         # Build QGraphicsView.
         self.layout: QVBoxLayout = QVBoxLayout(self)
@@ -107,9 +110,8 @@ class View(QWidget):
         # print(time.time(), event.type())
 
         import platform
-        import os
 
-        if os.getenv("XDG_CURRENT_DESKTOP") == "Hyprland" and event.type() in [QEvent.Type.Enter]:
+        if self.desktop == "Hyprland" and event.type() in [QEvent.Type.Enter]:
             hyprland_window_move(self.x, self.y)
 
         if event.type() in [QEvent.Type.ShortcutOverride]:
