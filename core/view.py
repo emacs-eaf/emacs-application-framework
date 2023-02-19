@@ -109,7 +109,7 @@ class View(QWidget):
         import platform
         import os
 
-        if os.getenv("XDG_CURRENT_DESKTOP") == "Hyprland":
+        if os.getenv("XDG_CURRENT_DESKTOP") == "Hyprland" and event.type() in [QEvent.Type.Enter]:
             hyprland_window_move(self.x, self.y)
 
         if event.type() in [QEvent.Type.ShortcutOverride]:
