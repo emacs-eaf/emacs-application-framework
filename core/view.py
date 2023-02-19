@@ -22,12 +22,11 @@
 from PyQt6.QtCore import Qt, QEvent, QPoint
 from PyQt6.QtGui import QPainter, QWindow, QBrush
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, hyprland_window_move
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, hyprland_window_move, current_desktop
 
 class View(QWidget):
 
     def __init__(self, buffer, view_info):
-        import os
 
         super(View, self).__init__()
 
@@ -52,7 +51,6 @@ class View(QWidget):
         self.y: int = int(self.y)
         self.width: int = int(self.width)
         self.height: int = int(self.height)
-        self.desktop = os.getenv("XDG_CURRENT_DESKTOP")
 
         # Build QGraphicsView.
         self.layout: QVBoxLayout = QVBoxLayout(self)
@@ -111,7 +109,7 @@ class View(QWidget):
 
         import platform
 
-        if self.desktop == "Hyprland" and event.type() in [QEvent.Type.Enter]:
+        if current_desktop == "Hyprland" and event.type() in [QEvent.Type.Enter]:
             hyprland_window_move(self.x, self.y)
 
         if event.type() in [QEvent.Type.ShortcutOverride]:

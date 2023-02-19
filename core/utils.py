@@ -21,6 +21,7 @@
 
 from PyQt6.QtCore import QObject, pyqtSignal
 import sexpdata
+import os
 
 class PostGui(QObject):
 
@@ -385,3 +386,5 @@ def get_emacs_func_cache_result(func_name, func_args):
         emacs_func_cache_dict[func_name] = result
 
         return result
+
+current_desktop = os.getenv("XDG_CURRENT_DESKTOP")
