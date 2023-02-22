@@ -14,11 +14,11 @@ parser.add_argument("--install-all-apps", action="store_true",
                     help='install/update all available applications')
 parser.add_argument("--install-core-deps", action="store_true",
                     help='only install/update core dependencies')
-parser.add_argument("--install", nargs='+', default=[],
+parser.add_argument("-i", "--install", nargs='+', default=[],
                     help='only install/update apps listed here')
 parser.add_argument("--install-new-apps", action="store_true",
                     help='also install previously uninstalled or new applications')
-parser.add_argument("--force", action="store_true",
+parser.add_argument("-f", "--force", action="store_true",
                     help="force install/update app dependencies even if apps are already up-to-date")
 parser.add_argument("--ignore-core-deps", action="store_true",
                     help='ignore core dependencies')
