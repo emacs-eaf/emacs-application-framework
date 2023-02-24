@@ -827,8 +827,6 @@ class BrowserBuffer(Buffer):
               "eaf-webengine-default-zoom",
               "eaf-webengine-zoom-step"])
 
-        # self.profile = QWebEngineProfile(self.buffer_widget)
-        # self.profile.defaultProfile() == QWebEngineProfile.defaultProfile()
         # The default profile can be accessed by defaultProfile(). It is a built-in profile that all web pages not specifically created with another profile belong to.
         self.profile = QWebEngineProfile.defaultProfile()
         self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
