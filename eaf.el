@@ -1155,7 +1155,13 @@ provide at least one way to let everyone experience EAF. ;)"
   "We need fetch Emacs coordinate to adjust coordinate of EAF if it running on system not support cross-process reparent technology.
 
 Such as, wayland native, macOS etc."
-  (cond ((eaf-emacs-running-in-wayland-native)
+  (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
+         (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
+        ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+         (list
+		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 0"))
+		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 1"))))
+        ((eaf-emacs-running-in-wayland-native)
          (require 'dbus)
          (let* ((coordinate (eaf--split-number
                              (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
@@ -1164,12 +1170,6 @@ Such as, wayland native, macOS etc."
                 (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
                 (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
            (list frame-x frame-y)))
-        ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-         (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
-        ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-         (list
-		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 0"))
-		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 1"))))
         (t
          (list 0 0))))
 
