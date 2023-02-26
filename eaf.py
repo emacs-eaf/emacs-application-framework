@@ -49,7 +49,7 @@ class EAF(object):
         # Init variables.
         self.buffer_dict = {}
         self.view_dict = {}
-        
+
         self.thread_queue = []
 
         for name in ["scroll_other_buffer", "eval_js_function", "eval_js_code", "action_quit", "send_key", "send_key_sequence",
@@ -65,7 +65,7 @@ class EAF(object):
         # Build EPC server.
         self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
         self.server.allow_reuse_address = True
-        
+
         # import logging
         # self.server = ThreadingEPCServer(('localhost', 0)
         # self.server.logger.setLevel(logging.DEBUG)
@@ -158,12 +158,12 @@ class EAF(object):
         ''' Create buffer.
         create_buffer can't wrap with @PostGui, because need call by createNewWindow signal of browser.'''
         import importlib
-        
+
         global emacs_width, emacs_height, proxy_string
 
         # Always load module with app absolute path.
-        # 
-        # Don't cache module in memory, 
+        #
+        # Don't cache module in memory,
         # this is very convenient for EAF to load the latest application code in real time without the need for kill EAF process.
         spec = importlib.util.spec_from_file_location("AppBuffer", module_path) # type: ignore
         module = importlib.util.module_from_spec(spec) # type: ignore
@@ -298,12 +298,12 @@ class EAF(object):
     def button_press_on_eaf_window(self):
         for key in self.buffer_dict:
             buffer_widget = self.buffer_dict[key].buffer_widget
-            
+
             if hasattr(buffer_widget, "is_button_press") and buffer_widget.is_button_press:
                 return True
-            
-        return False    
-        
+
+        return False
+
     @PostGui()
     def kill_buffer(self, buffer_id):
         ''' Kill all view based on buffer_id and clean buffer from buffer dict.'''
@@ -319,7 +319,7 @@ class EAF(object):
 
             self.buffer_dict[buffer_id].destroy_buffer()
             self.buffer_dict.pop(buffer_id, None)
-    
+
     @PostGui()
     def clip_buffer(self, buffer_id):
         '''Clip the image of buffer for display.'''
@@ -339,26 +339,26 @@ class EAF(object):
                 import tempfile
                 image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
                 image = view.screen_shot().save(image_path)
-                
+
                 thread = OCRThread(image_path)
                 self.thread_queue.append(thread)
                 thread.start()
-    
+
     @PostGui()
     def show_buffer_view(self, buffer_id):
         '''Show the single buffer view.'''
         for key in list(self.view_dict):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
-               view.try_show_top_view() 
-    
+               view.try_show_top_view()
+
     @PostGui()
     def hide_buffer_view(self, buffer_id):
         '''Hide the single buffer view.'''
         for key in list(self.view_dict):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
-               view.try_hide_top_view() 
+               view.try_hide_top_view()
 
     @PostGui()
     def kill_emacs(self):
@@ -458,7 +458,7 @@ class EAF(object):
         ''' Open devtools tab'''
         self.devtools_page = web_page
         eval_in_emacs('eaf-open-devtool-page', [])
-        
+
         # We need adjust web window size after open developer tool.
         QTimer().singleShot(1000, lambda : eval_in_emacs('eaf-monitor-configuration-change', []))
 
@@ -517,14 +517,14 @@ class EAF(object):
     def cleanup(self):
         '''Do some cleanup before exit python process.'''
         close_epc_client()
-        
+
 OCR_ADJUST_DICT = {
     " ,": ",",
     "一一一": " ── "
 }
 
 class OCRThread(QThread):
-    
+
     def __init__(self, image_path):
         QThread.__init__(self)
 
@@ -533,9 +533,9 @@ class OCRThread(QThread):
     def adjust_ocr(self, ocr_string):
         for char in OCR_ADJUST_DICT:
             ocr_string = ocr_string.replace(char, OCR_ADJUST_DICT[char])
-            
+
         return ocr_string
-        
+
     def run(self):
         try:
             message_to_emacs("Use PaddleOCR analyze screenshot, it's need few seconds to analyze...")
@@ -549,26 +549,26 @@ class OCRThread(QThread):
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ret = process.wait()
             string = process.stdout.readlines()[-1]    # type: ignore
-            
+
             eval_in_emacs("eaf-ocr-buffer-record", [self.adjust_ocr(string)])
         except:
             import traceback
             traceback.print_exc()
-            
+
             message_to_emacs("Use EasyOCR analyze screenshot, it's need few seconds to analyze...")
-            
+
             try:
                 import easyocr
-                reader = easyocr.Reader(['ch_sim','en']) 
+                reader = easyocr.Reader(['ch_sim','en'])
                 result = reader.readtext(self.image_path)
                 string = ''.join(list(map(lambda r: r[1], result)))
                 eval_in_emacs("eaf-ocr-buffer-record", [self.adjust_ocr(string)])
             except:
                 import traceback
                 traceback.print_exc()
-            
+
                 message_to_emacs("Please use pip3 install PaddleOCR or EasyOCR first.")
-        
+
         import os
         os.remove(self.image_path)
 

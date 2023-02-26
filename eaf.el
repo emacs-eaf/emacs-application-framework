@@ -662,6 +662,8 @@ A hashtable, key is url and value is title.")
         (add-to-list 'environments "QT_QPA_PLATFORM=xcb" t)))
     environments))
 
+(defvar eaf-start-process-hook nil)
+
 (defun eaf-start-process ()
   "Start EAF process if it isn't started."
   (unless (eaf-epc-live-p eaf-epc-process)
@@ -689,7 +691,10 @@ A hashtable, key is url and value is title.")
       (let ((process-connection-type (not (eaf--called-from-wsl-on-windows-p)))
             (process-environment environments))
         (setq eaf-internal-process (apply 'start-process eaf-name eaf-name eaf-internal-process-prog eaf-internal-process-args)))
-      (set-process-query-on-exit-flag eaf-internal-process nil))))
+      (set-process-query-on-exit-flag eaf-internal-process nil)))
+
+  ;; Run start process hooks.
+  (run-hooks 'eaf-start-process-hook))
 
 (run-with-idle-timer
  1 nil
@@ -1074,8 +1079,6 @@ provide at least one way to let everyone experience EAF. ;)"
               (eaf--clip-image window)
               (eaf-call-sync "hide_buffer_view" eaf--buffer-id))))))
 
-    (add-to-list 'move-frame-functions #'eaf-monitor-configuration-change)
-
     (defun eaf--clip-image (window)
       "Clip the image of the qwidget."
       (eaf-call-sync "clip_buffer" eaf--buffer-id)
@@ -1101,15 +1104,17 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (add-hook 'kill-emacs-hook #'eaf--topmost-clear-images-cache-handler)
 
-    (add-function :after after-focus-change-function #'eaf--topmost-focus-change)
+    (add-hook 'eaf-start-process-hook
+              (lambda ()
+                (add-function :after after-focus-change-function #'eaf--topmost-focus-change)
+                (add-to-list 'move-frame-functions #'eaf-monitor-configuration-change)))
 
     (add-hook 'eaf-stop-process-hook
               (lambda ()
                 (remove-function after-focus-change-function #'eaf--topmost-focus-change)
                 (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)))
 
-    (add-to-list 'delete-frame-functions #'eaf--topmost-delete-frame-handler)
-    ))
+    (add-to-list 'delete-frame-functions #'eaf--topmost-delete-frame-handler)))
 
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
