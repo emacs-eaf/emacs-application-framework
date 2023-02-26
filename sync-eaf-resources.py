@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import platform
 import sys
 import subprocess
 import json
