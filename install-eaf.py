@@ -5,7 +5,6 @@ import argparse
 import datetime
 import json
 import os
-import site
 import subprocess
 import sys
 
@@ -138,7 +137,7 @@ def install_sys_deps(distro: str, deps_list):
     try:
         run_command(command)
     except Exception as e:
-        print("Error: e")
+        print("Error: {}".format(e))
         install_failed_sys.append(' '.join(command))
 
 def install_py_deps(deps_list):
@@ -400,7 +399,7 @@ def install_app_deps(distro, deps_dict):
             updated = True
             try:
                 updated = add_or_update_app(app_name, app_spec_dict)
-            except Exception as e:
+            except Exception:
                 raise Exception("[EAF] There are unsaved changes in EAF " + app_name + " application. Please re-run command with --app-drop-local-edit or --app-save-local-edit")
             app_path = os.path.join(app_dir, app_name)
             app_dep_path = os.path.join(app_path, 'dependencies.json')
