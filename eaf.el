@@ -1450,7 +1450,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 
 (defun eaf--rebuild-buffer ()
   (when (derived-mode-p 'eaf-mode)
-    (eaf-start-process)
+    (eaf-restart-process)
     (eaf--open-new-buffer (current-buffer))
     (eaf-monitor-configuration-change)))
 
