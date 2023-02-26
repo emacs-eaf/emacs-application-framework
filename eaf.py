@@ -327,7 +327,7 @@ class EAF(object):
         for key in list(self.view_dict):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
-                image = view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
+                view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
 
     @PostGui()
     def ocr_buffer(self, buffer_id):
@@ -336,9 +336,8 @@ class EAF(object):
         for key in list(self.view_dict):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
-                import tempfile
                 image_path = os.path.join(tempfile.gettempdir(), buffer_id + ".png")
-                image = view.screen_shot().save(image_path)
+                view.screen_shot().save(image_path)
 
                 thread = OCRThread(image_path)
                 self.thread_queue.append(thread)
@@ -547,7 +546,7 @@ class OCRThread(QThread):
             import subprocess
             process = subprocess.Popen(command_string, cwd=cwd, shell=True, text=True,
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            ret = process.wait()
+            process.wait()
             string = process.stdout.readlines()[-1]    # type: ignore
 
             eval_in_emacs("eaf-ocr-buffer-record", [self.adjust_ocr(string)])
