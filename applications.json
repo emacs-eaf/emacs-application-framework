@@ -187,13 +187,13 @@
     "url": "https://github.com/metaescape/2048pyqt6.git",
     "default_install": "false"
   },
-  "vue-mindmap": {
-    "name": "EAF vue-mindmap",
-    "desc": "Use d3.js implementation MindMap app for EAF",
+  "markmap": {
+    "name": "EAF markmap",
+    "desc": "Visualize your Markdown as mindmaps",
     "type": "app",
     "branch": "master",
-    "url": "https://github.com/emacs-eaf/eaf-vue-mindmap.git",
-    "mirror_url": "https://gitee.com/emacs-eaf/eaf-vue-mindmap.git",
+    "url": "https://github.com/emacs-eaf/eaf-markmap.git",
+    "mirror_url": "https://gitee.com/emacs-eaf/eaf-markmap.git",
     "default_install": "false"
   },
   "map": {
