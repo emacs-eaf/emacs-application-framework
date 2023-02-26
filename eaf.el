@@ -1003,7 +1003,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
       (eaf--frame-left frame)
     0))
 
-(defun eaf--buffer-y-postion-adjust (frame)
+(defun eaf--buffer-y-position-adjust (frame)
   "Adjust the y position of EAF buffers for macOS"
   (if (eq system-type 'darwin)
       (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
@@ -1040,7 +1040,7 @@ provide at least one way to let everyone experience EAF. ;)"
                             (message "Please install jshon for swaywm support.")))
                          ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
                           (if (executable-find "jshon")
-                              (shell-command-to-string "hyprctl -j activewindow | jshon -e class -u")
+                              (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
                             (message "Please install jshon for hyprland support.")))
                          (t
                           (require 'dbus)
@@ -1048,7 +1048,9 @@ provide at least one way to let everyone experience EAF. ;)"
         (cond
          ((member front (list "Python\n" "python3\n" "python3"))
           (setq eaf--topmost-switch-to-python t))
-         ((member front (list "Emacs\n" "emacs"))
+         ((string-equal (string-replace "." "-"
+                                        (string-replace "\n" "" front))
+                        eaf--emacs-program-name)
           (if eaf--topmost-switch-to-python
               (setq eaf--topmost-switch-to-python nil)
             (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
@@ -1135,7 +1137,7 @@ provide at least one way to let everyone experience EAF. ;)"
                          (frame-x (car frame-coordinate))
                          (frame-y (cadr frame-coordinate))
                          (x (+ (eaf--buffer-x-position-adjust frame) (nth 0 window-allocation)))
-                         (y (+ (eaf--buffer-y-postion-adjust frame) (nth 1 window-allocation)))
+                         (y (+ (eaf--buffer-y-position-adjust frame) (nth 1 window-allocation)))
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation)))
                     (push (format "%s:%s:%s:%s:%s:%s"
@@ -1158,9 +1160,12 @@ Such as, wayland native, macOS etc."
   (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
          (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-         (list
-		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 0"))
-		   (string-to-number (shell-command-to-string "hyprctl -j activewindow | jshon -e at -e 1"))))
+          (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
+                (coordinate))
+            (dotimes (i (length clients))
+              (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
+                (setq coordinate (gethash "at" (aref clients i)))))
+            (list (aref coordinate 0) (aref coordinate 1))))
         ((eaf-emacs-running-in-wayland-native)
          (require 'dbus)
          (let* ((coordinate (eaf--split-number
@@ -1180,7 +1185,10 @@ Such as, wayland native, macOS etc."
            (if is-fullscreen-p
                0
              ;; `32' is titlebar of Gnome3, we need change this value in other environment.
-             32)))
+             (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+                    0)
+                   (t
+                    32)))))
         (t
          0)))
 
@@ -1633,6 +1641,9 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   "Activate Emacs win32 window."
   (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
 
+(defvar eaf--emacs-program-name (string-replace "." "-" (alist-get 'comm (process-attributes (emacs-pid))))
+  "Name of Emacs.")
+
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
   "Activate Emacs window by `wmctrl'."
   (let ((system-configuration-arguments (split-string system-configuration-features)))
@@ -1645,7 +1656,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
           ;;
           ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
           (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-                 (shell-command-to-string "hyprctl dispatch focuswindow Emacs"))
+                 (shell-command-to-string (concat "hyprctl dispatch focuswindow " eaf--emacs-program-name)))
                 (t
                  (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 
