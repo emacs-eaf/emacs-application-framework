@@ -115,6 +115,9 @@ A bookmark handler function is used as
 A new app can use this to configure extensions which should
 handled by it.")
 
+(defvar eaf-app-hook-alist '()
+  "Application running hook.")
+
 (defvar eaf-build-dir (file-name-directory (locate-library "eaf")))
 (defvar eaf-source-dir (file-name-directory (file-truename (concat eaf-build-dir "eaf.el"))))
 
@@ -906,24 +909,24 @@ to edit EAF keybindings!" fun fun)))
             (set-keymap-parent map eaf-mode-map*))
           (cl-loop for (key . fun) in (reverse keybinding)
                    do (define-key map (kbd key)
-                        (cond
-                         ;; If command is normal symbol, just call it directly.
-                         ((symbolp fun)
-                          fun)
+                                  (cond
+                                   ;; If command is normal symbol, just call it directly.
+                                   ((symbolp fun)
+                                    fun)
 
-                         ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
-                         ((string-match "-" fun)
-                          (intern fun))
+                                   ;; If command is string and include - , it's elisp function, use `intern' build elisp function from function name.
+                                   ((string-match "-" fun)
+                                    (intern fun))
 
-                         ;; If command prefix with js_, call JavaScript function directly.
-                         ((string-prefix-p "js_" fun)
-                          (eaf--make-js-proxy-function fun))
+                                   ;; If command prefix with js_, call JavaScript function directly.
+                                   ((string-prefix-p "js_" fun)
+                                    (eaf--make-js-proxy-function fun))
 
-                         ;; If command is not built-in function and not include char '-'
-                         ;; it's command in python side, build elisp proxy function to call it.
-                         (t
-                          (eaf--make-py-proxy-function fun))
-                         ))
+                                   ;; If command is not built-in function and not include char '-'
+                                   ;; it's command in python side, build elisp proxy function to call it.
+                                   (t
+                                    (eaf--make-py-proxy-function fun))
+                                   ))
                    finally return map))))
 
 (defun eaf--get-app-bindings (app-name)
@@ -937,6 +940,10 @@ keybinding variable to eaf-app-binding-alist."
 (defun eaf--get-app-module-path (app-name)
   (symbol-value
    (cdr (assoc app-name eaf-app-module-path-alist))))
+
+(defun eaf--get-app-hook (app-name)
+  (funcall
+   (cdr (assoc app-name eaf-app-hook-alist))))
 
 (defun eaf--create-buffer (url app-name args)
   "Create an EAF buffer given URL, APP-NAME, and ARGS."
@@ -1440,6 +1447,12 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                       eaf--buffer-url)
                     (eaf--get-app-module-path eaf--buffer-app-name)
                     eaf--buffer-args)
+
+    ;; Run application's hook.
+    (let ((app-hook (assoc eaf--buffer-app-name eaf-app-hook-alist)))
+      (when app-hook
+        (funcall (cdr app-hook))))
+
     (eaf--update-modeline-icon)
     (eaf--preview-display-buffer eaf--buffer-app-name buffer)))
 
@@ -1476,11 +1489,16 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
       (getenv "HOME")
     default-directory))
 
-(defun eaf--get-app-for-extension (extension-name)
+(defun eaf--get-app-for-extension (url)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
-  (cl-loop for (app . ext) in eaf-app-extensions-alist
-           if (member extension-name (symbol-value ext))
-           return app))
+  (let ((extension-name (eaf-get-file-name-extension url))
+        apps)
+    (dolist (app-extension eaf-app-extensions-alist)
+      (when (member extension-name (symbol-value (cdr app-extension)))
+        (add-to-list 'apps (car app-extension))))
+    (if (length= apps 1)
+        (car apps)
+      (completing-read (format "Which app to open %s: " url) apps))))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
@@ -1515,13 +1533,12 @@ When called interactively, URL accepts a file that can be opened by EAF."
     ;; Adjust before open.
     (if (file-directory-p url)
         (setq app-name "file-manager")
-      (let* ((extension-name (eaf-get-file-name-extension url)))
-        ;; Initialize url, app-name and args
-        (setq app-name (eaf--get-app-for-extension extension-name))
-        (cond
-         ((equal app-name "browser")
-          (setq url (concat "file://" url)))
-         ))))
+      ;; Initialize url, app-name and args
+      (setq app-name (eaf--get-app-for-extension url))
+      (cond
+       ((equal app-name "browser")
+        (setq url (concat "file://" url)))
+       )))
 
   ;; Now that app-name should hopefully be set
   (unless app-name
