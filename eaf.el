@@ -1037,25 +1037,27 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (defun eaf--topmost-focus-change ()
       "Manage Emacs's focus change."
-      (let ((front (cond ((eq system-type 'darwin)
-                          (shell-command-to-string "app-frontmost --name"))
-                         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-                          (if (executable-find "jshon")
-                              (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
-                            (message "Please install jshon for swaywm support.")))
-                         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-                          (if (executable-find "jshon")
-                              (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
-                            (message "Please install jshon for hyprland support.")))
-                         (t
-                          (require 'dbus)
-                          (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000)))))
+      (let* ((front (cond ((eq system-type 'darwin)
+                           (shell-command-to-string "app-frontmost --name"))
+                          ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
+                           (if (executable-find "jshon")
+                               (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
+                             (message "Please install jshon for swaywm support.")))
+                          ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+                           (if (executable-find "jshon")
+                               (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
+                             (message "Please install jshon for hyprland support.")))
+                          (t
+                           (require 'dbus)
+                           (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
+             (front-app-name (string-trim front)))
         (cond
-         ((member front (list "Python\n" "python3\n" "python3"))
+         ((member front-app-name (list "Python" "python3"))
           (setq eaf--topmost-switch-to-python t))
-         ((string-equal (string-replace "." "-"
-                                        (string-replace "\n" "" front))
-                        eaf--emacs-program-name)
+         ((or (string-equal (string-replace "." "-" front)
+                            eaf--emacs-program-name)
+              (string-match-p (regexp-quote front-app-name)
+                              eaf--emacs-program-name))
           (if eaf--topmost-switch-to-python
               (setq eaf--topmost-switch-to-python nil)
             (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
@@ -1646,7 +1648,9 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   "Activate Emacs win32 window."
   (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
 
-(defvar eaf--emacs-program-name (string-replace "." "-" (alist-get 'comm (process-attributes (emacs-pid))))
+(defvar eaf--emacs-program-name
+  (string-trim
+   (string-replace "." "-" (alist-get 'comm (process-attributes (emacs-pid)))))
   "Name of Emacs.")
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
