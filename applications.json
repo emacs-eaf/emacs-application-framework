@@ -222,5 +222,14 @@
     "url": "https://github.com/emacs-eaf/eaf-vue-demo.git",
     "mirror_url": "https://gitee.com/emacs-eaf/eaf-vue-demo.git",
     "default_install": "false"
+  },
+  "vue-tailwindcss": {
+    "name": "EAF Vue Tailwindcss Demo",
+    "desc": "EAF app tailwindcss demo base on Vue.js",
+    "type": "app",
+    "branch": "master",
+    "url": "https://github.com/emacs-eaf/eaf-vue-tailwindcss.git",
+    "mirror_url": "https://gitee.com/emacs-eaf/eaf-vue-tailwindcss.git",
+    "default_install": "false"
   }
 }
