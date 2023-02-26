@@ -1051,9 +1051,7 @@ provide at least one way to let everyone experience EAF. ;)"
                                (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
                              (message "Please install jshon for swaywm support.")))
                           ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-                           (if (executable-find "jshon")
-                               (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
-                             (message "Please install jshon for hyprland support.")))
+                           (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow"))))
                           (t
                            (require 'dbus)
                            (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
