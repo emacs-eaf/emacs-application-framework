@@ -230,7 +230,7 @@ def init_epc_client(emacs_server_port):
 
     global epc_client
 
-    if epc_client == None:
+    if epc_client is None:
         try:
             epc_client = EPCClient(("localhost", emacs_server_port), log_traceback=True)
         except ConnectionRefusedError:
@@ -240,7 +240,7 @@ def init_epc_client(emacs_server_port):
 def close_epc_client():
     global epc_client
 
-    if epc_client != None:
+    if epc_client is not None:
         epc_client.close()
 
 
