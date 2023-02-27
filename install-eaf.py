@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+import sysconfig
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
@@ -142,7 +143,11 @@ def install_sys_deps(distro: str, deps_list):
 
 def install_py_deps(deps_list):
     if sys.prefix == sys.base_prefix:
-        command = [PIP_CMD, 'install', '--user', '-U']
+        # pass --break-system-packages to permit installing packages into EXTERNALLY-MANAGED Python installations. see https://github.com/pypa/pip/issues/11780
+        if os.path.exists(os.path.join(sysconfig.get_path("stdlib", sysconfig.get_default_scheme()),"EXTERNALLY-MANAGED")):
+            command = [PIP_CMD, 'install', '--user', '--break-system-packages', '-U']
+        else:
+            command = [PIP_CMD, 'install', '--user', '-U']
     else:
         # if running on a virtual env, --user option is not valid.
         command = [PIP_CMD, 'install', '-U']
