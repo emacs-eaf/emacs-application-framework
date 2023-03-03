@@ -27,7 +27,7 @@ from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEnginePr
 from PyQt6.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
 from core.utils import (touch, string_to_base64, popen_and_call,
-                        call_and_check_code, interactive,
+                        call_and_check_code, interactive, get_emacs_theme_foreground, get_emacs_theme_background,
                         eval_in_emacs, message_to_emacs, clear_emacs_message,
                         open_url_in_background_tab, duplicate_page_in_new_tab,
                         open_url_in_new_tab, open_url_in_new_tab_other_window,
@@ -1571,6 +1571,13 @@ class BrowserBuffer(Buffer):
     def update_progress(self, progress):
         ''' Update the Progress Bar.'''
         self.dark_mode_js_load(progress)
+
+    @interactive
+    def update_theme(self):
+        self.theme_foreground_color = get_emacs_theme_foreground()
+        self.theme_background_color = get_emacs_theme_background()
+        self.buffer_widget.eval_js("document.body.style.background = '{}'; document.body.style.color = '{}'".format(
+            self.theme_background_color, self.theme_foreground_color))
 
 class ZoomSizeDb(object):
     def __init__(self, dbpath):

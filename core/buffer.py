@@ -454,6 +454,10 @@ class Buffer(QGraphicsScene):
         ''' Select right tab.'''
         eval_in_emacs('eaf-goto-right-tab', [])
 
+    @interactive
+    def update_theme(self):
+        pass
+
     def focus_widget(self, event=None):
         '''Focus buffer widget.'''
         if event is None:

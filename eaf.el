@@ -1172,12 +1172,12 @@ Such as, wayland native, macOS etc."
   (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
          (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
         ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-          (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
-                (coordinate))
-            (dotimes (i (length clients))
-              (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
-                (setq coordinate (gethash "at" (aref clients i)))))
-            (list (aref coordinate 0) (aref coordinate 1))))
+         (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
+               (coordinate))
+           (dotimes (i (length clients))
+             (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
+               (setq coordinate (gethash "at" (aref clients i)))))
+           (list (aref coordinate 0) (aref coordinate 1))))
         ((eaf-emacs-running-in-wayland-native)
          (require 'dbus)
          (let* ((coordinate (eaf--split-number
@@ -1847,6 +1847,11 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
         (apply fn file nil)
       (apply orig-fn file args))))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
+
+(defun eaf--load-theme (&rest _ignores)
+  (eaf-for-each-eaf-buffer
+   (eaf-call-async "eval_function" eaf--buffer-id "update_theme" (key-description (this-command-keys-vector)))))
+(advice-add #'load-theme :after #'eaf--load-theme)
 
 (defun eaf-ocr-buffer ()
   (interactive)
