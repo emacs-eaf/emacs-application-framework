@@ -1542,7 +1542,7 @@ When called interactively, URL accepts a file that can be opened by EAF."
       (setq app-name (eaf--get-app-for-extension url))
       (cond
        ((equal app-name "browser")
-        (setq url (concat "file://" url)))
+        (setq url (concat "file://" (if (equal system-type 'windows-nt) "/" "") url)))
        )))
 
   ;; Now that app-name should hopefully be set
