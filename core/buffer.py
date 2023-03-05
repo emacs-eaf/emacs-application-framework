@@ -456,7 +456,9 @@ class Buffer(QGraphicsScene):
 
     @interactive
     def update_theme(self):
-        pass
+        self.theme_mode = get_emacs_theme_mode()
+        self.theme_foreground_color = get_emacs_theme_foreground()
+        self.theme_background_color = get_emacs_theme_background()
 
     def focus_widget(self, event=None):
         '''Focus buffer widget.'''
