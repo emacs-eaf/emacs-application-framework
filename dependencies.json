@@ -35,7 +35,7 @@
   "pip": {
     "linux": [
       "epc",
-      "sexpdata==0.0.3",
+      "sexpdata",
       "tld",
       "lxml",
       "PyQt6==6.3.1",
@@ -46,7 +46,7 @@
     ],
     "win32": [
       "epc",
-      "sexpdata==0.0.3",
+      "sexpdata",
       "tld",
       "lxml",
       "pygetwindow",
@@ -58,7 +58,7 @@
     ],
     "darwin": [
       "epc",
-      "sexpdata==0.0.3",
+      "sexpdata",
       "tld",
       "lxml",
       "mac-app-frontmost",
