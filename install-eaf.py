@@ -124,7 +124,7 @@ def install_sys_deps(distro: str, deps_list):
     if distro == 'dnf':
         command = ['sudo', 'dnf', '-y', 'install']
     elif distro == 'emerge':
-        command = ['sudo', 'emerge']
+        command = ['sudo', 'emerge', "--update"]
     elif distro == 'apt':
         command = ['sudo', 'apt', '-y', 'install']
     elif distro == 'pacman':
