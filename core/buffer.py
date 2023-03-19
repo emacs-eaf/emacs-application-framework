@@ -184,7 +184,8 @@ class Buffer(QGraphicsScene):
                 self.send_key(self.current_event_string)
             else:
                 getattr(self, method_name)()
-                setattr(self, "insert_or_{}".format(method_name), _do)
+
+        setattr(self, "insert_or_{}".format(method_name), _do)
 
     def toggle_fullscreen(self):
         ''' Toggle full screen.'''
@@ -455,7 +456,8 @@ class Buffer(QGraphicsScene):
         '''Focus buffer widget.'''
         if event is None:
             event = QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.MouseFocusReason)
-            QApplication.postEvent(self.buffer_widget.focusProxy(), event)    # type: ignore
+
+        QApplication.postEvent(self.buffer_widget.focusProxy(), event)    # type: ignore
 
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
