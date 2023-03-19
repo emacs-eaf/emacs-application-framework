@@ -78,6 +78,9 @@ class View(QWidget):
 
         self.buffer.aspect_ratio_change.connect(self.adjust_aspect_ratio)
 
+        if current_desktop == "Hyprland":
+            self.setWindowTitle(f"eaf.py-{int(self.winId())}")
+
     def resizeEvent(self, event):
         # Fit content to view rect just when buffer fit_to_view option is enable.
         if self.buffer.fit_to_view:
@@ -110,7 +113,7 @@ class View(QWidget):
         import platform
 
         if current_desktop == "Hyprland" and event.type() in [QEvent.Type.Enter]:
-            hyprland_window_move(self.x, self.y)
+            hyprland_window_move(self.x, self.y, int(self.winId()))
 
         if event.type() in [QEvent.Type.ShortcutOverride]:
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
