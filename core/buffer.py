@@ -382,19 +382,11 @@ class Buffer(QGraphicsScene):
     def send_key(self, event_string):
         ''' Fake key event.'''
         # Init.
-        text = event_string
+        text = QT_TEXT_DICT.get(event_string, event_string)
         modifier = Qt.KeyboardModifier.NoModifier
 
-        # Get key text.
-        if event_string in QT_TEXT_DICT:
-            text = QT_TEXT_DICT[event_string]
-
-        if event_string == "<backtab>":
+        if event_string == "<backtab>" or (len(event_string) == 1 and event_string.isupper()):
             modifier = Qt.KeyboardModifier.ShiftModifier
-        elif len(event_string) == 1 and event_string.isupper():
-            modifier = Qt.KeyboardModifier.ShiftModifier
-
-        # print("Press: ", event_string, modifier, text)
 
         # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
         try:
@@ -527,7 +519,6 @@ class FetchSearchInputThread(QThread):
             else:
                 self.stop()
 
-            import time
             time.sleep(0.1)
 
     def stop(self):
