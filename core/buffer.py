@@ -28,6 +28,7 @@ from core.utils import (interactive, abstract, get_clipboard_text,
                         get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background)
 import abc
 import string
+import time
 
 QT_KEY_DICT = {}
 
@@ -292,7 +293,7 @@ class Buffer(QGraphicsScene):
         self.fetch_marker_input_thread.start()
 
     def stop_marker_input_monitor_thread(self):
-        if self.fetch_marker_input_thread != None and self.fetch_marker_input_thread.isRunning():
+        if self.fetch_marker_input_thread is not None and self.fetch_marker_input_thread.isRunning():
             self.fetch_marker_input_thread.running_flag = False
             self.fetch_marker_input_thread = None
 
@@ -303,7 +304,7 @@ class Buffer(QGraphicsScene):
         self.fetch_search_input_thread.start()
 
     def stop_search_input_monitor_thread(self):
-        if self.fetch_search_input_thread != None and self.fetch_search_input_thread.isRunning():
+        if self.fetch_search_input_thread is not None and self.fetch_search_input_thread.isRunning():
             self.fetch_search_input_thread.stop()
             self.fetch_search_input_thread = None
 
@@ -485,25 +486,20 @@ class FetchMarkerInputThread(QThread):
         while self.running_flag:
             ## In some cases, the markers may not be ready when fetch_marker_callback is first called,
             ## so we need to call fetch_marker_callback multiple times.
-            if self.markers is None or len(self.markers) == 0:
+            if not self.markers:
                 self.markers = self.fetch_marker_callback()
                 
-            if self.markers != None:
+            if self.markers:
                 minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
                 
                 marker_input_quit = minibuffer_input and len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
                 marker_input_finish = minibuffer_input in self.markers
-                
-                if marker_input_quit:
-                    self.running_flag = False
-                    eval_in_emacs('exit-minibuffer', [])
-                    message_to_emacs("Quit marker selection.")
-                elif marker_input_finish:
-                    self.running_flag = False
-                    eval_in_emacs('exit-minibuffer', [])
-                    message_to_emacs("Marker selected.")
 
-            import time
+                if marker_input_quit or marker_input_finish:
+                    self.running_flag = False
+                    eval_in_emacs('exit-minibuffer', [])
+                    message_to_emacs("Quit marker selection." if marker_input_quit else "Marker selected.")
+
             time.sleep(0.1)
 
 class FetchSearchInputThread(QThread):
