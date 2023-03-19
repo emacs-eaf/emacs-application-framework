@@ -29,19 +29,19 @@ from core.utils import (interactive, abstract, get_clipboard_text,
 import abc
 import string
 
-qt_key_dict = {}
+QT_KEY_DICT = {}
 
 # Build char event.
 for char in string.ascii_lowercase:
     upper_char = char.upper()
-    qt_key_dict[char] = eval("Qt.Key.Key_{}".format(upper_char))
-    qt_key_dict[upper_char] = eval("Qt.Key.Key_{}".format(upper_char))
+    QT_KEY_DICT[char] = eval("Qt.Key.Key_{}".format(upper_char))
+    QT_KEY_DICT[upper_char] = eval("Qt.Key.Key_{}".format(upper_char))
 
 # Build number event.
 for number in range(0, 10):
-    qt_key_dict[str(number)] = eval("Qt.Key.Key_{}".format(number))
+    QT_KEY_DICT[str(number)] = eval("Qt.Key.Key_{}".format(number))
 
-qt_key_dict.update({
+QT_KEY_DICT.update({
     ''':''': Qt.Key.Key_Colon,
     ''';''': Qt.Key.Key_Semicolon,
     '''.''': Qt.Key.Key_Period,
@@ -96,7 +96,7 @@ qt_key_dict.update({
 # NOTE:
 # We need convert return or backspace to correct text,
 # otherwise EAF browser will crash when user type return/backspace key.
-qt_text_dict = {
+QT_TEXT_DICT = {
     "SPC": " ",
     "<return>": "RET",
     "<backtab>": "",
@@ -111,6 +111,13 @@ qt_text_dict = {
     "<delete>": "",
     "<backspace>": "",
     "<escape>": ""
+}
+
+QT_MODIFIER_DICT = {
+    "C": Qt.KeyboardModifier.ControlModifier,
+    "M": Qt.KeyboardModifier.AltModifier,
+    "S": Qt.KeyboardModifier.ShiftModifier,
+    "s": Qt.KeyboardModifier.MetaModifier
 }
 
 class Buffer(QGraphicsScene):
@@ -176,7 +183,7 @@ class Buffer(QGraphicsScene):
                 self.send_key(self.current_event_string)
             else:
                 getattr(self, method_name)()
-        setattr(self, "insert_or_{}".format(method_name), _do)
+                setattr(self, "insert_or_{}".format(method_name), _do)
 
     def toggle_fullscreen(self):
         ''' Toggle full screen.'''
@@ -378,8 +385,8 @@ class Buffer(QGraphicsScene):
         modifier = Qt.KeyboardModifier.NoModifier
 
         # Get key text.
-        if event_string in qt_text_dict:
-            text = qt_text_dict[event_string]
+        if event_string in QT_TEXT_DICT:
+            text = QT_TEXT_DICT[event_string]
 
         if event_string == "<backtab>":
             modifier = Qt.KeyboardModifier.ShiftModifier
@@ -390,7 +397,7 @@ class Buffer(QGraphicsScene):
 
         # NOTE: don't ignore text argument, otherwise QWebEngineView not respond key event.
         try:
-            key_press = QKeyEvent(QEvent.Type.KeyPress, qt_key_dict[event_string], modifier, text)
+            key_press = QKeyEvent(QEvent.Type.KeyPress, QT_KEY_DICT[event_string], modifier, text)
         except:
             key_press = QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_unknown, modifier, text)
 
@@ -404,28 +411,19 @@ class Buffer(QGraphicsScene):
         event_list = event_string.split("-")
 
         if len(event_list) > 1:
-            for widget in [self.buffer_widget.focusProxy()]:    # type: ignore
-                last_char = event_list[-1]
-                last_key = last_char
-                if len(last_char) == 1:
-                    last_key = last_char.lower()
+            widget = self.buffer_widget.focusProxy()
+            last_char = event_list[-1]
+            last_key = last_char.lower() if len(last_char) == 1 else last_char
 
-                modifiers = Qt.KeyboardModifier.NoModifier
+            modifier_keys = [QT_MODIFIER_DICT.get(modifier) for modifier in event_list[0:-1]]
+            modifier_flags = Qt.KeyboardModifier.NoModifier
+            for modifier in modifier_keys:
+                modifier_flags |= modifier
 
-                for modifier in event_list[0:-1]:
-                    if modifier == "C":
-                        modifiers |= Qt.KeyboardModifier.ControlModifier
-                    elif modifier == "M":
-                        modifiers |= Qt.KeyboardModifier.AltModifier
-                    elif modifier == "S":
-                        modifiers |= Qt.KeyboardModifier.ShiftModifier
-                    elif modifier == "s":
-                        modifiers |= Qt.KeyboardModifier.MetaModifier
+            last_key = QT_TEXT_DICT.get(last_key, last_key)
 
-                if last_key in qt_text_dict:
-                    last_key = qt_text_dict[last_key]
-
-                QApplication.postEvent(widget, QKeyEvent(QEvent.Type.KeyPress, qt_key_dict[last_key], modifiers, last_key))
+            key_event = QKeyEvent(QEvent.Type.KeyPress, QT_KEY_DICT[last_key], modifier_flags, last_key)
+            QApplication.postEvent(widget, key_event)
 
     def get_url(self):
         ''' Get url.'''
@@ -464,7 +462,7 @@ class Buffer(QGraphicsScene):
         '''Focus buffer widget.'''
         if event is None:
             event = QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.MouseFocusReason)
-        QApplication.postEvent(self.buffer_widget.focusProxy(), event)    # type: ignore
+            QApplication.postEvent(self.buffer_widget.focusProxy(), event)    # type: ignore
 
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
