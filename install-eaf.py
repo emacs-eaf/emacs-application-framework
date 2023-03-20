@@ -77,6 +77,11 @@ important_messages = [
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
     print("[EAF] Running", ' '.join(command), "@", path)
 
+    # Throw exception if command not found,
+    # We found install-eaf.py still can work even it not found npm in system.
+    if not which(command[0]):
+        return Exception(f"Not found command: {command[0]}")
+
     # Use LC_ALL=C to make sure command output use English.
     # Then we can use English keyword to check command output.
     english_env = os.environ.copy()
