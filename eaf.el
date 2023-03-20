@@ -76,7 +76,6 @@
 (require 'json)
 (require 'map)
 (require 'seq)
-(require 'subr)
 (require 'subr-x)
 (require 'bookmark)
 
