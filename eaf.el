@@ -1059,7 +1059,7 @@ provide at least one way to let everyone experience EAF. ;)"
         (cond
          ((member front-app-name (list "Python" "python3"))
           (setq eaf--topmost-switch-to-python t))
-         ((or (string-equal (string-replace "." "-" front)
+         ((or (string-equal (replace-regexp-in-string "\\." "-" front)
                             eaf--emacs-program-name)
               (string-match-p (regexp-quote front-app-name)
                               eaf--emacs-program-name))
@@ -1664,8 +1664,11 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
 
 (defvar eaf--emacs-program-name
-  (string-trim
-   (string-replace "." "-" (alist-get 'comm (process-attributes (emacs-pid)))))
+  (let ((name (alist-get 'comm (process-attributes (emacs-pid)))))
+    (if name
+        (string-trim
+         (replace-regexp-in-string "\\." "-" name))
+      "emacs"))
   "Name of Emacs.")
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
