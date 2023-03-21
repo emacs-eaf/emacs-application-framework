@@ -1163,7 +1163,7 @@ provide at least one way to let everyone experience EAF. ;)"
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
 
 (defun eaf--split-number (string)
-  (mapcar #'string-to-number (string-split string)))
+  (mapcar #'string-to-number (split-string string)))
 
 (defun eaf--get-frame-coordinate ()
   "We need fetch Emacs coordinate to adjust coordinate of EAF if it running on system not support cross-process reparent technology.
