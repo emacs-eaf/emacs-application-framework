@@ -23,6 +23,7 @@ from PyQt6.QtCore import Qt, QEvent, QPoint
 from PyQt6.QtGui import QPainter, QWindow, QBrush
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
 from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, hyprland_window_move, current_desktop
+import platform
 
 class View(QWidget):
 
@@ -45,6 +46,7 @@ class View(QWidget):
         self.installEventFilter(self)
 
         # Init attributes.
+        self.last_event_type = None
         self.view_info = view_info
         (self.buffer_id, self.emacs_xid, self.x, self.y, self.width, self.height) = view_info.split(":")
         self.x: int = int(self.x)
@@ -106,22 +108,38 @@ class View(QWidget):
 
             self.layout.setContentsMargins(int(horizontal_padding), int(vertical_padding), int(horizontal_padding), int(vertical_padding))
 
+    def is_switch_from_other_application(self, event):
+        # When switch to Emacs from other application, such as Alt + Tab.
+        #
+        # Event match one of below rules:
+        # 1. Current event is QEvent.Type.ShortcutOverride or QEvent.Type.Enter
+        # or
+        # 2. Current event is QEvent.Type.KeyRelease but last event type is QEvent.Type.UpdateRequest.
+        return ((event.type() in [QEvent.Type.ShortcutOverride, QEvent.Type.Enter]) or
+                (self.last_event_type != None and self.last_event_type == QEvent.Type.UpdateRequest and event.type() == QEvent.Type.KeyRelease))
+
     def eventFilter(self, obj, event):
+        # ENABLE BELOW CODE FOR DEBUG.
+        #
         # import time
         # print(time.time(), event.type())
-
-        import platform
+        # if event.type() == QEvent.Type.PlatformSurface:
+        #     print("###### ", event.surfaceEventType())
 
         if current_desktop == "Hyprland" and event.type() in [QEvent.Type.Enter]:
             hyprland_window_move(self.x, self.y, int(self.winId()))
 
-        if event.type() in [QEvent.Type.ShortcutOverride]:
+        # Focus emacs window when event type match below event list.
+        # Make sure EAF window always response user key event after switch from other application, such as Alt + Tab.
+        if self.is_switch_from_other_application(event):
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
 
         # Focus emacs buffer when user click view.
         event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
             event_type += [QEvent.Type.Wheel]
+
+        self.last_event_type = event.type()
 
         if event.type() in event_type:
             focus_emacs_buffer(self.buffer_id)
@@ -132,8 +150,6 @@ class View(QWidget):
 
     def showEvent(self, event):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
-        import platform
-
         self.reparent()
 
         if platform.system() in ["Windows", "Darwin"]:
