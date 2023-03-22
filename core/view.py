@@ -116,7 +116,7 @@ class View(QWidget):
         # or
         # 2. Current event is QEvent.Type.KeyRelease but last event type is QEvent.Type.UpdateRequest.
         return ((event.type() in [QEvent.Type.ShortcutOverride, QEvent.Type.Enter]) or
-                (self.last_event_type != None and self.last_event_type == QEvent.Type.UpdateRequest and event.type() == QEvent.Type.KeyRelease))
+                (self.last_event_type is not None and self.last_event_type == QEvent.Type.UpdateRequest and event.type() == QEvent.Type.KeyRelease))
 
     def eventFilter(self, obj, event):
         # ENABLE BELOW CODE FOR DEBUG.
