@@ -117,7 +117,9 @@ class View(QWidget):
         # 1. Current event is QEvent.Type.ShortcutOverride or QEvent.Type.Enter
         # or
         # 2. Current event is QEvent.Type.KeyRelease but last event type is QEvent.Type.UpdateRequest.
-        return ((event.type() in [QEvent.Type.ShortcutOverride, QEvent.Type.Enter]) or
+        return ((event.type() in [QEvent.Type.ShortcutOverride]) or
+                ((not self.is_member_of_focus_fix_wms) and
+                 event.type() in [QEvent.Type.Enter]) or
                 ((not self.is_member_of_focus_fix_wms) and
                  (self.last_event_type is not None) and
                  (self.last_event_type == QEvent.Type.UpdateRequest) and
