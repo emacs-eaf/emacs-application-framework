@@ -22,7 +22,7 @@
 from PyQt6.QtCore import Qt, QEvent, QPoint
 from PyQt6.QtGui import QPainter, QWindow, QBrush
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, hyprland_window_move, current_desktop
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, get_emacs_var, hyprland_window_move, current_desktop
 import platform
 
 class View(QWidget):
@@ -40,6 +40,8 @@ class View(QWidget):
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.NoDropShadowWindowHint)
         else:
             self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+
+        self.is_member_of_focus_fix_wms = get_emacs_var("eaf-is-member-of-focus-fix-wms")
 
         self.setAttribute(Qt.WidgetAttribute.WA_X11DoNotAcceptFocus, True)
         self.setContentsMargins(0, 0, 0, 0)
@@ -116,7 +118,10 @@ class View(QWidget):
         # or
         # 2. Current event is QEvent.Type.KeyRelease but last event type is QEvent.Type.UpdateRequest.
         return ((event.type() in [QEvent.Type.ShortcutOverride, QEvent.Type.Enter]) or
-                (self.last_event_type is not None and self.last_event_type == QEvent.Type.UpdateRequest and event.type() == QEvent.Type.KeyRelease))
+                ((not self.is_member_of_focus_fix_wms) and
+                 (self.last_event_type is not None) and
+                 (self.last_event_type == QEvent.Type.UpdateRequest) and
+                 (event.type() == QEvent.Type.KeyRelease)))
 
     def eventFilter(self, obj, event):
         # ENABLE BELOW CODE FOR DEBUG.

@@ -1659,6 +1659,9 @@ So multiple EAF buffers visiting the same file do not sync with each other."
         "")
     eaf-wm-name))
 
+(defvar eaf-is-member-of-focus-fix-wms
+  (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms))
+
 (defun eaf--activate-emacs-win32-window()
   "Activate Emacs win32 window."
   (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
@@ -1677,7 +1680,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     (if (or (member "LUCID" system-configuration-arguments)
             (member "ATHENA" system-configuration-arguments))
         (message "Please compile emacs use option --with-x-toolkit=gtk3, otherwise EAF can't focus emacs window expected.")
-      (if (member (eaf--get-current-desktop-name) eaf-wm-focus-fix-wms)
+      (if eaf-is-member-of-focus-fix-wms
           ;; When switch app focus in WM, such as, i3 or qtile.
           ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
           ;;
