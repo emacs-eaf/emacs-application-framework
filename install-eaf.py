@@ -137,6 +137,8 @@ def install_sys_deps(distro: str, deps_list):
         command = [aur_helper, '-Sy', '--noconfirm', '--needed']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
+    elif which("guix"):
+        command = ['guix', 'install']
     elif which("zypper"):
         command = ['sudo', 'zypper', 'install','-y']
     command.extend(deps_list)
@@ -294,6 +296,8 @@ def get_distro():
 
     elif which("pkg"):
         distro = "pkg"
+    elif which("guix"):
+        distro = "guix"
     elif which("zypper"):
         distro = "zypper"
     elif which("brew"):
