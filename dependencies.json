@@ -7,7 +7,7 @@
   "guix": [
     "wmctrl",
     "node"
-  ]
+  ],
   "emerge": [
     "x11-misc/wmctrl",
     "dev-python/gssapi",
