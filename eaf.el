@@ -1051,7 +1051,9 @@ provide at least one way to let everyone experience EAF. ;)"
                                (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
                              (message "Please install jshon for swaywm support.")))
                           ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
-                           (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow"))))
+                           (or
+                            (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
+                            ""))
                           (t
                            (require 'dbus)
                            (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
@@ -1667,11 +1669,10 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   (eaf-call-async "activate_emacs_win32_window" (frame-parameter nil 'name)))
 
 (defvar eaf--emacs-program-name
-  (let ((name (alist-get 'comm (process-attributes (emacs-pid)))))
-    (if name
-        (string-trim
-         (replace-regexp-in-string "\\." "-" name))
-      "emacs"))
+  (string-trim
+   (or
+    (replace-regexp-in-string "\\." "-" (alist-get 'comm (process-attributes (emacs-pid))))
+    "emacs"))
   "Name of Emacs.")
 
 (defun eaf--activate-emacs-linux-window (&optional buffer_id)
