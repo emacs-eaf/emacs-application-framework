@@ -1499,13 +1499,17 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
 (defun eaf--get-app-for-extension (url)
   "Given the EXTENSION-NAME, loops through `eaf-app-extensions-alist', set and return `app-name'."
   (let ((extension-name (eaf-get-file-name-extension url))
-        apps)
+        apps
+        app)
     (dolist (app-extension eaf-app-extensions-alist)
       (when (member extension-name (symbol-value (cdr app-extension)))
         (add-to-list 'apps (car app-extension))))
     (if (length= apps 1)
         (car apps)
-      (completing-read (format "Which app to open %s: " url) apps))))
+      (setq app (completing-read (format "Which app to open %s: " url) apps))
+      (if (member app apps)
+          app
+        (error "Current application '%s' is not exists, please choose one application name from list %s" app apps)))))
 
 ;;;###autoload
 (defun eaf-get-file-name-extension (file)
