@@ -1504,7 +1504,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (dolist (app-extension eaf-app-extensions-alist)
       (when (member extension-name (symbol-value (cdr app-extension)))
         (add-to-list 'apps (car app-extension))))
-    (if (length= apps 1)
+    (if (= (length apps) 1)
         (car apps)
       (setq app (completing-read (format "Which app to open %s: " url) apps))
       (if (member app apps)
