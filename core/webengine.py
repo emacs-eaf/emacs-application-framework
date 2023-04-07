@@ -39,6 +39,7 @@ import base64
 import os
 import platform
 import pathlib
+import threading
 
 MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
@@ -81,6 +82,9 @@ class BrowserView(QWebEngineView):
         self.get_selection_text_js = None
         self.focus_input_js = None
         self.simulated_wheel_event = False
+
+        self.last_mouse_word = None
+        self.last_mouse_word_timer = None
 
         (self.default_zoom, self.zoom_step,
          self.show_hover_link, self.marker_letters,
@@ -275,6 +279,20 @@ class BrowserView(QWebEngineView):
             else:
                 focus_emacs_buffer(self.buffer_id)
 
+        if event.type() == QEvent.Type.MouseMove:
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers == Qt.KeyboardModifier.ControlModifier:
+                word = self.get_cursor_word(event.pos().x() / self.zoomFactor(), event.pos().y() / self.zoomFactor())
+                if self.last_mouse_word != word:
+                    self.last_mouse_word = word
+
+                    if self.last_mouse_word is not None:
+                        if self.last_mouse_word_timer is not None and self.last_mouse_word_timer.is_alive():
+                            self.last_mouse_word_timer.cancel()
+
+                        self.last_mouse_word_timer = threading.Timer(1, lambda : self.translate_cursor_word(word))
+                        self.last_mouse_word_timer.start()
+
         if event.type() == QEvent.Type.MouseButtonPress:
 
             if platform.system() == "Darwin":
@@ -321,6 +339,9 @@ class BrowserView(QWebEngineView):
                     self.zoom_out()
 
         return super(QWebEngineView, self).eventFilter(obj, event)
+
+    def translate_cursor_word(self, word):
+        self.translate_selected_text.emit(word)
 
     def link_hovered(self, url):
         self.url_hovered = url
@@ -714,6 +735,10 @@ class BrowserView(QWebEngineView):
 
         self.eval_js(self.focus_input_js)
         eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'t"])
+
+    def get_cursor_word(self, x, y):
+        get_cursor_word_js = self.read_js_content("get_cursor_word.js").replace("%{mouse_x}", str(x)).replace("%{mouse_y}", str(y))
+        return self.execute_js(get_cursor_word_js)
 
     @interactive
     def clear_focus(self):
