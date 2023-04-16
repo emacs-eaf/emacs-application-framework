@@ -6,6 +6,8 @@ English | [简体中文](./README.zh-CN.md)
 </p>
 
 ## Vision
+<img src="./framework.png">
+
 Emacs, the extensible *text editor*, is more than 45 years old. It is older than virtually all operating systems people use today, almost as old as the first UNIX system. During the decades of development, the world's brightest hackers have contributed their intelligence and creativity. Together they've constructed the most comprehensive and richest ecosystem that you can find in any software to date.
 
 If you are a hacker who works with numerous languages and text, who's keyboard-driven and desires maximum freedom, extensibility, and introspectivity over your tool, maybe to the extent of *living* in it, Emacs will be your best bet.
@@ -18,7 +20,6 @@ Unfortunately, this 45 years of age is also one of the greatest disadvantages of
 Emacs, although infinitely extensible in text, is very limited in graphics. It shouldn't have to be this way. However, Emacs Lisp is *the* integral part of the Emacs culture, it carries decades of history with itself, it is what makes Emacs special. It is irreplaceable.
 
 The vision of the Emacs Application Framework (EAF) project is, while fully retaining the rich history, culture, and ecosystem of Emacs and Emacs Lisp, to open up completely new doors to the ecosystems of Python, Qt6, and even JavaScript. EAF extends Emacs to the world of modern graphics, but still preserving the extensibility and customizability of Emacs. It will be the key to ultimately *Live in Emacs*.
-
 
 ## Features
 
