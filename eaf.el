@@ -1637,7 +1637,7 @@ So multiple EAF buffers visiting the same file do not sync with each other."
   ;; Do confirm action.
   (let ((confirm-function (cdr (assoc eaf-edit-confirm-action eaf-edit-confirm-function-alist))))
     (if confirm-function
-        (funcal confirm-function)
+        (funcall confirm-function)
       (eaf-call-async "set_focus_text" eaf--buffer-id (eaf--encode-string (eaf-copy-to-clipboard (buffer-string))))))
 
   ;; Close confirm window.
