@@ -81,6 +81,8 @@ class BrowserView(QWebEngineView):
         self.select_input_text_js = None
         self.get_selection_text_js = None
         self.focus_input_js = None
+        self.immersive_translation_js = None
+
         self.simulated_wheel_event = False
 
         self.last_mouse_word = None
@@ -748,6 +750,13 @@ class BrowserView(QWebEngineView):
 
         self.eval_js(self.clear_focus_js)
         eval_in_emacs('eaf-update-focus-state', [self.buffer_id, "'nil"])
+
+    @interactive(insert_or_do=True)
+    def immersive_translation(self):
+        if self.immersive_translation_js is None:
+            self.immersive_translation_js = self.read_js_content("immersive_translation.js")
+
+        print(self.execute_js(self.immersive_translation_js))
 
     def init_dark_mode_js(self, module_path, selection_color="auto", dark_mode_theme="dark",
                           dark_mode_custom_theme={
