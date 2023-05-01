@@ -414,9 +414,9 @@ class Buffer(QGraphicsScene):
             for modifier in modifier_keys:
                 modifier_flags |= modifier
 
-            last_key = QT_TEXT_DICT.get(last_key, last_key)
+            text = QT_TEXT_DICT.get(last_key, last_key)
 
-            key_event = QKeyEvent(QEvent.Type.KeyPress, QT_KEY_DICT[last_key], modifier_flags, last_key)
+            key_event = QKeyEvent(QEvent.Type.KeyPress, QT_KEY_DICT[last_key], modifier_flags, text)
             QApplication.postEvent(widget, key_event)
 
     def get_url(self):
@@ -482,10 +482,10 @@ class FetchMarkerInputThread(QThread):
             ## so we need to call fetch_marker_callback multiple times.
             if not self.markers:
                 self.markers = self.fetch_marker_callback()
-                
+
             if self.markers:
                 minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
-                
+
                 marker_input_quit = minibuffer_input and len(minibuffer_input) > 0 and minibuffer_input[-1] in self.marker_quit_keys
                 marker_input_finish = minibuffer_input in self.markers
 
