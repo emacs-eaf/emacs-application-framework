@@ -26,7 +26,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt6.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
-from core.utils import (touch, string_to_base64, popen_and_call,
+from core.utils import (input_message, touch, string_to_base64, popen_and_call,
                         call_and_check_code, interactive, get_emacs_theme_mode,
                         get_emacs_theme_foreground, get_emacs_theme_background,
                         eval_in_emacs, message_to_emacs, clear_emacs_message,
@@ -896,6 +896,8 @@ class BrowserBuffer(Buffer):
         self.caret_browsing_search_text = ""
         self.is_dark_mode_enabled = self.dark_mode_is_enabled()
 
+        self.input_mode = False
+
         self.current_url = ""
         self.request_url = ""
 
@@ -1428,13 +1430,25 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("No active input element.")
 
+    @interactive
+    def switch_to_input_mode(self):
+        self.input_mode = not self.input_mode
+
+        if self.input_mode:
+            message_to_emacs("Enable input mode.")
+        else:
+            message_to_emacs("Disable input mode.")
+
     def is_focus(self):
         ''' Return bool of whether the buffer is focused.'''
-        input_focus = (self.buffer_widget.get_focus_text() is not None) or self.url.startswith("devtools://")
+        if self.input_mode:
+            return True
+        else:
+            input_focus = (self.buffer_widget.get_focus_text() is not None) or self.url.startswith("devtools://")
 
-        eval_in_emacs("eaf-update-focus-state", [self.buffer_id, input_focus])
+            eval_in_emacs("eaf-update-focus-state", [self.buffer_id, input_focus])
 
-        return input_focus
+            return input_focus
 
     @interactive(insert_or_do=True)
     def duplicate_page(self):
