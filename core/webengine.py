@@ -35,6 +35,7 @@ from core.utils import (touch, string_to_base64, popen_and_call,
                         focus_emacs_buffer, atomic_edit, get_emacs_config_dir,
                         to_camel_case, get_emacs_vars, PostGui)
 from urllib.parse import urlparse, parse_qs
+import shutil
 import base64
 import os
 import platform
@@ -758,16 +759,19 @@ class BrowserView(QWebEngineView):
 
     @interactive(insert_or_do=True)
     def immersive_translation(self):
-        if self.immersive_translation_js is None:
-            self.immersive_translation_js = self.read_js_content("immersive_translation.js")
+        if shutil.which("crow"):
+            if self.immersive_translation_js is None:
+                self.immersive_translation_js = self.read_js_content("immersive_translation.js")
 
-        translate_list = self.execute_js(self.immersive_translation_js)
-        thread = TranslateThread(translate_list)
-        thread.fetch_result.connect(self.handle_immersive_translation_result)
-        self.thread_queue.append(thread)
-        thread.start()
+            translate_list = self.execute_js(self.immersive_translation_js)
+            thread = TranslateThread(translate_list)
+            thread.fetch_result.connect(self.handle_immersive_translation_result)
+            self.thread_queue.append(thread)
+            thread.start()
 
-        message_to_emacs("Translate...")
+            message_to_emacs("Translate...")
+        else:
+            message_to_emacs("Please install the translation tool 'crow' before experiencing immersive translation.")
 
     def handle_immersive_translation_result(self, translates):
         if self.immersive_translation_response_js is None:
