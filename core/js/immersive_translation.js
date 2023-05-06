@@ -34,11 +34,12 @@
         let nodeTexts = [];
         for (const textNode of textNodes) {
             const textContent = textNode.textContent;
+            const text = textContent.trim();
 
-            if (textContent.trim().length === 0 ||
-                textContent.trim().length === 1 ||
+            if (text.length === 0 ||
+                text.length === 1 ||
                 checkString(textContent) ||
-                (["nil"].includes(textContent.trim())) ||
+                (["nil"].includes(text)) ||
                 textNode.parentNode.tagName === 'BUTTON') {
                     continue;
                 }
@@ -51,7 +52,8 @@
                     textContent.startsWith("u/") ||
                     textContent.startsWith("level ") ||
                     textContent.endsWith(" ago") ||
-                    (["Give Award", "Share", "Reply", "Report", "Save", "Follow"].includes(textContent)) ||
+                    (["give award", "award", "share", "reply", "cc", "comment as", "posted by", "op",
+                        "report", "save", "follow"].includes(text.toLowerCase())) ||
                     (textNode.className && textNode.className.includes("button")) ||
                     (textNode.className && textNode.className.includes("icon-comment"))
                 )) {
