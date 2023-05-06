@@ -322,6 +322,9 @@ def duplicate_page_in_new_tab(url):
 def open_url_in_new_tab(url):
     eval_in_emacs('eaf-open-browser', [url])
 
+def open_url_in_new_tab_same_window(url, current_url):
+    eval_in_emacs("eaf-open-browser-same-window", [url, current_url])
+
 def open_url_in_new_tab_other_window(url):
     eval_in_emacs('eaf-open-browser-other-window', [url])
 
