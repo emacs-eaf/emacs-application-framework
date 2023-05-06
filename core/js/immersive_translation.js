@@ -8,12 +8,12 @@
             !node.textContent.trim().startsWith('(') &&
             !node.textContent.trim().startsWith('{') &&
             !node.textContent.trim().startsWith('[')) {
-            nodes.push(node);
-        } else {
-            for (const child of node.childNodes) {
-                getTextNodes(child, nodes);
+                nodes.push(node);
+            } else {
+                for (const child of node.childNodes) {
+                    getTextNodes(child, nodes);
+                }
             }
-        }
         return nodes;
     }
 
@@ -30,6 +30,12 @@
         for (const textNode of textNodes) {
             const textContent = textNode.textContent;
 
+            if (textNode.parentNode.tagName === 'A' ||
+                textNode.parentNode.tagName === 'BUTTON' ||
+                textContent.trim().length === 0) {
+                    continue;
+                }
+
             if (pageUrl.startsWith("https://www.reddit.com") &&
                 (isNumeric(textContent) ||
                     textContent.startsWith("/r/") ||
@@ -42,25 +48,25 @@
                     (textNode.className && textNode.className.includes("button")) ||
                     (textNode.className && textNode.className.includes("icon-comment"))
                 )) {
-                continue;
-            }
+                    continue;
+                }
 
             const translatedText = "eaf-translated-node-" + index;
-            const translatedTextNode = document.createTextNode(translatedText);
-            const translatedSpan = document.createElement("span");
-            translatedSpan.appendChild(translatedTextNode);
-            translatedSpan.classList.add("eaf-translated");
-            translatedSpan.classList.add(translatedText);
+            const translatedTextNode = document.createTextNode("");
+            const translatedNode = document.createElement("div");
 
-            const originalParent = textNode.parentNode;
-            originalParent.insertBefore(translatedSpan, textNode.nextSibling);
+            translatedNode.appendChild(translatedTextNode);
+            translatedNode.classList.add("eaf-translated");
+            translatedNode.classList.add(translatedText);
+
+            textNode.after(translatedNode);
 
             nodeTexts.push(textContent);
 
-            console.log(textContent);
-
             index++;
         }
+        
+        console.log("##### ", nodeTexts);
 
         return nodeTexts;
     }

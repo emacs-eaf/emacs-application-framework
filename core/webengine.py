@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt6 import QtCore
-from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint, pyqtSlot
+from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint, pyqtSlot, QThread
 from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
@@ -40,6 +40,8 @@ import os
 import platform
 import pathlib
 import threading
+import tempfile
+import json
 
 MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
@@ -82,11 +84,14 @@ class BrowserView(QWebEngineView):
         self.get_selection_text_js = None
         self.focus_input_js = None
         self.immersive_translation_js = None
+        self.immersive_translation_response_js = None
 
         self.simulated_wheel_event = False
 
         self.last_mouse_word = None
         self.last_mouse_word_timer = None
+
+        self.thread_queue = []
 
         (self.default_zoom, self.zoom_step,
          self.show_hover_link, self.marker_letters,
@@ -756,7 +761,21 @@ class BrowserView(QWebEngineView):
         if self.immersive_translation_js is None:
             self.immersive_translation_js = self.read_js_content("immersive_translation.js")
 
-        print(self.execute_js(self.immersive_translation_js))
+        translate_list = self.execute_js(self.immersive_translation_js)
+        thread = TranslateThread(translate_list)
+        thread.fetch_result.connect(self.handle_immersive_translation_result)
+        self.thread_queue.append(thread)
+        thread.start()
+
+        message_to_emacs("Translate...")
+
+    def handle_immersive_translation_result(self, translates):
+        if self.immersive_translation_response_js is None:
+            self.immersive_translation_response_js = self.read_js_content("immersive_translation_response.js")
+
+        self.eval_js(self.immersive_translation_response_js.replace("%1", json.dumps(translates)))
+
+        message_to_emacs("Translate done.")
 
     def init_dark_mode_js(self, module_path, selection_color="auto", dark_mode_theme="dark",
                           dark_mode_custom_theme={
@@ -1805,3 +1824,42 @@ class CookiesManager(object):
             encode_path = cookie.path().replace("/", "|")
 
         return name + "+" + domain + "+" + encode_path
+
+class TranslateThread(QThread):
+
+    fetch_result = QtCore.pyqtSignal(list)
+
+    def __init__(self, texts):
+        QThread.__init__(self)
+
+        self.texts = texts
+
+    def get_command_result(self, command_string):
+        import subprocess
+        process = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process.wait()
+        result = process.stdout.readlines()
+        return result
+
+    def run(self):
+        if self.texts is None:
+            message_to_emacs("Not fetch words, please try agian.")
+        else:
+            text = ''.join(list(map(lambda t: f"ϗ {t}\n", self.texts)))
+            self.cache_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
+            self.cache_file_path = self.cache_file.name
+
+            with open(self.cache_file_path, "w") as f:
+                f.write(text)
+
+            result = self.get_command_result("crow -t 'zh-CN' --j -e 'google' -f {}".format(self.cache_file_path))
+            translation = json.loads(''.join(list(map(lambda b: b.decode("utf-8"), result))))["translation"]
+
+            if os.path.exists(self.cache_file_path):
+                os.remove(self.cache_file_path)
+
+            if len(translation) > 0:
+                translates = translation.split("\n")
+                translation_texts = list(map(lambda t: t.split("ϗ")[1].strip() if "ϗ" in t else t, translates))
+
+                self.fetch_result.emit(translation_texts)
