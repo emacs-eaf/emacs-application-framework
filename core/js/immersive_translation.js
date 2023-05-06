@@ -1,13 +1,7 @@
 (function() {
     function getTextNodes(node, nodes = []) {
         if (node.nodeType === Node.TEXT_NODE &&
-            node.textContent.trim() &&
-            !node.textContent.trim().startsWith('.') &&
-            !node.textContent.trim().startsWith('!') &&
-            !node.textContent.trim().startsWith('__') &&
-            !node.textContent.trim().startsWith('(') &&
-            !node.textContent.trim().startsWith('{') &&
-            !node.textContent.trim().startsWith('[')) {
+            node.textContent.trim()) {
                 nodes.push(node);
             } else {
                 for (const child of node.childNodes) {
