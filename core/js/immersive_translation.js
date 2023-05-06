@@ -21,6 +21,11 @@
         return /^\d+$/.test(str);
     }
 
+    function checkString(input) {
+        const regex = /^[\d.,!?;:-\s]+$/
+        return regex.test(input);
+    }
+
     function addTranslations() {
         const textNodes = getTextNodes(document.body);
         var pageUrl = window.location.href;
@@ -30,9 +35,11 @@
         for (const textNode of textNodes) {
             const textContent = textNode.textContent;
 
-            if (textNode.parentNode.tagName === 'A' ||
-                textNode.parentNode.tagName === 'BUTTON' ||
-                textContent.trim().length === 0) {
+            if (textContent.trim().length === 0 ||
+                textContent.trim().length === 1 ||
+                checkString(textContent) ||
+                (["nil"].includes(textContent.trim())) ||
+                textNode.parentNode.tagName === 'BUTTON') {
                     continue;
                 }
 

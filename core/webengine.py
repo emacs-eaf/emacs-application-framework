@@ -1863,7 +1863,8 @@ class TranslateThread(QThread):
         if self.texts is None:
             message_to_emacs("Not fetch words, please try agian.")
         else:
-            text = ''.join(list(map(lambda t: f"ϗ {t}\n", self.texts)))
+            separator = "<meta name='google' content='notranslate'/>"
+            text = ''.join(list(map(lambda t: f"{separator}{t}\n", self.texts)))
             self.cache_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
             self.cache_file_path = self.cache_file.name
 
@@ -1877,7 +1878,6 @@ class TranslateThread(QThread):
                 os.remove(self.cache_file_path)
 
             if len(translation) > 0:
-                translates = translation.split("\n")
-                translation_texts = list(map(lambda t: t.split("ϗ")[1].strip() if "ϗ" in t else t, translates))
+                translates = translation.split(separator)[1:]
 
-                self.fetch_result.emit(translation_texts)
+                self.fetch_result.emit(translates)
