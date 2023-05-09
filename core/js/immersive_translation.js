@@ -106,7 +106,7 @@
                     textContent.startsWith("level ") ||
                     textContent.endsWith(" ago") ||
                     (["give award", "award", "share", "reply", "cc", "comment as", "posted by", "op",
-                        "report", "save", "follow"].includes(text.toLowerCase())) ||
+                        "report", "save", "follow", "markdown mode", "continue this thread"].includes(text.toLowerCase())) ||
                     (textNode.className && textNode.className.includes("button")) ||
                     (textNode.className && textNode.className.includes("icon-comment"))
                 )) {
