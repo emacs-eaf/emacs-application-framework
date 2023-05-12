@@ -44,6 +44,15 @@
     "mirror_url": "https://gitee.com/emacs-eaf/eaf-video-player.git",
     "default_install": "false"
   },
+  "js-video-player": {
+    "name": "EAF Video Player (JS)",
+    "desc": "Video Player in Emacs, build by Vue.js",
+    "type": "app",
+    "branch": "master",
+    "url": "https://github.com/emacs-eaf/eaf-js-video-player.git",
+    "mirror_url": "https://gitee.com/emacs-eaf/eaf-js-video-player.git",
+    "default_install": "false"
+  },
   "image-viewer": {
     "name": "EAF Image Viewer",
     "desc": "Dynanmic image viewer",
