@@ -2,7 +2,10 @@
   "pacman": [
     "wmctrl",
     "nodejs",
-    "npm"
+    "npm",
+    "python-pyqt6-webengine",
+    "python-pyqt6",
+    "python-pyqt6-sip"
   ],
   "guix": [
     "wmctrl",
@@ -37,6 +40,12 @@
     "node"
   ],
   "pip": {
+    "pacman": [
+      "epc",
+      "sexpdata",
+      "tld",
+      "lxml"
+    ],
     "linux": [
       "epc",
       "sexpdata",

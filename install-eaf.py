@@ -318,7 +318,19 @@ def install_core_deps(distro, deps_dict):
         if len(core_deps) > 0:
             install_sys_deps(distro, core_deps)
     if (not args.ignore_py_deps or sys.platform != "linux") and sys.platform in deps_dict["pip"]:
-        install_py_deps(deps_dict["pip"][sys.platform])
+        # For pip dependencies, the distribution name takes precedence over the os name.
+        #
+        # For example, in Arch Linux, we need install PyQt from Arch repository to instead install from PIP repository
+        # to make EAF browser support HTML5 video:
+        #
+        #     rm -rf ~/.local/lib/python3.10/site-packages/PyQt6*
+        #     sudo rm -rf /usr/lib/python3.10/site-packages/PyQt6*
+        #     sudo pacman -S python-pyqt6-webengine python-pyqt6 python-pyqt6-sip
+        distro = get_distro()
+        if distro in deps_dict["pip"]:
+            install_py_deps(deps_dict["pip"][distro])
+        else:
+            install_py_deps(deps_dict["pip"][sys.platform])
 
     print("[EAF] Finished installing core dependencies")
 
