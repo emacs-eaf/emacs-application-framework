@@ -4,7 +4,9 @@
         } else if (isHideNode(node)) {
         } else if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
             nodes.push(node);
-        } else if (isAParagraphNode(node)) {
+        } else if (node.tagName === 'P' ||
+                   node.tagName == "PRE" ||
+                   node.tagName == "A") {
             nodes.push(node);
         } else {
             for (const child of node.childNodes) {
@@ -40,12 +42,6 @@
         return false;
     }
 
-    // This node is a P node, and all its child nodes are EM, CODE, A nodes,
-    // so as to prevent em nodes from causing newlines in translation.
-    function isAParagraphNode(node) {
-        return node.tagName === 'P'
-    }
-
     function isNumeric(str) {
         return /^\d+$/.test(str);
     }
@@ -71,6 +67,10 @@
                 return getTextNodes(containerNode.parentNode);
             } else {
                 return getTextNodes(document.body);
+            }
+        } else if (pageUrl.startsWith("https://gitlab.com")) {
+            if (document.querySelector("article")) {
+                return getTextNodes(document.querySelector("article"));
             }
         } else {
             return getTextNodes(document.body);
