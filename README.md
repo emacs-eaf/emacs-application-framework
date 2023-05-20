@@ -179,6 +179,7 @@ If we missed your package, please make a PR to add it to the list.
 * ***[obr-viz](https://github.com/swhalemwo/obr-viz)***: visualizing [org-brain](https://github.com/Kungsgeten/org-brain) relationships using EAF
 * ***[netease-cloud-music](https://github.com/SpringHan/netease-cloud-music.el)***: A netease music client for emacs.
 * ***[2048pyqt6](https://github.com/porrige/2048pyqt6)***: A 2048 game that can run in emacs.
+* ***[pyqterminal](https://github.com/mumu-lhl/eaf-pyqterminal)***: A terminal written in PyQt6.
 
 ## Contributor
 <a href = "https://github.com/emacs-eaf/emacs-application-framework/graphs/contributors">
