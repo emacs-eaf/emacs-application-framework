@@ -986,11 +986,14 @@ class BrowserBuffer(Buffer):
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
         if success:
-            # Try to rename pdf file with title.
-            # Use host name if title include invalid file char.
-            title_path = os.path.join(os.path.expanduser(self.download_path), "{}.pdf".format(self.title))
             try:
-                os.rename(file_path, title_path)
+                # Try to rename pdf file with title if title exists and title does not contain invalid file char.
+                # Otherwise use host name (web pages) or filepath (local files) if title include invalid file char.
+                if self.title:
+                    title_path = os.path.join(os.path.expanduser(self.download_path), "{}.pdf".format(self.title))
+                    os.rename(file_path, title_path)
+                else:
+                    title_path = file_path
                 message_to_emacs("Successfully saved current webpage as '{}'.".format(title_path))
             except Exception:
                 message_to_emacs("Successfully saved current webpage as '{}'.".format(file_path))
@@ -1059,7 +1062,11 @@ class BrowserBuffer(Buffer):
 
     def _save_as_pdf(self):
         parsed = urlparse(self.url)
-        pdf_path = os.path.join(os.path.expanduser(self.download_path), "{}.pdf".format(parsed.netloc))
+        if parsed.netloc:
+            pdf_filename = "{}.pdf".format(parsed.netloc)
+        else:
+            pdf_filename = "{}.pdf".format(os.path.basename(parsed.path))
+        pdf_path = os.path.join(os.path.expanduser(self.download_path), pdf_filename)
         message_to_emacs("Saving as pdf...")
         self.buffer_widget.web_page.printToPdf(pdf_path)
 
