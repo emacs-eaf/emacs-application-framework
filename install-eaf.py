@@ -452,7 +452,7 @@ def install_app_deps(distro, deps_dict):
                 if not args.ignore_py_deps and 'pip' in deps_dict and sys.platform in deps_dict['pip']:
                     py_deps.extend(deps_dict['pip'][sys.platform])
                 if "npm_global" in deps_dict:
-                    npm_global_deps.append(deps_dict["npm_global"])
+                    npm_global_deps.extend(deps_dict["npm_global"])
                 if not args.ignore_node_deps:
                     if 'npm_install' in deps_dict and deps_dict['npm_install']:
                         npm_install_apps.append(app_path)
