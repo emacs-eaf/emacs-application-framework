@@ -6,7 +6,8 @@
     "python-pyqt6-webengine",
     "python-pyqt6",
     "python-pyqt6-sip",
-    "qt6-multimedia"
+    "qt6-multimedia",
+    "libvdpau-va-gl"
   ],
   "guix": [
     "wmctrl",
