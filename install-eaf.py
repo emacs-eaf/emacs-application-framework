@@ -68,6 +68,7 @@ available_apps_dict = get_available_apps_dict()
 
 install_failed_sys = []
 install_failed_pys = []
+install_failed_npm_globals = []
 install_failed_apps = []
 
 important_messages = [
@@ -164,6 +165,16 @@ def install_py_deps(deps_list):
     except Exception as e:
         print("Error:", e)
         install_failed_pys.append(' '.join(command))
+
+def install_npm_gloal_deps(deps_list):
+    command = ["sudo", NPM_CMD, "install", "-g"]
+    command.extend(deps_list)
+
+    try:
+        run_command(command)
+    except Exception as e:
+        print("Error:", e)
+        install_failed_npm_globals.append(' '.join(command))
 
 def remove_node_modules_path(app_path_list):
     for app_path in app_path_list:
@@ -417,6 +428,7 @@ def install_app_deps(distro, deps_dict):
 
     sys_deps = []
     py_deps = []
+    npm_global_deps = []
     npm_install_apps = []
     vue_install_apps = []
     npm_rebuild_apps = []
@@ -436,6 +448,8 @@ def install_app_deps(distro, deps_dict):
                     sys_deps.extend(deps_dict[distro])
                 if not args.ignore_py_deps and 'pip' in deps_dict and sys.platform in deps_dict['pip']:
                     py_deps.extend(deps_dict['pip'][sys.platform])
+                if "npm_global" in deps_dict:
+                    npm_global_deps.append(deps_dict["npm_global"])
                 if not args.ignore_node_deps:
                     if 'npm_install' in deps_dict and deps_dict['npm_install']:
                         npm_install_apps.append(app_path)
@@ -451,6 +465,8 @@ def install_app_deps(distro, deps_dict):
     if not args.ignore_py_deps and len(py_deps) > 0:
         print("[EAF] Installing python dependencies")
         install_py_deps(py_deps)
+    if len(npm_global_deps) > 0:
+        install_npm_gloal_deps(npm_global_deps)
     if not args.ignore_node_deps:
         if args.force:
             if len(npm_install_apps) > 0:
@@ -469,19 +485,28 @@ def install_app_deps(distro, deps_dict):
 
     global install_failed_sys
     global install_failed_pys
+    global install_failed_npm_globals
     global install_failed_apps
     if len(install_failed_sys) > 0:
         install_failed_sys = list(set(install_failed_sys))
         print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following system dependencies:" + bcolors.ENDC)
-        for dep in install_failed_sys: print(bcolors.WARNING + dep + bcolors.ENDC)
+        for dep in install_failed_sys:
+            print(bcolors.WARNING + dep + bcolors.ENDC)
     if len(install_failed_pys) > 0:
         install_failed_pys = list(set(install_failed_pys))
         print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following Python dependencies:" + bcolors.ENDC)
-        for dep in install_failed_pys: print(bcolors.WARNING + dep + bcolors.ENDC)
+        for dep in install_failed_pys:
+            print(bcolors.WARNING + dep + bcolors.ENDC)
+    if len(install_failed_npm_globals) > 0:
+        install_failed_npm_globals = list(set(install_failed_npm_globals))
+        print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following NPM dependencies:" + bcolors.ENDC)
+        for dep in install_failed_npm_globals:
+            print(bcolors.WARNING + dep + bcolors.ENDC)
     if len(install_failed_apps) > 0:
         install_failed_apps = list(set(install_failed_apps))
         print(bcolors.WARNING + "\n[EAF] Installation FAILED for following applications:" + bcolors.ENDC)
-        for app in install_failed_apps: print(bcolors.WARNING + app + bcolors.ENDC)
+        for app in install_failed_apps:
+            print(bcolors.WARNING + app + bcolors.ENDC)
     if len(install_failed_sys) + len(install_failed_pys) + len(install_failed_apps) == 0:
         print("[EAF] Installation SUCCESS!")
     else:
