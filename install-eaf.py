@@ -303,7 +303,10 @@ def get_distro():
         distro = "pacman"
         aur_helper = get_archlinux_aur_helper()
         if (not args.ignore_core_deps and not args.ignore_sys_deps and len(args.install) == 0) or args.install_core_deps:
-            run_command([aur_helper, '-Sy', '--noconfirm', '--needed'])
+            try:
+                run_command([aur_helper, '-Sy', '--noconfirm', '--needed'])
+            except:
+                print("Run command `{} -Sy --noconfirm --needed' failed.".format(aur_helper))
 
     elif which("pkg"):
         distro = "pkg"
