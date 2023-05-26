@@ -5,7 +5,8 @@
     "npm",
     "python-pyqt6-webengine",
     "python-pyqt6",
-    "python-pyqt6-sip"
+    "python-pyqt6-sip",
+    "qt6-multimedia"
   ],
   "guix": [
     "wmctrl",
