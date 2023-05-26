@@ -22,7 +22,7 @@
 from PyQt6.QtCore import Qt, QEvent, QPoint
 from PyQt6.QtGui import QPainter, QWindow, QBrush
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, get_emacs_var, hyprland_window_move, current_desktop
+from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, get_emacs_var, current_desktop
 import platform
 
 class View(QWidget):
@@ -83,7 +83,10 @@ class View(QWidget):
         self.buffer.aspect_ratio_change.connect(self.adjust_aspect_ratio)
 
         if current_desktop == "Hyprland":
-            self.setWindowTitle(f"eaf.py-{int(self.winId())}")
+            import subprocess
+            title = f"eaf.py-{self.x}-{self.y}"
+            subprocess.Popen(f"hyprctl keyword windowrule move {self.x} {self.y},title:^{title}$", shell=True)
+            self.setWindowTitle(title)
 
     def resizeEvent(self, event):
         # Fit content to view rect just when buffer fit_to_view option is enable.
@@ -132,9 +135,6 @@ class View(QWidget):
         # print(time.time(), event.type())
         # if event.type() == QEvent.Type.PlatformSurface:
         #     print("###### ", event.surfaceEventType())
-
-        if current_desktop == "Hyprland" and event.type() in [QEvent.Type.Enter]:
-            hyprland_window_move(self.x, self.y, int(self.winId()))
 
         # Focus emacs window when event type match below event list.
         # Make sure EAF window always response user key event after switch from other application, such as Alt + Tab.
