@@ -536,11 +536,11 @@ class BrowserView(QWebEngineView):
             self.buffer.send_key(self.buffer.current_event_string)
         else:
             self.scroll_up_page()
-            
+
             # Try scroll to next page if reach bottom, such as, access google.com
             if self.get_next_page_url_js is None:
                 self.get_next_page_url_js = self.read_js_content("get_next_page_url.js")
-                
+
             next_page_url = self.execute_js(self.get_next_page_url_js)
             if next_page_url and next_page_url != "":
                 self.buffer.change_url(next_page_url)
@@ -986,7 +986,7 @@ class BrowserBuffer(Buffer):
 
     def permission_requested(self, frame, feature):
         self.buffer_widget.web_page.setFeaturePermission(frame, feature, QWebEnginePage.PermissionPolicy.PermissionGrantedByUser)
-            
+
     def notify_print_message(self, file_path, success):
         ''' Notify the print as pdf message.'''
         if success:
@@ -1541,27 +1541,27 @@ class BrowserBuffer(Buffer):
         if url.startswith("https://www.youtube.com"):
             import shutil
 
-            if shutil.which("youtube-dl"):
+            if shutil.which("yt-dlp"):
                 download_path = "{}/%(title)s-%(id)s.%(ext)s".format(os.path.expanduser(self.download_path))
 
-                youtube_dl_args = ["youtube-dl"]
+                yt_dlp_args = ["yt-dlp"]
                 if self.proxy_string != "":
-                    youtube_dl_args.append("--proxy")
-                    youtube_dl_args.append(self.proxy_string)
-                youtube_dl_args.append(url)
-                youtube_dl_args.append("-o")
-                youtube_dl_args.append(download_path)
+                    yt_dlp_args.append("--proxy")
+                    yt_dlp_args.append(self.proxy_string)
+                yt_dlp_args.append(url)
+                yt_dlp_args.append("-o")
+                yt_dlp_args.append(download_path)
 
                 file_type = "video"
                 if only_audio:
-                    youtube_dl_args.append("-x")
+                    yt_dlp_args.append("-x")
                     file_type = "audio"
 
-                popen_and_call(youtube_dl_args, lambda : message_to_emacs("Downloaded: {0}".format(url)))
+                popen_and_call(yt_dlp_args, lambda : message_to_emacs("Downloaded: {0}".format(url)))
 
                 message_to_emacs("Downloading {0}: {1}".format(file_type, url))
             else:
-                message_to_emacs("Please install youtube-dl to use this feature.")
+                message_to_emacs("Please install yt-dlp to use this feature.")
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
