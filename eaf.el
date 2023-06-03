@@ -1463,11 +1463,20 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf--update-modeline-icon)
     (eaf--preview-display-buffer eaf--buffer-app-name buffer)))
 
+(defvar eaf--rebuild-buffer-times 0)
+
 (defun eaf--rebuild-buffer ()
-  (when (derived-mode-p 'eaf-mode)
-    (eaf-restart-process)
-    (eaf--open-new-buffer (current-buffer))
-    (eaf-monitor-configuration-change)))
+  (if (and (derived-mode-p 'eaf-mode)
+           (< eaf--rebuild-buffer-times 3))
+      (progn
+        (eaf-restart-process)
+        (eaf--open-new-buffer (current-buffer))
+        (eaf-monitor-configuration-change)
+
+        (setq eaf--rebuild-buffer-times (1+ eaf--rebuild-buffer-times)))
+    (when (>= eaf--rebuild-buffer-times 3)
+      (message "Restart more than %s times, switch to '%s' buffer." eaf--rebuild-buffer-times eaf-name)
+      (switch-to-buffer eaf-name))))
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
