@@ -762,5 +762,10 @@ This variable is used for the management purpose.")
           eaf-epc-server-processes)
     main-process))
 
+(defun eaf-epc-stop-server-processes ()
+  (dolist (proc eaf-epc-server-processes)
+    (delete-process (car proc)))
+  (sleep-for .3))
+
 (provide 'eaf-epc)
 ;;; eaf-epc.el ends here

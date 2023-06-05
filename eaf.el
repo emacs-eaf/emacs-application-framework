@@ -742,7 +742,8 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (message "[EAF] Killed %s EAF buffer%s" count (if (> count 1) "s!" "!")))
 
   ;; Kill process after kill buffer, make application can save session data.
-  (eaf--kill-python-process))
+  (eaf--kill-python-process)
+  (eaf-epc-stop-server-processes))
 
 (defalias 'eaf-stop-process #'eaf-kill-process)
 
