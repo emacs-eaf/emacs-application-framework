@@ -526,6 +526,10 @@ And you need re-implement `eaf-goto-right-tab' self."
 EAF will remove the duplicate file manager buffer."
   :type 'integer)
 
+(defcustom eaf-rebuild-buffer-after-crash t
+  "Rebuild EAF buffer after it crash."
+  :type 'boolean)
+
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -1464,7 +1468,8 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf--preview-display-buffer eaf--buffer-app-name buffer)))
 
 (defun eaf--rebuild-buffer ()
-  (when (derived-mode-p 'eaf-mode)
+  (when (and eaf-rebuild-buffer-after-crash
+             (derived-mode-p 'eaf-mode))
     (eaf-restart-process)
     (eaf--open-new-buffer (current-buffer))
     (eaf-monitor-configuration-change)))
