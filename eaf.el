@@ -1477,7 +1477,11 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
         (eaf-restart-process)
         (eaf--open-new-buffer (current-buffer))
         (eaf-monitor-configuration-change))
-    (switch-to-buffer eaf-name)))
+    (when (get-buffer eaf-name)
+      (message "Below is EAF log:\n %s"
+               (with-current-buffer eaf-name
+                 (buffer-string))))
+    (eaf-stop-process)))
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"
