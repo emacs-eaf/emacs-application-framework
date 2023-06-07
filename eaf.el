@@ -527,7 +527,11 @@ EAF will remove the duplicate file manager buffer."
   :type 'integer)
 
 (defcustom eaf-rebuild-buffer-after-crash t
-  "Rebuild EAF buffer after it crash."
+  "Rebuild EAF buffer after it crash.
+
+Turning on this option can quickly rebuild the buffer very conveniently, avoiding the current buffer crash and affecting other buffers.
+
+Only turn off this option when you want investigate the cause of the crash."
   :type 'boolean)
 
 (defvar eaf--monitor-configuration-p t
@@ -1468,11 +1472,12 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
     (eaf--preview-display-buffer eaf--buffer-app-name buffer)))
 
 (defun eaf--rebuild-buffer ()
-  (when (and eaf-rebuild-buffer-after-crash
-             (derived-mode-p 'eaf-mode))
-    (eaf-restart-process)
-    (eaf--open-new-buffer (current-buffer))
-    (eaf-monitor-configuration-change)))
+  (if eaf-rebuild-buffer-after-crash
+      (when (derived-mode-p 'eaf-mode)
+        (eaf-restart-process)
+        (eaf--open-new-buffer (current-buffer))
+        (eaf-monitor-configuration-change))
+    (switch-to-buffer eaf-name)))
 
 (defun eaf--update-modeline-icon ()
   "Update modeline icon if used"

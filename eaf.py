@@ -239,8 +239,13 @@ class EAF(object):
                         view = View(self.buffer_dict[buffer_id], view_info)
                         self.view_dict[view_info] = view
                     except KeyError:
+                        # Hide all view, to switch *eaf* buffer.
+                        for key in self.view_dict:
+                            self.view_dict[key].hide()
+
                         eval_in_emacs('eaf--rebuild-buffer', [])
-                        message_to_emacs("Buffer id '{}' not exists, rebuild EAF buffer.".format(buffer_id))
+                        message_to_emacs("Buffer id '{}' not exists".format(buffer_id))
+                        return
 
         # Call some_view_show interface when buffer's view switch back.
         # Note, this must call after new view create, otherwise some buffer,
