@@ -1905,21 +1905,37 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
 (advice-add 'watch-other-window-internal :around
             #'eaf--watch-other-window-internal)
 
-;; Make EAF as default app for supported extensions.
-;; Use `eaf-open' in `find-file'
-(defun eaf--find-file-advisor (orig-fn file &rest args)
-  "Advisor of `find-file' that opens EAF supported file using EAF.
-
-It currently identifies PDF, videos, images, and mindmap file extensions."
+(defun eaf--find-file (orig-fn file &rest args)
   (let ((fn (if (commandp 'eaf-open)
                 #'(lambda (file)
                     (eaf-open file))
               orig-fn))
         (ext (file-name-extension file)))
     (if (eaf--find-file-ext-p ext)
-        (apply fn file nil)
+        (if (string-equal ext "svg")
+            (if (y-or-n-p (format "Open '%s' with EAF? " file))
+                (apply fn file nil)
+              (find-file-literally file)))
       (apply orig-fn file args))))
+
+;; Make EAF as default app for supported extensions.
+;; Use `eaf-open' in `find-file'
+(defun eaf--find-file-advisor (orig-fn file &rest args)
+  "Advisor of `find-file' that opens EAF supported file using EAF.
+
+It currently identifies PDF, videos, images, and mindmap file extensions."
+  (eaf--find-file orig-fn file args))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
+
+;; Use `eaf-open' in `dired-find-file' and `dired-find-alternate-file'
+(defun eaf--dired-find-file-advisor (orig-fn)
+  "Advisor of `dired-find-file' and `dired-find-alternate-file' that opens EAF supported file using EAF.
+
+It currently identifies PDF, videos, images, and mindmap file extensions."
+  (dolist (file (dired-get-marked-files))
+    (eaf--find-file orig-fn file)))
+(advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
+(advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
 (defun eaf--load-theme (&rest _ignores)
   (eaf-for-each-eaf-buffer
@@ -2030,23 +2046,6 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
 
 (define-obsolete-function-alias 'eaf-install 'eaf-install-and-update
   "Please use M-x eaf-install-and-update instead.")
-
-;; Use `eaf-open' in `dired-find-file' and `dired-find-alternate-file'
-(defun eaf--dired-find-file-advisor (orig-fn)
-  "Advisor of `dired-find-file' and `dired-find-alternate-file' that opens EAF supported file using EAF.
-
-It currently identifies PDF, videos, images, and mindmap file extensions."
-  (dolist (file (dired-get-marked-files))
-    (let ((fn (if (commandp 'eaf-open)
-                  #'(lambda (file)
-                      (eaf-open file))
-                orig-fn))
-          (ext (file-name-extension file)))
-      (if (eaf--find-file-ext-p ext)
-          (apply fn file nil)
-        (funcall-interactively orig-fn)))))
-(advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
-(advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
 (defun eaf--isearch-forward-advisor (orig-fun &optional arg &rest args)
   (if eaf-search-input-active-p
