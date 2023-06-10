@@ -1913,9 +1913,13 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
         (ext (file-name-extension file)))
     (if (eaf--find-file-ext-p ext)
         (if (string-equal ext "svg")
+            ;; User choose open svg file by Emacs or EAF application.
             (if (y-or-n-p (format "Open '%s' with EAF? " file))
                 (apply fn file nil)
-              (find-file-literally file)))
+              (find-file-literally file))
+          ;; Open by EAF if not svg file.
+          (apply fn file nil))
+      ;; Use `find-file' open file if file can not open by EAF.
       (apply orig-fn file args))))
 
 ;; Make EAF as default app for supported extensions.
