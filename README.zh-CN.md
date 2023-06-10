@@ -34,7 +34,7 @@ EAF 是一个可编程扩展的框架， 它自带一系列丰富的应用， �
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): 基于 Qt 的视频播放器
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): 支持实时缩放的图片查看器
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): 新闻阅读器， 支持 Html 内容渲染
-- [Terminal](https://github.com/emacs-eaf/eaf-terminal): 支持图形绘制的全功能终端模拟器
+- [Terminal](https://github.com/mumu-lhl/eaf-pyqterminal): 支持图形绘制的全功能终端模拟器
 - [Camera](https://github.com/emacs-eaf/eaf-camera): 摄像头程序
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown 文档实时预览程序， 完美兼容 Github 样式, 支持 Mermaid、 PlantUML、 KaTeX、 MathJax 等内容的渲染
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org 文件实时预览程序， 支持文件实时预览

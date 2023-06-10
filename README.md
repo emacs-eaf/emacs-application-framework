@@ -40,7 +40,7 @@ EAF is very extensible. We ship a lot of applications, feel free to choose anyth
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video Player in Emacs
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Dynanmic image viewer
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS Reader in Emacs
-- [Terminal](https://github.com/emacs-eaf/eaf-terminal): Full-featured terminal in Emacs
+- [Terminal](https://github.com/mumu-lhl/eaf-pyqterminal): Full-featured terminal in Emacs
 - [Camera](https://github.com/emacs-eaf/eaf-camera): Use camera in Emacs
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Real-time Markdown previewer
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Real-time Org-mode previewer
