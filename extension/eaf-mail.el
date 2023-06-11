@@ -122,7 +122,7 @@
 
 (defun eaf-mu4e-get-html ()
   "Retrieve HTML part of a mu4e mail."
-  (let ((msg mu4e~view-message))
+  (let ((msg (or (bound-and-true-p mu4e~view-message) mu4e--view-message)))
     (mu4e-message-field msg :body-html)))
 
 (defun eaf-notmuch-get-html ()
