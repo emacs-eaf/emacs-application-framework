@@ -26,14 +26,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
 from PyQt6.QtWidgets import QApplication, QWidget
 from core.buffer import Buffer
-from core.utils import (input_message, touch, string_to_base64, popen_and_call,
-                        call_and_check_code, interactive, get_emacs_theme_mode,
-                        get_emacs_theme_foreground, get_emacs_theme_background,
-                        eval_in_emacs, message_to_emacs, clear_emacs_message,
-                        open_url_in_background_tab, duplicate_page_in_new_tab,
-                        open_url_in_new_tab, open_url_in_new_tab_other_window,
-                        focus_emacs_buffer, atomic_edit, get_emacs_config_dir,
-                        to_camel_case, get_emacs_vars, PostGui)
+from core.utils import *
 from urllib.parse import urlparse, parse_qs
 import shutil
 import base64
@@ -641,7 +634,7 @@ class BrowserView(QWebEngineView):
     def get_text_markers(self):
         ''' Get visiable text markers.'''
         self.load_marker_file()
-        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList());");
+        self.eval_js("Marker.generateMarker(Marker.generateTextMarkerList());")
 
     def get_marker_link(self, marker):
         ''' Get marker's link.'''
@@ -657,22 +650,26 @@ class BrowserView(QWebEngineView):
     def _open_link(self, marker):
         ''' Jump to link according to marker.'''
         link = self.get_marker_link(marker)
-        if link: self.open_url(link)
+        if link:
+            self.open_url(link)
 
     def _open_link_new_buffer(self, marker):
         ''' Open the link at the marker in a new buffer.'''
         link = self.get_marker_link(marker)
-        if link: self.open_url_new_buffer(link)
+        if link:
+            self.open_url_new_buffer(link)
 
     def _open_link_new_buffer_other_window(self, marker):
         ''' Open the link at the marker in a new buffer in other window.'''
         link = self.get_marker_link(marker)
-        if link: self.open_url_new_buffer_other_window(link)
+        if link:
+            self.open_url_new_buffer_other_window(link)
 
     def _open_link_background_buffer(self, marker):
         ''' Open link at the marker in the background.'''
         link = self.get_marker_link(marker)
-        if link: self.open_url_background_buffer(link)
+        if link:
+            self.open_url_background_buffer(link)
 
     def _copy_link(self, marker):
         ''' Copy the link.'''
@@ -732,7 +729,7 @@ class BrowserView(QWebEngineView):
         if self.set_focus_text_raw is None:
             self.set_focus_text_raw = self.read_js_content("set_focus_text.js")
 
-        self.set_focus_text_js = self.set_focus_text_raw.replace("%{new_text_base64}", string_to_base64(new_text));
+        self.set_focus_text_js = self.set_focus_text_raw.replace("%{new_text_base64}", string_to_base64(new_text))
         self.eval_js(self.set_focus_text_js)
 
     @interactive(insert_or_do=True)
@@ -1376,48 +1373,48 @@ class BrowserBuffer(Buffer):
     def copy_code(self):
         ''' Copy code.'''
         self.buffer_widget.get_code_markers()
-        self.send_input_message("Copy code: ", "copy_code", "marker");
+        self.send_input_message("Copy code: ", "copy_code", "marker")
 
     @interactive(insert_or_do=True)
     def select_text(self):
         ''' Select Text.'''
         self.buffer_widget.get_text_markers()
-        self.send_input_message("Select Text: ", "select_marker_text", "marker");
+        self.send_input_message("Select Text: ", "select_marker_text", "marker")
 
     @interactive(insert_or_do=True)
     def caret_at_line(self):
         self.buffer_widget.get_text_markers()
-        self.send_input_message("Toggle Caret Browsing at Line: ", "caret_at_line", "marker");
+        self.send_input_message("Toggle Caret Browsing at Line: ", "caret_at_line", "marker")
 
     @interactive(insert_or_do=True)
     def open_link(self):
         ''' Open Link through a marker.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link: ", "open_link", "marker");
+        self.send_input_message("Open Link: ", "open_link", "marker")
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer(self):
         ''' Open Link in New Buffer.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in New Buffer: ", "open_link_new_buffer", "marker");
+        self.send_input_message("Open Link in New Buffer: ", "open_link_new_buffer", "marker")
 
     @interactive(insert_or_do=True)
     def open_link_new_buffer_other_window(self):
         ''' Open Link in New Buffer in Other Window.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in New Buffer in Other Window: ", "open_link_new_buffer_other_window", "marker");
+        self.send_input_message("Open Link in New Buffer in Other Window: ", "open_link_new_buffer_other_window", "marker")
 
     @interactive(insert_or_do=True)
     def open_link_background_buffer(self):
         ''' Open Link in Background Buffer.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer", "marker");
+        self.send_input_message("Open Link in Background Buffer: ", "jump_link_background_buffer", "marker")
 
     @interactive
     def copy_link(self):
         ''' Copy link.'''
         self.buffer_widget.get_link_markers()
-        self.send_input_message("Copy link: ", "copy_link", "marker");
+        self.send_input_message("Copy link: ", "copy_link", "marker")
 
     @interactive(insert_or_do=True)
     def edit_url(self):
