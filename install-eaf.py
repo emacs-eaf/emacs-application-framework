@@ -492,29 +492,31 @@ def install_app_deps(distro, deps_dict):
     global install_failed_apps
     if len(install_failed_sys) > 0:
         install_failed_sys = list(set(install_failed_sys))
-        print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following system dependencies:" + bcolors.ENDC)
+        print_warning_message("\n[EAF] Installation FAILED for the following system dependencies:")
         for dep in install_failed_sys:
-            print(bcolors.WARNING + dep + bcolors.ENDC)
+            print_warning_message(dep)
     if len(install_failed_pys) > 0:
         install_failed_pys = list(set(install_failed_pys))
-        print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following Python dependencies:" + bcolors.ENDC)
+        print_warning_message("\n[EAF] Installation FAILED for the following Python dependencies:")
         for dep in install_failed_pys:
-            print(bcolors.WARNING + dep + bcolors.ENDC)
+            print_warning_message(dep)
     if len(install_failed_npm_globals) > 0:
         install_failed_npm_globals = list(set(install_failed_npm_globals))
-        print(bcolors.WARNING + "\n[EAF] Installation FAILED for the following NPM dependencies:" + bcolors.ENDC)
+        print_warning_message("\n[EAF] Installation FAILED for the following NPM dependencies:")
         for dep in install_failed_npm_globals:
-            print(bcolors.WARNING + dep + bcolors.ENDC)
+            print_warning_message(dep)
     if len(install_failed_apps) > 0:
         install_failed_apps = list(set(install_failed_apps))
-        print(bcolors.WARNING + "\n[EAF] Installation FAILED for following applications:" + bcolors.ENDC)
+        print_warning_message("\n[EAF] Installation FAILED for following applications:")
         for app in install_failed_apps:
-            print(bcolors.WARNING + app + bcolors.ENDC)
+            print_warning_message(app)
     if len(install_failed_sys) + len(install_failed_pys) + len(install_failed_apps) == 0:
         print("[EAF] Installation SUCCESS!")
     else:
         print("[EAF] Please rerun ./install-eaf.py with `--force`, or install them manually!")
 
+def print_warning_message(self, message):
+    print(bcolors.WARNING + message + bcolors.ENDC)
 
 def main():
     try:
@@ -535,7 +537,7 @@ def main():
         print("[EAF] install-eaf.py finished.\n")
 
         for msg in important_messages:
-            print(bcolors.WARNING + msg + bcolors.ENDC)
+            print_warning_message(msg)
     except KeyboardInterrupt:
         print("[EAF] install-eaf.py aborted!")
         sys.exit()
