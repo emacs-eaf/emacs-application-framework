@@ -1905,7 +1905,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
 (advice-add 'watch-other-window-internal :around
             #'eaf--watch-other-window-internal)
 
-(defun eaf--find-file (orig-fn file &rest args)
+(defun eaf--find-file (orig-fn file diredp &rest args)
   (let ((fn (if (commandp 'eaf-open)
                 #'(lambda (file)
                     (eaf-open file))
@@ -1920,7 +1920,9 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
           ;; Open by EAF if not svg file.
           (apply fn file nil))
       ;; Use `find-file' open file if file can not open by EAF.
-      (apply orig-fn file args))))
+      (if diredp
+          (funcall orig-fn)
+        (apply orig-fn file args)))))
 
 ;; Make EAF as default app for supported extensions.
 ;; Use `eaf-open' in `find-file'
@@ -1928,7 +1930,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
   "Advisor of `find-file' that opens EAF supported file using EAF.
 
 It currently identifies PDF, videos, images, and mindmap file extensions."
-  (eaf--find-file orig-fn file args))
+  (eaf--find-file orig-fn file nil args))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
 
 ;; Use `eaf-open' in `dired-find-file' and `dired-find-alternate-file'
@@ -1937,7 +1939,7 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 
 It currently identifies PDF, videos, images, and mindmap file extensions."
   (dolist (file (dired-get-marked-files))
-    (eaf--find-file orig-fn file)))
+    (eaf--find-file orig-fn file t)))
 (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
 (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
 
