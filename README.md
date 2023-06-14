@@ -134,14 +134,18 @@ Below are launch commands of EAF Applications:
 | PDF Viewer          | `M-x eaf-open` PDF File                                                |
 | Video Player        | `M-x eaf-open` Video File                                              |
 | Image Viewer        | `M-x eaf-open` Image File                                              |
-| Markdown Previewer  | `M-x eaf-open` Markdown File                                           |
-| Org Previewer       | `M-x eaf-open` Org File                                                |
+| Markdown Previewer  | `M-x eaf-open` Markdown File, select `markdown-previewer`              |
+| Org Previewer       | `M-x eaf-open` Org File, select `org-previewer`                        |
 | Camera              | `M-x eaf-open-camera`                                                  |
-| Terminal            | `M-x eaf-open-terminal`                                                |
-| File Manager   | `M-x eaf-open-in-file-manager`                                    |
+| Terminal            | `M-x eaf-open-pyqterminal`                                             |
+| File Manager        | `M-x eaf-open-in-file-manager`                                         |
+| RSS Reader          | `M-x eaf-open-rss-reader`                                              |
+| Git Client          | `M-x eaf-open-git`                                                     |
+| Map Route Planning  | `M-x eaf-open-map`                                                     |
 | File Sender         | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`      |
 | File Browser        | `M-x eaf-file-browser-qrcode`                                          |
 | Airshare            | `M-x eaf-open-airshare`                                                |
+| Markmap             | `M-x eaf-open` Markdown or Org file, select `markmap`                  |
 | Mindmap             | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                     |
 | MS Office Viewer    | `M-x eaf-open-office`                                                  |
 | Jupyter             | `M-x eaf-open-jupyter`                                                 |

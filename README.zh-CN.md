@@ -128,14 +128,18 @@ Wayland 环境的支持分四种情况：
 | PDF 阅读器        | `M-x eaf-open` 输入 PDF 文件                                                  |
 | 视频播放器       | `M-x eaf-open` 输入视频文件                                                 |
 | 图片浏览器       | `M-x eaf-open` 输入图片文件                                                 |
-| Markdown 预览     | `M-x eaf-open` 输入 Markdown 文件                                             |
-| Org 预览          | `M-x eaf-open` 输入 Org 文件                                                  |
+| Markdown 预览     | `M-x eaf-open` 输入 Markdown 文件, 选择 markdown-previewer                                             |
+| Org 预览          | `M-x eaf-open` 输入 Org 文件, 选择 org-previewer                                                  |
 | 摄像头程序       | `M-x eaf-open-camera`                                                       |
-| 终端模拟器       | `M-x eaf-open-terminal`                                                     |
+| 终端模拟器       | `M-x eaf-open-pyqterminal`                                                     |
 | 文件管理器  | `M-x eaf-open-in-file-manager`                                         |
+| 新闻阅读器  | `M-x eaf-open-rss-reader`                                         |
+| Git 客户端  | `M-x eaf-open-git`                                         |
+| 地图路径规划  | `M-x eaf-open-map`                                         |
 | 二维码下载文件   | `M-x eaf-file-sender-qrcode` or `eaf-file-sender-qrcode-in-dired`           |
 | 二维码在线浏览器 | `M-x eaf-file-browser-qrcode`                                               |
 | 无线分享         | `M-x eaf-open-airshare` 输入要分享给手机的字符串                            |
+| Markdown 思维导图预览         | `M-x eaf-open` 输入 Markdown 或 Org 文件， 选择 markmap
 | 思维导图         | `M-x eaf-create-mindmap` or `M-x eaf-open-mindmap`                          |
 | 微软 Office 阅读器 | `M-x eaf-open-office`                                                       |
 | jupyter          | `M-x eaf-open-jupyter`                                                      |
