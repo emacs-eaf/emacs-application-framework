@@ -515,7 +515,7 @@ def install_app_deps(distro, deps_dict):
     else:
         print("[EAF] Please rerun ./install-eaf.py with `--force`, or install them manually!")
 
-def print_warning_message(self, message):
+def print_warning_message(message):
     print(bcolors.WARNING + message + bcolors.ENDC)
 
 def main():
