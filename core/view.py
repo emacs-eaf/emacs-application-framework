@@ -85,7 +85,7 @@ class View(QWidget):
         if current_desktop == "Hyprland":
             import subprocess
             title = f"eaf.py-{self.x}-{self.y}"
-            subprocess.Popen(f"hyprctl keyword windowrule move {self.x} {self.y},title:^{title}$", shell=True)
+            subprocess.Popen(f"hyprctl --batch 'keyword windowrule float,title:^{title}$ ; keyword windowrule move {self.x} {self.y},title:^{title}$'", shell=True)
             self.setWindowTitle(title)
 
     def resizeEvent(self, event):
