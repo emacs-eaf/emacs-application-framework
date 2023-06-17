@@ -132,9 +132,8 @@ class View(QWidget):
         # ENABLE BELOW CODE FOR DEBUG.
         #
         # import time
-        # print(time.time(), event.type())
-        # if event.type() == QEvent.Type.PlatformSurface:
-        #     print("###### ", event.surfaceEventType())
+        # current_time = time.time()
+        # print(f"{current_time:.6f}" + " " + event.type().name)
 
         # Focus emacs window when event type match below event list.
         # Make sure EAF window always response user key event after switch from other application, such as Alt + Tab.
@@ -142,13 +141,13 @@ class View(QWidget):
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
 
         # Focus emacs buffer when user click view.
-        event_type = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
+        focus_event_types = [QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick]
         if platform.system() != "Darwin":
-            event_type += [QEvent.Type.Wheel]
+            focus_event_types += [QEvent.Type.Wheel]
 
         self.last_event_type = event.type()
 
-        if event.type() in event_type:
+        if event.type() in focus_event_types:
             focus_emacs_buffer(self.buffer_id)
             # Stop mouse event.
             return True
