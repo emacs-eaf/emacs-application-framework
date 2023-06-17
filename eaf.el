@@ -1978,6 +1978,10 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
         (set-process-sentinel proc #'eaf--post-install-sentinel)
       (eaf--post-install))))
 
+(defun eaf-record-log ()
+  (interactive)
+  (message "\nBelow is EAF log:\n %s" (with-current-buffer eaf-name (buffer-string))))
+
 (defun eaf--post-install-sentinel (process string-signal)
   (when (memq (process-status process) '(exit signal))
     (message "Running post install")
