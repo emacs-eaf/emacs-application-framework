@@ -1289,6 +1289,7 @@ Such as, wayland native, macOS etc."
 (eaf-create-send-key-function "up")
 (eaf-create-send-key-function "escape")
 (eaf-create-send-key-function "return" "RET")
+(eaf-create-send-key-function "backspace" "DEL")
 
 (eaf-create-send-sequence-function "ctrl-return" "C-RET")
 (eaf-create-send-sequence-function "ctrl-delete" "C-<delete>")
