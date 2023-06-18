@@ -271,7 +271,7 @@ def get_emacs_func_result(method_name, args):
 def get_app_dark_mode(app_dark_mode_var):
     app_dark_mode = get_emacs_var(app_dark_mode_var)
     return (app_dark_mode == "force" or \
-            app_dark_mode == True or \
+            app_dark_mode is True or \
             (app_dark_mode == "follow" and \
              get_emacs_theme_mode() == "dark"))
 
@@ -322,7 +322,7 @@ def atomic_edit(buffer_id, focus_text):
 
 def convert_emacs_bool(symbol_value, symbol_is_boolean):
     if symbol_is_boolean == "t":
-        return symbol_value == True
+        return symbol_value is True
     else:
         return symbol_value
 

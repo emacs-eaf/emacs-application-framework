@@ -19,11 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt6.QtCore import Qt, QEvent, QPoint
-from PyQt6.QtGui import QPainter, QWindow, QBrush
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QFrame
-from core.utils import eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, get_emacs_var, current_desktop
 import platform
+
+from core.utils import current_desktop, eval_in_emacs, focus_emacs_buffer, get_emacs_func_cache_result, get_emacs_var
+from PyQt6.QtCore import QEvent, QPoint, Qt
+from PyQt6.QtGui import QBrush, QPainter, QWindow
+from PyQt6.QtWidgets import QFrame, QGraphicsView, QVBoxLayout, QWidget
+
 
 class View(QWidget):
 

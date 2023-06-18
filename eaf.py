@@ -74,7 +74,7 @@ class EAF(object):
         self.session_file = os.path.join(eaf_config_dir, "session.json")
 
         if not os.path.exists(eaf_config_dir):
-            os.makedirs(eaf_config_dir);
+            os.makedirs(eaf_config_dir)
 
         # ch = logging.FileHandler(filename=os.path.join(eaf_config_dir, 'epc_log.txt'), mode='w')
         # formatter = logging.Formatter('%(asctime)s | %(levelname)-8s | %(lineno)04d | %(message)s')

@@ -19,23 +19,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt6 import QtCore
-from PyQt6.QtCore import QUrl, Qt, QEvent, QEventLoop, QTimer, QFile, QPointF, QPoint, pyqtSlot, QThread
-from PyQt6.QtWebChannel import QWebChannel
-from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineScript, QWebEngineProfile, QWebEngineSettings
-from PyQt6.QtWidgets import QApplication, QWidget
+import base64
+import json
+import os
+import pathlib
+import platform
+import shutil
+import tempfile
+import threading
+from urllib.parse import parse_qs, urlparse
+
 from core.buffer import Buffer
 from core.utils import *
-from urllib.parse import urlparse, parse_qs
-import shutil
-import base64
-import os
-import platform
-import pathlib
-import threading
-import tempfile
-import json
+from PyQt6 import QtCore
+from PyQt6.QtCore import QEvent, QEventLoop, QFile, QPoint, QPointF, Qt, QThread, QTimer, QUrl, pyqtSlot
+from PyQt6.QtWebChannel import QWebChannel
+from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile, QWebEngineScript, QWebEngineSettings
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWidgets import QApplication, QWidget
 
 MOUSE_LEFT_BUTTON = 1
 MOUSE_WHEEL_BUTTON = 4
@@ -157,7 +158,7 @@ class BrowserView(QWebEngineView):
         else:
             filtered = dict((k, v) for k, v in qd.items())
 
-        from urllib.parse import urlunparse, urlencode
+        from urllib.parse import urlencode, urlunparse
 
         return urlunparse([
             parsed.scheme,
@@ -1771,8 +1772,9 @@ class CookiesManager(object):
 
     def delete_cookie(self):
         ''' Delete all cookie used by current site except session cookies.'''
-        from PyQt6.QtNetwork import QNetworkCookie
         import shutil
+
+        from PyQt6.QtNetwork import QNetworkCookie
 
         cookies_domain = os.listdir(self.cookies_dir)
 
@@ -1816,8 +1818,9 @@ class CookiesManager(object):
 
     def get_relate_domains(self, cookie_domain):
         ''' Check whether the cookie domain is located under the same root host as the current URL host.'''
-        import tld
         import re
+
+        import tld
 
         host_string = self.browser_view.url().host()
 

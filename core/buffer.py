@@ -19,16 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt6.QtCore import Qt, QEvent, QThread, pyqtSignal
-from PyQt6.QtGui import QKeyEvent, QCursor, QFocusEvent, QColor
-from PyQt6.QtWidgets import QGraphicsScene, QApplication
-from core.utils import (interactive, abstract, get_clipboard_text,
-                        set_clipboard_text, eval_in_emacs, message_to_emacs,
-                        input_message, get_emacs_var, get_emacs_func_result,
-                        get_emacs_theme_mode, get_emacs_theme_foreground, get_emacs_theme_background)
 import abc
 import string
 import time
+
+from core.utils import abstract, eval_in_emacs, get_clipboard_text, get_emacs_func_result, get_emacs_theme_background, get_emacs_theme_foreground, get_emacs_theme_mode, get_emacs_var, input_message, interactive, message_to_emacs, set_clipboard_text
+from PyQt6.QtCore import QEvent, Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QColor, QCursor, QFocusEvent, QKeyEvent
+from PyQt6.QtWidgets import QApplication, QGraphicsScene
 
 QT_KEY_DICT = {}
 
