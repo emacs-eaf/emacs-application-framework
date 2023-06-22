@@ -1,7 +1,6 @@
 (function() {
     function getTextNodes(node, nodes = []) {
-        if (isHeaderOrFooter(node)) {
-        } else if (isHideNode(node)) {
+        if (isHeaderOrFooter(node) || isHideNode(node)) {
         } else if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
             nodes.push(node);
         } else if (node.tagName === 'P' ||
@@ -21,7 +20,7 @@
             return false;
         }
 
-        return node.classList.contains('header') || node.classList.contains('footer');
+        return node.tagName === "HEADER" || node.tagName === "FOOTER" || node.classList.contains('header') || node.classList.contains('footer');
     }
 
     function isHideNode(node) {
@@ -34,6 +33,13 @@
             if ((node.hasAttribute("data-adclicklocation") && node.getAttribute("data-adclicklocation") === "top_bar") ||
                 (node.hasAttribute("data-testid") && node.getAttribute("data-testid") === "post-comment-header") ||
                 node.id === 'CommentSort--SortPicker'
+            ) {
+                return true;
+            }
+        } else if (pageUrl.startsWith("https://world.hey.com/dhh/")) {
+            if (node.classList.contains('bio') ||
+                node.classList.contains('push_double--top') ||
+                node.classList.contains('push_half--bottom')
             ) {
                 return true;
             }
