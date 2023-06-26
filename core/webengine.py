@@ -835,6 +835,12 @@ class BrowserPage(QWebEnginePage):
         self.result = result
         self.loop.quit()
 
+    def javaScriptConsoleMessage(self, level, message, line_number, source_id):
+        # Only print JavaScript console message for EAF application.
+        # don't print any console message from browser, print too much message will slow down Emacs.
+        if self.url().toString() == "file:///":
+            print("[JavaScript console]: " + message)
+
 class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
