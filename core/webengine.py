@@ -477,7 +477,7 @@ class BrowserView(QWebEngineView):
         )
 
         for widget in self.buffer.get_key_event_widgets():
-            QApplication.postEvent(widget, event)
+            post_event(widget, event)
 
     @interactive(insert_or_do=True)
     def scroll_left(self):

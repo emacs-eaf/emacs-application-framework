@@ -19,9 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt6.QtCore import QObject, pyqtSignal
-import sexpdata
 import os
+
+import sexpdata
+from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QApplication
+
 
 class PostGui(QObject):
 
@@ -159,8 +162,8 @@ def call_and_check_code(popen_args, on_exit):
 
 def get_clipboard_text():
     ''' Get text from system clipboard.'''
-    from PyQt6.QtWidgets import QApplication
     from PyQt6.QtGui import QClipboard
+    from PyQt6.QtWidgets import QApplication
 
     clipboard = QApplication.clipboard()
     text = clipboard.text()
@@ -174,8 +177,8 @@ def get_clipboard_text():
 
 def set_clipboard_text(text):
     ''' Set text to system clipboard.'''
-    from PyQt6.QtWidgets import QApplication
     from PyQt6.QtGui import QClipboard
+    from PyQt6.QtWidgets import QApplication
 
     clipboard = QApplication.clipboard()
     clipboard.setText(text)
@@ -371,3 +374,10 @@ def get_emacs_func_cache_result(func_name, func_args):
         return result
 
 current_desktop = os.getenv("XDG_CURRENT_DESKTOP")
+
+def post_event(widget, event):
+    try:
+        QApplication.postEvent(widget, event)
+    except:
+        import traceback
+        print("post_event error: " + traceback.format_exc())

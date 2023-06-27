@@ -23,7 +23,7 @@ import abc
 import string
 import time
 
-from core.utils import abstract, eval_in_emacs, get_clipboard_text, get_emacs_func_result, get_emacs_theme_background, get_emacs_theme_foreground, get_emacs_theme_mode, get_emacs_var, input_message, interactive, message_to_emacs, set_clipboard_text
+from core.utils import *
 from PyQt6.QtCore import QEvent, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QFocusEvent, QKeyEvent
 from PyQt6.QtWidgets import QApplication, QGraphicsScene
@@ -395,7 +395,7 @@ class Buffer(QGraphicsScene):
             key_press = QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_unknown, modifier, text)
 
         for widget in self.get_key_event_widgets():
-            QApplication.postEvent(widget, key_press)
+            post_event(widget, key_press)
 
         self.send_key_filter(event_string)
 
@@ -416,7 +416,7 @@ class Buffer(QGraphicsScene):
             text = QT_TEXT_DICT.get(last_key, last_key)
 
             key_event = QKeyEvent(QEvent.Type.KeyPress, QT_KEY_DICT[last_key], modifier_flags, text)
-            QApplication.postEvent(widget, key_event)
+            post_event(widget, key_event)
 
     def get_url(self):
         ''' Get url.'''
@@ -456,7 +456,7 @@ class Buffer(QGraphicsScene):
         if event is None:
             event = QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.MouseFocusReason)
 
-        QApplication.postEvent(self.buffer_widget.focusProxy(), event)    # type: ignore
+        post_event(self.buffer_widget.focusProxy(), event)    # type: ignore
 
         # Activate emacs window when call focus widget, avoid first char is not
         eval_in_emacs('eaf-activate-emacs-window', [])
