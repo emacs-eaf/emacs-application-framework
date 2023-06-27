@@ -73,7 +73,7 @@
   },
   "terminal": {
     "name": "EAF Terminal",
-    "desc": "Full-featured terminal in Emacs",
+    "desc": "Full-featured terminal in Emacs, pyqterminal is faster, please install pyqterminal",
     "type": "app",
     "branch": "master",
     "url": "https://github.com/emacs-eaf/eaf-terminal.git",
