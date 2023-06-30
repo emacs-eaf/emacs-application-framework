@@ -152,7 +152,7 @@ def install_sys_deps(distro: str, deps_list):
 def install_py_deps(deps_list):
     if sys.prefix == sys.base_prefix:
         # pass --break-system-packages to permit installing packages into EXTERNALLY-MANAGED Python installations. see https://github.com/pypa/pip/issues/11780
-        if get_distro() != "guix" and os.path.exists(os.path.join(sysconfig.get_path("stdlib", sysconfig.get_default_scheme()),"EXTERNALLY-MANAGED")):
+        if get_distro() != "guix" and os.path.exists(os.path.join(sysconfig.get_path("stdlib", sysconfig.get_default_scheme() if hasattr(sysconfig, "get_default_scheme") else sysconfig._get_default_scheme()),"EXTERNALLY-MANAGED")):
             command = [PIP_CMD, 'install', '--user', '--break-system-packages', '-U']
         else:
             command = [PIP_CMD, 'install', '--user', '-U']
