@@ -105,44 +105,52 @@ class BrowserView(QWebEngineView):
         self.cookies_manager.delete_cookie()
 
     def load_css(self, path, name):
-        path = QFile(path)
-        if not path.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
-            return
-        css = path.readAll().data().decode("utf-8")
-        SCRIPT = """
-        (function() {
-        try {
-        css = document.createElement('style');
-        css.type = 'text/css';
-        css.id = "%s";
-        document.head.appendChild(css);
-        css.innerText = `%s`;
-        } catch(e) {}
-        })()
-        """ % (name, css)
+        try:
+            path = QFile(path)
+            if not path.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
+                return
+            css = path.readAll().data().decode("utf-8")
+            SCRIPT = """
+            (function() {
+            try {
+            css = document.createElement('style');
+            css.type = 'text/css';
+            css.id = "%s";
+            document.head.appendChild(css);
+            css.innerText = `%s`;
+            } catch(e) {}
+            })()
+            """ % (name, css)
 
-        script = QWebEngineScript()
-        self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
-        script.setName(name)
-        script.setSourceCode(SCRIPT)
-        script.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentReady)
-        script.setRunsOnSubFrames(True)
-        script.setWorldId(QWebEngineScript.ScriptWorldId.ApplicationWorld)
-        self.web_page.scripts().insert(script)
+            script = QWebEngineScript()
+            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
+            script.setName(name)
+            script.setSourceCode(SCRIPT)
+            script.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentReady)
+            script.setRunsOnSubFrames(True)
+            script.setWorldId(QWebEngineScript.ScriptWorldId.ApplicationWorld)
+            self.web_page.scripts().insert(script)
+        except:
+            import traceback
+            traceback.print_exc()
 
     def remove_css(self, name, immediately):
-        SCRIPT =  """
-        (function() {
-        var element = document.getElementById('%s');
-        element.outerHTML = '';
-        delete element;
-        })()
-         """ % (name)
-        if immediately:
-            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
+        try:
+            SCRIPT =  """
+            (function() {
+            var element = document.getElementById('%s');
+            element.outerHTML = '';
+            delete element;
+            })()
+             """ % (name)
+            if immediately:
+                self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
 
-        script = self.web_page.scripts().findScript(name)
-        self.web_page.scripts().remove(script)
+            script = self.web_page.scripts().findScript(name)
+            self.web_page.scripts().remove(script)
+        except:
+            import traceback
+            traceback.print_exc()
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
@@ -417,7 +425,11 @@ class BrowserView(QWebEngineView):
 
     def eval_js(self, js):
         ''' Run JavaScript.'''
-        self.web_page.runJavaScript(js)
+        try:
+            self.web_page.runJavaScript(js)
+        except:
+            import traceback
+            traceback.print_exc()
 
     def eval_js_file(self, js_file):
         ''' Run JavaScript from JS file.'''
@@ -433,25 +445,22 @@ class BrowserView(QWebEngineView):
         return self.web_page.execute_javascript(js)
 
     def eval_js_function(self, *args):
-        import json
-
-        function_name = args[0]
-        function_args = args[1:]
-
-        format_string = ""
-
-        for index, arg in enumerate(function_args):
-            if type(arg) == str:
-                format_string += '\"{}\"'.format(arg)
-            else:
-                format_string += '{}'.format(json.dumps(arg))
-
-            if index != len(function_args) - 1:
-                format_string += ","
-
-        format_string = function_name + "(" + format_string + ");"
-
         try:
+            function_name = args[0]
+            function_args = args[1:]
+
+            format_string = ""
+
+            for index, arg in enumerate(function_args):
+                if type(arg) == str:
+                    format_string += '\"{}\"'.format(arg)
+                else:
+                    format_string += '{}'.format(json.dumps(arg))
+
+                if index != len(function_args) - 1:
+                    format_string += ","
+
+            format_string = function_name + "(" + format_string + ");"
             self.web_page.runJavaScript(format_string)
         except:
             import traceback
@@ -809,26 +818,32 @@ class BrowserPage(QWebEnginePage):
 
     def execute_javascript(self, script_src):
         ''' Execute JavaScript.'''
-        if hasattr(self, "loop") and self.loop.isRunning():
-            # NOTE:
-            #
-            # Just return None is QEventLoop is busy, such as press 'j' key not release on webpage.
-            # Otherwise will got error 'RecursionError: maximum recursion depth exceeded while calling a Python object'.
-            #
-            # And don't warry, API 'execute_javascript' is works well for programming purpse since we just call this interface occasionally.
+        try:
+            if hasattr(self, "loop") and self.loop.isRunning():
+                # NOTE:
+                #
+                # Just return None is QEventLoop is busy, such as press 'j' key not release on webpage.
+                # Otherwise will got error 'RecursionError: maximum recursion depth exceeded while calling a Python object'.
+                #
+                # And don't warry, API 'execute_javascript' is works well for programming purpse since we just call this interface occasionally.
+                return None
+            else:
+                # Build event loop.
+                self.loop = QEventLoop()
+
+                # Run JavaScript code.
+                self.runJavaScript(script_src, self.callback_js)
+
+                # Execute event loop, and wait event loop quit.
+                self.loop.exec()
+
+                # Return JavaScript function result.
+                return self.result
+        except:
+            import traceback
+            traceback.print_exc()
+
             return None
-        else:
-            # Build event loop.
-            self.loop = QEventLoop()
-
-            # Run JavaScript code.
-            self.runJavaScript(script_src, self.callback_js)
-
-            # Execute event loop, and wait event loop quit.
-            self.loop.exec()
-
-            # Return JavaScript function result.
-            return self.result
 
     def callback_js(self, result):
         ''' Callback of JavaScript, call loop.quit to jump code after loop.exec.'''
