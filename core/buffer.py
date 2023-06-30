@@ -379,6 +379,7 @@ class Buffer(QGraphicsScene):
     def send_key_filter(self, event_string):
         pass
 
+    @PostGui()
     def send_key(self, event_string):
         ''' Fake key event.'''
         # Init.
@@ -399,6 +400,7 @@ class Buffer(QGraphicsScene):
 
         self.send_key_filter(event_string)
 
+    @PostGui()
     def send_key_sequence(self, event_string):
         ''' Fake key sequence.'''
         event_list = event_string.split("-")

@@ -221,7 +221,7 @@ class BrowserView(QWebEngineView):
         ''' Backward Search Text.'''
         self.buffer.send_input_message("Backward Search Text: ", "search_text_backward", "search")
 
-    @interactive
+    @PostGui()
     def action_quit(self):
         ''' Quit action.'''
         # Clean search selections if search text is not empty.
@@ -1145,6 +1145,7 @@ class BrowserBuffer(Buffer):
         # We need send key event to QWebEngineView's focusProxy widget, not QWebEngineView.
         return [self.buffer_widget.focusProxy()]
 
+    @PostGui()
     def scroll_other_buffer(self, scroll_direction, scroll_type):
         ''' Scroll.'''
         if scroll_type == "page":
@@ -1158,6 +1159,7 @@ class BrowserBuffer(Buffer):
             else:
                 self.scroll_down()
 
+    @PostGui()
     def handle_input_response(self, callback_tag, result_content):
         ''' Handle input message.'''
         result_content = str(result_content)
@@ -1199,6 +1201,7 @@ class BrowserBuffer(Buffer):
             return False
         return True
 
+    @PostGui()
     def cancel_input_response(self, callback_tag):
         ''' Cancel input message.'''
         if callback_tag == "open_link" or \
@@ -1214,14 +1217,17 @@ class BrowserBuffer(Buffer):
         elif callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
             self.buffer_widget.clean_search_and_select()
 
+    @PostGui()
     def handle_search_forward(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
             self.buffer_widget._search_text(self.buffer_widget.search_term)
 
+    @PostGui()
     def handle_search_backward(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
             self.buffer_widget._search_text(self.buffer_widget.search_term, True)
 
+    @PostGui()
     def handle_search_finish(self, callback_tag):
         if callback_tag == "search_text_forward" or callback_tag == "search_text_backward":
             self.buffer_widget.clean_search()
@@ -1584,6 +1590,7 @@ class BrowserBuffer(Buffer):
         else:
             message_to_emacs("Only videos from YouTube can be downloaded for now.")
 
+    @PostGui()
     def eval_js_function(self, function_name, function_arguments):
         ''' Eval JavaScript function.'''
         if function_arguments == "":
@@ -1598,6 +1605,7 @@ class BrowserBuffer(Buffer):
         else:
             return self.buffer_widget.execute_js('''{}({})'''.format(to_camel_case(function_name), function_arguments))
 
+    @PostGui()
     def eval_js_code(self, js_code):
         ''' Eval JavaScript code.'''
         self.buffer_widget.eval_js(js_code)
