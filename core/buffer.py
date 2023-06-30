@@ -288,7 +288,7 @@ class Buffer(QGraphicsScene):
         pass
 
     def start_marker_input_monitor_thread(self, callback_tag):
-        self.fetch_marker_input_thread = FetchMarkerInputThread(callback_tag, self.fetch_marker_callback)
+        self.fetch_marker_input_thread = FetchMarkerInputThread(callback_tag, self.fetch_marker_callback())
         self.fetch_marker_input_thread.match_marker.connect(self.handle_input_response)
         self.fetch_marker_input_thread.start()
 
@@ -465,23 +465,17 @@ class FetchMarkerInputThread(QThread):
 
     match_marker = pyqtSignal(str, str)
 
-    def __init__(self, callback_tag, fetch_marker_callback):
+    def __init__(self, callback_tag, markers):
         QThread.__init__(self)
 
         self.callback_tag = callback_tag
         self.running_flag = True
 
-        self.fetch_marker_callback = fetch_marker_callback
         self.marker_quit_keys = get_emacs_var("eaf-marker-quit-keys") or ""
-        self.markers = self.fetch_marker_callback()
+        self.markers = markers
 
     def run(self):
         while self.running_flag:
-            ## In some cases, the markers may not be ready when fetch_marker_callback is first called,
-            ## so we need to call fetch_marker_callback multiple times.
-            if not self.markers:
-                self.markers = self.fetch_marker_callback()
-
             if self.markers:
                 minibuffer_input = get_emacs_func_result("minibuffer-contents-no-properties", [])
 
