@@ -32,7 +32,7 @@ from urllib.parse import parse_qs, urlparse
 from core.buffer import Buffer
 from core.utils import *
 from PyQt6 import QtCore
-from PyQt6.QtCore import QEvent, QEventLoop, QFile, QPoint, QPointF, Qt, QThread, QTimer, QUrl, pyqtSlot
+from PyQt6.QtCore import QEvent, QEventLoop, QPoint, QPointF, Qt, QThread, QTimer, QUrl, pyqtSlot
 from PyQt6.QtWebChannel import QWebChannel
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile, QWebEngineScript, QWebEngineSettings
 from PyQt6.QtWebEngineWidgets import QWebEngineView
@@ -61,6 +61,8 @@ class BrowserView(QWebEngineView):
         self.page().linkHovered.connect(self.link_hovered)
 
         self.selectionChanged.connect(self.select_text_change)
+
+        self.loadProgress.connect(self.load_fix_script)
 
         # Cookie init.
         self.cookies_manager = CookiesManager(self)
@@ -104,53 +106,17 @@ class BrowserView(QWebEngineView):
     def delete_cookie(self):
         self.cookies_manager.delete_cookie()
 
-    def load_css(self, path, name):
-        try:
-            path = QFile(path)
-            if not path.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
-                return
-            css = path.readAll().data().decode("utf-8")
-            SCRIPT = """
-            (function() {
-            try {
-            css = document.createElement('style');
-            css.type = 'text/css';
-            css.id = "%s";
-            document.head.appendChild(css);
-            css.innerText = `%s`;
-            } catch(e) {}
-            })()
-            """ % (name, css)
+    def load_fix_script(self, progress):
+        '''We need set environment variable QTWEBENGINE_CHROMIUM_FLAGS with --disable-web-security
+to make EAF can load local html and avoid browser throw CORS error.
 
-            script = QWebEngineScript()
-            self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
-            script.setName(name)
-            script.setSourceCode(SCRIPT)
-            script.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentReady)
-            script.setRunsOnSubFrames(True)
-            script.setWorldId(QWebEngineScript.ScriptWorldId.ApplicationWorld)
-            self.web_page.scripts().insert(script)
-        except:
-            import traceback
-            traceback.print_exc()
+After set --disable-web-security, some website (such as github.com) will throw 'navigator.clipboard is undefined' error recursively.
 
-    def remove_css(self, name, immediately):
-        try:
-            SCRIPT =  """
-            (function() {
-            var element = document.getElementById('%s');
-            element.outerHTML = '';
-            delete element;
-            })()
-             """ % (name)
-            if immediately:
-                self.web_page.runJavaScript(SCRIPT, QWebEngineScript.ScriptWorldId.ApplicationWorld)
+So this function add some script to avoid website throw error recursively.
 
-            script = self.web_page.scripts().findScript(name)
-            self.web_page.scripts().remove(script)
-        except:
-            import traceback
-            traceback.print_exc()
+Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' is not enough.'''
+        if not self.url().toString().startswith("file:///"):
+            self.eval_js("navigator.clipboard = {};")
 
     def read_js_content(self, js_file):
         ''' Read content of JavaScript(js) files.'''
