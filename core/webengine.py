@@ -746,6 +746,7 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
         else:
             message_to_emacs("Please install the translation tool 'crow' before experiencing immersive translation.")
 
+    @PostGui()
     def handle_immersive_translation_result(self, translates):
         if self.immersive_translation_response_js is None:
             self.immersive_translation_response_js = self.read_js_content("immersive_translation_response.js")
