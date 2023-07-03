@@ -63,11 +63,11 @@ class EAF(object):
         init_epc_client(int(emacs_server_port))
 
         # Build EPC server.
-        self.server = ThreadingEPCServer(('localhost', 0), log_traceback=True)
+        self.server = ThreadingEPCServer(('127.0.0.1', 0), log_traceback=True)
         self.server.allow_reuse_address = True
 
         # import logging
-        # self.server = ThreadingEPCServer(('localhost', 0)
+        # self.server = ThreadingEPCServer(('127.0.0.1', 0)
         # self.server.logger.setLevel(logging.DEBUG)
 
         eaf_config_dir = get_emacs_config_dir()

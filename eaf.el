@@ -1386,7 +1386,7 @@ WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
                          :commands (cons eaf-internal-process-prog eaf-internal-process-args)
                          :title (mapconcat 'identity (cons eaf-internal-process-prog eaf-internal-process-args) " ")
                          :port eaf-epc-port
-                         :connection (eaf-epc-connect "localhost" eaf-epc-port)
+                         :connection (eaf-epc-connect "127.0.0.1" eaf-epc-port)
                          ))
   (eaf-epc-init-epc-layer eaf-epc-process)
 

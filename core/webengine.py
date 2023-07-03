@@ -1045,7 +1045,7 @@ class BrowserBuffer(Buffer):
                 from core.pyaria2 import Jsonrpc
 
                 download_url = download_item.url().toString()
-                jsonrpc = Jsonrpc('localhost', 6800)
+                jsonrpc = Jsonrpc('127.0.0.1', 6800)
                 jsonrpc.addUris(download_url)
 
                 message_to_emacs("Downloading: " + download_url)

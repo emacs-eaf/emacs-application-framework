@@ -90,7 +90,7 @@ def is_port_in_use(port):
     import socket
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
+        return s.connect_ex(('127.0.0.1', port)) == 0
 
 def string_to_base64(text):
     import base64
@@ -235,7 +235,7 @@ def init_epc_client(emacs_server_port):
 
     if epc_client is None:
         try:
-            epc_client = EPCClient(("localhost", emacs_server_port), log_traceback=True)
+            epc_client = EPCClient(("127.0.0.1", emacs_server_port), log_traceback=True)
         except ConnectionRefusedError:
             import traceback
             traceback.print_exc()
