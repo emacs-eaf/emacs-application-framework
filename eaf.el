@@ -1139,7 +1139,9 @@ provide at least one way to let everyone experience EAF. ;)"
 (defun eaf-monitor-configuration-change (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
-             (eaf-epc-live-p eaf-epc-process))
+             (eaf-epc-live-p eaf-epc-process)
+             ;; When current frame is same with `emacs-frame'.
+             (equal (window-frame) emacs-frame))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
@@ -1376,10 +1378,15 @@ of `eaf--buffer-app-name' inside the EAF buffer."
       (when eaf-goto-right-after-close-buffer
         (eaf-goto-right-tab)))))
 
+(defvar eaf-frame nil)
+
 (defun eaf--first-start (eaf-epc-port)
   "Call `eaf--open-internal' upon receiving `start_finish' signal from server.
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
+  ;; Record frame that start EAF.
+  (setq emacs-frame (window-frame))
+
   ;; Make EPC process.
   (setq eaf-epc-process (make-eaf-epc-manager
                          :server-process eaf-internal-process
