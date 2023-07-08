@@ -267,9 +267,11 @@ class EAF(object):
                 if len(buffer_views) > 0:
                     max_view = max(buffer_views, key=lambda v: v.width * v.height)
 
+                    buffer.buffer_widget.width, buffer.buffer_widget.height = lambda: max_view.width, lambda: max_view.height
                     buffer.buffer_widget.resize(max_view.width, max_view.height)
                 # Adjust buffer size to emacs window size if not match view found.
                 else:
+                    buffer.buffer_widget.width, buffer.buffer_widget.height = lambda: emacs_width, lambda: emacs_height
                     buffer.buffer_widget.resize(emacs_width, emacs_height)
 
                 # Send resize signal to buffer.
