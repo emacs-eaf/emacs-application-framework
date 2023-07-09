@@ -1924,14 +1924,18 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
         (ext (file-name-extension file)))
     ;; Open by EAF application if file extension match in `eaf-app-extensions-alist'.
     (if (eaf--find-file-ext-p ext)
-        (if (string-equal ext "svg")
-            ;; User choose open svg file by Emacs or EAF application.
-            (if (y-or-n-p (format "Open '%s' with EAF? " file))
-                (apply fn file nil)
-              (find-file-literally file))
-          ;; Open by EAF if not svg file.
-          (apply fn file nil))
-
+        (cond
+         ;; If file is svg, user choose open svg file by Emacs or EAF application.
+         ((string-equal ext "svg")
+          (if (y-or-n-p (format "Open '%s' with EAF? " file))
+              (apply fn file nil)
+            (find-file-literally file)))
+         ;; If file is office, open by `eaf-open-office'.
+         ((member ext '("docx" "doc" "ppt" "pptx" "xlsx" "xls"))
+          (eaf-open-office file))
+         ;; Open by EAF if not svg file.
+         (t
+          (apply fn file nil)))
       ;; Use `find-file' open file if file can not open by EAF.
       (if diredp
           ;; Open by dired if `diredp' is non-nil.
