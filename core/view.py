@@ -119,16 +119,19 @@ class View(QWidget):
         # When switch to Emacs from other application, such as Alt + Tab.
         #
         # Event match one of below rules:
-        # 1. Current event is QEvent.Type.ShortcutOverride or QEvent.Type.Enter
-        # or
-        # 2. Current event is QEvent.Type.KeyRelease but last event type is QEvent.Type.UpdateRequest.
-        return ((event.type() in [QEvent.Type.ShortcutOverride]) or
-                ((not self.is_member_of_focus_fix_wms) and
-                 event.type() in [QEvent.Type.Enter]) or
-                ((not self.is_member_of_focus_fix_wms) and
-                 (self.last_event_type is not None) and
-                 (self.last_event_type == QEvent.Type.UpdateRequest) and
-                 (event.type() == QEvent.Type.KeyRelease)))
+        return (
+            # Current event is QEvent.Type.ShortcutOverride
+            (event.type() in [QEvent.Type.ShortcutOverride]) or
+
+            # Current event is QEvent.Type.Enter.
+            ((not self.is_member_of_focus_fix_wms) and
+             (self.last_event_type not in [QEvent.Type.Resize, QEvent.Type.WinIdChange, QEvent.Type.Leave, QEvent.Type.UpdateRequest]) and
+             (event.type() in [QEvent.Type.Enter])) or
+
+            # Current event is QEvent.Type.KeyRelease and last event is QEvent.Type.UpdateRequest.
+            ((not self.is_member_of_focus_fix_wms) and
+             (self.last_event_type is QEvent.Type.UpdateRequest) and
+             (event.type() is QEvent.Type.KeyRelease)))
 
     def eventFilter(self, obj, event):
         # ENABLE BELOW CODE FOR DEBUG.
