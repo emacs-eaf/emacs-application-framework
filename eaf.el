@@ -259,8 +259,12 @@ Within EAF buffers the variable `eaf--buffer-app-name' holds the
 name of the current app. Each app can setup app hooks by using
 `eaf-<app-name>-hook'. This hook runs after the app buffer has
 been initialized."
-  ;; Let eaf can set its mode-line and frame-title.
-  (setq-local mode-line-format eaf-mode-line-format)
+  (if (require 'holo-layer nil t)
+      ;; Don't show mode-line if `holo-layer' is installed.
+      (setq-local mode-line-format nil)
+    ;; Let eaf can set its mode-line and frame-title.
+    (setq-local mode-line-format eaf-mode-line-format))
+
   (setq-local frame-title-format eaf-frame-title-format)
   ;; Split window combinations proportionally.
   (setq-local window-combination-resize t)
