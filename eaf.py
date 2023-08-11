@@ -47,6 +47,7 @@ class EAF(object):
         emacs_height = int(emacs_height)
 
         # Init variables.
+        self.views_data = None
         self.buffer_dict = {}
         self.view_dict = {}
 
@@ -207,83 +208,86 @@ class EAF(object):
     @PostGui()
     def update_views(self, args):
         ''' Update views.'''
-        from core.view import View
+        if args != self.views_data:
+            self.views_data = args
 
-        view_infos = args.split(",")
+            from core.view import View
 
-        # Do something if buffer's all view hide after update_views operation.
-        old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
-        new_view_buffer_ids = list(set(map(lambda v: v.split(":")[0], view_infos)))
+            view_infos = args.split(",")
 
-        # Call all_views_hide interface when buffer's all views will hide.
-        # We do something in app's buffer interface, such as videoplayer will pause video when all views hide.
-        # Note, we must call this function before last view destroy,
-        # such as QGraphicsVideoItem will report "Internal data stream error" error.
-        for old_view_buffer_id in old_view_buffer_ids:
-            if old_view_buffer_id not in new_view_buffer_ids:
-                if old_view_buffer_id in self.buffer_dict:
-                    self.buffer_dict[old_view_buffer_id].all_views_hide()
+            # Do something if buffer's all view hide after update_views operation.
+            old_view_buffer_ids = list(set(map(lambda v: v.buffer_id, self.view_dict.values())))
+            new_view_buffer_ids = list(set(map(lambda v: v.split(":")[0], view_infos)))
 
-        # Remove old key from view dict and destroy old view.
-        for key in list(self.view_dict):
-            if key not in view_infos:
-                self.destroy_view_later(key)
+            # Call all_views_hide interface when buffer's all views will hide.
+            # We do something in app's buffer interface, such as videoplayer will pause video when all views hide.
+            # Note, we must call this function before last view destroy,
+            # such as QGraphicsVideoItem will report "Internal data stream error" error.
+            for old_view_buffer_id in old_view_buffer_ids:
+                if old_view_buffer_id not in new_view_buffer_ids:
+                    if old_view_buffer_id in self.buffer_dict:
+                        self.buffer_dict[old_view_buffer_id].all_views_hide()
 
-        # NOTE:
-        # Create new view and REPARENT view to Emacs window.
-        if view_infos != ['']:
-            for view_info in view_infos:
-                if view_info not in self.view_dict:
-                    (buffer_id, _, _, _, _, _) = view_info.split(":")
-                    try:
-                        view = View(self.buffer_dict[buffer_id], view_info)
-                        self.view_dict[view_info] = view
-                    except KeyError:
-                        # Hide all view, to switch *eaf* buffer.
-                        for key in self.view_dict:
-                            self.view_dict[key].hide()
+            # Remove old key from view dict and destroy old view.
+            for key in list(self.view_dict):
+                if key not in view_infos:
+                    self.destroy_view_later(key)
 
-                        eval_in_emacs('eaf--rebuild-buffer', [])
-                        message_to_emacs("Buffer id '{}' not exists".format(buffer_id))
-                        return
+            # NOTE:
+            # Create new view and REPARENT view to Emacs window.
+            if view_infos != ['']:
+                for view_info in view_infos:
+                    if view_info not in self.view_dict:
+                        (buffer_id, _, _, _, _, _) = view_info.split(":")
+                        try:
+                            view = View(self.buffer_dict[buffer_id], view_info)
+                            self.view_dict[view_info] = view
+                        except KeyError:
+                            # Hide all view, to switch *eaf* buffer.
+                            for key in self.view_dict:
+                                self.view_dict[key].hide()
 
-        # Call some_view_show interface when buffer's view switch back.
-        # Note, this must call after new view create, otherwise some buffer,
-        # such as QGraphicsVideoItem will report "Internal data stream error" error.
-        if view_infos != ['']:
-            for new_view_buffer_id in new_view_buffer_ids:
-                if new_view_buffer_id not in old_view_buffer_ids:
-                    if new_view_buffer_id in self.buffer_dict:
-                        self.buffer_dict[new_view_buffer_id].some_view_show()
+                            eval_in_emacs('eaf--rebuild-buffer', [])
+                            message_to_emacs("Buffer id '{}' not exists".format(buffer_id))
+                            return
 
-        # Adjust buffer size along with views change.
-        # Note: just buffer that option `fit_to_view' is False need to adjust,
-        # if buffer option fit_to_view is True, buffer render adjust by view.resizeEvent()
-        for buffer in list(self.buffer_dict.values()):
-            if not buffer.fit_to_view:
-                buffer_views = list(filter(lambda v: v.buffer_id == buffer.buffer_id, list(self.view_dict.values())))
+            # Call some_view_show interface when buffer's view switch back.
+            # Note, this must call after new view create, otherwise some buffer,
+            # such as QGraphicsVideoItem will report "Internal data stream error" error.
+            if view_infos != ['']:
+                for new_view_buffer_id in new_view_buffer_ids:
+                    if new_view_buffer_id not in old_view_buffer_ids:
+                        if new_view_buffer_id in self.buffer_dict:
+                            self.buffer_dict[new_view_buffer_id].some_view_show()
 
-                # Adjust buffer size to max view's size.
-                if len(buffer_views) > 0:
-                    max_view = max(buffer_views, key=lambda v: v.width * v.height)
+            # Adjust buffer size along with views change.
+            # Note: just buffer that option `fit_to_view' is False need to adjust,
+            # if buffer option fit_to_view is True, buffer render adjust by view.resizeEvent()
+            for buffer in list(self.buffer_dict.values()):
+                if not buffer.fit_to_view:
+                    buffer_views = list(filter(lambda v: v.buffer_id == buffer.buffer_id, list(self.view_dict.values())))
 
-                    buffer.buffer_widget.width, buffer.buffer_widget.height = lambda: max_view.width, lambda: max_view.height
-                    buffer.buffer_widget.resize(max_view.width, max_view.height)
-                # Adjust buffer size to emacs window size if not match view found.
-                else:
-                    buffer.buffer_widget.width, buffer.buffer_widget.height = lambda: emacs_width, lambda: emacs_height
-                    buffer.buffer_widget.resize(emacs_width, emacs_height)
+                    # Adjust buffer size to max view's size.
+                    if len(buffer_views) > 0:
+                        max_view = max(buffer_views, key=lambda v: v.width * v.height)
 
-                # Send resize signal to buffer.
-                buffer.resize_view()
+                        buffer.buffer_widget.width, buffer.buffer_widget.height = lambda: max_view.width, lambda: max_view.height
+                        buffer.buffer_widget.resize(max_view.width, max_view.height)
+                    # Adjust buffer size to emacs window size if not match view found.
+                    else:
+                        buffer.buffer_widget.width, buffer.buffer_widget.height = lambda: emacs_width, lambda: emacs_height
+                        buffer.buffer_widget.resize(emacs_width, emacs_height)
 
-        # NOTE:
-        # When you do switch buffer or kill buffer in Emacs, will call Python function 'update_views.
-        # Screen will flick if destroy old view BEFORE reparent new view.
-        #
-        # So we call function 'destroy_view_now' at last to make sure destroy old view AFTER reparent new view.
-        # Then screen won't flick.
-        self.destroy_view_now()
+                    # Send resize signal to buffer.
+                    buffer.resize_view()
+
+            # NOTE:
+            # When you do switch buffer or kill buffer in Emacs, will call Python function 'update_views.
+            # Screen will flick if destroy old view BEFORE reparent new view.
+            #
+            # So we call function 'destroy_view_now' at last to make sure destroy old view AFTER reparent new view.
+            # Then screen won't flick.
+            self.destroy_view_now()
 
     def destroy_view_later(self, key):
         '''Just record view id in global list 'destroy_view_list', and not destroy old view immediately.'''
