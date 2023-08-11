@@ -67,7 +67,7 @@ class EAF(object):
         self.server.allow_reuse_address = True
 
         # import logging
-        # self.server = ThreadingEPCServer(('127.0.0.1', 0)
+        # self.server = ThreadingEPCServer(('127.0.0.1', 0))
         # self.server.logger.setLevel(logging.DEBUG)
 
         eaf_config_dir = get_emacs_config_dir()
