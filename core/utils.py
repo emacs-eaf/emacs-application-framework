@@ -374,7 +374,7 @@ def get_emacs_func_cache_result(func_name, func_args):
 
         return result
 
-current_desktop = os.getenv("XDG_CURRENT_DESKTOP")
+current_desktop = os.getenv("XDG_CURRENT_DESKTOP") or os.getenv("XDG_SESSION_DESKTOP")
 
 def post_event(widget, event):
     try:
