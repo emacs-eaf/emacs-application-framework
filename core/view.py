@@ -84,7 +84,7 @@ class View(QWidget):
 
         self.buffer.aspect_ratio_change.connect(self.adjust_aspect_ratio)
 
-        self.location()
+        self.locate()
 
     def resizeEvent(self, event):
         # Fit content to view rect just when buffer fit_to_view option is enable.
@@ -192,7 +192,7 @@ class View(QWidget):
     def screen_shot(self):
         return self.grab()
 
-    def location(self):
+    def locate(self):
         title = f"eaf.py-{self.x}-{self.y}"
         if current_desktop == "Hyprland":
             import subprocess
