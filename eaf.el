@@ -1052,6 +1052,12 @@ provide at least one way to let everyone experience EAF. ;)"
 (defun eaf-emacs-running-in-wayland-native ()
   (eq window-system 'pgtk))
 
+(defun eaf--on-hyprland-p ()
+  (string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland"))
+
+(defun eaf--on-sway-p ()
+  (string-equal (getenv "XDG_SESSION_DESKTOP") "sway"))
+
 (eval-when-compile
   (when (eaf-emacs-not-use-reparent-technology)
     (defvar eaf--topmost-switch-to-python nil
@@ -1061,11 +1067,11 @@ provide at least one way to let everyone experience EAF. ;)"
       "Manage Emacs's focus change."
       (let* ((front (cond ((eq system-type 'darwin)
                            (shell-command-to-string "app-frontmost --name"))
-                          ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-                           (if (executable-find "jshon")
-                               (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-focusfetcher.sh"))
-                             (message "Please install jshon for swaywm support.")))
-                          ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+                          ((eaf--on-sway-p)
+                           (if (executable-find "jq")
+                               (shell-command-to-string "swaymsg -t get_tree | jq -r '..|try select(.focused == true).app_id'")
+                             (message "Please install jq for swaywm support.")))
+                          ((eaf--on-hyprland-p)
                            (or
                             (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
                             ""))
@@ -1188,9 +1194,11 @@ provide at least one way to let everyone experience EAF. ;)"
   "We need fetch Emacs coordinate to adjust coordinate of EAF if it running on system not support cross-process reparent technology.
 
 Such as, wayland native, macOS etc."
-  (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "sway")
-         (eaf--split-number (shell-command-to-string (concat eaf-build-dir "swaymsg-treefetch/swaymsg-rectfetcher.sh emacs"))))
-        ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+  (cond ((and (eaf-emacs-running-in-wayland-native)
+              (eaf--on-sway-p))
+         (eaf--split-number (shell-command-to-string
+                             (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.x,.y'" (emacs-pid)))))
+        ((eaf--on-hyprland-p)
          (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
                (coordinate))
            (dotimes (i (length clients))
@@ -1216,8 +1224,11 @@ Such as, wayland native, macOS etc."
            (if is-fullscreen-p
                0
              ;; `32' is titlebar of Gnome3, we need change this value in other environment.
-             (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+             (cond ((eaf--on-hyprland-p)
                     0)
+                   ((eaf--on-sway-p)
+                    (string-to-number (shell-command-to-string
+                      (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.height'" (emacs-pid)))))
                    (t
                     32)))))
         (t
@@ -1767,8 +1778,11 @@ So multiple EAF buffers visiting the same file do not sync with each other."
           ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
           ;;
           ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
-          (cond ((string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland")
+          (cond ((eaf--on-hyprland-p)
                  (shell-command-to-string (concat "hyprctl dispatch focuswindow " eaf--emacs-program-name)))
+                ((and (eaf-emacs-running-in-wayland-native)
+                      (eaf--on-sway-p))
+                 (shell-command-to-string (format "swaymsg '[pid=%d] focus'" (emacs-pid))))
                 (t
                  (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector)))))
 

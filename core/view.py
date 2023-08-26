@@ -84,11 +84,7 @@ class View(QWidget):
 
         self.buffer.aspect_ratio_change.connect(self.adjust_aspect_ratio)
 
-        if current_desktop == "Hyprland":
-            import subprocess
-            title = f"eaf.py-{self.x}-{self.y}"
-            subprocess.Popen(f"hyprctl --batch 'keyword windowrule float,title:^{title}$ ; keyword windowrule nofocus,title:^{title}$ ; keyword windowrule move {self.x} {self.y},title:^{title}$'", shell=True)
-            self.setWindowTitle(title)
+        self.location()
 
     def resizeEvent(self, event):
         # Fit content to view rect just when buffer fit_to_view option is enable.
@@ -195,3 +191,19 @@ class View(QWidget):
 
     def screen_shot(self):
         return self.grab()
+
+    def location(self):
+        title = f"eaf.py-{self.x}-{self.y}"
+        if current_desktop == "Hyprland":
+            import subprocess
+
+            subprocess.Popen(f"hyprctl --batch 'keyword windowrule float,title:^{title}$;"
+                             f"keyword windowrule nofocus,title:^{title}$;"
+                             f"keyword windowrule move {self.x} {self.y},title:^{title}$'", shell=True)
+            self.setWindowTitle(title)
+        elif current_desktop == "sway" and get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
+            import subprocess
+
+            subprocess.Popen(f"swaymsg 'for_window [title={title}] floating enable;"
+                             f"for_window [title={title}] move position {self.x} {self.y}'", shell=True)
+            self.setWindowTitle(title)
