@@ -168,6 +168,7 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
         self.search_term = ""
         self.web_page.findText("")
 
+    @PostGui()
     def _search_text(self, text, is_backward = False):
         self.search_term = text
 
