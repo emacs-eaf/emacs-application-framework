@@ -7,6 +7,7 @@
     "python-pyqt6",
     "python-pyqt6-sip",
     "qt6-multimedia",
+    "qt6-svg",
     "libvdpau-va-gl"
   ],
   "guix": [
