@@ -76,8 +76,8 @@ chmod +x ./install-eaf.py
 Wayland 环境的支持分四种情况：
 - XWayland: EAF 可在 XWayland 下直接运行
 - Gnome3 Wayland Native： 你需要执行命令 `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` 并在 `gnome-extensions` 中激活 `eaf-wayland@emacs-eaf.org` 插件
-- Sway Wayland Native： 需要安装 jq， 编译 reinput 运行 `reinput/compile.sh`
-- Hyprland Wayland Native： 编译 reinput 运行 `reinput/compile.sh`
+- Sway Wayland Native： 需要安装 jq
+- Hyprland Wayland Native
 
 #### 3. 加载 EAF 核心
 

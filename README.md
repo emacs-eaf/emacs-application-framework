@@ -81,8 +81,8 @@ There are many useful flags available for `install-eaf.py`, check it yourself us
 There are four types of support for the Wayland environment:
 - XWayland: EAF can run directly under XWayland
 - Gnome3 Wayland Native: You need to execute the command `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` and activate the `eaf-wayland@emacs-eaf.org` plugin in `gnome-extensions`
-- Sway Wayland Native: jq needs to be installed, run `reinput/compile.sh` to compile reinput
-- Hyprland Wayland Native: run `reinput/compile.sh` to compile reinput
+- Sway Wayland Native: jq needs to be installed
+- Hyprland Wayland Native
 
 #### 3. Load EAF Core
 

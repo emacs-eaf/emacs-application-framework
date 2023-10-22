@@ -534,6 +534,11 @@ def main():
             install_app_deps(distro, deps_dict)
             print("[EAF] ------------------------------------------")
 
+        current_desktop = os.getenv("XDG_CURRENT_DESKTOP") or os.getenv("XDG_SESSION_DESKTOP")
+        if current_desktop in ["Hyprland", "sway"]:
+            subprocess.Popen("gcc main.c -o reinput `pkg-config --cflags --libs libinput libevdev libudev`",
+                             shell=True)
+
         print("[EAF] install-eaf.py finished.\n")
 
         for msg in important_messages:
