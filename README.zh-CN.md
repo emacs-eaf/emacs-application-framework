@@ -79,6 +79,8 @@ Wayland 环境的支持分四种情况：
 - Sway Wayland Native： 需要安装 jq
 - Hyprland Wayland Native
 
+Unity 桌面环境支持： 需要安装xdotool
+
 #### 3. 加载 EAF 核心
 
 从这里开始， 你可以把 EAF 加入 Emacs 的 ```load-path```， 然后在 `init.el` 中写入:
