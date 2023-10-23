@@ -1055,6 +1055,9 @@ provide at least one way to let everyone experience EAF. ;)"
 (defun eaf--on-hyprland-p ()
   (string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland"))
 
+(defun eaf--on-unity-p ()
+  (string-equal (getenv "XDG_CURRENT_DESKTOP") "Unity"))
+
 (defun eaf--on-sway-p ()
   (string-equal (getenv "XDG_SESSION_DESKTOP") "sway"))
 
@@ -1075,6 +1078,10 @@ provide at least one way to let everyone experience EAF. ;)"
                            (or
                             (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
                             ""))
+                          ((eaf--on-unity-p)
+                           (if (executable-find "xdotool")
+                               (shell-command-to-string "xdotool getactivewindow getwindowname")
+                             (message "Please install xdotool for Unity support.")))
                           (t
                            (require 'dbus)
                            (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))

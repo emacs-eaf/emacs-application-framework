@@ -84,6 +84,8 @@ There are four types of support for the Wayland environment:
 - Sway Wayland Native: jq needs to be installed
 - Hyprland Wayland Native
 
+Unity environment support: requires `xdotool` to be installed.
+
 #### 3. Load EAF Core
 
 From here on, you can add the full path to the EAF installation directory to your Emacs ```load-path```, then add the following to `init.el`:
