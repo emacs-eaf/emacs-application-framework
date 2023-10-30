@@ -34,10 +34,6 @@ parser.add_argument("--app-drop-local-edit", action="store_true",
                     help='during installation, local changes to app repos will be hard reset')
 parser.add_argument("--app-save-local-edit", action="store_true",
                     help='compared with --app-drop-local-edit, this option will stash your changes')
-parser.add_argument("--use-mirror", action="store_true",
-                    help='use mirror url instead of default url')
-parser.add_argument("--use-gitee", action="store_true",
-                    help='alias of --use-mirror')
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if sys.platform == "win32" else "npm"
@@ -225,15 +221,7 @@ def add_or_update_app(app: str, app_spec_dict):
     else:
         print("\n[EAF] Adding", app, "application to EAF...")
 
-    if args.use_mirror or args.use_gitee: # use_gitee is alias of use_mirror.
-        if 'mirror_url' not in app_spec_dict:
-            print("[EAF] There is no mirror URL set in applications.json for", app)
-            print("[EAF] Using default URL...")
-            url = app_spec_dict['url']
-        else:
-            url = app_spec_dict['mirror_url']
-    else:
-        url = app_spec_dict['url']
+    url = app_spec_dict['url']
 
     branch = app_spec_dict['branch']
     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
