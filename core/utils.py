@@ -19,30 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import functools
 import os
 
 import sexpdata
 from PyQt6 import QtGui
-from PyQt6.QtCore import QMetaObject, QObject, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QApplication
 
-
-def run_in_main_thread(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        app_thread = QApplication.instance().thread()
-        current_thread = QThread.currentThread()
-
-        if app_thread == current_thread:
-            return func(*args, **kwargs)
-        else:
-            QMetaObject.invokeMethod(
-                QApplication.instance(),
-                lambda: func(*args, **kwargs),
-                Qt.ConnectionType.QueuedConnection
-            )
-    return wrapper
 
 class PostGui(QObject):
 
