@@ -419,7 +419,7 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
             format_string = ""
 
             for index, arg in enumerate(function_args):
-                if type(arg) == str:
+                if isinstance(arg, str):
                     format_string += '\"{}\"'.format(arg)
                 else:
                     format_string += '{}'.format(json.dumps(arg))
