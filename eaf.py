@@ -385,7 +385,7 @@ class EAF(object):
         def _do(*args):
             buffer_id = args[0]
 
-            if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            if isinstance(buffer_id, str) and buffer_id in self.buffer_dict:
                 try:
                     getattr(self.buffer_dict[buffer_id], name)(*args[1:])
                 except AttributeError:
@@ -399,7 +399,7 @@ class EAF(object):
         def _do(*args):
             buffer_id = args[0]
 
-            if type(buffer_id) == str and buffer_id in self.buffer_dict:
+            if isinstance(buffer_id, str) and buffer_id in self.buffer_dict:
                 try:
                     return getattr(self.buffer_dict[buffer_id], name)(*args[1:])
                 except AttributeError:
@@ -413,7 +413,7 @@ class EAF(object):
     @PostGui()
     def eval_function(self, buffer_id, function_name, event_string):
         ''' Execute function and do not return anything. '''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+        if isinstance(buffer_id, str) and buffer_id in self.buffer_dict:
             try:
                 buffer = self.buffer_dict[buffer_id]
                 buffer.current_event_string = event_string
@@ -438,7 +438,7 @@ class EAF(object):
     @PostGui()
     def handle_input_response(self, buffer_id, callback_tag, callback_result):
         ''' Handle input message for specified buffer.'''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+        if isinstance(buffer_id, str) and buffer_id in self.buffer_dict:
             buffer = self.buffer_dict[buffer_id]
 
             buffer.handle_input_response(callback_tag, callback_result)
@@ -447,7 +447,7 @@ class EAF(object):
     @PostGui()
     def cancel_input_response(self, buffer_id, callback_tag):
         ''' Cancel input message for specified buffer.'''
-        if type(buffer_id) == str and buffer_id in self.buffer_dict:
+        if isinstance(buffer_id, str) and buffer_id in self.buffer_dict:
             buffer = self.buffer_dict[buffer_id]
 
             buffer.cancel_input_response(callback_tag)
