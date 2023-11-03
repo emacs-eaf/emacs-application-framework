@@ -266,7 +266,7 @@ def close_epc_client():
 
 
 def handle_arg_types(arg):
-    if type(arg) is str and arg.startswith("'"):
+    if isinstance(arg, str) and arg.startswith("'"):
         arg = sexpdata.Symbol(arg.partition("'")[2])
 
     return sexpdata.Quoted(arg)
