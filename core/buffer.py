@@ -294,7 +294,12 @@ class Buffer(QGraphicsScene):
 
     def stop_marker_input_monitor_thread(self):
         if self.fetch_marker_input_thread is not None and self.fetch_marker_input_thread.isRunning():
-            self.fetch_marker_input_thread.running_flag = False
+            self.fetch_marker_input_thread.stop()
+            # NOTE:
+            # We need call QThread.wait() function before reset QThread object to None.
+            # Set to None will trigger Python GC release QThread object, if QThread is still running,
+            # Segment falut "QThread: Destroyed while thread is still running" will throw, it will crash EAF.
+            self.fetch_marker_input_thread.wait()
             self.fetch_marker_input_thread = None
 
     def start_search_input_monitor_thread(self, callback_tag):
@@ -306,6 +311,11 @@ class Buffer(QGraphicsScene):
     def stop_search_input_monitor_thread(self):
         if self.fetch_search_input_thread is not None and self.fetch_search_input_thread.isRunning():
             self.fetch_search_input_thread.stop()
+            # NOTE:
+            # We need call QThread.wait() function before reset QThread object to None.
+            # Set to None will trigger Python GC release QThread object, if QThread is still running,
+            # Segment falut "QThread: Destroyed while thread is still running" will throw, it will crash EAF.
+            self.fetch_search_input_thread.wait()
             self.fetch_search_input_thread = None
 
     @abstract
@@ -490,6 +500,9 @@ class FetchMarkerInputThread(QThread):
                     message_to_emacs("Quit marker selection." if marker_input_quit else "Marker selected.")
 
             time.sleep(0.1)
+
+    def stop(self):
+        self.running_flag = False
 
 class FetchSearchInputThread(QThread):
 
