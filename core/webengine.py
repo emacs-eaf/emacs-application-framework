@@ -1635,6 +1635,19 @@ class BrowserBuffer(Buffer):
         self._change_url(url)
 
     @PostGui()
+    def load_url_with_agent(self, url, agent):
+        self.set_agent(agent)
+
+        self.change_url(url)
+
+    def set_agent(self, agent):
+        user_agent = self.profile.defaultProfile().httpUserAgent()
+        if agent == "pc" and user_agent == self.phone_user_agent:
+            self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+        elif agent == "phone" and user_agent == self.pc_user_agent:
+            self.profile.defaultProfile().setHttpUserAgent(self.phone_user_agent)
+
+    @PostGui()
     def _change_url(self, url):
         self.buffer_widget.stop()
         self.buffer_widget.setUrl(QUrl(url))
