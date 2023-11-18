@@ -26,7 +26,8 @@ from PyQt6.QtCore import QEvent, QPoint, Qt
 from PyQt6.QtGui import QBrush, QPainter, QWindow
 from PyQt6.QtWidgets import QFrame, QGraphicsView, QVBoxLayout, QWidget
 
-if current_desktop in ["Hyprland", "sway"] and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
+if ((current_desktop == "sway" and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []))
+    or current_desktop == "Hyprland"):
     global reinput
 
     import subprocess
@@ -36,11 +37,11 @@ if current_desktop in ["Hyprland", "sway"] and get_emacs_func_cache_result("eaf-
     pid = get_emacs_func_cache_result("emacs-pid", [])
     reinput = subprocess.Popen(f"{reinput_file} {pid}", stdin=subprocess.PIPE, shell=True)
 
-def focus_on_eaf():
+def focus():
     reinput.stdin.write("1\n".encode("utf-8"))
     reinput.stdin.flush()
 
-def lost_focus_on_eaf():
+def lose_focus():
     reinput.stdin.write("0\n".encode("utf-8"))
     reinput.stdin.flush()
 
@@ -156,11 +157,12 @@ class View(QWidget):
 
         # Focus emacs window when event type match below event list.
         # Make sure EAF window always response user key event after switch from other application, such as Alt + Tab.
-        if current_desktop in ["Hyprland", "sway"] and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
+        if ((current_desktop == "sway" and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []))
+            or current_desktop == "Hyprland"):
             if event.type() == QEvent.Type.WindowActivate:
-                focus_on_eaf()
+                focus()
             elif event.type() == QEvent.Type.WindowDeactivate:
-                lost_focus_on_eaf()
+                lose_focus()
 
         if self.is_switch_from_other_application(event):
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
@@ -217,6 +219,9 @@ class View(QWidget):
         return self.grab()
 
     def locate(self):
+        if not get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
+            return
+
         title = f"eaf.py-{self.x}-{self.y}"
         if current_desktop == "Hyprland":
             import subprocess
