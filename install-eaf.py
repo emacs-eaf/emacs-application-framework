@@ -524,7 +524,8 @@ def main():
 
         current_desktop = os.getenv("XDG_CURRENT_DESKTOP") or os.getenv("XDG_SESSION_DESKTOP")
         if current_desktop in ["Hyprland", "sway"]:
-            subprocess.Popen("gcc main.c -o reinput `pkg-config --cflags --libs libinput libevdev libudev`",
+            print("[EAF] Compiling reinput")
+            subprocess.Popen("gcc reinput/main.c -o reinput/reinput `pkg-config --cflags --libs libinput libevdev libudev`",
                              shell=True)
 
         print("[EAF] install-eaf.py finished.\n")

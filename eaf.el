@@ -1201,28 +1201,27 @@ provide at least one way to let everyone experience EAF. ;)"
   "We need fetch Emacs coordinate to adjust coordinate of EAF if it running on system not support cross-process reparent technology.
 
 Such as, wayland native, macOS etc."
-  (cond ((and (eaf-emacs-running-in-wayland-native)
-              (eaf--on-sway-p))
-         (eaf--split-number (shell-command-to-string
-                             (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.x,.y'" (emacs-pid)))))
-        ((eaf--on-hyprland-p)
-         (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
-               (coordinate))
-           (dotimes (i (length clients))
-             (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
-               (setq coordinate (gethash "at" (aref clients i)))))
-           (list (aref coordinate 0) (aref coordinate 1))))
-        ((eaf-emacs-running-in-wayland-native)
-         (require 'dbus)
-         (let* ((coordinate (eaf--split-number
-                             (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
-                             ","))
-                ;; HiDPI need except by `frame-scale-factor'.
-                (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
-                (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
-           (list frame-x frame-y)))
-        (t
-         (list 0 0))))
+  (if (eaf-emacs-running-in-wayland-native)
+      (cond ((eaf--on-sway-p)
+             (eaf--split-number (shell-command-to-string
+				 (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.x,.y'" (emacs-pid)))))
+            ((eaf--on-hyprland-p)
+             (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
+		   (coordinate))
+               (dotimes (i (length clients))
+		 (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
+		   (setq coordinate (gethash "at" (aref clients i)))))
+               (list (aref coordinate 0) (aref coordinate 1))))
+            (t
+             (require 'dbus)
+             (let* ((coordinate (eaf--split-number
+				 (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
+				 ","))
+                    ;; HiDPI need except by `frame-scale-factor'.
+                    (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
+                    (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
+               (list frame-x frame-y))))
+    (list 0 0)))
 
 (defun eaf--get-titlebar-height ()
   "We need fetch height of window titlebar to adjust y coordinate of EAF when Emacs is not fullscreen."
