@@ -26,8 +26,7 @@ from PyQt6.QtCore import QEvent, QPoint, Qt
 from PyQt6.QtGui import QBrush, QPainter, QWindow
 from PyQt6.QtWidgets import QFrame, QGraphicsView, QVBoxLayout, QWidget
 
-if ((current_desktop == "sway" and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []))
-    or current_desktop == "Hyprland"):
+if current_desktop in ["sway", "Hyprland"] and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
     global reinput
 
     import subprocess
