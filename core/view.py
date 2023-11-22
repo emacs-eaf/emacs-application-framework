@@ -156,8 +156,7 @@ class View(QWidget):
 
         # Focus emacs window when event type match below event list.
         # Make sure EAF window always response user key event after switch from other application, such as Alt + Tab.
-        if ((current_desktop == "sway" and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []))
-            or current_desktop == "Hyprland"):
+        if current_desktop == ["sway", "Hyprland"] and get_emacs_func_cache_result("eaf-emacs-running-in-wayland-native", []):
             if event.type() == QEvent.Type.WindowActivate:
                 focus()
             elif event.type() == QEvent.Type.WindowDeactivate:
