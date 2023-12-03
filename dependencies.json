@@ -46,13 +46,13 @@
   "pip": {
     "pacman": [
       "epc",
-      "sexpdata",
+      "sexpdata==1.0.0",
       "tld",
       "lxml"
     ],
     "linux": [
       "epc",
-      "sexpdata",
+      "sexpdata==1.0.0",
       "tld",
       "lxml",
       "PyQt6==6.5.0",
@@ -63,7 +63,7 @@
     ],
     "win32": [
       "epc",
-      "sexpdata",
+      "sexpdata==1.0.0",
       "tld",
       "lxml",
       "pygetwindow",
@@ -75,7 +75,7 @@
     ],
     "darwin": [
       "epc",
-      "sexpdata",
+      "sexpdata==1.0.0",
       "tld",
       "lxml",
       "mac-app-frontmost",
