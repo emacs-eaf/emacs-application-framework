@@ -14,8 +14,8 @@ If you are a hacker who works with numerous languages and text, who's keyboard-d
 
 Unfortunately, this 45 years of age is also one of the greatest disadvantages of Emacs. Comparing with modern software, Emacs lacks performance. Specifically Emacs Lisp lacks performance. It doesn't have proper multithreading and its graphical capabilities are seriously limited. It is far from what you'd expect from any GUI application today (such as IDEA or VSCode). You may think that Emacs, as a text-centric editor, doesn't need them, but have you ever run into a situation that, you sit comfortably typing commands and doing your Emacs sorcery, but can't help but ponder:
 
-    What if Emacs has a real browser?
-    What if this PDF or video file can be viewed efficiently without leaving Emacs?
+    What if Emacs had a real browser?
+    What if this PDF or video file could be viewed efficiently without leaving Emacs?
 
 Emacs, although infinitely extensible in text, is very limited in graphics. It shouldn't have to be this way. However, Emacs Lisp is *the* integral part of the Emacs culture, it carries decades of history with itself, it is what makes Emacs special. It is irreplaceable.
 
