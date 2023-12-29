@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from shutil import which, rmtree
 import argparse
 import datetime
 import json
@@ -8,6 +7,7 @@ import os
 import subprocess
 import sys
 import sysconfig
+from shutil import rmtree, which
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--install-all-apps", action="store_true",
@@ -68,7 +68,8 @@ install_failed_npm_globals = []
 install_failed_apps = []
 
 important_messages = [
-    "[EAF] Please run 'git pull ; ./install-eaf.py' (M-x eaf-install-and-update) to update EAF, applications and their dependencies."
+    "[EAF] Please run 'git pull && ./install-eaf.py' (M-x eaf-install-and-update) to update EAF and their dependencies.",
+    "[EAF] Refer to dependencies.json for the list of dependencies installed on your system."
 ]
 
 def run_command(command, path=script_path, ensure_pass=True, get_result=False):
@@ -403,7 +404,7 @@ def get_install_apps(apps_installed):
     if args.install_new_apps or len(apps_installed) == 0:
         pending_apps_dict_list.append(get_new_apps_dict(apps_installed))
     elif not args.install_new_apps:
-        important_messages.append("[EAF] Use the flag '--install-new-apps' to install previously uninstalled or new apps.")
+        important_messages.append("[EAF] Use the flag '--install-new-apps' to install new applications.")
 
     return pending_apps_dict_list
 
