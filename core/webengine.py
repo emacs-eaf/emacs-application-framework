@@ -47,18 +47,20 @@ class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
 
-    def __init__(self, buffer_id):
-        super(QWebEngineView, self).__init__()
+    def __init__(self, profile, buffer_id):
+        super(QWebEngineView, self).__init__(profile)
 
         self.installEventFilter(self)
         self.buffer_id = buffer_id
         self.is_button_press = False
 
-        self.web_page = BrowserPage()
+        self.web_page = BrowserPage(profile)
         self.setPage(self.web_page)
 
         self.url_hovered = ""
         self.page().linkHovered.connect(self.link_hovered)
+        self.page().quotaRequested.connect(lambda request: request.accept())
+        self.page().fileSystemAccessRequested.connect(lambda request: request.accept())
 
         self.selectionChanged.connect(self.select_text_change)
 
@@ -781,8 +783,8 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
 
 
 class BrowserPage(QWebEnginePage):
-    def __init__(self):
-        QWebEnginePage.__init__(self)
+    def __init__(self, profile):
+        QWebEnginePage.__init__(self, profile)
 
     def execute_javascript(self, script_src):
         ''' Execute JavaScript.'''
@@ -824,6 +826,10 @@ class BrowserPage(QWebEnginePage):
         if self.url().toString() == "file:///":
             print("[JavaScript console]: " + message)
 
+webengine_profile = QWebEngineProfile('eaf')
+webengine_profile.setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.ForcePersistentCookies)
+webengine_profile.setHttpCacheType(QWebEngineProfile.HttpCacheType.DiskHttpCache)
+
 class BrowserBuffer(Buffer):
 
     close_page = QtCore.pyqtSignal(str)
@@ -832,7 +838,9 @@ class BrowserBuffer(Buffer):
     def __init__(self, buffer_id, url, arguments, fit_to_view):
         Buffer.__init__(self, buffer_id, url, arguments, fit_to_view)
 
-        self.add_widget(BrowserView(buffer_id))
+        self.profile = webengine_profile
+
+        self.add_widget(BrowserView(self.profile, buffer_id))
 
         self.url = url
 
@@ -872,9 +880,7 @@ class BrowserBuffer(Buffer):
               "eaf-webengine-default-zoom",
               "eaf-webengine-zoom-step"])
 
-        # The default profile can be accessed by defaultProfile(). It is a built-in profile that all web pages not specifically created with another profile belong to.
-        self.profile = QWebEngineProfile.defaultProfile()
-        self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+        self.profile.setHttpUserAgent(self.pc_user_agent)
 
         self.caret_js_ready = False
         self.caret_browsing_mode = False
@@ -892,7 +898,7 @@ class BrowserBuffer(Buffer):
         self.buffer_widget.web_page.fullScreenRequested.connect(self.handle_fullscreen_request)
         self.buffer_widget.web_page.pdfPrintingFinished.connect(self.notify_print_message)
         self.buffer_widget.web_page.featurePermissionRequested.connect(self.permission_requested) # enable camera permission
-        self.profile.defaultProfile().downloadRequested.connect(self.handle_download_request)
+        self.profile.downloadRequested.connect(self.handle_download_request)
 
         self.settings = self.buffer_widget.settings()
         try:
@@ -917,6 +923,7 @@ class BrowserBuffer(Buffer):
             self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFontSize, self.font_size)
             self.settings.setFontSize(QWebEngineSettings.FontSize.DefaultFixedFontSize, self.fixed_font_size)
 
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.FullScreenSupportEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.DnsPrefetchEnabled, True)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.FocusOnNavigationEnabled, True)
@@ -1488,12 +1495,12 @@ class BrowserBuffer(Buffer):
     @interactive(insert_or_do=True)
     def toggle_device(self):
         ''' Toggle device.'''
-        user_agent = self.profile.defaultProfile().httpUserAgent()
+        user_agent = self.profile.httpUserAgent()
         if user_agent == self.pc_user_agent:
-            self.profile.defaultProfile().setHttpUserAgent(self.phone_user_agent)
+            self.profile.setHttpUserAgent(self.phone_user_agent)
             self.set_aspect_ratio(2.0 / 3)
         else:
-            self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+            self.profile.setHttpUserAgent(self.pc_user_agent)
             self.set_aspect_ratio(0)
 
         self.refresh_page()
@@ -1641,11 +1648,11 @@ class BrowserBuffer(Buffer):
         self.change_url(url)
 
     def set_agent(self, agent):
-        user_agent = self.profile.defaultProfile().httpUserAgent()
+        user_agent = self.profile.httpUserAgent()
         if agent == "pc" and user_agent == self.phone_user_agent:
-            self.profile.defaultProfile().setHttpUserAgent(self.pc_user_agent)
+            self.profile.setHttpUserAgent(self.pc_user_agent)
         elif agent == "phone" and user_agent == self.pc_user_agent:
-            self.profile.defaultProfile().setHttpUserAgent(self.phone_user_agent)
+            self.profile.setHttpUserAgent(self.phone_user_agent)
 
     @PostGui()
     def _change_url(self, url):
@@ -1720,9 +1727,6 @@ class CookiesManager(object):
         self.browser_view = browser_view
 
         self.cookies_dir = os.path.join(get_emacs_config_dir(), "browser", "cookies")
-
-        # Both session and persistent cookies are stored in memory
-        self.browser_view.page().profile().setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.NoPersistentCookies)
 
         self.cookie_store = self.browser_view.page().profile().cookieStore()
 
