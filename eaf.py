@@ -341,6 +341,21 @@ class EAF(object):
                 view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
 
     @PostGui()
+    def screenshot_buffer(self, buffer_id):
+        import time
+
+        for key in list(self.view_dict):
+            view = self.view_dict[key]
+            if buffer_id == view.buffer_id:
+                current_timestamp = int(time.time())
+                formatted_time = time.strftime("%M:%S", time.localtime(current_timestamp))
+
+                image_path = os.path.join(os.path.expanduser("~"), buffer_id + "_" + formatted_time + ".png")
+                view.screen_shot().save(image_path)
+                message_to_emacs("Save screenshot at: {}".format(image_path))
+                return
+
+    @PostGui()
     def ocr_buffer(self, buffer_id):
         import tempfile
 

@@ -193,6 +193,7 @@ handled by it.")
     (define-key map (kbd "C-h f") #'describe-function)
     (define-key map (kbd "C-h V") #'apropos-variable)
     (define-key map (kbd "C-h F") #'apropos-function)
+    (define-key map (kbd "M-0") #'eaf-get-buffer-screenshot)
     (define-key map (kbd "M-'") #'eaf-toggle-fullscreen)
     (define-key map (kbd "M-/") #'eaf-get-path-or-url)
     (define-key map (kbd "M-[") #'eaf-share-path-or-url)
@@ -1997,6 +1998,10 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 (defun eaf-ocr-buffer-record (result)
   (kill-new result)
   (message "[EAF] Have paste OCR string to kill-ring."))
+
+(defun eaf-get-buffer-screenshot ()
+  (interactive)
+  (eaf-call-async "screenshot_buffer" eaf--buffer-id))
 
 ;;;###autoload
 (defun eaf-install-and-update (&rest apps)
