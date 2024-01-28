@@ -38,11 +38,6 @@ from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile, QWebEngineS
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QWidget
 
-MOUSE_LEFT_BUTTON = 1
-MOUSE_WHEEL_BUTTON = 4
-MOUSE_BACK_BUTTON = 8
-MOUSE_FORWARD_BUTTON = 16
-
 class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
@@ -277,7 +272,7 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
             if platform.system() == "Darwin":
                 eval_in_emacs('eaf-activate-emacs-window', [])
 
-            if event.button() == MOUSE_FORWARD_BUTTON:
+            if event.button() == Qt.MouseButton.ForwardButton:
                 modifiers = QApplication.keyboardModifiers()
                 if modifiers == Qt.KeyboardModifier.ControlModifier:
                     self.switch_to_next_webpage_buffer()
@@ -287,7 +282,7 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
                 event.accept()
                 return True
 
-            elif event.button() == MOUSE_BACK_BUTTON:
+            elif event.button() == Qt.MouseButton.BackButton:
                 modifiers = QApplication.keyboardModifiers()
                 if modifiers == Qt.KeyboardModifier.ControlModifier:
                     self.switch_to_previous_webpage_buffer()
@@ -297,13 +292,13 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
                 event.accept()
                 return True
 
-            elif event.button() == MOUSE_LEFT_BUTTON:
+            elif event.button() == Qt.MouseButton.LeftButton:
                 modifiers = QApplication.keyboardModifiers()
                 if modifiers == Qt.KeyboardModifier.ControlModifier and self.url_hovered:
                     self.open_url_background_buffer(self.url_hovered)
                     return True
 
-            elif event.button() == MOUSE_WHEEL_BUTTON:
+            elif event.button() == Qt.MouseButton.MiddleButton:
                 if self.url_hovered:
                     self.open_url_new_buffer_other_window(self.url_hovered)
                     return True
