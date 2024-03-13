@@ -1158,8 +1158,8 @@ provide at least one way to let everyone experience EAF. ;)"
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
              (eaf-epc-live-p eaf-epc-process)
-             ;; When current frame is same with `emacs-frame'.
-             (equal (window-frame) emacs-frame))
+             ;; When current frame is same with `eaf-emacs-frame'.
+             (equal (window-frame) eaf-emacs-frame))
     (ignore-errors
       (let (view-infos)
         (dolist (frame (frame-list))
@@ -1407,7 +1407,7 @@ of `eaf--buffer-app-name' inside the EAF buffer."
 
 WEBENGINE-INCLUDE-PRIVATE-CODEC is only useful when app-name is video-player."
   ;; Record frame that start EAF.
-  (setq emacs-frame (window-frame))
+  (setq eaf-emacs-frame (window-frame))
 
   ;; Make EPC process.
   (setq eaf-epc-process (make-eaf-epc-manager
