@@ -4,7 +4,7 @@
         var visibleElements = [];
         for (var i = 0; i < all.length; i++) {
             var e = all[i];
-            // include elements in a shadowRoot.
+            // Include elements in a shadowRoot.
             if (e.shadowRoot) {
                 var cc = e.shadowRoot.querySelectorAll('*');
                 for (var j = 0; j < cc.length; j++) {
@@ -12,7 +12,7 @@
                 }
             }
             var rect = e.getBoundingClientRect();
-            if ( (rect.top <= window.innerHeight) && (rect.bottom >= 0)
+            if ((rect.top <= window.innerHeight) && (rect.bottom >= 0)
                 && (rect.left <= window.innerWidth) && (rect.right >= 0)
                 && rect.height > 0
                 && getComputedStyle(e).visibility !== 'hidden'
@@ -22,11 +22,13 @@
         }
         return visibleElements;
     }
-    var cssSelector = "input";
+    var cssSelector = "input, textarea, [contenteditable='true']";
 
     var elements = getVisibleElements(function(e, v) {
-        if (e.matches(cssSelector) && !e.disabled && !e.readOnly
-            && (e.type === "text" || e.type === "search" || e.type === "password")) {
+        if ((e.matches('input') && !e.disabled && !e.readOnly && 
+            (e.type === "text" || e.type === "search" || e.type === "password")) || 
+            (e.matches('textarea') && !e.disabled && !e.readOnly) ||
+            (e.contentEditable === "true")) {
             v.push(e);
         }
     });
@@ -34,7 +36,8 @@
     if (elements.length === 0 && document.querySelector(cssSelector) !== null) {
         document.querySelector(cssSelector).scrollIntoView();
         elements = getVisibleElements(function(e, v) {
-            if (e.matches(cssSelector) && !e.disabled && !e.readOnly) {
+            if ((e.matches(cssSelector) && !e.disabled && !e.readOnly) || 
+                (e.contentEditable === "true")) {
                 v.push(e);
             }
         });
@@ -42,9 +45,19 @@
 
     if (elements.length >= 1) {
         var focusElement = elements[0];
-        var value = focusElement.value;
-        focusElement.focus();
-        focusElement.value = "";
-        focusElement.value = value;
+        if (focusElement.contentEditable === "true") {
+            // For contenteditable elements, setting focus is slightly different
+            var range = document.createRange();
+            var sel = window.getSelection();
+            range.selectNodeContents(focusElement);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } else {
+            // For input and textarea elements
+            var value = focusElement.value;
+            focusElement.focus();
+            focusElement.value = "";
+            focusElement.value = value;
+        }
     }
 })();
