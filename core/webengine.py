@@ -1434,7 +1434,14 @@ class BrowserBuffer(Buffer):
         if text is not None:
             atomic_edit(self.buffer_id, text)
         else:
-            message_to_emacs("No active input element.")
+            self.buffer_widget.focus_input()
+
+            # try again:
+            text = self.buffer_widget.get_focus_text()
+            if text is not None:
+                atomic_edit(self.buffer_id, text)
+            else:
+                message_to_emacs("No active input element.")
 
     @interactive
     def switch_to_input_mode(self):

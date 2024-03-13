@@ -25,10 +25,11 @@
     var cssSelector = "input";
 
     var elements = getVisibleElements(function(e, v) {
-        if (e.matches(cssSelector) && !e.disabled && !e.readOnly
-            && (e.type === "text" || e.type === "search" || e.type === "password")) {
+	if ((e.matches('input') && !e.disabled && !e.readOnly && 
+             (e.type === "text" || e.type === "search" || e.type === "password")) || 
+            e.matches('textarea') && !e.disabled && !e.readOnly) {
             v.push(e);
-        }
+	}
     });
 
     if (elements.length === 0 && document.querySelector(cssSelector) !== null) {
