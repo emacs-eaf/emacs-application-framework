@@ -539,6 +539,12 @@ Turning on this option can quickly rebuild the buffer very conveniently, avoidin
 Only turn off this option when you want investigate the cause of the crash."
   :type 'boolean)
 
+(defcustom eaf-dired-advisor-enable t
+  "Toggle to enable/disable the EAF advisor in dired.
+
+When enabled, EAF will use eaf-file-manager to open file from dired."
+  :type 'boolean)
+
 (defvar eaf--monitor-configuration-p t
   "When this variable is non-nil, `eaf-monitor-configuration-change' executes.
 This variable is used to open buffer in backend and avoid graphics blink.
@@ -1983,8 +1989,9 @@ It currently identifies PDF, videos, images, and mindmap file extensions."
 It currently identifies PDF, videos, images, and mindmap file extensions."
   (dolist (file (dired-get-marked-files))
     (eaf--find-file orig-fn file t)))
-(advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
-(advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor)
+(when eaf-dired-advisor-enable
+  (advice-add #'dired-find-file :around #'eaf--dired-find-file-advisor)
+  (advice-add #'dired-find-alternate-file :around #'eaf--dired-find-file-advisor))
 
 (defun eaf--load-theme (&rest _ignores)
   (eaf-for-each-eaf-buffer
