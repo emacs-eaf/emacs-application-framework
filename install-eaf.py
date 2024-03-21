@@ -137,6 +137,8 @@ def install_sys_deps(distro: str, deps_list):
         command = ['doas', 'pkg', '-y', 'install']
     elif which("guix"):
         command = ['guix', 'install']
+    elif which("nix"):
+        command = ['nix', 'profile', 'install']
     elif which("zypper"):
         command = ['sudo', 'zypper', 'install','-y']
     command.extend(deps_list)
@@ -305,6 +307,8 @@ def get_distro():
         distro = "zypper"
     elif which("brew"):
         distro = "brew"
+    elif which("nix"):
+        distro = "nix"
     elif sys.platform == "linux":
         print("[EAF] Unsupported Linux distribution/package manager.")
         print(" Please see dependencies.json for list of dependencies.")
