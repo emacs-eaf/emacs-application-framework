@@ -15,7 +15,7 @@
     "node"
   ],
   "nix": [
-    "wmctrl",
+    "nixpkgs#wmctrl",
     "node"
   ],
   "emerge": [
