@@ -16,7 +16,7 @@
   ],
   "nix": [
     "nixpkgs#wmctrl",
-    "node"
+    "nixpkgs#nodejs"
   ],
   "emerge": [
     "x11-misc/wmctrl",
