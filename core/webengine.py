@@ -1806,11 +1806,11 @@ class CookiesManager(object):
     def domain_matching(self, cookie_domain):
         ''' Check if a given cookie's domain is matching for host string.'''
 
-        cookie_is_hostOnly = True
+        cookie_is_host_only = True
         if cookie_domain.startswith('.'):
             # get rid of prefixing dot when matching domains
             cookie_domain = cookie_domain[1:]
-            cookie_is_hostOnly = False
+            cookie_is_host_only = False
 
         host_string = self.browser_view.url().host()
 
@@ -1823,7 +1823,7 @@ class CookiesManager(object):
             # is shorter than the domain string
             return False
 
-        if host_string.endswith(cookie_domain) and host_string[:-len(cookie_domain)][-1] == '.' and not cookie_is_hostOnly:
+        if host_string.endswith(cookie_domain) and host_string[:-len(cookie_domain)][-1] == '.' and not cookie_is_host_only:
             # The domain string should be a suffix of the host string,
             # The last character of the host string that is not included in the
             # domain string should be a %x2E (".") character.
