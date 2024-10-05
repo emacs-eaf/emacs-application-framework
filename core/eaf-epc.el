@@ -701,6 +701,7 @@ This variable is used for the management purpose.")
     (set-process-filter process
                         (lambda (p m)
                           (eaf-epc-process-filter connection p m)))
+    (set-process-query-on-exit-flag process nil)
     (set-process-sentinel process
                           (lambda (p e)
                             (eaf-epc-process-sentinel connection p e)))
@@ -751,6 +752,7 @@ This variable is used for the management purpose.")
          :server t
          :host "127.0.0.1"
          :service (or port t)
+         :noquery t
          :sentinel
          (lambda (process message)
            (eaf-epc-server-sentinel process message connect-function)))))
