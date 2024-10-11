@@ -1981,6 +1981,7 @@ You can configure a blacklist using `eaf-find-file-ext-blacklist'"
 It currently identifies PDF, videos, images, and mindmap file extensions."
   (eaf--find-file orig-fn file nil args))
 (advice-add #'find-file :around #'eaf--find-file-advisor)
+(advice-add #'org-open-file :around #'eaf--find-file-advisor)
 
 ;; Use `eaf-open' in `dired-find-file' and `dired-find-alternate-file'
 (defun eaf--dired-find-file-advisor (orig-fn)
