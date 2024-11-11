@@ -119,14 +119,6 @@
     "url": "https://github.com/emacs-eaf/eaf-mindmap.git",
     "default_install": "false"
   },
-  "netease-cloud-music": {
-    "name": "EAF NetEase Cloud Music",
-    "desc": "Play Netease Cloud Music from Emacs",
-    "type": "app",
-    "branch": "master",
-    "url": "https://github.com/emacs-eaf/eaf-netease-cloud-music.git",
-    "default_install": "false"
-  },
   "system-monitor": {
     "name": "EAF System Monitor",
     "desc": "Simple system monitor tool",
