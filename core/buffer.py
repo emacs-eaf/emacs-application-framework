@@ -208,11 +208,11 @@ class Buffer(QGraphicsScene):
         '''
         screen = QApplication.instance().primaryScreen()    # type: ignore
         try:
-            QCursor().setPos(screen, screen.size().width(), screen.size().height())
+            QCursor().setPos(screen, screen.size().width() - 1, screen.size().height() - 1)
         except:
             # Moves the cursor the primary screen to the global screen position (x, y).
             # Sometimes, setPos(QScreen, Int, Int) API don't exists.
-            QCursor().setPos(screen.size().width(), screen.size().height())
+            QCursor().setPos(screen.size().width() - 1, screen.size().height() - 1)
 
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''
