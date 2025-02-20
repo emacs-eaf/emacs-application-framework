@@ -1786,19 +1786,19 @@ So multiple EAF buffers visiting the same file do not sync with each other."
     (if (or (member "LUCID" system-configuration-arguments)
             (member "ATHENA" system-configuration-arguments))
         (message "Please compile emacs use option --with-x-toolkit=gtk3, otherwise EAF can't focus emacs window expected.")
-      (if eaf-is-member-of-focus-fix-wms
+      (when eaf-is-member-of-focus-fix-wms
           ;; When switch app focus in WM, such as, i3 or qtile.
           ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
           ;;
-          ;; So we move mouse to frame bottom of Emacs, to make EAF receive input event.
+          ;; So we move mouse out of Emacs to the nearest outter border, then refocus on Emacs winodw.
 	  (if (eaf--on-hyprland-p)
 	      (shell-command (format "hyprctl dispatch focuswindow pid:%d" (emacs-pid)))
-	    (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_corner" (key-description (this-command-keys-vector))))
-
+	    (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_nearest_border" (key-description (this-command-keys-vector)))))
+    
         ;; Activate the window by `wmctrl' when possible
         (if (executable-find "wmctrl")
             (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
-          (message "Please install wmctrl to active Emacs window."))))))
+          (message "Please install wmctrl to active Emacs window.")))))
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs macOS window."
