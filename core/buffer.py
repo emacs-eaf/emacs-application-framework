@@ -214,6 +214,31 @@ class Buffer(QGraphicsScene):
             # Sometimes, setPos(QScreen, Int, Int) API don't exists.
             QCursor().setPos(screen.size().width() - 1, screen.size().height() - 1)
 
+    def move_cursor_to_nearest_border(self):
+        '''
+        Move cursor to nearest border of current buffer.
+        '''
+        # get current cursor position
+        cursor_pos = QCursor().pos()
+        # get current screen
+        screen = QApplication.instance().primaryScreen()    # type: ignore
+
+        c_x, c_y = cursor_pos.x(), cursor_pos.y()
+        sc_width, sc_height = screen.size().width(), screen.size().height()
+        left_dist, right_dist = c_x, sc_width - c_x
+        top_dist, bottom_dist = c_y, sc_height - c_y
+        min_dist = min(left_dist, right_dist, top_dist, bottom_dist)
+
+        # move cursor to nearest border
+        if min_dist == left_dist:
+            QCursor().setPos(0, c_y)
+        elif min_dist == right_dist:
+            QCursor().setPos(sc_width-1, c_y)
+        elif min_dist == top_dist:
+            QCursor().setPos(c_x, 0)
+        elif min_dist == bottom_dist:
+            QCursor().setPos(c_x, sc_height-1)
+        
     def set_aspect_ratio(self, aspect_ratio):
         ''' Set aspect ratio.'''
         self.aspect_ratio = aspect_ratio
