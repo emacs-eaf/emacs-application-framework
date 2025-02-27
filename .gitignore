@@ -10,3 +10,4 @@ tags
 compile_commands.json
 /reinput/reinput
 .cache/
+.aider*
