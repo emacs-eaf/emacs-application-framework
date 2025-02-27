@@ -119,6 +119,14 @@
     "url": "https://github.com/emacs-eaf/eaf-mindmap.git",
     "default_install": "false"
   },
+  "mind-elixir": {
+    "name": "EAF Mindmap base on Mind Elixir",
+    "desc": "Keyboard-driven Mindmap editor",
+    "type": "app",
+    "branch": "master",
+    "url": "https://github.com/emacs-eaf/eaf-mind-elixir.git",
+    "default_install": "false"
+  },
   "system-monitor": {
     "name": "EAF System Monitor",
     "desc": "Simple system monitor tool",
