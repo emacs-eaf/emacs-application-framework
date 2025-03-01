@@ -35,6 +35,7 @@ EAF 是一个可编程扩展的框架， 它自带一系列丰富的应用， �
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): 支持实时缩放的图片查看器
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): 新闻阅读器， 支持 Html 内容渲染
 - [Terminal](https://github.com/mumu-lhl/eaf-pyqterminal): 支持图形绘制的全功能终端模拟器
+- [MindMap](https://github.com/emacs-eaf/eaf-mind-elixir): 界面美观的全功能思维导图软件
 - [Camera](https://github.com/emacs-eaf/eaf-camera): 摄像头程序
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Markdown 文档实时预览程序， 完美兼容 Github 样式, 支持 Mermaid、 PlantUML、 KaTeX、 MathJax 等内容的渲染
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org 文件实时预览程序， 支持文件实时预览
@@ -79,7 +80,7 @@ Wayland 环境的支持分四种情况：
 - Sway Wayland Native： 需要安装 jq
 - Hyprland Wayland Native
 
-Unity 桌面环境支持： 需要安装xdotool
+Unity 桌面环境支持： 需要安装 xdotool
 
 #### 3. 加载 EAF 核心
 

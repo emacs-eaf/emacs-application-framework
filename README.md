@@ -41,6 +41,7 @@ EAF is very extensible. We ship a lot of applications, feel free to choose anyth
 - [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Dynanmic image viewer
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS Reader in Emacs
 - [Terminal](https://github.com/mumu-lhl/eaf-pyqterminal): Full-featured terminal in Emacs
+- [MindMap](https://github.com/emacs-eaf/eaf-mind-elixir): Mind map with balance layout
 - [Camera](https://github.com/emacs-eaf/eaf-camera): Use camera in Emacs
 - [Markdown Previewer](https://github.com/emacs-eaf/eaf-markdown-previewer): Real-time Markdown previewer
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Real-time Org-mode previewer
