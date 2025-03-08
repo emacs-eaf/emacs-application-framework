@@ -927,6 +927,7 @@ class BrowserBuffer(Buffer):
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.AllowRunningInsecureContent, True)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.AllowGeolocationOnInsecureOrigins, True)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
+            self.settings.setAttribute(QWebEngineSettings.WebAttribute.WebRTCPublicInterfacesOnly, False) # make sure Camera App can work
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, self.enable_plugin)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, self.enable_javascript)
             self.settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, self.enable_javascript_access_clipboard)
