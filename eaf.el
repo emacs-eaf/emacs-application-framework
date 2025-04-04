@@ -2127,7 +2127,7 @@ For a full `install-eaf.py' experience, refer to `--help' and run in a terminal.
     (apply orig-fun arg args)))
 (advice-add #'isearch-backward :around #'eaf--isearch-backward-advisor)
 (when (and (ignore-errors (require 'counsel)) (featurep 'counsel))
-  (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-forward-advisor))
+  (advice-add #'counsel-minibuffer-history :around #'eaf--isearch-backward-advisor))
 
 (provide 'eaf)
 
