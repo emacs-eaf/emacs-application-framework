@@ -312,6 +312,12 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
                 else:
                     self.zoom_out()
 
+        if event.type() == QEvent.Type.MouseButtonRelease and \
+           event.button() in [Qt.MouseButton.ForwardButton,
+                              Qt.MouseButton.BackButton]:
+            event.accept()
+            return True
+
         return super(QWebEngineView, self).eventFilter(obj, event)
 
     def translate_cursor_word(self, word):
