@@ -1075,35 +1075,36 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (defun eaf--topmost-focus-change ()
       "Manage Emacs's focus change."
-      (let* ((front (cond ((eq system-type 'darwin)
-                           (shell-command-to-string "app-frontmost --name"))
-                          ((eaf--on-sway-p)
-                           (if (executable-find "jq")
-                               (shell-command-to-string "swaymsg -t get_tree | jq -r '..|try select(.focused == true).app_id'")
-                             (message "Please install jq for swaywm support.")))
-                          ((eaf--on-hyprland-p)
-                           (or
-                            (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
-                            ""))
-                          ((eaf--on-unity-p)
-                           (if (executable-find "xdotool")
-                               (shell-command-to-string "xdotool getactivewindow getwindowname")
-                             (message "Please install xdotool for Unity support.")))
-                          (t
-                           (require 'dbus)
-                           (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
-             (front-app-name (string-trim front)))
-        (cond
-         ((member front-app-name (list "Python" "python3"))
-          (setq eaf--topmost-switch-to-python t))
-         ((or (string-equal (replace-regexp-in-string "\\." "-" front)
-                            eaf--emacs-program-name)
-              (string-match-p (regexp-quote front-app-name)
-                              eaf--emacs-program-name))
-          (if eaf--topmost-switch-to-python
-              (setq eaf--topmost-switch-to-python nil)
-            (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
-         (t (eaf--topmost-focus-out)))))
+      (when (eaf-emacs-not-use-reparent-technology)
+        (let* ((front (cond ((eq system-type 'darwin)
+                             (shell-command-to-string "app-frontmost --name"))
+                            ((eaf--on-sway-p)
+                             (if (executable-find "jq")
+                                 (shell-command-to-string "swaymsg -t get_tree | jq -r '..|try select(.focused == true).app_id'")
+                               (message "Please install jq for swaywm support.")))
+                            ((eaf--on-hyprland-p)
+                             (or
+                              (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
+                              ""))
+                            ((eaf--on-unity-p)
+                             (if (executable-find "xdotool")
+                                 (shell-command-to-string "xdotool getactivewindow getwindowname")
+                               (message "Please install xdotool for Unity support.")))
+                            (t
+                             (require 'dbus)
+                             (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
+               (front-app-name (string-trim front)))
+          (cond
+           ((member front-app-name (list "Python" "python3"))
+            (setq eaf--topmost-switch-to-python t))
+           ((or (string-equal (replace-regexp-in-string "\\." "-" front)
+                              eaf--emacs-program-name)
+                (string-match-p (regexp-quote front-app-name)
+                                eaf--emacs-program-name))
+            (if eaf--topmost-switch-to-python
+                (setq eaf--topmost-switch-to-python nil)
+              (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
+           (t (eaf--topmost-focus-out))))))
 
     (defun eaf--topmost-focus-update ()
       "Hide all eaf buffers, and then display new eaf buffers at front."
@@ -1211,19 +1212,19 @@ Such as, wayland native, macOS etc."
   (if (eaf-emacs-running-in-wayland-native)
       (cond ((eaf--on-sway-p)
              (eaf--split-number (shell-command-to-string
-				 (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.x,.y'" (emacs-pid)))))
+				                 (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.x,.y'" (emacs-pid)))))
             ((eaf--on-hyprland-p)
              (let ((clients (json-parse-string (shell-command-to-string "hyprctl -j clients")))
-		   (coordinate))
+		           (coordinate))
                (dotimes (i (length clients))
-		 (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
-		   (setq coordinate (gethash "at" (aref clients i)))))
+		         (when (equal (gethash "pid" (aref clients i)) (emacs-pid))
+		           (setq coordinate (gethash "at" (aref clients i)))))
                (list (aref coordinate 0) (aref coordinate 1))))
             (t
              (require 'dbus)
              (let* ((coordinate (eaf--split-number
-				 (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
-				 ","))
+				                 (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_emacs_window_coordinate" :timeout 1000)
+				                 ","))
                     ;; HiDPI need except by `frame-scale-factor'.
                     (frame-x (truncate (/ (car coordinate) (frame-scale-factor))))
                     (frame-y (truncate (/ (cadr coordinate) (frame-scale-factor)))))
@@ -1241,7 +1242,7 @@ Such as, wayland native, macOS etc."
                     0)
                    ((eaf--on-sway-p)
                     (string-to-number (shell-command-to-string
-                      (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.height'" (emacs-pid)))))
+                                       (format "swaymsg -t get_tree | jq -r '..|try select(.pid == %d).deco_rect|.height'" (emacs-pid)))))
                    (t
                     32)))))
         (t
@@ -1787,18 +1788,18 @@ So multiple EAF buffers visiting the same file do not sync with each other."
             (member "ATHENA" system-configuration-arguments))
         (message "Please compile emacs use option --with-x-toolkit=gtk3, otherwise EAF can't focus emacs window expected.")
       (when eaf-is-member-of-focus-fix-wms
-          ;; When switch app focus in WM, such as, i3 or qtile.
-          ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
-          ;;
-          ;; So we move mouse out of Emacs to the nearest outter border, then refocus on Emacs winodw.
-	  (if (eaf--on-hyprland-p)
-	      (shell-command (format "hyprctl dispatch focuswindow pid:%d" (emacs-pid)))
-	    (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_nearest_border" (key-description (this-command-keys-vector)))))
-    
-        ;; Activate the window by `wmctrl' when possible
-        (if (executable-find "wmctrl")
-            (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
-          (message "Please install wmctrl to active Emacs window.")))))
+        ;; When switch app focus in WM, such as, i3 or qtile.
+        ;; Emacs window cannot get the focus normally if mouse in EAF buffer area.
+        ;;
+        ;; So we move mouse out of Emacs to the nearest outter border, then refocus on Emacs winodw.
+	    (if (eaf--on-hyprland-p)
+	        (shell-command (format "hyprctl dispatch focuswindow pid:%d" (emacs-pid)))
+	      (eaf-call-async "eval_function" (or eaf--buffer-id buffer_id) "move_cursor_to_nearest_border" (key-description (this-command-keys-vector)))))
+
+      ;; Activate the window by `wmctrl' when possible
+      (if (executable-find "wmctrl")
+          (shell-command-to-string (format "wmctrl -i -a $(wmctrl -lp | awk -vpid=$PID '$3==%s {print $1; exit}')" (emacs-pid)))
+        (message "Please install wmctrl to active Emacs window.")))))
 
 (defun eaf--activate-emacs-mac-window()
   "Activate Emacs macOS window."
