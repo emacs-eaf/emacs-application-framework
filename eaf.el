@@ -1053,7 +1053,6 @@ In this situation, we use 'stay on top' technicality that show EAF window when E
 provide at least one way to let everyone experience EAF. ;)"
   (or (eq system-type 'darwin)              ;macOS
       (eaf-emacs-running-in-wayland-native) ;Wayland native
-      (not (display-graphic-p))             ;Terminal emulator
       ))
 
 (defun eaf-emacs-running-in-wayland-native ()
@@ -1075,36 +1074,35 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (defun eaf--topmost-focus-change ()
       "Manage Emacs's focus change."
-      (when (eaf-emacs-not-use-reparent-technology)
-        (let* ((front (cond ((eq system-type 'darwin)
-                             (shell-command-to-string "app-frontmost --name"))
-                            ((eaf--on-sway-p)
-                             (if (executable-find "jq")
-                                 (shell-command-to-string "swaymsg -t get_tree | jq -r '..|try select(.focused == true).app_id'")
-                               (message "Please install jq for swaywm support.")))
-                            ((eaf--on-hyprland-p)
-                             (or
-                              (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
-                              ""))
-                            ((eaf--on-unity-p)
-                             (if (executable-find "xdotool")
-                                 (shell-command-to-string "xdotool getactivewindow getwindowname")
-                               (message "Please install xdotool for Unity support.")))
-                            (t
-                             (require 'dbus)
-                             (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
-               (front-app-name (string-trim front)))
-          (cond
-           ((member front-app-name (list "Python" "python3"))
-            (setq eaf--topmost-switch-to-python t))
-           ((or (string-equal (replace-regexp-in-string "\\." "-" front)
-                              eaf--emacs-program-name)
-                (string-match-p (regexp-quote front-app-name)
-                                eaf--emacs-program-name))
-            (if eaf--topmost-switch-to-python
-                (setq eaf--topmost-switch-to-python nil)
-              (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
-           (t (eaf--topmost-focus-out))))))
+      (let* ((front (cond ((eq system-type 'darwin)
+                           (shell-command-to-string "app-frontmost --name"))
+                          ((eaf--on-sway-p)
+                           (if (executable-find "jq")
+                               (shell-command-to-string "swaymsg -t get_tree | jq -r '..|try select(.focused == true).app_id'")
+                             (message "Please install jq for swaywm support.")))
+                          ((eaf--on-hyprland-p)
+                           (or
+                            (gethash "class" (json-parse-string (shell-command-to-string "hyprctl -j activewindow")))
+                            ""))
+                          ((eaf--on-unity-p)
+                           (if (executable-find "xdotool")
+                               (shell-command-to-string "xdotool getactivewindow getwindowname")
+                             (message "Please install xdotool for Unity support.")))
+                          (t
+                           (require 'dbus)
+                           (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
+             (front-app-name (string-trim front)))
+        (cond
+         ((member front-app-name (list "Python" "python3"))
+          (setq eaf--topmost-switch-to-python t))
+         ((or (string-equal (replace-regexp-in-string "\\." "-" front)
+                            eaf--emacs-program-name)
+              (string-match-p (regexp-quote front-app-name)
+                              eaf--emacs-program-name))
+          (if eaf--topmost-switch-to-python
+              (setq eaf--topmost-switch-to-python nil)
+            (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
+         (t (eaf--topmost-focus-out)))))
 
     (defun eaf--topmost-focus-update ()
       "Hide all eaf buffers, and then display new eaf buffers at front."
