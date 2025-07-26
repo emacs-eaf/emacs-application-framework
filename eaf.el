@@ -539,13 +539,13 @@ Turning on this option can quickly rebuild the buffer very conveniently, avoidin
 Only turn off this option when you want investigate the cause of the crash."
   :type 'boolean)
 
-(defcustom eaf-dired-advisor-enable nil
+(defcustom eaf-dired-advisor-enable t
   "Toggle to enable/disable the EAF advisor in dired.
 
 When enabled, EAF will use eaf-file-manager to open file from dired."
   :type 'boolean)
 
-(defcustom eaf-find-file-advisor-enable nil
+(defcustom eaf-find-file-advisor-enable t
   "Toggle to enable/disable the EAF advisor for find-file.
 
 When enabled, EAF will use eaf-file-manager to open files."
