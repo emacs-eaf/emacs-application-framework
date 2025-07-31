@@ -1049,31 +1049,32 @@ Including title-bar, menu-bar, offset depends on window system, and border."
       (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
     0))
 
-(defun eaf-emacs-not-use-reparent-technology ()
-  "When Emacs running in macOS、Wayland native or terminal environment,
+(eval-when-compile
+
+  (defun eaf-emacs-not-use-reparent-technology ()
+    "When Emacs running in macOS、Wayland native or terminal environment,
 we can't use 'cross-process reparent' technicality like we does in X11, XWayland or Windows.
 
 In this situation, we use 'stay on top' technicality that show EAF window when Emacs get focus, hide EAF window when Emacs lost focus.
 
 'Stay on top' technicality is not perfect like 'cross-process reparent' technicality,
 provide at least one way to let everyone experience EAF. ;)"
-  (or (eq system-type 'darwin)              ;macOS
-      (eaf-emacs-running-in-wayland-native) ;Wayland native
-      ))
+    (or (eq system-type 'darwin)              ;macOS
+        (eaf-emacs-running-in-wayland-native) ;Wayland native
+        ))
 
-(defun eaf-emacs-running-in-wayland-native ()
-  (eq window-system 'pgtk))
+  (defun eaf-emacs-running-in-wayland-native ()
+    (eq window-system 'pgtk))
 
-(defun eaf--on-hyprland-p ()
-  (string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland"))
+  (defun eaf--on-hyprland-p ()
+    (string-equal (getenv "XDG_CURRENT_DESKTOP") "Hyprland"))
 
-(defun eaf--on-unity-p ()
-  (string-equal (getenv "XDG_CURRENT_DESKTOP") "Unity"))
+  (defun eaf--on-unity-p ()
+    (string-equal (getenv "XDG_CURRENT_DESKTOP") "Unity"))
 
-(defun eaf--on-sway-p ()
-  (string-equal (getenv "XDG_SESSION_DESKTOP") "sway"))
+  (defun eaf--on-sway-p ()
+    (string-equal (getenv "XDG_SESSION_DESKTOP") "sway"))
 
-(eval-when-compile
   (when (eaf-emacs-not-use-reparent-technology)
     (defvar eaf--topmost-switch-to-python nil
       "Record if Emacs should switch to Python process.")
