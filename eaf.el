@@ -829,8 +829,9 @@ We need calcuate render allocation to make sure no black border around render co
   (let* ((window-edges (window-pixel-edges window))
          (x (nth 0 window-edges))
          (y (+ (nth 1 window-edges)
+               (window-header-line-height window)
                (if (version< emacs-version "27.0")
-                   (window-header-line-height window)
+                   0
                  (window-tab-line-height window))))
          (w (- (nth 2 window-edges) x))
          (h (- (nth 3 window-edges) (window-mode-line-height window) y)))
