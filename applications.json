@@ -222,5 +222,13 @@
     "branch": "main",
     "url": "https://github.com/mumu-lhl/eaf-pyqterminal.git",
     "default_install": "false"
+  },
+  "video-editor": {
+    "name": "EAF Video Editor",
+    "desc": "A simple video editor",
+    "type": "app",
+    "branch": "main",
+    "url": "https://github.com/ginqi7/eaf-video-editor.git",
+    "default_install": "false"
   }
 }

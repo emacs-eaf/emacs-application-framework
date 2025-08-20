@@ -47,6 +47,7 @@ EAF is very extensible. We ship a lot of applications, feel free to choose anyth
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Real-time Org-mode previewer
 - [Git Client](https://github.com/emacs-eaf/eaf-git): Fully multi-threaded git client for Emacs
 - [File Manager](https://github.com/emacs-eaf/eaf-file-manager): Fully multi-threaded replacement for dired-mode
+- [Video Editor](https://github.com/ginqi7/eaf-video-editor): A simple video editor
 
 ... plus [many more](https://github.com/orgs/emacs-eaf/repositories)!
 
@@ -59,7 +60,7 @@ EAF is very extensible. We ship a lot of applications, feel free to choose anyth
 
 ## Install
 
-EAF supports Linux (X11 and Wayland), Windows, macOS and FreeBSD. The installation method is very simple.
+EAF supports Linux X11, Windows, macOS and FreeBSD. The installation method is very simple.
 
 #### 1. Download EAF
 
@@ -78,14 +79,6 @@ chmod +x ./install-eaf.py
 ```
 
 There are many useful flags available for `install-eaf.py`, check it yourself using `--help`.
-
-There are four types of support for the Wayland environment:
-- XWayland: EAF can run directly under XWayland
-- Gnome3 Wayland Native: You need to execute the command `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` and activate the `eaf-wayland@emacs-eaf.org` plugin in `gnome-extensions`
-- Sway Wayland Native: jq needs to be installed
-- Hyprland Wayland Native
-
-Unity environment support: requires `xdotool` to be installed.
 
 #### 3. Load EAF Core
 

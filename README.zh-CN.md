@@ -41,6 +41,7 @@ EAF 是一个可编程扩展的框架， 它自带一系列丰富的应用， �
 - [Org Previewer](https://github.com/emacs-eaf/eaf-org-previewer): Org 文件实时预览程序， 支持文件实时预览
 - [Git Client](https://github.com/emacs-eaf/eaf-git): 多线程 Git 客户端
 - [File Manager](https://github.com/emacs-eaf/eaf-file-manager): 多线程文件管理器
+- [Video Editor](https://github.com/ginqi7/eaf-video-editor): 视频编辑器
 
 ... 还有[很多](https://github.com/orgs/emacs-eaf/repositories)！
 
@@ -54,7 +55,7 @@ EAF 是一个可编程扩展的框架， 它自带一系列丰富的应用， �
 
 ## 安装
 
-EAF 可以在多个操作系统下工作， 包括 Linux (X11 和 Wayland), Windows， macOS 和 FreeBSD， 安装方法非常简单。
+EAF 可以在多个操作系统下工作， 包括 Linux X11, Windows， macOS 和 FreeBSD， 安装方法非常简单。
 
 #### 1. 下载 EAF
 
@@ -73,14 +74,6 @@ chmod +x ./install-eaf.py
 ```
 
 `install-eaf.py`脚本有许多有用的选项， 可以通过`--help`查看。
-
-Wayland 环境的支持分四种情况：
-- XWayland: EAF 可在 XWayland 下直接运行
-- Gnome3 Wayland Native： 你需要执行命令 `cp -r emacs-application-framework/gnome-shell/eaf-wayland@emacs-eaf.org ~/.local/share/gnome-shell/extensions` 并在 `gnome-extensions` 中激活 `eaf-wayland@emacs-eaf.org` 插件
-- Sway Wayland Native： 需要安装 jq
-- Hyprland Wayland Native
-
-Unity 桌面环境支持： 需要安装 xdotool
 
 #### 3. 加载 EAF 核心
 
