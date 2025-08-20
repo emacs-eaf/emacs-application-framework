@@ -62,6 +62,9 @@ EAF is very extensible. We ship a lot of applications, feel free to choose anyth
 
 EAF supports Linux X11, Windows, macOS and FreeBSD. The installation method is very simple.
 
+If you use Nix、 macOS or Gentoo， you need check [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki) first
+
+
 #### 1. Download EAF
 
 ```Bash

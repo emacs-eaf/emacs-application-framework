@@ -57,6 +57,8 @@ EAF 是一个可编程扩展的框架， 它自带一系列丰富的应用， �
 
 EAF 可以在多个操作系统下工作， 包括 Linux X11, Windows， macOS 和 FreeBSD， 安装方法非常简单。
 
+如果你使用的是 Nix、 macOS 或者 Gentoo， 你需要先看一下 [Wiki](https://github.com/emacs-eaf/emacs-application-framework/wiki)
+
 #### 1. 下载 EAF
 
 ```Bash
