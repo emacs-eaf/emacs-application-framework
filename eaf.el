@@ -1050,7 +1050,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
       (+ (eaf--frame-top frame) (eaf--frame-internal-height frame))
     0))
 
-(eval-when-compile
+(eval-and-compile
 
   (defun eaf-emacs-not-use-reparent-technology ()
     "When Emacs running in macOS、Wayland native or terminal environment,
