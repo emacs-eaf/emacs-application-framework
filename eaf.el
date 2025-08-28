@@ -1083,7 +1083,7 @@ provide at least one way to let everyone experience EAF. ;)"
     (defun eaf--topmost-focus-change ()
       "Manage Emacs's focus change."
       (let* ((front (cond ((eq system-type 'darwin)
-                           (shell-command-to-string "app-frontmost --name"))
+                           (string-trim (shell-command-to-string "osascript -e 'tell application \"System Events\" to get name of first application process whose frontmost is true'")))
                           ((eaf--on-sway-p)
                            (if (executable-find "jq")
                                (shell-command-to-string "swaymsg -t get_tree | jq -r '..|try select(.focused == true).app_id'")
