@@ -27,6 +27,7 @@ import platform
 import shutil
 import tempfile
 import threading
+import hashlib
 from urllib.parse import parse_qs, urlparse
 
 from core.buffer import Buffer
@@ -1751,7 +1752,11 @@ class CookiesManager(object):
         '''Store cookie on disk.'''
         cookie_domain = cookie.domain()
         if not cookie.isSessionCookie():
-            cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
+            cookie_name_hash = hashlib.sha256(bytes(cookie.name())).hexdigest()[:16]
+            cookie_file = os.path.join(self.cookies_dir,
+                           cookie_domain,
+                           cookie_name_hash)
+            #cookie_file = os.path.join(self.cookies_dir, cookie_domain, self._generate_cookie_filename(cookie))
             touch(cookie_file)
 
             # Save newest cookie to disk.
