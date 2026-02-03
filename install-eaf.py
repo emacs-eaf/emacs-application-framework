@@ -133,6 +133,8 @@ def install_sys_deps(distro: str, deps_list):
     elif distro == 'pacman':
         aur_helper = get_archlinux_aur_helper()
         command = [aur_helper, '-Sy', '--noconfirm', '--needed']
+    elif distro == 'xbps':
+        command = ['sudo', 'xbps-install', '-Sy']
     elif which("pkg"):
         command = ['doas', 'pkg', '-y', 'install']
     elif which("guix"):
@@ -309,6 +311,8 @@ def get_distro():
         distro = "brew"
     elif which("nix"):
         distro = "nix"
+    elif which("xbps-install"):
+        distro = "xbps"
     elif sys.platform == "linux":
         print("[EAF] Unsupported Linux distribution/package manager.")
         print(" Please see dependencies.json for list of dependencies.")

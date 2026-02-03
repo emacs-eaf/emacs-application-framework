@@ -44,6 +44,11 @@
     "nodejs16",
     "npm16"
   ],
+  "xbps": [
+    "wmctrl",
+    "nodejs",
+    "npm"
+  ],
   "brew": [
     "node"
   ],
