@@ -38,7 +38,7 @@ EAF is very extensible. We ship a lot of applications, feel free to choose anyth
 - [PDF Viewer](https://github.com/emacs-eaf/eaf-pdf-viewer): Fastest PDF Viewer in Emacs
 - [Music Player](https://github.com/emacs-eaf/eaf-music-player): Music player that supports playlist and audio visualization
 - [Video Player](https://github.com/emacs-eaf/eaf-video-player): Video Player in Emacs
-- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Dynanmic image viewer
+- [Image Viewer](https://github.com/emacs-eaf/eaf-image-viewer): Dynamic image viewer
 - [RSS Reader](https://github.com/emacs-eaf/eaf-rss-reader): RSS Reader in Emacs
 - [Terminal](https://github.com/mumu-lhl/eaf-pyqterminal): Full-featured terminal in Emacs
 - [MindMap](https://github.com/emacs-eaf/eaf-mind-elixir): Mind map with balance layout
