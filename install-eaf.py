@@ -37,7 +37,7 @@ parser.add_argument("--app-save-local-edit", action="store_true",
 args = parser.parse_args()
 
 NPM_CMD = "npm.cmd" if sys.platform == "win32" else "npm"
-PIP_CMD = "pip3" if which("pip3") else "pip" # mac only have pip3, so we need use pip3 instead pip
+PIP_CMD = [sys.executable, "-m", "pip"]
 
 class bcolors:
     HEADER = '\033[95m'
@@ -154,12 +154,12 @@ def install_py_deps(deps_list):
     if sys.prefix == sys.base_prefix:
         # pass --break-system-packages to permit installing packages into EXTERNALLY-MANAGED Python installations. see https://github.com/pypa/pip/issues/11780
         if get_distro() != "guix" and os.path.exists(os.path.join(sysconfig.get_path("stdlib", sysconfig.get_default_scheme() if hasattr(sysconfig, "get_default_scheme") else sysconfig._get_default_scheme()),"EXTERNALLY-MANAGED")):
-            command = [PIP_CMD, 'install', '--user', '--break-system-packages', '-U']
+            command = PIP_CMD + ['install', '--user', '--break-system-packages', '-U']
         else:
-            command = [PIP_CMD, 'install', '--user', '-U']
+            command = PIP_CMD + ['install', '--user', '-U']
     else:
         # if running on a virtual env, --user option is not valid.
-        command = [PIP_CMD, 'install', '-U']
+        command = PIP_CMD + ['install', '-U']
     command.extend(deps_list)
     try:
         run_command(command)
