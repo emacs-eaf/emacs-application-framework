@@ -755,7 +755,8 @@ If RESTART is non-nil, cached URL and app-name will not be cleared."
     (remove-hook 'after-save-hook #'eaf--org-preview-monitor-buffer-save)
     (remove-hook 'kill-buffer-hook #'eaf--org-preview-monitor-kill)
     (remove-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change))
+    (remove-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
+    (remove-hook 'window-configuration-change-hook #'eaf--schedule-monitor-configuration-change))
 
   ;; Set `eaf-fullscreen-p'.
   (setq-local eaf-fullscreen-p nil)
@@ -1010,16 +1011,32 @@ keybinding variable to eaf-app-binding-alist."
 
 (defun eaf-monitor-window-size-change (frame)
   "Delay some time and run `eaf-try-adjust-view-with-frame-size' to compare with Emacs FRAME size."
-  (when (eaf-epc-live-p eaf-epc-process)
-    (setq eaf-last-frame-width (frame-pixel-width frame))
-    (setq eaf-last-frame-height (frame-pixel-height frame))
-    (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame)))))
+  (if (eq system-type 'darwin)
+      (eaf--schedule-monitor-configuration-change)
+    (when (eaf-epc-live-p eaf-epc-process)
+      (setq eaf-last-frame-width (frame-pixel-width frame))
+      (setq eaf-last-frame-height (frame-pixel-height frame))
+      (run-with-timer 1 nil (lambda () (eaf-try-adjust-view-with-frame-size frame))))))
 
 (defun eaf-try-adjust-view-with-frame-size (frame)
   "Update EAF view once Emacs window size of the FRAME is changed."
   (unless (and (equal (frame-pixel-width frame) eaf-last-frame-width)
                (equal (frame-pixel-height frame) eaf-last-frame-height))
     (eaf-monitor-configuration-change)))
+
+(defvar eaf--configuration-change-timer nil
+  "Timer for debouncing native macOS frame geometry updates.")
+
+(defun eaf--schedule-monitor-configuration-change (&rest _)
+  "Schedule one final EAF layout update after a macOS frame change."
+  (when (timerp eaf--configuration-change-timer)
+    (cancel-timer eaf--configuration-change-timer))
+  (setq eaf--configuration-change-timer
+        (run-with-timer
+         0.08 nil
+         (lambda ()
+           (setq eaf--configuration-change-timer nil)
+           (eaf--monitor-configuration-change-now)))))
 
 (defun eaf--frame-left (frame)
   "Return outer left position"
@@ -1112,6 +1129,11 @@ provide at least one way to let everyone experience EAF. ;)"
             (run-with-timer 0.1 nil #'eaf--topmost-focus-update)))
          (t (eaf--topmost-focus-out)))))
 
+    (defun eaf--topmost-macos-focus-out ()
+      "Hide EAF views when native macOS focus leaves Emacs and EAF."
+      (setq eaf--topmost-switch-to-python nil)
+      (eaf--topmost-focus-out))
+
     (defun eaf--topmost-focus-update ()
       "Hide all eaf buffers, and then display new eaf buffers at front."
       (eaf--topmost-focus-out)
@@ -1123,12 +1145,22 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (defun eaf--topmost-focus-out ()
       "Prepare the screenshot and hide all eaf buffers."
+      (if (eq system-type 'darwin)
+          (eaf-call-async "clip_and_hide_top_views")
+        (dolist (frame (frame-list))
+          (dolist (window (window-list frame))
+            (with-current-buffer (window-buffer window)
+              (when (derived-mode-p 'eaf-mode)
+                (eaf--clip-image window)
+                (eaf-call-sync "hide_buffer_view" eaf--buffer-id)))))))
+
+    (defun eaf--topmost-display-images ()
+      "Display the latest EAF placeholder images in visible EAF buffers."
       (dolist (frame (frame-list))
         (dolist (window (window-list frame))
           (with-current-buffer (window-buffer window)
             (when (derived-mode-p 'eaf-mode)
-              (eaf--clip-image window)
-              (eaf-call-sync "hide_buffer_view" eaf--buffer-id))))))
+              (eaf--display-image window))))))
 
     (defun eaf--clip-image (window)
       "Clip the image of the qwidget."
@@ -1158,16 +1190,24 @@ provide at least one way to let everyone experience EAF. ;)"
     (add-hook 'eaf-start-process-hook
               (lambda ()
                 (add-function :after after-focus-change-function #'eaf--topmost-focus-change)
-                (add-to-list 'move-frame-functions #'eaf-monitor-configuration-change)))
+                (add-to-list
+                 'move-frame-functions
+                 (if (eq system-type 'darwin)
+                     #'eaf--schedule-monitor-configuration-change
+                   #'eaf-monitor-configuration-change))))
 
     (add-hook 'eaf-stop-process-hook
               (lambda ()
+                (when (timerp eaf--configuration-change-timer)
+                  (cancel-timer eaf--configuration-change-timer)
+                  (setq eaf--configuration-change-timer nil))
                 (remove-function after-focus-change-function #'eaf--topmost-focus-change)
-                (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)))
+                (remove-hook 'move-frame-functions #'eaf-monitor-configuration-change)
+                (remove-hook 'move-frame-functions #'eaf--schedule-monitor-configuration-change)))
 
     (add-to-list 'delete-frame-functions #'eaf--topmost-delete-frame-handler)))
 
-(defun eaf-monitor-configuration-change (&rest _)
+(defun eaf--monitor-configuration-change-now (&rest _)
   "EAF function to respond when detecting a window configuration change."
   (when (and eaf--monitor-configuration-p
              (eaf-epc-live-p eaf-epc-process)
@@ -1182,10 +1222,14 @@ provide at least one way to let everyone experience EAF. ;)"
                 ;; When `eaf-fullscreen-p' is non-nil, and only the EAF window is present, use frame size
                 (if (and eaf-fullscreen-p
                          (equal (length (cl-remove-if #'window-dedicated-p (window-list frame))) 1))
-                    (push (format "%s:%s:%s:%s:%s:%s"
+                    (push (format "%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
                                   eaf--buffer-id
                                   (eaf-get-emacs-xid frame)
-                                  0 0 (frame-pixel-width frame) (frame-pixel-height frame))
+                                  0 0 (frame-pixel-width frame) (frame-pixel-height frame)
+                                  (eaf--frame-left frame)
+                                  (eaf--frame-top frame)
+                                  (car (alist-get 'outer-size (frame-geometry frame)))
+                                  (cdr (alist-get 'outer-size (frame-geometry frame))))
                           view-infos)
                   (let* ((window-allocation (eaf-get-window-allocation window))
                          (window-divider-right-padding (if window-divider-mode window-divider-default-right-width 0))
@@ -1198,15 +1242,25 @@ provide at least one way to let everyone experience EAF. ;)"
                          (y (+ (eaf--buffer-y-position-adjust frame) (nth 1 window-allocation)))
                          (w (nth 2 window-allocation))
                          (h (nth 3 window-allocation)))
-                    (push (format "%s:%s:%s:%s:%s:%s"
+                    (push (format "%s:%s:%s:%s:%s:%s:%s:%s:%s:%s"
                                   eaf--buffer-id
                                   (eaf-get-emacs-xid frame)
                                   (+ x frame-x)
                                   (+ y titlebar-height frame-y)
                                   (- w window-divider-right-padding)
-                                  (- h window-divider-bottom-padding))
+                                  (- h window-divider-bottom-padding)
+                                  (eaf--frame-left frame)
+                                  (eaf--frame-top frame)
+                                  (car (alist-get 'outer-size (frame-geometry frame)))
+                                  (cdr (alist-get 'outer-size (frame-geometry frame))))
                           view-infos)))))))
         (eaf-call-async "update_views" (mapconcat #'identity view-infos ","))))))
+
+(defun eaf-monitor-configuration-change (&rest _)
+  "Update EAF layout, debouncing geometry changes on macOS."
+  (if (eq system-type 'darwin)
+      (eaf--schedule-monitor-configuration-change)
+    (eaf--monitor-configuration-change-now)))
 
 (defun eaf--split-number (string)
   (mapcar #'string-to-number (split-string string)))
@@ -1628,7 +1682,10 @@ When called interactively, URL accepts a file that can be opened by EAF."
 
   ;; Hooks are only added if not present already...
   (add-hook 'window-size-change-functions #'eaf-monitor-window-size-change)
-  (add-hook 'window-configuration-change-hook #'eaf-monitor-configuration-change)
+  (add-hook 'window-configuration-change-hook
+            (if (eq system-type 'darwin)
+                #'eaf--schedule-monitor-configuration-change
+              #'eaf-monitor-configuration-change))
 
   ;; Open URL with EAF application
   (if (eaf-epc-live-p eaf-epc-process)

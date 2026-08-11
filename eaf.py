@@ -27,7 +27,7 @@ from PyQt6 import QtWebEngineWidgets as NeverUsed # noqa
 from PyQt6.QtNetwork import QNetworkProxy, QNetworkProxyFactory
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer, QThread
-from core.utils import PostGui, eval_in_emacs, get_emacs_var, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
+from core.utils import PostGui, eval_in_emacs, get_emacs_func_cache_result, get_emacs_var, init_epc_client, close_epc_client, message_to_emacs, get_emacs_vars, get_emacs_config_dir
 from epc.server import ThreadingEPCServer
 import json
 import os
@@ -238,7 +238,7 @@ class EAF(object):
             if view_infos != ['']:
                 for view_info in view_infos:
                     if view_info not in self.view_dict:
-                        (buffer_id, _, _, _, _, _) = view_info.split(":")
+                        buffer_id = view_info.split(":", 1)[0]
                         try:
                             view = View(self.buffer_dict[buffer_id], view_info)
                             self.view_dict[view_info] = view
@@ -339,6 +339,23 @@ class EAF(object):
             view = self.view_dict[key]
             if buffer_id == view.buffer_id:
                 view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
+
+    @PostGui()
+    def clip_and_hide_top_views(self):
+        '''Capture all visible views, hide them, then save their placeholders.'''
+        screenshots = {}
+        for view in list(self.view_dict.values()):
+            if view.isVisible():
+                screenshots[view.buffer_id] = view.screen_shot()
+
+        for view in list(self.view_dict.values()):
+            view.try_hide_top_view()
+
+        eaf_config_dir = get_emacs_config_dir()
+        for buffer_id, screenshot in screenshots.items():
+            screenshot.save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
+
+        eval_in_emacs('eaf--topmost-display-images', [])
 
     @PostGui()
     def screenshot_buffer(self, buffer_id):
@@ -618,6 +635,12 @@ if __name__ == "__main__":
     app.setApplicationName("eaf.py")
 
     eaf = EAF(sys.argv[1:])
+
+    if platform.system() == "Darwin":
+        from core.macos import MacOSWindowTracker
+        eaf.macos_window_tracker = MacOSWindowTracker(
+            get_emacs_func_cache_result("emacs-pid", []),
+            lambda: list(eaf.view_dict.values()))
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec())

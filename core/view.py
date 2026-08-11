@@ -70,11 +70,18 @@ class View(QWidget):
         # Init attributes.
         self.last_event_type = None
         self.view_info = view_info
-        (self.buffer_id, self.emacs_xid, self.x, self.y, self.width, self.height) = view_info.split(":")
+        view_parts = view_info.split(":")
+        (self.buffer_id, self.emacs_xid, self.x, self.y,
+         self.width, self.height) = view_parts[:6]
         self.x: int = int(self.x)
         self.y: int = int(self.y)
         self.width: int = int(self.width)
         self.height: int = int(self.height)
+        self.emacs_frame_geometry = (
+            tuple(map(int, view_parts[6:10]))
+            if len(view_parts) >= 10 else None)
+        self.macos_window_number = None
+        self.macos_window_metrics = None
 
         # Build QGraphicsView.
         self.layout: QVBoxLayout = QVBoxLayout(self)
