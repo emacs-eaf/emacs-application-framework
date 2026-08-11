@@ -74,6 +74,12 @@ class MacOSWindowBridge:
             c_void_p, c_void_p, c_void_p)(("objc_msgSend", self.objc))
         self.send_pid = ctypes.CFUNCTYPE(
             c_int32, c_void_p, c_void_p)(("objc_msgSend", self.objc))
+        self.send_object_pid = ctypes.CFUNCTYPE(
+            c_void_p, c_void_p, c_void_p, c_int32)(
+                ("objc_msgSend", self.objc))
+        self.send_bool_options = ctypes.CFUNCTYPE(
+            c_bool, c_void_p, c_void_p, ctypes.c_ulong)(
+                ("objc_msgSend", self.objc))
 
         workspace_class = self.objc.objc_getClass(b"NSWorkspace")
         self.workspace = self.send_object(
@@ -82,6 +88,12 @@ class MacOSWindowBridge:
             b"frontmostApplication")
         self.process_identifier_selector = self.objc.sel_registerName(
             b"processIdentifier")
+        self.running_application_class = self.objc.objc_getClass(
+            b"NSRunningApplication")
+        self.running_application_selector = self.objc.sel_registerName(
+            b"runningApplicationWithProcessIdentifier:")
+        self.activate_selector = self.objc.sel_registerName(
+            b"activateWithOptions:")
 
     def _dictionary_int(self, dictionary, key):
         value = self.core_foundation.CFDictionaryGetValue(dictionary, key)
@@ -135,6 +147,17 @@ class MacOSWindowBridge:
         if not application:
             return None
         return self.send_pid(application, self.process_identifier_selector)
+
+    def activate_application(self, pid):
+        """Activate a running application immediately through AppKit."""
+        application = self.send_object_pid(
+            self.running_application_class,
+            self.running_application_selector,
+            int(pid))
+        if not application:
+            return False
+        return self.send_bool_options(
+            application, self.activate_selector, 1)  # Activate all windows.
 
 
 class MacOSWindowTracker:
@@ -269,16 +292,31 @@ class MacOSWindowTracker:
                 if not view.isVisible():
                     view.try_show_top_view()
 
+        external_application = (
+            frontmost_pid != self.emacs_pid and
+            frontmost_pid != self.eaf_pid)
+        if external_application:
+            # Hide immediately in the Qt process.  Waiting for the Emacs RPC
+            # screenshot path can race with app switching and leave an
+            # always-on-top EAF window visible until the next focus change.
+            for view in self.views():
+                if view.isVisible():
+                    view.try_hide_top_view()
+
         if frontmost_pid == self.last_frontmost_pid:
             return
 
         previous_pid = self.last_frontmost_pid
         self.last_frontmost_pid = frontmost_pid
-        if (frontmost_pid != self.emacs_pid and
-                frontmost_pid != self.eaf_pid and
+        if (external_application and
                 (previous_pid is None or
                  previous_pid in (self.emacs_pid, self.eaf_pid))):
             eval_in_emacs('eaf--topmost-macos-focus-out', [])
+
+    def activate_emacs_after_mouse_release(self):
+        """Return focus only if EAF is still the frontmost application."""
+        if self.bridge.frontmost_pid() == self.eaf_pid:
+            self.bridge.activate_application(self.emacs_pid)
 
     def update(self):
         """Synchronize EAF position and visibility with native macOS state."""

@@ -169,7 +169,8 @@ class View(QWidget):
             elif event.type() == QEvent.Type.WindowDeactivate:
                 lose_focus()
 
-        if self.is_switch_from_other_application(event):
+        if (platform.system() != "Darwin" and
+                self.is_switch_from_other_application(event)):
             eval_in_emacs('eaf-activate-emacs-window', [self.buffer_id])
 
         # Focus emacs buffer when user click view.
@@ -190,7 +191,7 @@ class View(QWidget):
         # NOTE: we must reparent after widget show, otherwise reparent operation maybe failed.
         self.reparent()
 
-        if platform.system() in ["Windows", "Darwin"]:
+        if platform.system() == "Windows":
             eval_in_emacs('eaf-activate-emacs-window', [])
 
         # Make graphics view at left-top corner after show.

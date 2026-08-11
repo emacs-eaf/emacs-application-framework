@@ -641,6 +641,7 @@ if __name__ == "__main__":
         eaf.macos_window_tracker = MacOSWindowTracker(
             get_emacs_func_cache_result("emacs-pid", []),
             lambda: list(eaf.view_dict.values()))
+        app.macos_window_tracker = eaf.macos_window_tracker
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec())

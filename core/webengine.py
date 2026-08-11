@@ -43,6 +43,13 @@ class BrowserView(QWebEngineView):
 
     translate_selected_text = QtCore.pyqtSignal(str)
 
+    @staticmethod
+    def _activate_emacs_after_mouse_release():
+        tracker = getattr(
+            QApplication.instance(), "macos_window_tracker", None)
+        if tracker is not None:
+            tracker.activate_emacs_after_mouse_release()
+
     def __init__(self, profile, buffer_id):
         super(QWebEngineView, self).__init__(profile)
 
@@ -249,10 +256,12 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
             self.buffer.is_focus()
             if platform.system() == "Darwin":
                 # Finish the native drag/selection before returning focus to
-                # Emacs, so mouse selection and Emacs key handling both work.
+                # Emacs.  The native tracker first verifies that EAF is still
+                # frontmost, so this cannot steal focus back after the user
+                # has started switching to another application.
                 QTimer.singleShot(
-                    0,
-                    lambda: eval_in_emacs('eaf-activate-emacs-window', []))
+                    50,
+                    self._activate_emacs_after_mouse_release)
 
         if event.type() in event_type:
             if self.simulated_wheel_event:
