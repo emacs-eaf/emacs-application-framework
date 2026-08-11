@@ -94,6 +94,12 @@ class MacOSWindowBridge:
             b"runningApplicationWithProcessIdentifier:")
         self.activate_selector = self.objc.sel_registerName(
             b"activateWithOptions:")
+        application_class = self.objc.objc_getClass(b"NSApplication")
+        self.application = self.send_object(
+            application_class,
+            self.objc.sel_registerName(b"sharedApplication"))
+        self.set_activation_policy_selector = self.objc.sel_registerName(
+            b"setActivationPolicy:")
 
     def _dictionary_int(self, dictionary, key):
         value = self.core_foundation.CFDictionaryGetValue(dictionary, key)
@@ -159,17 +165,24 @@ class MacOSWindowBridge:
         return self.send_bool_options(
             application, self.activate_selector, 1)  # Activate all windows.
 
+    def hide_dock_icon(self):
+        """Run EAF as a UI accessory without a Dock or Cmd-Tab icon."""
+        return self.send_bool_options(
+            self.application,
+            self.set_activation_policy_selector,
+            1)  # NSApplicationActivationPolicyAccessory.
+
 
 class MacOSWindowTracker:
     """Keep top-level EAF views aligned with their macOS Emacs windows."""
 
     edge_anchor_margin = 100
 
-    def __init__(self, emacs_pid, views):
+    def __init__(self, emacs_pid, views, bridge=None):
         self.emacs_pid = int(emacs_pid)
         self.eaf_pid = os.getpid()
         self.views = views
-        self.bridge = MacOSWindowBridge()
+        self.bridge = bridge or MacOSWindowBridge()
         self.last_frontmost_pid = None
 
         self.timer = QTimer()

@@ -634,13 +634,19 @@ if __name__ == "__main__":
     app = QApplication(sys.argv + hardware_acceleration_args)
     app.setApplicationName("eaf.py")
 
+    macos_window_bridge = None
+    if platform.system() == "Darwin":
+        from core.macos import MacOSWindowBridge, MacOSWindowTracker
+        macos_window_bridge = MacOSWindowBridge()
+        macos_window_bridge.hide_dock_icon()
+
     eaf = EAF(sys.argv[1:])
 
     if platform.system() == "Darwin":
-        from core.macos import MacOSWindowTracker
         eaf.macos_window_tracker = MacOSWindowTracker(
             get_emacs_func_cache_result("emacs-pid", []),
-            lambda: list(eaf.view_dict.values()))
+            lambda: list(eaf.view_dict.values()),
+            macos_window_bridge)
         app.macos_window_tracker = eaf.macos_window_tracker
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
