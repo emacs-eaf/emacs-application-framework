@@ -1189,7 +1189,12 @@ provide at least one way to let everyone experience EAF. ;)"
 
     (add-hook 'eaf-start-process-hook
               (lambda ()
-                (add-function :after after-focus-change-function #'eaf--topmost-focus-change)
+                ;; Native tracking handles macOS application changes.  The
+                ;; generic hook also fires for focus changes inside accessory
+                ;; Qt windows and causes a visible hide/show flicker.
+                (if (eq system-type 'darwin)
+                    (remove-function after-focus-change-function #'eaf--topmost-focus-change)
+                  (add-function :after after-focus-change-function #'eaf--topmost-focus-change))
                 (add-to-list
                  'move-frame-functions
                  (if (eq system-type 'darwin)
