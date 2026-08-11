@@ -247,6 +247,12 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
 
         if event.type() == QEvent.Type.MouseButtonRelease:
             self.buffer.is_focus()
+            if platform.system() == "Darwin":
+                # Finish the native drag/selection before returning focus to
+                # Emacs, so mouse selection and Emacs key handling both work.
+                QTimer.singleShot(
+                    0,
+                    lambda: eval_in_emacs('eaf-activate-emacs-window', []))
 
         if event.type() in event_type:
             if self.simulated_wheel_event:
@@ -269,10 +275,6 @@ Note, we need hook this function to signal 'loadProgress', signal 'loadStarted' 
                         self.last_mouse_word_timer.start()
 
         if event.type() == QEvent.Type.MouseButtonPress:
-
-            if platform.system() == "Darwin":
-                eval_in_emacs('eaf-activate-emacs-window', [])
-
             if event.button() == Qt.MouseButton.ForwardButton:
                 modifiers = QApplication.keyboardModifiers()
                 if modifiers == Qt.KeyboardModifier.ControlModifier:
