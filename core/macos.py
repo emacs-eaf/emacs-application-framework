@@ -178,10 +178,11 @@ class MacOSWindowTracker:
 
     edge_anchor_margin = 100
 
-    def __init__(self, emacs_pid, views, bridge=None):
+    def __init__(self, emacs_pid, views, bridge=None, hide_views=None):
         self.emacs_pid = int(emacs_pid)
         self.eaf_pid = os.getpid()
         self.views = views
+        self.hide_views = hide_views
         self.bridge = bridge or MacOSWindowBridge()
         self.last_frontmost_pid = None
 
@@ -308,13 +309,6 @@ class MacOSWindowTracker:
         external_application = (
             frontmost_pid != self.emacs_pid and
             frontmost_pid != self.eaf_pid)
-        if external_application:
-            # Hide immediately in the Qt process.  Waiting for the Emacs RPC
-            # screenshot path can race with app switching and leave an
-            # always-on-top EAF window visible until the next focus change.
-            for view in self.views():
-                if view.isVisible():
-                    view.try_hide_top_view()
 
         if frontmost_pid == self.last_frontmost_pid:
             return
@@ -324,7 +318,13 @@ class MacOSWindowTracker:
         if (external_application and
                 (previous_pid is None or
                  previous_pid in (self.emacs_pid, self.eaf_pid))):
-            eval_in_emacs('eaf--topmost-macos-focus-out', [])
+            if self.hide_views is not None:
+                # Capture and hide in one Qt event-loop turn.  Hiding here and
+                # asking Emacs to capture later races with the asynchronous
+                # RPC and produces an empty placeholder.
+                self.hide_views()
+            else:
+                eval_in_emacs('eaf--topmost-macos-focus-out', [])
 
     def activate_emacs_after_mouse_release(self):
         """Return focus only if EAF is still the frontmost application."""

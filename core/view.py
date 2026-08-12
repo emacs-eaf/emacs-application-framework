@@ -209,12 +209,10 @@ class View(QWidget):
 
     def try_show_top_view(self):
         if get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
-            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
             self.show()
 
     def try_hide_top_view(self):
         if get_emacs_func_cache_result("eaf-emacs-not-use-reparent-technology", []):
-            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
             self.hide()
 
     def destroy_view(self):

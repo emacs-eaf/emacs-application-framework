@@ -340,8 +340,7 @@ class EAF(object):
             if buffer_id == view.buffer_id:
                 view.screen_shot().save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
 
-    @PostGui()
-    def clip_and_hide_top_views(self):
+    def clip_and_hide_top_views_now(self):
         '''Capture all visible views, hide them, then save their placeholders.'''
         screenshots = {}
         for view in list(self.view_dict.values()):
@@ -356,6 +355,11 @@ class EAF(object):
             screenshot.save(os.path.join(eaf_config_dir, buffer_id + ".jpeg"))
 
         eval_in_emacs('eaf--topmost-display-images', [])
+
+    @PostGui()
+    def clip_and_hide_top_views(self):
+        '''Capture and hide top-level views in the Qt GUI thread.'''
+        self.clip_and_hide_top_views_now()
 
     @PostGui()
     def screenshot_buffer(self, buffer_id):
@@ -646,7 +650,8 @@ if __name__ == "__main__":
         eaf.macos_window_tracker = MacOSWindowTracker(
             get_emacs_func_cache_result("emacs-pid", []),
             lambda: list(eaf.view_dict.values()),
-            macos_window_bridge)
+            macos_window_bridge,
+            eaf.clip_and_hide_top_views_now)
         app.macos_window_tracker = eaf.macos_window_tracker
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
