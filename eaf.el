@@ -1118,7 +1118,13 @@ provide at least one way to let everyone experience EAF. ;)"
                            (dbus-call-method :session "org.gnome.Shell" "/org/eaf/wayland" "org.eaf.wayland" "get_active_window" :timeout 1000))))
              (front-app-name (string-trim front)))
         (cond
-         ((member front-app-name (list "Python" "python3"))
+         ;; macOS reports the EAF process name as "python" (lowercase) while
+         ;; other frontends report "Python"/"python3". Match
+         ;; case-insensitively, otherwise the flag is never set on macOS and
+         ;; every click on the EAF window falls through to
+         ;; `eaf--topmost-focus-out' (hide all views) -> hide+show flicker
+         ;; cycle per click.
+         ((member (downcase front-app-name) (list "python" "python3"))
           (setq eaf--topmost-switch-to-python t))
          ((or (string-equal (replace-regexp-in-string "\\." "-" front)
                             eaf--emacs-program-name)
@@ -1435,7 +1441,14 @@ of `eaf--buffer-app-name' inside the EAF buffer."
   "Focus the buffer given the BUFFER-ID."
   (let* ((buffer (eaf-get-buffer buffer-id))
          (window (if buffer (get-buffer-window buffer 'visible) nil)))
-    (when window (select-window window) t)))
+    ;; Avoid `select-window' when the EAF buffer window is already selected:
+    ;; `select-window' forces an Emacs redisplay, and on macOS every redisplay
+    ;; of an EAF window re-attaches the embedded Qt view (hide/show + reparent),
+    ;; which re-creates the view mid-gesture and swallows the second press of
+    ;; a double-click.
+    (when (and window (not (eq window (selected-window))))
+      (select-window window)
+      t)))
 
 (defvar-local eaf-buffer-input-focus nil)
 (defun eaf-update-focus-state (buffer-id state)
